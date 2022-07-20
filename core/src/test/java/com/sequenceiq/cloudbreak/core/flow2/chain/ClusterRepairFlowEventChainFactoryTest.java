@@ -29,6 +29,8 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
@@ -354,29 +356,69 @@ public class ClusterRepairFlowEventChainFactoryTest {
     public void testAddAwsNativeMigrationIfNeedWhenNotUpgrade() {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
-        boolean upgrade = false;
-        String variant = "variant";
-        underTest.addAwsNativeEventMigrationIfNeed(flowTriggers, STACK_ID, groupName, upgrade, variant);
+        StackView stackView = setupStackView();
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent(stackView.getId(), Map.of(), false, false);
+
+        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);
+
         Assertions.assertTrue(flowTriggers.isEmpty());
     }
 
     @Test
-    public void testAddAwsNativeMigrationIfNeedWhenUpgradeButNotAwsNativeVariant() {
+    public void testAddAwsNativeMigrationIfNeedWhenUpgradeButNotAwsNativeVariantIsTheTriggered() {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
-        boolean upgrade = true;
-        String variant = "variant";
-        underTest.addAwsNativeEventMigrationIfNeed(flowTriggers, STACK_ID, groupName, upgrade, variant);
+        String triggeredVariant = "triggeredVariant";
+        StackView stackView = setupStackView();
+        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), Map.of(), false, triggeredVariant);
+
+        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);
+
         Assertions.assertTrue(flowTriggers.isEmpty());
     }
 
     @Test
-    public void testAddAwsNativeMigrationIfNeedWhenUpgradeAndAwsNativeVariant() {
+    public void testAddAwsNativeMigrationIfNeedWhenUpgradeAndAwsNativeVariantIsTheTriggeredButStackIsAlreadyOnAwsNativeVariant() {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
-        boolean upgrade = true;
-        String variant = "AWS_NATIVE";
-        underTest.addAwsNativeEventMigrationIfNeed(flowTriggers, STACK_ID, groupName, upgrade, variant);
+        String triggeredVariant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value();
+        StackView stackView = setupStackView();
+        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), Map.of(), false, triggeredVariant);
+
+        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);
+
+        Assertions.assertTrue(flowTriggers.isEmpty());
+    }
+
+    @Test
+    public void testAddAwsNativeMigrationIfNeedWhenUpgradeAndAwsNativeVariantIsTheTriggeredOnTheLegacyAwsVariantAndEntitledForMigrationButNotEntitledFor() {
+        when(entitlementService.awsVariantMigrationEnable(anyString())).thenReturn(false);
+        Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
+        String groupName = "groupName";
+        String triggeredVariant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value();
+        StackView stackView = setupStackView();
+        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), Map.of(), false, triggeredVariant);
+
+        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);
+
+        Assertions.assertTrue(flowTriggers.isEmpty());
+    }
+
+    @Test
+    public void testAddAwsNativeMigrationIfNeedWhenUpgradeAndAwsNativeVariantIsTriggeredOnTheLegacyAwsVariantAndEntitledForMigration() {
+        when(entitlementService.awsVariantMigrationEnable(anyString())).thenReturn(true);
+        Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
+        String groupName = "groupName";
+        String triggeredVariant = "AWS_NATIVE";
+        StackView stackView = setupStackView();
+        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), Map.of(), false, triggeredVariant);
+
+        underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);
+
         Assertions.assertFalse(flowTriggers.isEmpty());
         AwsVariantMigrationTriggerEvent actual = (AwsVariantMigrationTriggerEvent) flowTriggers.peek();
         Assertions.assertEquals(groupName, actual.getHostGroupName());
@@ -405,13 +447,19 @@ public class ClusterRepairFlowEventChainFactoryTest {
         return stack;
     }
 
-    private void setupStackView() {
+    private StackView setupStackView() {
         StackView stack = mock(StackView.class);
         ClusterView cluster = mock(ClusterView.class);
         when(stack.getClusterView()).thenReturn(cluster);
         when(stack.getId()).thenReturn(STACK_ID);
         when(cluster.getId()).thenReturn(CLUSTER_ID);
+        Crn exampleCrn = CrnTestUtil.getDatalakeCrnBuilder()
+                .setResource("aResource")
+                .setAccountId("anAccountId")
+                .build();
+        when(stack.getResourceCrn()).thenReturn(exampleCrn.toString());
         when(stackViewService.getById(STACK_ID)).thenReturn(stack);
+        return stack;
     }
 
     private HostGroup setupHostGroup(String hostGroupName, InstanceGroup instanceGroup) {

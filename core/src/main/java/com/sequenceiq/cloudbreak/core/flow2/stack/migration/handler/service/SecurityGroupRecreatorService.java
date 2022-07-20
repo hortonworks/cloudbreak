@@ -38,17 +38,22 @@ public class SecurityGroupRecreatorService implements ResourceRecreator {
         CloudContext cloudContext = request.getCloudContext();
         CloudStack cloudStack = request.getCloudStack();
         Network network = cloudStack.getNetwork();
-        Group group = getGroupByName(cloudStack.getGroups(), request.getHostGroupName());
+        String hostGroupName = request.getHostGroupName();
+        Group group = getGroupByName(cloudStack.getGroups(), hostGroupName);
         CloudResource createdSecurityGroup = awsSecurityGroupResourceBuilder.create(awsContext, ac, group, network);
-        createdSecurityGroup = CloudResource.builder().cloudResource(createdSecurityGroup).group(group.getName()).build();
-        ResourcePersisted resourcePersisted = persistenceNotifier.notifyAllocation(createdSecurityGroup, cloudContext);
-        if (resourcePersisted.getException() != null) {
-            LOGGER.error("Cannot create security group resource in the db: {}", resourcePersisted.getStatusReason(), resourcePersisted.getException());
-            throw resourcePersisted.getException();
+        if (createdSecurityGroup != null) {
+            createdSecurityGroup = CloudResource.builder().cloudResource(createdSecurityGroup).group(group.getName()).build();
+            ResourcePersisted resourcePersisted = persistenceNotifier.notifyAllocation(createdSecurityGroup, cloudContext);
+            if (resourcePersisted.getException() != null) {
+                LOGGER.error("Cannot create security group resource in the db: {}", resourcePersisted.getStatusReason(), resourcePersisted.getException());
+                throw resourcePersisted.getException();
+            }
+            CloudResource existedSecGroup = awsSecurityGroupResourceBuilder.build(awsContext, ac, group, network, group.getSecurity(), createdSecurityGroup);
+            persistenceNotifier.notifyUpdate(existedSecGroup, cloudContext);
+            LOGGER.info("AWS security group successfully created");
+        } else {
+            LOGGER.info("Security group already exists for group: '{}', no need for recreation", hostGroupName);
         }
-        CloudResource existedSecGroup = awsSecurityGroupResourceBuilder.build(awsContext, ac, group, network, group.getSecurity(), createdSecurityGroup);
-        persistenceNotifier.notifyUpdate(existedSecGroup, cloudContext);
-        LOGGER.info("AWS security group successfully created");
     }
 
     private Group getGroupByName(List<Group> groups, String hostGroupName) {
