@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -125,6 +126,13 @@ public class DefaultResponseConfigure<T extends CloudbreakTestDto, R> {
         return this;
     }
 
+    public DefaultResponseConfigure<T, R> bodyContains(Set<String> body, int times) {
+        for (String b : body) {
+            verifications.add(new TextBodyContainsVerification(b, times));
+        }
+        return this;
+    }
+
     protected void pathVariableInternal(String name, String value) {
         pathVariables.put(name, value);
     }
@@ -153,7 +161,11 @@ public class DefaultResponseConfigure<T extends CloudbreakTestDto, R> {
         if (retType == null && retValue != null) {
             retType = retValue.getClass().getName();
         }
-        MockResponse body = new MockResponse(retValue, message, getMethod().getHttpMethod().name(), getPath(), times, statusCode, retType);
+        Set<String> requestMatchers = null;
+        if (!verifications.isEmpty()) {
+            requestMatchers = verifications.stream().filter(v -> v instanceof TextBodyContainsVerification).map(v -> v.getValue()).collect(Collectors.toSet());
+        }
+        MockResponse body = new MockResponse(retValue, message, getMethod().getHttpMethod().name(), getPath(), times, statusCode, retType, requestMatchers);
         executeQuery.executeConfigure(pathVariables(), body);
         return testDto;
     }
