@@ -68,7 +68,7 @@ public class SecurityGroupRecreatorServiceTest {
     private ResourcePersisted resourcePersisted;
 
     @Test
-    public void testAcceptWhenPersistSuccess() throws Exception {
+    public void testRecreateWhenPersistSuccess() throws Exception {
         String hostGroupName = "hostGroupName";
         CreateResourcesRequest request = new CreateResourcesRequest(cloudContext, cloudCredential, cloudStack, hostGroupName);
         CloudResource cloudResource = CloudResource.builder()
@@ -87,14 +87,14 @@ public class SecurityGroupRecreatorServiceTest {
 
         underTest.recreate(request, awsContext, ac);
 
-        verify(awsSecurityGroupResourceBuilder).build(any(), any(), any(), any(), any(), any());
-
         verify(awsSecurityGroupResourceBuilder).create(awsContext, ac, group, network);
+        verify(persistenceNotifier).notifyAllocation(any(), any());
+        verify(awsSecurityGroupResourceBuilder).build(eq(awsContext), eq(ac), eq(group), eq(network), any(), any());
         verify(persistenceNotifier).notifyUpdate(cloudResource, cloudContext);
     }
 
     @Test
-    public void testAcceptWhenPersistNotSuccess() throws Exception {
+    public void testRecreateWhenNoSecurityGroupNeedsToBeCreatedBecauseExistingOneIsConfigured() throws Exception {
         String hostGroupName = "hostGroupName";
         CreateResourcesRequest request = new CreateResourcesRequest(cloudContext, cloudCredential, cloudStack, hostGroupName);
         CloudResource cloudResource = CloudResource.builder()
@@ -107,7 +107,30 @@ public class SecurityGroupRecreatorServiceTest {
         when(group.getName()).thenReturn(hostGroupName);
         when(cloudStack.getGroups()).thenReturn(List.of(group));
         when(cloudStack.getNetwork()).thenReturn(network);
-        Exception value = new Exception();
+        when(awsSecurityGroupResourceBuilder.create(awsContext, ac, group, network)).thenReturn(null);
+
+        underTest.recreate(request, awsContext, ac);
+
+        verify(awsSecurityGroupResourceBuilder).create(awsContext, ac, group, network);
+        verify(awsSecurityGroupResourceBuilder, never()).build(eq(awsContext), eq(ac), eq(group), eq(network), any(), any());
+        verify(persistenceNotifier, never()).notifyUpdate(cloudResource, cloudContext);
+    }
+
+    @Test
+    public void testRecreateWhenPersistNotSuccess() throws Exception {
+        String hostGroupName = "hostGroupName";
+        CreateResourcesRequest request = new CreateResourcesRequest(cloudContext, cloudCredential, cloudStack, hostGroupName);
+        CloudResource cloudResource = CloudResource.builder()
+                .type(ResourceType.AWS_SECURITY_GROUP)
+                .status(CommonStatus.CREATED)
+                .name("name")
+                .params(Collections.emptyMap())
+                .build();
+
+        when(group.getName()).thenReturn(hostGroupName);
+        when(cloudStack.getGroups()).thenReturn(List.of(group));
+        when(cloudStack.getNetwork()).thenReturn(network);
+        Exception value = new Exception("Expected exception");
         when(resourcePersisted.getException()).thenReturn(value);
         when(persistenceNotifier.notifyAllocation(any(CloudResource.class), any())).thenReturn(resourcePersisted);
         when(awsSecurityGroupResourceBuilder.create(awsContext, ac, group, network)).thenReturn(cloudResource);

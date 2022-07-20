@@ -426,7 +426,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     @InternalOnly
     public OperationStatus upgradeCcmInternal(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
-            @ValidCrn(resource = CrnResourceDescriptor.USER) @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
+            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER }) @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
         String accountId = crnService.getCurrentAccountId();
         return upgradeCcmService.upgradeCcm(environmentCrn, accountId);
     }

@@ -355,7 +355,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @InternalOnly
     public StackCcmUpgradeV4Response upgradeCcmByNameInternal(Long workspaceId, @NotEmpty @ResourceName String name,
-            @InitiatorUserCrn @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.USER) String initiatorUserCrn) {
+            @InitiatorUserCrn @NotEmpty @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER }) String initiatorUserCrn) {
         return stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofName(name));
     }
 
@@ -363,7 +363,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public StackCcmUpgradeV4Response upgradeCcmByCrnInternal(Long workspaceId,
             @NotEmpty @ValidCrn(resource = { CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE }) String crn,
-            @InitiatorUserCrn @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.USER) String initiatorUserCrn) {
+            @InitiatorUserCrn @NotEmpty@ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER }) String initiatorUserCrn) {
         return stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofCrn(crn));
     }
 
@@ -371,7 +371,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public int getNotCcmUpgradedStackCount(Long workspaceId,
             @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String envCrn,
-            @InitiatorUserCrn @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.USER) String initiatorUserCrn) {
+            @InitiatorUserCrn @NotEmpty @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER }) String initiatorUserCrn) {
         return stackCcmUpgradeService.getNotUpgradedStackCount(envCrn);
     }
 

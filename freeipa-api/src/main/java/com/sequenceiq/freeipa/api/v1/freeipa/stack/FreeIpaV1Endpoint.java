@@ -291,7 +291,8 @@ public interface FreeIpaV1Endpoint {
     @ApiOperation(value = FreeIpaOperationDescriptions.INTERNAL_UPGRADE_CCM_BY_ENVID, produces = MediaType.APPLICATION_JSON,
             notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "internalUpgradeCcmByEnvironmentV1")
     OperationStatus upgradeCcmInternal(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
-            @ValidCrn(resource = CrnResourceDescriptor.USER) @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @GET
     @Path("get_recommendation")
