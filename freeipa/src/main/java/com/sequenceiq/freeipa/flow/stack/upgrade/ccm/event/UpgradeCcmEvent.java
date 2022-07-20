@@ -13,13 +13,17 @@ public class UpgradeCcmEvent extends StackEvent {
 
     private LocalDateTime revertTime;
 
+<<<<<<< HEAD
     private Boolean minaRemoved;
 
+=======
+>>>>>>> CB-14585 ccm upgrade revert flow in case of error in freeipa
     @JsonCreator
     public UpgradeCcmEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("oldTunnel") Tunnel oldTunnel,
+<<<<<<< HEAD
             @JsonProperty("revertTime") LocalDateTime revertTime,
             @JsonProperty("minaRemoved") Boolean minaRemoved) {
         super(selector, stackId);
@@ -34,6 +38,12 @@ public class UpgradeCcmEvent extends StackEvent {
             Tunnel oldTunnel,
             LocalDateTime revertTime) {
         this(selector, stackId, oldTunnel, revertTime, Boolean.TRUE);
+=======
+            @JsonProperty("revertTime") LocalDateTime revertTime) {
+        super(selector, stackId);
+        this.oldTunnel = oldTunnel;
+        this.revertTime = revertTime;
+>>>>>>> CB-14585 ccm upgrade revert flow in case of error in freeipa
     }
 
     public Tunnel getOldTunnel() {
@@ -56,6 +66,7 @@ public class UpgradeCcmEvent extends StackEvent {
         this.revertTime = revertTime;
     }
 
+<<<<<<< HEAD
     public Boolean getMinaRemoved() {
         return minaRemoved;
     }
@@ -64,12 +75,17 @@ public class UpgradeCcmEvent extends StackEvent {
         this.minaRemoved = minaRemoved;
     }
 
+=======
+>>>>>>> CB-14585 ccm upgrade revert flow in case of error in freeipa
     @Override
     public String toString() {
         return "UpgradeCcmEvent{" +
                 " oldTunnel=" + oldTunnel +
                 ", revertTime=" + revertTime +
+<<<<<<< HEAD
                 ", minaRemoved=" + minaRemoved +
+=======
+>>>>>>> CB-14585 ccm upgrade revert flow in case of error in freeipa
                 "} " + super.toString();
     }
 }

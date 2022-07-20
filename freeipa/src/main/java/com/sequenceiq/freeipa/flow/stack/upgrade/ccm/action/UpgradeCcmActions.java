@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.action;
 
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_CHANGE_TUNNEL_STATE_NAME;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_CHECK_PREREQUISITES_STATE_NAME;
+import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_CLEANING_FAILURE_STATE_NAME;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_DEREGISTER_MINA_STATE_NAME;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_FAILED_STATE_NAME;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_FINALIZE_FAILED_STATE_NAME;
@@ -175,7 +176,7 @@ public class UpgradeCcmActions {
     public Action<?, ?> finished() {
         return new AbstractUpgradeCcmEventAction() {
             @Override
-            protected void doExecute(UpgradeCcmContext context, UpgradeCcmEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(UpgradeCcmContext context, UpgradeCcmEvent payload, Map<Object, Object> variables) throws CloudbreakOrchestratorException {
                 LOGGER.info("FreeIPA CCM upgrade finished {}", payload);
                 StackEvent stackEvent = new StackEvent(context.getStack().getId());
                 String event = UPGRADE_CCM_FINISHED_EVENT.event();
@@ -200,6 +201,7 @@ public class UpgradeCcmActions {
 
     @Bean(name = UPGRADE_CCM_FAILED_STATE_NAME)
     public Action<?, ?> failedRevertTunnel() {
+
         return new AbstractUpgradeCcmAction<>(UpgradeCcmFailureEvent.class) {
             @Override
             protected UpgradeCcmContext createFlowContext(FlowParameters flowParameters, StateContext<UpgradeCcmState,
@@ -240,6 +242,7 @@ public class UpgradeCcmActions {
             }
         };
     }
+
 
     @Bean(name = UPGRADE_CCM_REVERT_FAILURE_STATE_NAME)
     public Action<?, ?> failedRevertTunnelAndSaltStates() {

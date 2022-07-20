@@ -24,6 +24,8 @@ public class CcmParametersConfigService {
 
     private static final String UPGRADE_CCM_KEY = "ccm_jumpgate";
 
+    private static final String UPGRADE_CCM_REVERT_JOB_KEY = "revert_job";
+
     private static final String UPGRADE_CCM_SLS_PATH = "/upgradeccm/init.sls";
 
     @Value("${ccmRevertJob.activationInMinutes}")

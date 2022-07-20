@@ -53,6 +53,7 @@ public abstract class AbstractUpgradeCcmAction<P extends StackEvent> extends Abs
     protected Object getFailurePayload(P payload, Optional<UpgradeCcmContext> flowContext, Exception e) {
         Tunnel oldTunnel = null;
         LocalDateTime revertTime = null;
+
         Class<? extends AbstractUpgradeCcmEventHandler> failureOrigin = null;
         if (payload instanceof UpgradeCcmFailureEvent) {
             UpgradeCcmFailureEvent ufe = (UpgradeCcmFailureEvent) payload;

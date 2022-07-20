@@ -33,6 +33,8 @@ public class UpgradeCcmState implements FlowState {
 
     public static final String UPGRADE_CCM_DEREGISTER_MINA_STATE_NAME = "UPGRADE_CCM_DEREGISTER_MINA_STATE";
 
+    public static final String UPGRADE_CCM_CLEANING_FAILURE_STATE_NAME = "UPGRADE_CCM_CLEANING_FAILURE_STATE";
+
     public static final UpgradeCcmState INIT_STATE = new UpgradeCcmState("INIT_STATE");
 
     public static final UpgradeCcmState UPGRADE_CCM_CHECK_PREREQUISITES_STATE = new UpgradeCcmState(UPGRADE_CCM_CHECK_PREREQUISITES_STATE_NAME);

@@ -8,3 +8,4 @@ ccm_jumpgate:
   environment_crn:
   agent_access_key_id: #only for one-way TLS
   agent_enciphered_access_key: #only for one-way TLS
+  activation_in_minutes:

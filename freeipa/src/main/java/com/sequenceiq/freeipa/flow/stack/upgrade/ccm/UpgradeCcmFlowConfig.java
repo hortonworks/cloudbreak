@@ -4,6 +4,7 @@ import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.FINA
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_CHANGE_TUNNEL_STATE;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_CHECK_PREREQUISITES_STATE;
+import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_CLEANING_FAILURE_STATE;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_DEREGISTER_MINA_STATE;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_FAILED_STATE;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_FINALIZE_FAILED_STATE;
@@ -81,6 +82,11 @@ public class UpgradeCcmFlowConfig extends AbstractFlowConfiguration<UpgradeCcmSt
                     .from(UPGRADE_CCM_UPGRADE_STATE)
                     .to(UPGRADE_CCM_RECONFIGURE_NGINX_STATE)
                     .event(UPGRADE_CCM_UPGRADE_FINISHED_EVENT)
+                    .noFailureEvent()
+
+                    .from(UPGRADE_CCM_UPGRADE_STATE)
+                    .to(UPGRADE_CCM_REVERT_FAILURE_STATE)
+                    .event(UPGRADE_CCM_FAILED_REVERT_EVENT)
                     .defaultFailureEvent()
 
                     .from(UPGRADE_CCM_UPGRADE_STATE)
@@ -91,6 +97,11 @@ public class UpgradeCcmFlowConfig extends AbstractFlowConfiguration<UpgradeCcmSt
                     .from(UPGRADE_CCM_RECONFIGURE_NGINX_STATE)
                     .to(UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE)
                     .event(UPGRADE_CCM_RECONFIGURE_NGINX_FINISHED_EVENT)
+                    .noFailureEvent()
+
+                    .from(UPGRADE_CCM_RECONFIGURE_NGINX_STATE)
+                    .to(UPGRADE_CCM_REVERT_FAILURE_STATE)
+                    .event(UPGRADE_CCM_FAILED_REVERT_EVENT)
                     .defaultFailureEvent()
 
                     .from(UPGRADE_CCM_RECONFIGURE_NGINX_STATE)
@@ -101,18 +112,25 @@ public class UpgradeCcmFlowConfig extends AbstractFlowConfiguration<UpgradeCcmSt
                     .from(UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE)
                     .to(UPGRADE_CCM_REMOVE_MINA_STATE)
                     .event(UPGRADE_CCM_REGISTER_CLUSTER_PROXY_FINISHED_EVENT)
-                    .defaultFailureEvent()
+                    .noFailureEvent()
 
                     .from(UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE)
-                    .to(UPGRADE_CCM_REVERT_ALL_FAILURE_STATE)
-                    .event(UPGRADE_CCM_FAILED_REVERT_ALL_EVENT)
+                    .to(UPGRADE_CCM_REVERT_FAILURE_STATE)
+                    .event(UPGRADE_CCM_FAILED_REVERT_EVENT)
                     .defaultFailureEvent()
 
                     .from(UPGRADE_CCM_REVERT_FAILURE_STATE)
                     .to(FINAL_STATE)
                     .event(UPGRADE_CCM_FINISHED_EVENT)
                     .defaultFailureEvent()
-
+                    .from(UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE)
+                    .to(UPGRADE_CCM_REVERT_ALL_FAILURE_STATE)
+                    .event(UPGRADE_CCM_FAILED_REVERT_ALL_EVENT)
+                    .defaultFailureEvent()
+                    .from(UPGRADE_CCM_REVERT_FAILURE_STATE)
+                    .to(FINAL_STATE)
+                    .event(UPGRADE_CCM_FINISHED_EVENT)
+                    .defaultFailureEvent()
                     .from(UPGRADE_CCM_REVERT_ALL_FAILURE_STATE)
                     .to(FINAL_STATE)
                     .event(UPGRADE_CCM_FINISHED_EVENT)
@@ -121,7 +139,7 @@ public class UpgradeCcmFlowConfig extends AbstractFlowConfiguration<UpgradeCcmSt
                     .from(UPGRADE_CCM_REMOVE_MINA_STATE)
                     .to(UPGRADE_CCM_DEREGISTER_MINA_STATE)
                     .event(UPGRADE_CCM_REMOVE_MINA_FINISHED_EVENT)
-                    .defaultFailureEvent()
+                    .failureState(UPGRADE_CCM_CLEANING_FAILURE_STATE).failureEvent(UPGRADE_CCM_CLEANING_FAILED_EVENT)
 
                     .from(UPGRADE_CCM_REMOVE_MINA_STATE)
                     .to(UPGRADE_CCM_FINISHED_STATE)
@@ -131,7 +149,7 @@ public class UpgradeCcmFlowConfig extends AbstractFlowConfiguration<UpgradeCcmSt
                     .from(UPGRADE_CCM_DEREGISTER_MINA_STATE)
                     .to(UPGRADE_CCM_FINISHED_STATE)
                     .event(UPGRADE_CCM_DEREGISTER_MINA_FINISHED_EVENT)
-                    .defaultFailureEvent()
+                    .failureState(UPGRADE_CCM_CLEANING_FAILURE_STATE).failureEvent(UPGRADE_CCM_CLEANING_FAILED_EVENT)
 
                     .from(UPGRADE_CCM_FINISHED_STATE)
                     .to(FINAL_STATE)

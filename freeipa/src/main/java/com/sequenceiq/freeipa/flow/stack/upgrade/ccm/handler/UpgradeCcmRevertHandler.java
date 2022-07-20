@@ -42,7 +42,9 @@ public class UpgradeCcmRevertHandler extends ExceptionCatcherEventHandler<Upgrad
     @Override
     protected Selectable doAccept(HandlerEvent<UpgradeCcmFailureEvent> event) {
         UpgradeCcmFailureEvent request = event.getData();
+
         String errText = "";
+
         LOGGER.info("CCM upgrade reverting");
         try {
             upgradeCcmService.changeTunnel(request.getResourceId(), request.getOldTunnel());
@@ -56,5 +58,4 @@ public class UpgradeCcmRevertHandler extends ExceptionCatcherEventHandler<Upgrad
 
         return resultEvent;
     }
-
 }

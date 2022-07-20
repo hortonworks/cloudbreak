@@ -81,5 +81,4 @@ public class UpgradeCcmUpgradeHandler extends AbstractUpgradeCcmEventHandler {
     private LocalDateTime getRevertDate() {
         return LocalDateTime.now().plusMinutes(ccmParametersConfigService.getActivationInMinutes());
     }
-
 }
