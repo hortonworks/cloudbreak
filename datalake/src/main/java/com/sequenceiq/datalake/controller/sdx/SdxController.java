@@ -72,6 +72,7 @@ import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
 import com.sequenceiq.sdx.api.model.SdxRecommendationResponse;
+import com.sequenceiq.sdx.api.model.SdxRefreshResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
@@ -169,9 +170,8 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESIZE_DATALAKE)
-    public SdxClusterResponse refreshDataHubs(@ResourceName String name, String datahubName) {
-        SdxCluster sdxCluster = sdxService.refreshDataHub(name, datahubName);
-        return sdxClusterConverter.sdxClusterToResponse(sdxCluster);
+    public SdxRefreshResponse refreshDataHubs(@ResourceName String name, String datahubName) {
+        return sdxService.refreshDataHub(name, datahubName);
     }
 
     @Override

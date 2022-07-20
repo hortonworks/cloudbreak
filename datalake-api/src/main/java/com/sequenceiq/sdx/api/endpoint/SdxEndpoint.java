@@ -44,6 +44,7 @@ import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
 import com.sequenceiq.sdx.api.model.SdxRecommendationResponse;
+import com.sequenceiq.sdx.api.model.SdxRefreshResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
@@ -127,7 +128,7 @@ public interface SdxEndpoint {
     @Path("{datalakeName}/refresh")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Restart and reload all configurations of the data hub by name", produces = "applicaton/json", nickname = "refreshDatahubs")
-    SdxClusterResponse refreshDataHubs(@PathParam("datalakeName") String name, @QueryParam("datahubName") String datahubName);
+    SdxRefreshResponse refreshDataHubs(@PathParam("datalakeName") String name, @QueryParam("datahubName") String datahubName);
 
     @DELETE
     @Path("/crn/{clusterCrn}")
