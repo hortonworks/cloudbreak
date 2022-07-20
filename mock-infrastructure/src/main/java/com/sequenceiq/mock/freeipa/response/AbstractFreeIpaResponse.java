@@ -12,16 +12,17 @@ public abstract class AbstractFreeIpaResponse<T> {
     public Object handle(List<CloudVmMetaDataStatus> metadatas, String body) throws Exception {
         RPCResponse<T> rpcResponse = new RPCResponse<>();
         rpcResponse.setSummary("summary");
-        rpcResponse.setResult(handleInternal(metadatas, body));
+        T result = handleInternal(metadatas, body);
+        rpcResponse.setResult(result);
         rpcResponse.setCount(1);
         rpcResponse.setTruncated(Boolean.FALSE);
-        rpcResponse.setMessages(getMessages());
+        rpcResponse.setMessages(getMessages(result, metadatas, body));
         return Map.of("result", rpcResponse);
     }
 
     public abstract String method();
 
-    protected List<RPCMessage> getMessages() {
+    protected List<RPCMessage> getMessages(T result, List<CloudVmMetaDataStatus> metadatas, String body) {
         return null;
     }
 

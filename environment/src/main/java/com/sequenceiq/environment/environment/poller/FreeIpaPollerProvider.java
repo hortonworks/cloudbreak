@@ -41,6 +41,11 @@ public class FreeIpaPollerProvider {
                 return AttemptResults.breakFor("FreeIpa polling cancelled in inmemory store, id: " + envId);
             }
             Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(envCrn);
+            if (freeIpaResponse.isPresent()) {
+                LOGGER.debug("Next FreeIpa start polling's step. FreeIpa status: {}", freeIpaResponse.get().getStatus());
+            } else {
+                LOGGER.debug("FreeIpa isn't found");
+            }
             if (freeIpaResponse.isEmpty() || freeipaAvailable(freeIpaResponse.get())) {
                 return AttemptResults.finishWith(null);
             } else {
@@ -56,6 +61,11 @@ public class FreeIpaPollerProvider {
                 return AttemptResults.breakFor("FreeIpa polling cancelled in inmemory store, id: " + envId);
             }
             Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(envCrn);
+            if (freeIpaResponse.isPresent()) {
+                LOGGER.debug("Next FreeIpa stop polling's step. FreeIpa status: {}", freeIpaResponse.get().getStatus());
+            } else {
+                LOGGER.debug("FreeIpa isn't found");
+            }
             if (freeIpaResponse.isEmpty() || freeipaStopped(freeIpaResponse.get())) {
                 return AttemptResults.finishWith(null);
             } else {

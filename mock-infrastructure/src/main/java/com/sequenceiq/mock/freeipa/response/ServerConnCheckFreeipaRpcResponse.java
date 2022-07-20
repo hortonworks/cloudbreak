@@ -7,26 +7,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.client.RPCMessage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 @Component
 public class ServerConnCheckFreeipaRpcResponse extends AbstractFreeIpaResponse<Boolean> {
-
-    private Boolean result;
-
-    private List<RPCMessage> messages;
-
-    public ServerConnCheckFreeipaRpcResponse() {
-        this(true, new ArrayList<>());
-        RPCMessage message = new RPCMessage();
-        message.setName("name");
-        message.setMessage("message");
-        messages.add(message);
-    }
-
-    private ServerConnCheckFreeipaRpcResponse(Boolean result, List<RPCMessage> messages) {
-        this.result = result;
-        this.messages = messages;
-    }
 
     @Override
     public String method() {
@@ -35,17 +19,26 @@ public class ServerConnCheckFreeipaRpcResponse extends AbstractFreeIpaResponse<B
 
     @Override
     protected Boolean handleInternal(List<CloudVmMetaDataStatus> metadatas, String body) {
-        return result;
+        return metadatas.stream().anyMatch(m -> m.getCloudVmInstanceStatus().getStatus() == InstanceStatus.STARTED);
     }
 
     @Override
-    protected List<RPCMessage> getMessages() {
+    protected List<RPCMessage> getMessages(Boolean result, List<CloudVmMetaDataStatus> metadatas, String body) {
+        List<RPCMessage> messages = new ArrayList<>();
+        if (result) {
+            messages.add(message("Instances are started"));
+        } else {
+            metadatas.forEach(m -> {
+                messages.add(message(m.getMetaData().getPublicIp() + " is " + m.getCloudVmInstanceStatus().getStatus()));
+            });
+        }
         return messages;
     }
 
-    public static ServerConnCheckFreeipaRpcResponse unreachable() {
+    private RPCMessage message(String message) {
         RPCMessage rpcMessage = new RPCMessage();
-        rpcMessage.setMessage("Unreachable mock");
-        return new ServerConnCheckFreeipaRpcResponse(false, List.of(rpcMessage));
+        rpcMessage.setName(method());
+        rpcMessage.setMessage(message);
+        return rpcMessage;
     }
 }

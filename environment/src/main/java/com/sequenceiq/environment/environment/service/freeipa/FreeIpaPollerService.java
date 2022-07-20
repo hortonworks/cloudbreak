@@ -82,6 +82,7 @@ public class FreeIpaPollerService {
         if (freeIpaResponse.isPresent() && shouldRun.apply(freeIpaResponse.get().getStatus())) {
             freeIpaOperation.accept(envCrn);
             try {
+                LOGGER.info("FreeIpa polling started.");
                 Polling.stopAfterAttempt(startStopAttempt)
                         .stopIfException(true)
                         .waitPeriodly(startStopSleeptime, TimeUnit.SECONDS)
