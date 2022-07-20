@@ -19,7 +19,7 @@ public class NonCmUpgradeImageFilter implements UpgradeImageFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NonCmUpgradeImageFilter.class);
 
-    private static final int ORDER_NUMBER = 3;
+    private static final int ORDER_NUMBER = 4;
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {

@@ -19,6 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.conf.UpgradeImageFilterConfig;
 import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
+import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
 
@@ -56,6 +57,9 @@ public class UpgradeImageFilterConfigTest {
 
         @MockBean
         private EntitlementService entitlementService;
+
+        @MockBean
+        private ImageService imageService;
 
     }
 }

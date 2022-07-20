@@ -16,7 +16,7 @@ public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OsVersionBasedUpgradeImageFilter.class);
 
-    private static final int ORDER_NUMBER = 7;
+    private static final int ORDER_NUMBER = 8;
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {

@@ -21,15 +21,15 @@ public class CloudPlatformBasedUpgradeImageFilter implements UpgradeImageFilter 
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
-        List<Image> filteredImages = filterImages(imageFilterResult, imageFilterParams.getCloudPlatform());
+        List<Image> filteredImages = filterImages(imageFilterResult, imageFilterParams.getImageCatalogPlatform());
         LOGGER.debug("After the filtering {} image found with {} cloud platform.", filteredImages.size(),
-                imageFilterParams.getCloudPlatform().nameToUpperCase());
+                imageFilterParams.getImageCatalogPlatform().nameToUpperCase());
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
     }
 
     @Override
     public String getMessage(ImageFilterParams imageFilterParams) {
-        return String.format("There are no eligible images to upgrade for %s cloud platform.", imageFilterParams.getCloudPlatform().nameToUpperCase());
+        return String.format("There are no eligible images to upgrade for %s cloud platform.", imageFilterParams.getImageCatalogPlatform().nameToUpperCase());
     }
 
     @Override

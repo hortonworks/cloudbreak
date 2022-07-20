@@ -21,7 +21,7 @@ public class EntitlementDrivenPackageLocationFilter implements UpgradeImageFilte
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EntitlementDrivenPackageLocationFilter.class);
 
-    private static final int ORDER_NUMBER = 8;
+    private static final int ORDER_NUMBER = 9;
 
     private final EntitlementService entitlementService;
 

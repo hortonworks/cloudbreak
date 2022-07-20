@@ -42,4 +42,11 @@ public class ImageCatalogPlatform {
     public int hashCode() {
         return Objects.hash(platform);
     }
+
+    @Override
+    public String toString() {
+        return "ImageCatalogPlatform{" +
+                "platform='" + platform + '\'' +
+                '}';
+    }
 }
