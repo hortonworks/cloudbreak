@@ -4,8 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -126,7 +129,7 @@ public class ResponseModifierServiceTest {
         underTest.addResponse(mockResponse3);
 
         String assertPath = "get_/path1";
-        String actualPost = underTest.evaluateResponse("get_/path1", String.class, () -> "OK");
+        String actualPost = underTest.evaluateResponse("get_/path1", String.class, () -> "OK", Collections.emptyList());
         assertEquals(actualPost, "result");
         assertException(assertPath, "400 message2", HttpStatus.BAD_REQUEST);
     }
@@ -136,7 +139,7 @@ public class ResponseModifierServiceTest {
         MockResponse mockResponse1 = createMockResponse(0, 200, "/path1", "get", "message1");
         underTest.addResponse(mockResponse1);
 
-        String actualPost = underTest.evaluateResponse("get_/path2", String.class, () -> "OK");
+        String actualPost = underTest.evaluateResponse("get_/path2", String.class, () -> "OK", Collections.emptyList());
         assertEquals(actualPost, "OK");
     }
 
@@ -148,17 +151,17 @@ public class ResponseModifierServiceTest {
         MockResponse mockResponse1 = createMockResponse(0, 200, "/path1", "get", null, publicKey);
         underTest.addResponse(mockResponse1);
 
-        PublicKey actualPost = underTest.evaluateResponse("get_/path1", PublicKey.class, () -> null);
+        PublicKey actualPost = underTest.evaluateResponse("get_/path1", PublicKey.class, () -> null, Collections.emptyList());
         assertEquals(actualPost.getPublicKey(), "hash");
         assertEquals(actualPost.getPublicKeyId(), "id");
     }
 
     @Test
     public void testEvaluateResponseWhenResponseMapButTheReturnTypePublicKey() throws Throwable {
-        MockResponse mockResponse1 = createMockResponse(0, 200, "/path1", "get", null, Map.of("publicKeyId", "id", "publicKey", "hash"), Map.class);
+        MockResponse mockResponse1 = createMockResponse(0, 200, "/path1", "get", null, Map.of("publicKeyId", "id", "publicKey", "hash"), Map.class, Collections.emptySet());
         underTest.addResponse(mockResponse1);
 
-        PublicKey actualPost = underTest.evaluateResponse("get_/path1", PublicKey.class, () -> null);
+        PublicKey actualPost = underTest.evaluateResponse("get_/path1", PublicKey.class, () -> null, Collections.emptyList());
         assertEquals(actualPost.getPublicKey(), "hash");
         assertEquals(actualPost.getPublicKeyId(), "id");
     }
@@ -168,7 +171,7 @@ public class ResponseModifierServiceTest {
         MockResponse mockResponse1 = createMockResponse(0, 200, "/path1", "get", null, "result");
         underTest.addResponse(mockResponse1);
 
-        ResponseEntity<String> actualPost = underTest.evaluateResponse("get_/path1", ResponseEntity.class, () -> null);
+        ResponseEntity<String> actualPost = underTest.evaluateResponse("get_/path1", ResponseEntity.class, () -> null, Collections.emptyList());
         assertEquals(actualPost.getBody(), "result");
     }
 
@@ -178,25 +181,45 @@ public class ResponseModifierServiceTest {
         mockResponse1.setClss("com.cloudera.api.swagger.model.ApiCommand");
         underTest.addResponse(mockResponse1);
 
-        ApiCommand actualPost = underTest.evaluateResponse("get_/path1", ApiCommand.class, () -> null);
+        ApiCommand actualPost = underTest.evaluateResponse("get_/path1", ApiCommand.class, () -> null, Collections.emptyList());
         assertEquals(actualPost.getId(), Integer.valueOf(1));
     }
 
+    @Test
+    public void testEvaluateResponseWhenBodyContains() throws Throwable {
+        MockResponse mockResponse = createMockResponse(0, 200, "/path", "get", null, "MOCKED_RESPONSE",
+                String.class, new HashSet<>(List.of("body-filter")));
+        underTest.addResponse(mockResponse);
+
+        String response = underTest.evaluateResponse("get_/path", String.class, () -> null, List.of("TESTbody-filterTEST"));
+        assertEquals("MOCKED_RESPONSE", response);
+    }
+
+    @Test
+    public void testEvaluateResponseWhenBodyContainsDoesNotMatchAll() throws Throwable {
+        MockResponse mockResponse = createMockResponse(0, 200, "/path", "get", null, "MOCKED_RESPONSE",
+                String.class, new HashSet<>(List.of("body-filter1", "body-filter2")));
+        underTest.addResponse(mockResponse);
+
+        String response = underTest.evaluateResponse("get_/path", String.class, () -> "DEFAULT_RESPONSE", List.of("TESTbody-filter1TEST"));
+        assertEquals("DEFAULT_RESPONSE", response);
+    }
+
     private void assertException(String path, String message, HttpStatus httpStatus) {
-        HttpServerErrorException actual = assertThrows(HttpServerErrorException.class, () -> underTest.evaluateResponse(path, String.class, () -> null));
+        HttpServerErrorException actual = assertThrows(HttpServerErrorException.class, () -> underTest.evaluateResponse(path, String.class, () -> null, Collections.emptyList()));
         assertEquals(actual.getStatusCode(), httpStatus);
         assertEquals(actual.getMessage(), message);
     }
 
     private MockResponse createMockResponse(int times, int code, String path, String method, String message) {
-        return createMockResponse(times, code, path, method, message, null, null);
+        return createMockResponse(times, code, path, method, message, null, null, Collections.emptySet());
     }
 
     private MockResponse createMockResponse(int times, int code, String path, String method, String message, Object obj) {
-        return createMockResponse(times, code, path, method, message, obj, obj.getClass());
+        return createMockResponse(times, code, path, method, message, obj, obj.getClass(), Collections.emptySet());
     }
 
-    private MockResponse createMockResponse(int times, int code, String path, String method, String message, Object obj, Class clss) {
+    private MockResponse createMockResponse(int times, int code, String path, String method, String message, Object obj, Class clss, Set<String> bodyContains) {
         MockResponse mockResponse = new MockResponse();
         mockResponse.setTimes(times);
         mockResponse.setStatusCode(code);
@@ -207,6 +230,7 @@ public class ResponseModifierServiceTest {
             mockResponse.setClss(clss.getName());
             mockResponse.setResponse(obj);
         }
+        mockResponse.setBodyContains(bodyContains);
         return mockResponse;
     }
 }
