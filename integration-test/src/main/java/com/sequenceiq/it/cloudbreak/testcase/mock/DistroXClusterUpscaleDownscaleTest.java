@@ -29,7 +29,7 @@ import com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.AbstractCloude
 
 public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerTest {
 
-    private static final int CLUSTER_NODE_COUNT_MAX = 400;
+    private static final int CLUSTER_NODE_COUNT_MAX = 800;
 
     private static final int CLUSTER_NODE_COUNT_MIN = 2;
 
@@ -152,14 +152,14 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
         createDatalake(testContext);
         createDistroxDto(testContext, stack, WORKER_NODE_COUNT_MAX + 1)
                 .whenException(distroXClient.create(), BadRequestException.class, key(stack)
-                        .expectedMessage("The maximum count of nodes for this cluster cannot be higher than 400"))
+                        .expectedMessage("The maximum count of nodes for this cluster cannot be higher than " + CLUSTER_NODE_COUNT_MAX))
                 .given("dx-1000-ig-worker", DistroXInstanceGroupTestDto.class)
                 .withNodeCount(350)
                 .given(stack, DistroXTestDto.class)
                 .when(distroXClient.create(), key(stack))
                 .await(STACK_AVAILABLE, key(stack))
                 .whenException(distroXClient.scale(HostGroupType.WORKER.getName(), CLUSTER_NODE_COUNT_MAX + 1), BadRequestException.class, key(stack)
-                        .expectedMessage("The maximum count of nodes for this cluster cannot be higher than 400"))
+                        .expectedMessage("The maximum count of nodes for this cluster cannot be higher than " + CLUSTER_NODE_COUNT_MAX))
                 .validate();
     }
 
