@@ -9,6 +9,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NA
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,7 @@ import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -186,7 +188,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    @CheckPermissionByResourceName(action = DESCRIBE_ENVIRONMENT)
     public DetailedEnvironmentResponse getByName(@ResourceName String environmentName) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByNameAndAccountId(environmentName, accountId);
@@ -194,7 +196,13 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    @CheckPermissionByResourceName(action = DESCRIBE_ENVIRONMENT)
+    public Map<String, Set<String>> getAttachedExperiencesByEnvironmentName(@ResourceName String name) {
+        return environmentService.collectExperiences(NameOrCrn.ofName(name));
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = DESCRIBE_ENVIRONMENT)
     public EnvironmentCrnResponse getCrnByName(@ResourceName String environmentName) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String crn = environmentService.getCrnByNameAndAccountId(environmentName, accountId);
@@ -202,11 +210,17 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
     public DetailedEnvironmentResponse getByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
         return environmentResponseConverter.dtoToDetailedResponse(environmentDto);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
+    public Map<String, Set<String>> getAttachedExperiencesByEnvironmentCrn(@ResourceCrn String crn) {
+        return environmentService.collectExperiences(NameOrCrn.ofCrn(crn));
     }
 
     @Override
@@ -275,7 +289,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     @FilterListBasedOnPermissions
     public SimpleEnvironmentResponses list() {
-        List<EnvironmentDto> environmentDtos = environmentFiltering.filterEnvironments(AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+        List<EnvironmentDto> environmentDtos = environmentFiltering.filterEnvironments(DESCRIBE_ENVIRONMENT);
         return toSimpleEnvironmentResponses(environmentDtos);
     }
 
@@ -384,7 +398,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
     public CredentialResponse verifyCredentialByEnvCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByEnvironmentCrnAndAccountId(crn, accountId, ENVIRONMENT);
@@ -393,13 +407,13 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    @CheckPermissionByResourceName(action = DESCRIBE_ENVIRONMENT)
     public Object getCreateEnvironmentForCliByName(@ResourceName String environmentName) {
         throw new UnsupportedOperationException("not supported request");
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
     public Object getCreateEnvironmentForCliByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn) {
         throw new UnsupportedOperationException("not supported request");
     }
@@ -436,13 +450,13 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
     public FlowProgressResponse getLastFlowLogProgressByResourceCrn(@ResourceCrn String resourceCrn) {
         return environmentProgressService.getLastFlowProgressByResourceCrn(resourceCrn);
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
     public List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@ResourceCrn String resourceCrn) {
         return environmentProgressService.getFlowProgressListByResourceCrn(resourceCrn);
     }
@@ -469,7 +483,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
     public boolean isUpgradeCcmAvailable(@ResourceCrn @TenantAwareParam String crn) {
         EnvironmentDto environmentDto = environmentService.internalGetByCrn(crn);
         return Tunnel.getUpgradables().contains(environmentDto.getTunnel()) ||

@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.environment.endpoint;
 import static com.sequenceiq.environment.api.doc.environment.EnvironmentDescription.ENVIRONMENT_NOTES;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -62,6 +63,13 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "getEnvironmentV1ByName")
     DetailedEnvironmentResponse getByName(@PathParam("name") String environmentName);
+
+    @GET
+    @Path("/xp/name/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.GET_XP_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "getAttachedExperiencesByEnvironmentName")
+    Map<String, Set<String>> getAttachedExperiencesByEnvironmentName(@PathParam("name") String name);
 
     @GET
     @Path("/crnByName/{name}")
@@ -143,6 +151,13 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.GET_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "getEnvironmentV1ByCrn")
     DetailedEnvironmentResponse getByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
+
+    @GET
+    @Path("/xp/crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.GET_XP_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "getAttachedExperiencesByEnvironmentCrn")
+    Map<String, Set<String>> getAttachedExperiencesByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
 
     @DELETE
     @Path("/crn/{crn}")
