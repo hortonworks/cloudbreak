@@ -35,7 +35,8 @@ public interface ConsumptionInternalEndpoint {
     @ApiOperation(value = ConsumptionOpDescription.SCHEDULE_STORAGE, produces = MediaType.APPLICATION_JSON, nickname = "scheduleStorageCollection")
     void scheduleStorageConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
             @Valid @NotNull StorageConsumptionRequest request,
-            @ValidCrn(resource = CrnResourceDescriptor.USER) @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @DELETE
     @Path("unschedule/storage")
@@ -44,7 +45,8 @@ public interface ConsumptionInternalEndpoint {
     void unscheduleStorageConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
             @NotNull @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE})
             @QueryParam("monitoredResourceCrn") String monitoredResourceCrn, @NotEmpty @QueryParam("storageLocation") String storageLocation,
-            @ValidCrn(resource = CrnResourceDescriptor.USER) @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
     @GET
     @Path("exists/storage")
@@ -53,5 +55,6 @@ public interface ConsumptionInternalEndpoint {
     ConsumptionExistenceResponse doesStorageConsumptionCollectionExist(@AccountId @QueryParam("accountId") String accountId,
             @NotNull @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE})
             @QueryParam("monitoredResourceCrn") String monitoredResourceCrn, @NotEmpty @QueryParam("storageLocation") String storageLocation,
-            @ValidCrn(resource = CrnResourceDescriptor.USER) @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 }
