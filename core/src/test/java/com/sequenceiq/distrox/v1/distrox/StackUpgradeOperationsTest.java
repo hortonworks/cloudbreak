@@ -144,7 +144,7 @@ class StackUpgradeOperationsTest {
         UpgradeV4Request request = createUpgradeRequest(true);
         StackInstanceCount stackInstanceCount = mock(StackInstanceCount.class);
         when(stackInstanceCount.getInstanceCount()).thenReturn(201);
-        when(limitConfiguration.getUpgradeNodeCountLimit()).thenReturn(200);
+        when(limitConfiguration.getUpgradeNodeCountLimit(any())).thenReturn(200);
         when(instanceMetaDataService.countByStackId(any())).thenReturn(stackInstanceCount);
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
@@ -188,7 +188,7 @@ class StackUpgradeOperationsTest {
         StackInstanceCount instanceCount = mock(StackInstanceCount.class);
         when(instanceCount.getInstanceCount()).thenReturn(INSTANCE_COUNT);
         when(instanceMetaDataService.countByStackId(STACK_ID)).thenReturn(instanceCount);
-        when(limitConfiguration.getUpgradeNodeCountLimit()).thenReturn(NODE_LIMIT);
+        when(limitConfiguration.getUpgradeNodeCountLimit(any())).thenReturn(NODE_LIMIT);
         when(clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings())).thenReturn(upgradeResponse);
         when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
 
@@ -198,7 +198,7 @@ class StackUpgradeOperationsTest {
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
         verify(upgradeService).isOsUpgrade(request);
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
-        verify(limitConfiguration).getUpgradeNodeCountLimit();
+        verify(limitConfiguration).getUpgradeNodeCountLimit(any());
         verify(clusterUpgradeAvailabilityService).checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings());
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponse, request, false);
         verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
@@ -218,7 +218,7 @@ class StackUpgradeOperationsTest {
         StackInstanceCount instanceCount = mock(StackInstanceCount.class);
         when(instanceCount.getInstanceCount()).thenReturn(INSTANCE_COUNT);
         when(instanceMetaDataService.countByStackId(STACK_ID)).thenReturn(instanceCount);
-        when(limitConfiguration.getUpgradeNodeCountLimit()).thenReturn(NODE_LIMIT);
+        when(limitConfiguration.getUpgradeNodeCountLimit(any())).thenReturn(NODE_LIMIT);
         when(clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings())).thenReturn(upgradeResponse);
         when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
         when(stackOperations.listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any())).thenReturn(stackViewV4Responses);
@@ -229,7 +229,7 @@ class StackUpgradeOperationsTest {
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
         verify(upgradeService).isOsUpgrade(request);
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
-        verify(limitConfiguration).getUpgradeNodeCountLimit();
+        verify(limitConfiguration).getUpgradeNodeCountLimit(any());
         verify(clusterUpgradeAvailabilityService).checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings());
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponse, request, true);
         verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
@@ -252,7 +252,7 @@ class StackUpgradeOperationsTest {
         StackInstanceCount instanceCount = mock(StackInstanceCount.class);
         when(instanceCount.getInstanceCount()).thenReturn(INSTANCE_COUNT);
         when(instanceMetaDataService.countByStackId(STACK_ID)).thenReturn(instanceCount);
-        when(limitConfiguration.getUpgradeNodeCountLimit()).thenReturn(NODE_LIMIT);
+        when(limitConfiguration.getUpgradeNodeCountLimit(any())).thenReturn(NODE_LIMIT);
         when(clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings()))
                 .thenReturn(upgradeResponseToReturn);
         when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
@@ -268,7 +268,7 @@ class StackUpgradeOperationsTest {
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
         verify(upgradeService).isOsUpgrade(request);
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
-        verify(limitConfiguration).getUpgradeNodeCountLimit();
+        verify(limitConfiguration).getUpgradeNodeCountLimit(any());
         verify(clusterUpgradeAvailabilityService).checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings());
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponseToReturn, request, true);
         verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
@@ -291,7 +291,7 @@ class StackUpgradeOperationsTest {
         StackInstanceCount instanceCount = mock(StackInstanceCount.class);
         when(instanceCount.getInstanceCount()).thenReturn(INSTANCE_COUNT);
         when(instanceMetaDataService.countByStackId(STACK_ID)).thenReturn(instanceCount);
-        when(limitConfiguration.getUpgradeNodeCountLimit()).thenReturn(NODE_LIMIT);
+        when(limitConfiguration.getUpgradeNodeCountLimit(any())).thenReturn(NODE_LIMIT);
         when(clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings()))
                 .thenReturn(upgradeResponseToReturn);
         when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
@@ -306,7 +306,7 @@ class StackUpgradeOperationsTest {
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
         verify(upgradeService).isOsUpgrade(request);
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
-        verify(limitConfiguration).getUpgradeNodeCountLimit();
+        verify(limitConfiguration).getUpgradeNodeCountLimit(any());
         verify(clusterUpgradeAvailabilityService).checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings());
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponseToReturn, request, true);
         verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);

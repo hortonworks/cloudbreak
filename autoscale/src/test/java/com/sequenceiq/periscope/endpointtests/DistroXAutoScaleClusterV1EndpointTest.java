@@ -170,7 +170,7 @@ public class DistroXAutoScaleClusterV1EndpointTest {
         when(grpcUmsClient.getAccountDetails(anyString(), any())).thenReturn(account);
         doNothing().when(resourceAuthorizationService).authorize(eq("crn:cdp:iam:us-west-1:accid:cluster:mockuser@cloudera.com"), any(), any());
         when(clusterProxyConfigurationService.getClusterProxyUrl()).thenReturn(Optional.of("http://clusterproxy"));
-        when(limitsConfigurationService.getMaxNodeCountLimit()).thenReturn(400);
+        when(limitsConfigurationService.getMaxNodeCountLimit(anyString())).thenReturn(400);
         when(recommendationService.getAutoscaleRecommendations(TEST_CLUSTER_CRN))
                 .thenReturn(new AutoscaleRecommendationV4Response(Set.of("compute"), Set.of("compute")));
     }

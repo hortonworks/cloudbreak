@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,27 +36,27 @@ public class NodeCountLimitValidatorTest {
 
     @Test
     public void testUpscaleValidation() {
-        when(nodeCountLimitConfiguration.getNodeCountLimit()).thenReturn(500);
+        when(nodeCountLimitConfiguration.getNodeCountLimit(any())).thenReturn(500);
         when(instanceMetaDataService.countByStackId(anyLong())).thenReturn(count(10));
-        underTest.validateScale(1L, 1);
+        underTest.validateScale(1L, 1, "acc");
         when(instanceMetaDataService.countByStackId(anyLong())).thenReturn(count(499));
-        assertThrows(BadRequestException.class, () -> underTest.validateScale(1L, 2),
+        assertThrows(BadRequestException.class, () -> underTest.validateScale(1L, 2, "acc"),
                 "The maximum count of nodes for this cluster cannot be higher than 500");
-        when(nodeCountLimitConfiguration.getNodeCountLimit()).thenReturn(600);
+        when(nodeCountLimitConfiguration.getNodeCountLimit(any())).thenReturn(600);
         when(instanceMetaDataService.countByStackId(anyLong())).thenReturn(count(499));
-        underTest.validateScale(1L, 2);
+        underTest.validateScale(1L, 2, "acc");
         verify(instanceMetaDataService, times(3)).countByStackId(anyLong());
     }
 
     @Test
     public void testDownscaleValidation() {
-        underTest.validateScale(1L, -1);
+        underTest.validateScale(1L, -1, "acc");
         verifyNoInteractions(instanceMetaDataService);
     }
 
     @Test
     public void testProvisionValidation() {
-        when(nodeCountLimitConfiguration.getNodeCountLimit()).thenReturn(500);
+        when(nodeCountLimitConfiguration.getNodeCountLimit(any())).thenReturn(500);
         underTest.validateProvision(stackV4Request(499));
         assertThrows(BadRequestException.class, () -> underTest.validateProvision(stackV4Request(501)),
                 "The maximum count of nodes for this cluster cannot be higher than 500");
@@ -81,6 +82,7 @@ public class NodeCountLimitValidatorTest {
         InstanceGroupV4Request instanceGroupV4Request = new InstanceGroupV4Request();
         instanceGroupV4Request.setNodeCount(nodeCount);
         stackV4Request.setInstanceGroups(Lists.newArrayList(instanceGroupV4Request));
+        stackV4Request.setEnvironmentCrn("crn:cdp:environments:us-west-1:accid:environment:cluster");
         return stackV4Request;
     }
 }

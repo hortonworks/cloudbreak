@@ -86,8 +86,8 @@ public class CloudbreakCommunicator {
     }
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 10000))
-    public LimitsConfigurationResponse getLimitsConfiguration() {
-        return cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getLimitsConfiguration();
+    public LimitsConfigurationResponse getLimitsConfiguration(String accountId) {
+        return cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getLimitsConfiguration(accountId);
     }
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 10000))
