@@ -232,6 +232,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                         flowChainId, flowTriggerConditionResult.getErrorMessage());
                 createNewFinishedFlow(key, payload, flowParameters, flowChainId, flowConfig, contextParams, false);
             }
+            flowConfig.getFinalizerCallBack().onFinalize(payload.getResourceId());
             throw new FlowNotTriggerableException(flowTriggerConditionResult.getErrorMessage());
         } else if (flowTriggerConditionResult.isSkip()) {
             if (flowChainId != null) {
@@ -239,6 +240,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                         flowChainId, flowTriggerConditionResult.getErrorMessage());
                 createNewFinishedFlow(key, payload, flowParameters, flowChainId, flowConfig, contextParams, true);
             }
+            flowConfig.getFinalizerCallBack().onFinalize(payload.getResourceId());
             throw new FlowNotTriggerableException("Trigger condition failed, skip flow.", true);
         } else {
             Set<FlowLogIdWithTypeAndTimestamp> flowLogItems = flowLogService.findAllRunningNonTerminationFlowsByResourceId(payload.getResourceId());
