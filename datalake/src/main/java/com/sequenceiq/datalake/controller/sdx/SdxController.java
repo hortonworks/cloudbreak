@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.controller.sdx;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CREDENTIAL;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATALAKE;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityTy
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.datalake.authorization.DataLakeFiltering;
 import com.sequenceiq.datalake.cm.RangerCloudIdentityService;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
@@ -62,6 +64,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
+import com.sequenceiq.sdx.api.model.SdxBackupLocationValidationRequest;
 import com.sequenceiq.sdx.api.model.SdxChangeImageCatalogRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
@@ -185,6 +188,13 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
+    @CheckPermissionByRequestProperty(path = "clusterName", type = NAME, action = DESCRIBE_DATALAKE)
+    public ValidationResult validateBackupStorage(@RequestObject @Valid SdxBackupLocationValidationRequest sdxBackupLocationValidationRequest) {
+        SdxCluster sdxCluster = getSdxClusterByName(sdxBackupLocationValidationRequest.getClusterName());
+        return storageValidationService.validateBackupStorage(sdxCluster);
+    }
+
+    @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_DATALAKE)
     public FlowIdentifier delete(@ResourceName String name, Boolean forced) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
@@ -199,14 +209,14 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATALAKE)
+    @CheckPermissionByResourceName(action = DESCRIBE_DATALAKE)
     public SdxClusterResponse get(@ResourceName String name) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxClusterConverter.sdxClusterToResponse(sdxCluster);
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATALAKE)
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
     public SdxClusterResponse getByCrn(@TenantAwareParam @ResourceCrn String clusterCrn) {
         SdxCluster sdxCluster = getSdxClusterByCrn(clusterCrn);
         return sdxClusterConverter.sdxClusterToResponse(sdxCluster);
@@ -215,7 +225,7 @@ public class SdxController implements SdxEndpoint {
     @Override
     @FilterListBasedOnPermissions
     public List<SdxClusterResponse> list(@FilterParam(DataLakeFiltering.ENV_NAME) String envName, boolean includeDetached) {
-        List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvNameOrAll(AuthorizationResourceAction.DESCRIBE_DATALAKE, envName);
+        List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvNameOrAll(DESCRIBE_DATALAKE, envName);
         return includeDetached ? convertSdxClusters(sdxClusters) : convertAttachedSdxClusters(sdxClusters);
     }
 
@@ -230,7 +240,7 @@ public class SdxController implements SdxEndpoint {
     @FilterListBasedOnPermissions
     public List<SdxClusterResponse> getByEnvCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @FilterParam(DataLakeFiltering.ENV_CRN)
     @TenantAwareParam String envCrn) {
-        List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvCrn(AuthorizationResourceAction.DESCRIBE_DATALAKE, envCrn);
+        List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvCrn(DESCRIBE_DATALAKE, envCrn);
         return convertAttachedSdxClusters(sdxClusters);
     }
 
@@ -420,7 +430,7 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATALAKE)
+    @CheckPermissionByResourceName(action = DESCRIBE_DATALAKE)
     public SdxGenerateImageCatalogResponse generateImageCatalog(@ResourceName String name) {
         CloudbreakImageCatalogV3 imageCatalog = sdxImageCatalogService.generateImageCatalog(name);
         return new SdxGenerateImageCatalogResponse(imageCatalog);

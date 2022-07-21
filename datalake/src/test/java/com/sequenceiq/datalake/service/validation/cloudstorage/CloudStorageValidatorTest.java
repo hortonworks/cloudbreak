@@ -1,13 +1,18 @@
 package com.sequenceiq.datalake.service.validation.cloudstorage;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,6 +23,8 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -45,7 +52,7 @@ public class CloudStorageValidatorTest {
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @Mock
-    private CloudProviderServicesV4Endopint cloudProviderServicesV4Endopint;
+    private CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint;
 
     @Mock
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -92,9 +99,52 @@ public class CloudStorageValidatorTest {
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(
                 new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc", false));
         when(entitlementService.cloudStorageValidationEnabled(any())).thenReturn(true);
-        when(cloudProviderServicesV4Endopint.validateObjectStorage(any())).thenReturn(new ObjectStorageValidateResponse());
+        when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(new ObjectStorageValidateResponse());
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(new CloudStorageRequest(), environment, validationResultBuilder));
         assertFalse(validationResultBuilder.build().hasError());
+    }
+
+    @Test
+    public void validateBackupLocation() {
+        when(environment.getCredential()).thenReturn(new CredentialResponse());
+        when(secretService.getByResponse(any())).thenReturn("secret");
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(
+                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc", false));
+
+        when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(new ObjectStorageValidateResponse());
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), environment, validationResultBuilder));
+        assertFalse(validationResultBuilder.build().hasError());
+    }
+
+    @Test
+    public void validateBackupLocationOnError() {
+        ArgumentCaptor<ObjectStorageValidateRequest> captor = ArgumentCaptor.forClass(ObjectStorageValidateRequest.class);
+        when(environment.getCredential()).thenReturn(new CredentialResponse());
+        when(environment.getCloudPlatform()).thenReturn("AWS");
+        when(environment.getBackupLocation()).thenReturn("/location/to/backup");
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(
+                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc", false));
+
+        ObjectStorageValidateResponse objectStorageValidateResponse = new ObjectStorageValidateResponse();
+        objectStorageValidateResponse.setStatus(ResponseStatus.ERROR);
+        objectStorageValidateResponse.setError("dummy failure");
+        when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(objectStorageValidateResponse);
+        ValidationResultBuilder validationResultBuilderforFailure = new ValidationResultBuilder();
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), environment,
+                validationResultBuilderforFailure));
+        verify(cloudProviderServicesV4Endpoint, times(1)).validateObjectStorage(captor.capture());
+        assertTrue(captor.getValue().getCloudStorageRequest().getLocations().isEmpty());
+        assertEquals("id", captor.getValue().getCredential().getId());
+        assertEquals("acc", captor.getValue().getCredential().getAccountId());
+        assertEquals("/location/to/backup", captor.getValue().getBackupLocationBase());
+        assertEquals("AWS", captor.getValue().getCloudPlatform());
+        assertTrue(validationResultBuilderforFailure.build().hasError());
+        assertEquals("dummy failure", validationResultBuilderforFailure.build().getFormattedErrors());
     }
 }

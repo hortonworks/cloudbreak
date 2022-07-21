@@ -1,0 +1,222 @@
+{
+  "name": "test-datalake",
+  "environmentCrn": "crn:cdp:environments:us-west-1:cloudera:environment:ceb2ac9d-16f5-45de-9e9b-d38ed26d6967",
+  "customDomain": {
+    "domainName": "cloudera.site",
+    "clusterNameAsSubdomain": false,
+    "hostgroupNameAsHostname": true
+  },
+  "tags": {
+    "application": {},
+    "userDefined": {},
+    "defaults": {}
+  },
+  "telemetry": {
+    "fluentAttributes": {
+      "clusterCrn": "crn:cdp:datalake:us-west-1:cloudera:datalake:445c3910-8517-40ef-88aa-76feffe554f0",
+      "azureIdBrokerInstanceMsi": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-assumer-identity"
+    },
+    "logging": {
+      "storageLocation": "abfs://logs@biglauerazdaily1san.dfs.core.windows.net",
+      "adlsGen2": {
+        "accountKey": null,
+        "accountName": null,
+        "managedIdentity": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-logger-identity",
+        "secure": false
+      }
+    },
+    "monitoring": {},
+    "workloadAnalytics": null,
+    "features": {
+      "workloadAnalytics": null,
+      "clusterLogsCollection": null,
+      "monitoring": null,
+      "cloudStorageLogging": {
+        "enabled": true
+      }
+    }
+  },
+  "instanceGroups": [
+    {
+      "nodeCount": 1,
+      "name": "idbroker",
+      "type": "CORE",
+      "scalabilityOption": "ALLOWED",
+      "minimumNodeCount": 0,
+      "recoveryMode": "MANUAL",
+      "template": {
+        "azure": {
+          "encrypted": false,
+          "encryption": {
+            "type": null,
+            "key": null,
+            "diskEncryptionSetId": null,
+            "encryptionAtHostEnabled": null
+          },
+          "managedDisk": true
+        },
+        "instanceType": "Standard_D2s_v3",
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "type": "StandardSSD_LRS"
+          }
+        ]
+      },
+      "securityGroup": {
+        "securityGroupIds": [],
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": [
+              "22"
+            ],
+            "protocol": "tcp"
+          }
+        ]
+      },
+      "recipeNames": []
+    },
+    {
+      "nodeCount": 1,
+      "name": "master",
+      "type": "GATEWAY",
+      "scalabilityOption": "ALLOWED",
+      "minimumNodeCount": 0,
+      "recoveryMode": "MANUAL",
+      "template": {
+        "azure": {
+          "encrypted": false,
+          "encryption": {
+            "type": null,
+            "key": null,
+            "diskEncryptionSetId": null,
+            "encryptionAtHostEnabled": null
+          },
+          "managedDisk": true
+        },
+        "instanceType": "Standard_DS13_v2",
+        "attachedVolumes": [
+          {
+            "size": 250,
+            "count": 1,
+            "type": "StandardSSD_LRS"
+          }
+        ]
+      },
+      "securityGroup": {
+        "securityGroupIds": [],
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": [
+              "443"
+            ],
+            "protocol": "tcp"
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": [
+              "22"
+            ],
+            "protocol": "tcp"
+          }
+        ]
+      },
+      "recipeNames": []
+    }
+  ],
+  "authentication": {
+    "publicKey": "ssh-rsa dummy-key cloudbreak"
+  },
+  "cluster": {
+    "password": "2ajb2abs21aqe50in7v61gghb4",
+    "databases": [],
+    "databaseServerCrn": "crn:cdp:redbeams:us-west-1:cloudera:databaseServer:5ce2c27a-7340-48fd-8f9b-504981d47a93",
+    "cloudStorage": {
+      "locations": [
+        {
+          "type": "HBASE_ROOT",
+          "value": "abfs://data@biglauerazdaily1san.dfs.core.windows.net/perm-test-2/hbase"
+        },
+        {
+          "type": "HIVE_METASTORE_WAREHOUSE",
+          "value": "abfs://data@biglauerazdaily1san.dfs.core.windows.net/warehouse/tablespace/managed/hive"
+        },
+        {
+          "type": "HIVE_METASTORE_EXTERNAL_WAREHOUSE",
+          "value": "abfs://data@biglauerazdaily1san.dfs.core.windows.net/warehouse/tablespace/external/hive"
+        },
+        {
+          "type": "HIVE_REPLICA_WAREHOUSE",
+          "value": "abfs://data@biglauerazdaily1san.dfs.core.windows.net/hive_replica_functions_dir"
+        },
+        {
+          "type": "RANGER_AUDIT",
+          "value": "abfs://data@biglauerazdaily1san.dfs.core.windows.net/ranger/audit"
+        }
+      ],
+      "identities": [
+        {
+          "adlsGen2": {
+            "accountKey": null,
+            "accountName": null,
+            "managedIdentity": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-assumer-identity",
+            "secure": false
+          },
+          "type": "ID_BROKER"
+        },
+        {
+          "adlsGen2": {
+            "accountKey": null,
+            "accountName": null,
+            "managedIdentity": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-logger-identity",
+            "secure": false
+          },
+          "type": "LOG"
+        }
+      ],
+      "accountMapping": {
+        "groupMappings": {},
+        "userMappings": {
+          "hive": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-datalake-admin-identity",
+          "atlas": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-ranger-audit-identity",
+          "nifiregistry": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-ranger-audit-identity",
+          "kudu": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-datalake-admin-identity",
+          "zeppelin": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-datalake-admin-identity",
+          "impala": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-datalake-admin-identity",
+          "nifi": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-ranger-audit-identity",
+          "flink": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-datalake-admin-identity",
+          "dpprofiler": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-datalake-admin-identity",
+          "kafka": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-ranger-audit-identity",
+          "solr": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-ranger-audit-identity",
+          "hdfs": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-datalake-admin-identity",
+          "hue": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-datalake-admin-identity",
+          "yarn": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-datalake-admin-identity",
+          "schemaregistry": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-datalake-admin-identity",
+          "hbase": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-datalake-admin-identity",
+          "mapred": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-datalake-admin-identity",
+          "knox": "/subscriptions/subscription-id/resourcegroups/biglauer-az-daily-1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/biglauer-az-daily-1-ranger-audit-identity"
+        }
+      }
+    },
+    "gateway": {
+      "topologies": [
+        {
+          "topologyName": "cdp-proxy",
+          "exposedServices": [
+            "ALL"
+          ]
+        }
+      ],
+      "ssoType": "SSO_PROVIDER"
+    },
+    "blueprintName": "7.2.15 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas",
+    "validateBlueprint": false,
+    "rangerRazEnabled": false
+  },
+  "type": "DATALAKE",
+  "inputs": {},
+  "enableLoadBalancer": false,
+  "resourceCrn": "crn:cdp:datalake:us-west-1:cloudera:datalake:445c3910-8517-40ef-88aa-76feffe554f0"
+}
