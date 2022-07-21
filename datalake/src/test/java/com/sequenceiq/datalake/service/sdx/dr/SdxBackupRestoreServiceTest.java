@@ -12,6 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrClient;
 import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
@@ -182,6 +184,60 @@ public class SdxBackupRestoreServiceTest {
         when(datalakeDrClient.getLastSuccessfulBackup(CLUSTER_NAME, USER_CRN, Optional.empty())).thenReturn(datalakeBackupInfo);
         datalakeDRProto.DatalakeBackupInfo backupInfo = sdxBackupRestoreService.getLastSuccessfulBackupInfo(CLUSTER_NAME, USER_CRN);
         assertEquals(datalakeBackupInfo, backupInfo);
+    }
+
+    @Test
+    public void testcheckExistingBackup() {
+        Date currentDate = new Date();
+        currentDate.setHours(new Date().getHours()-10);
+        datalakeDRProto.DatalakeBackupInfo datalakeBackupInfo = datalakeDRProto.DatalakeBackupInfo
+                .newBuilder()
+                .setRuntimeVersion(RUNTIME)
+                .setOverallState("SUCCESSFUL")
+                .setEndTimestamp(String.valueOf(currentDate.getTime()))
+                .build();
+        when(datalakeDrClient.getLastSuccessfulBackup(CLUSTER_NAME, USER_CRN, Optional.empty())).thenReturn(datalakeBackupInfo);
+        sdxBackupRestoreService.checkExistingBackup(CLUSTER_NAME, USER_CRN, false);
+
+        currentDate.setHours(new Date().getHours()-23);
+        datalakeBackupInfo = datalakeDRProto.DatalakeBackupInfo
+                .newBuilder()
+                .setRuntimeVersion(RUNTIME)
+                .setOverallState("SUCCESSFUL")
+                .setEndTimestamp(String.valueOf(currentDate.getTime()))
+                .build();
+        when(datalakeDrClient.getLastSuccessfulBackup(CLUSTER_NAME, USER_CRN, Optional.empty())).thenReturn(datalakeBackupInfo);
+        sdxBackupRestoreService.checkExistingBackup(CLUSTER_NAME, USER_CRN, false);
+
+        currentDate.setHours(new Date().getHours()-25);
+        datalakeBackupInfo = datalakeDRProto.DatalakeBackupInfo
+                .newBuilder()
+                .setRuntimeVersion(RUNTIME)
+                .setOverallState("SUCCESSFUL")
+                .setEndTimestamp(String.valueOf(currentDate.getTime()))
+                .build();
+        when(datalakeDrClient.getLastSuccessfulBackup(CLUSTER_NAME, USER_CRN, Optional.empty())).thenReturn(datalakeBackupInfo);
+        try {
+            sdxBackupRestoreService.checkExistingBackup(CLUSTER_NAME, USER_CRN, false);
+            fail("Should have thrown BadRequestException");
+        } catch (BadRequestException badRequestException) {
+
+        }
+
+        currentDate.setHours(new Date().getHours()-48);;
+        datalakeBackupInfo = datalakeDRProto.DatalakeBackupInfo
+                .newBuilder()
+                .setRuntimeVersion(RUNTIME)
+                .setOverallState("SUCCESSFUL")
+                .setEndTimestamp(String.valueOf(currentDate.getTime()))
+                .build();
+        when(datalakeDrClient.getLastSuccessfulBackup(CLUSTER_NAME, USER_CRN, Optional.empty())).thenReturn(datalakeBackupInfo);
+        try {
+            sdxBackupRestoreService.checkExistingBackup(CLUSTER_NAME, USER_CRN, false);
+            fail("Should have thrown BadRequestException");
+        } catch (BadRequestException badRequestException) {
+
+        }
     }
 
     @Test

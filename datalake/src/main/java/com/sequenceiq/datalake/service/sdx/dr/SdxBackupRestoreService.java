@@ -10,13 +10,11 @@ import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.RUNNING;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Optional;
-import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -605,14 +603,13 @@ public class SdxBackupRestoreService {
         return true;
     }
 
-    public void checkExistingBackup(SdxCluster newSdxCluster, String userId, boolean performBackup) {
-        DatalakeBackupInfo lastSuccessfulBackup = datalakeDrClient.getLastSuccessfulBackup(newSdxCluster.getClusterName(), userId, Optional.empty());
+    public void checkExistingBackup(String clusterName, String userId, boolean performBackup) {
+        DatalakeBackupInfo lastSuccessfulBackup = datalakeDrClient.getLastSuccessfulBackup(clusterName, userId, Optional.empty());
         if (isNull(lastSuccessfulBackup) && !performBackup) {
             throw new BadRequestException("The resize cannot be executed because there is no backup.");
         } else if (nonNull(lastSuccessfulBackup)) {
-            long endTimestamp = Long.parseLong(lastSuccessfulBackup.getEndTimestamp());
-            LocalDateTime backupEnd = LocalDateTime.ofInstant(Instant.ofEpochMilli(endTimestamp), TimeZone.getDefault().toZoneId());
-            if (LocalDateTime.now().isBefore(backupEnd.minus(lastBackupInSeconds, ChronoUnit.SECONDS)) && !performBackup) {
+            Date backupTime = new Date(Long.parseLong(lastSuccessfulBackup.getEndTimestamp()));
+            if(TimeUnit.DAYS.convert(new Date().getTime() - backupTime.getTime(), TimeUnit.MILLISECONDS) > 0) {
                 throw new BadRequestException(String.format("The resize cannot be executed because the last backup is older than %d days", lastBackupInSeconds));
             }
         }

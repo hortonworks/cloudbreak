@@ -115,7 +115,7 @@ public class SdxReactorFlowManager {
         boolean performRestore = sdxBackupRestoreService.shouldSdxRestoreBePerformed(
                 newSdxCluster, entitlementService.isDatalakeBackupOnResizeEnabled(ThreadBasedUserCrnProvider.getAccountId())
         );
-        sdxBackupRestoreService.checkExistingBackup(newSdxCluster, userId, performBackup);
+        sdxBackupRestoreService.checkExistingBackup(newSdxCluster.getClusterName(), userId, performBackup);
         eventSenderService.sendEventAndNotification(newSdxCluster, userId, DATALAKE_RESIZE_TRIGGERED);
         return notify(SDX_RESIZE_FLOW_CHAIN_START_EVENT, new DatalakeResizeFlowChainStartEvent(sdxClusterId, newSdxCluster, userId,
                 environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn()), performBackup, performRestore), newSdxCluster.getClusterName());
