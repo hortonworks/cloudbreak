@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGrou
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
@@ -107,7 +108,8 @@ public class ScalingRequest implements Runnable {
             if (!decommissionNodeIds.isEmpty()) {
                 scaleDownByNodeIds(decommissionNodeIds);
             } else if (scalingAdjustment > 0) {
-                Integer cbSupportedScalingAdjustment = getScaleUpNodeCountForCBSupportedMax(scalingAdjustment);
+                String accountId = Crn.safeFromString(cluster.getStackCrn()).getAccountId();
+                Integer cbSupportedScalingAdjustment = getScaleUpNodeCountForCBSupportedMax(scalingAdjustment, accountId);
                 if (cbSupportedScalingAdjustment > 0) {
                     scaleUp(cbSupportedScalingAdjustment, existingHostGroupNodeCount);
                 }
@@ -221,8 +223,8 @@ public class ScalingRequest implements Runnable {
         }
     }
 
-    private Integer getScaleUpNodeCountForCBSupportedMax(Integer scalingAdjustment) {
-        int cbSupportedMaxClusterSize = limitsConfigurationService.getMaxNodeCountLimit();
+    private Integer getScaleUpNodeCountForCBSupportedMax(Integer scalingAdjustment, String accountId) {
+        int cbSupportedMaxClusterSize = limitsConfigurationService.getMaxNodeCountLimit(accountId);
         if ((existingClusterNodeCount + scalingAdjustment) > cbSupportedMaxClusterSize) {
             int requestedScalingAdjustment = scalingAdjustment;
             scalingAdjustment = cbSupportedMaxClusterSize - existingClusterNodeCount;

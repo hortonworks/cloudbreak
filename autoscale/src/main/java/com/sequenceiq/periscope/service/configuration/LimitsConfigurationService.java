@@ -21,10 +21,10 @@ public class LimitsConfigurationService {
     private CloudbreakCommunicator cbCommunicator;
 
     @Cacheable(cacheNames = LIMITS_CONFIGURATION_CACHE)
-    public Integer getMaxNodeCountLimit() {
+    public Integer getMaxNodeCountLimit(String accountId) {
         Integer supportedMaxNodeCount = DEFAULT_CLUSTER_MAX_SIZE;
         try {
-            supportedMaxNodeCount = cbCommunicator.getLimitsConfiguration().getMaxNodeCountLimit();
+            supportedMaxNodeCount = cbCommunicator.getLimitsConfiguration(accountId).getMaxNodeCountLimit();
         } catch (Exception ex) {
             LOGGER.warn("Error retrieving CB Limits Configuration, Using default max cluster size '{}'", supportedMaxNodeCount, ex);
         }

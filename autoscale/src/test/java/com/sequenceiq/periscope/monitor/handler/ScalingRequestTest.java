@@ -113,7 +113,7 @@ public class ScalingRequestTest {
         if (expectedNodeCount > 0) {
             initScaleUpMocks();
             when(cluster.isStopStartScalingEnabled()).thenReturn(false);
-            when(limitsConfigurationService.getMaxNodeCountLimit()).thenReturn(TEST_CLUSTER_MAX_NODE_COUNT);
+            when(limitsConfigurationService.getMaxNodeCountLimit(anyString())).thenReturn(TEST_CLUSTER_MAX_NODE_COUNT);
             ScalingRequest scalingRequest = initializeTestRequest(existingClusterNodeCount, existingHostGroupNodeCount, desiredHostGroupNodeCount, List.of());
             scalingRequest.run();
 
@@ -134,7 +134,7 @@ public class ScalingRequestTest {
         if (expectedNodeCount > 0) {
             initScaleUpMocks();
             when(cluster.isStopStartScalingEnabled()).thenReturn(true);
-            when(limitsConfigurationService.getMaxNodeCountLimit()).thenReturn(TEST_CLUSTER_MAX_NODE_COUNT);
+            when(limitsConfigurationService.getMaxNodeCountLimit(anyString())).thenReturn(TEST_CLUSTER_MAX_NODE_COUNT);
             ScalingRequest scalingRequest = initializeTestRequest(existingClusterNodeCount, existingHostGroupNodeCount, desiredHostGroupNodeCount, List.of());
             scalingRequest.run();
 
@@ -150,7 +150,7 @@ public class ScalingRequestTest {
         when(scalingHardLimitsService.isViolatingAutoscaleMaxStepInNodeCount(anyInt())).thenReturn(false);
         ClusterPertain cluterPertain = mock(ClusterPertain.class);
         when(cluster.getClusterPertain()).thenReturn(cluterPertain);
-        when(cluster.getStackCrn()).thenReturn("testStackCrn");
+        when(cluster.getStackCrn()).thenReturn("crn:cdp:datahub:us-west-1:accid:cluster:cluster");
         when(cluterPertain.getTenant()).thenReturn("testTenant");
         lenient().when(cluterPertain.getUserId()).thenReturn("userId");
 
