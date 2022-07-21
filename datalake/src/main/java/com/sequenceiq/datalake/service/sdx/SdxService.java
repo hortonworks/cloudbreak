@@ -286,16 +286,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
         if (sdxCluster.isPresent()) {
             sdxClusterList.add(sdxCluster.get());
-            if (includeDeleted) {
-                sdxCluster = sdxClusterRepository.findByAccountIdAndOriginalCrn(accountIdFromCrn, clusterCrn);
-            } else {
-                sdxCluster = sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
-
-            }
-            if (sdxCluster.isPresent()) {
-                LOGGER.info("Found a detached data lake associated with crn:{}", clusterCrn);
-                sdxClusterList.add(sdxCluster.get());
-            }
+        }
+        if (includeDeleted) {
+            sdxClusterList.addAll(sdxClusterRepository.findByAccountIdAndOriginalCrn(accountIdFromCrn, clusterCrn));
+        } else {
+            sdxClusterList.addAll(sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn));
         }
         if (sdxClusterList.isEmpty()) {
             throw notFound("SDX cluster", clusterCrn).get();

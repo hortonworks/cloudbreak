@@ -172,7 +172,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     public SdxTestDto awaitForHealthyInstances() {
         Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
-                InstanceUtil.getInstanceStatusMap(getResponse().getStackV4Response()));
+                InstanceUtil.getInstanceStatusMapForStatus(getResponse().getStackV4Response(), InstanceStatus.SERVICES_HEALTHY));
         return awaitForInstance(instanceStatusMap);
     }
 

@@ -10,7 +10,7 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
-import com.sequenceiq.it.cloudbreak.util.SdxResizeTestValidator;
+import com.sequenceiq.it.cloudbreak.util.resize.SdxResizeTestValidator;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -19,8 +19,6 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class SdxResizeTests extends PreconditionSdxE2ETest {
-    private static final String MOCK_UMS_PASSWORD = "Password123!";
-
     @Inject
     private SdxTestClient sdxTestClient;
 

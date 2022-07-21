@@ -21,7 +21,7 @@ public class InstanceUtil {
                 .getMetadata().stream().map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList());
     }
 
-    public static Map<List<String>, InstanceStatus> getInstanceStatusMap(StackV4Response stackV4Response) {
+    public static Map<List<String>, InstanceStatus> getInstanceStatusMapForStatus(StackV4Response stackV4Response, InstanceStatus status) {
         return stackV4Response.getInstanceGroups().stream()
                 .filter(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
                         .anyMatch(instanceMetaDataV4Response -> Objects.nonNull(instanceMetaDataV4Response.getInstanceId())))
@@ -29,6 +29,6 @@ public class InstanceUtil {
                         instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
                                 .filter(instanceMetaDataV4Response -> Objects.nonNull(instanceMetaDataV4Response.getInstanceId()))
                                 .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
-                        instanceMetaDataV4Response -> InstanceStatus.SERVICES_HEALTHY));
+                        instanceMetaDataV4Response -> status));
     }
 }

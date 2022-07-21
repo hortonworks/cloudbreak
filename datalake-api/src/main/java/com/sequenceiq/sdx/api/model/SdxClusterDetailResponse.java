@@ -43,7 +43,8 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
                     .withSdxClusterServiceVersion(sdxClusterResponse.getSdxClusterServiceVersion())
                     .withDetached(sdxClusterResponse.isDetached())
                     .withEnableMultiAz(sdxClusterResponse.isEnableMultiAz())
-                    .withDatabaseEngineVersion(sdxClusterResponse.getDatabaseEngineVersion());
+                    .withDatabaseEngineVersion(sdxClusterResponse.getDatabaseEngineVersion())
+                    .withCreated(sdxClusterResponse.getCreated());
         }
         return builder.withStackV4Response(stackV4Response).build();
     }
