@@ -58,6 +58,7 @@ import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.chain.FlowChainHandler;
 import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
 import com.sequenceiq.flow.core.helloworld.config.HelloWorldFlowConfig;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
@@ -252,6 +253,8 @@ public class Flow2HandlerTest {
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(flowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
+        FlowFinalizerCallback flowFinalizerCallback = mock(FlowFinalizerCallback.class);
+        given(flowConfig.getFinalizerCallBack()).willReturn(flowFinalizerCallback);
         given(flow.getCurrentState()).willReturn(flowState);
         when(flowTriggerCondition.isFlowTriggerable(any(Payload.class))).thenReturn(FlowTriggerConditionResult.fail("It's not triggerable!"));
 
@@ -271,6 +274,7 @@ public class Flow2HandlerTest {
         verify(runningFlows, times(0)).remove(anyString());
         verify(flowChains, times(0)).cleanFlowChain(anyString(), anyString());
         verify(flow, times(0)).sendEvent(anyString(), anyString(), isNull(), any(), any());
+        verify(flowFinalizerCallback, times(1)).onFinalize(eq(payload.getResourceId()));
     }
 
     @Test
@@ -278,6 +282,8 @@ public class Flow2HandlerTest {
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(flowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
+        FlowFinalizerCallback flowFinalizerCallback = mock(FlowFinalizerCallback.class);
+        given(flowConfig.getFinalizerCallBack()).willReturn(flowFinalizerCallback);
         given(flow.getCurrentState()).willReturn(flowState);
         when(flowTriggerCondition.isFlowTriggerable(any(Payload.class))).thenReturn(FlowTriggerConditionResult.skip("Skip!"));
 
@@ -295,6 +301,7 @@ public class Flow2HandlerTest {
                 .save(any(FlowParameters.class), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(flowConfig.getClass()), eq(flowState));
         verify(runningFlows, times(0)).remove(anyString());
         verify(flow, times(0)).sendEvent(anyString(), anyString(), isNull(), any(), any());
+        verify(flowFinalizerCallback, times(1)).onFinalize(eq(payload.getResourceId()));
     }
 
     @Test
@@ -462,6 +469,8 @@ public class Flow2HandlerTest {
         dummyEvent.setKey("KEY");
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
+        FlowFinalizerCallback flowFinalizerCallback = mock(FlowFinalizerCallback.class);
+        given(flowConfig.getFinalizerCallBack()).willReturn(flowFinalizerCallback);
         given(flowTriggerCondition.isFlowTriggerable(any(Payload.class))).willReturn(FlowTriggerConditionResult.fail("Not triggerable."));
 
         FlowNotTriggerableException exception = assertThrows(FlowNotTriggerableException.class, () -> underTest.accept(dummyEvent));
@@ -471,6 +480,7 @@ public class Flow2HandlerTest {
         verify(flowLogService, times(1)).close(eq(payload.getResourceId()), any(), eq(true), anyMap());
         verify(flowChains, times(1)).cleanFlowChain(eq(FLOW_CHAIN_ID), anyString());
         verify(flowChains, times(1)).removeFullFlowChain(FLOW_CHAIN_ID, false);
+        verify(flowFinalizerCallback, times(1)).onFinalize(eq(payload.getResourceId()));
     }
 
     @Test
@@ -482,6 +492,8 @@ public class Flow2HandlerTest {
         dummyEvent.setKey("KEY");
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
+        FlowFinalizerCallback flowFinalizerCallback = mock(FlowFinalizerCallback.class);
+        given(flowConfig.getFinalizerCallBack()).willReturn(flowFinalizerCallback);
         given(flowTriggerCondition.isFlowTriggerable(any(Payload.class))).willReturn(FlowTriggerConditionResult.skip("Skipped."));
 
         underTest.accept(dummyEvent);
@@ -490,6 +502,7 @@ public class Flow2HandlerTest {
         verify(flowLogService, times(1)).close(eq(payload.getResourceId()), any(), eq(false), anyMap());
         verify(flowChains, times(1)).cleanFlowChain(eq(FLOW_CHAIN_ID), anyString());
         verify(flowChains, times(1)).removeFullFlowChain(FLOW_CHAIN_ID, true);
+        verify(flowFinalizerCallback, times(1)).onFinalize(eq(payload.getResourceId()));
     }
 
     @Test
