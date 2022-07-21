@@ -4,12 +4,14 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
+import com.sequenceiq.redbeams.exception.DatabaseStartFailedException;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerRequest;
@@ -60,17 +62,20 @@ public class StartDatabaseServerHandler implements EventHandler<StartDatabaseSer
             ExternalDatabaseStatus status = connector.resources().getDatabaseServerStatus(ac, request.getDbStack());
             if (status != null && status.isTransient()) {
                 LOGGER.debug("Database server '{}' is in '{}' status. Start waiting for a permanent status.", request.getDbStack(), status);
-
-                PollTask<ExternalDatabaseStatus> task = statusCheckFactory.newPollPermanentExternalDatabaseStateTask(ac, request.getDbStack());
-                status = externalDatabaseStatusPollingScheduler.schedule(task);
+                status = pollAndGetDatabaseStatus(ac, request.getDbStack());
             }
 
             if (status != STARTED) {
                 LOGGER.debug("Database server '{}' is in '{}' status. Calling for '{}' status.",
                         request.getDbStack(), status, STARTED);
                 connector.resources().startDatabaseServer(ac, request.getDbStack());
+                status = pollAndGetDatabaseStatus(ac, request.getDbStack());
             } else {
                 LOGGER.debug("Database server '{}' is already in '{}' status.", request.getDbStack(), STARTED);
+            }
+
+            if (STARTED != status) {
+                throw new DatabaseStartFailedException("Unable to start database server!");
             }
 
             RedbeamsEvent success = new StartDatabaseServerSuccess(request.getResourceId());
@@ -82,4 +87,12 @@ public class StartDatabaseServerHandler implements EventHandler<StartDatabaseSer
             eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));
         }
     }
+
+    private ExternalDatabaseStatus pollAndGetDatabaseStatus(AuthenticatedContext ac, DatabaseStack dbStack) throws Exception {
+        PollTask<ExternalDatabaseStatus> task = statusCheckFactory.newPollPermanentExternalDatabaseStateTask(ac, dbStack);
+        LOGGER.debug("About to poll database for permanent status, since its current is: {}",
+                dbStack.getDatabaseServer() != null ? dbStack.getDatabaseServer().getStatus() : "unknown");
+        return externalDatabaseStatusPollingScheduler.schedule(task);
+    }
+
 }
