@@ -39,6 +39,7 @@ public enum ResourceEvent {
     UPDATE_LOAD_BALANCER_DNS_FAILED("resource.sdx.update_lb_dns.failed"),
     SDX_STOP_FAILED("resource.sdx.stop.failed"),
     SDX_VALIDATION_FAILED_AND_SKIPPED("resource.sdx.validation.skipped"),
+    SDX_VALIDATION_FAILED("resource.sdx.validation.failed"),
     SDX_CHANGE_IMAGE_STARTED("resource.sdx.change.image.started"),
     DATALAKE_UPGRADE_STARTED("resource.sdx.datalake.upgrade.started"),
     DATALAKE_UPGRADE_PREPARATION_STARTED("resource.sdx.datalake.upgrade.preparation.started"),

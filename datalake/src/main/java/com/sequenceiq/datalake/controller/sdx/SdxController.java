@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityTy
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.datalake.authorization.DataLakeFiltering;
 import com.sequenceiq.datalake.cm.RangerCloudIdentityService;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
@@ -182,6 +183,13 @@ public class SdxController implements SdxEndpoint {
         return storageValidationService.validateObjectStorage(sdxValidateCloudStorageRequest.getCredentialCrn(),
                 sdxValidateCloudStorageRequest.getSdxCloudStorageRequest(), sdxValidateCloudStorageRequest.getBlueprintName(), clusterName,
                 sdxValidateCloudStorageRequest.getDataAccessRole(), sdxValidateCloudStorageRequest.getRangerAuditRole());
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_DATALAKE)
+    public ValidationResult validateBackupStorage(@ValidStackNameFormat @ValidStackNameLength String clusterName) {
+        SdxCluster sdxCluster = getSdxClusterByName(clusterName);
+        return storageValidationService.validateBackupStorage(sdxCluster);
     }
 
     @Override

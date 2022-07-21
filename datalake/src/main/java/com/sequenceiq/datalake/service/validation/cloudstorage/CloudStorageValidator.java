@@ -4,6 +4,7 @@ import static com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerM
 import static com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage.SINGLE;
 import static com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage.SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Optional;
 
@@ -97,6 +98,28 @@ public class CloudStorageValidator {
         }
     }
 
+    public void validateBackupLocation(CloudStorageRequest cloudStorageRequest, DetailedEnvironmentResponse environment,
+            ValidationResult.ValidationResultBuilder validationResultBuilder) {
+
+        LOGGER.info("Validating backup Location: {}", getBackupLocationBase(environment));
+        Credential credential = getCredential(environment);
+        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
+
+        ObjectStorageValidateRequest request = createBackupLocationValidateRequest(cloudCredential, cloudStorageRequest, environment);
+        ObjectStorageValidateResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> cloudProviderServicesV4Endpoint.validateObjectStorage(request));
+
+        LOGGER.info("Validate backup storage: request: {}, response: {}", AnonymizerUtil.anonymize(JsonUtil.writeValueAsStringSilent(request)),
+                JsonUtil.writeValueAsStringSilent(response));
+
+        if (ResponseStatus.ERROR.equals(response.getStatus())) {
+            validationResultBuilder.error(response.getError());
+        } else if (StringUtils.isNotBlank(response.getError())) {
+            validationResultBuilder.warning(response.getError());
+        }
+    }
+
     private String getSingleResourceGroupName(DetailedEnvironmentResponse env) {
         return Optional.ofNullable(env.getAzure())
                 .map(AzureEnvironmentParameters::getResourceGroup)
@@ -122,6 +145,22 @@ public class CloudStorageValidator {
         return result.build();
     }
 
+    private ObjectStorageValidateRequest createBackupLocationValidateRequest(
+            CloudCredential credential, CloudStorageRequest cloudStorageRequest,
+            DetailedEnvironmentResponse environment) {
+        cloudStorageRequest.setLocations(Collections.emptyList());
+        ObjectStorageValidateRequest.Builder result = ObjectStorageValidateRequest.builder()
+                .withCloudPlatform(environment.getCloudPlatform())
+                .withCredential(credential)
+                .withCloudStorageRequest(cloudStorageRequest)
+                .withBackupLocationBase(getBackupLocationBase(environment))
+                .withAzureParameters(getSingleResourceGroupName(environment));
+        if (environment.getIdBrokerMappingSource() == MOCK) {
+            result.withMockSettings(environment.getLocation().getName(), environment.getAdminGroupName());
+        }
+        return result.build();
+    }
+
     private String getLogsLocationBase(DetailedEnvironmentResponse env) {
         return Optional.ofNullable(env.getTelemetry())
                 .map(TelemetryResponse::getLogging)
@@ -132,7 +171,7 @@ public class CloudStorageValidator {
     private String getBackupLocationBase(DetailedEnvironmentResponse environment) {
         return Optional.ofNullable(environment.getBackup())
                 .map(BackupResponse::getStorageLocation)
-                .orElse(null);
+                .orElse(getLogsLocationBase(environment));
     }
 
     private Credential getCredential(DetailedEnvironmentResponse environment) {

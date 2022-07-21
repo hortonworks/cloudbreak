@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
@@ -274,6 +275,12 @@ public interface SdxEndpoint {
     @ApiOperation(value = "validate cloud storage", produces = MediaType.APPLICATION_JSON, nickname = "validateCloudStorage")
     ObjectStorageValidateResponse validateCloudStorage(@ValidStackNameFormat @ValidStackNameLength @PathParam("name") String clusterName,
             @Valid SdxValidateCloudStorageRequest sdxValidateCloudStorageRequest);
+
+    @POST
+    @Path("validate_cloud_backup_storage/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "validate cloud backup storage", produces = MediaType.APPLICATION_JSON, nickname = "validateCloudBackupStorage")
+    ValidationResult validateBackupStorage(@ValidStackNameFormat @ValidStackNameLength @PathParam("name") String clusterName);
 
     @PUT
     @Path("{name}/change_image_catalog")

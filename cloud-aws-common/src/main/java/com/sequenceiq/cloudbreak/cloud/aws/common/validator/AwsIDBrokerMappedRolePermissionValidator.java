@@ -19,10 +19,9 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.auth.policy.Policy;
 import com.amazonaws.services.identitymanagement.model.AmazonIdentityManagementException;
 import com.amazonaws.services.identitymanagement.model.EvaluationResult;
-import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.Role;
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
@@ -79,8 +78,8 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
      * @param cloudFileSystem         cloud file system to evaluate
      * @param validationResultBuilder builder for any errors encountered
      */
-    public void validate(AmazonIdentityManagementClient iam, CloudS3View cloudFileSystem, String backupLocation,
-            ValidationResultBuilder validationResultBuilder, InstanceProfile instanceProfile) {
+    public void validate(AmazonIdentityManagementClient iam, CloudS3View cloudFileSystem, String backupLocation, String accountId,
+            ValidationResultBuilder validationResultBuilder) {
         AccountMappingBase accountMappings = cloudFileSystem.getAccountMapping();
         if (accountMappings != null) {
             SortedSet<String> roleArns = getRoleArnsForUsers(getUsers(), accountMappings.getUserMappings());
@@ -88,17 +87,19 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
             Set<Role> roles = awsIamService.getValidRoles(iam, roleArns, validationResultBuilder);
 
             boolean s3guardEnabled = cloudFileSystem.getS3GuardDynamoTableName() != null;
-            boolean validateBackupLocation = validateBackup(backupLocation);
             List<String> policyFileNames = getPolicyFileNames(s3guardEnabled);
 
             SortedSet<String> failedActions = new TreeSet<>();
             SortedSet<String> warnings = new TreeSet<>();
             List<Policy> policies = collectPolicies(cloudFileSystem, policyFileNames);
-            if (validateBackupLocation) {
+            if (shouldValidateBackupLocation(accountId, backupLocation)) {
                 policies.addAll(collectBackupRestorePolicies(cloudFileSystem, backupLocation));
             }
             for (Role role : roles) {
                 try {
+                    LOGGER.info("Permission validation on role: {} on locations {}", role.getArn(),
+                            Lists.newArrayList(getLocations(cloudFileSystem.getLocations()), backupLocation));
+                    policies.stream().forEach(p -> LOGGER.info("Policies being validated {}", p.toJson()));
                     List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam, role, policies);
                     failedActions.addAll(getFailedActions(role, evaluationResults));
                     warnings.addAll(getWarnings(role, evaluationResults));
@@ -218,8 +219,13 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
         return policies;
     }
 
-    private boolean validateBackup(String backupLocation) {
-        return (entitlementService.isDatalakeBackupRestorePrechecksEnabled(ThreadBasedUserCrnProvider.getAccountId())) &&
+    List<String> getLocations(List<StorageLocationBase> storageLocationBases) {
+        return storageLocationBases.stream().map(storageLocationBase -> getStorageLocationBase(storageLocationBase))
+                .collect(Collectors.toList());
+    }
+
+    private boolean shouldValidateBackupLocation(String accountId, String backupLocation) {
+        return (entitlementService.isDatalakeBackupRestorePrechecksEnabled(accountId)) &&
                 !Strings.isNullOrEmpty(backupLocation);
     }
 }
