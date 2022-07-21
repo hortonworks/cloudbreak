@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -34,10 +35,12 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.StorageValidationService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.sdx.api.model.SdxBackupLocationValidationRequest;
 import com.sequenceiq.sdx.api.model.SdxChangeImageCatalogRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -78,6 +81,9 @@ class SdxControllerTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private StorageValidationService storageValidationService;
 
     @InjectMocks
     private SdxController sdxController;
@@ -188,6 +194,25 @@ class SdxControllerTest {
     void refreshDatahubs() {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.refreshDataHubs(SDX_CLUSTER_NAME, null));
         verify(sdxService, times(1)).refreshDataHub(SDX_CLUSTER_NAME, null);
+    }
+
+    @Test
+    void validateBackupStorage() {
+        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
+        ValidationResult validationResult = resultBuilder.build();
+
+        SdxCluster sdxCluster = getValidSdxCluster();
+        sdxCluster.setClusterName(SDX_CLUSTER_NAME);
+        SdxBackupLocationValidationRequest sdxBackupLocationValidationRequest = new SdxBackupLocationValidationRequest(SDX_CLUSTER_NAME);
+        when(storageValidationService.validateBackupStorage(sdxCluster)).thenReturn(validationResult);
+        when(sdxService.getByNameInAccount(USER_CRN, SDX_CLUSTER_NAME)).thenReturn(sdxCluster);
+
+        ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.validateBackupStorage(sdxBackupLocationValidationRequest));
+
+        verify(sdxService, times(1)).getByNameInAccount(USER_CRN, SDX_CLUSTER_NAME);
+        verify(storageValidationService, times(1)).validateBackupStorage(sdxCluster);
+        assertEquals(ValidationResult.State.VALID, result.getState());
+
     }
 
     private SdxCluster getValidSdxCluster() {
