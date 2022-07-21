@@ -61,6 +61,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxInternalClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 
@@ -337,7 +338,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         if (checkResponseHasInstanceGroups()) {
             return instanceStatusMapSupplier.get();
         } else {
-            LOGGER.info("Response doesn't has instance groups");
+            LOGGER.info("Response doesn't have instance groups");
             return Collections.emptyMap();
         }
     }
@@ -482,6 +483,14 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return resize.getRequest();
     }
 
+    public SdxRecoveryRequest getSdxRecoveryRequest() {
+        SdxRecoveryTestDto recovery = given(SdxRecoveryTestDto.class);
+        if (recovery == null) {
+            throw new IllegalArgumentException("SDX Recovery does not exist!");
+        }
+        return recovery.getRequest();
+    }
+
     @Override
     public Clue investigate() {
         if (getResponse() == null || getResponse().getCrn() == null) {
@@ -492,7 +501,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 CloudbreakEventService.DATALAKE_RESOURCE_TYPE,
                 null,
                 getResponse().getCrn());
-        boolean hasSpotTermination = (getResponse().getStackV4Response() == null) ? false : getResponse().getStackV4Response().getInstanceGroups().stream()
+        boolean hasSpotTermination = getResponse().getStackV4Response() != null && getResponse().getStackV4Response().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetadata().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
         return new Clue("SDX", auditEvents, getResponse(), hasSpotTermination);

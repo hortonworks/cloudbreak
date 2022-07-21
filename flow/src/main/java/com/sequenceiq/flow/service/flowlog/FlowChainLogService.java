@@ -134,8 +134,11 @@ public class FlowChainLogService {
         return repository.save(chainLog);
     }
 
-    public boolean isFlowTriggeredByFlowChain(String flowChainType, FlowLogWithoutPayload lastFlowLog) {
-        Optional<FlowChainLog> flowChainLog = findFirstByFlowChainIdOrderByCreatedDesc(lastFlowLog.getFlowChainId());
-        return flowChainLog.isPresent() && flowChainLog.get().getFlowChainType().equals(flowChainType);
+    public boolean isFlowTriggeredByFlowChain(String flowChainType, Optional<FlowLogWithoutPayload> lastFlowLog) {
+        if (lastFlowLog.isPresent()) {
+            Optional<FlowChainLog> flowChainLog = findFirstByFlowChainIdOrderByCreatedDesc(lastFlowLog.get().getFlowChainId());
+            return flowChainLog.isPresent() && flowChainLog.get().getFlowChainType().equals(flowChainType);
+        }
+        return false;
     }
 }

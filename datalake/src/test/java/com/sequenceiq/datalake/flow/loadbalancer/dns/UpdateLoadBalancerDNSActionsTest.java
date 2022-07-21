@@ -3,7 +3,6 @@ package com.sequenceiq.datalake.flow.loadbalancer.dns;
 import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -26,7 +25,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
-import com.sequenceiq.datalake.flow.chain.DatalakeResizeFlowEventChainFactory;
+import com.sequenceiq.datalake.flow.chain.DatalakeResizeRecoveryFlowEventChainFactory;
 import com.sequenceiq.datalake.flow.loadbalancer.dns.event.StartUpdateLoadBalancerDNSEvent;
 import com.sequenceiq.datalake.service.loadbalancer.dns.UpdateLoadBalancerDNSService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -36,7 +35,6 @@ import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
-import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
@@ -97,7 +95,6 @@ class UpdateLoadBalancerDNSActionsTest {
         SdxCluster sdxCluster = genCluster();
         FlowParameters flowParameters = new FlowParameters(FLOW_ID, null, null);
         when(sdxService.getById(eq(SDX_ID))).thenReturn(sdxCluster);
-        when(flowLogService.getLastFlowLog(anyString())).thenReturn(Optional.of(mock(FlowLogWithoutPayload.class)));
         StartUpdateLoadBalancerDNSEvent event = new StartUpdateLoadBalancerDNSEvent(UPDATE_LOAD_BALANCER_DNS_EVENT.event(), SDX_ID, USER_CRN, new Promise<>());
         AbstractAction action = (AbstractAction) underTest.updateLoadBalancerDNSAction();
         initActionPrivateFields(action);
@@ -119,13 +116,11 @@ class UpdateLoadBalancerDNSActionsTest {
         SdxCluster sdxCluster = genCluster();
         FlowParameters flowParameters = new FlowParameters(FLOW_ID, null, null);
         when(sdxService.getById(eq(SDX_ID))).thenReturn(sdxCluster);
-        FlowChainLog mockFlowLog = mock(FlowChainLog.class);
         FlowLogWithoutPayload flowLogWithoutPayload = mock(FlowLogWithoutPayload.class);
         when(flowLogService.getLastFlowLog(eq(FLOW_ID)))
                 .thenReturn(Optional.of(flowLogWithoutPayload));
-        when(flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(any()))
-                .thenReturn(Optional.of(mockFlowLog));
-        when(mockFlowLog.getFlowChainType()).thenReturn(DatalakeResizeFlowEventChainFactory.class.getSimpleName());
+        when(flowChainLogService.isFlowTriggeredByFlowChain(eq(DatalakeResizeRecoveryFlowEventChainFactory.class.getSimpleName()), any()))
+                .thenReturn(true);
         StartUpdateLoadBalancerDNSEvent event = new StartUpdateLoadBalancerDNSEvent(UPDATE_LOAD_BALANCER_DNS_EVENT.event(), SDX_ID, USER_CRN, new Promise<>());
         AbstractAction action = (AbstractAction) underTest.updateLoadBalancerDNSAction();
         initActionPrivateFields(action);

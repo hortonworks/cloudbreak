@@ -147,9 +147,9 @@ class FlowChainLogServiceTest {
         flowChainLog.setFlowChainType("flowChainType");
         when(flowLogRepository.findFirstByFlowChainIdOrderByCreatedDesc("chainId"))
                 .thenReturn(Optional.of(flowChainLog));
-        assertTrue(underTest.isFlowTriggeredByFlowChain("flowChainType", flowLog));
+        assertTrue(underTest.isFlowTriggeredByFlowChain("flowChainType", Optional.of(flowLog)));
 
-        assertFalse(underTest.isFlowTriggeredByFlowChain("flowChainType1", flowLog));
+        assertFalse(underTest.isFlowTriggeredByFlowChain("flowChainType1", Optional.of(flowLog)));
     }
 
     private FlowChainLog flowChainLog(String flowChainId, String parentFlowChainId, long created) {
