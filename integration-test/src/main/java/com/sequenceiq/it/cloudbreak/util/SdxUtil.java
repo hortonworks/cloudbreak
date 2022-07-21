@@ -44,6 +44,16 @@ public class SdxUtil {
                 .getCloudStorageBaseLocation();
     }
 
+    public Long getCreated(AbstractSdxTestDto testDto, SdxClient sdxClient) {
+        return getSdxClusterDetailResponse(testDto, sdxClient)
+                .getCreated();
+    }
+
+    public String getStatusReason(AbstractSdxTestDto testDto, SdxClient sdxClient) {
+        return getSdxClusterDetailResponse(testDto, sdxClient)
+                .getStatusReason();
+    }
+
     private SdxClusterDetailResponse getSdxClusterDetailResponse(AbstractSdxTestDto testDto, SdxClient sdxClient) {
         return sdxClient.getDefaultClient().sdxEndpoint().getDetail(testDto.getName(), new HashSet<>());
     }

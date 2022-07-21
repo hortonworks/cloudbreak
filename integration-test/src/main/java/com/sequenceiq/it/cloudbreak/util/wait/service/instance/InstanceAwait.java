@@ -60,4 +60,34 @@ public class InstanceAwait {
         }
         return entity;
     }
+
+    public <E extends Enum<E>> CloudbreakTestDto awaitExistence(CloudbreakTestDto entity, TestContext testContext,
+            RunningParameter runningParameter, Duration pollingInterval, int maxRetry) {
+        if (entity == null) {
+            throw new RuntimeException("Cloudbreak key has been provided but no result in resource map!");
+        }
+        try {
+            Log.await(LOGGER, String.format("%s for instance existence", entity.getName()));
+            MicroserviceClient client = testContext.getMicroserviceClient(entity.getClass(), testContext.setActingUser(runningParameter).getAccessKey());
+
+            InstanceWaitObject instanceWaitObject = client.waitInstancesObject(entity, testContext, List.of(), null);
+
+            if (runningParameter.getTimeoutChecker() != null) {
+                client.<CloudbreakInstanceWaitObject>waiterService().waitObject(new InstanceExistenceChecker<>(), instanceWaitObject, testContext,
+                        pollingInterval, runningParameter.getTimeoutChecker(), maxRetry);
+            } else {
+                client.<CloudbreakInstanceWaitObject>waiterService().waitObject(new InstanceExistenceChecker<>(), instanceWaitObject, testContext,
+                        pollingInterval, maxRetry, 1);
+            }
+        } catch (Exception e) {
+            if (runningParameter.isLogError()) {
+                LOGGER.error("await [{}] for instance existence is failed due to: {}, name: {}", entity, ResponseUtil.getErrorMessage(e),
+                        entity.getName());
+                Log.await(null, String.format("[%s] is failed for instance existence due to: %s, name: %s",
+                        entity, ResponseUtil.getErrorMessage(e), entity.getName()));
+            }
+            testContext.getExceptionMap().put("await " + entity + " for instance existence", e);
+        }
+        return entity;
+    }
 }

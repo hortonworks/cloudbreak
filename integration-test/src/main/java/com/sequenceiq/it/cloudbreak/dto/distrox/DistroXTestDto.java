@@ -186,7 +186,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     public DistroXTestDto awaitForHealthyInstances() {
         Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
-                InstanceUtil.getInstanceStatusMap(getResponse()));
+                InstanceUtil.getInstanceStatusMapForStatus(getResponse(), InstanceStatus.SERVICES_HEALTHY));
         return awaitForInstance(instanceStatusMap);
     }
 
