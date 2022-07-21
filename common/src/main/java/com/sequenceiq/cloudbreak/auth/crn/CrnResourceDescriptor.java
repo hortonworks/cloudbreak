@@ -26,7 +26,7 @@ public enum CrnResourceDescriptor {
     CUSTOM_CONFIGURATIONS(Crn.ResourceType.CUSTOM_CONFIGURATIONS, Crn.Service.DATAHUB),
     DATAHUB(Crn.ResourceType.CLUSTER, Crn.Service.DATAHUB),
     IMAGE_CATALOG(Crn.ResourceType.IMAGE_CATALOG, Crn.Service.DATAHUB),
-    RECIPE(Crn.ResourceType.RECIPE, Crn.Service.DATAHUB),
+    RECIPE(Crn.ResourceType.RECIPE, Crn.Service.RECIPE),
     // freeipa management service
     FREEIPA(Crn.ResourceType.FREEIPA, Crn.Service.FREEIPA),
     KERBEROS(Crn.ResourceType.KERBEROS, Crn.Service.FREEIPA),
