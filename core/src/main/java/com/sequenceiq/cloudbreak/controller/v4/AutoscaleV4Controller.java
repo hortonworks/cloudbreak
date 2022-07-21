@@ -4,6 +4,7 @@ package com.sequenceiq.cloudbreak.controller.v4;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -224,8 +225,8 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Override
     @AccountIdNotNeeded
     @InternalOnly
-    public LimitsConfigurationResponse getLimitsConfiguration() {
-        return new LimitsConfigurationResponse(limitConfiguration.getNodeCountLimit());
+    public LimitsConfigurationResponse getLimitsConfiguration(String accountId) {
+        return new LimitsConfigurationResponse(limitConfiguration.getNodeCountLimit(Optional.ofNullable(accountId)));
     }
 
     @Override

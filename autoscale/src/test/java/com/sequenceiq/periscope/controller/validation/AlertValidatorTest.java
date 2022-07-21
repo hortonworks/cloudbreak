@@ -55,6 +55,8 @@ public class AlertValidatorTest {
 
     private static final String TEST_USER_CRN = String.format("crn:cdp:iam:us-west-1:%s:user:mockuser@cloudera.com", TEST_ACCOUNT_ID);
 
+    private static final String TEST_STACK_CRN = String.format("crn:cdp:datahub:us-west-1:%s:cluster:cluster", TEST_ACCOUNT_ID);
+
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
 
@@ -443,7 +445,7 @@ public class AlertValidatorTest {
         loadAlertRequest.setLoadAlertConfiguration(loadAlertConfigurationRequest);
         request.setLoadAlertRequests(List.of(loadAlertRequest));
 
-        when(limitsConfigurationService.getMaxNodeCountLimit()).thenReturn(400);
+        when(limitsConfigurationService.getMaxNodeCountLimit(anyString())).thenReturn(400);
         when(messagesService.getMessage(AUTOSCALING_CLUSTER_LIMIT_EXCEEDED, List.of(400)))
                 .thenReturn("cluster limit exceeded");
 
@@ -548,7 +550,7 @@ public class AlertValidatorTest {
 
     private Cluster getACluster() {
         Cluster cluster = new Cluster();
-        cluster.setStackCrn("testcrn");
+        cluster.setStackCrn(TEST_STACK_CRN);
         cluster.setStackName("teststack");
         cluster.setCloudPlatform("AWS");
         cluster.setTunnel(Tunnel.CLUSTER_PROXY);

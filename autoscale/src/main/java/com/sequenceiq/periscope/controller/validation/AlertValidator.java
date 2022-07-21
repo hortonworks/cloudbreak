@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.AlertType;
@@ -91,13 +92,13 @@ public class AlertValidator {
 
     public void validateDistroXAutoscaleClusterRequest(Cluster cluster,
             DistroXAutoscaleClusterRequest distroXAutoscaleClusterRequest) {
-
+        String accountId = Crn.safeFromString(cluster.getStackCrn()).getAccountId();
         if (!distroXAutoscaleClusterRequest.getTimeAlertRequests().isEmpty()) {
             Set<String> timeAlertHostGroups = distroXAutoscaleClusterRequest.getTimeAlertRequests().stream()
                     .map(timeAlertRequest -> {
                         validateSchedule(timeAlertRequest);
                         validateClusterLimit(timeAlertRequest.getScalingPolicy().getAdjustmentType(),
-                                timeAlertRequest.getScalingPolicy().getScalingAdjustment());
+                                timeAlertRequest.getScalingPolicy().getScalingAdjustment(), accountId);
                         return timeAlertRequest;
                     })
                     .map(TimeAlertRequest::getScalingPolicy)
@@ -110,7 +111,7 @@ public class AlertValidator {
             Set<String> loadAlertHostGroups = distroXAutoscaleClusterRequest.getLoadAlertRequests().stream()
                     .map(loadAlertRequest -> {
                         validateClusterLimit(loadAlertRequest.getScalingPolicy().getAdjustmentType(),
-                                loadAlertRequest.getLoadAlertConfiguration().getMaxResourceValue());
+                                loadAlertRequest.getLoadAlertConfiguration().getMaxResourceValue(), accountId);
                         return loadAlertRequest;
                     })
                     .map(LoadAlertRequest::getScalingPolicy)
@@ -120,11 +121,11 @@ public class AlertValidator {
         }
     }
 
-    public void validateClusterLimit(AdjustmentType adjustmentType, Integer configuredMax) {
+    public void validateClusterLimit(AdjustmentType adjustmentType, Integer configuredMax, String accountId) {
         if ((adjustmentType == AdjustmentType.LOAD_BASED || adjustmentType == AdjustmentType.EXACT)
-                && configuredMax > limitsConfigurationService.getMaxNodeCountLimit()) {
+                && configuredMax > limitsConfigurationService.getMaxNodeCountLimit(accountId)) {
             throw new BadRequestException(messagesService.getMessage(MessageCode.AUTOSCALING_CLUSTER_LIMIT_EXCEEDED,
-                    List.of(limitsConfigurationService.getMaxNodeCountLimit())));
+                    List.of(limitsConfigurationService.getMaxNodeCountLimit(accountId))));
         }
     }
 
