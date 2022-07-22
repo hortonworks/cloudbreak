@@ -1,0 +1,97 @@
+package com.sequenceiq.cloudbreak.quartz.saltstatuschecker;
+
+import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
+
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sequenceiq.cloudbreak.quartz.JobDataMapProvider;
+import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
+
+public abstract class SaltStatusCheckerJobService<T extends JobResourceAdapter<?>> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SaltStatusCheckerJobService.class);
+
+    private static final String JOB_GROUP = "stack-salt-status-checker-jobs";
+
+    private static final String TRIGGER_GROUP = "stack-salt-status-checker-triggers";
+
+    private static final Random RANDOM = new SecureRandom();
+
+    @Inject
+    private SaltStatusCheckerConfig saltStatusCheckerConfig;
+
+    @Inject
+    private Scheduler scheduler;
+
+    @Inject
+    private JobDataMapProvider jobDataMapProvider;
+
+    public void schedule(T resource) {
+        JobDetail jobDetail = buildJobDetail(resource);
+        JobKey jobKey = jobDetail.getKey();
+        try {
+            Trigger trigger = buildJobTrigger(jobDetail);
+            if (scheduler.getJobDetail(jobKey) != null) {
+                LOGGER.info("Unscheduling stack salt status job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
+                unschedule(jobKey);
+            }
+            LOGGER.info("Scheduling stack salt status job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
+            scheduler.scheduleJob(jobDetail, trigger);
+        } catch (SchedulerException e) {
+            LOGGER.error("Error during scheduling stack salt status job: {}", jobDetail, e);
+        }
+    }
+
+    public void unschedule(JobKey jobKey) {
+        try {
+            if (scheduler.getJobDetail(jobKey) != null) {
+                scheduler.deleteJob(jobKey);
+            }
+        } catch (SchedulerException e) {
+            LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
+        }
+    }
+
+    private JobDetail buildJobDetail(T resource) {
+        return JobBuilder.newJob(resource.getJobClassForResource())
+                .withIdentity(resource.getJobResource().getLocalId(), JOB_GROUP)
+                .withDescription("Checking salt status of stack: " + resource.getJobResource().getRemoteResourceId())
+                .usingJobData(jobDataMapProvider.provide(resource))
+                .storeDurably()
+                .build();
+    }
+
+    private Trigger buildJobTrigger(JobDetail jobDetail) {
+        return TriggerBuilder.newTrigger()
+                .forJob(jobDetail)
+                .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
+                .withDescription("Trigger for stack salt status checker job")
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule()
+                        .withIntervalInMinutes(saltStatusCheckerConfig.getIntervalInMinutes())
+                        .repeatForever()
+                        .withMisfireHandlingInstructionNextWithExistingCount())
+                .startAt(delayedStart())
+                .build();
+    }
+
+    private Date delayedStart() {
+        int intervalInSeconds = (int) TimeUnit.MINUTES.toSeconds(saltStatusCheckerConfig.getIntervalInMinutes());
+        return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofSeconds(RANDOM.nextInt(intervalInSeconds))));
+    }
+}

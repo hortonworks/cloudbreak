@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.host;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -135,4 +136,6 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     boolean unboundClusterConfigPresentOnAnyNodes(GatewayConfig primaryGateway, Set<String> nodes);
 
     void uploadStates(List<GatewayConfig> allGatewayConfigs, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException;
+
+    LocalDate getPasswordExpiryDate(List<GatewayConfig> allGatewayConfigs, String user) throws CloudbreakOrchestratorException;
 }
