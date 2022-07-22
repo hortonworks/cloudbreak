@@ -6,9 +6,9 @@ import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -26,19 +26,21 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -66,8 +68,9 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.RetryService;
 
-@RunWith(MockitoJUnitRunner.class)
 public class SaltStatesTest {
+
+    private static final String VALID_PATERN = "(.*)-([0-9]+)[a-zA-z]*(\\..*)?";
 
     private SaltConnector saltConnector;
 
@@ -76,8 +79,8 @@ public class SaltStatesTest {
     @Captor
     private ArgumentCaptor<Set<String>> minionIdsCaptor;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         Set<String> targets = new HashSet<>();
         targets.add("10-0-0-1.example.com");
         targets.add("10-0-0-2.example.com");
@@ -87,20 +90,20 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void addRoleTest() {
+    void addRoleTest() {
         String role = "ambari-server";
         SaltStates.addGrain(saltConnector, target, "roles", role);
         verify(saltConnector, times(1)).run(eq(target), eq("grains.append"), eq(LOCAL), eq(ApplyResponse.class), eq("roles"), eq(role));
     }
 
     @Test
-    public void syncAllTest() {
+    void syncAllTest() {
         SaltStates.syncAll(saltConnector);
         verify(saltConnector, times(1)).run(eq(Glob.ALL), eq("saltutil.sync_all"), eq(LOCAL_ASYNC), eq(ApplyResponse.class));
     }
 
     @Test
-    public void highstateTest() throws IOException {
+    void highstateTest() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         String jobId = "1";
         ApplyResponse response = new ApplyResponse();
@@ -117,7 +120,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void highstateTargetTest() throws IOException {
+    void highstateTargetTest() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         String jobId = "1";
         ApplyResponse response = new ApplyResponse();
@@ -134,7 +137,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void jidInfoHighTest() throws Exception {
+    void jidInfoHighTest() throws Exception {
         String jobId = "2";
 
         InputStream responseStream = SaltStatesTest.class.getResourceAsStream("/jid_response.json");
@@ -168,7 +171,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void highstateIsRunningTest() throws IOException {
+    void highstateIsRunningTest() throws IOException {
         String runningJid = "20201116101144197633";
         String jobId = "2";
 
@@ -208,7 +211,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void highstateIsRunningAndExceptionIsThrownAtTheEndTest() {
+    void highstateIsRunningAndExceptionIsThrownAtTheEndTest() {
         String runningJid = "20201116101144197633";
         String jobId = "2";
 
@@ -229,7 +232,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void jidInfoSimpleTest() throws Exception {
+    void jidInfoSimpleTest() throws Exception {
         String jobId = "2";
 
         InputStream responseStream = SaltStatesTest.class.getResourceAsStream("/jid_simple_response.json");
@@ -260,7 +263,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void jobIsRunningTest() throws CloudbreakOrchestratorFailedException {
+    void jobIsRunningTest() throws CloudbreakOrchestratorFailedException {
         String jid = "3";
         RunningJobsResponse runningJobsResponse = new RunningJobsResponse();
         List<Map<String, Map<String, Object>>> result = new ArrayList<>();
@@ -277,27 +280,27 @@ public class SaltStatesTest {
         assertFalse(running);
     }
 
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void testJobIsRunningReturnsExceptionOnNullResult() throws CloudbreakOrchestratorFailedException {
+    @Test
+    void testJobIsRunningReturnsExceptionOnNullResult() {
         RunningJobsResponse runningJobsResponse = new RunningJobsResponse();
         when(saltConnector.run(eq("jobs.active"), any(), eq(RunningJobsResponse.class))).thenReturn(runningJobsResponse);
-        SaltStates.jobIsRunning(saltConnector, "1");
-    }
-
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
-    public void testJobIsRunningReturnsExceptionOnNullResponse() throws CloudbreakOrchestratorFailedException {
-        when(saltConnector.run(eq("jobs.active"), any(), eq(RunningJobsResponse.class))).thenReturn(null);
-        SaltStates.jobIsRunning(saltConnector, "1");
+        Assertions.assertThrows(CloudbreakOrchestratorFailedException.class, () -> SaltStates.jobIsRunning(saltConnector, "1"));
     }
 
     @Test
-    public void pingTest() {
+    void testJobIsRunningReturnsExceptionOnNullResponse() {
+        when(saltConnector.run(eq("jobs.active"), any(), eq(RunningJobsResponse.class))).thenReturn(null);
+        Assertions.assertThrows(CloudbreakOrchestratorFailedException.class, () -> SaltStates.jobIsRunning(saltConnector, "1"));
+    }
+
+    @Test
+    void pingTest() {
         SaltStates.ping(saltConnector, target);
         verify(saltConnector, times(1)).run(any(), eq("test.ping"), eq(LOCAL), eq(PingResponse.class));
     }
 
     @Test
-    public void stopMinionsTest() {
+    void stopMinionsTest() {
         Set<String> privateIps = new HashSet<>();
         privateIps.add("10.0.0.1");
         privateIps.add("10.0.0.2");
@@ -317,7 +320,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void changePasswordTest() throws CloudbreakOrchestratorFailedException {
+    void changePasswordTest() throws CloudbreakOrchestratorFailedException {
         String password = "password";
         Set<String> privateIps = new HashSet<>();
         privateIps.add("10.0.0.1");
@@ -339,7 +342,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void testGetPackageVersionsWithOnePackage() {
+    void testGetPackageVersionsWithOnePackage() {
         // GIVEN
         List<Map<String, String>> pkgVersionList = new ArrayList<>();
         Map<String, String> pkgVersionsOnHosts = new HashMap<>();
@@ -365,7 +368,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void testGetPackageVersionWithOnePackageShouldReturnEmptyMapWhenTheListIsEmptyInResponse() {
+    void testGetPackageVersionWithOnePackageShouldReturnEmptyMapWhenTheListIsEmptyInResponse() {
         // GIVEN
         List<Map<String, String>> pkgVersionsList = new ArrayList<>();
         PackageVersionResponse resp = new PackageVersionResponse();
@@ -381,17 +384,56 @@ public class SaltStatesTest {
         assertTrue(actualResponse.size() == 0);
     }
 
+    public static Stream<Arguments> packageVersionPatters() {
+        return Stream.of(
+                //TestCase, ActualVersion, Pattern, Version, BuildNumber
+                Arguments.of("NORMAL_VERSION", "7.5.2-27070447.el7", "(.*)-([0-9]+)[a-zA-z]*(\\..*)?", "7.5.2", "27070447"),
+                Arguments.of("PATCHED_VERSION", "7.5.2-27070447p.el7", "(.*)-([0-9]+)[a-zA-z]*(\\..*)?", "7.5.2", "27070447"),
+                Arguments.of("WILD_VERSION", "7.5.2-27070447psdfsdfsdfsdg.el7", "(.*)-([0-9]+)[a-zA-z]*(\\..*)?", "7.5.2", "27070447"),
+                Arguments.of("NO_PATTERN", "7.5.2-27070447p.el7", null, "7.5.2-27070447p.el7", null),
+                Arguments.of("NORMAL_VERSION_NO_OS", "7.5.2-27070447", "(.*)-([0-9]+)[a-zA-z]*(\\..*)?", "7.5.2", "27070447"),
+                Arguments.of("PATCHED_VERSION_NO_OS", "7.5.2-27070447p", "(.*)-([0-9]+)[a-zA-z]*(\\..*)?", "7.5.2", "27070447"),
+                Arguments.of("WILD_VERSION_NO_OS", "7.5.2-27070447psdfsdfsdfsdg", "(.*)-([0-9]+)[a-zA-z]*(\\..*)?", "7.5.2", "27070447"),
+                Arguments.of("NO_PATTERN_NO_OS", "7.5.2-27070447p", null, "7.5.2-27070447p", null)
+        );
+    }
+
+    @ParameterizedTest (name = "{0}: with actual version {1}, with pattern {2} with version {3}, with build number {4}")
+    @MethodSource("packageVersionPatters")
+    void testGetPackageVersionsWithMorePackages(String testCase, String actualVersion, String pattern, String version, String buildNumber) {
+
+        // GIVEN
+        Map<String, List<PackageInfo>> pkgVersionsOnHosts = new HashMap<>();
+        List<PackageInfo> pkgVersionsOnHost1 = new ArrayList<>();
+        pkgVersionsOnHost1.add(new PackageInfo("package2", version, buildNumber));
+        pkgVersionsOnHosts.put("host1", pkgVersionsOnHost1);
+
+        Map<String, String> pkgVersionsOnHost1Resp = new HashMap<>();
+        pkgVersionsOnHost1Resp.put("host1", actualVersion);
+        PackageVersionResponse resp1 = new PackageVersionResponse();
+        resp1.setResult(Lists.newArrayList(pkgVersionsOnHost1Resp));
+        when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package2")).thenReturn(resp1);
+
+        Map<String, Optional<String>> packages = new HashMap<>();
+        packages.put("package2", Objects.isNull(pattern) ? Optional.empty() : Optional.of(pattern));
+
+        // WHEN
+        Map<String, List<PackageInfo>> actualResponse = SaltStates.getPackageVersions(saltConnector, packages);
+        // THEN
+        assertEquals(pkgVersionsOnHosts, actualResponse);
+    }
+
     @Test
-    public void testGetPackageVersionsWithMorePackages() {
+    void testGetPackageVersionsWithMorePackages() {
         // GIVEN
         Map<String, List<PackageInfo>> pkgVersionsOnHosts = new HashMap<>();
         List<PackageInfo> pkgVersionsOnHost1 = new ArrayList<>();
         pkgVersionsOnHost1.add(new PackageInfo("package1", "1.0"));
-        pkgVersionsOnHost1.add(new PackageInfo("package2", "2.0", "3.0A13466743"));
+        pkgVersionsOnHost1.add(new PackageInfo("package2", "2.0", "3"));
         pkgVersionsOnHosts.put("host1", pkgVersionsOnHost1);
         List<PackageInfo> pkgVersionsOnHost2 = new ArrayList<>();
         pkgVersionsOnHost2.add(new PackageInfo("package1", "2.0"));
-        pkgVersionsOnHost2.add(new PackageInfo("package2", "3.0", "3.0A13466743"));
+        pkgVersionsOnHost2.add(new PackageInfo("package2", "7.5.2", "27070447"));
         pkgVersionsOnHosts.put("host2", pkgVersionsOnHost2);
 
         Map<String, String> pkgVersionsOnHost1Resp = new HashMap<>();
@@ -399,7 +441,7 @@ public class SaltStatesTest {
         pkgVersionsOnHost1Resp.put("host2", "2.0");
         Map<String, String> pkgVersionsOnHost2Resp = new HashMap<>();
         pkgVersionsOnHost2Resp.put("host1", "2.0-3.0A13466743");
-        pkgVersionsOnHost2Resp.put("host2", "3.0-3.0A13466743");
+        pkgVersionsOnHost2Resp.put("host2", "7.5.2-27070447p");
         PackageVersionResponse resp1 = new PackageVersionResponse();
         resp1.setResult(Lists.newArrayList(pkgVersionsOnHost1Resp));
         PackageVersionResponse resp2 = new PackageVersionResponse();
@@ -409,16 +451,16 @@ public class SaltStatesTest {
 
         Map<String, Optional<String>> packages = new HashMap<>();
         packages.put("package1", Optional.empty());
-        packages.put("package2", Optional.of("(.*)-(.*)"));
+        packages.put("package2", Optional.of(VALID_PATERN));
 
         // WHEN
         Map<String, List<PackageInfo>> actualResponse = SaltStates.getPackageVersions(saltConnector, packages);
         // THEN
-        Assert.assertEquals(pkgVersionsOnHosts, actualResponse);
+        assertEquals(pkgVersionsOnHosts, actualResponse);
     }
 
     @Test
-    public void testGetPackageVersionWithMorePackagesShouldReturnEmptyMapWhenTheListIsEmptyInResponse() {
+    void testGetPackageVersionWithMorePackagesShouldReturnEmptyMapWhenTheListIsEmptyInResponse() {
         // GIVEN
         PackageVersionResponse resp = new PackageVersionResponse();
         when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package1")).thenReturn(resp);
@@ -426,16 +468,16 @@ public class SaltStatesTest {
 
         Map<String, Optional<String>> packages = new HashMap<>();
         packages.put("package1", Optional.empty());
-        packages.put("package2", Optional.of("(.*)-(.*)"));
+        packages.put("package2", Optional.of(VALID_PATERN));
 
         // WHEN
         Map<String, List<PackageInfo>> actualResponse = SaltStates.getPackageVersions(saltConnector, packages);
         // THEN
-        assertTrue(actualResponse.size() == 0);
+        assertEquals(0, actualResponse.size());
     }
 
     @Test
-    public void testGetPackageVersionsThrowsRuntimeException() {
+    void testGetPackageVersionsThrowsRuntimeException() {
         // GIVEN
         RuntimeException exception = new RuntimeException();
         when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package1")).thenThrow(exception);
@@ -443,7 +485,7 @@ public class SaltStatesTest {
         try {
             Map<String, Optional<String>> packages = new HashMap<>();
             packages.put("package1", Optional.empty());
-            packages.put("package2", Optional.of("(.*)-(.*)"));
+            packages.put("package2", Optional.of(VALID_PATERN));
 
             SaltStates.getPackageVersions(saltConnector, packages);
         } catch (RuntimeException ex) {
@@ -453,7 +495,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void testRunCommandExecuteCommandSuccesfully() {
+    void testRunCommandExecuteCommandSuccesfully() {
         // GIVEN
         Map<String, String> commandOutputs = new HashMap<>();
         commandOutputs.put("host1", "output1");
@@ -470,7 +512,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void testSaltStatesAreMissing() {
+    void testSaltStatesAreMissing() {
         // GIVEN
         ApplyFullResponse applyResponse = new ApplyFullResponse();
         List<Map<String, FullNodeResponse>> result = new ArrayList<>();
@@ -494,7 +536,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void testRunCommandShouldReturnEmptyMapWhenTheListIsEmptyInResponse() {
+    void testRunCommandShouldReturnEmptyMapWhenTheListIsEmptyInResponse() {
         // GIVEN
         CommandExecutionResponse resp = new CommandExecutionResponse();
         List<Map<String, String>> commandOutputsList = new ArrayList<>();
@@ -507,7 +549,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void testRunCommandThrowsRuntimeException() {
+    void testRunCommandThrowsRuntimeException() {
         // GIVEN
         RuntimeException exception = new RuntimeException();
         when(saltConnector.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, "command")).thenThrow(exception);
