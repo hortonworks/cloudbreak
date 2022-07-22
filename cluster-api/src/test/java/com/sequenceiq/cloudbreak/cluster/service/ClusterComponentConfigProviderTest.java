@@ -45,4 +45,5 @@ class ClusterComponentConfigProviderTest {
         ClouderaManagerProduct product = underTest.getNormalizedCdhProductWithNormalizedVersion(CLUSTER_ID).get();
         assertEquals(product.getVersion(), "7.2.15");
     }
+
 }
