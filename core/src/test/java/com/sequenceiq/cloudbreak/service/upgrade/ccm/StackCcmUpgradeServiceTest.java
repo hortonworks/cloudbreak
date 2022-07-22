@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmTriggerRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -87,13 +87,13 @@ class StackCcmUpgradeServiceTest {
         when(stackService.getByNameOrCrnInWorkspace(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
         when(environmentService.getByCrn(ENV_CRN)).thenReturn(environment);
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
-        when(reactorNotifier.notify(eq(STACK_ID), eq("UPGRADE_CCM_TRIGGER_EVENT"), any(Acceptable.class))).thenReturn(flowId);
+        when(reactorNotifier.notify(eq(STACK_ID), eq("UPGRADE_CCM_CHAIN_TRIGGER_EVENT"), any(Acceptable.class))).thenReturn(flowId);
 
         StackCcmUpgradeV4Response response = underTest.upgradeCcm(NameOrCrn.ofCrn(STACK_CRN));
 
-        ArgumentCaptor<UpgradeCcmTriggerRequest> requestCaptor = ArgumentCaptor.forClass(UpgradeCcmTriggerRequest.class);
-        verify(reactorNotifier).notify(eq(STACK_ID), eq("UPGRADE_CCM_TRIGGER_EVENT"), requestCaptor.capture());
-        UpgradeCcmTriggerRequest request = requestCaptor.getValue();
+        ArgumentCaptor<UpgradeCcmFlowChainTriggerEvent> requestCaptor = ArgumentCaptor.forClass(UpgradeCcmFlowChainTriggerEvent.class);
+        verify(reactorNotifier).notify(eq(STACK_ID), eq("UPGRADE_CCM_CHAIN_TRIGGER_EVENT"), requestCaptor.capture());
+        UpgradeCcmFlowChainTriggerEvent request = requestCaptor.getValue();
         assertThat(request.getResourceId()).isEqualTo(STACK_ID);
         assertThat(request.getClusterId()).isEqualTo(CLUSTER_ID);
         assertThat(request.getOldTunnel()).isEqualTo(tunnel);
