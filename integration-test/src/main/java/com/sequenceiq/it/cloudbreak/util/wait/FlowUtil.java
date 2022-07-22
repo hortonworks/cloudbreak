@@ -54,6 +54,7 @@ public class FlowUtil {
         if (pollingInterval == null) {
             pollingInterval = Duration.of(this.pollingInterval, ChronoUnit.MILLIS);
         }
+        LOGGER.info("Polling interval is: '{}'", pollingInterval);
         return pollingInterval;
     }
 
