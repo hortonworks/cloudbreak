@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.domain.IdAware;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
@@ -191,6 +192,10 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
 
     public SecurityConfig getSecurityConfig() {
         return securityConfig;
+    }
+
+    public String getAccountId() {
+        return Crn.safeFromString(getResourceCrn()).getAccountId();
     }
 
     @Override

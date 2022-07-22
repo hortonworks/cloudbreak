@@ -464,17 +464,15 @@ public class StackOperationServiceTest {
     public void testRotateSaltPassword() {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn("crn");
         StackDto stackDto = mock(StackDto.class);
-        when(stackDto.getId()).thenReturn(5L);
         when(stackDtoService.getByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stackDto);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollableId");
-        when(flowManager.triggerRotateSaltPassword(stackDto.getId(), REASON)).thenReturn(flowIdentifier);
+        when(rotateSaltPasswordService.triggerRotateSaltPassword(stackDto, REASON)).thenReturn(flowIdentifier);
 
         FlowIdentifier result = underTest.rotateSaltPassword(nameOrCrn, ACCOUNT_ID, REASON);
 
         assertEquals(flowIdentifier, result);
         verify(stackDtoService).getByNameOrCrn(nameOrCrn, ACCOUNT_ID);
-        verify(rotateSaltPasswordService).validateRotateSaltPassword(stackDto);
-        verify(flowManager).triggerRotateSaltPassword(stackDto.getId(), REASON);
+        verify(rotateSaltPasswordService).triggerRotateSaltPassword(stackDto, REASON);
     }
 
     private InstanceMetaData createInstanceMetadataForTest(Long privateId, String instanceGroupName) {
