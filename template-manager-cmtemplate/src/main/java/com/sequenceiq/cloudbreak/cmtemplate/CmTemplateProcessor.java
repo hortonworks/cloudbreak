@@ -493,7 +493,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         }
     }
 
-    public void addServiceConfigs(String serviceType, List<String> roleTypes, List<ApiClusterTemplateConfig> configs) {
+    public void addServiceConfigs(String serviceType, List<ApiClusterTemplateConfig> configs) {
         getServiceByType(serviceType).ifPresent(service -> mergeServiceConfigs(service, configs));
     }
 
