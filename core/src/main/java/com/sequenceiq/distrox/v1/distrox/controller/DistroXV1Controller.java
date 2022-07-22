@@ -64,13 +64,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
 import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
 import com.sequenceiq.cloudbreak.service.operation.OperationService;

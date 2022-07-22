@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRota
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -37,6 +38,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.Upg
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatusResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
@@ -52,6 +55,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgr
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
@@ -60,7 +64,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeService;
@@ -214,9 +217,19 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public FlowIdentifier rotateSaltPasswordInternal(Long workspaceId, String crn, @InitiatorUserCrn String initiatorUserCrn) {
-        return stackOperations.rotateSaltPassword(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(),
-                RotateSaltPasswordReason.MANUAL);
+    public FlowIdentifier rotateSaltPasswordInternal(Long workspaceId, String crn, RotateSaltPasswordRequest request,
+            @InitiatorUserCrn String initiatorUserCrn) {
+        RotateSaltPasswordReason rotateSaltPasswordReason = RotateSaltPasswordReason.valueOf(request.getReason().name());
+        return stackOperations.rotateSaltPassword(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), rotateSaltPasswordReason);
+    }
+
+    @Override
+    @InternalOnly
+    public SaltPasswordStatusResponse getSaltPasswordStatus(Long workspaceId, @TenantAwareParam String crn) {
+        SaltPasswordStatusResponse response = new SaltPasswordStatusResponse();
+        SaltPasswordStatus saltPasswordStatus = stackOperations.getSaltPasswordStatus(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId());
+        response.setStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus.valueOf(saltPasswordStatus.name()));
+        return response;
     }
 
     @Override

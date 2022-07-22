@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -46,6 +47,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -59,7 +61,6 @@ import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
@@ -267,6 +268,10 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     public FlowIdentifier rotateSaltPassword(NameOrCrn nameOrCrn, String accountId, RotateSaltPasswordReason reason) {
         return stackCommonService.rotateSaltPassword(nameOrCrn, accountId, reason);
+    }
+
+    public SaltPasswordStatus getSaltPasswordStatus(NameOrCrn nameOrCrn, String accountId) {
+        return stackCommonService.getSaltPasswordStatus(nameOrCrn, accountId);
     }
 
     public FlowIdentifier putScaling(@NotNull NameOrCrn nameOrCrn, String accountId, @Valid StackScaleV4Request updateRequest) {

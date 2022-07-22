@@ -56,6 +56,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntrie
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
@@ -1348,10 +1350,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return result;
     }
 
-    public FlowIdentifier rotateSaltPassword(SdxCluster sdxCluster) {
+    public FlowIdentifier rotateSaltPassword(SdxCluster sdxCluster, RotateSaltPasswordReason reason) {
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                initiatorUserCrn -> stackV4Endpoint.rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(), initiatorUserCrn)
+                initiatorUserCrn -> stackV4Endpoint.rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(),
+                        new RotateSaltPasswordRequest(reason), initiatorUserCrn)
         );
         cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         return sdxReactorFlowManager.triggerSaltPasswordRotationTracker(sdxCluster);

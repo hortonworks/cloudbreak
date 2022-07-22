@@ -15,14 +15,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
+import com.sequenceiq.cloudbreak.service.SaltPasswordStatusService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 import io.opentracing.Tracer;
@@ -89,6 +91,9 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
     @Inject
     private RotateSaltPasswordService rotateSaltPasswordService;
 
+    @Inject
+    private SaltPasswordStatusService saltPasswordStatusService;
+
     public StackSaltStatusCheckerJob(Tracer tracer) {
         super(tracer, "Stack Salt Status Checker Job");
     }
@@ -127,8 +132,15 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
 
     private void rotateSaltPasswordIfNeeded(StackDto stack) {
         try {
-            Optional<RotateSaltPasswordReason> rotateSaltPasswordReason = rotateSaltPasswordService.checkIfSaltPasswordRotationNeeded(stack);
-            rotateSaltPasswordReason.ifPresent(reason -> rotateSaltPasswordService.triggerRotateSaltPassword(stack, reason));
+            SaltPasswordStatus status = saltPasswordStatusService.getSaltPasswordStatus(stack);
+            Optional<RotateSaltPasswordReason> reasonOptional = RotateSaltPasswordReason.getForStatus(status);
+            if (reasonOptional.isPresent()) {
+                RotateSaltPasswordReason reason = reasonOptional.get();
+                LOGGER.info("Triggering salt password rotaiton for status {} with reason {}", status, reason);
+                rotateSaltPasswordService.triggerRotateSaltPassword(stack, reason);
+            } else {
+                LOGGER.debug("Salt password rotation is not needed for status {}", status);
+            }
         } catch (Exception e) {
             rotateSaltPasswordService.sendFailureUsageReport(stack.getResourceCrn(), RotateSaltPasswordReason.UNSET, e.getMessage());
             throw e;

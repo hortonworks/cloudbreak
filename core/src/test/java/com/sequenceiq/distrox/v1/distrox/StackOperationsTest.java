@@ -30,8 +30,10 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
@@ -43,7 +45,6 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackVie
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
@@ -254,6 +255,18 @@ public class StackOperationsTest {
         underTest.rotateSaltPassword(nameOrCrn, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
 
         verify(stackCommonService).rotateSaltPassword(nameOrCrn, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
+    }
+
+    @Test
+    public void checkIfSaltPasswordRotationNeeded() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
+        SaltPasswordStatus saltPasswordStatus = SaltPasswordStatus.OK;
+        when(stackCommonService.getSaltPasswordStatus(nameOrCrn, ACCOUNT_ID)).thenReturn(saltPasswordStatus);
+
+        SaltPasswordStatus result = underTest.getSaltPasswordStatus(nameOrCrn, ACCOUNT_ID);
+
+        assertEquals(saltPasswordStatus, result);
+        verify(stackCommonService).getSaltPasswordStatus(nameOrCrn, ACCOUNT_ID);
     }
 
     private StackV4Response stackResponse() {

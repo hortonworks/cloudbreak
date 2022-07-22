@@ -35,6 +35,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkScaleV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -52,7 +54,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
@@ -444,6 +445,16 @@ class StackCommonServiceTest {
 
         assertEquals("1", flowIdentifier.getPollableId());
         verify(instanceMetaDataService, times(1)).anyInstanceStopped(STACK_ID);
+    }
+
+    @Test
+    public void checkIfSaltPasswordRotationNeeded() {
+        when(stackOperationService.getSaltPasswordStatus(STACK_CRN, ACCOUNT_ID)).thenReturn(SaltPasswordStatus.OK);
+
+        SaltPasswordStatus result = underTest.getSaltPasswordStatus(STACK_CRN, ACCOUNT_ID);
+
+        assertEquals(SaltPasswordStatus.OK, result);
+        verify(stackOperationService).getSaltPasswordStatus(STACK_CRN, ACCOUNT_ID);
     }
 
 }

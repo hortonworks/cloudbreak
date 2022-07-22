@@ -45,6 +45,7 @@ public class OperationDescriptions {
         public static final String START_BY_NAME_IN_WORKSPACE_INTERNAL = "starts the stack by name in workspace, internal only";
         public static final String ROTATE_SALT_PASSWORD_BY_CRN_IN_WORKSPACE_INTERNAL = "rotates the SaltStack user password of stack by crn in workspace, " +
                 "internal only";
+        public static final String SALT_PASSWORD_STATUS = "checks if salt password rotation is needed";
         public static final String SCALE_BY_NAME_IN_WORKSPACE = "scales the stack by name in workspace";
         public static final String REPAIR_CLUSTER_IN_WORKSPACE = "repairs the stack by name in workspace";
         public static final String REPAIR_CLUSTER_IN_WORKSPACE_INTERNAL = "repairs the stack by name in workspace, internal only";
