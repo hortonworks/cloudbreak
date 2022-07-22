@@ -56,8 +56,7 @@ public class RotateSaltPasswordActions {
 
             @Override
             protected Selectable createRequest(RotateSaltPasswordContext context) {
-                return new RotateSaltPasswordRequest(
-                        RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.selector(), context.getStack().getId(), context.getReason());
+                return new RotateSaltPasswordRequest(context.getStack().getId(), context.getReason());
             }
         };
     }

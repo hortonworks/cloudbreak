@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.RotateSaltPasswordEvent;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordFailureResponse;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordReason;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordRequest;
@@ -35,7 +34,7 @@ class RotateSaltPasswordHandlerTest {
     private static final long STACK_ID = 1L;
 
     private static final HandlerEvent<RotateSaltPasswordRequest> EVENT = new HandlerEvent<>(new Event<>(
-                    new RotateSaltPasswordRequest(RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.selector(), STACK_ID, RotateSaltPasswordReason.MANUAL)));
+            new RotateSaltPasswordRequest(STACK_ID, RotateSaltPasswordReason.MANUAL)));
 
     @Mock
     private EventBus eventBus;

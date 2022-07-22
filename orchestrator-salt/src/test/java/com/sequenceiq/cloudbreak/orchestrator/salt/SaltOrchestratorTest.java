@@ -14,7 +14,9 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -25,6 +27,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,6 +68,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostAndRoleTarget;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
@@ -746,5 +751,24 @@ class SaltOrchestratorTest {
         verify(callable).call();
         SaltUpload saltUpload = saltUploadCaptor.getValue();
         assertEquals(Set.of(gatewayConfig.getPrivateAddress()), saltUpload.getTargets());
+    }
+
+    @Test
+    void testGetPasswordExpiryDate() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
+        String user = "saltuser";
+        when(saltStateService.runCommandOnHosts(any(), any(), any(), anyString())).thenReturn(Map.of(
+                "host1", " Jan 01, 2022",
+                "host2", " Mar 10, 2022"
+        ));
+
+        LocalDate result = saltOrchestrator.getPasswordExpiryDate(allGatewayConfigs, user);
+
+        ArgumentCaptor<HostList> hostListCaptor = ArgumentCaptor.forClass(HostList.class);
+        verify(saltStateService).runCommandOnHosts(eq(retry), eq(saltConnector), hostListCaptor.capture(), startsWith("chage -l saltuser"));
+        assertEquals(gatewayConfig.getHostname(), hostListCaptor.getValue().getTarget());
+        assertEquals(2022, result.getYear());
+        assertEquals(Month.JANUARY, result.getMonth());
+        assertEquals(1, result.getDayOfMonth());
     }
 }

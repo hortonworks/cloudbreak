@@ -127,3 +127,8 @@ telemetry:
       diagnostics-collect: 360
       metering-upgrade: 5
       telemetry-upgrade: 50
+jobs:
+  salt-status-checker:
+    enabled: true
+    interval-in-minutes: 60
+    password-expiry-threshold-in-days: 14

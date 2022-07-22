@@ -374,7 +374,7 @@ public class SaltStateService {
                 return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.get(0);
             } catch (RuntimeException e) {
                 LOGGER.error("Salt run command on hosts failed", e);
-                throw new Retry.ActionFailedException("Salt run command on hosts failed");
+                throw new Retry.ActionFailedException("Salt run command on hosts failed", e);
             }
         });
     }

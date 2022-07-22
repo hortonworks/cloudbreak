@@ -8,6 +8,8 @@ import static java.util.function.Predicate.not;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -135,6 +137,8 @@ public class SaltOrchestrator implements HostOrchestrator {
     private static final String SRV_SALT_DISK = "/srv/salt/disk";
 
     private static final String PERMISSION = "0600";
+
+    private static final DateTimeFormatter CHAGE_DATE_PATTERN = DateTimeFormatter.ofPattern("MMM dd, yyyy");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltOrchestrator.class);
 
@@ -1475,6 +1479,25 @@ public class SaltOrchestrator implements HostOrchestrator {
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
         LOGGER.debug("Upload state finished");
+    }
+
+    @Override
+    public LocalDate getPasswordExpiryDate(List<GatewayConfig> allGatewayConfigs, String user) throws CloudbreakOrchestratorException {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
+        Set<String> gatewayTargets = getGatewayHostnames(allGatewayConfigs);
+        LOGGER.info("Getting password expiry date for user {} using primary gateway {} on all gateways: {} ",
+                user, primaryGateway.getPrivateAddress(), gatewayTargets);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            String command = String.format("chage -l %s | grep \"Password expires\" | cut -d \":\" -f2", user);
+            Map<String, String> passwordExpiryDatesOnHosts = saltStateService.runCommandOnHosts(retry, sc, new HostList(gatewayTargets), command);
+            return passwordExpiryDatesOnHosts.values().stream()
+                    .map(dateString -> LocalDate.parse(dateString.trim(), CHAGE_DATE_PATTERN))
+                    .min(LocalDate::compareTo)
+                    .orElseThrow(() -> new IllegalStateException("No password expiry date found for user " + user));
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during the salt state upload", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
     }
 
 }

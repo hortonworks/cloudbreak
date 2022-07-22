@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.common.service;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.TemporalAmount;
 
 import org.springframework.stereotype.Service;
@@ -18,5 +19,9 @@ public class Clock {
 
     public Instant nowMinus(TemporalAmount amount) {
         return Instant.now().minus(amount);
+    }
+
+    public LocalDateTime getCurrentLocalDateTime() {
+        return LocalDateTime.now();
     }
 }

@@ -57,6 +57,10 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
         return stackRepository.findAllRunning();
     }
 
+    public JobResource getJobResource(Long resourceId) {
+        return stackRepository.getJobResource(resourceId).orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack [%s] not found", resourceId)));
+    }
+
     public List<JobResource> findAllForAutoSync() {
         return stackRepository.findAllRunningAndStatusIn(List.of(
                 Status.AVAILABLE,

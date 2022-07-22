@@ -10,10 +10,9 @@ public class RotateSaltPasswordRequest extends StackEvent {
 
     @JsonCreator
     public RotateSaltPasswordRequest(
-            @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("reason") RotateSaltPasswordReason reason) {
-        super(selector, stackId);
+        super(stackId);
         this.reason = reason;
     }
 
