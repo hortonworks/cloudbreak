@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
@@ -79,6 +80,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
@@ -1654,14 +1656,15 @@ class SdxServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         FlowIdentifier cbFlowIdentifier = mock(FlowIdentifier.class);
-        when(stackV4Endpoint.rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, SDX_CRN, USER_CRN)).thenReturn(cbFlowIdentifier);
+        RotateSaltPasswordRequest request = new RotateSaltPasswordRequest(RotateSaltPasswordReason.MANUAL);
+        when(stackV4Endpoint.rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, SDX_CRN, request, USER_CRN)).thenReturn(cbFlowIdentifier);
         FlowIdentifier sdxFlowIdentifier = mock(FlowIdentifier.class);
         when(sdxReactorFlowManager.triggerSaltPasswordRotationTracker(sdxCluster)).thenReturn(sdxFlowIdentifier);
 
-        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateSaltPassword(sdxCluster));
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateSaltPassword(sdxCluster, RotateSaltPasswordReason.MANUAL));
 
         assertEquals(sdxFlowIdentifier, result);
-        verify(stackV4Endpoint).rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, SDX_CRN, USER_CRN);
+        verify(stackV4Endpoint).rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, SDX_CRN, request, USER_CRN);
         verify(regionAwareInternalCrnGenerator).getInternalCrnForServiceAsString();
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, cbFlowIdentifier);
         verify(sdxReactorFlowManager).triggerSaltPasswordRotationTracker(sdxCluster);

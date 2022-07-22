@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.salt.rotatepassword;
 
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.CommonContext;
@@ -11,11 +11,11 @@ public class RotateSaltPasswordContext extends CommonContext {
 
     private final StackView stack;
 
+    private final StackStatus previousStackStatus;
+
     private final RotateSaltPasswordReason reason;
 
     private final RotateSaltPasswordType type;
-
-    private final StackStatus previousStackStatus;
 
     public RotateSaltPasswordContext(FlowParameters flowParameters, StackView stack, StackStatus previousStackStatus,
             RotateSaltPasswordReason reason, RotateSaltPasswordType type) {
@@ -30,6 +30,10 @@ public class RotateSaltPasswordContext extends CommonContext {
         return stack;
     }
 
+    public StackStatus getPreviousStackStatus() {
+        return previousStackStatus;
+    }
+
     public Long getStackId() {
         return stack.getId();
     }
@@ -40,9 +44,5 @@ public class RotateSaltPasswordContext extends CommonContext {
 
     public RotateSaltPasswordType getType() {
         return type;
-    }
-
-    public StackStatus getPreviousStackStatus() {
-        return previousStackStatus;
     }
 }

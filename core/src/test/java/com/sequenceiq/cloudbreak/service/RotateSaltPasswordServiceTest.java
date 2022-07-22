@@ -12,10 +12,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.assertj.core.api.Assertions;
@@ -30,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
@@ -44,7 +42,6 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.quartz.saltstatuschecker.SaltStatusCheckerConfig;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
@@ -277,53 +274,5 @@ class RotateSaltPasswordServiceTest {
                 .returns(UsageProto.CDPSaltPasswordRotationEventReason.Value.EXPIRED, UsageProto.CDPSaltPasswordRotationEvent::getReason)
                 .returns(UsageProto.CDPSaltPasswordRotationEventResult.Value.FAILURE, UsageProto.CDPSaltPasswordRotationEvent::getEventResult)
                 .returns(message, UsageProto.CDPSaltPasswordRotationEvent::getMessage);
-    }
-
-    @Test
-    void expiredSaltPasswordRotationNeeded() throws Exception {
-        when(clock.getCurrentLocalDateTime()).thenReturn(LocalDateTime.now());
-        when(saltStatusCheckerConfig.getPasswordExpiryThresholdInDays()).thenReturn(14);
-        when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
-        when(hostOrchestrator.getPasswordExpiryDate(gatewayConfigs, RotateSaltPasswordService.SALTUSER)).thenReturn(LocalDate.now().minusMonths(2));
-
-        Optional<RotateSaltPasswordReason> result = underTest.checkIfSaltPasswordRotationNeeded(stack);
-
-        assertThat(result).hasValue(RotateSaltPasswordReason.EXPIRED);
-    }
-
-    @Test
-    void noSaltPasswordRotationNeeded() throws Exception {
-        when(clock.getCurrentLocalDateTime()).thenReturn(LocalDateTime.now());
-        when(saltStatusCheckerConfig.getPasswordExpiryThresholdInDays()).thenReturn(14);
-        when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
-        when(hostOrchestrator.getPasswordExpiryDate(gatewayConfigs, RotateSaltPasswordService.SALTUSER)).thenReturn(LocalDate.now().plusMonths(2));
-
-        Optional<RotateSaltPasswordReason> result = underTest.checkIfSaltPasswordRotationNeeded(stack);
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    void unauthorizedSaltPasswordRotationNeeded() throws Exception {
-        when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
-        RuntimeException causeCause = new RuntimeException(RotateSaltPasswordService.UNAUTHORIZED_RESPONSE);
-        RuntimeException cause = new RuntimeException("Ooops", causeCause);
-        CloudbreakOrchestratorFailedException exception = new CloudbreakOrchestratorFailedException("Failed", cause);
-        when(hostOrchestrator.getPasswordExpiryDate(gatewayConfigs, RotateSaltPasswordService.SALTUSER)).thenThrow(exception);
-
-        Optional<RotateSaltPasswordReason> result = underTest.checkIfSaltPasswordRotationNeeded(stack);
-
-        assertThat(result).hasValue(RotateSaltPasswordReason.UNAUTHORIZED);
-    }
-
-    @Test
-    void errorWhileSaltPasswordRotationNeeded() throws Exception {
-        when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
-        CloudbreakOrchestratorFailedException exception = new CloudbreakOrchestratorFailedException("Unexpected failure");
-        when(hostOrchestrator.getPasswordExpiryDate(gatewayConfigs, RotateSaltPasswordService.SALTUSER)).thenThrow(exception);
-
-        assertThatThrownBy(() -> underTest.checkIfSaltPasswordRotationNeeded(stack))
-                .isInstanceOf(CloudbreakRuntimeException.class)
-                .hasCause(exception);
     }
 }
