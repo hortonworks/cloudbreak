@@ -4,7 +4,6 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,7 +108,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest {
                 })
                 .when(sdxTestClient.upgrade(), key(sdx))
                 .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdx).withPollingInterval(Duration.ofSeconds(5L)))
+                .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
                     List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
