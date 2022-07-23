@@ -1,6 +1,9 @@
 package com.sequenceiq.consumption.flow.consumption.storage.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 
 import reactor.rx.Promise;
@@ -11,7 +14,13 @@ public class StorageConsumptionCollectionEvent extends BaseFlowEvent {
         super(selector, resourceId, resourceCrn);
     }
 
-    public StorageConsumptionCollectionEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted) {
+    @JsonCreator
+    public StorageConsumptionCollectionEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("resourceCrn") String resourceCrn,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
+
         super(selector, resourceId, resourceCrn, accepted);
     }
 
