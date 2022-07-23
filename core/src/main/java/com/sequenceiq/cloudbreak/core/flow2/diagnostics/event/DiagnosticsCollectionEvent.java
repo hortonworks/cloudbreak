@@ -35,7 +35,7 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("resourceCrn") String resourceCrn,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("parameters") DiagnosticParameters parameters,
             @JsonProperty("hosts") Set<String> hosts,
             @JsonProperty("hostGroups") Set<String> hostGroups,

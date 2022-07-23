@@ -41,7 +41,7 @@ public class SdxStartCertRotationEvent extends SdxEvent {
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long sdxId,
             @JsonProperty("userId") String userId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("request") CertificatesRotationV4Request request) {
         super(selector, sdxId, userId, accepted);
         this.request = request;

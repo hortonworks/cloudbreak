@@ -18,7 +18,7 @@ public class MaintenanceModeValidationTriggerEvent extends StackEvent {
     public MaintenanceModeValidationTriggerEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
     }
 

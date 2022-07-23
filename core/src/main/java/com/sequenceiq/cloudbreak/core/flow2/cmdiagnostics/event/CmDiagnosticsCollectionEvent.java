@@ -23,7 +23,7 @@ public class CmDiagnosticsCollectionEvent extends BaseFlowEvent {
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("resourceCrn") String resourceCrn,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("parameters") CmDiagnosticsParameters parameters) {
         super(selector, resourceId, resourceCrn, accepted);
         this.parameters = parameters;

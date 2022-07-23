@@ -159,16 +159,16 @@ public class FlowPayloadSerializabilityChecker {
         int jsonPropertyCount = 0;
         for (Parameter param : creator.getParameters()) {
             JsonIgnoreDeserialization ignoreDeserialization = param.getAnnotation(JsonIgnoreDeserialization.class);
-            if (ignoreDeserialization == null) {
-                JsonProperty jsonProperty = param.getAnnotation(JsonProperty.class);
-                if (jsonProperty == null || StringUtils.isBlank(jsonProperty.value())) {
-                    missingJsonPropertyParams.add(param.getName());
+            JsonProperty jsonProperty = param.getAnnotation(JsonProperty.class);
+            if (jsonProperty == null || StringUtils.isBlank(jsonProperty.value())) {
+                missingJsonPropertyParams.add(param.getName());
+            } else {
+                jsonPropertyCount++;
+                if (uniqueNamesCheck.contains(jsonProperty.value())) {
+                    duplicateNames.add(jsonProperty.value());
                 } else {
-                    jsonPropertyCount++;
-                    if (uniqueNamesCheck.contains(jsonProperty.value())) {
-                        duplicateNames.add(jsonProperty.value());
-                    } else {
-                        uniqueNamesCheck.add(jsonProperty.value());
+                    uniqueNamesCheck.add(jsonProperty.value());
+                    if (ignoreDeserialization == null) {
                         if (!isGetterFoundRecursive(clazz, jsonProperty.value(), isBooleanType(param.getType()))) {
                             missingGetters.add(jsonProperty.value());
                         }

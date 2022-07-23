@@ -49,7 +49,7 @@ public class BackupRestoreEvent extends StackEvent {
     public BackupRestoreEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("backupLocation") String backupLocation,
             @JsonProperty("backupId") String backupId,
             @JsonProperty("closeConnections") boolean closeConnections) {

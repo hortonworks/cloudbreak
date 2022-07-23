@@ -28,7 +28,7 @@ public class SaltUpdateTriggerEvent extends StackEvent {
     public SaltUpdateTriggerEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("chained") boolean chained,
             @JsonProperty("finalChain") boolean finalChain) {
         super(selector, stackId, accepted);

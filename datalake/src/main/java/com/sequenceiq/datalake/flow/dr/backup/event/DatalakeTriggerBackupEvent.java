@@ -29,7 +29,7 @@ public class DatalakeTriggerBackupEvent extends DatalakeDatabaseDrStartBaseEvent
             @JsonProperty("backupLocation") String backupLocation,
             @JsonProperty("backupName") String backupName,
             @JsonProperty("reason") DatalakeBackupFailureReason reason,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, sdxId, userId, SdxOperationType.BACKUP, accepted);
         this.backupLocation = backupLocation;
         this.backupName = backupName;

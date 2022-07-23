@@ -23,7 +23,7 @@ public class ClusterUpgradeTriggerEvent extends StackEvent {
     public ClusterUpgradeTriggerEvent(
             @JsonProperty("selector") String event,
             @JsonProperty("resourceId") Long resourceId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("imageId") String imageId) {
         super(event, resourceId, accepted);
         this.imageId = imageId;

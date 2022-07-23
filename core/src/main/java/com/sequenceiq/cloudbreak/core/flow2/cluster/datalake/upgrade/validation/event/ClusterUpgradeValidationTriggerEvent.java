@@ -19,7 +19,7 @@ public class ClusterUpgradeValidationTriggerEvent extends StackEvent {
     @JsonCreator
     public ClusterUpgradeValidationTriggerEvent(
             @JsonProperty("resourceId") Long resourceId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("imageId") String imageId,
             @JsonProperty("lockComponents") boolean lockComponents) {
         super(START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT.event(), resourceId, accepted);

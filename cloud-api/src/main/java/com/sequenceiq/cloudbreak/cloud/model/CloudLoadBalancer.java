@@ -6,6 +6,8 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -13,6 +15,8 @@ public class CloudLoadBalancer {
 
     private final LoadBalancerType type;
 
+    @JsonSerialize(keyUsing = TargetGroupPortPair.TargetGroupPortPairSerializer.class)
+    @JsonDeserialize(keyUsing = TargetGroupPortPair.TargetGroupPortPairDeserializer.class)
     private final Map<TargetGroupPortPair, Set<Group>> portToTargetGroupMapping;
 
     private final LoadBalancerSku sku;
@@ -54,9 +58,9 @@ public class CloudLoadBalancer {
     @Override
     public String toString() {
         return "CloudLoadBalancer{" +
-            "type=" + type +
-            "sku=" + sku +
-            ", portToTargetGroupMapping=" + portToTargetGroupMapping +
-            '}';
+                "type=" + type +
+                ", portToTargetGroupMapping=" + portToTargetGroupMapping +
+                ", sku=" + sku +
+                '}';
     }
 }

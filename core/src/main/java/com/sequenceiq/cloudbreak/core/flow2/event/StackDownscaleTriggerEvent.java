@@ -34,7 +34,7 @@ public class StackDownscaleTriggerEvent extends StackScaleTriggerEvent {
             @JsonProperty("hostGroupsWithPrivateIds") Map<String, Set<Long>> hostGroupWithPrivateIds,
             @JsonProperty("hostGroupsWithHostNames") Map<String, Set<String>> hostGroupWithHostNames,
             @JsonProperty("triggeredStackVariant") String triggeredStackVariant,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, stackId, hostGroupWithAdjustment, hostGroupWithPrivateIds, hostGroupWithHostNames,
                 new AdjustmentTypeWithThreshold(AdjustmentType.BEST_EFFORT, null), triggeredStackVariant, accepted);
     }

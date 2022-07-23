@@ -31,7 +31,7 @@ public class ImageChangeEvent extends StackEvent {
     public ImageChangeEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("request") ImageSettingsRequest request) {
         super(selector, stackId, accepted);
         this.request = request;

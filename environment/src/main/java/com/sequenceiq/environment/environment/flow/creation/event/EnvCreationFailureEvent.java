@@ -1,13 +1,16 @@
 package com.sequenceiq.environment.environment.flow.creation.event;
 
+import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FAILED_ENV_CREATION_EVENT;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 public class EnvCreationFailureEvent extends BaseNamedFlowEvent {
 
+    @JsonTypeInfo(use = CLASS, property = "@type")
     private final Exception exception;
 
     @JsonCreator

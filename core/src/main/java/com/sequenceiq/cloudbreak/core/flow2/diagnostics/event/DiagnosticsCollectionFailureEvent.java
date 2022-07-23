@@ -1,14 +1,17 @@
 package com.sequenceiq.cloudbreak.core.flow2.diagnostics.event;
 
+import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors.FAILED_DIAGNOSTICS_COLLECTION_EVENT;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 
 public class DiagnosticsCollectionFailureEvent extends DiagnosticsCollectionEvent implements Selectable {
 
+    @JsonTypeInfo(use = CLASS, property = "@type")
     private final Exception exception;
 
     private final String failureType;

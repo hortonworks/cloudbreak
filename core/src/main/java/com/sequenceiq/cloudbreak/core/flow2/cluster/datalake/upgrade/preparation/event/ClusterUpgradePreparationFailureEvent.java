@@ -1,13 +1,16 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event;
 
+import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.FAILED_CLUSTER_UPGRADE_PREPARATION_EVENT;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 
 public class ClusterUpgradePreparationFailureEvent extends StackFailureEvent {
 
+    @JsonTypeInfo(use = CLASS, property = "@type")
     private final Exception exception;
 
     @JsonCreator

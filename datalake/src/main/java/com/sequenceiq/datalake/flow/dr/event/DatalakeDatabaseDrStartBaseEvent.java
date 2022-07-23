@@ -20,7 +20,7 @@ public class DatalakeDatabaseDrStartBaseEvent extends SdxEvent  {
             @JsonProperty("resourceId") Long sdxId,
             @JsonProperty("userId") String userId,
             @JsonProperty("operationType") SdxOperationType operationType,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, sdxId, userId, accepted);
         drStatus = new SdxOperation(operationType, sdxId);
     }

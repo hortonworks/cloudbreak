@@ -18,7 +18,7 @@ public class ClusterUpgradePreparationTriggerEvent extends StackEvent {
     @JsonCreator
     public ClusterUpgradePreparationTriggerEvent(
             @JsonProperty("resourceId") Long resourceId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("imageChangeDto") ImageChangeDto imageChangeDto) {
         super(START_CLUSTER_UPGRADE_PREPARATION_INIT_EVENT.event(), resourceId, accepted);
         this.imageChangeDto = imageChangeDto;

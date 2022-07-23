@@ -30,7 +30,7 @@ public class SleepChainTriggerEvent implements IdempotentEvent<SleepChainTrigger
     public SleepChainTriggerEvent(
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("sleepConfigs") ArrayList<SleepConfig> sleepConfigs,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
 
         this.resourceId = resourceId;
         this.sleepConfigs = sleepConfigs;

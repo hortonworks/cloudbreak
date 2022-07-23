@@ -51,7 +51,7 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
             @JsonProperty("scalingType") ScalingType scalingType,
             @JsonProperty("singleMasterGateway") boolean singlePrimaryGateway,
             @JsonProperty("kerberosSecured") boolean kerberosSecured,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("singleNodeCluster") boolean singleNodeCluster,
             @JsonProperty("restartServices") boolean restartServices,
             @JsonProperty("clusterManagerType") ClusterManagerType clusterManagerType,

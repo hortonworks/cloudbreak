@@ -494,6 +494,13 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         this.ccmParameters = new Secret(JsonUtil.writeValueAsStringSilent(ccmParameters));
     }
 
+    /**
+     * Need this for Jackson deserialization
+     */
+    private void setCcmParameters(String rawCcmParameters) {
+        this.ccmParameters = new Secret(rawCcmParameters);
+    }
+
     @Override
     public String toString() {
         return "Stack{" +

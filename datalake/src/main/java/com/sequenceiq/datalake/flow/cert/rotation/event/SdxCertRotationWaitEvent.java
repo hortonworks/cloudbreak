@@ -31,7 +31,7 @@ public class SdxCertRotationWaitEvent extends SdxEvent {
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long sdxId,
             @JsonProperty("userId") String userId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, sdxId, userId, accepted);
     }
 }

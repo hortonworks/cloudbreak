@@ -24,7 +24,7 @@ public class StackSyncTriggerEvent extends StackEvent {
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("statusUpdateEnabled") Boolean statusUpdateEnabled,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.statusUpdateEnabled = statusUpdateEnabled;
     }

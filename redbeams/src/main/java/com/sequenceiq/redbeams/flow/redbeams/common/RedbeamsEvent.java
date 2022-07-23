@@ -44,7 +44,7 @@ public class RedbeamsEvent implements IdempotentEvent<RedbeamsEvent> {
     public RedbeamsEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("forced") boolean forced) {
 
         this.selector = selector;

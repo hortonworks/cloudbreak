@@ -88,6 +88,14 @@ public class JsonUtil {
         return MAPPER.writeValueAsString(object);
     }
 
+    public static String writeValueAsStringUnchecked(Object object) {
+        try {
+            return MAPPER.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Cannot convert object to Json string.", e);
+        }
+    }
+
     public static String writeValueAsStringSilent(Object object) {
         return writeValueAsStringSilent(object, false);
     }

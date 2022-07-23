@@ -33,7 +33,7 @@ public class ChangePrimaryGatewayEvent extends StackEvent {
             @JsonProperty("repairInstanceIds") List<String> repairInstanceIds,
             @JsonProperty("finalChain") Boolean finalChain,
             @JsonProperty("operationId") String operationId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.repairInstanceIds = repairInstanceIds;
         this.finalChain = finalChain;
