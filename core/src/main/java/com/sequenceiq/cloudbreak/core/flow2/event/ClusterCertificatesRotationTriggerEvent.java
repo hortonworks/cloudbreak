@@ -23,7 +23,7 @@ public class ClusterCertificatesRotationTriggerEvent extends StackEvent {
     public ClusterCertificatesRotationTriggerEvent(
             @JsonProperty("selector") String event,
             @JsonProperty("resourceId") Long resourceId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("certificateRotationType") CertificateRotationType certificateRotationType) {
         super(event, resourceId, accepted);
         this.certificateRotationType = certificateRotationType;

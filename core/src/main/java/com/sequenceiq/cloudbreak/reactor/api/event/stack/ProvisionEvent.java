@@ -24,7 +24,7 @@ public class ProvisionEvent extends StackEvent {
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("provisionType") ProvisionType provisionType,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.provisionType = provisionType;
     }

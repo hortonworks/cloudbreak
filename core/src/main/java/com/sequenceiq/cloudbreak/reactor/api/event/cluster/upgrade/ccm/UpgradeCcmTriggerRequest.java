@@ -20,7 +20,7 @@ public class UpgradeCcmTriggerRequest extends AbstractUpgradeCcmEvent {
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("clusterId") Long clusterId,
             @JsonProperty("oldTunnel") Tunnel oldTunnel,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, stackId, clusterId, oldTunnel, accepted);
     }
 

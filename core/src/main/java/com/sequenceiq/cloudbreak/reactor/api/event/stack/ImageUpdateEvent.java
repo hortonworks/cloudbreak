@@ -22,7 +22,7 @@ public class ImageUpdateEvent extends StackEvent {
     public ImageUpdateEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("image") StatedImage image) {
         super(selector, stackId, accepted);
         this.image = image;

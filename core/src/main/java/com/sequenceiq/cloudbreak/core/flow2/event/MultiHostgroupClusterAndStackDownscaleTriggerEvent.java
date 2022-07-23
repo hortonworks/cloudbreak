@@ -26,7 +26,7 @@ public class MultiHostgroupClusterAndStackDownscaleTriggerEvent extends StackEve
             @JsonProperty("privateIdsByHostgroupMap") Map<String, Set<Long>> privateIdsByHostgroupMap,
             @JsonProperty("details") ClusterDownscaleDetails details,
             @JsonProperty("scalingType") ScalingType scalingType,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.privateIdsByHostgroupMap = privateIdsByHostgroupMap;
         this.details = details;

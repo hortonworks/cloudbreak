@@ -36,7 +36,7 @@ public class CleanupFreeIpaEvent extends StackEvent {
     public CleanupFreeIpaEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("hostNames") Set<String> hostNames,
             @JsonProperty("ips") Set<String> ips,
             @JsonProperty("recover") boolean recover) {

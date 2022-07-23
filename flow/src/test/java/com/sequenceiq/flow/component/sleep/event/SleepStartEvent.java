@@ -38,7 +38,7 @@ public class SleepStartEvent implements IdempotentEvent<SleepStartEvent> {
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("sleepDuration") Duration sleepDuration,
             @JsonProperty("failUntil") LocalDateTime failUntil,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
 
         this.resourceId = resourceId;
         this.sleepDuration = sleepDuration;

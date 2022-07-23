@@ -1,6 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.io.IOException;
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.KeyDeserializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 /**
  * A joining of ports related to target groups. Target groups are groups of instances that a load balancer routes traffic
@@ -15,7 +25,11 @@ public class TargetGroupPortPair {
 
     private final int healthCheckPort;
 
-    public TargetGroupPortPair(int trafficPort, int healthCheckPort) {
+    @JsonCreator
+    public TargetGroupPortPair(
+            @JsonProperty("trafficPort") int trafficPort,
+            @JsonProperty("healthCheckPort") int healthCheckPort) {
+
         this.trafficPort = trafficPort;
         this.healthCheckPort = healthCheckPort;
     }
@@ -49,8 +63,22 @@ public class TargetGroupPortPair {
     @Override
     public String toString() {
         return "TargetGroupPortPair{" +
-            "trafficPort=" + trafficPort +
-            ", healthCheckPort=" + healthCheckPort +
-            '}';
+                "trafficPort=" + trafficPort +
+                ", healthCheckPort=" + healthCheckPort +
+                '}';
+    }
+
+    public static class TargetGroupPortPairDeserializer extends KeyDeserializer {
+        @Override
+        public Object deserializeKey(String key, DeserializationContext ctxt) throws IOException {
+            return JsonUtil.readValue(key, TargetGroupPortPair.class);
+        }
+    }
+
+    public static class TargetGroupPortPairSerializer extends JsonSerializer<TargetGroupPortPair> {
+        @Override
+        public void serialize(TargetGroupPortPair value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            gen.writeFieldName(JsonUtil.writeValueAsStringUnchecked(value));
+        }
     }
 }

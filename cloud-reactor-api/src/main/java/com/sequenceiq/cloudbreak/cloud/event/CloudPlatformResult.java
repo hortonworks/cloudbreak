@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.event;
 
+import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS;
+
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 
@@ -11,6 +14,7 @@ public class CloudPlatformResult implements Payload {
 
     private String statusReason;
 
+    @JsonTypeInfo(use = CLASS, property = "@type")
     private Exception errorDetails;
 
     public CloudPlatformResult(Long resourceId) {

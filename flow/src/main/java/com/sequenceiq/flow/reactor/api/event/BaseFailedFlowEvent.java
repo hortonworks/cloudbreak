@@ -1,7 +1,10 @@
 package com.sequenceiq.flow.reactor.api.event;
 
+import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 
@@ -9,6 +12,7 @@ import reactor.rx.Promise;
 
 public class BaseFailedFlowEvent extends BaseNamedFlowEvent {
 
+    @JsonTypeInfo(use = CLASS, property = "@type")
     private final Exception exception;
 
     public BaseFailedFlowEvent(String selector, Long resourceId, String resourceName, String resourceCrn, Exception exception) {
@@ -20,7 +24,7 @@ public class BaseFailedFlowEvent extends BaseNamedFlowEvent {
     public BaseFailedFlowEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("resourceName") String resourceName,
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("exception") Exception exception) {

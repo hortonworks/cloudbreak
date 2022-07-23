@@ -29,7 +29,7 @@ public class SdxStartStopEvent extends SdxEvent {
             @JsonProperty("resourceId") Long sdxId,
             @JsonProperty("userId") String userId,
             @JsonProperty("stopDataHubs") boolean stopDataHubs,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, sdxId, userId, accepted);
         this.stopDataHubs = stopDataHubs;
     }

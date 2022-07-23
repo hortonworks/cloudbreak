@@ -31,7 +31,7 @@ public class BaseFlowEvent implements IdempotentEvent<BaseFlowEvent>, ResourceCr
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("resourceCrn") String resourceCrn,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
 
         this.selector = selector;
         this.resourceId = resourceId;

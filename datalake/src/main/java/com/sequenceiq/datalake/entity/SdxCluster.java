@@ -273,6 +273,13 @@ public class SdxCluster implements AccountAwareResource {
         }
     }
 
+    /**
+     * Need this for Jackson deserialization
+     */
+    private void setStackRequest(String rawRequest) {
+        this.stackRequest = new Secret(rawRequest);
+    }
+
     public String getStackRequestToCloudbreak() {
         return stackRequestToCloudbreak.getRaw();
     }

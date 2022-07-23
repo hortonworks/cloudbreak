@@ -20,7 +20,7 @@ public class BaseNamedFlowEvent extends BaseFlowEvent {
     public BaseNamedFlowEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("resourceName") String resourceName,
             @JsonProperty("resourceCrn") String resourceCrn) {
 

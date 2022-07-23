@@ -22,7 +22,7 @@ public class FlowChainInitPayload implements Selectable, Acceptable {
     public FlowChainInitPayload(
             @JsonProperty("flowChainName") String flowChainName,
             @JsonProperty("resourceId") Long resourceId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
 
         this.flowChainName = flowChainName;
         this.resourceId = resourceId;

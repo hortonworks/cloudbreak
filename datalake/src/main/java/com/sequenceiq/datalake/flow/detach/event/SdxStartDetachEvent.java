@@ -28,7 +28,7 @@ public class SdxStartDetachEvent extends SdxEvent {
             @JsonProperty("resourceId") Long sdxId,
             @JsonProperty("sdxCluster") SdxCluster sdxCluster,
             @JsonProperty("userId") String userId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, sdxId, userId, accepted);
         this.sdxCluster = sdxCluster;
     }

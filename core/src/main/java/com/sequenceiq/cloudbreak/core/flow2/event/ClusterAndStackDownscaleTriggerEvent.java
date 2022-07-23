@@ -47,7 +47,7 @@ public class ClusterAndStackDownscaleTriggerEvent extends ClusterDownscaleTrigge
             @JsonProperty("hostGroupsWithPrivateIds") Map<String, Set<Long>> hostGroupWithPrivateIds,
             @JsonProperty("hostGroupsWithHostNames") Map<String, Set<String>> hostGroupWithHostNames,
             @JsonProperty("scalingType") ScalingType scalingType,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("details") ClusterDownscaleDetails details) {
         super(selector, stackId, hostGroupWithAdjustment, hostGroupWithPrivateIds, hostGroupWithHostNames, accepted, details);
         this.scalingType = scalingType;

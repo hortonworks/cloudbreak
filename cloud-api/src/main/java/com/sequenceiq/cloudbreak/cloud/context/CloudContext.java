@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.context;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
@@ -179,8 +180,20 @@ public class CloudContext {
             return this;
         }
 
+        @JsonProperty("platform")
+        public Builder withPlatform(Platform platform) {
+            this.platform = platform.getValue();
+            return this;
+        }
+
         public Builder withVariant(String variant) {
             this.variant = variant;
+            return this;
+        }
+
+        @JsonProperty("variant")
+        public Builder withVariant(Variant variant) {
+            this.variant = variant.getValue();
             return this;
         }
 

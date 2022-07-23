@@ -29,7 +29,7 @@ public class UpgradeCcmFlowChainTriggerEvent extends StackEvent {
             @JsonProperty("operationId") String operationId,
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("oldTunnel") Tunnel oldTunnel,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.operationId = operationId;
         this.oldTunnel = oldTunnel;

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 
@@ -37,6 +38,12 @@ public class CollectDownscaleCandidatesRequest extends AbstractClusterScaleReque
 
     public ClusterDownscaleDetails getDetails() {
         return details;
+    }
+
+    @JsonIgnore
+    @Override
+    public Set<String> getHostGroupNames() {
+        return super.getHostGroupNames();
     }
 
     @Override

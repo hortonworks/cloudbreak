@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
@@ -84,6 +85,7 @@ public class ClusterScaleTriggerEvent extends StackEvent {
         return hostGroupsWithHostNames;
     }
 
+    @JsonIgnore
     public Set<String> getHostGroups() {
         return getHostGroupsWithAdjustment().keySet();
     }

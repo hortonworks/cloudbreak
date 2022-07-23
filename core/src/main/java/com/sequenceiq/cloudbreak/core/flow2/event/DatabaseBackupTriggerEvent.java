@@ -25,7 +25,7 @@ public class DatabaseBackupTriggerEvent extends BackupRestoreEvent {
     public DatabaseBackupTriggerEvent(
             @JsonProperty("selector") String event,
             @JsonProperty("resourceId") Long resourceId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("backupLocation") String backupLocation,
             @JsonProperty("backupId") String backupId,
             @JsonProperty("closeConnections") boolean closeConnections) {

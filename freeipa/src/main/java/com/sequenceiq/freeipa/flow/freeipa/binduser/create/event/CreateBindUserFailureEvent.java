@@ -1,12 +1,16 @@
 package com.sequenceiq.freeipa.flow.freeipa.binduser.create.event;
 
+import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 public class CreateBindUserFailureEvent extends CreateBindUserEvent {
 
     private final String failureMessage;
 
+    @JsonTypeInfo(use = CLASS, property = "@type")
     private final Exception exception;
 
     @JsonCreator

@@ -41,7 +41,7 @@ public class DownscaleEvent extends StackEvent {
             @JsonProperty("chained") boolean chained,
             @JsonProperty("finalChain") boolean finalChain,
             @JsonProperty("operationId") String operationId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.instanceIds = instanceIds;
         this.instanceCountByGroup = instanceCountByGroup;

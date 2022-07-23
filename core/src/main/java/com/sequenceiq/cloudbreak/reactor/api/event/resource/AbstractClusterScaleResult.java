@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformResult;
 
@@ -19,6 +20,7 @@ public abstract class AbstractClusterScaleResult<R extends AbstractClusterScaleR
         super(status, statusReason, errorDetails, request);
     }
 
+    @JsonIgnore
     public Set<String> getHostGroupNames() {
         return getRequest().getHostGroupNames();
     }

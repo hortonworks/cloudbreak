@@ -25,7 +25,7 @@ public class NestedSleepChainTriggerEvent implements IdempotentEvent<NestedSleep
     public NestedSleepChainTriggerEvent(
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("sleepChainTriggerEvents") ArrayList<SleepChainTriggerEvent> sleepChainTriggerEvents,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         this.resourceId = resourceId;
         this.sleepChainTriggerEvents = sleepChainTriggerEvents;
         this.accepted = accepted;

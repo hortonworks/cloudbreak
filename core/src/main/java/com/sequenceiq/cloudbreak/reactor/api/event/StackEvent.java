@@ -35,7 +35,7 @@ public class StackEvent implements IdempotentEvent<StackEvent> {
     public StackEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
-            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         this.selector = selector;
         this.stackId = stackId;
         this.accepted = accepted;
