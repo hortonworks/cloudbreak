@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.metrics;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.metrics.processor.MetricsProcessorConfiguration;
@@ -64,38 +67,29 @@ public class MetricsClient {
         }
     }
 
-    private void processRequest(String resourceCrn, String platform, String status, Integer statusOrdinal, Crn crn,
+    @VisibleForTesting
+    MetricsRecordRequest processRequest(String resourceCrn, String platform, String status, Integer statusOrdinal, Crn crn,
             Optional<Boolean> computeMonitoringEnabled) {
-        Types.TimeSeries.Builder timeSeriesBuilder = Types.TimeSeries.newBuilder()
-                .addLabels(Types.Label.newBuilder()
-                        .setName(METRIC_LABEL_NAME)
-                        .setValue(METRIC_NAME_VALUE)
-                        .build())
-                .addLabels(Types.Label.newBuilder()
-                        .setName(RESOURCE_CRN_LABEL_NAME)
-                        .setValue(resourceCrn)
-                        .build())
-                .addLabels(Types.Label.newBuilder()
-                        .setName(PLATFORM_LABEL_NAME)
-                        .setValue(platform)
-                        .build())
-                .addLabels(Types.Label.newBuilder()
-                        .setName(CLUSTER_STATUS_LABEL_NAME)
-                        .setValue(status)
-                        .build())
-                .addLabels(Types.Label.newBuilder()
-                        .setName(CLUSTER_TYPE_LABEL_NAME)
-                        .setValue(crn.getService().getName())
-                        .build())
-                .addSamples(Types.Sample.newBuilder()
-                        .setValue(statusOrdinal.doubleValue())
-                        .setTimestamp(System.currentTimeMillis())
-                        .build());
-        computeMonitoringEnabled.ifPresent(aBoolean ->
-                timeSeriesBuilder.addLabels(Types.Label.newBuilder()
-                        .setName(COMPUTE_MONITORING_ENABLED_LABEL_NAME)
-                        .setValue(String.valueOf(aBoolean))
-                        .build()));
+        Map<String, String> sortedLabelsMap = new TreeMap<>();
+        sortedLabelsMap.put(METRIC_LABEL_NAME, METRIC_NAME_VALUE);
+        sortedLabelsMap.put(RESOURCE_CRN_LABEL_NAME, resourceCrn);
+        sortedLabelsMap.put(PLATFORM_LABEL_NAME, platform);
+        sortedLabelsMap.put(CLUSTER_STATUS_LABEL_NAME, status);
+        sortedLabelsMap.put(CLUSTER_TYPE_LABEL_NAME, crn.getService().getName());
+        computeMonitoringEnabled.ifPresent(
+                aBoolean -> sortedLabelsMap.put(COMPUTE_MONITORING_ENABLED_LABEL_NAME, String.valueOf(aBoolean))
+        );
+        Types.TimeSeries.Builder timeSeriesBuilder = Types.TimeSeries.newBuilder();
+        for (Map.Entry<String, String> labelEntry : sortedLabelsMap.entrySet()) {
+            timeSeriesBuilder.addLabels(Types.Label.newBuilder()
+                    .setName(labelEntry.getKey())
+                    .setValue(labelEntry.getValue())
+                    .build());
+        }
+        timeSeriesBuilder.addSamples(Types.Sample.newBuilder()
+                .setValue(statusOrdinal.doubleValue())
+                .setTimestamp(System.currentTimeMillis())
+                .build());
         Remote.WriteRequest writeRequest = Remote.WriteRequest.newBuilder()
                 .addMetadata(Types.MetricMetadata.newBuilder()
                         .setType(Types.MetricMetadata.MetricType.INFO)
@@ -104,5 +98,6 @@ public class MetricsClient {
                 .build();
         MetricsRecordRequest request = new MetricsRecordRequest(writeRequest, Crn.safeFromString(resourceCrn).getAccountId());
         metricsRecordProcessor.processRecord(request);
+        return request;
     }
 }
