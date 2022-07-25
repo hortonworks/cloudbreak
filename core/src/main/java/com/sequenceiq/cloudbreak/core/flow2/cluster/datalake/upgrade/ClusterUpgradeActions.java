@@ -54,12 +54,12 @@ public class ClusterUpgradeActions {
     @Inject
     private ClusterUpgradeService clusterUpgradeService;
 
+    @Inject
+    private ImageComponentUpdaterService imageComponentUpdaterService;
+
     @Bean(name = "CLUSTER_UPGRADE_INIT_STATE")
     public Action<?, ?> initClusterUpgrade() {
         return new AbstractClusterUpgradeAction<>(ClusterUpgradeTriggerEvent.class) {
-
-            @Inject
-            private ImageComponentUpdaterService imageComponentUpdaterService;
 
             @Inject
             private ClusterUpgradeTargetImageService clusterUpgradeTargetImageService;
@@ -171,6 +171,7 @@ public class ClusterUpgradeActions {
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeSuccess payload, Map<Object, Object> variables) {
                 StatedImage currentImage = getCurrentImage(variables);
                 StatedImage targetImage = getTargetImage(variables);
+                imageComponentUpdaterService.updateForUpgrade(targetImage, payload.getResourceId());
                 clusterUpgradeService.clusterUpgradeFinished(context.getStackId(), currentImage, targetImage);
                 stackImageService.removeImageByComponentName(context.getStackId(), TARGET_IMAGE);
                 sendEvent(context);
