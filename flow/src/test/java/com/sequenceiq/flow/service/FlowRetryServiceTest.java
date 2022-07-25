@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
 
@@ -38,6 +39,8 @@ public class FlowRetryServiceTest {
 
     private static final String FLOW_ID = "flowId";
 
+    private static final String IGNORED_EVENT = "IGNORED_EVENT";
+
     @InjectMocks
     private FlowRetryService underTest;
 
@@ -52,6 +55,7 @@ public class FlowRetryServiceTest {
     @Before
     public void setUp() throws Exception {
         ReflectionTestUtils.setField(underTest, "retryableEvents", List.of(TestFlowConfig.TestFlowEvent.TEST_FAIL_HANDLED_EVENT.event()));
+        ReflectionTestUtils.setField(underTest, "ignoredFromRetryEvents", Set.of(IGNORED_EVENT));
 
         flowConfig = new TestFlowConfig();
         ReflectionTestUtils.setField(underTest, "flowConfigs", List.of(flowConfig));
@@ -72,7 +76,11 @@ public class FlowRetryServiceTest {
     }
 
     private FlowLog createFlowLog(String currentState, StateStatus stateStatus, long created, String name) {
-        FlowLog flowLog = new FlowLog(STACK_ID, FLOW_ID, currentState, true, stateStatus, OperationType.UNKNOWN);
+        return createFlowLog(FLOW_ID, currentState, stateStatus, created, name);
+    }
+
+    private FlowLog createFlowLog(String flowId, String currentState, StateStatus stateStatus, long created, String name) {
+        FlowLog flowLog = new FlowLog(STACK_ID, flowId, currentState, true, stateStatus, OperationType.UNKNOWN);
         flowLog.setCreated(created);
         flowLog.setFlowType(ClassValue.of(flowConfig.getClass()));
         flowLog.setNextEvent(name);
@@ -109,5 +117,21 @@ public class FlowRetryServiceTest {
         underTest.retry(STACK_ID);
 
         verify(flow2Handler, never()).restartFlow(any(FlowLog.class));
+    }
+
+    @Test
+    public void retryLastFailedWithSuccessfulAfter() {
+        FlowLog lastSuccessfulState = createFlowLog("1", "INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, 5, TestFlowEvent.TEST_FINISHED_EVENT.event());
+        List<FlowLog> pendingFlowLogs = Lists.newArrayList(
+                createFlowLog("2", IGNORED_EVENT, StateStatus.SUCCESSFUL, 7, null),
+                createFlowLog("1", "NEXT_STATE", StateStatus.FAILED, 6, TestFlowEvent.TEST_FAIL_HANDLED_EVENT.event()),
+                lastSuccessfulState,
+                createFlowLog("1", "INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, 2, TestFlowEvent.TEST_FINISHED_EVENT.event()),
+                createFlowLog("1", "INIT_STATE", StateStatus.SUCCESSFUL, 1, TestFlowEvent.TEST_FLOW_EVENT.event())
+        );
+        when(flowLogRepository.findAllByResourceIdOrderByCreatedDesc(STACK_ID, PageRequest.of(0, 50))).thenReturn(pendingFlowLogs);
+        underTest.retry(STACK_ID);
+
+        verify(flow2Handler, times(1)).restartFlow(ArgumentMatchers.eq(lastSuccessfulState));
     }
 }
