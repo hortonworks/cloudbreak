@@ -174,7 +174,7 @@ public interface AutoscaleV4Endpoint {
     @GET
     @Path("limits_configuration")
     @Produces(MediaType.APPLICATION_JSON)
-    LimitsConfigurationResponse getLimitsConfiguration();
+    LimitsConfigurationResponse getLimitsConfiguration(@QueryParam("accountId") String accountId);
 
     @GET
     @Path("/stack/crn/{crn}/recommendation")

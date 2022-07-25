@@ -104,7 +104,7 @@ public class StackUpgradeOperations {
         boolean replaceVms = determineReplaceVmsParameter(stack, request.getReplaceVms());
         if (replaceVms) {
             StackInstanceCount stackInstanceCount = instanceMetaDataService.countByStackId(stack.getId());
-            Integer upgradeNodeCountLimit = limitConfiguration.getUpgradeNodeCountLimit();
+            Integer upgradeNodeCountLimit = limitConfiguration.getUpgradeNodeCountLimit(Optional.ofNullable(accountId));
             LOGGER.debug("Instance count: {} and limit: [{}]", stackInstanceCount == null ? "null" : stackInstanceCount.asString(), upgradeNodeCountLimit);
             if (stackInstanceCount != null && stackInstanceCount.getInstanceCount() > upgradeNodeCountLimit) {
                 throw new BadRequestException(
