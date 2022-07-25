@@ -68,23 +68,24 @@ public class SigmaDatabusClient<D extends AbstractDatabusStreamConfiguration> im
         ManagedChannelWrapper channelWrapper = getMessageWrapper();
         DbusProto.PutRecordRequest recordRequest = convert(request, databusStreamConfiguration);
         String requestId = MDCBuilder.getOrGenerateRequestId();
-        LOGGER.debug("Creating databus request with request id: {}", requestId);
+        String streamName = recordRequest.getRecord().getStreamName();
+        LOGGER.debug("Creating databus request with request id: {} [stream: {}]", requestId, streamName);
         buildMdcContext(request, requestId);
         DbusProto.PutRecordResponse recordResponse = newStub(channelWrapper.getChannel(),
                 requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString())
                 .putRecord(recordRequest);
         DbusProto.Record.Reply.Status status = recordResponse.getRecord().getStatus();
-        LOGGER.debug("Returned dbus record status is {}", status);
+        LOGGER.debug("Returned dbus record status is {} [stream: {}]", status, streamName);
         if (DbusProto.Record.Reply.Status.SENT.equals(status)) {
             String recordId = recordResponse.getRecord().getRecordId();
-            LOGGER.debug("Dbus record sucessfully processed with record id: {}", recordId);
+            LOGGER.debug("Dbus record successfully processed with record id: {} [stream: {}]", recordId, streamName);
         } else if (DbusProto.Record.Reply.Status.PENDING.equals(status)) {
             String recordId = recordResponse.getRecord().getRecordId();
             String s3BucketUrl = recordResponse.getRecord().getUploadUrl();
-            LOGGER.debug("Dbus record can be uploaded to s3 [record id: {}], [s3 url: {}]", recordId, s3BucketUrl);
+            LOGGER.debug("Dbus record can be uploaded to s3 [record id: {}], [s3 url: {}], [stream: {}]", recordId, s3BucketUrl, streamName);
             uploadRecordToS3(s3BucketUrl, request, recordId);
         } else {
-            throw new DatabusRecordProcessingException("Cannot process record to Sigma Databus.");
+            throw new DatabusRecordProcessingException(String.format("Cannot process record to Sigma Databus. [stream: %s]", streamName));
         }
     }
 
