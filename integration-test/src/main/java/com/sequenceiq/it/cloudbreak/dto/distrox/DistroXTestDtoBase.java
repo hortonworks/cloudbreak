@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.dto.distrox;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -215,6 +216,11 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
 
     public DistroXTestDtoBase<T> withLoadBalancer() {
         getRequest().setEnableLoadBalancer(true);
+        return this;
+    }
+
+    public DistroXTestDtoBase<T> addTags(Map<String, String> tags) {
+        tags.forEach((key, value) -> getRequest().addTag(key, value));
         return this;
     }
 }
