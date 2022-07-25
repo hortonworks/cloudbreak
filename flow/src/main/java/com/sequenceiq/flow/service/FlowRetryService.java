@@ -3,7 +3,9 @@ package com.sequenceiq.flow.service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -32,7 +34,9 @@ public class FlowRetryService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowRetryService.class);
 
-    private static final int INDEX_BEFORE_FINISHED_STATE = 1;
+    private static final int MIN_FLOW_LOGS_IN_RETRYABLE_FLOW = 2;
+
+    private static final int RETRYABLE_FLOW_LIMIT = 1;
 
     private static final int LAST_FIFTY_FLOWLOGS = 50;
 
@@ -44,6 +48,9 @@ public class FlowRetryService {
 
     @Resource
     private List<String> retryableEvents;
+
+    @Resource
+    private Set<String> ignoredFromRetryEvents;
 
     @Resource
     private List<FlowConfiguration<?>> flowConfigs;
@@ -143,12 +150,14 @@ public class FlowRetryService {
     }
 
     private List<RetryableFlow> getRetryableFlows(List<FlowLog> flowLogs) {
-        if (flowLogs.size() > 2) {
-            return Optional.ofNullable(flowLogs.get(INDEX_BEFORE_FINISHED_STATE))
+        if (flowLogs.size() > MIN_FLOW_LOGS_IN_RETRYABLE_FLOW) {
+            return flowLogs.stream()
+                    .filter(flowLog -> flowLog.getNextEvent() != null)
+                    .filter(flowLog -> !ignoredFromRetryEvents.contains(flowLog.getNextEvent()))
+                    .limit(RETRYABLE_FLOW_LIMIT)
                     .filter(log -> retryableEvents.contains(log.getNextEvent()))
                     .map(toRetryableFlow())
-                    .map(List::of)
-                    .orElse(List.of());
+                    .collect(Collectors.toList());
         } else {
             return Collections.emptyList();
         }
