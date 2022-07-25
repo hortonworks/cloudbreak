@@ -10,5 +10,17 @@ public class CoreRoles {
 
     public static final String CORE_SETTINGS_REF_NAME = "core_settings-STORAGEOPERATIONS-BASE";
 
+    public static final String CORE_DEFAULTFS = "core_defaultfs";
+
+    public static final String CORE_SITE_SAFETY_VALVE = "core_site_safety_valve";
+
+    public static final String HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD = "hadoop.security.groups.cache.background.reload";
+
+    public static final String STUB_DFS = "STUB_DFS";
+
+    public static final String STUB_DFS_SERVICE_REF_NAME = "stub_dfs";
+
+    public static final String STUB_DFS_SERVICE_ROLE_STORAGEOPERATIONS_REF_NAME = "stub_dfs-STORAGEOPERATIONS-BASE";
+
     private CoreRoles() { }
 }

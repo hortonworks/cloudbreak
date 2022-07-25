@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.StubDfsConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase.HbaseCloudStorageServiceConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3.S3ConfigProvider;
@@ -73,6 +74,8 @@ public class CentralCmTemplateUpdaterTest {
 
     @InjectMocks
     private CoreConfigProvider coreConfigProvider;
+
+    private StubDfsConfigProvider stubDfsConfigProvider = new StubDfsConfigProvider();
 
     @Spy
     private TemplateProcessor templateProcessor;
@@ -119,7 +122,8 @@ public class CentralCmTemplateUpdaterTest {
         List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviders = List.of(
                 new HiveMetastoreConfigProvider(),
                 coreConfigProvider,
-                hbaseCloudStorageProvider);
+                hbaseCloudStorageProvider,
+                stubDfsConfigProvider);
         when(cmTemplateProcessorFactory.get(anyString())).thenAnswer(i -> new CmTemplateProcessor(i.getArgument(0)));
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
         when(templatePreparationObject.getHostgroupViews()).thenReturn(toHostgroupViews(getHostgroupMappings()));
@@ -138,7 +142,6 @@ public class CentralCmTemplateUpdaterTest {
         S3FileSystemConfigurationsView fileSystemConfigurationsView =
                 new S3FileSystemConfigurationsView(new S3FileSystem(), locations, false);
         when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(Optional.of(fileSystemConfigurationsView));
-
         when(generalClusterConfigs.getClusterName()).thenReturn("testcluster");
         when(generalClusterConfigs.getPassword()).thenReturn("Admin123!");
         when(generalClusterConfigs.getAccountId()).thenReturn(Optional.of("1234"));
@@ -295,10 +298,6 @@ public class CentralCmTemplateUpdaterTest {
 
     @Test
     public void getKafkaPropertiesWhenNoHdfsInClusterShouldPresentCoreSettings() {
-        CoreConfigProvider coreConfigProvider = new CoreConfigProvider();
-        ReflectionTestUtils.setField(coreConfigProvider, "s3ConfigProvider", s3ConfigProvider);
-        List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviders = List.of(coreConfigProvider);
-        ReflectionTestUtils.setField(cmTemplateComponentConfigProviderProcessor, "providers", cmTemplateComponentConfigProviders);
         S3FileSystem s3FileSystem = new S3FileSystem();
         s3FileSystem.setInstanceProfile("profile");
         s3FileSystem.setS3GuardDynamoTableName("cb-table");
@@ -322,6 +321,35 @@ public class CentralCmTemplateUpdaterTest {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/kafka-without-hdfs.bp"));
         String generated = generator.getBlueprintText(templatePreparationObject);
         String expected = new CmTemplateProcessor(getBlueprintText("output/kafka-without-hdfs.bp")).getTemplate().toString();
+        String output = new CmTemplateProcessor(generated).getTemplate().toString();
+        Assert.assertEquals(expected, output);
+    }
+
+    @Test
+    public void getKafkaPropertiesWhenNoHdfsInClusterAndCmNewerOrEqualsThan771ShouldPresentCoreSettingsAndStubDfsService() {
+        S3FileSystem s3FileSystem = new S3FileSystem();
+        s3FileSystem.setInstanceProfile("profile");
+        s3FileSystem.setS3GuardDynamoTableName("cb-table");
+        s3FileSystem.setStorageContainer("cloudbreak-bucket");
+
+        StorageLocation storageLocation = new StorageLocation();
+        storageLocation.setProperty("core_defaultfs");
+        storageLocation.setValue("s3a://cloudbreak-bucket/kafka");
+        storageLocation.setConfigFile("core_settings");
+        StorageLocationView storageLocationView = new StorageLocationView(storageLocation);
+
+        BaseFileSystemConfigurationsView baseFileSystemConfigurationsView =
+                new S3FileSystemConfigurationsView(s3FileSystem, Sets.newHashSet(storageLocationView), false);
+        when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(Optional.of(baseFileSystemConfigurationsView));
+        when(templatePreparationObject.getGatewayView()).thenReturn(new GatewayView(new Gateway(), "signkey", new HashSet<>()));
+        Set<HostgroupView> hostgroupViews = new HashSet<>();
+        hostgroupViews.add(new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1));
+        when(templatePreparationObject.getHostgroupViews()).thenReturn(hostgroupViews);
+        when(templatePreparationObject.getGatewayView()).thenReturn(new GatewayView(new Gateway(), "signkey", new HashSet<>()));
+
+        when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/kafka-without-hdfs-cm-771.bp"));
+        String generated = generator.getBlueprintText(templatePreparationObject);
+        String expected = new CmTemplateProcessor(getBlueprintText("output/kafka-without-hdfs-cm-771.bp")).getTemplate().toString();
         String output = new CmTemplateProcessor(generated).getTemplate().toString();
         Assert.assertEquals(expected, output);
     }
