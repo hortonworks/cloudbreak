@@ -1,7 +1,7 @@
 {
   "cdhVersion": "7.0.1",
   "displayName": "testcluster",
-  "cmVersion": "7.x.0",
+  "cmVersion": "7.0.1",
   "services": [
     {
       "refName": "streams_messaging_manager",
