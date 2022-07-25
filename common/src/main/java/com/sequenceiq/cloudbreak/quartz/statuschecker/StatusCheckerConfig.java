@@ -18,6 +18,9 @@ public class StatusCheckerConfig {
     @Value("${statuschecker.longintervalsec:7200}")
     private int longIntervalInSeconds;
 
+    @Value("${statuschecker.snoozesec:60}")
+    private int snoozeSeconds;
+
     @Value("${statuschecker.enabled:true}")
     private boolean autoSyncEnabled;
 
@@ -41,4 +44,9 @@ public class StatusCheckerConfig {
     public int getLongIntervalInSeconds() {
         return longIntervalInSeconds;
     }
+
+    public int getSnoozeSeconds() {
+        return snoozeSeconds;
+    }
+
 }
