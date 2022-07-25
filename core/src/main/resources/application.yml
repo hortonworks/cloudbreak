@@ -793,8 +793,10 @@ cb:
         pkg:
           - name: cloudera-manager-agent
             pattern: "(.*)-([0-9]+)[a-zA-z]*\\..*"
+            validateForMultipleVersions: true
           - name: cloudera-manager-server
             pattern: "(.*)-([0-9]+)[a-zA-z]*\\..*"
+            validateForMultipleVersions: false
         prewarmed: true
   paywall.url: "https://archive.cloudera.com/p/cdp-public/"
   nodestatus:

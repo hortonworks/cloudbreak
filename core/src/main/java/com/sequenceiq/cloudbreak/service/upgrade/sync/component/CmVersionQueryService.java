@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.model.PackageInfo;
@@ -26,6 +28,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.Package;
 import com.sequenceiq.cloudbreak.service.cluster.PackageName;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 
 @Component
 @ConfigurationProperties(prefix = "cb.instance")
@@ -58,11 +61,10 @@ public class CmVersionQueryService {
      */
     public Map<String, List<PackageInfo>> queryCmPackageInfo(Stack stack) throws CloudbreakOrchestratorFailedException {
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        Map<String, Optional<String>> packageMap = packages.stream()
-                .filter(aPackage -> aPackage.getName().equals(ImagePackageVersion.CM.getKey()))
-                .map(Package::getPkg)
-                .flatMap(List::stream)
-                .collect(Collectors.toMap(PackageName::getName, packageName -> Optional.ofNullable(packageName.getPattern())));
+        Map<String, Optional<String>> packageMap = getPackageStream()
+                .collect(Collectors.toMap(
+                        PackageName::getName,
+                        packageName -> Optional.ofNullable(packageName.getPattern())));
         Map<String, List<PackageInfo>> fullPackageVersionsFromAllHosts = hostOrchestrator.getFullPackageVersionsFromAllHosts(gatewayConfig, packageMap);
         LOGGER.debug("Reading CM package info, found packages: " + fullPackageVersionsFromAllHosts);
         return fullPackageVersionsFromAllHosts;
@@ -76,22 +78,13 @@ public class CmVersionQueryService {
         validatePackageHasMultipleVersions(pkgVersionsMMap);
         Set<PackageInfo> distinctPackageInfos = new HashSet<>(pkgVersionsMMap.values());
         validatePackageInfoExists(distinctPackageInfos);
-        validateServerAndAgentHasSameVersion(distinctPackageInfos);
-        return distinctPackageInfos.stream().findFirst().get();
+        return getPackageInfoWithLatestVersion(distinctPackageInfos);
     }
 
-    private void validateServerAndAgentHasSameVersion(Set<PackageInfo> distinctPackageInfos) {
-        Set<String> distinctVersions = distinctPackageInfos.stream()
-                .map(PackageInfo::getFullVersion)
-                .collect(Collectors.toSet());
-
-        if (distinctVersions.size() > 1) {
-            String error = "Error during sync! CM server and agent has different versions: "
-                    + distinctPackageInfos.stream()
-                    .map(PackageInfo::getPackageNameAndFullVersion)
-                    .collect(Collectors.joining(", "));
-            logAndThrowError(error);
-        }
+    private PackageInfo getPackageInfoWithLatestVersion(Set<PackageInfo> distinctPackageInfos) {
+        return distinctPackageInfos.stream()
+                .max((p1, p2) -> new VersionComparator().compare(p1::getVersion, p2::getVersion))
+                .get();
     }
 
     private void validatePackageInfoExists(Set<PackageInfo> distinctPackageInfos) {
@@ -102,8 +95,15 @@ public class CmVersionQueryService {
     }
 
     private void validatePackageHasMultipleVersions(Multimap<String, PackageInfo> pkgVersionsMMap) {
-        if (pkgVersionsMMap.keySet().size() < pkgVersionsMMap.size()) {
-            String packageErrorStr = pkgVersionsMMap.asMap()
+
+        Set<String> packagesToValidate = getPackagesToValidateForMultipleVersions();
+
+        HashMultimap<String, PackageInfo> filteredPkgVersionsMMap = pkgVersionsMMap.entries()
+                .stream()
+                .filter(stringPackageInfoEntry -> packagesToValidate.contains(stringPackageInfoEntry.getKey()))
+                .collect(Multimaps.toMultimap(Map.Entry::getKey, Map.Entry::getValue, HashMultimap::create));
+        if (filteredPkgVersionsMMap.keySet().size() < filteredPkgVersionsMMap.size()) {
+            String packageErrorStr = filteredPkgVersionsMMap.asMap()
                     .values()
                     .stream()
                     .filter(packageInfos -> packageInfos.size() > 1)
@@ -111,6 +111,20 @@ public class CmVersionQueryService {
                     .collect(Collectors.joining("Package: "));
             logAndThrowError("Error during sync! The following package(s) has multiple versions present on the machines. Package: " + packageErrorStr);
         }
+    }
+
+    private Stream<PackageName> getPackageStream() {
+        return packages.stream()
+                .filter(aPackage -> aPackage.getName().equals(ImagePackageVersion.CM.getKey()))
+                .map(Package::getPkg)
+                .flatMap(List::stream);
+    }
+
+    private Set<String> getPackagesToValidateForMultipleVersions() {
+        return getPackageStream()
+                .filter(PackageName::getValidateForMultipleVersions)
+                .map(PackageName::getName)
+                .collect(Collectors.toSet());
     }
 
     private void logAndThrowError(String error) {

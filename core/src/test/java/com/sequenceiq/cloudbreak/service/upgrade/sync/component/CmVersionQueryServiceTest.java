@@ -42,7 +42,7 @@ class CmVersionQueryServiceTest {
 
     private static final String CLOUDERA_MANAGER_SERVER = "cloudera-manager-server";
 
-    private static final String VALID_PATTERN = "(.*)-(.*)\\..*";
+    private static final String VALID_PATTERN = "(.*)-([0-9]+)[a-zA-z]*\\..*";
 
     private static final String HOST_1 = "host1";
 
@@ -109,7 +109,7 @@ class CmVersionQueryServiceTest {
     }
 
     @Test
-    void testWhenServerHasMultiplePackageVersionsThenValidateConsistencyShouldFail() {
+    void testWhenAgentHasMultiplePackageVersionsThenValidateConsistencyShouldFail() {
         Map<String, List<PackageInfo>> hostPackageMap = Maps.newHashMap();
         hostPackageMap.put(HOST_1, getPackageInfoList(true));
         hostPackageMap.put(HOST_2, getPackageInfoList(false));
@@ -117,22 +117,24 @@ class CmVersionQueryServiceTest {
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.checkCmPackageInfoConsistency(hostPackageMap));
 
         Assertions.assertEquals("Error during sync! The following package(s) has multiple versions present on the machines. "
-                + "Package: [PackageInfo{name='cloudera-manager-server', version='2', buildNumber='2000'}, "
-                + "PackageInfo{name='cloudera-manager-server', version='1', buildNumber='1000'}]", exception.getMessage());
-
+                + "Package: [PackageInfo{name='cloudera-manager-agent', version='2', buildNumber='2000'}, "
+                + "PackageInfo{name='cloudera-manager-agent', version='1', buildNumber='1000'}]", exception.getMessage());
     }
 
     @Test
-    void testWhenServerAndAgentHaveDifferentPackageVersionsThenValidateConsistencyShouldFail() {
+    void testWhenServerHasMultiplePackageVersionsThenValidateConsistencyShouldPassAndChooseLatestVersion() {
         Map<String, List<PackageInfo>> hostPackageMap = Maps.newHashMap();
-        hostPackageMap.put(HOST_1, getPackageInfoList(false));
-        hostPackageMap.put(HOST_2, getPackageInfoList(false));
+        hostPackageMap.put(HOST_1, List.of(
+                getPackageInfo(CLOUDERA_MANAGER_SERVER, A_VERSION, A_BUILD_NUMBER),
+                getPackageInfo(CLOUDERA_MANAGER_AGENT, A_VERSION, A_BUILD_NUMBER)));
+        hostPackageMap.put(HOST_2, List.of(
+                getPackageInfo(CLOUDERA_MANAGER_SERVER, OTHER_VERSION, OTHER_BUILD_NUMBER),
+                getPackageInfo(CLOUDERA_MANAGER_AGENT, A_VERSION, A_BUILD_NUMBER)));
 
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.checkCmPackageInfoConsistency(hostPackageMap));
+        PackageInfo packageInfo = underTest.checkCmPackageInfoConsistency(hostPackageMap);
 
-        Assertions.assertEquals("Error during sync! CM server and agent has different versions:"
-                + " cloudera-manager-server (2-2000), cloudera-manager-agent (1-1000)", exception.getMessage());
-
+        Assertions.assertEquals(packageInfo.getVersion(), OTHER_VERSION);
+        Assertions.assertEquals(packageInfo.getBuildNumber(), OTHER_BUILD_NUMBER);
     }
 
     @Test
@@ -159,10 +161,11 @@ class CmVersionQueryServiceTest {
         return stack;
     }
 
-    private PackageName generatePackageName(String pkg, String pattern) {
+    private PackageName generatePackageName(String pkg, String pattern, boolean validate) {
         PackageName packageName = new PackageName();
         packageName.setName(pkg);
         packageName.setPattern(pattern);
+        packageName.setValidateForMultipleVersions(validate);
         return packageName;
     }
 
@@ -170,8 +173,8 @@ class CmVersionQueryServiceTest {
         Package cmPackage = new Package();
         cmPackage.setName("cm");
         cmPackage.setPkg(Lists.newArrayList(
-                generatePackageName(CLOUDERA_MANAGER_AGENT, VALID_PATTERN),
-                generatePackageName(CLOUDERA_MANAGER_SERVER, VALID_PATTERN)));
+                generatePackageName(CLOUDERA_MANAGER_AGENT, VALID_PATTERN, true),
+                generatePackageName(CLOUDERA_MANAGER_SERVER, VALID_PATTERN, false)));
         return cmPackage;
     }
 
@@ -179,18 +182,18 @@ class CmVersionQueryServiceTest {
         Package otherPackage = new Package();
         otherPackage.setName("other");
         otherPackage.setPkg(Lists.newArrayList(
-                generatePackageName("other-package", "(.*)-(.*)\\..*")));
+                generatePackageName("other-package", VALID_PATTERN, true)));
         return otherPackage;
     }
 
     private List<PackageInfo> getPackageInfoList(boolean matchVersions) {
         List<PackageInfo> packageMap = new ArrayList<>();
-        packageMap.add(getPackageInfo(CLOUDERA_MANAGER_AGENT, A_VERSION, A_BUILD_NUMBER));
+        packageMap.add(getPackageInfo(CLOUDERA_MANAGER_SERVER, A_VERSION, A_BUILD_NUMBER));
         PackageInfo server = null;
         if (matchVersions) {
-            server = getPackageInfo(CLOUDERA_MANAGER_SERVER, A_VERSION, A_BUILD_NUMBER);
+            server = getPackageInfo(CLOUDERA_MANAGER_AGENT, A_VERSION, A_BUILD_NUMBER);
         } else {
-            server = getPackageInfo(CLOUDERA_MANAGER_SERVER, OTHER_VERSION, OTHER_BUILD_NUMBER);
+            server = getPackageInfo(CLOUDERA_MANAGER_AGENT, OTHER_VERSION, OTHER_BUILD_NUMBER);
         }
         packageMap.add(server);
         return packageMap;
