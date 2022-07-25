@@ -107,16 +107,18 @@ public class RecipeEngine {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
         if (shouldExecuteRecipeOnStack(recipes, POST_CLUSTER_INSTALL, POST_SERVICE_DEPLOYMENT)) {
             uploadRecipesIfNeeded(stack, hostGroups);
-            orchestratorRecipeExecutor.postClusterInstall(stack);
         }
+        // Post cluster install should be executed even if we don't have post install recipe because we have the internal createuserhome.sh recipe
+        orchestratorRecipeExecutor.postClusterInstall(stack);
     }
 
     public void executePostInstallRecipesOnTargets(Stack stack, Set<HostGroup> hostGroups, Map<String, String> candidateAddresses) throws CloudbreakException {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
         if (shouldExecuteRecipeOnStack(recipes, POST_CLUSTER_INSTALL, POST_SERVICE_DEPLOYMENT)) {
             uploadRecipesIfNeeded(stack, hostGroups);
-            orchestratorRecipeExecutor.postClusterInstallOnTargets(stack, candidateAddresses);
         }
+        // Post cluster install should be executed even if we don't have post install recipe because we have the internal createuserhome.sh recipe
+        orchestratorRecipeExecutor.postClusterInstallOnTargets(stack, candidateAddresses);
     }
 
     public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups, boolean forced) throws CloudbreakException {
