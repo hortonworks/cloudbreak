@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.metrics;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,8 +20,12 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.metrics.processor.MetricsProcessorConfiguration;
 import com.sequenceiq.cloudbreak.metrics.processor.MetricsRecordProcessor;
+import com.sequenceiq.cloudbreak.metrics.processor.MetricsRecordRequest;
+
+import prometheus.Types;
 
 @ExtendWith(MockitoExtension.class)
 public class MetricsClientTest {
@@ -105,5 +112,20 @@ public class MetricsClientTest {
         underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL, Optional.of(true));
         // THEN
         verify(metricsRecordProcessor, times(0)).processRecord(any());
+    }
+
+    @Test
+    public void testProcessRequestInOrder() {
+        // GIVEN
+        // WHEN
+        MetricsRecordRequest request = underTest.processRequest(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL, Crn.safeFromString(CRN), Optional.of(true));
+        Types.TimeSeries timeSeries = request.getWriteRequest().getTimeseries(0);
+        // THEN
+        List<String> labels = List.of("__name__", "cluster_status", "cluster_type",
+                "compute_monitoring_enabled", "platform", "resource_crn");
+        Iterator<String> labelIterator = labels.iterator();
+        for (int i = 0; i < labels.size(); i++) {
+            assertEquals(timeSeries.getLabels(i).getName(), labelIterator.next());
+        }
     }
 }
