@@ -112,6 +112,19 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
+    public void testGetRecommendationFailed() {
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any()))
+                .thenThrow(new javax.ws.rs.BadRequestException("The provided client secret keys for app 1234."));
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.getRecommendation("cred", LIGHT_DUTY, "7.2.14", "AWS", "ec-central-1", null));
+
+        assertEquals("The provided client secret keys for app 1234. Please update your CDP Credential with the newly generated application key value!",
+                badRequestException.getMessage());
+    }
+
+    @Test
     public void validateVmTypeOverrideWhenInstanceGroupIsMissingFromDefaultTemplate() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any()))
