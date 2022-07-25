@@ -5,6 +5,8 @@ public class PackageName {
 
     private String pattern;
 
+    private boolean validateForMultipleVersions;
+
     public String getName() {
         return name;
     }
@@ -19,6 +21,14 @@ public class PackageName {
 
     public void setPattern(String pattern) {
         this.pattern = pattern;
+    }
+
+    public boolean getValidateForMultipleVersions() {
+        return validateForMultipleVersions;
+    }
+
+    public void setValidateForMultipleVersions(boolean validateForMultipleVersions) {
+        this.validateForMultipleVersions = validateForMultipleVersions;
     }
 
     @Override
