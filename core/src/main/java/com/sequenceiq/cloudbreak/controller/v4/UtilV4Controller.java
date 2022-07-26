@@ -160,8 +160,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     }
 
     @Override
-    @InternalOnly
-    @AccountIdNotNeeded
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public RemoteCommandsExecutionResponse remoteCommandExecution(String resourceCrn, RemoteCommandsExecutionRequest request) {
         return remoteExecutionService.remoteExec(resourceCrn, request);
     }
