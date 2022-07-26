@@ -36,6 +36,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXChangeImageCatalogT
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.securityrule.SecurityRulesTestDto;
+import com.sequenceiq.it.cloudbreak.dto.stack.StackRemoteTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.CheckResourceRightTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.CheckRightTestDto;
@@ -191,7 +192,8 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
                 RenewDistroXCertificateTestDto.class.getSimpleName(),
                 ImageCatalogTestDto.class.getSimpleName(),
                 UsedImagesTestDto.class.getSimpleName(),
-                DistroXChangeImageCatalogTestDto.class.getSimpleName());
+                DistroXChangeImageCatalogTestDto.class.getSimpleName(),
+                StackRemoteTestDto.class.getSimpleName());
     }
 
     @Override

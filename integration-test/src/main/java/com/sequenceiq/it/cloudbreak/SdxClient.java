@@ -17,6 +17,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxChangeImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.dto.stack.StackRemoteTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RenewDatalakeCertificateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.SdxEventTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeWaitObject;
@@ -72,7 +73,8 @@ public class SdxClient extends MicroserviceClient<SdxServiceApiKeyEndpoints, Voi
                 SdxInternalTestDto.class.getSimpleName(),
                 SdxCustomTestDto.class.getSimpleName(),
                 SdxChangeImageCatalogTestDto.class.getSimpleName(),
-                SdxEventTestDto.class.getSimpleName());
+                SdxEventTestDto.class.getSimpleName(),
+                StackRemoteTestDto.class.getSimpleName());
     }
 
     @Override

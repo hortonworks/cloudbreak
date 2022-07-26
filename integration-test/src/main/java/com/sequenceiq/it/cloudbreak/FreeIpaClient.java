@@ -35,6 +35,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeipaChangeImageCatalogTestDto
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeipaUsedImagesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRemoteTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaOperationWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaUserSyncWaitObject;
@@ -131,7 +132,8 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
                 FreeIpaOperationStatusTestDto.class.getSimpleName(),
                 FreeipaChangeImageCatalogTestDto.class.getSimpleName(),
                 FreeIpaUpscaleTestDto.class.getSimpleName(),
-                FreeIpaDownscaleTestDto.class.getSimpleName());
+                FreeIpaDownscaleTestDto.class.getSimpleName(),
+                FreeIpaRemoteTestDto.class.getSimpleName());
     }
 
     @Override
