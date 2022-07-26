@@ -56,7 +56,8 @@ public class StatusCheckerJobService {
 
     public <T> void schedule(JobResourceAdapter<T> resource) {
         JobDetail jobDetail = buildJobDetail(resource);
-        Trigger trigger = buildJobTrigger(jobDetail, resource.getJobResource(), RANDOM.nextInt(statusCheckerConfig.getIntervalInSeconds()),
+        Trigger trigger = buildJobTrigger(jobDetail, resource.getJobResource(),
+                statusCheckerConfig.getSnoozeSeconds() + RANDOM.nextInt(statusCheckerConfig.getIntervalInSeconds()),
                 statusCheckerConfig.getIntervalInSeconds());
         schedule(jobDetail, trigger, resource.getJobResource());
     }

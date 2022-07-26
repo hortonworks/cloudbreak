@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.states;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.LOCAL;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.LOCAL_ASYNC;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.RUNNER;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
@@ -27,15 +26,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -69,6 +73,8 @@ import com.sequenceiq.cloudbreak.service.RetryService;
 
 @ExtendWith(MockitoExtension.class)
 class SaltStateServiceTest {
+
+    private static final String VALID_PATERN = "(.*)-([0-9]+)[a-zA-z]*(\\..*)?";
 
     private SaltConnector saltConnector;
 
@@ -156,17 +162,17 @@ class SaltStateServiceTest {
         Collection<Map<String, String>> hostErrors = jidInfo.get(hostName);
 
         Map<String, String> expectedMap1 = Map.of(
-            "Name", "/opt/ambari-server/ambari-server-init.sh",
-            "Comment", "Source file salt://ambari/scripts/ambari-server-initttt.sh not found");
+                "Name", "/opt/ambari-server/ambari-server-init.sh",
+                "Comment", "Source file salt://ambari/scripts/ambari-server-initttt.sh not found");
         Map<String, String> expectedMap2 = Map.of(
-            "Name", "ambari-server",
-            "Comment", "Service ambari-server is already enabled, and is dead");
+                "Name", "ambari-server",
+                "Comment", "Service ambari-server is already enabled, and is dead");
         Map<String, String> expectedMap3 = Map.of(
-            "Comment", "Command \"/opt/ambari-server/install-mpack-1.sh\" run",
-            "Stderr", "+ ARGS= + echo yes + ambari-server install-mpack --");
+                "Comment", "Command \"/opt/ambari-server/install-mpack-1.sh\" run",
+                "Stderr", "+ ARGS= + echo yes + ambari-server install-mpack --");
         Map<String, String> expectedMap4 = Map.of(
-            "Name", "haveged",
-            "Comment", "Package haveged is already installed.");
+                "Name", "haveged",
+                "Comment", "Package haveged is already installed.");
 
         assertThat(hostErrors, containsInAnyOrder(expectedMap1, expectedMap2, expectedMap3, expectedMap4));
     }
@@ -251,14 +257,14 @@ class SaltStateServiceTest {
         Collection<Map<String, String>> hostErrors = jidInfo.get(hostName);
 
         Map<String, String> expectedMap1 = Map.of(
-            "Name", "/opt/ambari-server/ambari-server-init.sh",
-            "Comment", "Source file salt://ambari/scripts/ambari-server-initttt.sh not found");
+                "Name", "/opt/ambari-server/ambari-server-init.sh",
+                "Comment", "Source file salt://ambari/scripts/ambari-server-initttt.sh not found");
         Map<String, String> expectedMap2 = Map.of(
-            "Name", "ambari-server",
-            "Comment", "Service ambari-server is already enabled, and is dead");
+                "Name", "ambari-server",
+                "Comment", "Service ambari-server is already enabled, and is dead");
         Map<String, String> expectedMap3 = Map.of(
-            "Name", "haveged",
-            "Comment", "Package haveged is already installed.");
+                "Name", "haveged",
+                "Comment", "Package haveged is already installed.");
 
         assertThat(hostErrors, containsInAnyOrder(expectedMap1, expectedMap2, expectedMap3));
     }
@@ -285,15 +291,13 @@ class SaltStateServiceTest {
     void testJobIsRunningReturnsExceptionOnNullResult() throws CloudbreakOrchestratorFailedException {
         RunningJobsResponse runningJobsResponse = new RunningJobsResponse();
         when(saltConnector.run(eq("jobs.active"), any(), eq(RunningJobsResponse.class))).thenReturn(runningJobsResponse);
-        assertThatThrownBy(() -> underTest.jobIsRunning(saltConnector, "1"))
-                .isInstanceOf(CloudbreakOrchestratorFailedException.class);
+        Assertions.assertThrows(CloudbreakOrchestratorFailedException.class, () -> underTest.jobIsRunning(saltConnector, "1"));
     }
 
     @Test
     void testJobIsRunningReturnsExceptionOnNullResponse() throws CloudbreakOrchestratorFailedException {
         when(saltConnector.run(eq("jobs.active"), any(), eq(RunningJobsResponse.class))).thenReturn(null);
-        assertThatThrownBy(() -> underTest.jobIsRunning(saltConnector, "1"))
-                .isInstanceOf(CloudbreakOrchestratorFailedException.class);
+        Assertions.assertThrows(CloudbreakOrchestratorFailedException.class, () -> underTest.jobIsRunning(saltConnector, "1"));
     }
 
     @Test
@@ -387,17 +391,56 @@ class SaltStateServiceTest {
         assertEquals(0, actualResponse.size());
     }
 
+    public static Stream<Arguments> packageVersionPatters() {
+        return Stream.of(
+                //TestCase, ActualVersion, Pattern, Version, BuildNumber
+                Arguments.of("NORMAL_VERSION", "7.5.2-27070447.el7", "(.*)-([0-9]+)[a-zA-z]*(\\..*)?", "7.5.2", "27070447"),
+                Arguments.of("PATCHED_VERSION", "7.5.2-27070447p.el7", "(.*)-([0-9]+)[a-zA-z]*(\\..*)?", "7.5.2", "27070447"),
+                Arguments.of("WILD_VERSION", "7.5.2-27070447psdfsdfsdfsdg.el7", "(.*)-([0-9]+)[a-zA-z]*(\\..*)?", "7.5.2", "27070447"),
+                Arguments.of("NO_PATTERN", "7.5.2-27070447p.el7", null, "7.5.2-27070447p.el7", null),
+                Arguments.of("NORMAL_VERSION_NO_OS", "7.5.2-27070447", "(.*)-([0-9]+)[a-zA-z]*(\\..*)?", "7.5.2", "27070447"),
+                Arguments.of("PATCHED_VERSION_NO_OS", "7.5.2-27070447p", "(.*)-([0-9]+)[a-zA-z]*(\\..*)?", "7.5.2", "27070447"),
+                Arguments.of("WILD_VERSION_NO_OS", "7.5.2-27070447psdfsdfsdfsdg", "(.*)-([0-9]+)[a-zA-z]*(\\..*)?", "7.5.2", "27070447"),
+                Arguments.of("NO_PATTERN_NO_OS", "7.5.2-27070447p", null, "7.5.2-27070447p", null)
+        );
+    }
+
+    @ParameterizedTest(name = "{0}: with actual version {1}, with pattern {2} with version {3}, with build number {4}")
+    @MethodSource("packageVersionPatters")
+    void testGetPackageVersionsWithMorePackages(String testCase, String actualVersion, String pattern, String version, String buildNumber) {
+
+        // GIVEN
+        Map<String, List<PackageInfo>> pkgVersionsOnHosts = new HashMap<>();
+        List<PackageInfo> pkgVersionsOnHost1 = new ArrayList<>();
+        pkgVersionsOnHost1.add(new PackageInfo("package2", version, buildNumber));
+        pkgVersionsOnHosts.put("host1", pkgVersionsOnHost1);
+
+        Map<String, String> pkgVersionsOnHost1Resp = new HashMap<>();
+        pkgVersionsOnHost1Resp.put("host1", actualVersion);
+        PackageVersionResponse resp1 = new PackageVersionResponse();
+        resp1.setResult(Lists.newArrayList(pkgVersionsOnHost1Resp));
+        when(saltConnector.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, "package2")).thenReturn(resp1);
+
+        Map<String, Optional<String>> packages = new HashMap<>();
+        packages.put("package2", Objects.isNull(pattern) ? Optional.empty() : Optional.of(pattern));
+
+        // WHEN
+        Map<String, List<PackageInfo>> actualResponse = underTest.getPackageVersions(saltConnector, packages);
+        // THEN
+        assertEquals(pkgVersionsOnHosts, actualResponse);
+    }
+
     @Test
     void testGetPackageVersionsWithMorePackages() {
         // GIVEN
         Map<String, List<PackageInfo>> pkgVersionsOnHosts = new HashMap<>();
         List<PackageInfo> pkgVersionsOnHost1 = new ArrayList<>();
         pkgVersionsOnHost1.add(new PackageInfo("package1", "1.0"));
-        pkgVersionsOnHost1.add(new PackageInfo("package2", "2.0", "3.0A13466743"));
+        pkgVersionsOnHost1.add(new PackageInfo("package2", "2.0", "3"));
         pkgVersionsOnHosts.put("host1", pkgVersionsOnHost1);
         List<PackageInfo> pkgVersionsOnHost2 = new ArrayList<>();
         pkgVersionsOnHost2.add(new PackageInfo("package1", "2.0"));
-        pkgVersionsOnHost2.add(new PackageInfo("package2", "3.0", "3.0A13466743"));
+        pkgVersionsOnHost2.add(new PackageInfo("package2", "7.5.2", "27070447"));
         pkgVersionsOnHosts.put("host2", pkgVersionsOnHost2);
 
         Map<String, String> pkgVersionsOnHost1Resp = new HashMap<>();
@@ -405,7 +448,7 @@ class SaltStateServiceTest {
         pkgVersionsOnHost1Resp.put("host2", "2.0");
         Map<String, String> pkgVersionsOnHost2Resp = new HashMap<>();
         pkgVersionsOnHost2Resp.put("host1", "2.0-3.0A13466743");
-        pkgVersionsOnHost2Resp.put("host2", "3.0-3.0A13466743");
+        pkgVersionsOnHost2Resp.put("host2", "7.5.2-27070447p");
         PackageVersionResponse resp1 = new PackageVersionResponse();
         resp1.setResult(Lists.newArrayList(pkgVersionsOnHost1Resp));
         PackageVersionResponse resp2 = new PackageVersionResponse();
@@ -415,7 +458,7 @@ class SaltStateServiceTest {
 
         Map<String, Optional<String>> packages = new HashMap<>();
         packages.put("package1", Optional.empty());
-        packages.put("package2", Optional.of("(.*)-(.*)"));
+        packages.put("package2", Optional.of(VALID_PATERN));
 
         // WHEN
         Map<String, List<PackageInfo>> actualResponse = underTest.getPackageVersions(saltConnector, packages);
@@ -432,7 +475,7 @@ class SaltStateServiceTest {
 
         Map<String, Optional<String>> packages = new HashMap<>();
         packages.put("package1", Optional.empty());
-        packages.put("package2", Optional.of("(.*)-(.*)"));
+        packages.put("package2", Optional.of(VALID_PATERN));
 
         // WHEN
         Map<String, List<PackageInfo>> actualResponse = underTest.getPackageVersions(saltConnector, packages);
@@ -449,7 +492,7 @@ class SaltStateServiceTest {
         try {
             Map<String, Optional<String>> packages = new HashMap<>();
             packages.put("package1", Optional.empty());
-            packages.put("package2", Optional.of("(.*)-(.*)"));
+            packages.put("package2", Optional.of(VALID_PATERN));
 
             underTest.getPackageVersions(saltConnector, packages);
         } catch (RuntimeException ex) {
