@@ -75,6 +75,9 @@ public class InstanceMetaDataService {
     private ResourceRetriever resourceRetriever;
 
     @Inject
+    private StackDtoService stackDtoService;
+
+    @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public void updateInstanceStatuses(Collection<Long> instanceIds, InstanceStatus newStatus,
@@ -114,7 +117,8 @@ public class InstanceMetaDataService {
         Map<String, String> subnetAzPairs = multiAzCalculatorService.prepareSubnetAzMap(environment);
         String stackSubnetId = getStackSubnetIdIfExists(stack);
         String stackAz = stackSubnetId == null ? null : subnetAzPairs.get(stackSubnetId);
-        long privateId = getFirstValidPrivateId(stack.getInstanceGroupDtos());
+        List<InstanceGroupDto> allInstanceMetadataByInstanceGroup = stackDtoService.getInstanceMetadataByInstanceGroup(stack.getId());
+        long privateId = getFirstValidPrivateId(allInstanceMetadataByInstanceGroup);
         List<InstanceGroupDto> instanceGroupDtos = stack.getInstanceGroupDtos();
         for (Map.Entry<String, Integer> hostGroupWithInstanceCount : hostGroupsWithInstanceCountToCreate.entrySet()) {
             String hostGroup = hostGroupWithInstanceCount.getKey();
