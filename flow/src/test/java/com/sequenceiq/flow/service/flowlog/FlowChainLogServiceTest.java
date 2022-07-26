@@ -1,9 +1,9 @@
 package com.sequenceiq.flow.service.flowlog;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -13,20 +13,23 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cedarsoftware.util.io.JsonWriter;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
 
-@RunWith(MockitoJUnitRunner.class)
-public class FlowChainLogServiceTest {
+@ExtendWith(MockitoExtension.class)
+class FlowChainLogServiceTest {
 
     private static final String FLOWCHAIN_PARENT_SUFFIX = "Parent";
 
@@ -39,7 +42,7 @@ public class FlowChainLogServiceTest {
     private FlowChainLogRepository flowLogRepository;
 
     @Test
-    public void testFindAllFlowChainsInTree() {
+    void testFindAllFlowChainsInTree() {
         FlowChainLog flowChainLogA = flowChainLog("A", NO_PARENT, 1);
         FlowChainLog flowChainLogB = flowChainLog("B", flowChainLogA.getFlowChainId(), 2);
         FlowChainLog flowChainLogC = flowChainLog("C", flowChainLogA.getFlowChainId(), 3);
@@ -56,7 +59,7 @@ public class FlowChainLogServiceTest {
     }
 
     @Test
-    public void testFindAllLatestFlowChainsInTree() {
+    void testFindAllLatestFlowChainsInTree() {
         FlowChainLog flowChainLogA = flowChainLog("A", NO_PARENT, 1);
         FlowChainLog flowChainLogB = flowChainLog("B", flowChainLogA.getFlowChainId(), 2);
         FlowChainLog flowChainLogC = flowChainLog("C", flowChainLogA.getFlowChainId(), 3);
@@ -73,57 +76,60 @@ public class FlowChainLogServiceTest {
         assertEquals(List.of(flowChainLogA, flowChainLogB, flowChainLogC, flowChainLogD, flowChainLogES2), result);
     }
 
-    @Test
-    public void testCheckIfThereIsEventInQueues() {
+    @ParameterizedTest(name = "use Jackson = {0}")
+    @ValueSource(booleans = { false, true })
+    void testCheckIfThereIsEventInQueues(boolean useJackson) {
         List<FlowChainLog> flowChains = List.of(
-                flowChainLog("1", true, 1L),
-                flowChainLog("1", true, 2L),
-                flowChainLog("2", true, 1L),
-                flowChainLog("2", false, 2L)
+                flowChainLog("1", true, 1L, useJackson),
+                flowChainLog("1", true, 2L, useJackson),
+                flowChainLog("2", true, 1L, useJackson),
+                flowChainLog("2", false, 2L, useJackson)
         );
         assertTrue(underTest.hasEventInFlowChainQueue(flowChains));
     }
 
-    @Test
-    public void testCheckIfThereIsNoEventInQueues() {
+    @ParameterizedTest(name = "use Jackson = {0}")
+    @ValueSource(booleans = { false, true })
+    void testCheckIfThereIsNoEventInQueues(boolean useJackson) {
         List<FlowChainLog> flowChains = List.of(
-                flowChainLog("1", true, 1L),
-                flowChainLog("1", false, 2L),
-                flowChainLog("2", true, 1L),
-                flowChainLog("2", false, 2L)
+                flowChainLog("1", true, 1L, useJackson),
+                flowChainLog("1", false, 2L, useJackson),
+                flowChainLog("2", true, 1L, useJackson),
+                flowChainLog("2", false, 2L, useJackson)
         );
         assertFalse(underTest.hasEventInFlowChainQueue(flowChains));
     }
 
-    @Test
-    public void testCheckIfThereIsEventInQueuesBasedOnlatestChains() {
+    @ParameterizedTest(name = "use Jackson = {0}")
+    @ValueSource(booleans = { false, true })
+    void testCheckIfThereIsEventInQueuesBasedOnlatestChains(boolean useJackson) {
         List<FlowChainLog> flowChains = List.of(
-                flowChainLog("1", false, 1L),
-                flowChainLog("1", true, 2L),
-                flowChainLog("2", false, 1L),
-                flowChainLog("2", true, 2L)
+                flowChainLog("1", false, 1L, useJackson),
+                flowChainLog("1", true, 2L, useJackson),
+                flowChainLog("2", false, 1L, useJackson),
+                flowChainLog("2", true, 2L, useJackson)
         );
         assertTrue(underTest.hasEventInFlowChainQueue(flowChains));
     }
 
     @Test
-    public void testFlowTypeEmpty() {
+    void testFlowTypeEmpty() {
         String flowChainType = underTest.getFlowChainType(null);
-        assertNull("For null input the flowChainType must be null", flowChainType);
+        assertNull(flowChainType, "For null input the flowChainType must be null");
     }
 
     @Test
-    public void testFlowChainLogWhichIsEmpty() {
+    void testFlowChainLogWhichIsEmpty() {
         // This is mainly for flows launched before 2.39
         FlowChainLog flowChainLog = new FlowChainLog();
         when(flowLogRepository.findFirstByFlowChainIdOrderByCreatedDesc(any()))
                 .thenReturn(Optional.of(flowChainLog));
         String flowChainType = underTest.getFlowChainType("chainId");
-        assertNull("For empty flowChainLog the reurn must be null", flowChainType);
+        assertNull(flowChainType, "For empty flowChainLog the reurn must be null");
     }
 
     @Test
-    public void testFlowChainLogWithFlowChainType() {
+    void testFlowChainLogWithFlowChainType() {
         // This is mainly for flows launched before 2.39
         FlowChainLog flowChainLog = new FlowChainLog();
         flowChainLog.setFlowChainType("flowChainType");
@@ -134,7 +140,7 @@ public class FlowChainLogServiceTest {
     }
 
     @Test
-    public void testIsFlowTriggeredByFlowChain() {
+    void testIsFlowTriggeredByFlowChain() {
         FlowLogWithoutPayload flowLog = mock(FlowLogWithoutPayload.class);
         when(flowLog.getFlowChainId()).thenReturn("chainId");
         FlowChainLog flowChainLog = new FlowChainLog();
@@ -164,17 +170,20 @@ public class FlowChainLogServiceTest {
                 .thenReturn(children);
     }
 
-    private FlowChainLog flowChainLog(String flowChanId, boolean hasEventInQueue, Long created) {
+    private FlowChainLog flowChainLog(String flowChanId, boolean hasEventInQueue, Long created, boolean useJackson) {
         FlowChainLog flowChainLog = flowChainLog(flowChanId, flowChanId + FLOWCHAIN_PARENT_SUFFIX, created);
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         if (hasEventInQueue) {
             flowEventChain.add(new TestEvent());
         }
         flowChainLog.setChain(JsonWriter.objectToJson(flowEventChain));
+        if (useJackson) {
+            flowChainLog.setChainJackson(TypedJsonUtil.writeValueAsStringSilent(flowEventChain));
+        }
         return flowChainLog;
     }
 
-    public static class TestEvent implements Selectable {
+    static class TestEvent implements Selectable {
 
         @Override
         public String selector() {

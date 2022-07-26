@@ -1,29 +1,31 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cedarsoftware.util.io.JsonWriter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
@@ -39,10 +41,8 @@ import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.FlowCancelService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class TerminationTriggerServiceTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TerminationTriggerServiceTest.class);
+@ExtendWith(MockitoExtension.class)
+class TerminationTriggerServiceTest {
 
     @Mock
     private KerberosConfigService kerberosConfigService;
@@ -62,18 +62,19 @@ public class TerminationTriggerServiceTest {
     @InjectMocks
     private TerminationTriggerService underTest;
 
-    @Before
-    public void init() {
-        when(applicationFlowInformation.getTerminationFlow()).thenReturn(List.of(StackTerminationFlowConfig.class, ClusterTerminationFlowConfig.class));
+    @BeforeEach
+    void init() {
+        lenient().when(applicationFlowInformation.getTerminationFlow())
+                .thenReturn(List.of(StackTerminationFlowConfig.class, ClusterTerminationFlowConfig.class));
     }
 
-    @After
-    public void validateCancelOldterminationFlowsCalled() {
+    @AfterEach
+    void validateCancelOldterminationFlowsCalled() {
         verify(flowCancelService).cancelTooOldTerminationFlowForResource(anyLong(), anyString());
     }
 
     @Test
-    public void whenStackNotDeletedAndNoFlowLogAndKerbAndNotForcedShouldTerminate() {
+    void whenStackNotDeletedAndNoFlowLogAndKerbAndNotForcedShouldTerminate() {
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of());
         setupKerberized();
 
@@ -83,7 +84,7 @@ public class TerminationTriggerServiceTest {
     }
 
     @Test
-    public void whenStackNotDeletedAndNoFlowLogAndNotKerbAndNotForcedShouldTerminate() {
+    void whenStackNotDeletedAndNoFlowLogAndNotKerbAndNotForcedShouldTerminate() {
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of());
         setupNotKerberized();
 
@@ -93,7 +94,7 @@ public class TerminationTriggerServiceTest {
     }
 
     @Test
-    public void whenStackNotDeletedAndNoFlowLogAndKerbAndForcedShouldTerminate() {
+    void whenStackNotDeletedAndNoFlowLogAndKerbAndForcedShouldTerminate() {
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of());
         setupKerberized();
 
@@ -103,7 +104,7 @@ public class TerminationTriggerServiceTest {
     }
 
     @Test
-    public void whenStackNotDeletedAndNoFlowLogAndNotKerbAndForcedShouldTerminate() {
+    void whenStackNotDeletedAndNoFlowLogAndNotKerbAndForcedShouldTerminate() {
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of());
         setupNotKerberized();
 
@@ -113,7 +114,7 @@ public class TerminationTriggerServiceTest {
     }
 
     @Test
-    public void whenStackNotDeletedAndNotTerminationFlowLogAndKerbAndNotForcedShouldTerminate() {
+    void whenStackNotDeletedAndNotTerminationFlowLogAndKerbAndNotForcedShouldTerminate() {
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowType(ClassValue.of(StackCreationFlowConfig.class));
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(flowLog));
@@ -125,7 +126,7 @@ public class TerminationTriggerServiceTest {
     }
 
     @Test
-    public void whenStackNotDeletedAndNotTerminationFlowLogAndKerbAndForcedShouldTerminate() {
+    void whenStackNotDeletedAndNotTerminationFlowLogAndKerbAndForcedShouldTerminate() {
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowType(ClassValue.of(StackCreationFlowConfig.class));
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(flowLog));
@@ -137,7 +138,7 @@ public class TerminationTriggerServiceTest {
     }
 
     @Test
-    public void whenStackNotDeletedAndNotTerminationFlowLogAndNotKerbAndNotForcedShouldTerminate() {
+    void whenStackNotDeletedAndNotTerminationFlowLogAndNotKerbAndNotForcedShouldTerminate() {
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowType(ClassValue.of(StackCreationFlowConfig.class));
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(flowLog));
@@ -149,7 +150,7 @@ public class TerminationTriggerServiceTest {
     }
 
     @Test
-    public void whenStackNotDeletedAndNotTerminationFlowLogAndNotKerbAndForcedShouldTerminate() {
+    void whenStackNotDeletedAndNotTerminationFlowLogAndNotKerbAndForcedShouldTerminate() {
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowType(ClassValue.of(StackCreationFlowConfig.class));
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(flowLog));
@@ -160,36 +161,40 @@ public class TerminationTriggerServiceTest {
         verifyTerminationEventFired(false, true, false);
     }
 
-    @Test
-    public void whenStackNotDeletedAndNotForcedTerminationFlowLogAndNotForcedShouldNotTerminate() {
-        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(getTerminationFlowLog(false)));
+    @ParameterizedTest(name = "use Jackson = {0}")
+    @ValueSource(booleans = { false, true })
+    void whenStackNotDeletedAndNotForcedTerminationFlowLogAndNotForcedShouldNotTerminate(boolean useJackson) {
+        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(getTerminationFlowLog(false, useJackson)));
 
         underTest.triggerTermination(getAvailableStack(), false);
 
         verifyNoTerminationEventFired();
     }
 
-    @Test
-    public void whenStackNotDeletedAndForcedTerminationFlowLogAndNotForcedShouldNotTerminate() {
-        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(getTerminationFlowLog(true)));
+    @ParameterizedTest(name = "use Jackson = {0}")
+    @ValueSource(booleans = { false, true })
+    void whenStackNotDeletedAndForcedTerminationFlowLogAndNotForcedShouldNotTerminate(boolean useJackson) {
+        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(getTerminationFlowLog(true, useJackson)));
 
         underTest.triggerTermination(getAvailableStack(), false);
 
         verifyNoTerminationEventFired();
     }
 
-    @Test
-    public void whenStackNotDeletedAndForcedTerminationFlowLogAndForcedShouldNotTerminate() {
-        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(getTerminationFlowLog(true)));
+    @ParameterizedTest(name = "use Jackson = {0}")
+    @ValueSource(booleans = { false, true })
+    void whenStackNotDeletedAndForcedTerminationFlowLogAndForcedShouldNotTerminate(boolean useJackson) {
+        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(getTerminationFlowLog(true, useJackson)));
 
         underTest.triggerTermination(getAvailableStack(), true);
 
         verifyNoTerminationEventFired();
     }
 
-    @Test
-    public void whenStackNotDeletedAndNotForcedTerminationFlowLogAndForcedShouldTerminate() {
-        FlowLog flowLog = getTerminationFlowLog(false);
+    @ParameterizedTest(name = "use Jackson = {0}")
+    @ValueSource(booleans = { false, true })
+    void whenStackNotDeletedAndNotForcedTerminationFlowLogAndForcedShouldTerminate(boolean useJackson) {
+        FlowLog flowLog = getTerminationFlowLog(false, useJackson);
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(flowLog));
         setupKerberized();
 
@@ -200,7 +205,7 @@ public class TerminationTriggerServiceTest {
     }
 
     @Test
-    public void whenStackDeletedShouldNotTerminate() {
+    void whenStackDeletedShouldNotTerminate() {
         Stack stack = stackWithStatus(Status.DELETE_COMPLETED);
         stack.setTerminated(2L);
 
@@ -210,7 +215,7 @@ public class TerminationTriggerServiceTest {
     }
 
     @Test
-    public void whenStackDeletedButTerminationDateDidNotSetThenItShouldTerminate() {
+    void whenStackDeletedButTerminationDateDidNotSetThenItShouldTerminate() {
         Stack stack = stackWithStatus(Status.DELETE_COMPLETED);
 
         underTest.triggerTermination(stack, true);
@@ -219,7 +224,7 @@ public class TerminationTriggerServiceTest {
     }
 
     @Test
-    public void whenStackStoppedAndSecureThenItShouldTerminate() {
+    void whenStackStoppedAndSecureThenItShouldTerminate() {
         Stack stack = stackWithStatus(Status.STOP_REQUESTED);
 
         underTest.triggerTermination(stack, false);
@@ -228,7 +233,7 @@ public class TerminationTriggerServiceTest {
     }
 
     @Test
-    public void whenStackStoppedAndNotSecureThenItShouldTerminate() {
+    void whenStackStoppedAndNotSecureThenItShouldTerminate() {
         Stack stack = stackWithStatus(Status.STOP_REQUESTED);
 
         underTest.triggerTermination(stack, false);
@@ -282,12 +287,15 @@ public class TerminationTriggerServiceTest {
         when(kerberosConfigService.isKerberosConfigExistsForEnvironment(anyString(), anyString())).thenReturn(Boolean.FALSE);
     }
 
-    private FlowLog getTerminationFlowLog(boolean forced) {
+    private FlowLog getTerminationFlowLog(boolean forced, boolean useJackson) {
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowType(ClassValue.of(StackTerminationFlowConfig.class));
         flowLog.setCurrentState("INIT_STATE");
         TerminationEvent event = new TerminationEvent("selector", 1L, forced ? TerminationType.FORCED : TerminationType.REGULAR);
         flowLog.setPayload(JsonWriter.objectToJson(event));
+        if (useJackson) {
+            flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(event));
+        }
         flowLog.setPayloadType(ClassValue.of(TerminationEvent.class));
         return flowLog;
     }

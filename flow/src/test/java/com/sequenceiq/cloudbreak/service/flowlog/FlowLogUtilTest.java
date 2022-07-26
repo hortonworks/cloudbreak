@@ -1,23 +1,29 @@
 package com.sequenceiq.cloudbreak.service.flowlog;
 
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 
-public class FlowLogUtilTest {
+class FlowLogUtilTest {
 
     @Test
-    public void getLastSuccessfulStateLog() {
+    void getLastSuccessfulStateLog() {
         List<FlowLog> flowLogs = new ArrayList<>();
 
         FlowLog successfulFlowLog1 = new FlowLog();
@@ -52,7 +58,7 @@ public class FlowLogUtilTest {
     }
 
     @Test
-    public void getMostRecentFailedLog() {
+    void getMostRecentFailedLog() {
         List<FlowLog> flowLogs = new ArrayList<>();
 
         FlowLog successfulFlowLog1 = new FlowLog();
@@ -93,7 +99,7 @@ public class FlowLogUtilTest {
     }
 
     @Test
-    public void isFlowPending() {
+    void isFlowPending() {
         List<FlowLog> flowLogs = new ArrayList<>();
 
         FlowLog successfulFlowLog1 = new FlowLog();
@@ -139,7 +145,7 @@ public class FlowLogUtilTest {
     }
 
     @Test
-    public void isFlowPendingButNoPending() {
+    void isFlowPendingButNoPending() {
         List<FlowLog> flowLogs = new ArrayList<>();
 
         FlowLog successfulFlowLog1 = new FlowLog();
@@ -176,5 +182,100 @@ public class FlowLogUtilTest {
         flowLogs.add(failedFlowLog);
 
         assertFalse(FlowLogUtil.getPendingFlowLog(flowLogs).isPresent());
+    }
+
+    @ParameterizedTest(name = "use Jackson = {0}")
+    @ValueSource(booleans = { false, true })
+    void testTryDeserializeTriggerEvent(boolean useJackson) {
+        FlowChainLog flowChainLog = getFlowChainLog(useJackson);
+        Payload payload = FlowLogUtil.tryDeserializeTriggerEvent(flowChainLog);
+        assertEquals("triggerEvent" + (useJackson ? "Jackson" : "") + "Value", ((SimplePayload) payload).getKey());
+    }
+
+    @Test
+    void testTryDeserializeTriggerEventAllNull() {
+        FlowChainLog flowChainLog = new FlowChainLog("type", "id", "parentId", null, null, "userCrn", null, null);
+        Payload payload = FlowLogUtil.tryDeserializeTriggerEvent(flowChainLog);
+        assertNull(payload);
+    }
+
+    @Test
+    void testTryDeserializeTriggerEventContainsGarbage() {
+        FlowChainLog flowChainLog = new FlowChainLog("type", "id", "parentId", "garbage", "garbage", "userCrn", "garbage", "garbage");
+        Payload payload = FlowLogUtil.tryDeserializeTriggerEvent(flowChainLog);
+        assertNull(payload);
+    }
+
+    private static FlowChainLog getFlowChainLog(boolean useJackson) {
+        return new FlowChainLog("type", "id", "parentId", "any", "any", "userCrn",
+                "{\"@type\":\"" + SimplePayload.class.getName() + "\",\"key\":\"triggerEventValue\"}",
+                useJackson
+                    ? "{\"@type\":\"" + SimplePayload.class.getName() + "\",\"key\":\"triggerEventJacksonValue\"}"
+                    : null);
+    }
+
+    @ParameterizedTest(name = "use Jackson = {0}")
+    @ValueSource(booleans = { false, true })
+    void testTryDeserializePayload(boolean useJackson) {
+        FlowLog flowLog = getFlowLog(useJackson);
+        Payload payload = FlowLogUtil.tryDeserializePayload(flowLog);
+        assertEquals("payload" + (useJackson ? "Jackson" : "") + "Value", ((SimplePayload) payload).getKey());
+    }
+
+    @Test
+    void testTryDeserializePayloadAllNull() {
+        FlowLog flowLog = new FlowLog(123L, "flowId", "chainId", "userCrn", "nextEvent", null, null,
+                com.sequenceiq.flow.domain.ClassValue.of(SimplePayload.class), null, null,
+                com.sequenceiq.flow.domain.ClassValue.ofUnknown("unknown"), "currentState");
+        Payload payload = FlowLogUtil.tryDeserializePayload(flowLog);
+        assertNull(payload);
+    }
+
+    @Test
+    void testTryDeserializePayloadContainsGarbage() {
+        FlowLog flowLog = new FlowLog(123L, "flowId", "chainId", "userCrn", "nextEvent",
+                "garbage", "garbage",
+                com.sequenceiq.flow.domain.ClassValue.of(SimplePayload.class),
+                "garbage", "garbage",
+                com.sequenceiq.flow.domain.ClassValue.ofUnknown("unknown"), "currentState");
+        Payload payload = FlowLogUtil.tryDeserializePayload(flowLog);
+        assertNull(payload);
+    }
+
+    private static FlowLog getFlowLog(boolean useJackson) {
+        return new FlowLog(123L, "flowId", "chainId", "userCrn", "nextEvent",
+                "{\"@type\":\"" + SimplePayload.class.getName() + "\",\"key\":\"payloadValue\"}",
+                useJackson
+                        ? "{\"@type\":\"" + SimplePayload.class.getName() + "\",\"key\":\"payloadJacksonValue\"}"
+                        : null,
+                com.sequenceiq.flow.domain.ClassValue.of(SimplePayload.class),
+                "any", "any",
+                com.sequenceiq.flow.domain.ClassValue.ofUnknown("unknown"), "currentState");
+    }
+
+    static class SimplePayload implements Payload {
+
+        private final String key;
+
+        @JsonCreator
+        SimplePayload(@JsonProperty("key") String key) {
+            this.key = key;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        @Override
+        public Long getResourceId() {
+            return 123L;
+        }
+
+        @Override
+        public String toString() {
+            return "Simple{" +
+                    "key='" + key + '\'' +
+                    '}';
+        }
     }
 }
