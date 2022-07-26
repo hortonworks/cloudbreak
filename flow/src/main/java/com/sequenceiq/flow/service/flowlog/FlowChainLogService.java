@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import com.cedarsoftware.util.io.JsonReader;
 import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
@@ -105,7 +106,13 @@ public class FlowChainLogService {
                     .get();
             LOGGER.debug("Checking if chain with id {} has any event in it's queue", latestFlowChain.getFlowChainId());
             LOGGER.trace("Chain string in db: {}", latestFlowChain.getChain());
-            Queue<Selectable> chain = (Queue<Selectable>) JsonReader.jsonToJava(latestFlowChain.getChain());
+            Queue<Selectable> chain;
+            if (null != latestFlowChain.getChainJackson()) {
+                chain = (Queue<Selectable>) TypedJsonUtil.readValueWithJsonIoFallback(
+                        latestFlowChain.getChainJackson(), latestFlowChain.getChain(), Queue.class);
+            } else {
+                chain = (Queue<Selectable>) JsonReader.jsonToJava(latestFlowChain.getChain());
+            }
             return !chain.isEmpty();
         });
     }

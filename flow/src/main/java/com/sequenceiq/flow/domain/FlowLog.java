@@ -39,11 +39,17 @@ public class FlowLog {
     @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT")
     private String payload;
 
+    @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT")
+    private String payloadJackson;
+
     @Convert(converter = ClassValueConverter.class)
     private ClassValue payloadType;
 
     @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT")
     private String variables;
+
+    @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT")
+    private String variablesJackson;
 
     @Convert(converter = ClassValueConverter.class)
     private ClassValue flowType;
@@ -92,8 +98,10 @@ public class FlowLog {
             String flowTriggerUserCrn,
             String nextEvent,
             String payload,
+            String payloadJackson,
             ClassValue payloadType,
             String variables,
+            String variablesJackson,
             ClassValue flowType,
             String currentState) {
         this.resourceId = resourceId;
@@ -102,8 +110,10 @@ public class FlowLog {
         this.flowTriggerUserCrn = flowTriggerUserCrn;
         this.nextEvent = nextEvent;
         this.payload = payload;
+        this.payloadJackson = payloadJackson;
         this.payloadType = payloadType;
         this.variables = variables;
+        this.variablesJackson = variablesJackson;
         this.flowType = flowType;
         this.currentState = currentState;
     }
@@ -250,6 +260,22 @@ public class FlowLog {
 
     public void setOperationType(OperationType operationType) {
         this.operationType = operationType;
+    }
+
+    public String getPayloadJackson() {
+        return payloadJackson;
+    }
+
+    public void setPayloadJackson(String payloadJackson) {
+        this.payloadJackson = payloadJackson;
+    }
+
+    public String getVariablesJackson() {
+        return variablesJackson;
+    }
+
+    public void setVariablesJackson(String variablesJackson) {
+        this.variablesJackson = variablesJackson;
     }
 
     public String minimizedString() {

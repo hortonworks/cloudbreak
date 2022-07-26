@@ -496,7 +496,9 @@ public class FlowComponentTest {
                 "userCrn",
                 "NEXT_EVENT",
                 "payload",
+                "payload",
                 ClassValue.ofUnknown("nope.NopePayload"),
+                "variables",
                 "variables",
                 ClassValue.ofUnknown("nope.NopeFlowType"),
                 "CURRENT_STATE");

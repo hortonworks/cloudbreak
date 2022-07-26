@@ -37,6 +37,7 @@ dependencies {
   implementation group: 'io.projectreactor',                     name: 'reactor-stream',                 version: eventBusVersion
   implementation group: 'org.mybatis',                           name: 'mybatis-migrations',             version: mybatisMigrationVersion
   implementation group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.datatype',        name: 'jackson-datatype-jdk8',          version: jacksonVersion
   implementation group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   api group: 'net.jcip',                              name: 'jcip-annotations',               version: '1.0'
   api group: 'com.github.spotbugs',                   name: 'spotbugs-annotations',           version: '4.4.2'
@@ -85,6 +86,7 @@ dependencies {
   api group: 'org.springframework.security',        name: 'spring-security-jwt',              version: '1.0.8.RELEASE'
   api group: 'org.springframework.security',        name: 'spring-security-core',             version: springSecurityVersion
   api group: 'org.springframework.security',        name: 'spring-security-config',           version: springSecurityVersion
+  implementation group: 'com.cedarsoftware',        name: 'json-io',                          version: '4.9.12'
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test',       version: springBootVersion
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: springBootVersion

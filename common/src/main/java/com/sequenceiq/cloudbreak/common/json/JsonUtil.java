@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cedarsoftware.util.io.JsonReader;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 
 import net.sf.json.JSONObject;
 
@@ -39,6 +41,7 @@ public class JsonUtil {
         MAPPER.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
         MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false);
         MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        MAPPER.registerModule(new Jdk8Module());
     }
 
     private JsonUtil() {
@@ -112,7 +115,7 @@ public class JsonUtil {
                 }
                 return MAPPER.writeValueAsString(object);
             } catch (JsonProcessingException e) {
-                LOGGER.info("JSON parse went wrong in silent mode: {}", e.getMessage());
+                LOGGER.warn("JSON serialization went wrong in silent mode: {}", e.getMessage());
             }
         }
         return null;
@@ -168,6 +171,26 @@ public class JsonUtil {
             return true;
         } catch (IOException ignore) {
             return false;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T readValueWithJsonIoFallback(String jackson, String jsonio, Class<T> valueType) {
+        try {
+            return readValue(jackson, valueType);
+        } catch (IOException e) {
+            LOGGER.error("Failed to deserialize with Jackson, falling back to json-io. JSON: {}", jackson, e);
+            return (T) JsonReader.jsonToJava(jsonio);
+        }
+    }
+
+    public static void checkReadability(String jackson, Class<?> valueType) {
+        if (jackson != null) {
+            try {
+                readValue(jackson, valueType);
+            } catch (IOException e) {
+                LOGGER.error("Failed to deserialize with Jackson: {}", jackson, e);
+            }
         }
     }
 }

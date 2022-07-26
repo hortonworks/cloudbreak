@@ -29,6 +29,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
@@ -49,6 +51,8 @@ import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.flow.api.model.operation.OperationType;
@@ -78,7 +82,7 @@ import reactor.bus.Event.Headers;
 import reactor.rx.Promise;
 
 @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
-public class Flow2HandlerTest {
+class Flow2HandlerTest {
 
     private static final String FLOW_ID = "flowId";
 
@@ -189,7 +193,7 @@ public class Flow2HandlerTest {
     private final Payload payload = () -> 1L;
 
     @BeforeEach
-    public void setUp() throws TransactionExecutionException {
+    void setUp() throws TransactionExecutionException {
         underTest = new Flow2Handler();
         MockitoAnnotations.initMocks(this);
         Map<String, Object> headers = new HashMap<>();
@@ -209,7 +213,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testNewFlow() {
+    void testNewFlow() {
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(flowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
@@ -227,7 +231,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testFlowCanNotBeSaved() {
+    void testFlowCanNotBeSaved() {
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(flowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
@@ -249,7 +253,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testFlowRejectedBecauseNotTriggerable() {
+    void testFlowRejectedBecauseNotTriggerable() {
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(flowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
@@ -278,7 +282,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testFlowSkippedBecauseNotTriggerable() {
+    void testFlowSkippedBecauseNotTriggerable() {
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(flowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
@@ -305,7 +309,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testNewSyncFlowMaintenanceActive() {
+    void testNewSyncFlowMaintenanceActive() {
         HelloWorldFlowConfig helloWorldFlowConfig = mock(HelloWorldFlowConfig.class);
         given(helloWorldFlowConfig.getFlowTriggerCondition()).willReturn(new DefaultFlowTriggerCondition());
 
@@ -327,7 +331,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testNewFlowButNotHandled() {
+    void testNewFlowButNotHandled() {
         Event<Payload> event = new Event<>(payload);
         event.setKey("KEY");
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.accept(event));
@@ -338,7 +342,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testExistingFlow() {
+    void testExistingFlow() {
         FlowLog lastFlowLog = mock(FlowLog.class);
         Optional<FlowLog> flowLogOptional = Optional.of(lastFlowLog);
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
@@ -360,7 +364,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testFinalizedFlow() {
+    void testFinalizedFlow() {
         FlowLog lastFlowLog = mock(FlowLog.class);
         Optional<FlowLog> flowLogOptional = Optional.of(lastFlowLog);
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
@@ -382,7 +386,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testChangedNodeId() {
+    void testChangedNodeId() {
         FlowLog lastFlowLog = mock(FlowLog.class);
         Optional<FlowLog> flowLogOptional = Optional.of(lastFlowLog);
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
@@ -402,7 +406,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testExistingFlowRepeatedState() {
+    void testExistingFlowRepeatedState() {
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(runningFlows.get(anyString())).willReturn(flow);
         given(flow.getCurrentState()).willReturn(flowState);
@@ -424,7 +428,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testExistingFlowNotFound() {
+    void testExistingFlowNotFound() {
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);
@@ -433,7 +437,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testFlowFinalFlowNotChained() throws TransactionExecutionException {
+    void testFlowFinalFlowNotChained() throws TransactionExecutionException {
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         dummyEvent.setKey(FlowConstants.FLOW_FINAL);
         underTest.accept(dummyEvent);
@@ -446,7 +450,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testFlowFinalFlowChained() throws TransactionExecutionException {
+    void testFlowFinalFlowChained() throws TransactionExecutionException {
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         dummyEvent.setKey(FlowConstants.FLOW_FINAL);
         dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_ID, FLOW_CHAIN_ID);
@@ -461,7 +465,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testFlowChainFailureOnNotTriggerableFlowCreatesFailedFlow() throws TransactionExecutionException {
+    void testFlowChainFailureOnNotTriggerableFlowCreatesFailedFlow() throws TransactionExecutionException {
         Map<String, Object> headers = new HashMap<>();
         headers.put(FlowConstants.FLOW_CHAIN_ID, FLOW_CHAIN_ID);
         headers.put(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN);
@@ -484,7 +488,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testFlowChainSkipOnNotTriggerableFlowCreatesFinishedFlow() throws TransactionExecutionException {
+    void testFlowChainSkipOnNotTriggerableFlowCreatesFinishedFlow() throws TransactionExecutionException {
         Map<String, Object> headers = new HashMap<>();
         headers.put(FlowConstants.FLOW_CHAIN_ID, FLOW_CHAIN_ID);
         headers.put(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN);
@@ -506,7 +510,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testFlowFinalFlowFailedNoChain() throws TransactionExecutionException {
+    void testFlowFinalFlowFailedNoChain() throws TransactionExecutionException {
         given(flow.isFlowFailed()).willReturn(Boolean.TRUE);
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         dummyEvent.setKey(FlowConstants.FLOW_FINAL);
@@ -521,7 +525,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testFlowFinalFlowFailedWithChain() throws TransactionExecutionException {
+    void testFlowFinalFlowFailedWithChain() throws TransactionExecutionException {
         given(flow.isFlowFailed()).willReturn(Boolean.TRUE);
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         dummyEvent.setKey(FlowConstants.FLOW_FINAL);
@@ -537,7 +541,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testCancelRunningFlows() throws TransactionExecutionException {
+    void testCancelRunningFlows() throws TransactionExecutionException {
         given(flowLogService.findAllRunningNonTerminationFlowIdsByStackId(anyLong())).willReturn(Collections.singleton(FLOW_ID));
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         given(runningFlows.getFlowChainId(eq(FLOW_ID))).willReturn(FLOW_CHAIN_ID);
@@ -548,7 +552,7 @@ public class Flow2HandlerTest {
     }
 
     @Test
-    public void testRestartFlowNotRestartable() throws TransactionExecutionException {
+    void testRestartFlowNotRestartable() throws TransactionExecutionException {
         FlowLog flowLog = new FlowLog(STACK_ID, FLOW_ID, "START_STATE", true, StateStatus.SUCCESSFUL, OperationType.UNKNOWN);
         flowLog.setFlowType(ClassValue.of(String.class));
         flowLog.setPayloadType(ClassValue.of(TestPayload.class));
@@ -558,12 +562,16 @@ public class Flow2HandlerTest {
         verify(flowLogService, times(1)).terminate(STACK_ID, FLOW_ID);
     }
 
-    @Test
-    public void testRestartFlow() throws TransactionExecutionException {
-        FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID);
+    @ParameterizedTest(name = "use Jackson = {0}")
+    @ValueSource(booleans = { false, true })
+    void testRestartFlow(boolean useJackson) throws TransactionExecutionException {
+        FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID, useJackson);
         Payload payload = new TestPayload(STACK_ID);
         flowLog.setPayloadType(ClassValue.of(TestPayload.class));
         flowLog.setPayload(JsonWriter.objectToJson(payload));
+        if (useJackson) {
+            flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(payload));
+        }
         when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
 
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
@@ -590,12 +598,16 @@ public class Flow2HandlerTest {
         assertEquals(FLOW_TRIGGER_USERCRN, flowParameters.getFlowTriggerUserCrn());
     }
 
-    @Test
-    public void testRestartFlowNoRestartAction() throws TransactionExecutionException {
-        FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID);
+    @ParameterizedTest(name = "use Jackson = {0}")
+    @ValueSource(booleans = { false, true })
+    void testRestartFlowNoRestartAction(boolean useJackson) throws TransactionExecutionException {
+        FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID, useJackson);
         Payload payload = new TestPayload(STACK_ID);
         flowLog.setPayloadType(ClassValue.of(TestPayload.class));
         flowLog.setPayload(JsonWriter.objectToJson(payload));
+        if (useJackson) {
+            flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(payload));
+        }
         when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
 
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
@@ -612,12 +624,16 @@ public class Flow2HandlerTest {
         verify(defaultRestartAction, never()).restart(any(), any(), any(), any());
     }
 
-    @Test
-    public void testRestartFlowNoRestartActionNoFlowChainId() throws TransactionExecutionException {
-        FlowLog flowLog = createFlowLog(null);
+    @ParameterizedTest(name = "use Jackson = {0}")
+    @ValueSource(booleans = { false, true })
+    void testRestartFlowNoRestartActionNoFlowChainId(boolean useJackson) throws TransactionExecutionException {
+        FlowLog flowLog = createFlowLog(null, useJackson);
         Payload payload = new TestPayload(STACK_ID);
         flowLog.setPayloadType(ClassValue.of(TestPayload.class));
         flowLog.setPayload(JsonWriter.objectToJson(payload));
+        if (useJackson) {
+            flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(payload));
+        }
         when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
 
@@ -633,10 +649,13 @@ public class Flow2HandlerTest {
         verify(defaultRestartAction, never()).restart(any(), any(), any(), any());
     }
 
-    private FlowLog createFlowLog(String flowChainId) {
+    private FlowLog createFlowLog(String flowChainId, boolean useJackson) {
         FlowLog flowLog = new FlowLog(STACK_ID, FLOW_ID, "START_STATE", true, StateStatus.SUCCESSFUL, OperationType.UNKNOWN);
         flowLog.setFlowType(ClassValue.of(HelloWorldFlowConfig.class));
         flowLog.setVariables(JsonWriter.objectToJson(new HashMap<>()));
+        if (useJackson) {
+            flowLog.setVariablesJackson(TypedJsonUtil.writeValueAsStringSilent(new HashMap<>()));
+        }
         flowLog.setFlowChainId(flowChainId);
         flowLog.setNextEvent(NEXT_EVENT);
         flowLog.setFlowTriggerUserCrn(FLOW_TRIGGER_USERCRN);

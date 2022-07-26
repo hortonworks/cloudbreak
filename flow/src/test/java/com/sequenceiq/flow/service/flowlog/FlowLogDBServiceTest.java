@@ -1,6 +1,10 @@
 package com.sequenceiq.flow.service.flowlog;
 
-import static org.junit.Assert.assertEquals;
+import static com.sequenceiq.flow.core.FlowConstants.FINISHED_STATE;
+import static com.sequenceiq.flow.core.FlowConstants.TERMINATED_STATE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -25,14 +29,13 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
 import org.assertj.core.util.Lists;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -42,7 +45,10 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -59,20 +65,21 @@ import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 
-@RunWith(MockitoJUnitRunner.class)
-public class FlowLogDBServiceTest {
+@ExtendWith(MockitoExtension.class)
+class FlowLogDBServiceTest {
 
     private static final String FLOW_ID = "flowId";
 
-    private static final long ID = 1L;
+    private static final long ID = 123L;
+
+    private static final Long DATABASE_ID = 234L;
+
+    private static final String NODE_ID = "node1";
 
     private static final String CLOUDBREAK_STACK_CRN = CrnTestUtil.getDatalakeCrnBuilder()
             .setAccountId("acc")
             .setResource("stack")
             .build().toString();
-
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private FlowLogDBService underTest;
@@ -92,13 +99,16 @@ public class FlowLogDBServiceTest {
     @Mock
     private NodeConfig nodeConfig;
 
+    @Captor
+    private ArgumentCaptor<FlowLog> savedFlowLogCaptor;
+
     @Test
-    public void updateLastFlowLogStatus() {
+    void updateLastFlowLogStatus() {
         runUpdateLastFlowLogStatusTest(false, StateStatus.SUCCESSFUL);
     }
 
     @Test
-    public void updateLastFlowLogStatusFailure() {
+    void updateLastFlowLogStatusFailure() {
         runUpdateLastFlowLogStatusTest(true, StateStatus.FAILED);
     }
 
@@ -112,9 +122,9 @@ public class FlowLogDBServiceTest {
     }
 
     @Test
-    public void getLastFlowLog() {
+    void getLastFlowLog() {
         FlowLogWithoutPayload flowLog = mock(FlowLogWithoutPayload.class);
-        Page<FlowLogWithoutPayload> flowLogOptional = new PageImpl(List.of(flowLog));
+        Page<FlowLogWithoutPayload> flowLogOptional = new PageImpl<>(List.of(flowLog));
 
         when(flowLogRepository.findByFlowIdOrderByCreatedDesc(FLOW_ID, Pageable.ofSize(1))).thenReturn(flowLogOptional);
 
@@ -123,11 +133,11 @@ public class FlowLogDBServiceTest {
     }
 
     @Test
-    public void updateLastFlowLogPayload() {
+    void updateLastFlowLogPayload() {
         FlowLog flowLog = new FlowLog();
         flowLog.setId(ID);
 
-        Payload payload = mock(Selectable.class);
+        Payload payload = new TestSelectable();
         Map<Object, Object> variables = Map.of("repeated", 2);
 
         underTest.updateLastFlowLogPayload(flowLog, payload, variables);
@@ -140,12 +150,16 @@ public class FlowLogDBServiceTest {
 
         String payloadJson = JsonWriter.objectToJson(payload, Map.of());
         String variablesJson = JsonWriter.objectToJson(variables, Map.of());
+        String payloadJackson = JsonUtil.writeValueAsStringSilent(payload);
+        String variablesJackson = TypedJsonUtil.writeValueAsStringSilent(variables);
         assertEquals(payloadJson, savedFlowLog.getPayload());
         assertEquals(variablesJson, savedFlowLog.getVariables());
+        assertEquals(payloadJackson, savedFlowLog.getPayloadJackson());
+        assertEquals(variablesJackson, savedFlowLog.getVariablesJackson());
     }
 
     @Test
-    public void testGetResourceIdIfTheInputIsCrn() {
+    void testGetResourceIdIfTheInputIsCrn() {
         when(resourceIdProvider.getResourceIdByResourceCrn(anyString())).thenReturn(1L);
 
         underTest.getResourceIdByCrnOrName(CLOUDBREAK_STACK_CRN);
@@ -155,7 +169,7 @@ public class FlowLogDBServiceTest {
     }
 
     @Test
-    public void testGetResourceIdIfTheInputIsNotCrn() {
+    void testGetResourceIdIfTheInputIsNotCrn() {
         when(resourceIdProvider.getResourceIdByResourceName(anyString())).thenReturn(1L);
 
         underTest.getResourceIdByCrnOrName("stackName");
@@ -165,7 +179,7 @@ public class FlowLogDBServiceTest {
     }
 
     @Test
-    public void testGetFlowLogs() {
+    void testGetFlowLogs() {
         when(resourceIdProvider.getResourceIdByResourceCrn(anyString())).thenReturn(1L);
         when(flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(anyLong())).thenReturn(Optional.of(createFlowLog("1")));
         when(flowLogRepository.findAllByFlowIdOrderByCreatedDesc(anyString())).thenReturn(Lists.newArrayList(new FlowLog()));
@@ -177,24 +191,23 @@ public class FlowLogDBServiceTest {
     }
 
     @Test
-    public void testGetFlowLogsWithChainId() {
+    void testGetFlowLogsWithChainId() {
         when(flowLogRepository.findAllByFlowIdsCreatedDesc(any())).thenReturn(List.of(createFlowLog("flow")));
 
         assertEquals(1, underTest.getFlowLogsByFlowIdsCreatedDesc(Set.of("flowchain")).size());
     }
 
     @Test
-    public void testGetLastFlowLogWhenThereIsNoFlow() {
+    void testGetLastFlowLogWhenThereIsNoFlow() {
         when(resourceIdProvider.getResourceIdByResourceCrn(anyString())).thenReturn(1L);
 
-        thrown.expect(NotFoundException.class);
-        thrown.expectMessage("Flow log for resource not found!");
-
-        underTest.getLastFlowLogByResourceCrnOrName(CLOUDBREAK_STACK_CRN);
+        assertThatThrownBy(() -> underTest.getLastFlowLogByResourceCrnOrName(CLOUDBREAK_STACK_CRN))
+                .hasMessage("Flow log for resource not found!")
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test
-    public void testGetLastFlowLog() {
+    void testGetLastFlowLog() {
         when(resourceIdProvider.getResourceIdByResourceCrn(anyString())).thenReturn(1L);
         when(flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(anyLong())).thenReturn(Optional.of(createFlowLog("1")));
         when(flowLogRepository.findAllByFlowIdOrderByCreatedDesc(anyString())).thenReturn(Lists.newArrayList(createFlowLog("1"), createFlowLog("2")));
@@ -206,7 +219,7 @@ public class FlowLogDBServiceTest {
     }
 
     @Test
-    public void cancelTooOldTerminationFlowForResourceTest() throws TransactionService.TransactionExecutionException {
+    void cancelTooOldTerminationFlowForResourceTest() throws TransactionService.TransactionExecutionException {
         Set<FlowLogIdWithTypeAndTimestamp> flowLogs = new LinkedHashSet<>();
         FlowLogIdWithTypeAndTimestamp flowLog2 = mock(FlowLogIdWithTypeAndTimestamp.class);
         when(flowLog2.getFlowType()).thenReturn(ClassValue.of(Class.class));
@@ -222,7 +235,7 @@ public class FlowLogDBServiceTest {
         when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(eq("flow1"))).thenReturn(Optional.of(realFlowLog1));
         when(applicationFlowInformation.getTerminationFlow()).thenReturn(Collections.singletonList(TerminationFlowConfig.class));
         when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> ((Supplier) invocation.getArguments()[0]).get());
-        when(nodeConfig.getId()).thenReturn("node1");
+        when(nodeConfig.getId()).thenReturn(NODE_ID);
         underTest.cancelTooOldTerminationFlowForResource(1L, 10000L);
         verify(flowLogRepository).finalizeByFlowId(eq("flow1"));
         verify(flowLogRepository, times(0)).finalizeByFlowId(eq("flow2"));
@@ -230,7 +243,7 @@ public class FlowLogDBServiceTest {
     }
 
     @Test
-    public void doNotCancelTooYoungTerminationFlowForResourceTest() {
+    void doNotCancelTooYoungTerminationFlowForResourceTest() {
         Set<FlowLogIdWithTypeAndTimestamp> flowLogs = new HashSet<>();
         FlowLogIdWithTypeAndTimestamp flowLog1 = mock(FlowLogIdWithTypeAndTimestamp.class);
         when(flowLog1.getFlowType()).thenReturn(ClassValue.of(TerminationFlowConfig.class));
@@ -248,32 +261,67 @@ public class FlowLogDBServiceTest {
     }
 
     @Test
-    public void testNoPendingFlowEvent() {
+    void testNoPendingFlowEvent() {
         Boolean actual = underTest.hasPendingFlowEvent(Lists.newArrayList(createFlowLog(false, "1"), createFlowLog(false, "2")));
         assertEquals(Boolean.FALSE, actual);
     }
 
     @Test
-    public void testHasPendingFlowEvent() {
+    void testHasPendingFlowEvent() {
         Boolean actual = underTest.hasPendingFlowEvent(Lists.newArrayList(createFlowLog(true, "1"), createFlowLog(false, "2")));
         assertEquals(Boolean.TRUE, actual);
     }
 
     @Test
-    public void testTerminate() throws TransactionService.TransactionExecutionException {
-        Long resourceId = 1L;
-        Long flowDatabaseId = 2L;
-        when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> ((Supplier) invocation.getArguments()[0]).get());
-        FlowLog lastFlowLog = new FlowLog(resourceId, FLOW_ID, "currentState", false, StateStatus.SUCCESSFUL, OperationType.UNKNOWN);
-        lastFlowLog.setId(flowDatabaseId);
-        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(lastFlowLog));
+    void testTerminate() throws TransactionExecutionException {
+        prepareFinalization();
+        FlowLog flowLog = underTest.terminate(ID, FLOW_ID);
 
-        FlowLog flowLog = underTest.terminate(resourceId, FLOW_ID);
-
-        verify(flowLogRepository).finalizeByFlowId(FLOW_ID);
-        verify(flowLogRepository).updateLastLogStatusInFlow(flowDatabaseId, StateStatus.SUCCESSFUL);
-        verify(flowLogRepository).save(any());
+        verifyFinalization();
         verify(applicationFlowInformation).handleFlowFail(flowLog);
+        FlowLog savedFlowLog = savedFlowLogCaptor.getValue();
+        assertThat(savedFlowLog.getResourceId()).isEqualTo(ID);
+        assertThat(savedFlowLog.getFlowId()).isEqualTo(FLOW_ID);
+        assertThat(savedFlowLog.getCurrentState()).isEqualTo(TERMINATED_STATE);
+        assertThat(savedFlowLog.getFinalized()).isTrue();
+        assertThat(savedFlowLog.getStateStatus()).isEqualTo(StateStatus.SUCCESSFUL);
+        assertThat(savedFlowLog.getOperationType()).isEqualTo(OperationType.DIAGNOSTICS);
+        assertThat(savedFlowLog.getCloudbreakNodeId()).isEqualTo(NODE_ID);
+        assertThat(savedFlowLog.getVariables()).isNull();
+        assertThat(savedFlowLog.getVariablesJackson()).isNull();
+    }
+
+    @Test
+    void testClose() throws TransactionExecutionException {
+        prepareFinalization();
+        Map<Object, Object> params = Map.of("param1", StateStatus.SUCCESSFUL, "param2", 234L, "param3", "true");
+        underTest.close(ID, FLOW_ID, false, params);
+
+        verifyFinalization();
+        FlowLog savedFlowLog = savedFlowLogCaptor.getValue();
+        assertThat(savedFlowLog.getResourceId()).isEqualTo(ID);
+        assertThat(savedFlowLog.getFlowId()).isEqualTo(FLOW_ID);
+        assertThat(savedFlowLog.getCurrentState()).isEqualTo(FINISHED_STATE);
+        assertThat(savedFlowLog.getFinalized()).isTrue();
+        assertThat(savedFlowLog.getStateStatus()).isEqualTo(StateStatus.SUCCESSFUL);
+        assertThat(savedFlowLog.getOperationType()).isEqualTo(OperationType.DIAGNOSTICS);
+        assertThat(savedFlowLog.getCloudbreakNodeId()).isEqualTo(NODE_ID);
+        assertThat(savedFlowLog.getVariables()).isEqualTo(JsonWriter.objectToJson(params));
+        assertThat(savedFlowLog.getVariablesJackson()).isEqualTo(TypedJsonUtil.writeValueAsStringSilent(params));
+    }
+
+    private void prepareFinalization() throws TransactionExecutionException {
+        when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> ((Supplier) invocation.getArguments()[0]).get());
+        FlowLog lastFlowLog = new FlowLog(ID, FLOW_ID, "currentState", false, StateStatus.SUCCESSFUL, OperationType.DIAGNOSTICS);
+        lastFlowLog.setId(DATABASE_ID);
+        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(lastFlowLog));
+        when(nodeConfig.getId()).thenReturn(NODE_ID);
+    }
+
+    private void verifyFinalization() {
+        verify(flowLogRepository).finalizeByFlowId(FLOW_ID);
+        verify(flowLogRepository).updateLastLogStatusInFlow(DATABASE_ID, StateStatus.SUCCESSFUL);
+        verify(flowLogRepository).save(savedFlowLogCaptor.capture());
     }
 
     private FlowLog createFlowLog(boolean pending, String flowId) {
@@ -394,6 +442,19 @@ public class FlowLogDBServiceTest {
 
         public TestEntity getEntity() {
             return entity;
+        }
+    }
+
+    private static class TestSelectable implements Selectable {
+
+        @Override
+        public String selector() {
+            return "selector";
+        }
+
+        @Override
+        public Long getResourceId() {
+            return ID;
         }
     }
 }

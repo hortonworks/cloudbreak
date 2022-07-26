@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
@@ -78,11 +79,15 @@ public class FlowLogUtil {
     }
 
     public static Payload tryDeserializeTriggerEvent(FlowChainLog flowChainLog) {
-        if (null == flowChainLog.getTriggerEvent()) {
+        if (null == flowChainLog.getTriggerEvent() && null == flowChainLog.getTriggerEventJackson()) {
             return null;
         } else {
             try {
-                return (Payload) JsonReader.jsonToJava(flowChainLog.getTriggerEvent());
+                if (null != flowChainLog.getTriggerEventJackson()) {
+                    return JsonUtil.readValueWithJsonIoFallback(flowChainLog.getTriggerEventJackson(), flowChainLog.getTriggerEvent(), Payload.class);
+                } else {
+                    return (Payload) JsonReader.jsonToJava(flowChainLog.getTriggerEvent());
+                }
             } catch (Exception exception) {
                 LOGGER.warn("Couldn't deserialize trigger event from flow chain log {}", flowChainLog);
                 return null;
@@ -91,11 +96,16 @@ public class FlowLogUtil {
     }
 
     public static Payload tryDeserializePayload(FlowLog flowLog) {
-        if (null == flowLog.getPayload()) {
+        if (null == flowLog.getPayload() && null == flowLog.getPayloadJackson()) {
             return null;
         } else {
             try {
-                return (Payload) JsonReader.jsonToJava(flowLog.getPayload());
+                if (null != flowLog.getPayloadJackson()) {
+                    return JsonUtil.readValueWithJsonIoFallback(flowLog.getPayloadJackson(), flowLog.getPayload(), Payload.class);
+                } else {
+                    return (Payload) JsonReader.jsonToJava(flowLog.getPayload());
+                }
+
             } catch (Exception exception) {
                 LOGGER.warn("Couldn't deserialize payload from flow log {}", flowLog);
                 return null;
