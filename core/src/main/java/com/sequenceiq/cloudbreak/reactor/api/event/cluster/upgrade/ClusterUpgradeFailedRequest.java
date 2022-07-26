@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
-public class ClusterUpgradeFailedCmSyncRequest extends StackEvent {
+public class ClusterUpgradeFailedRequest extends StackEvent {
 
     private final Exception exception;
 
@@ -17,7 +17,7 @@ public class ClusterUpgradeFailedCmSyncRequest extends StackEvent {
     private final Set<Image> candidateImages;
 
     @JsonCreator
-    public ClusterUpgradeFailedCmSyncRequest(
+    public ClusterUpgradeFailedRequest(
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("exception") Exception exception,
             @JsonProperty("detailedStatus") DetailedStackStatus detailedStackStatus,

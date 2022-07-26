@@ -33,7 +33,8 @@ public class NodeStatusService {
         try (CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance())) {
             return client.nodeStatusReport(request);
         } catch (CdpNodeStatusMonitorClientException e) {
-            throw new CloudbreakServiceException("Could not get node status report from stack.");
+            LOGGER.warn("Node status report failed", e);
+            throw new CloudbreakServiceException("Could not get node status report from stack, reason: " + e.getMessage());
         }
     }
 
@@ -43,7 +44,8 @@ public class NodeStatusService {
         try (CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance())) {
             return client.nodeMeteringReport();
         } catch (CdpNodeStatusMonitorClientException e) {
-            throw new CloudbreakServiceException("Could not get metering report from stack.");
+            LOGGER.warn("Node metering report failed", e);
+            throw new CloudbreakServiceException("Could not get metering report from stack, reason: " + e.getMessage());
         }
     }
 
@@ -56,7 +58,8 @@ public class NodeStatusService {
         try (CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance())) {
             return client.nodeNetworkReport();
         } catch (CdpNodeStatusMonitorClientException e) {
-            throw new CloudbreakServiceException("Could not get network report from stack.");
+            LOGGER.warn("Node network report failed", e);
+            throw new CloudbreakServiceException("Could not get network report from stack, reason: " + e.getMessage());
         }
     }
 
@@ -70,7 +73,8 @@ public class NodeStatusService {
         try (CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance())) {
             return client.nodeServicesReport();
         } catch (CdpNodeStatusMonitorClientException e) {
-            throw new CloudbreakServiceException("Could not get services report from stack.");
+            LOGGER.warn("Node services report failed", e);
+            throw new CloudbreakServiceException("Could not get services report from stack, reason: " + e.getMessage());
         }
     }
 
@@ -85,7 +89,8 @@ public class NodeStatusService {
         try (CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance())) {
             return client.saltPing(false, false);
         } catch (CdpNodeStatusMonitorClientException e) {
-            throw new CloudbreakServiceException("Could not get salt ping report from stack.");
+            LOGGER.warn("Node salt ping failed", e);
+            throw new CloudbreakServiceException("Could not get salt ping report from stack, reason: " + e.getMessage());
         }
     }
 
