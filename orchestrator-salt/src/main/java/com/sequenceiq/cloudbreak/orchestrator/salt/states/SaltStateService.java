@@ -296,8 +296,8 @@ public class SaltStateService {
 
     public Map<String, List<PackageInfo>> getPackageVersions(SaltConnector sc, Map<String, Optional<String>> packages) {
         Map<String, List<PackageInfo>> packageVersions = new HashMap<>();
-            packages.forEach((key, value) -> {
-                Map<String, PackageInfo> singlePackageVersion = getSinglePackageVersion(sc, key, value);
+            packages.forEach((key, versionPattern) -> {
+                Map<String, PackageInfo> singlePackageVersion = getSinglePackageVersion(sc, key, versionPattern);
                 singlePackageVersion.entrySet().forEach(entry -> addToVersionList(packageVersions, entry));
             });
             return packageVersions;
@@ -417,7 +417,7 @@ public class SaltStateService {
             Matcher matcher = Pattern.compile(pattern.get()).matcher(versionCommandOutput);
             if (matcher.matches()) {
                 packageInfo.setVersion(matcher.group(1));
-                if (matcher.groupCount() == 2) {
+                if (matcher.groupCount() > 1) {
                     packageInfo.setBuildNumber(matcher.group(2));
                 }
             }

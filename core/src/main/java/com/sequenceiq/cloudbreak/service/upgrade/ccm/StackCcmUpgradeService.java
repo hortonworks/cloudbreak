@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.ccm;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.UPGRADE_CCM_CHAIN_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATAHUB_UPGRADE_CCM_ALREADY_UPGRADED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATAHUB_UPGRADE_CCM_ERROR_ENVIRONMENT_IS_NOT_LATEST;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATAHUB_UPGRADE_CCM_NOT_AVAILABLE;
@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmTriggerRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -103,9 +103,10 @@ public class StackCcmUpgradeService {
 
     private StackCcmUpgradeV4Response triggerCcmUpgradeFlow(Stack stack) {
         Cluster cluster = stack.getCluster();
-        String selector = UPGRADE_CCM_EVENT.event();
-        FlowIdentifier triggeredFlow = reactorNotifier.notify(stack.getId(), selector, new UpgradeCcmTriggerRequest(stack.getId(),
-                Optional.ofNullable(cluster).map(Cluster::getId).orElse(null), stack.getTunnel()));
+        String selector = UPGRADE_CCM_CHAIN_TRIGGER_EVENT;
+        UpgradeCcmFlowChainTriggerEvent event = new UpgradeCcmFlowChainTriggerEvent(selector, stack.getId(),
+                Optional.ofNullable(cluster).map(Cluster::getId).orElse(null), stack.getTunnel());
+        FlowIdentifier triggeredFlow = reactorNotifier.notify(stack.getId(), selector, event);
 
         return new StackCcmUpgradeV4Response(CcmUpgradeResponseType.TRIGGERED, triggeredFlow, null, stack.getResourceCrn());
     }
