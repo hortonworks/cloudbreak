@@ -77,8 +77,14 @@ public class SaltCheckerConclusionStep extends ConclusionStep {
         } catch (NodesUnreachableException e) {
             Set<String> unreachableNodes = e.getUnreachableNodes();
             String conclusion = String.format("Unreachable nodes: %s. We detected that cluster members can’t communicate with each other. " +
-                            "Please validate if all cluster members are available and healthy through your cloud provider.", unreachableNodes);
+                    "Please validate if all cluster members are available and healthy through your cloud provider.", unreachableNodes);
             String details = String.format("Unreachable salt minions: %s", unreachableNodes);
+            LOGGER.warn(details);
+            return failed(conclusion, details);
+        } catch (Exception e) {
+            String conclusion = String.format("Can't collect reachable and unreachable nodes. " +
+                    "Please validate if all cluster members are available and healthy through your cloud provider.");
+            String details = String.format("Can't collect reachable and unreachable nodes. Reason: %s", e.getMessage());
             LOGGER.warn(details);
             return failed(conclusion, details);
         }
