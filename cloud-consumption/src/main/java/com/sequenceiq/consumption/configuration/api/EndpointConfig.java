@@ -2,6 +2,7 @@ package com.sequenceiq.consumption.configuration.api;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.ext.ExceptionMapper;
 
@@ -39,12 +40,12 @@ public class EndpointConfig extends ResourceConfig {
 
     private final String applicationVersion;
 
-    private final Boolean auditEnabled;
+    private final boolean auditEnabled;
 
     private final List<ExceptionMapper<?>> exceptionMappers;
 
     public EndpointConfig(@Value("${info.app.version:unspecified}") String applicationVersion,
-            @Value("${consumption.structuredevent.rest.enabled}") Boolean auditEnabled,
+            @Value("${consumption.structuredevent.rest.enabled:true}") boolean auditEnabled,
             List<ExceptionMapper<?>> exceptionMappers,
             ServerTracingDynamicFeature serverTracingDynamicFeature,
             ClientTracingFeature clientTracingFeature) {
@@ -59,6 +60,7 @@ public class EndpointConfig extends ResourceConfig {
         register(clientTracingFeature);
     }
 
+    @PostConstruct
     private void registerSwagger() {
         BeanConfig swaggerConfig = new BeanConfig();
         swaggerConfig.setTitle("Consumption API");
