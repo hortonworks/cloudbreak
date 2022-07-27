@@ -168,23 +168,6 @@ public class StackUtil {
         return nodeReachabilityResult;
     }
 
-    public Set<Node> collectNodesFromHostnames(Stack stack, Set<String> hostnames) {
-        Set<Node> agents = new HashSet<>();
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            if (instanceGroup.getNodeCount() != 0) {
-                for (InstanceMetaData im : instanceGroup.getReachableInstanceMetaDataSet()) {
-                    if (im.getDiscoveryFQDN() != null && hostnames.contains(im.getDiscoveryFQDN())) {
-                        String instanceId = im.getInstanceId();
-                        String instanceType = instanceGroup.getTemplate().getInstanceType();
-                        agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), instanceId, instanceType,
-                                im.getDiscoveryFQDN(), im.getInstanceGroupName()));
-                    }
-                }
-            }
-        }
-        return agents;
-    }
-
     public Set<Node> collectNodesWithDiskData(Stack stack) {
         return collectNewNodesWithDiskData(stack, Set.of());
     }
