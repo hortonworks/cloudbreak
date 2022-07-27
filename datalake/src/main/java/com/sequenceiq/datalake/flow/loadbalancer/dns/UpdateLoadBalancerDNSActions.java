@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
+import com.sequenceiq.datalake.flow.chain.DatalakeResizeFlowEventChainFactory;
 import com.sequenceiq.datalake.flow.loadbalancer.dns.event.StartUpdateLoadBalancerDNSEvent;
 import com.sequenceiq.datalake.flow.loadbalancer.dns.event.UpdateLoadBalancerDNSFailedEvent;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
@@ -27,8 +28,12 @@ import com.sequenceiq.datalake.service.loadbalancer.dns.UpdateLoadBalancerDNSSer
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.domain.FlowChainLog;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
+import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
 @Configuration
 public class UpdateLoadBalancerDNSActions {
@@ -45,6 +50,12 @@ public class UpdateLoadBalancerDNSActions {
 
     @Inject
     private EventSenderService eventSenderService;
+
+    @Inject
+    private FlowLogService flowLogService;
+
+    @Inject
+    private FlowChainLogService flowChainLogService;
 
     @Bean(name = "UPDATE_LOAD_BALANCER_DNS_STATE")
     public Action<?, ?> updateLoadBalancerDNSAction() {
@@ -64,7 +75,18 @@ public class UpdateLoadBalancerDNSActions {
                 updateLoadBalancerDNSService.performLoadBalancerDNSUpdate(sdxCluster);
                 LOGGER.info("Successfully updated the load balancer DNS for cluster {}.", sdxCluster.getClusterName());
                 eventSenderService.notifyEvent(sdxCluster, context, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_FINISHED);
+                sendNotificationInCaseOfResizeRecovery(context, sdxCluster);
                 sendEvent(context, UPDATE_LOAD_BALANCER_DNS_SUCCESS_EVENT.event(), payload);
+            }
+
+            private void sendNotificationInCaseOfResizeRecovery(SdxContext context, SdxCluster sdxCluster) {
+                Optional<FlowLogWithoutPayload> lastFlowLog = flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId());
+                if (lastFlowLog.isPresent()) {
+                    Optional<FlowChainLog> flowChainLog = flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(lastFlowLog.get().getFlowChainId());
+                    if (flowChainLog.isPresent() && flowChainLog.get().getFlowChainType().equals(DatalakeResizeFlowEventChainFactory.class.getSimpleName())) {
+                        eventSenderService.sendEventAndNotification(sdxCluster, context.getUserId(), ResourceEvent.DATALAKE_RECOVERY_FINISHED);
+                    }
+                }
             }
 
             @Override

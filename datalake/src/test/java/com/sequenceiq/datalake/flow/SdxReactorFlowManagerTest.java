@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.flow;
 
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.preparation.DatalakeUpgradePreparationEvent.DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT;
+import static com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent.SDX_RESIZE_FLOW_CHAIN_START_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmStateSelectors.UPGRADE_CCM_UPGRADE_STACK_EVENT;
 import static com.sequenceiq.flow.api.model.FlowType.FLOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,8 +27,10 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
@@ -77,6 +80,9 @@ class SdxReactorFlowManagerTest {
     private SdxReactorFlowManager underTest;
 
     private SdxCluster sdxCluster;
+
+    @Mock
+    private EventSenderService eventSenderService;
 
     @Mock
     private Promise<AcceptResult> acceptResultPromise;
@@ -154,10 +160,17 @@ class SdxReactorFlowManagerTest {
     @Test
     public void testTriggerDatalakeRuntimeUpgradePreparationFlow() {
         FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerDatalakeRuntimeUpgradePreparationFlow(sdxCluster, IMAGE_ID));
-
         verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT.event()), any(Event.class));
         assertEquals(FLOW, result.getType());
         assertEquals("flowId", result.getPollableId());
+    }
+
+    @Test
+    void testTriggerSdxResizeEventSend() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerSdxResize(sdxCluster.getId(), sdxCluster));
+        verify(eventSenderService, times(1)).sendEventAndNotification(eq(sdxCluster), eq(USER_CRN), eq(ResourceEvent.DATALAKE_RESIZE_TRIGGERED));
+        verify(reactor, times(1)).notify(eq(SDX_RESIZE_FLOW_CHAIN_START_EVENT), any(Event.class));
     }
 
     private SdxCluster getValidSdxCluster() {
