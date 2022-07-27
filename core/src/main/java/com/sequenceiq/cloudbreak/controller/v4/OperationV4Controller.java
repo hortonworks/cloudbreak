@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATALAKE;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATAHUB;
 
 import org.springframework.stereotype.Controller;
 
@@ -20,7 +20,7 @@ public class OperationV4Controller implements OperationV4Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
     public OperationView getOperationProgressByResourceCrn(@ResourceCrn String resourceCrn, boolean detailed) {
         return operationService.getOperationProgressByResourceCrn(resourceCrn, detailed);
     }
