@@ -18,6 +18,8 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.datalake.recovery.event.DatalakeRecoveryCouldNotStartEvent;
@@ -27,6 +29,7 @@ import com.sequenceiq.datalake.flow.datalake.recovery.event.DatalakeRecoverySucc
 import com.sequenceiq.datalake.flow.datalake.recovery.event.DatalakeRecoveryWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.SdxRecoveryService;
+import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -43,6 +46,12 @@ public class DatalakeUpgradeRecoveryActions {
     @Inject
     private SdxStatusService sdxStatusService;
 
+    @Inject
+    private EventSenderService eventSenderService;
+
+    @Inject
+    private SdxService sdxService;
+
     @Bean(name = "DATALAKE_RECOVERY_START_STATE")
     public Action<?, ?> datalakeRecoveryStart() {
         return new AbstractSdxAction<>(DatalakeRecoveryStartEvent.class) {
@@ -55,6 +64,8 @@ public class DatalakeUpgradeRecoveryActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeRecoveryStartEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Datalake recovery has been started for {}", payload.getResourceId());
+                SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
+                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_RECOVERY_STARTED);
                 sdxRecoveryService.recoverCluster(payload.getResourceId());
                 sendEvent(context, DATALAKE_RECOVERY_IN_PROGRESS_EVENT.event(), payload);
             }
@@ -78,6 +89,8 @@ public class DatalakeUpgradeRecoveryActions {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Datalake recovery is in progress for {}", payload.getResourceId());
+                SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
+                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_RECOVERY_IN_PROGRESS);
                 sendEvent(context, DatalakeRecoveryWaitRequest.from(context));
             }
 
@@ -101,6 +114,8 @@ public class DatalakeUpgradeRecoveryActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeRecoverySuccessEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Sdx recovery was finalized with sdx id: {}", payload.getResourceId());
+                SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
+                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_RECOVERY_FINISHED);
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_RECOVERY_FINISHED,
