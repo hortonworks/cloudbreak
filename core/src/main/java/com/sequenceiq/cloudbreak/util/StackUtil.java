@@ -127,8 +127,8 @@ public class StackUtil {
         return agents;
     }
 
-    public NodeReachabilityResult collectReachableAndUnreachableCandidateNodes(StackDto stack, Set<String> necessaryNodes) {
-        NodeReachabilityResult nodeReachabilityResult = collectReachableAndUnreachableNodes(stack, necessaryNodes);
+    public NodeReachabilityResult collectReachableAndUnreachableCandidateNodes(StackDto stack, Collection<String> necessaryNodes) {
+        NodeReachabilityResult nodeReachabilityResult = collectReachableAndUnreachableNodes(stack);
         Set<Node> reachableCandidateNodes = nodeReachabilityResult.getReachableNodes().stream()
                 .filter(node -> necessaryNodes.contains(node.getHostname()))
                 .collect(Collectors.toSet());
@@ -158,12 +158,13 @@ public class StackUtil {
     }
 
     public Set<Node> collectReachableNodes(StackDto stackDto) {
-        return hostOrchestrator.getResponsiveNodes(collectNodes(stackDto), gatewayConfigService.getPrimaryGatewayConfig(stackDto), false).getReachableNodes();
+        return hostOrchestrator.getResponsiveNodes(collectNodes(stackDto, emptySet()), gatewayConfigService.getPrimaryGatewayConfig(stackDto))
+                .getReachableNodes();
     }
 
-    public NodeReachabilityResult collectReachableAndUnreachableNodes(StackDto stackDto, Set<String> targets) {
-        NodeReachabilityResult nodeReachabilityResult = hostOrchestrator.getResponsiveNodes(collectNodes(stackDto, targets),
-                gatewayConfigService.getPrimaryGatewayConfig(stackDto), true);
+    public NodeReachabilityResult collectReachableAndUnreachableNodes(StackDto stack) {
+        NodeReachabilityResult nodeReachabilityResult = hostOrchestrator.getResponsiveNodes(collectNodes(stack, emptySet()),
+                gatewayConfigService.getPrimaryGatewayConfig(stack));
         LOGGER.debug("Node reachability result: {}", nodeReachabilityResult);
         return nodeReachabilityResult;
     }

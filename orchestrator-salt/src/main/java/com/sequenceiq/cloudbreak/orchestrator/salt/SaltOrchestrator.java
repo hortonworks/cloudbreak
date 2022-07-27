@@ -1088,7 +1088,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void stopClusterManagerAgent(OrchestratorAware stack, GatewayConfig gatewayConfig, Set<Node> allNodes, Set<Node> nodesUnderStopping,
             ExitCriteriaModel exitCriteriaModel, CmAgentStopFlags flags) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
-            NodeReachabilityResult nodeReachabilityResult = getResponsiveNodes(allNodes, sc, false);
+            NodeReachabilityResult nodeReachabilityResult = getResponsiveNodes(allNodes, sc);
             Set<Node> responsiveNodes = nodeReachabilityResult.getReachableNodes();
             Set<String> nodesUnderStoppingIPs = nodesUnderStopping.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             Set<Node> responsiveNodesUnderStopping = responsiveNodes.stream()
@@ -1201,9 +1201,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public NodeReachabilityResult getResponsiveNodes(Set<Node> nodes, GatewayConfig gatewayConfig, boolean targeted) {
+    public NodeReachabilityResult getResponsiveNodes(Set<Node> nodes, GatewayConfig gatewayConfig) {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gatewayConfig)) {
-            return getResponsiveNodes(nodes, saltConnector, targeted);
+            return getResponsiveNodes(nodes, saltConnector);
         }
     }
 
@@ -1456,15 +1456,10 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
-    private NodeReachabilityResult getResponsiveNodes(Set<Node> nodes, SaltConnector sc, boolean targeted) {
+    private NodeReachabilityResult getResponsiveNodes(Set<Node> nodes, SaltConnector sc) {
         Set<Node> responsiveNodes = new HashSet<>();
         Set<Node> unresponsiveNodes = new HashSet<>();
-        Set<String> minionIpAddresses;
-        if (targeted) {
-            minionIpAddresses = saltStateService.collectMinionIpAddresses(Optional.of(nodes), retry, sc);
-        } else {
-            minionIpAddresses = saltStateService.collectMinionIpAddresses(Optional.empty(), retry, sc);
-        }
+        Set<String> minionIpAddresses = saltStateService.collectMinionIpAddresses(retry, sc);
         nodes.forEach(node -> {
             if (minionIpAddresses.contains(node.getPrivateIp())) {
                 LOGGER.info("Salt-minion is responding on host: {}", node);
