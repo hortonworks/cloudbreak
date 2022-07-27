@@ -12,6 +12,7 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingList;
+import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiHostTemplateList;
@@ -195,7 +196,7 @@ public final class ClouderaManagerEndpoints<T extends CloudbreakTestDto> {
         }
 
         interface Hosts<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
-            DefaultResponseConfigure<T, ApiServiceList> get();
+            DefaultResponseConfigure<T, ApiHostList> get();
         }
 
         interface ClustersByClusterName {
