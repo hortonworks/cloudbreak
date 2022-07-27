@@ -30,6 +30,7 @@ import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.action.UpgradeCcmContext;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmFailureEvent;
+import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmRegisterClusterProxyHandler;
 import com.sequenceiq.freeipa.service.BootstrapService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaOrchestrationConfigService;
 import com.sequenceiq.freeipa.service.image.ImageService;
@@ -157,7 +158,12 @@ public class UpgradeCcmService {
         stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
     }
 
-    public void registerClusterProxy(Long stackId) {
+    public void registerClusterProxyAndCheckHealth(Long stackId) {
+        registerClusterProxy(stackId);
+        healthCheck(stackId);
+    }
+
+    private void registerClusterProxy(Long stackId) {
         Optional<ConfigRegistrationResponse> configRegistrationResponse = clusterProxyService.registerFreeIpa(stackId);
         configRegistrationResponse.ifPresentOrElse(c -> LOGGER.debug(c.toString()), () -> LOGGER.debug("No clusterproxy register response for {}", stackId));
     }
@@ -168,13 +174,13 @@ public class UpgradeCcmService {
         stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
     }
 
-    public void healthCheck(Long stackId) {
+    private void healthCheck(Long stackId) {
+        LOGGER.info("Health check for CCM upgrade...");
         Stack stack = stackService.getStackById(stackId);
         HealthDetailsFreeIpaResponse healthDetails = healthService.getHealthDetails(stack.getEnvironmentCrn(), stack.getAccountId());
         if (healthDetails.getNodeHealthDetails().stream().anyMatch(hd -> !hd.getStatus().isAvailable())) {
             throw new CloudbreakServiceException("One or more FreeIPA instance is not available. Need to roll back CCM upgrade to previous version.");
         }
-        // TODO: rollback if bad, but how?
     }
 
     public void removeMinaState(Long stackId) {
@@ -212,6 +218,10 @@ public class UpgradeCcmService {
         InMemoryStateStore.deleteStack(payload.getResourceId());
         DetailedStackStatus detailedStatus = payload.getTransitionStatusAfterFailure().orElse(UPGRADE_CCM_FAILED);
         stackService.setTunnelByStackId(payload.getResourceId(), payload.getOldTunnel());
+        if (payload.getFailureOrigin().equals(UpgradeCcmRegisterClusterProxyHandler.class)) {
+            LOGGER.info("Re-registering cluster proxy to previous tunnel {}", payload.getOldTunnel());
+            registerClusterProxy(payload.getResourceId());
+        }
         String statusReason = "Upgrade CCM failed";
         stackUpdater.updateStackStatus(payload.getResourceId(), detailedStatus, statusReason);
     }

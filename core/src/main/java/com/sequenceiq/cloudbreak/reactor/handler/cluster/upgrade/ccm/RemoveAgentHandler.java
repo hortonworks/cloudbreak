@@ -42,6 +42,7 @@ public class RemoveAgentHandler extends ExceptionCatcherEventHandler<UpgradeCcmR
         UpgradeCcmRemoveAgentRequest request = event.getData();
         Long stackId = request.getResourceId();
         LOGGER.info("Remove agent for CCM upgrade...");
+        upgradeCcmService.updateTunnel(stackId);
         try {
             upgradeCcmService.removeAgent(stackId, request.getOldTunnel());
         } catch (CloudbreakOrchestratorException e) {

@@ -42,6 +42,7 @@ public class ReconfigureNginxHandler extends ExceptionCatcherEventHandler<Upgrad
         UpgradeCcmReconfigureNginxRequest request = event.getData();
         Long stackId = request.getResourceId();
         LOGGER.info("NGINX reconfiguration is needed for previous CCM tunnel type");
+        upgradeCcmService.updateTunnel(stackId);
         try {
             upgradeCcmService.reconfigureNginx(stackId);
         } catch (CloudbreakOrchestratorException e) {

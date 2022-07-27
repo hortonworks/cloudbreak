@@ -92,11 +92,11 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     private static final long STACK_ID = 1L;
 
-    private static final int ALL_CALLED_ONCE = 22;
+    private static final int ALL_CALLED_ONCE = 21;
 
-    private static final int CALLED_ONCE_TILL_DEREGISTER_MINA = 20;
+    private static final int CALLED_ONCE_TILL_DEREGISTER_MINA = 19;
 
-    private static final int CALLED_ONCE_TILL_GENERATE_USERDATA = 21;
+    private static final int CALLED_ONCE_TILL_GENERATE_USERDATA = 20;
 
     @Inject
     private FlowRegister flowRegister;
@@ -226,9 +226,8 @@ class UpgradeCcmFlowChainIntegrationTest {
         inOrder.verify(upgradeCcmService, times(expected[i++])).reconfigureNginxState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).reconfigureNginx(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).registerClusterProxyState(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(expected[i++])).registerClusterProxy(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).registerClusterProxyAndCheckHealth(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).healthCheckState(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(expected[i++])).healthCheck(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).removeMinaState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).removeMina(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).deregisterMinaState(STACK_ID);

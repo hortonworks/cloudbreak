@@ -41,6 +41,7 @@ public class UpgradeCcmReconfigureNginxHandler extends AbstractUpgradeCcmEventHa
     @Override
     protected Selectable doAccept(HandlerEvent<UpgradeCcmEvent> event) {
         UpgradeCcmEvent request = event.getData();
+        upgradeCcmService.changeTunnel(request.getResourceId());
         if (request.getOldTunnel().useCcmV1()) {
             LOGGER.info("NGINX reconfiguration is needed for previous CCM tunnel type");
             try {

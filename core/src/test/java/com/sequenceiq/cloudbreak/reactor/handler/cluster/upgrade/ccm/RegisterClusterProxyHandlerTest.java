@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -48,7 +49,9 @@ class RegisterClusterProxyHandlerTest {
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
-        verify(upgradeCcmService).registerClusterProxy(STACK_ID);
+        InOrder inOrder = inOrder(upgradeCcmService);
+        inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID);
+        inOrder.verify(upgradeCcmService).registerClusterProxyAndCheckHealth(STACK_ID);
         assertThat(result.selector()).isEqualTo("UPGRADECCMREGISTERCLUSTERPROXYRESULT");
     }
 

@@ -42,6 +42,7 @@ public class PushSaltStateHandler extends ExceptionCatcherEventHandler<UpgradeCc
         Long stackId = request.getResourceId();
         Long clusterId = request.getClusterId();
         LOGGER.info("Pushing salt states for CCM upgrade...");
+        upgradeCcmService.updateTunnel(stackId);
         upgradeCcmService.pushSaltState(stackId, clusterId);
         return new UpgradeCcmPushSaltStatesResult(stackId, clusterId, request.getOldTunnel());
     }
