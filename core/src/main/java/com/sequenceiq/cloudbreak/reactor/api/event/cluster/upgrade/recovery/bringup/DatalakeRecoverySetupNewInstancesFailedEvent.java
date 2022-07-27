@@ -1,16 +1,12 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.recovery.bringup;
 
-import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class DatalakeRecoverySetupNewInstancesFailedEvent extends StackEvent {
 
-    @JsonTypeInfo(use = CLASS, property = "@type")
     private final Exception exception;
 
     private final DetailedStackStatus detailedStatus;

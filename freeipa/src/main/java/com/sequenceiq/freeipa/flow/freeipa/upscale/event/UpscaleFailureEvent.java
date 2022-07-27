@@ -1,18 +1,14 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.event;
 
-import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS;
-
 import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class UpscaleFailureEvent extends StackEvent {
 
-    @JsonTypeInfo(use = CLASS, property = "@type")
     private final Exception exception;
 
     private final String failedPhase;
