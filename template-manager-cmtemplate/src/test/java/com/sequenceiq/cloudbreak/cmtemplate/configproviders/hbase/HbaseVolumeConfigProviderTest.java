@@ -22,7 +22,7 @@ public class HbaseVolumeConfigProviderTest {
     @Test
     void getRoleConfigsWithMultipleEphemeralVolumes() {
         HostgroupView worker = hostGroupWithVolumeTemplatesAndTemporaryStorage(2,
-                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.EPHEMERAL_VOLUMES, 3);
+                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.EPHEMERAL_VOLUMES, 3, 300);
 
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(HbaseRoles.REGIONSERVER, worker, preparatorWithHostGroups(worker));
 
@@ -37,7 +37,7 @@ public class HbaseVolumeConfigProviderTest {
     @Test
     void getRoleConfigsWithMultipleAttachedVolumes() {
         HostgroupView worker = hostGroupWithVolumeTemplatesAndTemporaryStorage(2,
-                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.ATTACHED_VOLUMES, 0);
+                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.ATTACHED_VOLUMES, 0, 0);
 
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(HbaseRoles.REGIONSERVER, worker, preparatorWithHostGroups(worker));
 

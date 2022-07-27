@@ -75,6 +75,8 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
 
     private Integer instanceStorageCount;
 
+    private Integer instanceStorageSize;
+
     public Template() {
         deleted = false;
     }
@@ -197,5 +199,13 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setInstanceStorageCount(Integer instanceStorageCount) {
         this.instanceStorageCount = instanceStorageCount;
+    }
+
+    public Integer getInstanceStorageSize() {
+        return instanceStorageSize;
+    }
+
+    public void setInstanceStorageSize(Integer instanceStorageSize) {
+        this.instanceStorageSize = instanceStorageSize;
     }
 }

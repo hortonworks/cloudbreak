@@ -28,6 +28,11 @@ public class InstanceStoreMetadata {
         return instanceStoreCount != null ? instanceStoreCount : 0;
     }
 
+    public Integer mapInstanceTypeToInstanceSizeNullHandled(String instanceType) {
+        Integer instanceSize = instaceStoreConfigMap.getOrDefault(instanceType, VolumeParameterConfig.EMPTY).maximumSize();
+        return instanceSize != null ? instanceSize : 0;
+    }
+
     public Map<String, VolumeParameterConfig> getInstaceStoreConfigMap() {
         return instaceStoreConfigMap;
     }

@@ -22,9 +22,9 @@ public class VolumeConfigProviderTestHelper {
     }
 
     public static HostgroupView hostGroupWithVolumeTemplatesAndTemporaryStorage(int volumeCount, Set<VolumeTemplate> volumeTemplates,
-            TemporaryStorage temporaryStorage, Integer temporaryStorageVolumeCount) {
+            TemporaryStorage temporaryStorage, Integer temporaryStorageVolumeCount, Integer temporaryStorageVolumeSize) {
         return new HostgroupView("some name", volumeCount, InstanceGroupType.CORE, Collections.EMPTY_SET,
-                volumeTemplates, temporaryStorage, temporaryStorageVolumeCount);
+                volumeTemplates, temporaryStorage, temporaryStorageVolumeCount, temporaryStorageVolumeSize);
     }
 
     public static TemplatePreparationObject preparatorWithHostGroups(HostgroupView... hostGroups) {

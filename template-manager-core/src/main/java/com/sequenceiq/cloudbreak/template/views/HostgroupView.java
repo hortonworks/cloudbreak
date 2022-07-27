@@ -34,17 +34,20 @@ public class HostgroupView {
 
     private final Integer temporaryStorageVolumeCount;
 
+    private final Integer temporaryStorageVolumeSize;
+
     public HostgroupView(String name, int volumeCount, InstanceGroupType instanceGroupType, Collection<String> hosts) {
         this(name, volumeCount, instanceGroupType, hosts, Collections.emptySet());
     }
 
     public HostgroupView(String name, int volumeCount, InstanceGroupType instanceGroupType,
             Collection<String> hosts, Set<VolumeTemplate> volumeTemplates) {
-        this(name, volumeCount, instanceGroupType, hosts, volumeTemplates, null, null);
+        this(name, volumeCount, instanceGroupType, hosts, volumeTemplates, null, null, null);
     }
 
     public HostgroupView(String name, int volumeCount, InstanceGroupType instanceGroupType,
-            Collection<String> hosts, Set<VolumeTemplate> volumeTemplates, TemporaryStorage temporaryStorage, Integer temporaryStorageVolumeCount) {
+            Collection<String> hosts, Set<VolumeTemplate> volumeTemplates, TemporaryStorage temporaryStorage,
+            Integer temporaryStorageVolumeCount, Integer temporaryStorageVolumeSize) {
         this.name = name;
         this.volumeCount = volumeCount;
         instanceGroupConfigured = true;
@@ -61,6 +64,7 @@ public class HostgroupView {
         this.volumeTemplates = Collections.unmodifiableSet(volumeTemplates);
         this.temporaryStorage = temporaryStorage;
         this.temporaryStorageVolumeCount = temporaryStorageVolumeCount;
+        this.temporaryStorageVolumeSize = temporaryStorageVolumeSize;
     }
 
     public HostgroupView(String name, int volumeCount, InstanceGroupType instanceGroupType, Integer nodeCount) {
@@ -73,6 +77,7 @@ public class HostgroupView {
         volumeTemplates = Collections.emptySet();
         temporaryStorage = null;
         temporaryStorageVolumeCount = null;
+        temporaryStorageVolumeSize = null;
     }
 
     public HostgroupView(String name) {
@@ -85,6 +90,7 @@ public class HostgroupView {
         volumeTemplates = Collections.emptySet();
         temporaryStorage = null;
         temporaryStorageVolumeCount = null;
+        temporaryStorageVolumeSize = null;
     }
 
     public String getName() {
@@ -121,6 +127,10 @@ public class HostgroupView {
 
     public Integer getTemporaryStorageVolumeCount() {
         return temporaryStorageVolumeCount;
+    }
+
+    public Integer getTemporaryStorageVolumeSize() {
+        return temporaryStorageVolumeSize;
     }
 
     private List<String> filterNullOrEmpty(Collection<String> hosts) {
