@@ -27,7 +27,6 @@ import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.common.model.PackageInfo;
@@ -37,6 +36,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyFullResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
@@ -258,7 +258,7 @@ public class SaltStateService {
     }
 
     public MinionIpAddressesResponse collectMinionIpAddresses(SaltConnector sc, Optional<Set<String>> targets) {
-        Target<String> runTargets = targets.map(strings -> new Glob(Joiner.on(",").join(strings))).orElse(Glob.ALL);
+        Target<String> runTargets = targets.isPresent() ? new HostList(targets.get()) : Glob.ALL;
         MinionIpAddressesResponse minionIpAddressesResponse = measure(() -> sc.run(runTargets, "network.ipaddrs", LOCAL,
                         MinionIpAddressesResponse.class, NETWORK_IPADDRS_TIMEOUT),
                 LOGGER, "Network IP address call took {}ms");
