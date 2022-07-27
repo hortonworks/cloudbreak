@@ -48,6 +48,9 @@ public class MetricsRecordWorker extends RecordWorker<MetricsRecordProcessor, Me
             if (response.code() < STATUS_OK || response.code() > LAST_REDIRECT_CODE) {
                 throw new StreamProcessingException(String.format("Response code is not valid. (status code: %s)", response.code()));
             }
+            if (response.body() != null) {
+                response.body().close();
+            }
         } catch (IOException e) {
             throw new StreamProcessingException(e);
         }
