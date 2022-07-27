@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation
 
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -11,12 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.services.rds.model.ApplyMethod;
 import com.amazonaws.services.rds.model.DBInstance;
 import com.amazonaws.services.rds.model.DescribeDBEngineVersionsRequest;
 import com.amazonaws.services.rds.model.DescribeDBEngineVersionsResult;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.amazonaws.services.rds.model.ModifyDBInstanceRequest;
+import com.amazonaws.services.rds.model.Parameter;
 import com.amazonaws.services.rds.model.UpgradeTarget;
 import com.amazonaws.waiters.Waiter;
 import com.dyngr.exception.PollerException;
@@ -25,8 +28,10 @@ import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.util.poller.upgrade.UpgradeStartPoller;
 import com.sequenceiq.cloudbreak.cloud.aws.util.poller.upgrade.UpgradeStartWaitTask;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsDbParameterGroupView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 
 @Service
 public class AwsRdsUpgradeOperations {
@@ -38,6 +43,9 @@ public class AwsRdsUpgradeOperations {
 
     @Inject
     private UpgradeStartPoller upgradeStartPoller;
+
+    @Inject
+    private AwsRdsVersionOperations awsRdsVersionOperations;
 
     public String getCurrentDbEngineVersion(AmazonRdsClient rdsClient, String dbInstanceIdentifier) {
         DescribeDBInstancesRequest describeDBInstancesRequest = new DescribeDBInstancesRequest().withDBInstanceIdentifier(dbInstanceIdentifier);
@@ -75,12 +83,13 @@ public class AwsRdsUpgradeOperations {
         }
     }
 
-    public void upgradeRds(AmazonRdsClient rdsClient, String targetVersion, String dbInstanceIdentifier) {
-        ModifyDBInstanceRequest modifyDBInstanceRequest = new ModifyDBInstanceRequest();
-        modifyDBInstanceRequest.setDBInstanceIdentifier(dbInstanceIdentifier);
-        modifyDBInstanceRequest.setEngineVersion(targetVersion);
-        modifyDBInstanceRequest.setAllowMajorVersionUpgrade(true);
-        modifyDBInstanceRequest.setApplyImmediately(true);
+    public void upgradeRds(AmazonRdsClient rdsClient, String targetVersion, String dbInstanceIdentifier, String dbParameterGroupName) {
+        ModifyDBInstanceRequest modifyDBInstanceRequest = new ModifyDBInstanceRequest()
+                .withDBInstanceIdentifier(dbInstanceIdentifier)
+                .withEngineVersion(targetVersion)
+                .withAllowMajorVersionUpgrade(true)
+                .withApplyImmediately(true)
+                .withDBParameterGroupName(dbParameterGroupName);
 
         LOGGER.debug("RDS modify request to upgrade engine version to {}: {}", targetVersion, dbInstanceIdentifier);
         try {
@@ -97,6 +106,24 @@ public class AwsRdsUpgradeOperations {
         DescribeDBInstancesRequest describeDBInstancesRequest = new DescribeDBInstancesRequest().withDBInstanceIdentifier(dbInstanceIdentifier);
         waitUntilUpgradeStarts(rdsClient, describeDBInstancesRequest);
         waitUntilUpgradeFinishes(ac, rdsClient, describeDBInstancesRequest);
+    }
+
+    public String createPatameterGroupWithCustomSettings(AmazonRdsClient rdsClient, DatabaseServer databaseServer, String highestAvailableTargetVersion) {
+        AwsRdsDbParameterGroupView awsRdsDbParameterGroupView = new AwsRdsDbParameterGroupView(databaseServer, awsRdsVersionOperations);
+        String dbParameterGroupName = awsRdsDbParameterGroupView.getDBParameterGroupName() + highestAvailableTargetVersion;
+        String dbParameterGroupFamily = awsRdsVersionOperations.getDBParameterGroupFamily(databaseServer.getEngine(), highestAvailableTargetVersion);
+
+        rdsClient.createParameterGroup(dbParameterGroupFamily, dbParameterGroupName);
+        rdsClient.changeParameterInGroup(dbParameterGroupName, List.of(createForceSslParameter()));
+        return dbParameterGroupName;
+    }
+
+    private Parameter createForceSslParameter() {
+        Parameter forceSslParameter = new Parameter()
+                .withParameterName("rds.force_ssl")
+                .withParameterValue("1")
+                .withApplyMethod(ApplyMethod.Immediate);
+        return forceSslParameter;
     }
 
     private void waitUntilUpgradeStarts(AmazonRdsClient rdsClient, DescribeDBInstancesRequest describeDBInstancesRequest) {

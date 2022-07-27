@@ -8,6 +8,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -15,6 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,6 +34,7 @@ import com.amazonaws.services.rds.model.DescribeDBEngineVersionsResult;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.amazonaws.services.rds.model.ModifyDBInstanceRequest;
+import com.amazonaws.services.rds.model.Parameter;
 import com.amazonaws.services.rds.model.UpgradeTarget;
 import com.amazonaws.waiters.Waiter;
 import com.dyngr.exception.PollerException;
@@ -41,6 +44,8 @@ import com.sequenceiq.cloudbreak.cloud.aws.util.poller.upgrade.UpgradeStartPolle
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 
 import reactor.fn.tuple.Tuple2;
 
@@ -53,11 +58,20 @@ public class AwsRdsUpgradeOperationsTest {
 
     private static final String DB_INSTANCE_IDENTIFIER = "dbInstanceIdentifier";
 
+    private static final String DB_PARAMETER_GROUP_NAME = "dbParameterGroupName";
+
+    private static final String DB_SERVER_ID = "dbServerId";
+
+    private static final String PARAMETER_GROUP_FAMILY = "parameterGroupFamily";
+
     @Mock
     private CustomAmazonWaiterProvider customAmazonWaiterProvider;
 
     @Mock
     private UpgradeStartPoller upgradeStartPoller;
+
+    @Mock
+    private AwsRdsVersionOperations awsRdsVersionOperations;
 
     @InjectMocks
     private AwsRdsUpgradeOperations underTest;
@@ -138,7 +152,7 @@ public class AwsRdsUpgradeOperationsTest {
 
     @Test
     void testUpgradeRds() {
-        underTest.upgradeRds(rdsClient, "2.2", DB_INSTANCE_IDENTIFIER);
+        underTest.upgradeRds(rdsClient, "2.2", DB_INSTANCE_IDENTIFIER, DB_PARAMETER_GROUP_NAME);
 
         ArgumentCaptor<ModifyDBInstanceRequest> modifyRequestCaptor = ArgumentCaptor.forClass(ModifyDBInstanceRequest.class);
         verify(rdsClient).modifyDBInstance(modifyRequestCaptor.capture());
@@ -154,7 +168,7 @@ public class AwsRdsUpgradeOperationsTest {
         when(rdsClient.modifyDBInstance(any())).thenThrow(new RuntimeException("myException"));
 
         Assertions.assertThrows(CloudConnectorException.class, () ->
-                underTest.upgradeRds(rdsClient, "2.2", DB_INSTANCE_IDENTIFIER)
+                underTest.upgradeRds(rdsClient, "2.2", DB_INSTANCE_IDENTIFIER, DB_PARAMETER_GROUP_NAME)
         );
     }
 
@@ -181,6 +195,27 @@ public class AwsRdsUpgradeOperationsTest {
 
         verify(upgradeStartPoller).waitForUpgradeToStart(any());
         verify(customAmazonWaiterProvider, never()).getDbInstanceModifyWaiter(any());
+    }
+
+    @Test
+    void testCreatePatameterGroupWithCustomSettings() {
+        DatabaseServer databaseServer = mock(DatabaseServer.class);
+        when(databaseServer.getServerId()).thenReturn(DB_SERVER_ID);
+        when(databaseServer.getEngine()).thenReturn(DatabaseEngine.POSTGRESQL);
+        when(awsRdsVersionOperations.getDBParameterGroupFamily(DatabaseEngine.POSTGRESQL, "highestVersion")).thenReturn(PARAMETER_GROUP_FAMILY);
+        String dbParameterGroupName = "dpg-" + DB_SERVER_ID + "highestVersion";
+
+        underTest.createPatameterGroupWithCustomSettings(rdsClient, databaseServer, "highestVersion");
+
+        verify(rdsClient).createParameterGroup(PARAMETER_GROUP_FAMILY, dbParameterGroupName);
+        ArgumentCaptor<List<Parameter>> parameterArgumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(rdsClient).changeParameterInGroup(eq(dbParameterGroupName), parameterArgumentCaptor.capture());
+        List<Parameter> modifiedParameters = parameterArgumentCaptor.getValue();
+        assertThat(modifiedParameters, hasSize(1));
+        Parameter sslParameter = modifiedParameters.get(0);
+        assertEquals("rds.force_ssl", sslParameter.getParameterName());
+        assertEquals("1", sslParameter.getParameterValue());
+
     }
 
     private AuthenticatedContext setupAuthenticatedContext() {

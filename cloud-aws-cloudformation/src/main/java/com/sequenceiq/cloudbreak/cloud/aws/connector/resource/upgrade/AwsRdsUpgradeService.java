@@ -16,9 +16,17 @@ import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsVersionOperations;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 
+/*
+TODO:
+    - if the DB server was already upgraded, then the upgrade command should not be fired again.
+    - but then should check state as well. If it is upgrading, then it should wait. But if it is not upgrading, then no waiting should be done.
+
+
+ */
 @Service
 public class AwsRdsUpgradeService {
 
@@ -37,18 +45,21 @@ public class AwsRdsUpgradeService {
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AmazonRdsClient rdsClient = awsClient.createRdsClient(credentialView, regionName);
-        String dbInstanceIdentifier = dbStack.getDatabaseServer().getServerId();
 
-        return upgradeRds(ac, targetMajorVersion, rdsClient, dbInstanceIdentifier);
+        return upgradeRds(ac, targetMajorVersion, rdsClient, dbStack.getDatabaseServer());
     }
 
     private List<CloudResourceStatus> upgradeRds(AuthenticatedContext ac, MajorVersion targetMajorVersion, AmazonRdsClient rdsClient,
-            String dbInstanceIdentifier) {
+            DatabaseServer databaseServer) {
+        String dbInstanceIdentifier = databaseServer.getServerId();
         String currentDbEngineVersion = awsRdsUpgradeOperations.getCurrentDbEngineVersion(rdsClient, dbInstanceIdentifier);
         Set<String> upgradeTargets = awsRdsUpgradeOperations.getUpgradeTargetVersions(rdsClient, currentDbEngineVersion);
         String highestAvailableTargetVersion = awsRdsVersionOperations.getHighestUpgradeVersion(upgradeTargets, targetMajorVersion);
-        awsRdsUpgradeOperations.upgradeRds(rdsClient, highestAvailableTargetVersion, dbInstanceIdentifier);
+
+        String dbParameterGroupName = awsRdsUpgradeOperations.createPatameterGroupWithCustomSettings(rdsClient, databaseServer, highestAvailableTargetVersion);
+        awsRdsUpgradeOperations.upgradeRds(rdsClient, highestAvailableTargetVersion, dbInstanceIdentifier, dbParameterGroupName);
         awsRdsUpgradeOperations.waitForRdsUpgrade(ac, rdsClient, dbInstanceIdentifier);
+
         LOGGER.debug("RDS upgrade done for DB: {}", dbInstanceIdentifier);
         return List.of();
     }

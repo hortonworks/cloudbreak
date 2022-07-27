@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,6 +45,8 @@ public class AwsRdsUpgradeServiceTest {
 
     private static final String UPGRADE_TARGET_MAJOR_VERSION = "upgradeTargetMajorVersion";
 
+    private static final String DB_PARAMETER_GROUP_NAME = "dbParameterGroupName";
+
     @Mock
     private AwsCloudFormationClient awsClient;
 
@@ -58,20 +62,34 @@ public class AwsRdsUpgradeServiceTest {
     @Mock
     private AmazonRdsClient rdsClient;
 
+    @Mock
+    private DatabaseStack databaseStack;
+
+    @Mock
+    private DatabaseServer databaseServer;
+
+    @BeforeEach
+    void setupDbStack() {
+        when(databaseStack.getDatabaseServer()).thenReturn(databaseServer);
+        when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
+    }
+
     @Test
     void testUpgrade() {
         AuthenticatedContext ac = setupAuthenticatedContext();
         when(awsClient.createRdsClient(any(), eq(REGION_NAME))).thenReturn(rdsClient);
-        DatabaseStack databaseStack = setupDbStack();
         when(awsRdsUpgradeOperations.getCurrentDbEngineVersion(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(CURRENT_DB_VERSION);
         Set<String> upgradeTargets = Set.of(UPGRADE_TARGET_VERSION);
         when(awsRdsUpgradeOperations.getUpgradeTargetVersions(rdsClient, CURRENT_DB_VERSION)).thenReturn(upgradeTargets);
         MajorVersion upgradeTargetMajorVersion = () -> UPGRADE_TARGET_MAJOR_VERSION;
         when(awsRdsVersionOperations.getHighestUpgradeVersion(upgradeTargets, upgradeTargetMajorVersion)).thenReturn(UPGRADE_TARGET_VERSION);
+        when(awsRdsUpgradeOperations.createPatameterGroupWithCustomSettings(rdsClient, databaseStack.getDatabaseServer(), UPGRADE_TARGET_VERSION))
+                .thenReturn(DB_PARAMETER_GROUP_NAME);
 
         underTest.upgrade(ac, databaseStack, upgradeTargetMajorVersion);
 
-        verify(awsRdsUpgradeOperations).upgradeRds(rdsClient, UPGRADE_TARGET_VERSION, DB_INSTANCE_IDENTIFIER);
+        verify(awsRdsUpgradeOperations).upgradeRds(rdsClient, UPGRADE_TARGET_VERSION, DB_INSTANCE_IDENTIFIER, DB_PARAMETER_GROUP_NAME);
+        verify(awsRdsUpgradeOperations).createPatameterGroupWithCustomSettings(rdsClient, databaseServer, UPGRADE_TARGET_VERSION);
         verify(awsRdsUpgradeOperations).waitForRdsUpgrade(ac, rdsClient, DB_INSTANCE_IDENTIFIER);
     }
 
@@ -79,7 +97,6 @@ public class AwsRdsUpgradeServiceTest {
     void testUpgradeWhenGetCurrentDbEngineVersionThrowsThenThrows() {
         AuthenticatedContext ac = setupAuthenticatedContext();
         when(awsClient.createRdsClient(any(), eq(REGION_NAME))).thenReturn(rdsClient);
-        DatabaseStack databaseStack = setupDbStack();
         when(awsRdsUpgradeOperations.getCurrentDbEngineVersion(rdsClient, DB_INSTANCE_IDENTIFIER)).thenThrow(new CloudConnectorException("My exception"));
         MajorVersion upgradeTargetMajorVersion = () -> UPGRADE_TARGET_MAJOR_VERSION;
 
@@ -89,7 +106,8 @@ public class AwsRdsUpgradeServiceTest {
 
         verify(awsRdsUpgradeOperations, never()).getUpgradeTargetVersions(any(), any());
         verify(awsRdsVersionOperations, never()).getHighestUpgradeVersion(any(), any());
-        verify(awsRdsUpgradeOperations, never()).upgradeRds(rdsClient, UPGRADE_TARGET_VERSION, DB_INSTANCE_IDENTIFIER);
+        verify(awsRdsUpgradeOperations, never()).createPatameterGroupWithCustomSettings(any(), any(), anyString());
+        verify(awsRdsUpgradeOperations, never()).upgradeRds(rdsClient, UPGRADE_TARGET_VERSION, DB_INSTANCE_IDENTIFIER, DB_PARAMETER_GROUP_NAME);
         verify(awsRdsUpgradeOperations, never()).waitForRdsUpgrade(ac, rdsClient, DB_INSTANCE_IDENTIFIER);
     }
 
@@ -97,7 +115,6 @@ public class AwsRdsUpgradeServiceTest {
     void testUpgradeWhenGetUpgradeTargetVersionThrowsThenThrows() {
         AuthenticatedContext ac = setupAuthenticatedContext();
         when(awsClient.createRdsClient(any(), eq(REGION_NAME))).thenReturn(rdsClient);
-        DatabaseStack databaseStack = setupDbStack();
         when(awsRdsUpgradeOperations.getCurrentDbEngineVersion(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(CURRENT_DB_VERSION);
         when(awsRdsUpgradeOperations.getUpgradeTargetVersions(rdsClient, CURRENT_DB_VERSION)).thenThrow(new CloudConnectorException("My Exception"));
         MajorVersion upgradeTargetMajorVersion = () -> UPGRADE_TARGET_MAJOR_VERSION;
@@ -107,7 +124,8 @@ public class AwsRdsUpgradeServiceTest {
         );
 
         verify(awsRdsVersionOperations, never()).getHighestUpgradeVersion(any(), any());
-        verify(awsRdsUpgradeOperations, never()).upgradeRds(rdsClient, UPGRADE_TARGET_VERSION, DB_INSTANCE_IDENTIFIER);
+        verify(awsRdsUpgradeOperations, never()).createPatameterGroupWithCustomSettings(any(), any(), anyString());
+        verify(awsRdsUpgradeOperations, never()).upgradeRds(rdsClient, UPGRADE_TARGET_VERSION, DB_INSTANCE_IDENTIFIER, DB_PARAMETER_GROUP_NAME);
         verify(awsRdsUpgradeOperations, never()).waitForRdsUpgrade(ac, rdsClient, DB_INSTANCE_IDENTIFIER);
     }
 
@@ -115,7 +133,6 @@ public class AwsRdsUpgradeServiceTest {
     void testUpgradeWhenGetHighestUpgradeVersionThrowsThenThrows() {
         AuthenticatedContext ac = setupAuthenticatedContext();
         when(awsClient.createRdsClient(any(), eq(REGION_NAME))).thenReturn(rdsClient);
-        DatabaseStack databaseStack = setupDbStack();
         when(awsRdsUpgradeOperations.getCurrentDbEngineVersion(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(CURRENT_DB_VERSION);
         Set<String> upgradeTargets = Set.of(UPGRADE_TARGET_VERSION);
         when(awsRdsUpgradeOperations.getUpgradeTargetVersions(rdsClient, CURRENT_DB_VERSION)).thenReturn(upgradeTargets);
@@ -126,7 +143,28 @@ public class AwsRdsUpgradeServiceTest {
                 underTest.upgrade(ac, databaseStack, upgradeTargetMajorVersion)
         );
 
-        verify(awsRdsUpgradeOperations, never()).upgradeRds(rdsClient, UPGRADE_TARGET_VERSION, DB_INSTANCE_IDENTIFIER);
+        verify(awsRdsUpgradeOperations, never()).createPatameterGroupWithCustomSettings(any(), any(), anyString());
+        verify(awsRdsUpgradeOperations, never()).upgradeRds(rdsClient, UPGRADE_TARGET_VERSION, DB_INSTANCE_IDENTIFIER, DB_PARAMETER_GROUP_NAME);
+        verify(awsRdsUpgradeOperations, never()).waitForRdsUpgrade(ac, rdsClient, DB_INSTANCE_IDENTIFIER);
+    }
+
+    @Test
+    void testUpgradeWhenCreateParameterGroupThrowsThenThrows() {
+        AuthenticatedContext ac = setupAuthenticatedContext();
+        when(awsClient.createRdsClient(any(), eq(REGION_NAME))).thenReturn(rdsClient);
+        when(awsRdsUpgradeOperations.getCurrentDbEngineVersion(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(CURRENT_DB_VERSION);
+        Set<String> upgradeTargets = Set.of(UPGRADE_TARGET_VERSION);
+        when(awsRdsUpgradeOperations.getUpgradeTargetVersions(rdsClient, CURRENT_DB_VERSION)).thenReturn(upgradeTargets);
+        MajorVersion upgradeTargetMajorVersion = () -> UPGRADE_TARGET_MAJOR_VERSION;
+        when(awsRdsVersionOperations.getHighestUpgradeVersion(upgradeTargets, upgradeTargetMajorVersion)).thenReturn(UPGRADE_TARGET_VERSION);
+        when(awsRdsUpgradeOperations.createPatameterGroupWithCustomSettings(rdsClient, databaseServer, UPGRADE_TARGET_VERSION))
+                .thenThrow(new CloudConnectorException("My Exception"));
+
+        Assertions.assertThrows(CloudConnectorException.class, () ->
+                underTest.upgrade(ac, databaseStack, upgradeTargetMajorVersion)
+        );
+
+        verify(awsRdsUpgradeOperations, never()).upgradeRds(rdsClient, UPGRADE_TARGET_VERSION, DB_INSTANCE_IDENTIFIER, DB_PARAMETER_GROUP_NAME);
         verify(awsRdsUpgradeOperations, never()).waitForRdsUpgrade(ac, rdsClient, DB_INSTANCE_IDENTIFIER);
     }
 
@@ -134,13 +172,15 @@ public class AwsRdsUpgradeServiceTest {
     void testUpgradeWhenUpgradeRdsThrowsThenThrows() {
         AuthenticatedContext ac = setupAuthenticatedContext();
         when(awsClient.createRdsClient(any(), eq(REGION_NAME))).thenReturn(rdsClient);
-        DatabaseStack databaseStack = setupDbStack();
         when(awsRdsUpgradeOperations.getCurrentDbEngineVersion(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(CURRENT_DB_VERSION);
         Set<String> upgradeTargets = Set.of(UPGRADE_TARGET_VERSION);
         when(awsRdsUpgradeOperations.getUpgradeTargetVersions(rdsClient, CURRENT_DB_VERSION)).thenReturn(upgradeTargets);
         MajorVersion upgradeTargetMajorVersion = () -> UPGRADE_TARGET_MAJOR_VERSION;
         when(awsRdsVersionOperations.getHighestUpgradeVersion(upgradeTargets, upgradeTargetMajorVersion)).thenReturn(UPGRADE_TARGET_VERSION);
-        doThrow(new CloudConnectorException("My exception")).when(awsRdsUpgradeOperations).upgradeRds(rdsClient, UPGRADE_TARGET_VERSION, DB_INSTANCE_IDENTIFIER);
+        when(awsRdsUpgradeOperations.createPatameterGroupWithCustomSettings(rdsClient, databaseServer, UPGRADE_TARGET_VERSION))
+                .thenReturn(DB_PARAMETER_GROUP_NAME);
+        doThrow(new CloudConnectorException("My exception")).when(awsRdsUpgradeOperations)
+                .upgradeRds(rdsClient, UPGRADE_TARGET_VERSION, DB_INSTANCE_IDENTIFIER, DB_PARAMETER_GROUP_NAME);
 
         Assertions.assertThrows(CloudConnectorException.class, () ->
                 underTest.upgrade(ac, databaseStack, upgradeTargetMajorVersion)
@@ -153,25 +193,18 @@ public class AwsRdsUpgradeServiceTest {
     void testUpgradeWhenWaitForRdsUpgradeThrowsThenThrows() {
         AuthenticatedContext ac = setupAuthenticatedContext();
         when(awsClient.createRdsClient(any(), eq(REGION_NAME))).thenReturn(rdsClient);
-        DatabaseStack databaseStack = setupDbStack();
         when(awsRdsUpgradeOperations.getCurrentDbEngineVersion(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(CURRENT_DB_VERSION);
         Set<String> upgradeTargets = Set.of(UPGRADE_TARGET_VERSION);
         when(awsRdsUpgradeOperations.getUpgradeTargetVersions(rdsClient, CURRENT_DB_VERSION)).thenReturn(upgradeTargets);
         MajorVersion upgradeTargetMajorVersion = () -> UPGRADE_TARGET_MAJOR_VERSION;
         when(awsRdsVersionOperations.getHighestUpgradeVersion(upgradeTargets, upgradeTargetMajorVersion)).thenReturn(UPGRADE_TARGET_VERSION);
+        when(awsRdsUpgradeOperations.createPatameterGroupWithCustomSettings(rdsClient, databaseServer, UPGRADE_TARGET_VERSION))
+                .thenReturn(DB_PARAMETER_GROUP_NAME);
         doThrow(new CloudConnectorException("myException")).when(awsRdsUpgradeOperations).waitForRdsUpgrade(ac, rdsClient, DB_INSTANCE_IDENTIFIER);
 
         Assertions.assertThrows(CloudConnectorException.class, () ->
                 underTest.upgrade(ac, databaseStack, upgradeTargetMajorVersion)
         );
-    }
-
-    private DatabaseStack setupDbStack() {
-        DatabaseStack dbStack = mock(DatabaseStack.class);
-        DatabaseServer databaseServer = mock(DatabaseServer.class);
-        when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
-        when(dbStack.getDatabaseServer()).thenReturn(databaseServer);
-        return dbStack;
     }
 
     private AuthenticatedContext setupAuthenticatedContext() {

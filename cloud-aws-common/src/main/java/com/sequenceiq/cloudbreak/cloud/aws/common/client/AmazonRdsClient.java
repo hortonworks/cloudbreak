@@ -4,7 +4,9 @@ import java.util.List;
 
 import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.model.Certificate;
+import com.amazonaws.services.rds.model.CreateDBParameterGroupRequest;
 import com.amazonaws.services.rds.model.DBInstance;
+import com.amazonaws.services.rds.model.DBParameterGroup;
 import com.amazonaws.services.rds.model.DescribeCertificatesRequest;
 import com.amazonaws.services.rds.model.DescribeCertificatesResult;
 import com.amazonaws.services.rds.model.DescribeDBEngineVersionsRequest;
@@ -12,6 +14,9 @@ import com.amazonaws.services.rds.model.DescribeDBEngineVersionsResult;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.amazonaws.services.rds.model.ModifyDBInstanceRequest;
+import com.amazonaws.services.rds.model.ModifyDBParameterGroupRequest;
+import com.amazonaws.services.rds.model.ModifyDBParameterGroupResult;
+import com.amazonaws.services.rds.model.Parameter;
 import com.amazonaws.services.rds.model.StartDBInstanceRequest;
 import com.amazonaws.services.rds.model.StopDBInstanceRequest;
 import com.amazonaws.services.rds.waiters.AmazonRDSWaiters;
@@ -47,6 +52,22 @@ public class AmazonRdsClient extends AmazonClient {
 
     public DescribeDBInstancesResult describeDBInstances(DescribeDBInstancesRequest describeDBInstancesRequest) {
         return client.describeDBInstances(describeDBInstancesRequest);
+    }
+
+    public DBParameterGroup createParameterGroup(String dbParameterGroupFamily, String dbParameterGroupName) {
+        CreateDBParameterGroupRequest createDBParameterGroupRequest = new CreateDBParameterGroupRequest()
+                .withDBParameterGroupFamily(dbParameterGroupFamily)
+                .withDBParameterGroupName(dbParameterGroupName)
+                .withDescription("Parameter group for enforcing SSL for an RDS");
+        return client.createDBParameterGroup(createDBParameterGroupRequest);
+    }
+
+    public ModifyDBParameterGroupResult changeParameterInGroup(String dbParameterGroupName, List<Parameter> parameters) {
+        ModifyDBParameterGroupRequest modifyDBParameterGroupRequest = new ModifyDBParameterGroupRequest()
+                .withDBParameterGroupName(dbParameterGroupName)
+                .withParameters(parameters);
+
+        return client.modifyDBParameterGroup(modifyDBParameterGroupRequest);
     }
 
     public DBInstance stopDBInstance(StopDBInstanceRequest stopDBInstanceRequest) {
