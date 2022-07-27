@@ -1,15 +1,11 @@
 package com.sequenceiq.datalake.flow.dr.backup.event;
 
-import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class DatalakeDatabaseBackupFailedEvent extends SdxEvent {
 
-    @JsonTypeInfo(use = CLASS, property = "@type")
     private final Exception exception;
 
     @JsonCreator

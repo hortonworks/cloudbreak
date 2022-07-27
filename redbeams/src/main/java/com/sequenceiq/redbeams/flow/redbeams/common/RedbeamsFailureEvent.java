@@ -1,14 +1,10 @@
 package com.sequenceiq.redbeams.flow.redbeams.common;
 
-import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 public class RedbeamsFailureEvent extends RedbeamsEvent {
 
-    @JsonTypeInfo(use = CLASS, property = "@type")
     private final Exception exception;
 
     public RedbeamsFailureEvent(Long resourceId, Exception exception) {

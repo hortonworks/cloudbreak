@@ -1,10 +1,7 @@
 package com.sequenceiq.flow.reactor.api.event;
 
-import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 
@@ -12,7 +9,6 @@ import reactor.rx.Promise;
 
 public class BaseFailedFlowEvent extends BaseNamedFlowEvent {
 
-    @JsonTypeInfo(use = CLASS, property = "@type")
     private final Exception exception;
 
     public BaseFailedFlowEvent(String selector, Long resourceId, String resourceName, String resourceCrn, Exception exception) {
