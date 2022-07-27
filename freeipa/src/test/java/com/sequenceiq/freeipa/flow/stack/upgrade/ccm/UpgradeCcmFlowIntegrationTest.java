@@ -80,11 +80,9 @@ class UpgradeCcmFlowIntegrationTest {
 
     private static final int CALLED_ONCE_TILL_REGISTER = 14;
 
-    private static final int CALLED_ONCE_TILL_HEALTH_CHECK = 16;
+    private static final int CALLED_ONCE_TILL_REMOVE_MINA = 17;
 
-    private static final int CALLED_ONCE_TILL_REMOVE_MINA = 18;
-
-    private static final int CALLED_ONCE_TILL_DEREGISTER_MINA = 20;
+    private static final int CALLED_ONCE_TILL_DEREGISTER_MINA = 19;
 
     @Inject
     private FlowRegister flowRegister;
@@ -155,14 +153,8 @@ class UpgradeCcmFlowIntegrationTest {
 
     @Test
     public void testCcmUpgradeWhenRegisterCcmFails() throws CloudbreakOrchestratorException {
-        doThrow(new BadRequestException()).when(upgradeCcmService).registerClusterProxy(1L);
+        doThrow(new BadRequestException()).when(upgradeCcmService).registerClusterProxyAndCheckHealth(1L);
         testFlow(CALLED_ONCE_TILL_REGISTER, false);
-    }
-
-    @Test
-    public void testCcmUpgradeWhenHealthCheckFails() throws CloudbreakOrchestratorException {
-        doThrow(new BadRequestException()).when(upgradeCcmService).healthCheck(1L);
-        testFlow(CALLED_ONCE_TILL_HEALTH_CHECK, false);
     }
 
     @Test
@@ -221,9 +213,8 @@ class UpgradeCcmFlowIntegrationTest {
         inOrder.verify(upgradeCcmService, times(expected[i++])).reconfigureNginxState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).reconfigureNginx(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).registerClusterProxyState(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(expected[i++])).registerClusterProxy(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).registerClusterProxyAndCheckHealth(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).healthCheckState(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(expected[i++])).healthCheck(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).removeMinaState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).removeMina(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).deregisterMinaState(STACK_ID);

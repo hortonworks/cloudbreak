@@ -40,9 +40,10 @@ public class UpgradeCcmRegisterClusterProxyHandler extends AbstractUpgradeCcmEve
     @Override
     protected Selectable doAccept(HandlerEvent<UpgradeCcmEvent> event) {
         UpgradeCcmEvent request = event.getData();
+        upgradeCcmService.changeTunnel(request.getResourceId());
         if (request.getOldTunnel().useCcmV1()) {
             LOGGER.info("Registering to cluster proxy for CCM upgrade...");
-            upgradeCcmService.registerClusterProxy(request.getResourceId());
+            upgradeCcmService.registerClusterProxyAndCheckHealth(request.getResourceId());
         } else {
             LOGGER.info("Registering to cluster proxy step is skipped for previous tunnel type '{}'", request.getOldTunnel());
         }

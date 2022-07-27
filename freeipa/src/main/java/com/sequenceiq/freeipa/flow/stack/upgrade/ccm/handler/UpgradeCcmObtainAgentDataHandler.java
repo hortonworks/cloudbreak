@@ -40,6 +40,7 @@ public class UpgradeCcmObtainAgentDataHandler extends AbstractUpgradeCcmEventHan
     @Override
     protected Selectable doAccept(HandlerEvent<UpgradeCcmEvent> event) {
         UpgradeCcmEvent request = event.getData();
+        upgradeCcmService.changeTunnel(request.getResourceId());
         if (request.getOldTunnel().useCcmV1()) {
             LOGGER.info("Obtaining agent data for CCM upgrade...");
             upgradeCcmService.obtainAgentData(request.getResourceId());

@@ -1,13 +1,10 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmService;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmHealthCheckRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmHealthCheckResult;
@@ -21,9 +18,6 @@ import reactor.bus.Event;
 public class HealthCheckHandler extends ExceptionCatcherEventHandler<UpgradeCcmHealthCheckRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HealthCheckHandler.class);
-
-    @Inject
-    private UpgradeCcmService upgradeCcmService;
 
     @Override
     public String selector() {
@@ -40,8 +34,7 @@ public class HealthCheckHandler extends ExceptionCatcherEventHandler<UpgradeCcmH
     public Selectable doAccept(HandlerEvent<UpgradeCcmHealthCheckRequest> event) {
         UpgradeCcmHealthCheckRequest request = event.getData();
         Long stackId = request.getResourceId();
-        LOGGER.info("Health check for CCM upgrade...");
-        upgradeCcmService.healthCheck(stackId);
+        // kept for forward compatibility with CB-14585
         return new UpgradeCcmHealthCheckResult(stackId, request.getClusterId(), request.getOldTunnel());
     }
 }
