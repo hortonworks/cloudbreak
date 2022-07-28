@@ -68,10 +68,16 @@ include:
   - postgresql.pg11
 {%- endif %}
 
+ensure-postgres-stopped-before-initdb:
+  service.dead:
+    - name: postgresql
+    - unless: grep -q UTF-8 {{ postgres_directory }}/initdb.log && test -f {{ postgres_directory }}/data/PG_VERSION
+
 init-db-with-utf8:
   cmd.run:
     - name: rm -rf {{ postgres_directory }}/data/* && runuser -l postgres -s /bin/bash sh -c 'initdb --locale=en_US.UTF-8 {{ postgres_directory }}/data > {{ postgres_directory }}/initdb.log' && rm -f {{ postgres_log_directory }}/pgsql_listen_address_configured
     - unless: grep -q UTF-8 {{ postgres_directory }}/initdb.log && test -f {{ postgres_directory }}/data/PG_VERSION
+    - failhard: True
 
 {%- if postgres_data_on_attached_disk %}
 
