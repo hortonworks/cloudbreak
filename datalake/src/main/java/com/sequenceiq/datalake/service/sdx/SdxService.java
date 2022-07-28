@@ -127,6 +127,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
+import com.sequenceiq.sdx.api.model.SdxRefreshDatahubResponse;
 
 @Service
 public class SdxService implements ResourceIdProvider, PayloadContextProvider, HierarchyAuthResourcePropertyProvider {
@@ -601,20 +602,21 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return Pair.of(sdxCluster, flowIdentifier);
     }
 
-    public SdxCluster refreshDataHub(String clusterName, String datahubName) {
-        if (!entitlementService.isDatalakeLightToMediumMigrationEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            throw new BadRequestException("Refresh of the data hub is not supported");
-        }
+    public SdxRefreshDatahubResponse refreshDataHub(String clusterName, String datahubName) {
+        SdxRefreshDatahubResponse response = new SdxRefreshDatahubResponse();
         String accountIdFromCrn = getAccountIdFromCrn(ThreadBasedUserCrnProvider.getUserCrn());
         SdxCluster sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, clusterName)
                 .orElseThrow(() -> notFound("SDX cluster", clusterName).get());
         if (Strings.isNullOrEmpty(datahubName)) {
             distroxService.restartAttachedDistroxClusters(sdxCluster.getEnvCrn());
-        } else {
-            StackV4Response stackV4Response = distroXV1Endpoint.getByName(datahubName, null);
-            distroxService.restartDistroxByCrns(List.of(stackV4Response.getCrn()));
+            distroxService.getAttachedDistroXClusters(sdxCluster.getEnvCrn())
+                    .forEach(response::addStack);
+            return response;
         }
-        return sdxCluster;
+        StackV4Response stackV4Response = distroXV1Endpoint.getByName(datahubName, null);
+        distroxService.restartDistroxByCrns(List.of(stackV4Response.getCrn()));
+        response.addStack(stackV4Response);
+        return response;
     }
 
     private SdxCluster validateAndCreateNewSdxCluster(String userCrn,

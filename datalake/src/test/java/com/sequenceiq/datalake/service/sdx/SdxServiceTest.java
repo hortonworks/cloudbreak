@@ -1667,4 +1667,27 @@ class SdxServiceTest {
         verify(sdxReactorFlowManager).triggerSaltPasswordRotationTracker(sdxCluster);
     }
 
+    @Test
+    void refreshDatahubsWithoutName() {
+        SdxCluster sdxCluster = getSdxCluster();
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString()))
+                .thenReturn(Optional.of(sdxCluster));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.refreshDataHub(CLUSTER_NAME, null));
+        verify(distroxService, times(1)).restartAttachedDistroxClusters(sdxCluster.getEnvCrn());
+        verify(distroxService, times(1)).getAttachedDistroXClusters(sdxCluster.getEnvCrn());
+    }
+
+    @Test
+    void refreshDatahubsWithName() {
+        SdxCluster sdxCluster = getSdxCluster();
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString()))
+                .thenReturn(Optional.of(sdxCluster));
+        StackV4Response stackV4Response = mock(StackV4Response.class);
+        when(stackV4Response.getCrn()).thenReturn(getCrn());
+        when(distroXV1Endpoint.getByName(anyString(), eq(null))).thenReturn(stackV4Response);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.refreshDataHub(CLUSTER_NAME, "datahubName"));
+        verify(distroXV1Endpoint, times(1)).getByName(anyString(), eq(null));
+        verify(distroxService, times(1)).restartDistroxByCrns(any());
+    }
+
 }
