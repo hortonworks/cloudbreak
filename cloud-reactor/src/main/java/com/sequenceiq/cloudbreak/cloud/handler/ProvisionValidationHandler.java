@@ -46,7 +46,7 @@ public class ProvisionValidationHandler implements CloudPlatformEventHandler<Val
         CloudContext cloudContext = request.getCloudContext();
         ValidationResult result;
         try {
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
             CloudStack cloudStack = request.getCloudStack();
             Set<String> warningMessages = new HashSet<>();

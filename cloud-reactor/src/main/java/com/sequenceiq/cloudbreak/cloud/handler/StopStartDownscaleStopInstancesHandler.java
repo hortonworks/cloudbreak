@@ -47,7 +47,7 @@ public class StopStartDownscaleStopInstancesHandler implements CloudPlatformEven
 
         CloudContext cloudContext = request.getCloudContext();
         try {
-            CloudConnector<?> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = getAuthenticatedContext(request, cloudContext, connector);
 
             List<CloudInstance> cloudInstancesToStop = request.getCloudInstancesToStop();
@@ -82,7 +82,7 @@ public class StopStartDownscaleStopInstancesHandler implements CloudPlatformEven
     }
 
     private AuthenticatedContext getAuthenticatedContext(StopStartDownscaleStopInstancesRequest request,
-            CloudContext cloudContext, CloudConnector<?> connector) {
+            CloudContext cloudContext, CloudConnector connector) {
         return connector.authentication().authenticate(cloudContext, request.getCloudCredential());
     }
 }

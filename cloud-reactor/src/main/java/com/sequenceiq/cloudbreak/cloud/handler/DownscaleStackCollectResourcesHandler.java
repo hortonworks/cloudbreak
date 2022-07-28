@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -12,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackCollectResourcesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackCollectResourcesResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -38,9 +41,9 @@ public class DownscaleStackCollectResourcesHandler implements CloudPlatformEvent
         DownscaleStackCollectResourcesResult result;
         try {
             CloudContext cloudContext = request.getCloudContext();
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
-            Object resourcesToScale = connector.resources().collectResourcesToRemove(ac, request.getCloudStack(),
+            List<CloudResource> resourcesToScale = connector.resources().collectResourcesToRemove(ac, request.getCloudStack(),
                     request.getCloudResources(), request.getInstances());
             LOGGER.debug("Collect resources successfully finished for {}", cloudContext);
             result = new DownscaleStackCollectResourcesResult(request.getResourceId(), resourcesToScale);

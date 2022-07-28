@@ -72,7 +72,7 @@ public class CreateCloudLoadBalancersHandler extends ExceptionCatcherEventHandle
             LOGGER.info("Updating cloud stack with load balancer network information");
             CloudStack origCloudStack = request.getCloudStack();
 
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             LOGGER.debug("Initiating cloud load balancer creation");
             List<CloudResourceStatus> resourceStatus = connector.resources().launchLoadBalancers(ac, origCloudStack, persistenceNotifier);

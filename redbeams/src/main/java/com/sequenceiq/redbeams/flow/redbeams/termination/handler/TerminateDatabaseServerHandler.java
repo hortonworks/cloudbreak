@@ -75,7 +75,7 @@ public class TerminateDatabaseServerHandler extends ExceptionCatcherEventHandler
         TerminateDatabaseServerRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             if (request.getCloudCredential() != null) {
                 AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
                 List<CloudResource> resourcesToTerminate = dbResourceService.getAllAsCloudResource(request.getResourceId());

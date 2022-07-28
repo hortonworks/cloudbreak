@@ -116,7 +116,7 @@ public class CredentialExperienceTest {
     private UserPreferencesRepository userPreferencesRepository;
 
     @Mock
-    private CloudConnector<Object> connector;
+    private CloudConnector connector;
 
     @Mock
     private CredentialConnector credentialConnector;

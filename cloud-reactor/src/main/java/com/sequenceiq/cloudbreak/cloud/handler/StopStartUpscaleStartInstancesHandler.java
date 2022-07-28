@@ -65,7 +65,7 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
 
         CloudContext cloudContext = request.getCloudContext();
         try {
-            CloudConnector<?> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = getAuthenticatedContext(request, cloudContext, connector);
 
             List<CloudInstance> stoppedInstancesInCbHg = request.getStoppedCloudInstancesInHg();
@@ -120,7 +120,7 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
     }
 
     private List<CloudVmInstanceStatus> startInstances(
-            CloudConnector<?> connector, AuthenticatedContext ac, List<CloudInstance> instancesToStart) {
+            CloudConnector connector, AuthenticatedContext ac, List<CloudInstance> instancesToStart) {
         // Note: This timebound can apply thrice along with some delays, given how retries on this API are currently configured for AWS.
         //  The rest of the cloud providers is an UNKNOWN.
         try {
@@ -136,7 +136,7 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
         }
     }
 
-    private List<CloudVmInstanceStatus> getInstanceStatusOnStartError(CloudConnector<?> connector, AuthenticatedContext ac,
+    private List<CloudVmInstanceStatus> getInstanceStatusOnStartError(CloudConnector connector, AuthenticatedContext ac,
             List<CloudInstance> instancesToStart, Exception originalException) {
         try {
             return connector.instances().checkWithoutRetry(ac, instancesToStart);
@@ -150,7 +150,7 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
     }
 
     private List<CloudVmInstanceStatus> collectStoppedInstancesFromCloudProvider(
-            CloudConnector<?> connector, AuthenticatedContext ac, List<CloudInstance> cloudInstances) {
+            CloudConnector connector, AuthenticatedContext ac, List<CloudInstance> cloudInstances) {
         List<CloudVmInstanceStatus> vmInstanceStatusAllInstances = connector.instances().checkWithoutRetry(ac, cloudInstances);
         return vmInstanceStatusAllInstances.stream().filter(vm -> vm.getStatus() == InstanceStatus.STOPPED).collect(Collectors.toList());
     }
@@ -201,7 +201,7 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
     }
 
     private AuthenticatedContext getAuthenticatedContext(StopStartUpscaleStartInstancesRequest request,
-            CloudContext cloudContext, CloudConnector<?> connector) {
+            CloudContext cloudContext, CloudConnector connector) {
         return connector.authentication().authenticate(cloudContext, request.getCloudCredential());
     }
 }

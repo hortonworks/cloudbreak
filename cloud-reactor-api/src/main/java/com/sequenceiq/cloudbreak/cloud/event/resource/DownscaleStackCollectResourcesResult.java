@@ -1,17 +1,18 @@
 package com.sequenceiq.cloudbreak.cloud.event.resource;
 
-import java.util.Collections;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.common.event.FlowPayload;
 
 public class DownscaleStackCollectResourcesResult extends CloudPlatformResult implements FlowPayload {
 
-    private final Object resourcesToScale;
+    private final List<CloudResource> resourcesToScale;
 
-    public DownscaleStackCollectResourcesResult(Long resourceId, Object resourcesToScale) {
+    public DownscaleStackCollectResourcesResult(Long resourceId, List<CloudResource> resourcesToScale) {
         super(resourceId);
         this.resourcesToScale = resourcesToScale;
     }
@@ -22,10 +23,10 @@ public class DownscaleStackCollectResourcesResult extends CloudPlatformResult im
             @JsonProperty("errorDetails") Exception errorDetails,
             @JsonProperty("resourceId") Long resourceId) {
         super(statusReason, errorDetails, resourceId);
-        resourcesToScale = Collections.emptyMap();
+        resourcesToScale = List.of();
     }
 
-    public Object getResourcesToScale() {
+    public List<CloudResource> getResourcesToScale() {
         return resourcesToScale;
     }
 }

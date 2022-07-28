@@ -98,7 +98,7 @@ class AllocateDatabaseServerHandlerTest {
     private CloudCredential cloudCredential;
 
     @Mock
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @Mock
     private Authenticator authenticator;
@@ -107,7 +107,7 @@ class AllocateDatabaseServerHandlerTest {
     private AuthenticatedContext authenticatedContext;
 
     @Mock
-    private ResourceConnector<Object> resourceConnector;
+    private ResourceConnector resourceConnector;
 
     @Mock
     private PollTask<ResourcesStatePollerResult> task;

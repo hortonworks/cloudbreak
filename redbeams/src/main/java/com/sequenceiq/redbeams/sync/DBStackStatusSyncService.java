@@ -116,7 +116,7 @@ public class DBStackStatusSyncService {
             Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
             CloudCredential cloudCredential = credentialConverter.convert(credential);
 
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
             DatabaseStack databaseStack = databaseStackConverter.convert(dbStack);
 

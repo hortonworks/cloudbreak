@@ -121,7 +121,7 @@ public class StorageConsumptionCollectionHandler  extends AbstractStorageOperati
     private ObjectStorageConnector getObjectStorageConnector(String cloudPlatform) {
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(Platform.platform(cloudPlatform), Variant.variant(cloudPlatform));
         return Optional.ofNullable(cloudPlatformConnectors.get(cloudPlatformVariant))
-                .map(CloudConnector<Object>::objectStorage)
+                .map(CloudConnector::objectStorage)
                 .orElseThrow(() -> new NotFoundException("No object storage connector for cloud platform: " + cloudPlatform));
     }
 

@@ -44,7 +44,7 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
         CloudContext cloudContext = request.getCloudContext();
         try {
             LOGGER.debug("Start the stack with platform variant: {}", cloudContext.getPlatformVariant());
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext authenticatedContext = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudInstance> instances = request.getCloudInstances();
             List<CloudVmInstanceStatus> instanceStatuses = connector.instances().start(authenticatedContext, request.getResources(), instances);

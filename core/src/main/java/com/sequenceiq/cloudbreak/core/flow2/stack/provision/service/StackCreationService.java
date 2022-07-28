@@ -267,7 +267,7 @@ public class StackCreationService {
     public void setInstanceStoreCount(StackCreationContext stackContext) {
         StackView stack = stackContext.getStack();
         List<InstanceGroupDto> instanceGroupDtos = stackDtoService.getInstanceMetadataByInstanceGroup(stack.getId());
-        CloudConnector<Object> connector = cloudPlatformConnectors.get(stackContext.getCloudContext().getPlatformVariant());
+        CloudConnector connector = cloudPlatformConnectors.get(stackContext.getCloudContext().getPlatformVariant());
         AuthenticatedContext ac = connector.authentication().authenticate(stackContext.getCloudContext(), stackContext.getCloudCredential());
 
         List<String> instanceTypes = instanceGroupDtos.stream()

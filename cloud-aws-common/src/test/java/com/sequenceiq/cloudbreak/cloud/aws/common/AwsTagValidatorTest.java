@@ -153,7 +153,7 @@ class AwsTagValidatorTest {
         AwsTagValidator awsTagValidator;
 
         @Bean
-        CloudConnector<Object> cloud() {
+        CloudConnector cloud() {
             PlatformParameters parameter = parameters();
             CloudConnector mock = Mockito.mock(CloudConnector.class);
             when(mock.parameters()).thenReturn(parameter);

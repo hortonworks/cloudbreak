@@ -39,7 +39,7 @@ public class CollectMetadataHandler implements CloudPlatformEventHandler<Collect
         LOGGER.debug("Received event: {}", collectMetadataRequestEvent);
         CollectMetadataRequest request = collectMetadataRequestEvent.getData();
         try {
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
 
             List<CloudVmMetaDataStatus> instanceStatuses = connector.metadata()

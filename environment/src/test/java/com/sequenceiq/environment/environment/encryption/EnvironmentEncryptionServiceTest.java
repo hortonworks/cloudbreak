@@ -77,7 +77,7 @@ class EnvironmentEncryptionServiceTest {
     private static final String KEY_URL_RESOURCE_GROUP_NAME = "dummyRG";
 
     @Mock
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @Mock
     private EncryptionResources encryptionResources;

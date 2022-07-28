@@ -94,7 +94,7 @@ class S3GuardTableDeleteHandlerTest {
     private Headers headers;
 
     @Mock
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @Mock
     private NoSqlConnector noSql;

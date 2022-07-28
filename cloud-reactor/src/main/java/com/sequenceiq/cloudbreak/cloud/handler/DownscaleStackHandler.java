@@ -56,7 +56,7 @@ public class DownscaleStackHandler implements CloudPlatformEventHandler<Downscal
         DownscaleStackResult result;
         try {
             CloudContext cloudContext = request.getCloudContext();
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudInstance> removableInstancesWithInstanceId = request.getInstances().stream()
                     .filter(cloudInstance -> cloudInstance.getInstanceId() != null)

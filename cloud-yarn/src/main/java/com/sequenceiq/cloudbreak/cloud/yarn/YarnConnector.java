@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.yarn.auth.YarnAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.yarn.auth.YarnCredentialConnector;
 
 @Service
-public class YarnConnector implements CloudConnector<Object> {
+public class YarnConnector implements CloudConnector {
     @Inject
     private YarnAuthenticator authenticator;
 
@@ -77,7 +77,7 @@ public class YarnConnector implements CloudConnector<Object> {
     }
 
     @Override
-    public ResourceConnector<Object> resources() {
+    public ResourceConnector resources() {
         return resourceConnector;
     }
 

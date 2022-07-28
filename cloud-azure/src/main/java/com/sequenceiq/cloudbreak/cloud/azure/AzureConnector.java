@@ -25,17 +25,16 @@ import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.ValidatorType;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureFileSystemValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureSubnetValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureTagValidator;
-import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureFileSystemValidator;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Service
-public class AzureConnector implements CloudConnector<List<CloudResource>> {
+public class AzureConnector implements CloudConnector {
 
     @Inject
     private AzureAuthenticator azureAuthenticator;
@@ -118,7 +117,7 @@ public class AzureConnector implements CloudConnector<List<CloudResource>> {
     }
 
     @Override
-    public ResourceConnector<List<CloudResource>> resources() {
+    public ResourceConnector resources() {
         return azureResourceConnector;
     }
 

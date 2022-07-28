@@ -85,7 +85,7 @@ public class CloudPlatformConnectorsTest {
         return new FakeCloudConnector(variant, platform);
     }
 
-    private static class FakeCloudConnector implements CloudConnector<Object> {
+    private static class FakeCloudConnector implements CloudConnector {
         private final String variant;
 
         private final String platform;
@@ -116,7 +116,7 @@ public class CloudPlatformConnectorsTest {
         }
 
         @Override
-        public ResourceConnector<Object> resources() {
+        public ResourceConnector resources() {
             return null;
         }
 

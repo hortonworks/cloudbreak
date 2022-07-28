@@ -53,7 +53,7 @@ public class UpdateUserDataOnProviderHandler extends ExceptionCatcherEventHandle
         UserDataUpdateOnProviderRequest request = event.getData();
         try {
             LOGGER.info("Updating userData on cloud provider side...");
-            CloudConnector<?> connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext auth = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
             CloudStack stack = request.getCloudStack();
 

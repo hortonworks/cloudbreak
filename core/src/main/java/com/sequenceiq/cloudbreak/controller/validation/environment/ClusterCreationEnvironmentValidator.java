@@ -122,7 +122,7 @@ public class ClusterCreationEnvironmentValidator {
 
     private boolean isAutoTlsSupportedByCloudPlatform(Stack stack, String parentEnvironmentCloudPlatform) {
         String cloudPlatform = Optional.ofNullable(parentEnvironmentCloudPlatform).orElse(stack.getCloudPlatform());
-        CloudConnector<Object> connector = cloudPlatformConnectors.get(platform(cloudPlatform), Variant.variant(stack.getPlatformVariant()));
+        CloudConnector connector = cloudPlatformConnectors.get(platform(cloudPlatform), Variant.variant(stack.getPlatformVariant()));
         PlatformParameters platformParameters = connector.parameters();
         return platformParameters.isAutoTlsSupported();
     }

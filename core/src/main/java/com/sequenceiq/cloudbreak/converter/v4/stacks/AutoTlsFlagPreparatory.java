@@ -30,7 +30,7 @@ public class AutoTlsFlagPreparatory {
         Boolean autoTlsFlag = Optional.ofNullable(request.getCm())
                 .map(ClouderaManagerV4Request::getEnableAutoTls)
                 .orElseGet(() -> {
-                    CloudConnector<Object> connector = cloudPlatformConnectors.get(
+                    CloudConnector connector = cloudPlatformConnectors.get(
                             Platform.platform(cloudPlatform), Variant.variant(stack.getPlatformVariant()));
                     PlatformParameters platformParameters = connector.parameters();
                     return platformParameters.isAutoTlsSupported();

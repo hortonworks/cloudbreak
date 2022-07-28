@@ -54,7 +54,7 @@ public class DelayedStartStackHandler implements CloudPlatformEventHandler<Delay
         DelayedStartInstancesRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext authenticatedContext = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudInstance> instances = request.getCloudInstances();
             List<CloudVmInstanceStatus> instanceStatuses = startFirstInstance(request.getResources(), connector, authenticatedContext, instances);
@@ -76,12 +76,12 @@ public class DelayedStartStackHandler implements CloudPlatformEventHandler<Delay
         }
     }
 
-    private List<CloudVmInstanceStatus> startFirstInstance(List<CloudResource> resources, CloudConnector<Object> connector,
+    private List<CloudVmInstanceStatus> startFirstInstance(List<CloudResource> resources, CloudConnector connector,
             AuthenticatedContext authenticatedContext, List<CloudInstance> instances) {
         return instances.isEmpty() ? new ArrayList<>(0) : startInstance(resources, connector, authenticatedContext, instances.get(0));
     }
 
-    private List<CloudVmInstanceStatus> startInstance(List<CloudResource> resources, CloudConnector<Object> connector,
+    private List<CloudVmInstanceStatus> startInstance(List<CloudResource> resources, CloudConnector connector,
             AuthenticatedContext authenticatedContext, CloudInstance instance) {
         LOGGER.info("Stop instance: {}", instance);
         return connector.instances().start(authenticatedContext, resources, List.of(instance));

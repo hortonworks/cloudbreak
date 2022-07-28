@@ -44,7 +44,7 @@ public class FreeipaUpscaleStackHandler implements CloudPlatformEventHandler<Ups
         UpscaleStackRequest<UpscaleStackResult> request = upscaleStackRequestEvent.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
-            CloudConnector<?> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = getAuthenticatedContext(request, cloudContext, connector);
             List<CloudResourceStatus> resourceStatus = connector.resources().upscale(ac, request.getCloudStack(), request.getResourceList(),
                     request.getAdjustmentWithThreshold());
@@ -62,7 +62,7 @@ public class FreeipaUpscaleStackHandler implements CloudPlatformEventHandler<Ups
     }
 
     private AuthenticatedContext getAuthenticatedContext(UpscaleStackRequest<UpscaleStackResult> request, CloudContext cloudContext,
-            CloudConnector<?> connector) {
+            CloudConnector connector) {
         return connector.authentication().authenticate(cloudContext, request.getCloudCredential());
     }
 

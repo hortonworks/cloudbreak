@@ -1,5 +1,23 @@
 package com.sequenceiq.redbeams.flow.redbeams.start.handler;
 
+import static com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus.STARTED;
+import static com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus.STOPPED;
+import static com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus.UPDATE_IN_PROGRESS;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -16,25 +34,9 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerSuccess;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
-import static com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus.STARTED;
-import static com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus.STOPPED;
-import static com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus.UPDATE_IN_PROGRESS;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class StartDatabaseServerHandlerTest {
@@ -58,7 +60,7 @@ public class StartDatabaseServerHandlerTest {
     private CloudPlatformVariant cloudPlatformVariant;
 
     @Mock
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @Mock
     private Authenticator authenticator;
@@ -67,7 +69,7 @@ public class StartDatabaseServerHandlerTest {
     private AuthenticatedContext authenticatedContext;
 
     @Mock
-    private ResourceConnector<Object> resourceConnector;
+    private ResourceConnector resourceConnector;
 
     @Mock
     private SyncPollingScheduler<ExternalDatabaseStatus> externalDatabaseStatusSyncPollingScheduler;

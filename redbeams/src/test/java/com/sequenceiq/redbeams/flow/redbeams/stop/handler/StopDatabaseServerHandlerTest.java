@@ -1,5 +1,19 @@
 package com.sequenceiq.redbeams.flow.redbeams.stop.handler;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -16,21 +30,9 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerSuccess;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class StopDatabaseServerHandlerTest {
@@ -54,7 +56,7 @@ public class StopDatabaseServerHandlerTest {
     private CloudPlatformVariant cloudPlatformVariant;
 
     @Mock
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @Mock
     private Authenticator authenticator;
@@ -63,7 +65,7 @@ public class StopDatabaseServerHandlerTest {
     private AuthenticatedContext authenticatedContext;
 
     @Mock
-    private ResourceConnector<Object> resourceConnector;
+    private ResourceConnector resourceConnector;
 
     @Mock
     private SyncPollingScheduler<ExternalDatabaseStatus> externalDatabaseStatusSyncPollingScheduler;

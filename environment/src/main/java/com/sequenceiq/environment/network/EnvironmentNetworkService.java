@@ -153,7 +153,7 @@ public class EnvironmentNetworkService {
     private NetworkConnector getNetworkConnector(String cloudPlatform) {
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(Platform.platform(cloudPlatform), Variant.variant(cloudPlatform));
         return Optional.ofNullable(cloudPlatformConnectors.get(cloudPlatformVariant))
-                .map(CloudConnector<Object>::networkConnector)
+                .map(CloudConnector::networkConnector)
                 .orElseThrow(() -> new NetworkConnectorNotFoundException("No network connector for cloud platform: " + cloudPlatform));
     }
 

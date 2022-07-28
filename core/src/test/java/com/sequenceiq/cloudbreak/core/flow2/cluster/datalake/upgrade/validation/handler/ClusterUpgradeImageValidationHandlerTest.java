@@ -60,7 +60,7 @@ public class ClusterUpgradeImageValidationHandlerTest {
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Mock
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @Mock
     private AuthenticatedContext authenticatedContext;

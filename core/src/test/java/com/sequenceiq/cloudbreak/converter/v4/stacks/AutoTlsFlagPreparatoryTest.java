@@ -51,7 +51,7 @@ class AutoTlsFlagPreparatoryTest {
         ClusterV4Request request = new ClusterV4Request();
         Stack stack = new Stack();
         stack.setPlatformVariant("var");
-        CloudConnector<Object> connector = mock(CloudConnector.class);
+        CloudConnector connector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(Platform.platform("magic"), Variant.variant("var"))).thenReturn(connector);
         PlatformParameters platformParameters = mock(PlatformParameters.class);
         when(connector.parameters()).thenReturn(platformParameters);
@@ -69,7 +69,7 @@ class AutoTlsFlagPreparatoryTest {
         Stack stack = new Stack();
         stack.setPlatformVariant("var");
         stack.setCloudPlatform("magic");
-        CloudConnector<Object> connector = mock(CloudConnector.class);
+        CloudConnector connector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(Platform.platform("magic"), Variant.variant("var"))).thenReturn(connector);
         PlatformParameters platformParameters = mock(PlatformParameters.class);
         when(connector.parameters()).thenReturn(platformParameters);

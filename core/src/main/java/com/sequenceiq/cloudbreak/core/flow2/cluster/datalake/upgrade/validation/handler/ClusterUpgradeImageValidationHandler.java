@@ -62,7 +62,7 @@ public class ClusterUpgradeImageValidationHandler extends ExceptionCatcherEventH
     }
 
     private void executePlatformSpecificValidations(ClusterUpgradeImageValidationEvent request, CloudContext cloudContext) {
-        CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+        CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
         for (Validator validator : connector.validators(ValidatorType.IMAGE)) {
             validator.validate(ac, request.getCloudStack());

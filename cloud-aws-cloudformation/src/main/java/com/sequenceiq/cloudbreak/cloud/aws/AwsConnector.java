@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Service
-public class AwsConnector implements CloudConnector<Object> {
+public class AwsConnector implements CloudConnector {
 
     @Inject
     private AwsResourceConnector awsResourceConnector;
@@ -111,7 +111,7 @@ public class AwsConnector implements CloudConnector<Object> {
     }
 
     @Override
-    public ResourceConnector<Object> resources() {
+    public ResourceConnector resources() {
         return awsResourceConnector;
     }
 
