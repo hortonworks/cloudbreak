@@ -38,4 +38,8 @@ public interface StatusCheckerTask<T> {
     default Optional<String> additionalTimeoutErrorMessage() {
         return Optional.empty();
     }
+
+    default long increasePollingBackoff(long defaultInterval, long consecutiveFailures) {
+        return defaultInterval;
+    }
 }

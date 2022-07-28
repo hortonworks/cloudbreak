@@ -61,6 +61,10 @@ public class ClouderaManagerPollingServiceProvider {
 
     private static final long POLL_FOR_10_MINUTES = TimeUnit.MINUTES.toSeconds(10);
 
+    private static final int DEFAULT_BACKOFF_NODECOUNT_LIMIT = 50;
+
+    private static final int BACKOFF_NODE_COUNT_MULTIPLIER = 25;
+
     @Inject
     private ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
 
@@ -285,7 +289,7 @@ public class ClouderaManagerPollingServiceProvider {
         return clouderaManagerCommandPollerObjectPollingService.pollWithAbsoluteTimeout(
                 listenerTask,
                 pollerObject,
-                POLL_INTERVAL,
+                getPollInterval(stack),
                 ClouderaManagerPollingTimeoutProvider.getSyncApiCommandTimeout(stack.getCloudPlatform()));
     }
 
@@ -295,7 +299,7 @@ public class ClouderaManagerPollingServiceProvider {
         return clouderaManagerCommandListPollerObjectPollingService.pollWithAbsoluteTimeout(
                 listenerTask,
                 clouderaManagerCommandPollerObject,
-                POLL_INTERVAL,
+                getPollInterval(stack),
                 maximumWaitTimeInSeconds);
     }
 
@@ -305,7 +309,7 @@ public class ClouderaManagerPollingServiceProvider {
         return clouderaManagerPollerObjectPollingService.pollWithAbsoluteTimeout(
                 listenerTask,
                 clouderaManagerPollerObject,
-                POLL_INTERVAL,
+                getPollInterval(stack),
                 maximumWaitTimeInSeconds);
     }
 
@@ -315,7 +319,7 @@ public class ClouderaManagerPollingServiceProvider {
         return clouderaManagerCommandPollerObjectPollingService.pollWithAbsoluteTimeout(
                 listenerTask,
                 clouderaManagerCommandPollerObject,
-                POLL_INTERVAL,
+                getPollInterval(stack),
                 maximumWaitTimeInSeconds);
     }
 
@@ -325,7 +329,7 @@ public class ClouderaManagerPollingServiceProvider {
         return clouderaManagerCommandPollerObjectPollingService.pollWithAttempt(
                 listenerTask,
                 clouderaManagerCommandPollerObject,
-                POLL_INTERVAL,
+                getPollInterval(stack),
                 numAttempts);
     }
 
@@ -335,7 +339,15 @@ public class ClouderaManagerPollingServiceProvider {
         return clouderaManagerPollerObjectPollingService.pollWithAttempt(
                 listenerTask,
                 clouderaManagerPollerObject,
-                POLL_INTERVAL,
+                getPollInterval(stack),
                 numAttempts);
+    }
+
+    private static int getPollInterval(StackDtoDelegate stackDtoDelegate) {
+        int instanceCount = stackDtoDelegate.getNotTerminatedInstanceMetaData().size();
+        if (instanceCount < DEFAULT_BACKOFF_NODECOUNT_LIMIT) {
+            return POLL_INTERVAL;
+        }
+        return POLL_INTERVAL + (instanceCount * BACKOFF_NODE_COUNT_MULTIPLIER);
     }
 }
