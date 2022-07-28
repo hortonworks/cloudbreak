@@ -26,6 +26,8 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
 
     private static final int TOLERATED_ERROR_LIMIT = 5;
 
+    private static final int EXPONENTIAL_BASE = 2;
+
     //CHECKSTYLE:OFF
     protected final ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
 
@@ -124,5 +126,12 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
     @Override
     public String successMessage(T t) {
         return String.format("Cloudera Manager API checking [%s] was a success", getPollingName());
+    }
+
+    @Override
+    public long increasePollingBackoff(long defaultInterval, long consecutiveFailures) {
+        double newPollingBackoff = defaultInterval * Math.pow(EXPONENTIAL_BASE, consecutiveFailures);
+        LOGGER.trace("New backoff value for [{}] polling is {} ms.", getPollingName(), newPollingBackoff);
+        return (long) newPollingBackoff;
     }
 }

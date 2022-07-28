@@ -37,6 +37,7 @@ public class PollingService<T> {
         boolean timeout = false;
         int attempts = 0;
         int consecutiveFailures = 0;
+        long defaultInterval = interval;
         Exception actual = null;
         boolean exit = false;
         if (statusCheckerTask.initialExitCheck(t)) {
@@ -47,11 +48,13 @@ public class PollingService<T> {
             try {
                 success = statusCheckerTask.checkStatus(t);
                 consecutiveFailures = 0;
+                interval = defaultInterval;
             } catch (Exception ex) {
                 consecutiveFailures++;
                 actual = ex;
                 LOGGER.debug("Exception occurred in the polling: {}. Number of consecutive failures: [{}/{}]",
                         ex.getMessage(), consecutiveFailures, maxConsecutiveFailures, ex);
+                interval = statusCheckerTask.increasePollingBackoff(defaultInterval, consecutiveFailures);
             }
             if (consecutiveFailures >= maxConsecutiveFailures) {
                 LOGGER.debug("Polling failure reached the limit which was {}, poller will drop the last exception.", maxConsecutiveFailures);
