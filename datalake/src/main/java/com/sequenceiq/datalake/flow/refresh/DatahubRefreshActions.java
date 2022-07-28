@@ -70,7 +70,7 @@ public class DatahubRefreshActions {
                 SdxCluster sdxCluster = sdxService.getById(context.getSdxId());
                 variables.put(SDX, sdxCluster);
                 eventSenderService.sendEventAndNotification(
-                        sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_STARTED);
+                        sdxCluster, ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_STARTED);
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         "Data Hub refresh in progress", payload.getResourceId());
                 sdxRefreshService.refreshAllDatahub(payload.getResourceId());
@@ -120,7 +120,7 @@ public class DatahubRefreshActions {
                 LOGGER.info("Data Hub refresh finished for: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, "Datahub refresh finished", payload.getResourceId());
                 eventSenderService.sendEventAndNotification(
-                        (SdxCluster) variables.get(SDX), context.getFlowTriggerUserCrn(), ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_FINISHED);
+                        (SdxCluster) variables.get(SDX), ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_FINISHED);
                 sdxRefreshService.refreshAllDatahub(payload.getResourceId());
                 sendEvent(context, DatahubRefreshFlowEvent.DATAHUB_REFRESH_FINALIZED_EVENT.selector(), payload);
 
@@ -146,7 +146,7 @@ public class DatahubRefreshActions {
             protected void doExecute(SdxContext context, DatahubRefreshFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.error("Data Hub refresh failed for: {}", payload.getResourceId(), payload.getException());
                 eventSenderService.sendEventAndNotification(
-                        (SdxCluster) variables.get(SDX), context.getFlowTriggerUserCrn(), ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_FAILED);
+                        (SdxCluster) variables.get(SDX), ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_FAILED);
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         "Data Hub refresh failed", payload.getResourceId());
                 sendEvent(context, DatahubRefreshFlowEvent.DATAHUB_REFRESH_FAILED_HANDLED_EVENT.selector(), payload);

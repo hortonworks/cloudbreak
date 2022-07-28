@@ -58,28 +58,28 @@ public class EventSenderService {
     public void notifyEvent(SdxContext context, ResourceEvent resourceEvent) {
         SdxCluster sdxCluster = sdxService.getById(context.getSdxId());
         if (sdxCluster != null) {
-            sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), resourceEvent, List.of(sdxCluster.getName()));
+            sendEventAndNotification(sdxCluster, resourceEvent, List.of(sdxCluster.getName()));
         }
     }
 
     public void notifyEvent(SdxCluster sdxCluster, SdxContext context, ResourceEvent resourceEvent) {
         if (sdxCluster != null) {
-            sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), resourceEvent);
+            sendEventAndNotification(sdxCluster, resourceEvent);
         }
     }
 
-    public void sendEventAndNotification(SdxCluster sdxCluster, String userCrn, ResourceEvent resourceEvent) {
-        sendEventAndNotification(sdxCluster, userCrn, resourceEvent, new HashSet<>());
+    public void sendEventAndNotification(SdxCluster sdxCluster, ResourceEvent resourceEvent) {
+        sendEventAndNotification(sdxCluster, resourceEvent, new HashSet<>());
     }
 
-    public void sendEventAndNotification(SdxCluster sdxCluster, String userCrn, ResourceEvent resourceEvent,
+    public void sendEventAndNotification(SdxCluster sdxCluster, ResourceEvent resourceEvent,
             Collection<?> messageArgs) {
 
         SdxClusterDto sdxClusterToDto = sdxClusterDtoConverter.sdxClusterToDto(sdxCluster);
-        sendEventAndNotificationWithPayload(sdxClusterToDto, userCrn, resourceEvent, sdxClusterToDto, messageArgs);
+        sendEventAndNotificationWithPayload(sdxClusterToDto, resourceEvent, sdxClusterToDto, messageArgs);
     }
 
-    public void sendEventAndNotificationWithPayload(AccountAwareResource resource, String userCrn, ResourceEvent resourceEvent, Object payload,
+    public void sendEventAndNotificationWithPayload(AccountAwareResource resource, ResourceEvent resourceEvent, Object payload,
             Collection<?> messageArgs) {
         CDPStructuredNotificationEvent cdpStructuredEvent = getStructuredEvent(resource, resourceEvent, payload, messageArgs);
         cdpDefaultStructuredEventClient.sendStructuredEvent(cdpStructuredEvent);

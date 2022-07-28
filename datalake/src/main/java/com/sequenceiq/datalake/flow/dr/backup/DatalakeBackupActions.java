@@ -22,7 +22,6 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.dyngr.exception.PollerStoppedException;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -99,7 +98,7 @@ public class DatalakeBackupActions {
                 LOGGER.info("Triggering data lake backup for {}", payload.getResourceId());
 
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_BACKUP_IN_PROGRESS);
+                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_BACKUP_IN_PROGRESS);
 
                 DatalakeBackupStatusResponse backupStatusResponse =
                         sdxBackupRestoreService.triggerDatalakeBackup(payload.getResourceId(), payload.getBackupLocation(),
@@ -204,7 +203,7 @@ public class DatalakeBackupActions {
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.FAILED, payload.getException().getMessage());
 
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_DATABASE_BACKUP_FAILED);
+                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_DATABASE_BACKUP_FAILED);
 
                 sendEvent(context, DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT.event(), payload);
             }
@@ -231,7 +230,7 @@ public class DatalakeBackupActions {
                 String operationId = (String) variables.get(OPERATION_ID);
                 String backupId = (String) variables.get(BACKUP_ID);
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                eventSenderService.sendEventAndNotification(sdxCluster, ThreadBasedUserCrnProvider.getUserCrn(), DATALAKE_DATABASE_BACKUP_FINISHED);
+                eventSenderService.sendEventAndNotification(sdxCluster, DATALAKE_DATABASE_BACKUP_FINISHED);
                 SdxDatabaseBackupStatusResponse backupStatusResponse =
                         sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, operationId);
                 if (backupStatusResponse.getStatus().equals(DatalakeDatabaseDrStatus.INPROGRESS)) {
@@ -265,7 +264,7 @@ public class DatalakeBackupActions {
                         ResourceEvent.DATALAKE_BACKUP_FINISHED,
                         "Datalake backup finished, Datalake is running", payload.getResourceId());
 
-                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_BACKUP_FINISHED);
+                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_BACKUP_FINISHED);
 
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_FINISHED, sdxCluster);
             }
@@ -294,7 +293,7 @@ public class DatalakeBackupActions {
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.FAILED, exception.getLocalizedMessage());
 
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_DATABASE_BACKUP_FAILED);
+                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_DATABASE_BACKUP_FAILED);
 
                 sendEvent(context, DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT.event(), payload);
             }
@@ -326,8 +325,7 @@ public class DatalakeBackupActions {
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_FAILED, sdxCluster);
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(exception);
-                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(),
-                        ResourceEvent.DATALAKE_BACKUP_FAILED, List.of(exception.getMessage()));
+                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_BACKUP_FAILED, List.of(exception.getMessage()));
 
                 sendEvent(context, DATALAKE_BACKUP_FAILURE_HANDLED_EVENT.event(), payload);
             }

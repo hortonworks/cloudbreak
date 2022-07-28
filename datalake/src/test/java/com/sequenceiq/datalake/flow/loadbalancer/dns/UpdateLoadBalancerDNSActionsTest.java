@@ -137,7 +137,7 @@ class UpdateLoadBalancerDNSActionsTest {
         verify(eventSenderService, times(1))
                 .notifyEvent(eq(sdxCluster), eq(sdxContext), eq(ResourceEvent.UPDATE_LOAD_BALANCER_DNS_FINISHED));
         verify(eventSenderService, times(1))
-                .sendEventAndNotification(eq(sdxCluster), eq(USER_CRN), eq(ResourceEvent.DATALAKE_RECOVERY_FINISHED));
+                .sendEventAndNotification(eq(sdxCluster), eq(ResourceEvent.DATALAKE_RECOVERY_FINISHED));
 
         ArgumentCaptor<StartUpdateLoadBalancerDNSEvent> captor = ArgumentCaptor.forClass(StartUpdateLoadBalancerDNSEvent.class);
         verify(reactorEventFactory, times(1)).createEvent(any(), captor.capture());

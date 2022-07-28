@@ -84,7 +84,7 @@ public class UpdateLoadBalancerDNSActions {
                 if (lastFlowLog.isPresent()) {
                     Optional<FlowChainLog> flowChainLog = flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(lastFlowLog.get().getFlowChainId());
                     if (flowChainLog.isPresent() && flowChainLog.get().getFlowChainType().equals(DatalakeResizeFlowEventChainFactory.class.getSimpleName())) {
-                        eventSenderService.sendEventAndNotification(sdxCluster, context.getUserId(), ResourceEvent.DATALAKE_RECOVERY_FINISHED);
+                        eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_RECOVERY_FINISHED);
                     }
                 }
             }
@@ -113,7 +113,7 @@ public class UpdateLoadBalancerDNSActions {
                         payload.getResourceId(), payload.getSdxName(), exception.getMessage(), exception);
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
                 eventSenderService.sendEventAndNotification(
-                        sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.UPDATE_LOAD_BALANCER_DNS_FAILED,
+                        sdxCluster, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_FAILED,
                         Set.of(exception.getMessage())
                 );
                 getFlow(context.getFlowParameters().getFlowId()).setFlowFailed(payload.getException());

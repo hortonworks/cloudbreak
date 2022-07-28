@@ -197,7 +197,7 @@ public class StackRequestManifester {
         }
         if (validationResult.hasWarning()) {
             LOGGER.info(validationResult.getFormattedWarnings());
-            eventSenderService.sendEventAndNotification(sdxCluster, ThreadBasedUserCrnProvider.getUserCrn(),
+            eventSenderService.sendEventAndNotification(sdxCluster,
                     ResourceEvent.SDX_VALIDATION_FAILED_AND_SKIPPED, Set.of(validationResult.getFormattedWarnings()));
             sdxNotificationService.send(ResourceEvent.SDX_VALIDATION_FAILED_AND_SKIPPED,
                     Set.of(validationResult.getFormattedWarnings()), sdxCluster);

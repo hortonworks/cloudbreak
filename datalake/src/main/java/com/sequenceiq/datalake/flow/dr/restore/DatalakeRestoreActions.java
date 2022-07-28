@@ -205,7 +205,7 @@ public class DatalakeRestoreActions {
                         ResourceEvent.DATALAKE_RESTORE_IN_PROGRESS,
                         "Datalake restore in progress", payload.getResourceId());
 
-                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_RESTORE_IN_PROGRESS);
+                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_RESTORE_IN_PROGRESS);
 
                 metricService.incrementMetricCounter(MetricType.SDX_RESTORE_REQUESTED, sdxCluster);
                 sendEvent(context, DatalakeDatabaseRestoreWaitRequest.from(context, operationId));
@@ -290,7 +290,7 @@ public class DatalakeRestoreActions {
                         ResourceEvent.DATALAKE_RESTORE_FINISHED,
                         "Datalake restore finished, Datalake is running", payload.getResourceId());
 
-                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_RESTORE_FINISHED);
+                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_RESTORE_FINISHED);
 
                 metricService.incrementMetricCounter(MetricType.SDX_RESTORE_FINISHED, sdxCluster);
                 sendEvent(context, DATALAKE_DATABASE_RESTORE_FINALIZED_EVENT.event(), payload);
@@ -347,7 +347,7 @@ public class DatalakeRestoreActions {
                         ResourceEvent.DATALAKE_RESTORE_FINISHED,
                         "Datalake is running, Datalake restore failed", payload.getResourceId());
 
-                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_RESTORE_FAILED,
+                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_RESTORE_FAILED,
                         List.of(exception.getMessage()));
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(payload.getException());

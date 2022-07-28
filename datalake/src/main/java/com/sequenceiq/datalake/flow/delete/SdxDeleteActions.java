@@ -207,7 +207,7 @@ public class SdxDeleteActions {
 
                     if (sdxCluster.isDetached()) {
                         eventSenderService.sendEventAndNotification(
-                                sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.SDX_DETACHED_CLUSTER_DELETION_FAILED,
+                                sdxCluster, ResourceEvent.SDX_DETACHED_CLUSTER_DELETION_FAILED,
                                 List.of(sdxCluster.getClusterName())
                         );
                     } else {

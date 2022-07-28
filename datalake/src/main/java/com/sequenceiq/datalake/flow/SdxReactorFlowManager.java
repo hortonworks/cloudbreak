@@ -118,7 +118,7 @@ public class SdxReactorFlowManager {
         boolean performRestore = sdxBackupRestoreService.shouldSdxRestoreBePerformed(
                 newSdxCluster, entitlementService.isDatalakeBackupOnResizeEnabled(ThreadBasedUserCrnProvider.getAccountId())
         );
-        eventSenderService.sendEventAndNotification(newSdxCluster, userId, DATALAKE_RESIZE_TRIGGERED);
+        eventSenderService.sendEventAndNotification(newSdxCluster, DATALAKE_RESIZE_TRIGGERED);
         return notify(SDX_RESIZE_FLOW_CHAIN_START_EVENT, new DatalakeResizeFlowChainStartEvent(sdxClusterId, newSdxCluster, userId,
                 environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn()), performBackup, performRestore), newSdxCluster.getClusterName());
     }
@@ -127,7 +127,7 @@ public class SdxReactorFlowManager {
         LOGGER.info("Triggering recovery for failed SDX resize with original cluster: {} and resized cluster: {}",
                 oldSdxCluster, newSdxCluster);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        eventSenderService.sendEventAndNotification(newSdxCluster, userId, ResourceEvent.DATALAKE_RECOVERY_STARTED);
+        eventSenderService.sendEventAndNotification(newSdxCluster, ResourceEvent.DATALAKE_RECOVERY_STARTED);
         return notify(
                 SDX_RESIZE_RECOVERY_FLOW_CHAIN_START_EVENT,
                 new DatalakeResizeRecoveryFlowChainStartEvent(oldSdxCluster, newSdxCluster, userId),

@@ -79,7 +79,7 @@ public class SdxDetachActions {
                 variables.put(DETACHED_SDX, detached);
                 variables.put(IS_DETACH_DURING_RECOVERY, payload.isDetachDuringRecovery());
                 eventSenderService.sendEventAndNotification(
-                        detached, context.getFlowTriggerUserCrn(), ResourceEvent.SDX_DETACH_STARTED,
+                        detached, ResourceEvent.SDX_DETACH_STARTED,
                         List.of(detached.getClusterName())
                 );
                 sendEvent(context, SDX_DETACH_CLUSTER_SUCCESS_EVENT.event(), payload);

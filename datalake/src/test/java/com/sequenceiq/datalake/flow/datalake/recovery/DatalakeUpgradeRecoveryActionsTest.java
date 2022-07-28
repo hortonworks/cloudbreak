@@ -91,7 +91,7 @@ public class DatalakeUpgradeRecoveryActionsTest {
         testSupport.doExecute(sdxContext, datalakeRecoveryStartEvent, new HashMap<>());
         verify(sdxRecoveryService).recoverCluster(anyLong());
         verify(eventSenderService, times(1))
-                .sendEventAndNotification(any(SdxCluster.class), anyString(), eq(DATALAKE_RECOVERY_STARTED));
+                .sendEventAndNotification(any(SdxCluster.class), eq(DATALAKE_RECOVERY_STARTED));
         ArgumentCaptor<DatalakeRecoveryStartEvent> captor = ArgumentCaptor.forClass(DatalakeRecoveryStartEvent.class);
         verify(reactorEventFactory, times(1)).createEvent(any(), captor.capture());
         DatalakeRecoveryStartEvent captorValue = captor.getValue();
@@ -123,7 +123,7 @@ public class DatalakeUpgradeRecoveryActionsTest {
                 eq("Recovery finished"),
                 eq(SDX_ID));
         verify(eventSenderService, times(1))
-                .sendEventAndNotification(eq(sdxCluster), anyString(), eq(ResourceEvent.DATALAKE_RECOVERY_FINISHED));
+                .sendEventAndNotification(eq(sdxCluster), eq(ResourceEvent.DATALAKE_RECOVERY_FINISHED));
     }
 
     private SdxCluster generateCluster() {
