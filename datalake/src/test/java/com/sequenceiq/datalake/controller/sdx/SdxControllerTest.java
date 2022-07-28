@@ -24,14 +24,18 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.metric.SdxMetricService;
+import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.SdxChangeImageCatalogRequest;
@@ -62,6 +66,18 @@ class SdxControllerTest {
 
     @Mock
     private SdxImageCatalogService sdxImageCatalogService;
+
+    @Mock
+    private SdxClusterRepository sdxClusterRepository;
+
+    @Mock
+    private DistroxService distroxService;
+
+    @Mock
+    private DistroXV1Endpoint distroXV1Endpoint;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private SdxController sdxController;
@@ -166,6 +182,12 @@ class SdxControllerTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.rotateSaltPasswordByCrn(sdxCluster.getCrn()));
 
         verify(sdxService).rotateSaltPassword(sdxCluster);
+    }
+
+    @Test
+    void refreshDatahubs() {
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.refreshDataHubs(SDX_CLUSTER_NAME, null));
+        verify(sdxService, times(1)).refreshDataHub(SDX_CLUSTER_NAME, null);
     }
 
     private SdxCluster getValidSdxCluster() {
