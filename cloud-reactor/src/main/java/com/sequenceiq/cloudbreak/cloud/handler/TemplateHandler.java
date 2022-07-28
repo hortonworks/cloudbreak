@@ -32,7 +32,7 @@ public class TemplateHandler implements CloudPlatformEventHandler<GetPlatformTem
         GetPlatformTemplateRequest request = platformTemplateRequestEvent.getData();
         String template = null;
         try {
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             if (connector != null) {
                 template = connector.resources().getStackTemplate();
             }

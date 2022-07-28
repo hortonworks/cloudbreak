@@ -35,7 +35,7 @@ class NoSqlTableCreationModeDeterminerServiceTest {
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @Mock
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @Mock
     private NoSqlConnector noSql;

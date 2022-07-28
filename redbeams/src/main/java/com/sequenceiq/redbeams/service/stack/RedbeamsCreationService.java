@@ -103,7 +103,7 @@ public class RedbeamsCreationService {
         // for now, just get it synchronously / within this thread, it ought to be quick
         CloudPlatformVariant platformVariant = new CloudPlatformVariant(dbStack.getCloudPlatform(), dbStack.getPlatformVariant());
         try {
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(platformVariant);
+            CloudConnector connector = cloudPlatformConnectors.get(platformVariant);
             if (connector == null) {
                 throw new RedbeamsException("Failed to find cloud connector for platform variant " + platformVariant);
             }

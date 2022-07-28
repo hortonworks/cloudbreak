@@ -14,18 +14,18 @@ public class DownscaleStackRequest extends CloudStackRequest<DownscaleStackResul
 
     private final List<CloudInstance> instances;
 
-    private final Object resourcesToScale;
+    private final List<CloudResource> resourcesToScale;
 
     public DownscaleStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack, List<CloudResource> cloudResources,
             List<CloudInstance> instances) {
         super(cloudContext, cloudCredential, cloudStack);
         this.cloudResources = cloudResources;
         this.instances = instances;
-        resourcesToScale = null;
+        resourcesToScale = List.of();
     }
 
     public DownscaleStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack, List<CloudResource> cloudResources,
-            List<CloudInstance> instances, Object resourcesToScale) {
+            List<CloudInstance> instances, List<CloudResource> resourcesToScale) {
         super(cloudContext, cloudCredential, cloudStack);
         this.cloudResources = cloudResources;
         this.instances = instances;
@@ -40,7 +40,7 @@ public class DownscaleStackRequest extends CloudStackRequest<DownscaleStackResul
         return instances;
     }
 
-    public Object getResourcesToScale() {
+    public List<CloudResource> getResourcesToScale() {
         return resourcesToScale;
     }
 }

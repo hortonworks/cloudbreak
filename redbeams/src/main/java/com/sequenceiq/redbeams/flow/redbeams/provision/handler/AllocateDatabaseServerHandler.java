@@ -76,7 +76,7 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
         CloudContext cloudContext = request.getCloudContext();
         Selectable response;
         try {
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             CloudCredential cloudCredential = request.getCloudCredential();
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
             DatabaseStack databaseStack = request.getDatabaseStack();

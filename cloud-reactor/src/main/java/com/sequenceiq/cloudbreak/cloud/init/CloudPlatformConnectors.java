@@ -43,7 +43,7 @@ public class CloudPlatformConnectors {
     @Inject
     private List<CloudConnector> cloudConnectors;
 
-    private final Map<CloudPlatformVariant, CloudConnector<Object>> map = new HashMap<>();
+    private final Map<CloudPlatformVariant, CloudConnector> map = new HashMap<>();
 
     private Multimap<Platform, Variant> platformToVariants;
 
@@ -117,31 +117,31 @@ public class CloudPlatformConnectors {
         return defaultGovVariants.get(platform);
     }
 
-    public CloudConnector<Object> getDefault(Platform platform) {
+    public CloudConnector getDefault(Platform platform) {
         Variant variant = getDefaultVariant(platform);
         return map.get(new CloudPlatformVariant(platform, variant));
     }
 
-    public CloudConnector<Object> getGovDefault(Platform platform) {
+    public CloudConnector getGovDefault(Platform platform) {
         Variant variant = getDefaultGovVariant(platform);
         return map.get(new CloudPlatformVariant(platform, variant));
     }
 
-    public CloudConnector<Object> get(Platform platform, Variant variant) {
+    public CloudConnector get(Platform platform, Variant variant) {
         return get(new CloudPlatformVariant(platform, variant));
     }
 
-    public CloudConnector<Object> getGov(Platform platform, Variant variant) {
+    public CloudConnector getGov(Platform platform, Variant variant) {
         return getGov(new CloudPlatformVariant(platform, variant));
     }
 
-    public CloudConnector<Object> get(CloudPlatformVariant variant) {
-        CloudConnector<Object> cloudConnector = map.get(variant);
+    public CloudConnector get(CloudPlatformVariant variant) {
+        CloudConnector cloudConnector = map.get(variant);
         return cloudConnector == null ? getDefault(variant.getPlatform()) : cloudConnector;
     }
 
-    public CloudConnector<Object> getGov(CloudPlatformVariant variant) {
-        CloudConnector<Object> cloudConnector = map.get(variant);
+    public CloudConnector getGov(CloudPlatformVariant variant) {
+        CloudConnector cloudConnector = map.get(variant);
         return cloudConnector == null ? getGovDefault(variant.getPlatform()) : cloudConnector;
     }
 

@@ -58,7 +58,7 @@ public class StopDatabaseServerHandler implements EventHandler<StopDatabaseServe
         StopDatabaseServerRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
 
             ExternalDatabaseStatus status = connector.resources().getDatabaseServerStatus(ac, request.getDbStack());

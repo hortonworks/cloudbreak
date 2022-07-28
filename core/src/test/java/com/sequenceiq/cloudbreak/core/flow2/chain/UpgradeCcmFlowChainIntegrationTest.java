@@ -158,7 +158,7 @@ class UpgradeCcmFlowChainIntegrationTest {
     private FlowChains flowChains;
 
     @Mock
-    private ResourceConnector<Object> resourcesApi;
+    private ResourceConnector resourcesApi;
 
     private Stack mockStack() {
         Stack stack = new Stack();
@@ -197,7 +197,7 @@ class UpgradeCcmFlowChainIntegrationTest {
         Image image = new Image("alma", Map.of(InstanceGroupType.GATEWAY, USER_DATA), "", "", "", "", "", null);
         when(imageService.getImage(STACK_ID)).thenReturn(image);
 
-        CloudConnector<Object> connector = mock(CloudConnector.class);
+        CloudConnector connector = mock(CloudConnector.class);
         AuthenticatedContext context = mock(AuthenticatedContext.class);
         Authenticator authApi = mock(Authenticator.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(connector);

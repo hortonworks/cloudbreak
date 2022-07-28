@@ -31,7 +31,7 @@ public class CheckPlatformVariantHandler implements CloudPlatformEventHandler<Ch
         LOGGER.debug("Received event: {}", defaultPlatformVariantRequestEvent);
         CheckPlatformVariantRequest request = defaultPlatformVariantRequestEvent.getData();
         try {
-            CloudConnector<?> connector = getConnector(request);
+            CloudConnector connector = getConnector(request);
             Variant defaultVariant = connector.variant();
             CheckPlatformVariantResult platformParameterResult = new CheckPlatformVariantResult(request.getResourceId(), defaultVariant);
             request.getResult().onNext(platformParameterResult);
@@ -41,7 +41,7 @@ public class CheckPlatformVariantHandler implements CloudPlatformEventHandler<Ch
         }
     }
 
-    private CloudConnector<Object> getConnector(CheckPlatformVariantRequest request) {
+    private CloudConnector getConnector(CheckPlatformVariantRequest request) {
         if (request.getCloudContext().isGovCloud()) {
             return cloudPlatformConnectors.getGov(request.getCloudContext().getPlatform(), request.getCloudContext().getVariant());
         } else {

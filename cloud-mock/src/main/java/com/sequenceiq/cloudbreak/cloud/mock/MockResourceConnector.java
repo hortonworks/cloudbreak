@@ -43,7 +43,7 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
-public class MockResourceConnector implements ResourceConnector<Object> {
+public class MockResourceConnector implements ResourceConnector {
 
     public static final String MOCK_RDS_PORT = "1234";
 
@@ -215,14 +215,14 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public Object collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack,
+    public List<CloudResource> collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack,
             List<CloudResource> resources, List<CloudInstance> vms) {
         return null;
     }
 
     @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
-            List<CloudInstance> vms, Object resourcesToRemove) {
+            List<CloudInstance> vms, List<CloudResource> resourcesToRemove) {
         mockUrlFactory.get(authenticatedContext, "/spi/terminate_instances").post(Entity.entity(vms, MediaType.APPLICATION_JSON_TYPE), String.class);
         List<String> instanceIdsToDownscale = new ArrayList<>();
         for (CloudInstance vm : vms) {

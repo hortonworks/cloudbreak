@@ -26,7 +26,7 @@ public class LoadBalancerMetadataService {
     public List<CloudLoadBalancerMetadata> collectMetadata(CloudContext cloudContext, CloudCredential cloudCredential,
             List<LoadBalancerType> types, List<CloudResource> cloudResources) {
         LOGGER.debug("Initiating load balancer metadata collection");
-        CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+        CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
         List<CloudLoadBalancerMetadata> loadBalancerStatuses = connector.metadata().collectLoadBalancer(ac, types, cloudResources);
         LOGGER.debug("Load balancer metadata collection successfully finished. Collected metadata: {}", loadBalancerStatuses);

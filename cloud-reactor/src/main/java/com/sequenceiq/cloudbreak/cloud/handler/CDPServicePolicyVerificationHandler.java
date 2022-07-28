@@ -44,7 +44,7 @@ public class CDPServicePolicyVerificationHandler implements CloudPlatformEventHa
         List<String> services = request.getServices();
         Map<String, String> experiencePrerequisites = request.getExperiencePrerequisites();
         try {
-            CloudConnector<Object> connector = cloudPlatformConnectors.getDefault(request.getCloudContext().getPlatform());
+            CloudConnector connector = cloudPlatformConnectors.getDefault(request.getCloudContext().getPlatform());
             AuthenticatedContext ac;
             CDPServicePolicyVerificationResponses cdpServicePolicyVerificationResponses;
             try {

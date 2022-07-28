@@ -83,7 +83,7 @@ class RedbeamsCreationServiceTest {
     private DBStack dbStack;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private CloudConnector<Object> connector;
+    private CloudConnector connector;
 
     @BeforeEach
     public void setup() {

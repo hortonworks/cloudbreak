@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -55,10 +54,10 @@ public class RemoveInstanceHandler implements CloudPlatformEventHandler<RemoveIn
         RemoveInstanceResult result;
         try {
             CloudContext cloudContext = request.getCloudContext();
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudResourceStatus> resourceStatus = connector.resources().downscale(ac, request.getCloudStack(), request.getCloudResources(),
-                    request.getInstances(), Collections.emptyMap());
+                    request.getInstances(), List.of());
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);
             ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatus);

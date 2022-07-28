@@ -2,9 +2,13 @@ package com.sequenceiq.cloudbreak.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Iterator;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openpojo.random.RandomFactory;
 import com.openpojo.reflection.PojoClass;
@@ -32,7 +36,11 @@ class InstanceMetadataToArchivedInstanceMetadataConverterTest {
 
         String imJson = objectMapper.writeValueAsString(instanceMetaData);
         String aimJson = objectMapper.writeValueAsString(result);
-        assertEquals(objectMapper.readTree(imJson), objectMapper.readTree(aimJson),
+        JsonNode expected = objectMapper.readTree(imJson);
+        JsonNode actual = objectMapper.readTree(aimJson);
+        removeTyping(expected);
+        removeTyping(actual);
+        assertEquals(expected, actual,
                 "Converted ArchivedInstanceMetaData should have the same fields and values.");
     }
 
@@ -54,5 +62,14 @@ class InstanceMetadataToArchivedInstanceMetadataConverterTest {
         InstanceMetaData instanceMetaData = (InstanceMetaData) classInstance;
         instanceMetaData.setServer(instanceMetaData.getClusterManagerServer());
         return instanceMetaData;
+    }
+
+    private static void removeTyping(JsonNode expected) {
+        Iterator<Map.Entry<String, JsonNode>> expectedIterator = expected.fields();
+        expectedIterator.forEachRemaining(entry -> {
+            if ("@type".equals(entry.getKey())) {
+                expectedIterator.remove();
+            }
+        });
     }
 }

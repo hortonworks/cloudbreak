@@ -51,7 +51,7 @@ public class ProvisionValidationHandlerTest {
     private EventBus eventBus;
 
     @Mock
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @Mock
     private Authenticator authenticator;

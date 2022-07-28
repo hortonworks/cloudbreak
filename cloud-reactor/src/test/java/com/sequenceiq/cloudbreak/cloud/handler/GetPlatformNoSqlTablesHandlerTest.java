@@ -37,7 +37,7 @@ class GetPlatformNoSqlTablesHandlerTest {
     private PlatformResources platformResources;
 
     @Mock
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @InjectMocks
     private GetPlatformNoSqlTablesHandler underTest;

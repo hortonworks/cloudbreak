@@ -204,7 +204,7 @@ public class StackUpscaleService {
         return stackScalabilityCondition.isScalable(stack, instanceGroupName) ? adjustment - reusableInstanceCount : 0;
     }
 
-    public List<CloudResourceStatus> upscale(AuthenticatedContext ac, UpscaleStackRequest<UpscaleStackResult> request, CloudConnector<?> connector)
+    public List<CloudResourceStatus> upscale(AuthenticatedContext ac, UpscaleStackRequest<UpscaleStackResult> request, CloudConnector connector)
             throws QuotaExceededException {
         CloudStack cloudStack = request.getCloudStack();
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = request.getAdjustmentWithThreshold();
@@ -215,7 +215,7 @@ public class StackUpscaleService {
         }
     }
 
-    private List<CloudResourceStatus> handleQuotaExceptionAndRetryUpscale(UpscaleStackRequest<UpscaleStackResult> request, CloudConnector<?> connector,
+    private List<CloudResourceStatus> handleQuotaExceptionAndRetryUpscale(UpscaleStackRequest<UpscaleStackResult> request, CloudConnector connector,
             AuthenticatedContext ac, CloudStack cloudStack, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold,
             QuotaExceededException quotaExceededException) throws QuotaExceededException {
         flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,

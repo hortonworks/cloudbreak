@@ -59,7 +59,7 @@ import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
-public class YarnResourceConnector implements ResourceConnector<Object> {
+public class YarnResourceConnector implements ResourceConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(YarnResourceConnector.class);
 
     @Inject
@@ -265,12 +265,13 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
-            List<CloudInstance> vms, Object resourcesToRemove) {
+            List<CloudInstance> vms, List<CloudResource> resourcesToRemove) {
         throw new CloudOperationNotSupportedException("Downscale stack operation is not supported on YARN");
     }
 
     @Override
-    public Object collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms) {
+    public List<CloudResource> collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+            List<CloudInstance> vms) {
         throw new CloudOperationNotSupportedException("Downscale resources collection operation is not supported on YARN");
     }
 

@@ -104,7 +104,7 @@ public class TestApplicationContext {
     private MetadataCollector collector;
 
     @Mock
-    private ResourceConnector<Object> resourceConnector;
+    private ResourceConnector resourceConnector;
 
     @Mock
     private InstanceConnector instanceConnector;

@@ -84,7 +84,7 @@ public class StorageConsumptionCollectionHandlerTest {
     private CloudCredential cloudCredential;
 
     @Mock
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @Mock
     private ObjectStorageConnector objectStorageConnector;
