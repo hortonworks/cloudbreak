@@ -89,7 +89,7 @@ public class DistroXClusterFaultTolerantUpscaleTest extends AbstractClouderaMana
                 .mockSalt().run().post().bodyContains(saltBodyFilters, 1)
                 .thenReturn(minionIpAddressesResponse, null, 200, 0, null)
                 .when(distroXClient.scale(UPSCALED_INSTANCE_GROUP_NAME, SUCCESSFUL_UPSCALE_NODE_COUNT))
-                .awaitForFlow(RunningParameter.waitForFlowFail())
+                .awaitForFlow()
                 .await(STACK_AVAILABLE, key(stack).withPollingInterval(POLLING_INTERVAL))
                 .then((tc, testDto, client) -> verifyHealthyNodeCountAfterUpscale(testDto));
 
