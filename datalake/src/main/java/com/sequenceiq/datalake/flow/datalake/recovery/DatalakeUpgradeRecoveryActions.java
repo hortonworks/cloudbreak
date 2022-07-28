@@ -65,7 +65,7 @@ public class DatalakeUpgradeRecoveryActions {
             protected void doExecute(SdxContext context, DatalakeRecoveryStartEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Datalake recovery has been started for {}", payload.getResourceId());
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_RECOVERY_STARTED);
+                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_RECOVERY_STARTED);
                 sdxRecoveryService.recoverCluster(payload.getResourceId());
                 sendEvent(context, DATALAKE_RECOVERY_IN_PROGRESS_EVENT.event(), payload);
             }
@@ -90,7 +90,7 @@ public class DatalakeUpgradeRecoveryActions {
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Datalake recovery is in progress for {}", payload.getResourceId());
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_RECOVERY_IN_PROGRESS);
+                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_RECOVERY_IN_PROGRESS);
                 sendEvent(context, DatalakeRecoveryWaitRequest.from(context));
             }
 
@@ -115,7 +115,7 @@ public class DatalakeUpgradeRecoveryActions {
             protected void doExecute(SdxContext context, DatalakeRecoverySuccessEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Sdx recovery was finalized with sdx id: {}", payload.getResourceId());
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_RECOVERY_FINISHED);
+                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_RECOVERY_FINISHED);
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_RECOVERY_FINISHED,

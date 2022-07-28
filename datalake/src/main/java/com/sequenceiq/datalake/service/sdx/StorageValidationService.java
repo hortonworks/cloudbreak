@@ -121,12 +121,12 @@ public class StorageValidationService {
         ValidationResult validationResult = validationResultBuilder.build();
         if (validationResult.hasError()) {
             LOGGER.error(validationResult.getFormattedErrors());
-            eventSenderService.sendEventAndNotification(sdxCluster, null,
+            eventSenderService.sendEventAndNotification(sdxCluster,
                     ResourceEvent.SDX_VALIDATION_FAILED, Set.of(validationResult.getFormattedErrors()));
         }
         if (validationResult.hasWarning()) {
             LOGGER.info(validationResult.getFormattedWarnings());
-            eventSenderService.sendEventAndNotification(sdxCluster, null,
+            eventSenderService.sendEventAndNotification(sdxCluster,
                     ResourceEvent.SDX_VALIDATION_FAILED_AND_SKIPPED, Set.of(validationResult.getFormattedWarnings()));
         }
         return validationResult;
