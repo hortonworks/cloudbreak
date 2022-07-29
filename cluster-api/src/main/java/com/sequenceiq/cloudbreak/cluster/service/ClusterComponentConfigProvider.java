@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.cluster.service;
 
-import static java.util.Collections.emptySet;
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,8 +11,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.exception.NotAuditedException;
 import org.slf4j.Logger;
@@ -30,9 +29,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponentHistory;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
-import com.sequenceiq.cloudbreak.repository.ClusterComponentHistoryRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentViewRepository;
 import com.sequenceiq.cloudbreak.util.VersionNormalizer;
@@ -42,22 +39,14 @@ public class ClusterComponentConfigProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterComponentConfigProvider.class);
 
+    @Inject
     private ClusterComponentRepository componentRepository;
 
+    @Inject
     private ClusterComponentViewRepository componentViewRepository;
 
-    private ClusterComponentHistoryRepository clusterComponentHistoryRepository;
-
+    @Inject
     private AuditReader auditReader;
-
-    public ClusterComponentConfigProvider(ClusterComponentRepository componentRepository,
-            ClusterComponentViewRepository componentViewRepository,
-            ClusterComponentHistoryRepository clusterComponentHistoryRepository, AuditReader auditReader) {
-        this.componentRepository = componentRepository;
-        this.componentViewRepository = componentViewRepository;
-        this.clusterComponentHistoryRepository = clusterComponentHistoryRepository;
-        this.auditReader = auditReader;
-    }
 
     public ClusterComponent getComponent(Long clusterId, ComponentType componentType) {
         return getComponent(clusterId, componentType, componentType.name());
@@ -210,20 +199,11 @@ public class ClusterComponentConfigProvider {
         }
     }
 
-    public void cleanUpDetachedEntries(Collection<Long> idsForDeletedClusters) {
-        LOGGER.debug("About to delete detached {} entries if they exist.", ClusterComponentHistory.class.getSimpleName());
-        long deleted = clusterComponentHistoryRepository.deleteByClusterIdIsNullOrClusterIdIsIn(CollectionUtils.isEmpty(idsForDeletedClusters) ?
-                emptySet() : idsForDeletedClusters);
-        LOGGER.debug("Cleanung up detached {} entries has finished ({} entry has been removed).", ClusterComponentHistory.class.getSimpleName(), deleted);
-    }
-
     public void deleteClusterComponents(Set<ClusterComponent> components) {
-        if (isNotEmpty(components)) {
+        if (!components.isEmpty()) {
             LOGGER.debug("Components are going to be deleted: {}", components);
             componentRepository.deleteAll(components);
             LOGGER.debug("Components have been deleted: {}", components);
-        } else {
-            LOGGER.debug("Empty/null set of {}s has been passed for deletion, therefore no deletion happened.", ClusterComponent.class.getSimpleName());
         }
     }
 
@@ -261,5 +241,4 @@ public class ClusterComponentConfigProvider {
             throw new CloudbreakServiceException(message, e);
         }
     }
-
 }
