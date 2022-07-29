@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -76,9 +75,6 @@ public class TerminationService {
     @Inject
     private ClusterService clusterService;
 
-    @Inject
-    private FinalizationCleanUpService cleanUpService;
-
     public void finalizeTermination(Long stackId, boolean force) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Date now = new Date();
@@ -105,18 +101,6 @@ public class TerminationService {
             LOGGER.info("Failed to terminate cluster infrastructure. Stack id {}", stack.getId());
             deleteOnlyIfForced(stack, force, terminatedName);
             throw new TerminationFailedException(ex);
-        }
-        cleanUpUnnecessaryDatabaseEntries(stackId, stack.getResourceCrn());
-    }
-
-    private void cleanUpUnnecessaryDatabaseEntries(Long stackId, String resourceCrn) {
-        LOGGER.debug("About to clean up leftover DB entries.");
-        try {
-            cleanUpService.cleanUpStructuredEventsForStack(stackId);
-            cleanUpService.detachClusterComponentRelatedAuditEntries();
-            cleanUpService.cleanUpStructuredEventsForAccount(Crn.safeFromString(resourceCrn).getAccountId());
-        } catch (Exception e) {
-            LOGGER.warn("Unable to clean up resources due to: " + e.getMessage(), e);
         }
     }
 
