@@ -21,6 +21,7 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 
 @Prototype
@@ -63,32 +64,65 @@ public class StackRemoteTestDto extends AbstractCloudbreakTestDto<RemoteCommands
     }
 
     public StackRemoteTestDto withSdx(SdxTestDto sdx) {
-        resourceCrn = sdx.getResponse().getCrn();
+        if (sdx != null && sdx.getResponse() != null) {
+            resourceCrn = sdx.getResponse().getCrn();
+        } else {
+            throw new IllegalArgumentException("SDX is not available for remote command execution request!" +
+                    " Please create a valid sdx resource first via TestContext in test steps!");
+        }
         return this;
     }
 
     public StackRemoteTestDto withDistrox(DistroXTestDto distrox) {
-        resourceCrn = distrox.getResponse().getCrn();
+        if (distrox != null && distrox.getResponse() != null) {
+            resourceCrn = distrox.getResponse().getCrn();
+        } else {
+            throw new IllegalArgumentException("DistroX is not available for remote command execution request!" +
+                    " Please create a valid distroX resource first via TestContext in test steps!");
+        }
         return this;
     }
 
     public StackRemoteTestDto withSdx(String key) {
-        resourceCrn = getTestContext().get(key).getCrn();
-        return this;
+        return withKey(key);
     }
 
     public StackRemoteTestDto withDistrox(String key) {
-        resourceCrn = getTestContext().get(key).getCrn();
+        return withKey(key);
+    }
+
+    private StackRemoteTestDto withKey(String key) {
+        if (key != null && getTestContext().get(key) != null) {
+            resourceCrn = getTestContext().get(key).getCrn();
+        } else {
+            throw new IllegalArgumentException(String.format("%s is not available for remote command execution request!" +
+                    " Please create a valid resource first via TestContext in test steps!", key));
+        }
         return this;
     }
 
     public StackRemoteTestDto withSdx() {
-        resourceCrn = getTestContext().get(SdxTestDto.class).getCrn();
+        SdxTestDto sdxTestDto = getTestContext().get(SdxTestDto.class);
+        SdxInternalTestDto sdxInternalTestDto = getTestContext().get(SdxInternalTestDto.class);
+        if (sdxTestDto != null && sdxTestDto.getResponse() != null) {
+            resourceCrn = sdxTestDto.getResponse().getCrn();
+        } else if (sdxInternalTestDto != null && sdxInternalTestDto.getResponse() != null) {
+            resourceCrn = sdxInternalTestDto.getResponse().getCrn();
+        } else {
+            throw new IllegalArgumentException("SDX is not available for remote command execution request!" +
+                    " Please create a valid sdx resource first via TestContext in test steps!");
+        }
         return this;
     }
 
     public StackRemoteTestDto withDistrox() {
-        resourceCrn = getTestContext().get(DistroXTestDto.class).getCrn();
+        DistroXTestDto distroXTestDto = getTestContext().get(DistroXTestDto.class);
+        if (distroXTestDto != null && distroXTestDto.getResponse() != null) {
+            resourceCrn = distroXTestDto.getResponse().getCrn();
+        } else {
+            throw new IllegalArgumentException("DistroX is not available for remote command execution request!" +
+                    " Please create a valid distroX resource first via TestContext in test steps!");
+        }
         return this;
     }
 
@@ -110,11 +144,26 @@ public class StackRemoteTestDto extends AbstractCloudbreakTestDto<RemoteCommands
     }
 
     public Set<String> getDistroxHosts(String hostGroupName) {
-        return getHostgroupHosts(hostGroupName, getTestContext().get(DistroXTestDto.class).getResponse());
+        DistroXTestDto distroXTestDto = getTestContext().get(DistroXTestDto.class);
+        if (distroXTestDto != null && distroXTestDto.getResponse() != null) {
+            return getHostgroupHosts(hostGroupName, distroXTestDto.getResponse());
+        } else {
+            throw new IllegalArgumentException("DistroX is not available for getting its hosts!" +
+                    " Please create a valid distroX resource first via TestContext in test steps!");
+        }
     }
 
     public Set<String> getSdxHosts(String hostGroupName) {
-        return getHostgroupHosts(hostGroupName, getTestContext().get(SdxTestDto.class).getResponse().getStackV4Response());
+        SdxTestDto sdxTestDto = getTestContext().get(SdxTestDto.class);
+        SdxInternalTestDto sdxInternalTestDto = getTestContext().get(SdxInternalTestDto.class);
+        if (sdxTestDto != null && sdxTestDto.getResponse() != null) {
+            return getHostgroupHosts(hostGroupName, sdxTestDto.getResponse().getStackV4Response());
+        } else if (sdxInternalTestDto != null && sdxInternalTestDto.getResponse() != null) {
+            return getHostgroupHosts(hostGroupName, sdxInternalTestDto.getResponse().getStackV4Response());
+        } else {
+            throw new IllegalArgumentException("SDX is not available for getting its hosts!" +
+                    " Please create a valid sdx resource first via TestContext in test steps!");
+        }
     }
 
     private Set<String> getHostgroupHosts(String hostGroupName, StackV4Response stackV4Response) {

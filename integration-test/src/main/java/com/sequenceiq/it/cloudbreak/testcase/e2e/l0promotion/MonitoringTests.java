@@ -22,7 +22,6 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
-import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRemoteTestDto;
@@ -174,8 +173,6 @@ public class MonitoringTests extends AbstractE2ETest {
                 .given(SdxInternalTestDto.class)
                     .withEnvironment()
                     .withDatabase(sdxDatabaseRequest)
-                    .withImageCatalogNameAndImageId(commonCloudProperties().getImageValidation().getSourceCatalogName(),
-                        commonCloudProperties().getImageValidation().getImageUuid())
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
@@ -188,13 +185,9 @@ public class MonitoringTests extends AbstractE2ETest {
                     Log.whenJson(LOGGER, format(" SDX remote command done with result:%n"), testDto.getResponse());
                     return testDto;
                 })
-                .given(DistroXImageTestDto.class)
-                    .withImageId(commonCloudProperties().getImageValidation().getImageUuid())
-                    .withImageCatalog(commonCloudProperties().getImageValidation().getSourceCatalogName())
                 .given(DistroXTestDto.class)
                     .withExternalDatabase(distroXDatabaseRequest)
                     .withEnvironment()
-                    .withImageSettings()
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
