@@ -28,7 +28,7 @@
     proxy_url                        "{{ fluent.proxyUrl }}"{%- if fluent.proxyAuth %}
     proxy_username                   "{{ fluent.proxyUser }}"
     proxy_password                   "{{ fluent.proxyPassword }}"{% endif %}{% if fluent.noProxyHosts and fluent.fluentVersion > 3 %}
-    no_proxy                         "{{ fluent.noProxyHosts }}"{% endif %}{% endif %}{% if fluent.environmentRegion %}
+    no_proxy                         "{{ fluent.noProxyHosts }}"{% endif %}{% endif %}{% if fluent.environmentRegion and fluent.cdpLoggingAgentPackageVersion and salt['pkg.version_cmp'](fluent.cdpLoggingAgentPackageVersion,'0.2.17-1') >= 0 %}
     region                           "{{ fluent.environmentRegion }}"{% endif %}
     <buffer tag,time>
       @type file
