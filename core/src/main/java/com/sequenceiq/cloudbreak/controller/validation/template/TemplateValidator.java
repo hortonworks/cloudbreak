@@ -215,8 +215,8 @@ public class TemplateValidator {
                 // To be backward-compatible, we only check max limit and allow the min limit to be zero for IDBroker
                 if (value.getVolumeSize() > config.maximumSize()) {
                     validationBuilder.error(String.format("Max allowed volume size for '%s': %s", vmType.value(), config.maximumSize()));
-                } else if (!(isIDBrokerInstanceGroup(instanceGroup) || isComputeInstanceGroup(instanceGroup)) &&
-                        value.getVolumeSize() < config.minimumSize()) {
+                } else if (!(isIDBrokerInstanceGroup(instanceGroup) || isComputeInstanceGroup(instanceGroup))
+                        && value.getVolumeSize() < config.minimumSize()) {
                     validationBuilder.error(String.format("Min allowed volume size for '%s': %s", vmType.value(), config.minimumSize()));
                 }
             } else {

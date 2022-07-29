@@ -131,16 +131,15 @@ public class TemplateValidatorTest {
     }
 
     @Test
-    public void validateComputeDataVolumeZeroCountZeroSize() {
-        instanceGroup = createInstanceGroup(0, 0, false, true, false, "c3.2xlarge");
+    public void validateComputeDataVolumeZeroCount() {
+        instanceGroup = createInstanceGroup(0, 1, false, true, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
-        verifyIDBrokerVolume(instanceGroup);
     }
 
     @Test
     public void validateComputeDataVolumeCountOne() {
-        instanceGroup = createInstanceGroup(1, 0, false, true, false, "c3.2xlarge");
+        instanceGroup = createInstanceGroup(1, 1, false, true, false, "c3.2xlarge");
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
     }
