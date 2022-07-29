@@ -29,7 +29,7 @@ public class InstanceStoreMetadata {
     }
 
     public Integer mapInstanceTypeToInstanceSizeNullHandled(String instanceType) {
-        Integer instanceSize = instaceStoreConfigMap.getOrDefault(instanceType, VolumeParameterConfig.EMPTY).maximumSize();
+        Integer instanceSize = instaceStoreConfigMap.getOrDefault(instanceType, VolumeParameterConfig.EMPTY).minimumSize();
         return instanceSize != null ? instanceSize : 0;
     }
 

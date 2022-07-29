@@ -42,10 +42,14 @@ public class ImpalaVolumeConfigProvider implements CmHostGroupRoleConfigProvider
                         .orElse(0);
                 Integer volumeCount = 0;
                 Integer temporaryStorageVolumeCount = 0;
+                Integer temporaryStorageVolumeSize = 0;
                 if (hostGroupView != null) {
                     volumeCount = hostGroupView.getVolumeCount();
                     if (hostGroupView.getTemporaryStorageVolumeCount() != null) {
                         temporaryStorageVolumeCount = hostGroupView.getTemporaryStorageVolumeCount();
+                    }
+                    if(hostGroupView.getTemporaryStorageVolumeSize() != null) {
+                        temporaryStorageVolumeSize = hostGroupView.getTemporaryStorageVolumeSize();
                     }
                 }
 
@@ -65,7 +69,15 @@ public class ImpalaVolumeConfigProvider implements CmHostGroupRoleConfigProvider
                             .convertGBToBytes(Math.min(minAttachedVolumeSize / 2, MAX_IMPALA_DATA_CACHE_SIZE_IN_GB / hostGroupView.getVolumeCount()));
 
                     configs.add(config(IMPALA_DATACACHE_ENABLED_PARAM, "true"));
-                    configs.add(config(IMPALA_DATACACHE_CAPACITY_PARAM, Long.toString(dataCacheCapacityInBytes)));
+
+                    long temporaryStoragedataCacheCapacityInBytes = VolumeUtils
+                            .convertGBToBytes(Math.min( hostGroupView.getTemporaryStorageVolumeSize()/ 2, MAX_IMPALA_DATA_CACHE_SIZE_IN_GB / hostGroupView.getTemporaryStorageVolumeCount()));
+                    if (checkTemporaryStorage(hostGroupView, temporaryStorageVolumeSize)) {
+                        configs.add(config(IMPALA_DATACACHE_CAPACITY_PARAM, Long.toString(temporaryStoragedataCacheCapacityInBytes)));
+                    } else {
+                        configs.add(config(IMPALA_DATACACHE_CAPACITY_PARAM, Long.toString(dataCacheCapacityInBytes)));
+                    }
+
                     if (checkTemporaryStorage(hostGroupView, temporaryStorageVolumeCount)) {
                         configs.add(config(IMPALA_DATACACHE_DIRS_PARAM,
                                 buildEphemeralVolumePathString(temporaryStorageVolumeCount, "impala/datacache")));
