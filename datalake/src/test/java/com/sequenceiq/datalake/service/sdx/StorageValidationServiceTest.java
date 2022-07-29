@@ -1,11 +1,14 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -14,12 +17,19 @@ import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Paramete
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 
 @ExtendWith(MockitoExtension.class)
 class StorageValidationServiceTest {
+
+    @Mock
+    EnvironmentService environmentService;
+
+    @Mock
+    SdxCluster sdxCluster;
 
     @InjectMocks
     private StorageValidationService underTest;
@@ -167,5 +177,37 @@ class StorageValidationServiceTest {
                 () -> underTest.validateCloudStorage(CloudPlatform.AWS.toString(), sdxCloudStorageRequest));
         assertEquals(exception.getMessage(), "instance profile must be defined for S3");
     }
+
+    @Test
+    public void validateBackupStorageSdxClusterFailure() {
+        when(sdxCluster.getStackRequestToCloudbreak()).thenReturn("StackRequest");
+
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateBackupStorage(sdxCluster));
+        assertEquals(exception.getMessage(), "Failed to validate backup storage");
+    }
+
+    @Test
+    public void validateBackupStorageEnvironmentServiceFailure() {
+        when(sdxCluster.getStackRequestToCloudbreak()).thenReturn("StackRequest");
+        when(sdxCluster.getEnvName()).thenReturn("test environment");
+        when(environmentService.getDetailedEnvironmentResponseByName(anyString())).thenReturn(new DetailedEnvironmentResponse());
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateBackupStorage(sdxCluster));
+        assertEquals(exception.getMessage(), "Failed to validate backup storage");
+    }
+
+    @Test
+    public void validateBackupStorageValidationFailure() {
+        when(sdxCluster.getStackRequestToCloudbreak()).thenReturn("StackRequest");
+        when(sdxCluster.getEnvName()).thenReturn("test environment");
+        when(environmentService.getDetailedEnvironmentResponseByName(anyString())).thenReturn(new DetailedEnvironmentResponse());
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateBackupStorage(sdxCluster));
+        assertEquals(exception.getMessage(), "Failed to validate backup storage");
+    }
+
+//    @Test
+//    public void
 
 }

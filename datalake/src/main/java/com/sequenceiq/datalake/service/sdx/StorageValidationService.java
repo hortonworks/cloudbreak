@@ -32,12 +32,10 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.model.FileSystemType;
-import com.sequenceiq.datalake.entity.Credential;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
-import com.sequenceiq.datalake.service.validation.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
@@ -58,9 +56,6 @@ public class StorageValidationService {
 
     @Inject
     private EnvironmentClientService environmentClientService;
-
-    @Inject
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -127,14 +122,12 @@ public class StorageValidationService {
         if (validationResult.hasError()) {
             LOGGER.error(validationResult.getFormattedErrors());
             eventSenderService.sendEventAndNotification(sdxCluster, sdxCluster.getInitiatorUserCrn(),
-                    ResourceEvent.SDX_VALIDATION_FAILED, Set.of(validationResult.getFormattedWarnings()));
+                    ResourceEvent.SDX_VALIDATION_FAILED, Set.of(validationResult.getFormattedErrors()));
         }
         if (validationResult.hasWarning()) {
             LOGGER.info(validationResult.getFormattedWarnings());
             eventSenderService.sendEventAndNotification(sdxCluster, sdxCluster.getInitiatorUserCrn(),
                     ResourceEvent.SDX_VALIDATION_FAILED_AND_SKIPPED, Set.of(validationResult.getFormattedWarnings()));
-            sdxNotificationService.send(ResourceEvent.SDX_VALIDATION_FAILED_AND_SKIPPED,
-                    Set.of(validationResult.getFormattedWarnings()), sdxCluster);
         }
         return validationResult;
     }
@@ -191,13 +184,5 @@ public class StorageValidationService {
             }
         }
         return userMapping;
-    }
-
-    private Credential getCredential(DetailedEnvironmentResponse environment) {
-        return new Credential(environment.getCloudPlatform(),
-                environment.getCredential().getName(),
-                secretService.getByResponse(environment.getCredential().getAttributes()),
-                environment.getCredential().getCrn(),
-                environment.getCredential().getAccountId());
     }
 }
