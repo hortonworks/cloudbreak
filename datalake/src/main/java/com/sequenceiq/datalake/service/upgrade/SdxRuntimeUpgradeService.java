@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
@@ -80,13 +82,15 @@ public class SdxRuntimeUpgradeService {
     @Inject
     private SdxUpgradeFilter upgradeFilter;
 
-    public SdxUpgradeResponse checkForUpgradeByName(String clusterName, SdxUpgradeRequest upgradeSdxClusterRequest, String accountId) {
-        return checkForSdxUpgradeResponse(upgradeSdxClusterRequest, clusterName, accountId);
+    public SdxUpgradeResponse checkForUpgradeByName(String clusterName, SdxUpgradeRequest upgradeSdxClusterRequest, String accountId,
+            boolean upgradePreparation) {
+        return checkForSdxUpgradeResponse(upgradeSdxClusterRequest, clusterName, accountId, upgradePreparation);
     }
 
-    public SdxUpgradeResponse checkForUpgradeByCrn(String userCrn, String crn, SdxUpgradeRequest upgradeSdxClusterRequest, String accountId) {
+    public SdxUpgradeResponse checkForUpgradeByCrn(String userCrn, String crn, SdxUpgradeRequest upgradeSdxClusterRequest, String accountId,
+            boolean upgradePreparation) {
         String clusterName = getClusterName(userCrn, crn);
-        return checkForSdxUpgradeResponse(upgradeSdxClusterRequest, clusterName, accountId);
+        return checkForSdxUpgradeResponse(upgradeSdxClusterRequest, clusterName, accountId, upgradePreparation);
     }
 
     private String getClusterName(String userCrn, String clusterCrn) {
@@ -99,7 +103,7 @@ public class SdxRuntimeUpgradeService {
             boolean upgradePreparation) {
         SdxCluster cluster = sdxService.getByNameInAccount(userCrn, clusterName);
         MDCBuilder.buildMdcContext(cluster);
-        SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByName(clusterName, upgradeRequest, accountId);
+        SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByName(clusterName, upgradeRequest, accountId, upgradePreparation);
         validateUpgradeCandidates(clusterName, sdxUpgradeResponse);
         return upgradePreparation ? initSdxUpgradePreparation(userCrn, sdxUpgradeResponse.getUpgradeCandidates(), upgradeRequest, cluster)
                 : initSdxUpgrade(userCrn, sdxUpgradeResponse.getUpgradeCandidates(), upgradeRequest, cluster);
@@ -109,7 +113,7 @@ public class SdxRuntimeUpgradeService {
             boolean upgradePreparation) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
         MDCBuilder.buildMdcContext(cluster);
-        SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByCrn(userCrn, clusterCrn, upgradeRequest, accountId);
+        SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByCrn(userCrn, clusterCrn, upgradeRequest, accountId, upgradePreparation);
         validateUpgradeCandidates(cluster.getClusterName(), sdxUpgradeResponse);
         return upgradePreparation ? initSdxUpgradePreparation(userCrn, sdxUpgradeResponse.getUpgradeCandidates(), upgradeRequest, cluster)
                 : initSdxUpgrade(userCrn, sdxUpgradeResponse.getUpgradeCandidates(), upgradeRequest, cluster);
@@ -121,12 +125,17 @@ public class SdxRuntimeUpgradeService {
     }
 
     private SdxUpgradeResponse checkForSdxUpgradeResponse(SdxUpgradeRequest upgradeSdxClusterRequest,
-            String clusterName, String accountId) {
+            String clusterName, String accountId, boolean upgradePreparation) {
+        UpgradeV4Request request = sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest);
+        if (upgradePreparation) {
+            InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(false, false, false, true);
+            request.setInternalUpgradeSettings(internalUpgradeSettings);
+        }
         UpgradeV4Response upgradeV4Response = ThreadBasedUserCrnProvider
                 .doAsInternalActor(
                         regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, clusterName,
-                                sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest), accountId));
+                                request, accountId));
         UpgradeV4Response filteredUpgradeV4Response =
                 upgradeFilter.filterSdxUpgradeResponse(accountId, clusterName, upgradeSdxClusterRequest, upgradeV4Response);
         return sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(filteredUpgradeV4Response);

@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
 
 import java.util.Objects;
-import java.util.StringJoiner;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class InternalUpgradeSettings {
@@ -14,10 +15,24 @@ public class InternalUpgradeSettings {
 
     private final boolean dataHubOsUpgradeEntitled;
 
+    private final boolean upgradePreparation;
+
     public InternalUpgradeSettings(boolean skipValidations, boolean dataHubRuntimeUpgradeEntitled, boolean dataHubOsUpgradeEntitled) {
         this.skipValidations = skipValidations;
         this.dataHubRuntimeUpgradeEntitled = dataHubRuntimeUpgradeEntitled;
         this.dataHubOsUpgradeEntitled = dataHubOsUpgradeEntitled;
+        upgradePreparation = false;
+    }
+
+    @JsonCreator
+    public InternalUpgradeSettings(@JsonProperty("skipValidations") boolean skipValidations,
+            @JsonProperty("dataHubRuntimeUpgradeEntitled") boolean dataHubRuntimeUpgradeEntitled,
+            @JsonProperty("dataHubOsUpgradeEntitled") boolean dataHubOsUpgradeEntitled,
+            @JsonProperty("upgradePreparation") boolean upgradePreparation) {
+        this.skipValidations = skipValidations;
+        this.dataHubRuntimeUpgradeEntitled = dataHubRuntimeUpgradeEntitled;
+        this.dataHubOsUpgradeEntitled = dataHubOsUpgradeEntitled;
+        this.upgradePreparation = upgradePreparation;
     }
 
     public boolean isSkipValidations() {
@@ -32,6 +47,10 @@ public class InternalUpgradeSettings {
         return dataHubOsUpgradeEntitled;
     }
 
+    public boolean isUpgradePreparation() {
+        return upgradePreparation;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -43,20 +62,22 @@ public class InternalUpgradeSettings {
         InternalUpgradeSettings that = (InternalUpgradeSettings) o;
         return skipValidations == that.skipValidations
                 && dataHubRuntimeUpgradeEntitled == that.dataHubRuntimeUpgradeEntitled
-                && dataHubOsUpgradeEntitled == that.dataHubOsUpgradeEntitled;
+                && dataHubOsUpgradeEntitled == that.dataHubOsUpgradeEntitled
+                && upgradePreparation == that.upgradePreparation;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(skipValidations, dataHubRuntimeUpgradeEntitled, dataHubOsUpgradeEntitled);
+        return Objects.hash(skipValidations, dataHubRuntimeUpgradeEntitled, dataHubOsUpgradeEntitled, upgradePreparation);
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", InternalUpgradeSettings.class.getSimpleName() + "[", "]")
-                .add("skipValidations=" + skipValidations)
-                .add("dataHubUpgradeEntitled=" + dataHubRuntimeUpgradeEntitled)
-                .add("dataHubOsUpgradeEntitled=" + dataHubOsUpgradeEntitled)
-                .toString();
+        return "InternalUpgradeSettings{" +
+                "skipValidations=" + skipValidations +
+                ", dataHubRuntimeUpgradeEntitled=" + dataHubRuntimeUpgradeEntitled +
+                ", dataHubOsUpgradeEntitled=" + dataHubOsUpgradeEntitled +
+                ", upgradePreparation=" + upgradePreparation +
+                '}';
     }
 }

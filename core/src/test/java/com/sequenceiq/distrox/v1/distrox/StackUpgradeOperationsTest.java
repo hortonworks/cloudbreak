@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -241,6 +242,35 @@ class StackUpgradeOperationsTest {
         verify(upgradePreconditionService).checkForRunningAttachedClusters(stackViewV4Responses, stack);
         verify(upgradePreconditionService).checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
         verifyNoInteractions(clusterDBValidationService);
+    }
+
+    @Test
+    void testCheckForClusterUpgradeShouldReturnUpgradeCandidatesWhenTheUpgradeIsRuntimeUpgradeAndTheStackTypeIsDataLakeAndReplaceVmEnabledAndPrepare() {
+        Stack stack = createStack(StackType.DATALAKE);
+        UpgradeV4Request request = createUpgradeRequest(null);
+        request.setInternalUpgradeSettings(new InternalUpgradeSettings(false, false, false, true));
+        UpgradeV4Response upgradeResponse = createUpgradeResponse();
+        when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
+        when(upgradeService.isOsUpgrade(request)).thenReturn(false);
+        StackInstanceCount instanceCount = mock(StackInstanceCount.class);
+        when(instanceCount.getInstanceCount()).thenReturn(INSTANCE_COUNT);
+        when(instanceMetaDataService.countByStackId(STACK_ID)).thenReturn(instanceCount);
+        when(limitConfiguration.getUpgradeNodeCountLimit(any())).thenReturn(NODE_LIMIT);
+        when(clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings())).thenReturn(upgradeResponse);
+        when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
+
+        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, WORKSPACE_ID, request);
+
+        assertEquals(upgradeResponse, actual);
+        verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
+        verify(upgradeService).isOsUpgrade(request);
+        verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
+        verify(limitConfiguration).getUpgradeNodeCountLimit(any());
+        verify(clusterUpgradeAvailabilityService).checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings());
+        verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponse, request, true);
+        verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
+        verify(stackOperations, never()).listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any());
+        verifyNoInteractions(upgradePreconditionService, clusterDBValidationService);
     }
 
     @Test
