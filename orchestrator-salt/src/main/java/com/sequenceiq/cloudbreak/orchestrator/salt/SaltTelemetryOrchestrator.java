@@ -118,6 +118,8 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     private static final int LOGGING_DOCTOR_MAX_RETRY = 3;
 
+    private static final int REINIT_STATE_APPLY_MAX_RETRY = 5;
+
     @Inject
     private ExitCriteria exitCriteria;
 
@@ -257,6 +259,22 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
             distributeAndExecuteLoggingAgentDoctor(allGateways, nodes, exitModel);
         } catch (Exception e) {
             LOGGER.info("Error occurred during logging agent diagnostics ", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void updateAndRestartTelemetryService(byte[] saltState, String stateName, String applyState, List<GatewayConfig> gatewayConfigs,
+            Set<Node> nodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(gatewayConfigs);
+        Set<String> gatewayTargets = getGatewayPrivateIps(gatewayConfigs);
+        Set<String> gatewayHostnames = getGatewayHostnames(gatewayConfigs);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            uploadAndUpdateSaltStateComponent(stateName, saltState, sc, gatewayTargets, gatewayHostnames, exitModel);
+            runSimpleSaltState(gatewayConfigs, nodes, exitModel, applyState, String.format("Apply state '%s' failed.", applyState),
+                    REINIT_STATE_APPLY_MAX_RETRY, false);
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during updating salt state definition {} and service state apply: '{}'.", stateName, applyState);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
