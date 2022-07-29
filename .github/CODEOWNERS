@@ -67,3 +67,11 @@ core/src/main/resources/defaults/clustertemplates/*/*/dataengineering*.json     
 autoscale/                                                                      @hortonworks/cloudbreak-bobcat
 autoscale-api/                                                                  @hortonworks/cloudbreak-bobcat
 
+# Duck team should review freeipa related changes
+freeipa/                                                                        @hortonworks/cloudbreak-duck
+freeipa-api/                                                                    @hortonworks/cloudbreak-duck
+freeipa-client/                                                                 @hortonworks/cloudbreak-duck
+
+# Duck team should review redbeams related changes
+redbeams/                                                                       @hortonworks/cloudbreak-duck
+redbeams-api/                                                                   @hortonworks/cloudbreak-duck
