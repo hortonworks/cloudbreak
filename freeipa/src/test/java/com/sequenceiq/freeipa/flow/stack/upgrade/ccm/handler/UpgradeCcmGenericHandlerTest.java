@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler;
 
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_DEREGISTER_MINA_FINISHED_EVENT;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_HEALTH_CHECK_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_OBTAIN_AGENT_DATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_PUSH_SALT_STATES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_RECONFIGURE_NGINX_FINISHED_EVENT;
@@ -10,6 +9,7 @@ import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmS
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_UPGRADE_FINISHED_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,6 +29,7 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.internal.configuration.DefaultInjectionEngine;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -71,7 +72,9 @@ class UpgradeCcmGenericHandlerTest {
         UpgradeCcmEvent upgradeCcmEvent = new UpgradeCcmEvent("selector", STACK_ID, tunnel);
         Event<UpgradeCcmEvent> event = new Event<>(upgradeCcmEvent);
         underTest.accept(event);
-        UpgradeCcmService.class.getMethod(methodToVerify, Long.class).invoke(verify(upgradeCcmService, mockVerificationMode), STACK_ID);
+        InOrder inOrder = inOrder(upgradeCcmService);
+        inOrder.verify(upgradeCcmService).changeTunnel(STACK_ID);
+        UpgradeCcmService.class.getMethod(methodToVerify, Long.class).invoke(inOrder.verify(upgradeCcmService, mockVerificationMode), STACK_ID);
         verify(eventBus).notify(eq(expectedEndState), eventCaptor.capture());
         Event<UpgradeCcmEvent> eventResult = eventCaptor.getValue();
         assertThat(eventResult.getData().getOldTunnel()).isEqualTo(tunnel);
@@ -91,11 +94,10 @@ class UpgradeCcmGenericHandlerTest {
             //CHECKSTYLE:OFF: checkstyle:LineLength
             return Stream.of(
                     argumentsMaker(UpgradeCcmDeregisterMinaHandler.class, "deregisterMina", UPGRADE_CCM_DEREGISTER_MINA_FINISHED_EVENT.event()).stream(),
-                    argumentsMaker(UpgradeCcmHealthCheckHandler.class, "healthCheck", UPGRADE_CCM_HEALTH_CHECK_FINISHED_EVENT.event()).stream(),
                     argumentsMaker(UpgradeCcmObtainAgentDataHandler.class, "obtainAgentData", UPGRADE_CCM_OBTAIN_AGENT_DATA_FINISHED_EVENT.event()).stream(),
                     argumentsMaker(UpgradeCcmPushSaltStatesHandler.class, "pushSaltStates", UPGRADE_CCM_PUSH_SALT_STATES_FINISHED_EVENT.event()).stream(),
                     argumentsMaker(UpgradeCcmReconfigureNginxHandler.class, "reconfigureNginx", UPGRADE_CCM_RECONFIGURE_NGINX_FINISHED_EVENT.event()).stream(),
-                    argumentsMaker(UpgradeCcmRegisterClusterProxyHandler.class, "registerClusterProxy", UPGRADE_CCM_REGISTER_CLUSTER_PROXY_FINISHED_EVENT.event()).stream(),
+                    argumentsMaker(UpgradeCcmRegisterClusterProxyHandler.class, "registerClusterProxyAndCheckHealth", UPGRADE_CCM_REGISTER_CLUSTER_PROXY_FINISHED_EVENT.event()).stream(),
                     argumentsMaker(UpgradeCcmRemoveMinaHandler.class, "removeMina", UPGRADE_CCM_REMOVE_MINA_FINISHED_EVENT.event()).stream(),
                     argumentsMaker(UpgradeCcmUpgradeHandler.class, "upgrade", UPGRADE_CCM_UPGRADE_FINISHED_EVENT.event()).stream()
             ).flatMap(Function.identity());

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.AbstractUpgradeCcmEvent;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.RegisterClusterProxyHandler;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -139,6 +140,10 @@ public class UpgradeCcmService {
         InMemoryStateStore.deleteStack(stackId);
         InMemoryStateStore.deleteCluster(clusterId);
         stackService.setTunnelByStackId(stackId, oldTunnel);
+        if (failureOrigin.equals(RegisterClusterProxyHandler.class)) {
+            LOGGER.info("Re-registering cluster proxy to previous tunnel {}", oldTunnel);
+            registerClusterProxy(stackId);
+        }
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CCM_UPGRADE_FAILED, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_FAILED);
     }
@@ -160,12 +165,18 @@ public class UpgradeCcmService {
         upgradeCcmOrchestratorService.reconfigureNginx(stackId);
     }
 
-    public void registerClusterProxy(Long stackId) {
+    public void registerClusterProxyAndCheckHealth(Long stackId) {
+        registerClusterProxy(stackId);
+        healthCheck(stackId);
+    }
+
+    private void registerClusterProxy(Long stackId) {
         Optional<ConfigRegistrationResponse> configRegistrationResponse = clusterProxyService.reRegisterCluster(stackId);
         configRegistrationResponse.ifPresentOrElse(c -> LOGGER.debug(c.toString()), () -> LOGGER.debug("No clusterproxy register response for {}", stackId));
     }
 
-    public void healthCheck(Long stackId) {
+    private void healthCheck(Long stackId) {
+        LOGGER.info("Health check for CCM upgrade...");
         Set<String> unhealthyHosts;
         try {
             unhealthyHosts = healthCheckService.getUnhealthyHosts(stackId);

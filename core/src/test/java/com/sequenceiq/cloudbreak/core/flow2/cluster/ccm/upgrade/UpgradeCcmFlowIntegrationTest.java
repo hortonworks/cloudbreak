@@ -146,8 +146,7 @@ class UpgradeCcmFlowIntegrationTest {
         inOrder.verify(upgradeCcmService, times(1)).updateTunnel(STACK_ID);
         inOrder.verify(upgradeCcmService, times(1)).pushSaltState(STACK_ID, CLUSTER_ID);
         inOrder.verify(upgradeCcmService, times(1)).reconfigureNginx(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(1)).registerClusterProxy(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(1)).healthCheck(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).registerClusterProxyAndCheckHealth(STACK_ID);
         inOrder.verify(upgradeCcmService, times(1)).removeAgent(STACK_ID, Tunnel.CCM);
         inOrder.verify(upgradeCcmService, times(1)).deregisterAgent(STACK_ID, Tunnel.CCM);
         verify(upgradeCcmService, never()).ccmUpgradeFailed(eq(STACK_ID), eq(CLUSTER_ID), eq(Tunnel.CCM), any());
@@ -168,15 +167,14 @@ class UpgradeCcmFlowIntegrationTest {
         inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(STACK_ID, CLUSTER_ID, Tunnel.CCM, TunnelUpdateHandler.class);
         verify(upgradeCcmService, never()).pushSaltState(STACK_ID, CLUSTER_ID);
         verify(upgradeCcmService, never()).reconfigureNginx(STACK_ID);
-        verify(upgradeCcmService, never()).registerClusterProxy(STACK_ID);
-        verify(upgradeCcmService, never()).healthCheck(STACK_ID);
+        verify(upgradeCcmService, never()).registerClusterProxyAndCheckHealth(STACK_ID);
         verify(upgradeCcmService, never()).deregisterAgent(STACK_ID, Tunnel.CCM);
         verify(upgradeCcmService, never()).removeAgent(STACK_ID, Tunnel.CCM);
     }
 
     @Test
     public void testCcmUpgradeWhenRegisterClusterProxyFail() throws CloudbreakOrchestratorException {
-        doThrow(new BadRequestException()).when(upgradeCcmService).registerClusterProxy(STACK_ID);
+        doThrow(new BadRequestException()).when(upgradeCcmService).registerClusterProxyAndCheckHealth(STACK_ID);
 
         FlowIdentifier flowIdentifier = triggerFlow();
         letItFlow(flowIdentifier);
@@ -188,7 +186,7 @@ class UpgradeCcmFlowIntegrationTest {
         inOrder.verify(upgradeCcmService, times(1)).updateTunnel(STACK_ID);
         inOrder.verify(upgradeCcmService, times(1)).pushSaltState(STACK_ID, CLUSTER_ID);
         inOrder.verify(upgradeCcmService, times(1)).reconfigureNginx(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(1)).registerClusterProxy(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).registerClusterProxyAndCheckHealth(STACK_ID);
         inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(STACK_ID, CLUSTER_ID, Tunnel.CCM, RegisterClusterProxyHandler.class);
         verify(upgradeCcmService, never()).healthCheckState(STACK_ID);
         verify(upgradeCcmService, never()).deregisterAgent(STACK_ID, Tunnel.CCM);

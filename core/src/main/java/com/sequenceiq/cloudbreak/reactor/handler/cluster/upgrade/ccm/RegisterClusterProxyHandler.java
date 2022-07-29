@@ -41,7 +41,8 @@ public class RegisterClusterProxyHandler extends ExceptionCatcherEventHandler<Up
         UpgradeCcmRegisterClusterProxyRequest request = event.getData();
         Long stackId = request.getResourceId();
         LOGGER.info("Registering to cluster proxy for CCM upgrade...");
-        upgradeCcmService.registerClusterProxy(stackId);
+        upgradeCcmService.updateTunnel(stackId);
+        upgradeCcmService.registerClusterProxyAndCheckHealth(stackId);
         return new UpgradeCcmRegisterClusterProxyResult(stackId, request.getClusterId(), request.getOldTunnel());
     }
 }

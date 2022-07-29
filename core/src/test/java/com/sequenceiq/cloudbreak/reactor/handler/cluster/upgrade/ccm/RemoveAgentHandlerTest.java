@@ -3,12 +3,14 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -53,7 +55,9 @@ class RemoveAgentHandlerTest {
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
-        verify(upgradeCcmService).removeAgent(STACK_ID, Tunnel.CCM);
+        InOrder inOrder = inOrder(upgradeCcmService);
+        inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID);
+        inOrder.verify(upgradeCcmService).removeAgent(STACK_ID, Tunnel.CCM);
         assertThat(result.selector()).isEqualTo("UPGRADECCMREMOVEAGENTRESULT");
     }
 
