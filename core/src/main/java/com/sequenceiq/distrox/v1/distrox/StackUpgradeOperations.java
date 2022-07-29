@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
@@ -123,13 +124,15 @@ public class StackUpgradeOperations {
         if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
             clusterUpgradeAvailabilityService.filterUpgradeOptions(accountId, upgradeResponse, request, stack.isDatalake());
         }
-        validateAttachedDataHubsForDataLake(accountId, workspaceId, stack, upgradeResponse);
+        validateAttachedDataHubsForDataLake(accountId, workspaceId, stack, upgradeResponse, request.getInternalUpgradeSettings());
         LOGGER.debug("Upgrade response after validations: {}", upgradeResponse);
         return upgradeResponse;
     }
 
-    private void validateAttachedDataHubsForDataLake(String accountId, Long workspaceId, Stack stack, UpgradeV4Response upgradeResponse) {
-        if (entitlementService.runtimeUpgradeEnabled(accountId) && StackType.DATALAKE == stack.getType()) {
+    private void validateAttachedDataHubsForDataLake(String accountId, Long workspaceId, Stack stack, UpgradeV4Response upgradeResponse,
+            InternalUpgradeSettings internalUpgradeSettings) {
+        if (entitlementService.runtimeUpgradeEnabled(accountId) && StackType.DATALAKE == stack.getType()
+                && (internalUpgradeSettings == null || !internalUpgradeSettings.isUpgradePreparation())) {
             LOGGER.info("Checking that the attached DataHubs of the Data lake are both in stopped state and upgradeable only in case if "
                     + "Data lake runtime upgrade is enabled in [{}] account on [{}] cluster.", accountId, stack.getName());
             StackViewV4Responses stackViewV4Responses = stackOperations.listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(),
