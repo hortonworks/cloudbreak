@@ -215,7 +215,7 @@ public class ImageService {
     }
 
     public String determineImageName(String cloudPlatform, ImageCatalogPlatform platformString, String region,
-            com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog) throws CloudbreakImageNotFoundException {
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog) throws CloudbreakImageNotFoundException {
         Optional<Map<String, String>> imagesForPlatform = findStringKeyWithEqualsIgnoreCase(
                 platformString.nameToLowerCase(),
                 imgFromCatalog.getImageSetsByProvider());
@@ -243,11 +243,6 @@ public class ImageService {
                 .filter(entry -> entry.getKey().equalsIgnoreCase(key))
                 .map(Entry::getValue)
                 .findFirst();
-    }
-
-    public Set<Component> getComponentsWithoutUserData(Stack stack, StatedImage statedImage)
-            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        return getComponents(stack, null, statedImage, EnumSet.of(CDH_PRODUCT_DETAILS, CM_REPO_DETAILS));
     }
 
     public Set<Component> getComponents(Stack stack, Map<InstanceGroupType, String> userData, StatedImage statedImage,

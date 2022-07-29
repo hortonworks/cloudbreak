@@ -59,7 +59,7 @@ public class DatalakeRecoveryBringupActions {
                 Long stackId = context.getStackId();
                 try {
                     Image image = componentConfigProviderService.getImage(stackId);
-                    imageComponentUpdaterService.updateComponentsForUpgrade(image.getImageId(), stackId);
+                    imageComponentUpdaterService.updateForUpgrade(image.getImageId(), stackId);
                 } catch (CloudbreakImageNotFoundException e) {
                     String message = "Image was not found for current stack, it is not possible to continue recovery. "
                             + "Please open a Cloudera support ticket to fix this issue";
