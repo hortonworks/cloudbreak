@@ -55,7 +55,9 @@ public class ClusterUseCaseMapper {
         firstStepUseCaseMap.put(Pair.of("BackupDatalakeDatabaseFlowEventChainFactory", "SaltUpdateFlowConfig"),
                 UsageProto.CDPClusterStatus.Value.BACKUP_STARTED);
         firstStepUseCaseMap.put(Pair.of("", "DiagnosticsCollectionFlowConfig"), UsageProto.CDPClusterStatus.Value.DIAGNOSTIC_COLLECTION_STARTED);
-        firstStepUseCaseMap.put(Pair.of("", "DatalakeResizeFlowEventChainFactory"), UsageProto.CDPClusterStatus.Value.DATALAKE_RESIZE_START);
+        firstStepUseCaseMap.put(Pair.of("", "DatalakeResizeFlowEventChainFactory"), UsageProto.CDPClusterStatus.Value.DATALAKE_RESIZE_STARTED);
+        firstStepUseCaseMap.put(Pair.of("PrepareClusterUpgradeFlowEventChainFactory", "ClusterUpgradeValidationFlowConfig"),
+                UsageProto.CDPClusterStatus.Value.UPGRADE_PREPARE_STARTED);
     }
 
     // At the moment we need to introduce a complex logic to figure out the use case
@@ -155,6 +157,10 @@ public class ClusterUseCaseMapper {
                     useCase = getClusterStatus(nextFlowState, "DATAHUB_REFRESH_FINISHED_STATE",
                             UsageProto.CDPClusterStatus.Value.DATALAKE_RESIZE_FINISHED,
                             UsageProto.CDPClusterStatus.Value.DATALAKE_RESIZE_FAILED);
+                    break;
+                case "PrepareClusterUpgradeFlowEventChainFactory":
+                    useCase = getClusterStatus(nextFlowState, "CLUSTER_UPGRADE_PREPARATION_FINISHED_STATE",
+                            UsageProto.CDPClusterStatus.Value.UPGRADE_PREPARE_FINISHED, UsageProto.CDPClusterStatus.Value.UPGRADE_PREPARE_FAILED);
                     break;
                 default:
                     LOGGER.debug("Next flow state: {}", nextFlowState);
