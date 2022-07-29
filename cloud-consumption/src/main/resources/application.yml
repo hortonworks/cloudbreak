@@ -128,7 +128,7 @@ cb:
       contentlogging: true
   aws:
     spotinstances.enabled: true
-    disabled.instance.types: c5d,f1,i3,m5d,p3dn,r5d,z1d
+    disabled.instance.types:
     hostkey.verify: false
     credential.cache.ttl: 60
     external.id: provision-ambari
