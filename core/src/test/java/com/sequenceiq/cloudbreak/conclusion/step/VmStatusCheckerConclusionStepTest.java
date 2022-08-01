@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.conclusion.step;
 
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.CM_UNHEALTHY_VMS_FOUND;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.CM_UNHEALTHY_VMS_FOUND_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.PROVIDER_NOT_RUNNING_VMS_FOUND;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.PROVIDER_NOT_RUNNING_VMS_FOUND_DETAILS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -41,6 +45,7 @@ import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceCo
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
@@ -68,6 +73,9 @@ class VmStatusCheckerConclusionStepTest {
 
     @Mock
     private RuntimeVersionService runtimeVersionService;
+
+    @Mock
+    private CloudbreakMessagesService cloudbreakMessagesService;
 
     @InjectMocks
     private VmStatusCheckerConclusionStep underTest;
@@ -105,6 +113,8 @@ class VmStatusCheckerConclusionStepTest {
 
     @Test
     public void checkShouldFailIfCMIsRunningAndUnhealthyOrUnknownInstanceExists() {
+        when(cloudbreakMessagesService.getMessage(eq(CM_UNHEALTHY_VMS_FOUND))).thenReturn("cm unhealthy vms");
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(CM_UNHEALTHY_VMS_FOUND_DETAILS), any())).thenReturn("cm unhealthy vms details");
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.TRUE);
         when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong()))
                 .thenReturn(List.of(createInstanceMetadata("host1"), createInstanceMetadata("host2"), createInstanceMetadata("host3")));
@@ -112,10 +122,8 @@ class VmStatusCheckerConclusionStepTest {
 
         Conclusion conclusion = underTest.check(1L);
         assertTrue(conclusion.isFailureFound());
-        assertEquals("Unhealthy and/or unknown VMs found based on CM status. Unhealthy VMs: {host1=error, host2=error}, unknown VMs: [host3]. " +
-                "Please check the instances on your cloud provider for further details.", conclusion.getConclusion());
-        assertEquals("Unhealthy and/or unknown VMs found based on CM status. Unhealthy VMs: {host1=error, host2=error}, unknown VMs: [host3]",
-                conclusion.getDetails());
+        assertEquals("cm unhealthy vms", conclusion.getConclusion());
+        assertEquals("cm unhealthy vms details", conclusion.getDetails());
         assertEquals(VmStatusCheckerConclusionStep.class, conclusion.getConclusionStepClass());
     }
 
@@ -136,6 +144,8 @@ class VmStatusCheckerConclusionStepTest {
 
     @Test
     public void checkShouldFailIfCMIsNotRunningAndUnhealthyInstanceExists() {
+        when(cloudbreakMessagesService.getMessage(eq(PROVIDER_NOT_RUNNING_VMS_FOUND))).thenReturn("provider not running vms");
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(PROVIDER_NOT_RUNNING_VMS_FOUND_DETAILS), any())).thenReturn("provider not running vms details");
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
         when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong()))
                 .thenReturn(List.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
@@ -144,10 +154,8 @@ class VmStatusCheckerConclusionStepTest {
 
         Conclusion conclusion = underTest.check(1L);
         assertTrue(conclusion.isFailureFound());
-        assertEquals("Not running VMs found based on provider status: [host1, host2]. " +
-                "Please check the instances on your cloud provider for further details.", conclusion.getConclusion());
-        assertEquals("Not running VMs found based on provider status: [host1, host2]",
-                conclusion.getDetails());
+        assertEquals("provider not running vms", conclusion.getConclusion());
+        assertEquals("provider not running vms details", conclusion.getDetails());
         assertEquals(VmStatusCheckerConclusionStep.class, conclusion.getConclusionStepClass());
     }
 

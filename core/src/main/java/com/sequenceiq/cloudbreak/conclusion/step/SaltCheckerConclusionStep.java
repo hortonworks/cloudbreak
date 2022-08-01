@@ -1,5 +1,14 @@
 package com.sequenceiq.cloudbreak.conclusion.step;
 
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.SALT_COLLECT_UNREACHABLE_FAILED;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.SALT_COLLECT_UNREACHABLE_FAILED_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.SALT_COLLECT_UNREACHABLE_FOUND;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.SALT_COLLECT_UNREACHABLE_FOUND_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.SALT_MASTER_SERVICES_UNHEALTHY;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.SALT_MASTER_SERVICES_UNHEALTHY_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.SALT_MINIONS_UNREACHABLE;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.SALT_MINIONS_UNREACHABLE_DETAILS;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -7,7 +16,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,6 +30,7 @@ import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
@@ -40,6 +49,9 @@ public class SaltCheckerConclusionStep extends ConclusionStep {
 
     @Inject
     private StackUtil stackUtil;
+
+    @Inject
+    private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Override
     public Conclusion check(Long resourceId) {
@@ -71,21 +83,21 @@ public class SaltCheckerConclusionStep extends ConclusionStep {
 
     private Conclusion checkUnreachableNodes(Long resourceId) {
         StackDto stackDto = stackDtoService.getById(resourceId);
-        Set<String> allNodes = stackUtil.collectNodes(stackDto).stream().map(Node::getHostname).collect(Collectors.toSet());
+        Set<String> allAvailableInstanceHostNames = stackDto.getAllAvailableInstances().stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.toSet());
+        Set<String> availableNodes = stackUtil.collectNodes(stackDto, allAvailableInstanceHostNames)
+                .stream().map(Node::getHostname).collect(Collectors.toSet());
         try {
-            stackUtil.collectAndCheckReachableNodes(stackDto, allNodes);
+            stackUtil.collectAndCheckReachableNodes(stackDto, availableNodes);
         } catch (NodesUnreachableException e) {
             Set<String> unreachableNodes = e.getUnreachableNodes();
-            String conclusion = String.format("Unreachable nodes: %s. We detected that cluster members can’t communicate with each other. " +
-                    "Please validate if all cluster members are available and healthy through your cloud provider.", unreachableNodes);
-            String details = String.format("Unreachable salt minions: %s", unreachableNodes);
+            String conclusion = cloudbreakMessagesService.getMessageWithArgs(SALT_COLLECT_UNREACHABLE_FOUND, unreachableNodes);
+            String details = cloudbreakMessagesService.getMessageWithArgs(SALT_COLLECT_UNREACHABLE_FOUND_DETAILS, unreachableNodes);
             LOGGER.warn(details);
             return failed(conclusion, details);
         } catch (Exception e) {
-            String conclusion = String.format("Can't collect reachable and unreachable nodes. " +
-                    "Please validate if all cluster members are available and healthy through your cloud provider.");
-            String details = String.format("Can't collect reachable and unreachable nodes. Reason: %s", e.getMessage());
-            LOGGER.warn(details);
+            String conclusion = cloudbreakMessagesService.getMessage(SALT_COLLECT_UNREACHABLE_FAILED);
+            String details = cloudbreakMessagesService.getMessageWithArgs(SALT_COLLECT_UNREACHABLE_FAILED_DETAILS, e.getMessage());
+            LOGGER.warn(details, e);
             return failed(conclusion, details);
         }
         return succeeded();
@@ -107,17 +119,15 @@ public class SaltCheckerConclusionStep extends ConclusionStep {
     }
 
     private Conclusion createFailedConclusionForMaster(List<String> failedServicesOnMaster) {
-        String conclusion = String.format("There are unhealthy services on master node: %s. " +
-                        "Please check the instances on your cloud provider for further details.", failedServicesOnMaster);
-        String details = String.format("Unhealthy services on master: %s", StringUtils.join(failedServicesOnMaster));
+        String conclusion = cloudbreakMessagesService.getMessageWithArgs(SALT_MASTER_SERVICES_UNHEALTHY, failedServicesOnMaster);
+        String details = cloudbreakMessagesService.getMessageWithArgs(SALT_MASTER_SERVICES_UNHEALTHY_DETAILS, failedServicesOnMaster);
         LOGGER.warn(details);
         return failed(conclusion, details);
     }
 
     private Conclusion createFailedConclusionForMinions(Map<String, String> unreachableMinions) {
-        String conclusion = String.format("Unreachable nodes: %s. We detected that cluster members can’t communicate with each other. " +
-                        "Please validate if all cluster members are available and healthy through your cloud provider.", unreachableMinions.keySet());
-        String details = String.format("Unreachable salt minions: %s", StringUtils.join(unreachableMinions));
+        String conclusion = cloudbreakMessagesService.getMessageWithArgs(SALT_MINIONS_UNREACHABLE, unreachableMinions.keySet());
+        String details = cloudbreakMessagesService.getMessageWithArgs(SALT_MINIONS_UNREACHABLE_DETAILS, unreachableMinions);
         LOGGER.warn(details);
         return failed(conclusion, details);
     }

@@ -1,5 +1,13 @@
 package com.sequenceiq.cloudbreak.conclusion.step;
 
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_CCM_NOT_ACCESSIBLE;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_CCM_NOT_ACCESSIBLE_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_NEIGHBOUR_NOT_ACCESSIBLE;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_NEIGHBOUR_NOT_ACCESSIBLE_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NODE_STATUS_MONITOR_UNREACHABLE;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +22,7 @@ import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDeta
 import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus;
 import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatusReport;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
 
 @Component
@@ -24,14 +33,17 @@ public class NetworkCheckerConclusionStep extends ConclusionStep {
     @Inject
     private NodeStatusService nodeStatusService;
 
+    @Inject
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
     @Override
     public Conclusion check(Long resourceId) {
         RPCResponse<NodeStatusReport> networkReport;
         try {
             networkReport = nodeStatusService.getNetworkReport(resourceId);
         } catch (Exception e) {
-            LOGGER.debug("Network report failed, error: {}", e.getMessage());
-            return succeeded();
+            LOGGER.warn("Network report failed, error: {}", e.getMessage());
+            return failed(cloudbreakMessagesService.getMessage(NODE_STATUS_MONITOR_UNREACHABLE), e.getMessage());
         }
         if (networkReport.getResult() == null) {
             String nodeStatusResult = networkReport.getFirstTextMessage();
@@ -55,20 +67,22 @@ public class NetworkCheckerConclusionStep extends ConclusionStep {
             NetworkDetails networkDetails = nodeStatus.getNetworkDetails();
             String host = nodeStatus.getStatusDetails().getHost();
             if (networkDetails.getCcmEnabled() && HealthStatus.NOK.equals(networkDetails.getCcmAccessible())) {
-                networkFailures.add("CCM is not accessible from node " + host + ". Please check network settings!");
-                String details = String.format("CCM health status is %s for node %s", networkDetails.getCcmAccessible(), host);
+                networkFailures.add(cloudbreakMessagesService.getMessageWithArgs(NETWORK_CCM_NOT_ACCESSIBLE, host));
+                String details = cloudbreakMessagesService.getMessageWithArgs(NETWORK_CCM_NOT_ACCESSIBLE_DETAILS, networkDetails.getCcmAccessible(), host);
                 networkFailureDetails.add(details);
                 LOGGER.warn(details);
             }
             if (HealthStatus.NOK.equals(networkDetails.getClouderaComAccessible())) {
-                networkFailures.add("Cloudera.com is not accessible from node: " + host + ". Please check network settings!");
-                String details = String.format("Cloudera.com accessibility status is %s for node %s", networkDetails.getClouderaComAccessible(), host);
+                networkFailures.add(cloudbreakMessagesService.getMessageWithArgs(NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE, host));
+                String details = cloudbreakMessagesService.getMessageWithArgs(NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE_DETAILS,
+                        networkDetails.getClouderaComAccessible(), host);
                 networkFailureDetails.add(details);
                 LOGGER.warn(details);
             }
             if (networkDetails.getNeighbourScan() && HealthStatus.NOK.equals(networkDetails.getAnyNeighboursAccessible())) {
-                networkFailures.add("Node " + host + " cannot reach any neighbour nodes. Please check nodes and network settings!");
-                String details = String.format("Neighbours accessibility status is %s for node %s", networkDetails.getAnyNeighboursAccessible(), host);
+                networkFailures.add(cloudbreakMessagesService.getMessageWithArgs(NETWORK_NEIGHBOUR_NOT_ACCESSIBLE, host));
+                String details = cloudbreakMessagesService.getMessageWithArgs(NETWORK_NEIGHBOUR_NOT_ACCESSIBLE_DETAILS,
+                        networkDetails.getAnyNeighboursAccessible(), host);
                 networkFailureDetails.add(details);
                 LOGGER.warn(details);
             }

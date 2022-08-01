@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.conclusion.step;
 
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NODE_STATUS_MONITOR_FAILED;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NODE_STATUS_MONITOR_FAILED_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NODE_STATUS_MONITOR_UNREACHABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,6 +30,7 @@ import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetai
 import com.sequenceiq.cloudbreak.client.RPCMessage;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,17 +39,21 @@ class NodeServicesCheckerConclusionStepTest {
     @Mock
     private NodeStatusService nodeStatusService;
 
+    @Mock
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
     @InjectMocks
     private NodeServicesCheckerConclusionStep underTest;
 
     @Test
     public void checkShouldBeSuccessfulIfNodeStatusReportFailsForOlderImageVersions() {
         when(nodeStatusService.getServicesReport(eq(1L))).thenThrow(new CloudbreakServiceException("error"));
+        when(cloudbreakMessagesService.getMessage(NODE_STATUS_MONITOR_UNREACHABLE)).thenReturn("node status monitor unreachable");
         Conclusion stepResult = underTest.check(1L);
 
-        assertFalse(stepResult.isFailureFound());
-        assertNull(stepResult.getConclusion());
-        assertNull(stepResult.getDetails());
+        assertTrue(stepResult.isFailureFound());
+        assertEquals("node status monitor unreachable", stepResult.getConclusion());
+        assertEquals("error", stepResult.getDetails());
         assertEquals(NodeServicesCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(nodeStatusService, times(1)).getServicesReport(eq(1L));
     }
@@ -67,7 +76,7 @@ class NodeServicesCheckerConclusionStepTest {
 
     @Test
     public void checkShouldBeSuccessfulIfNoNodesWithUnhealthyServicesFound() {
-        when(nodeStatusService.getServicesReport(eq(1L))).thenReturn(createNodeStatusResponse(HealthStatus.OK));
+        when(nodeStatusService.getServicesReport(eq(1L))).thenReturn(createNodeStatusResponse(HealthStatus.OK, HealthStatus.OK));
         Conclusion stepResult = underTest.check(1L);
 
         assertFalse(stepResult.isFailureFound());
@@ -79,27 +88,33 @@ class NodeServicesCheckerConclusionStepTest {
 
     @Test
     public void checkShouldFailAndReturnConclusionIfNodeWithUnhealthyServicesFound() {
-        when(nodeStatusService.getServicesReport(eq(1L))).thenReturn(createNodeStatusResponse(HealthStatus.NOK));
+        when(nodeStatusService.getServicesReport(eq(1L))).thenReturn(createNodeStatusResponse(HealthStatus.NOK, HealthStatus.NOK));
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(NODE_STATUS_MONITOR_FAILED), any())).thenReturn("unhealthy nodes");
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(NODE_STATUS_MONITOR_FAILED_DETAILS), any())).thenReturn("unhealthy nodes details");
         Conclusion stepResult = underTest.check(1L);
 
         assertTrue(stepResult.isFailureFound());
-        assertEquals("There are unhealthy services on nodes: [host1]. " +
-                "Please check the instances on your cloud provider for further details.", stepResult.getConclusion());
-        assertEquals("There are unhealthy services on nodes: {host1=[salt-bootstrap]}", stepResult.getDetails());
+        assertEquals("unhealthy nodes", stepResult.getConclusion());
+        assertEquals("unhealthy nodes details", stepResult.getDetails());
         assertEquals(NodeServicesCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(nodeStatusService, times(1)).getServicesReport(eq(1L));
     }
 
-    private RPCResponse<NodeStatusReport> createNodeStatusResponse(HealthStatus saltBootstrapServiceStatus) {
+    private RPCResponse<NodeStatusReport> createNodeStatusResponse(HealthStatus saltBootstrapHealthStatus, HealthStatus cmAgentHealthStatus) {
         StatusDetails statusDetails = StatusDetails.newBuilder()
                 .setHost("host1")
                 .build();
-        ServiceStatus serviceStatus = ServiceStatus.newBuilder()
+        ServiceStatus saltBootstrapServiceStatus = ServiceStatus.newBuilder()
                 .setName("salt-bootstrap")
-                .setStatus(saltBootstrapServiceStatus)
+                .setStatus(saltBootstrapHealthStatus)
+                .build();
+        ServiceStatus cmAgentServiceStatus = ServiceStatus.newBuilder()
+                .setName("cm-agent")
+                .setStatus(cmAgentHealthStatus)
                 .build();
         ServicesDetails  servicesDetails = ServicesDetails.newBuilder()
-                .addInfraServices(serviceStatus)
+                .addInfraServices(saltBootstrapServiceStatus)
+                .addCmServices(cmAgentServiceStatus)
                 .build();
         NodeStatus nodeStatus = NodeStatus.newBuilder()
                 .setStatusDetails(statusDetails)

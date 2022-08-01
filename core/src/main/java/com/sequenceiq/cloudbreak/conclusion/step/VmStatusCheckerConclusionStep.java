@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.conclusion.step;
 
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.CM_UNHEALTHY_VMS_FOUND;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.CM_UNHEALTHY_VMS_FOUND_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.PROVIDER_NOT_RUNNING_VMS_FOUND;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.PROVIDER_NOT_RUNNING_VMS_FOUND_DETAILS;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.List;
@@ -24,6 +28,7 @@ import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
@@ -55,6 +60,9 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
     @Inject
     private RuntimeVersionService runtimeVersionService;
 
+    @Inject
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
     @Override
     public Conclusion check(Long resourceId) {
         Stack stack = stackService.getById(resourceId);
@@ -81,10 +89,8 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
                 .collect(toSet());
 
         if (!unhealthyHosts.isEmpty() || !noReportHosts.isEmpty()) {
-            String conclusion = String.format("Unhealthy and/or unknown VMs found based on CM status. Unhealthy VMs: %s, unknown VMs: %s. " +
-                    "Please check the instances on your cloud provider for further details.", unhealthyHosts, noReportHosts);
-            String details = String.format("Unhealthy and/or unknown VMs found based on CM status. Unhealthy VMs: %s, unknown VMs: %s",
-                    unhealthyHosts, noReportHosts);
+            String conclusion = cloudbreakMessagesService.getMessage(CM_UNHEALTHY_VMS_FOUND);
+            String details = cloudbreakMessagesService.getMessageWithArgs(CM_UNHEALTHY_VMS_FOUND_DETAILS, unhealthyHosts, noReportHosts);
             LOGGER.warn(details);
             return failed(conclusion, details);
         } else {
@@ -104,9 +110,8 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
                 .collect(toSet());
 
         if (!notRunningInstances.isEmpty()) {
-            String conclusion = String.format("Not running VMs found based on provider status: %s. " +
-                    "Please check the instances on your cloud provider for further details.", notRunningInstances);
-            String details = String.format("Not running VMs found based on provider status: %s", notRunningInstances);
+            String conclusion = cloudbreakMessagesService.getMessage(PROVIDER_NOT_RUNNING_VMS_FOUND);
+            String details = cloudbreakMessagesService.getMessageWithArgs(PROVIDER_NOT_RUNNING_VMS_FOUND_DETAILS, notRunningInstances);
             LOGGER.warn(details);
             return failed(conclusion, details);
         } else {

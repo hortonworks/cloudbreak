@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.conclusion.step;
 
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.SALT_COLLECT_UNREACHABLE_FOUND;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.SALT_COLLECT_UNREACHABLE_FOUND_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.SALT_MASTER_SERVICES_UNHEALTHY;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.SALT_MASTER_SERVICES_UNHEALTHY_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.SALT_MINIONS_UNREACHABLE;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.SALT_MINIONS_UNREACHABLE_DETAILS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -31,6 +37,7 @@ import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
@@ -54,12 +61,15 @@ public class SaltCheckerConclusionStepTest {
     @Mock
     private StackDto stackDto;
 
+    @Mock
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
     @Test
     public void checkShouldFallbackIfNodeStatusCheckFailsAndBeSuccessfulIfNoUnreachableNodeFound() throws NodesUnreachableException {
         when(nodeStatusService.saltPing(eq(1L))).thenThrow(new CloudbreakServiceException("error"));
         when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
         Set<Node> nodes = Set.of(createNode("host1"), createNode("host2"));
-        when(stackUtil.collectNodes(any())).thenReturn(nodes);
+        when(stackUtil.collectNodes(any(), any())).thenReturn(nodes);
         when(stackUtil.collectAndCheckReachableNodes(any(), anyCollection())).thenReturn(nodes);
         Conclusion stepResult = underTest.check(1L);
 
@@ -69,7 +79,7 @@ public class SaltCheckerConclusionStepTest {
         assertEquals(SaltCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(nodeStatusService, times(1)).saltPing(eq(1L));
         verify(stackDtoService, times(1)).getById(eq(1L));
-        verify(stackUtil, times(1)).collectNodes(any());
+        verify(stackUtil, times(1)).collectNodes(any(), any());
         verify(stackUtil, times(1)).collectAndCheckReachableNodes(any(), any());
     }
 
@@ -82,7 +92,7 @@ public class SaltCheckerConclusionStepTest {
         when(nodeStatusService.saltPing(eq(1L))).thenReturn(response);
         when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
         Set<Node> nodes = Set.of(createNode("host1"), createNode("host2"));
-        when(stackUtil.collectNodes(any())).thenReturn(nodes);
+        when(stackUtil.collectNodes(any(), any())).thenReturn(nodes);
         when(stackUtil.collectAndCheckReachableNodes(any(), anyCollection())).thenReturn(nodes);
         Conclusion stepResult = underTest.check(1L);
 
@@ -92,30 +102,31 @@ public class SaltCheckerConclusionStepTest {
         assertEquals(SaltCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(nodeStatusService, times(1)).saltPing(eq(1L));
         verify(stackDtoService, times(1)).getById(eq(1L));
-        verify(stackUtil, times(1)).collectNodes(any());
+        verify(stackUtil, times(1)).collectNodes(any(), any());
         verify(stackUtil, times(1)).collectAndCheckReachableNodes(any(), any());
     }
 
     @Test
     public void checkShouldFallbackForOldImageVersionsAndReturnConclusionIfUnreachableNodeFound() throws NodesUnreachableException {
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(SALT_COLLECT_UNREACHABLE_FOUND), any())).thenReturn("collect unreachable found");
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(SALT_COLLECT_UNREACHABLE_FOUND_DETAILS), any())).thenReturn("collect unreachable found details");
         RPCResponse<SaltHealthReport> response = new RPCResponse<>();
         RPCMessage message = new RPCMessage();
         message.setMessage("rpc response");
         response.setMessages(List.of(message));
         when(nodeStatusService.saltPing(eq(1L))).thenReturn(response);
         when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
-        when(stackUtil.collectNodes(any())).thenReturn(Set.of(createNode("host1"), createNode("host2")));
+        when(stackUtil.collectNodes(any(), any())).thenReturn(Set.of(createNode("host1"), createNode("host2")));
         when(stackUtil.collectAndCheckReachableNodes(any(), anyCollection())).thenThrow(new NodesUnreachableException("error", Set.of("host1")));
         Conclusion stepResult = underTest.check(1L);
 
         assertTrue(stepResult.isFailureFound());
-        assertEquals("Unreachable nodes: [host1]. We detected that cluster members can’t communicate with each other. " +
-                "Please validate if all cluster members are available and healthy through your cloud provider.", stepResult.getConclusion());
-        assertEquals("Unreachable salt minions: [host1]", stepResult.getDetails());
+        assertEquals("collect unreachable found", stepResult.getConclusion());
+        assertEquals("collect unreachable found details", stepResult.getDetails());
         assertEquals(SaltCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(nodeStatusService, times(1)).saltPing(eq(1L));
         verify(stackDtoService, times(1)).getById(eq(1L));
-        verify(stackUtil, times(1)).collectNodes(any());
+        verify(stackUtil, times(1)).collectNodes(any(), any());
         verify(stackUtil, times(1)).collectAndCheckReachableNodes(any(), any());
     }
 
@@ -133,26 +144,28 @@ public class SaltCheckerConclusionStepTest {
 
     @Test
     public void checkShouldFailAndReturnConclusionIfUnhealthyServicesOnMasterFound() {
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(SALT_MASTER_SERVICES_UNHEALTHY), any())).thenReturn("master error");
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(SALT_MASTER_SERVICES_UNHEALTHY_DETAILS), any())).thenReturn("master error details");
         when(nodeStatusService.saltPing(eq(1L))).thenReturn(createSaltPingResponse(HealthStatus.NOK, HealthStatus.OK));
         Conclusion stepResult = underTest.check(1L);
 
         assertTrue(stepResult.isFailureFound());
-        assertEquals("There are unhealthy services on master node: [salt-bootstrap]. " +
-                "Please check the instances on your cloud provider for further details.", stepResult.getConclusion());
-        assertEquals("Unhealthy services on master: [salt-bootstrap]", stepResult.getDetails());
+        assertEquals("master error", stepResult.getConclusion());
+        assertEquals("master error details", stepResult.getDetails());
         assertEquals(SaltCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(nodeStatusService, times(1)).saltPing(eq(1L));
     }
 
     @Test
     public void checkShouldFailAndReturnConclusionIfUnhealthyMinionsFound() {
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(SALT_MINIONS_UNREACHABLE), any())).thenReturn("minions unreachable");
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(SALT_MINIONS_UNREACHABLE_DETAILS), any())).thenReturn("minions unreachable details");
         when(nodeStatusService.saltPing(eq(1L))).thenReturn(createSaltPingResponse(HealthStatus.OK, HealthStatus.NOK));
         Conclusion stepResult = underTest.check(1L);
 
         assertTrue(stepResult.isFailureFound());
-        assertEquals("Unreachable nodes: [host1]. We detected that cluster members can’t communicate with each other. " +
-                "Please validate if all cluster members are available and healthy through your cloud provider.", stepResult.getConclusion());
-        assertEquals("Unreachable salt minions: {host1=bigproblem}", stepResult.getDetails());
+        assertEquals("minions unreachable", stepResult.getConclusion());
+        assertEquals("minions unreachable details", stepResult.getDetails());
         assertEquals(SaltCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(nodeStatusService, times(1)).saltPing(eq(1L));
     }
