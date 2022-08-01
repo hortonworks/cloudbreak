@@ -10,9 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.streaming.config.AbstractStreamingConfiguration;
 import com.sequenceiq.cloudbreak.streaming.model.RecordRequest;
 import com.sequenceiq.cloudbreak.streaming.model.StreamProcessingException;
+import com.sequenceiq.cloudbreak.telemetry.streaming.CommonStreamingConfiguration;
 
 /**
  * Record processor that holds processing queues that are used by round robin algorithm.
@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.streaming.model.StreamProcessingException;
  * @param <R> type of the request that is processed.
  * @param <W> type of the worker that implements the client specific mechanism for the processing.
  */
-public abstract class AbstractRecordProcessor<C extends AbstractStreamingConfiguration, R extends RecordRequest, W extends RecordWorker> {
+public abstract class AbstractRecordProcessor<C extends CommonStreamingConfiguration, R extends RecordRequest, W extends RecordWorker> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRecordProcessor.class);
 
@@ -44,7 +44,7 @@ public abstract class AbstractRecordProcessor<C extends AbstractStreamingConfigu
         this.numberOfWorkers = configuration.getNumberOfWorkers();
         this.queueSizeLimit = configuration.getQueueSizeLimit();
         this.processingQueuesRef = new AtomicReference<>();
-        this.processingEnabled = new AtomicBoolean(configuration.isEnabled());
+        this.processingEnabled = new AtomicBoolean(configuration.isStreamingEnabled());
     }
 
     /**
@@ -54,13 +54,13 @@ public abstract class AbstractRecordProcessor<C extends AbstractStreamingConfigu
     public void processRecord(R input) {
         if (isProcessingEnabled()) {
             try {
-                if (messageIsNotEmpty(input)) {
+                if (isInputValid(input)) {
                     getProcessingQueues().process(input);
                 } else {
-                    LOGGER.debug("Record request needs payload message. Skip processing...");
+                    logInputIsNotValid();
                 }
             } catch (InterruptedException e) {
-                LOGGER.debug("Putting record request for processing is interrupted. {}", e.getMessage());
+                LOGGER.debug("Putting {} record request for processing is interrupted. {}", getProcessorTypeForLog(), e.getMessage());
             }
         } else {
             LOGGER.debug("{} processing is not enabled, skip text message processing.", getServiceName());
@@ -104,7 +104,7 @@ public abstract class AbstractRecordProcessor<C extends AbstractStreamingConfigu
      * Default behaviour: log the dropped record request input.
      */
     public void handleDroppedRecordRequest(R input, int sizeLimit) {
-        LOGGER.warn("Blocking queue reached size limit: {}. Dropping record input: {}", sizeLimit, input);
+        LOGGER.warn("Blocking queue reached size limit: {}. Dropping {} record input: {}", sizeLimit, getProcessorTypeForLog(), input);
     }
 
     /**
@@ -112,7 +112,7 @@ public abstract class AbstractRecordProcessor<C extends AbstractStreamingConfigu
      * Default behaviour: log the exception.
      */
     public void handleDataStreamingException(R input, StreamProcessingException e) {
-        LOGGER.warn(String.format("Exception during stream record processing [skip] - input: %s", input), e);
+        LOGGER.warn(String.format("Exception during %s record processing [skip] - input: %s", getProcessorTypeForLog(), input), e);
     }
 
     /**
@@ -120,7 +120,7 @@ public abstract class AbstractRecordProcessor<C extends AbstractStreamingConfigu
      * Default behaviour: log the exception.
      */
     public void handleUnexpectedException(R input, Exception e) {
-        LOGGER.warn(String.format("Unexpected exception during stream record processing [skip] - input: %s", input), e);
+        LOGGER.warn(String.format("Unexpected exception during %s record processing [skip] - input: %s", getProcessorTypeForLog(), input), e);
     }
 
     public boolean isProcessingEnabled() {
@@ -138,6 +138,30 @@ public abstract class AbstractRecordProcessor<C extends AbstractStreamingConfigu
      */
     public boolean validateConfiguration(C configuration) {
         return true;
+    }
+
+    /**
+     * Check whether input is valid for processing.
+     * Override this to implement specific input validation.
+     * @param input Input to be validated.
+     */
+    public boolean isInputValid(R input) {
+        return messageIsNotEmpty(input);
+    }
+
+    /**
+     * Log a message about input not being valid.
+     * Override this to customize log message.
+     */
+    public void logInputIsNotValid() {
+        LOGGER.debug("Record request needs payload message. Skip processing...");
+    }
+
+    /**
+     * Override this to specify processor type name used in logs.
+     */
+    public String getProcessorTypeForLog() {
+        return "stream";
     }
 
     public C getConfiguration() {

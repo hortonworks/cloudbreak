@@ -24,7 +24,7 @@ public class MeteringConfigServiceTest {
 
     @Before
     public void setUp() {
-        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "app", "stream");
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "app", "stream", false);
         TelemetryComponentUpgradeConfiguration meteringAgentConfig = new TelemetryComponentUpgradeConfiguration();
         meteringAgentConfig.setDesiredDate("2021-01-01");
         TelemetryUpgradeConfiguration upgradeConfigs = new TelemetryUpgradeConfiguration();

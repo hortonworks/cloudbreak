@@ -45,9 +45,9 @@ public class FluentConfigServiceTest {
     @Before
     public void setUp() {
         MeteringConfiguration meteringConfiguration =
-                new MeteringConfiguration(false, "dbusApp", "dbusStream");
+                new MeteringConfiguration(false, "dbusApp", "dbusStream", false);
         ClusterLogsCollectionConfiguration logCollectionConfig =
-                new ClusterLogsCollectionConfiguration(false, null, null);
+                new ClusterLogsCollectionConfiguration(false, null, null, false);
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(null, meteringConfiguration, logCollectionConfig, null, null);
         underTest = new FluentConfigService(new S3ConfigGenerator(), new AdlsGen2ConfigGenerator(), new GcsConfigGenerator(),

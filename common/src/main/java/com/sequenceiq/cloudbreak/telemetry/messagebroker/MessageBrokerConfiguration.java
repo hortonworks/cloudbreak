@@ -12,14 +12,23 @@ public class MessageBrokerConfiguration extends AbstractDatabusStreamConfigurati
 
     private final String processor;
 
+    private final int numberOfWorkers;
+
+    private final int queueSizeLimit;
+
     public MessageBrokerConfiguration(@Value("${telemetry.usage.messagebroker.enabled}") boolean enabled,
             @Value("${telemetry.usage.messagebroker.dbus-app-name}") String dbusAppName,
             @Value("${telemetry.usage.messagebroker.dbus-stream-name}") String dbusStreamName,
+            @Value("${telemetry.usage.messagebroker.streaming-enabled}") boolean streamingEnabled,
             @Value("${telemetry.usage.messagebroker.headers.origin}") String origin,
-            @Value("${telemetry.usage.messagebroker.headers.processor}") String processor) {
-        super(enabled, dbusAppName, dbusStreamName);
+            @Value("${telemetry.usage.messagebroker.headers.processor}") String processor,
+            @Value("${telemetry.usage.messagebroker.workers:1}") int numberOfWorkers,
+            @Value("${telemetry.usage.messagebroker.queueSizeLimit:2000}") int queueSizeLimit) {
+        super(enabled, dbusAppName, dbusStreamName, streamingEnabled);
         this.origin = origin;
         this.processor = processor;
+        this.numberOfWorkers = numberOfWorkers;
+        this.queueSizeLimit = queueSizeLimit;
     }
 
     @Override
@@ -30,6 +39,16 @@ public class MessageBrokerConfiguration extends AbstractDatabusStreamConfigurati
     @Override
     public String getDbusAppNameKey() {
         return "usage-events-app";
+    }
+
+    @Override
+    public int getNumberOfWorkers() {
+        return numberOfWorkers;
+    }
+
+    @Override
+    public int getQueueSizeLimit() {
+        return queueSizeLimit;
     }
 
     public String getOrigin() {

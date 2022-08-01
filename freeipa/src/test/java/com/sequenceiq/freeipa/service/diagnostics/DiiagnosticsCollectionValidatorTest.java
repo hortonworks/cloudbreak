@@ -36,7 +36,7 @@ public class DiiagnosticsCollectionValidatorTest {
     @BeforeEach
     public void setUp() {
         underTest = new DiagnosticsCollectionValidator(
-                new SupportBundleConfiguration(false, null, null), entitlementService);
+                new SupportBundleConfiguration(false, null, null, false), entitlementService);
     }
 
     @Test

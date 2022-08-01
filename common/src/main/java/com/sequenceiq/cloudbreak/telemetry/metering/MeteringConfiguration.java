@@ -10,8 +10,9 @@ public class MeteringConfiguration extends AbstractDatabusStreamConfiguration {
 
     public MeteringConfiguration(@Value("${metering.enabled:false}") boolean enabled,
             @Value("${metering.dbus.app.name:}") String dbusAppName,
-            @Value("${metering.dbus.stream.name:Metering}") String dbusStreamName) {
-        super(enabled, dbusAppName, dbusStreamName);
+            @Value("${metering.dbus.stream.name:Metering}") String dbusStreamName,
+            @Value("${metering.consumption.enabled:false}") boolean streamingEnabled) {
+        super(enabled, dbusAppName, dbusStreamName, streamingEnabled);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.sigmadbus.processor;
 
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.PostConstruct;
 
@@ -11,9 +11,10 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sigmadbus.config.SigmaDatabusConfig;
-import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRecordProcessingException;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequest;
+import com.sequenceiq.cloudbreak.streaming.processor.AbstractRecordProcessor;
 import com.sequenceiq.cloudbreak.telemetry.databus.AbstractDatabusStreamConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.streaming.CommonStreamingConfiguration;
 
 import io.opentracing.Tracer;
 
@@ -25,7 +26,8 @@ import io.opentracing.Tracer;
  * Implement this in order to process data into different databus streams.
  * @param <C> type of an implemented databus streaming configuration.
  */
-public abstract class AbstractDatabusRecordProcessor<C extends AbstractDatabusStreamConfiguration> {
+public abstract class AbstractDatabusRecordProcessor<C extends AbstractDatabusStreamConfiguration>
+        extends AbstractRecordProcessor<CommonStreamingConfiguration, DatabusRequest, DatabusRecordWorker<C>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDatabusRecordProcessor.class);
 
@@ -35,23 +37,15 @@ public abstract class AbstractDatabusRecordProcessor<C extends AbstractDatabusSt
 
     private final C databusStreamConfiguration;
 
-    private final int numberOfWorkers;
-
-    private final int queueSizeLimit;
-
-    private final AtomicReference<RoundRobinDatabusProcessingQueues<C>> processingQueuesRef;
-
     private final Tracer tracer;
 
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public AbstractDatabusRecordProcessor(SigmaDatabusConfig sigmaDatabusConfig, C databusStreamConfiguration,
-            int numberOfWorkers, int queueSizeLimit, Tracer tracer, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+    public AbstractDatabusRecordProcessor(SigmaDatabusConfig sigmaDatabusConfig, C databusStreamConfiguration, Tracer tracer,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        super(databusStreamConfiguration);
         this.sigmaDatabusConfig = sigmaDatabusConfig;
         this.databusStreamConfiguration = databusStreamConfiguration;
-        this.numberOfWorkers = numberOfWorkers;
-        this.queueSizeLimit = queueSizeLimit;
-        this.processingQueuesRef = new AtomicReference<>();
         this.tracer = tracer;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
@@ -63,69 +57,16 @@ public abstract class AbstractDatabusRecordProcessor<C extends AbstractDatabusSt
             LOGGER.debug("Sigma DataBus endpoint is not set or stream processing is not enabled for {}", getDatabusStreamConfiguration().getDbusServiceName());
         } else {
             LOGGER.debug("Starting sigma databus worker for databus service: {} ", getDatabusStreamConfiguration().getDbusServiceName());
-            RoundRobinDatabusProcessingQueues<C> processingQueues = new RoundRobinDatabusProcessingQueues<C>(
-                    numberOfWorkers, queueSizeLimit, this, tracer, regionAwareInternalCrnGeneratorFactory);
-            processingQueuesRef.set(processingQueues);
-            getProcessingQueues().startWorkers();
             dataProcessingEnabled.set(true);
         }
-    }
-
-    /**
-     * Put a databus record request into a blocking queue for processing.
-     * @param input Databus record payload with request context
-     */
-    public void processRecord(DatabusRequest input) {
-        if (isDatabusProcessingEnabled()) {
-            try {
-                if (messageIsNotEmpty(input) && doesAccountIdExist(input)) {
-                    getProcessingQueues().process(input);
-                } else {
-                    LOGGER.debug("DataBusRecordInput needs both context with account ID and a payload message. Skip processing...");
-                }
-            } catch (InterruptedException e) {
-                LOGGER.debug("Putting DataBus put record request for processing is interrupted. {}", e.getMessage());
-            }
-        } else {
-            LOGGER.debug("Databus processing is not enabled, skip text message processing to databus");
-        }
-    }
-
-    /**
-     * Override this to change the default behavior when an databus record processing error happens.
-     * Default behaviour: log the exception.
-     */
-    protected void handleDatabusRecordProcessingException(DatabusRequest input, DatabusRecordProcessingException e) {
-        LOGGER.warn(String.format("Exception during databus record processing [skip] - input: %s", input), e);
-    }
-
-    /**
-     * Override this to change the default behavior when an unexpected error happens.
-     * Default behaviour: log the exception.
-     */
-    protected void handleUnexpectedException(DatabusRequest input, Exception e) {
-        LOGGER.warn(String.format("Unexpected exception during databus record processing [skip] - input: %s", input), e);
-    }
-
-    /**
-     * Override this to change the default behavior when the processing queue is too high.
-     * Default behaviour: log the dropped databus request input.
-     */
-    protected void handleDroppedDatabusRequest(DatabusRequest input, int sizeLimit) {
-        LOGGER.warn("Blocking queue reached size limit: {}. Dropping databus input: {}", sizeLimit, input);
-    }
-
-    /**
-     * Round robin processing queue list that put data into the queue and record workers will pick those up.
-     */
-    public RoundRobinDatabusProcessingQueues<C> getProcessingQueues() {
-        return processingQueuesRef.get();
+        super.init();
     }
 
     /**
      * Checks that data processing is enabled for databus. Disabled if there are no databus workers.
      */
-    public boolean isDatabusProcessingEnabled() {
+    @Override
+    public boolean isProcessingEnabled() {
         return this.dataProcessingEnabled.get();
     }
 
@@ -143,13 +84,61 @@ public abstract class AbstractDatabusRecordProcessor<C extends AbstractDatabusSt
         return this.sigmaDatabusConfig;
     }
 
-    private boolean messageIsNotEmpty(DatabusRequest input) {
-        return input != null &&
-                (rawMessageIsNotEmpty(input) || input.getMessageBody().isPresent());
+    /**
+     * Tracer
+     */
+    public Tracer getTracer() {
+        return tracer;
     }
 
-    private boolean rawMessageIsNotEmpty(DatabusRequest input) {
-        return input.getRawBody().isPresent() && StringUtils.isNotBlank(input.getRawBody().get());
+    /**
+     * RegionAwareInternalCrnGeneratorFactory
+     */
+    public RegionAwareInternalCrnGeneratorFactory getRegionAwareInternalCrnGeneratorFactory() {
+        return regionAwareInternalCrnGeneratorFactory;
+    }
+
+    /**
+     * Service name used to identify the record processor more easily
+     */
+    @Override
+    public String getServiceName() {
+        return databusStreamConfiguration.getDbusServiceName();
+    }
+
+    /**
+     * Creating a new DatabusRecordWorker
+     * @param threadName      thread name of the worker that is calculated by the round robin processing queue.
+     * @param processingQueue processing queue that the worker watches.
+     */
+    @Override
+    public DatabusRecordWorker<C> createWorker(String threadName, BlockingDeque<DatabusRequest> processingQueue) {
+        return new DatabusRecordWorker<>(threadName, processingQueue, this, getTracer(), getRegionAwareInternalCrnGeneratorFactory());
+    }
+
+    /**
+     * Check whether input is valid for processing.
+     * @param input Input to be validated.
+     */
+    @Override
+    public boolean isInputValid(DatabusRequest input) {
+        return super.isInputValid(input) && doesAccountIdExist(input);
+    }
+
+    /**
+     * Log a message about input not being valid.
+     */
+    @Override
+    public void logInputIsNotValid() {
+        LOGGER.debug("DataBusRecordInput needs both context with account ID and a payload message. Skip processing...");
+    }
+
+    /**
+     * Override this to specify processor type name used in logs.
+     */
+    @Override
+    public String getProcessorTypeForLog() {
+        return "DataBus";
     }
 
     private boolean doesAccountIdExist(DatabusRequest input) {
