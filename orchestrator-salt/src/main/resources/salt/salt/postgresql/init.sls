@@ -88,16 +88,21 @@ change-db-location:
     - repl: Environment=PGDATA={{ postgres_directory }}/data
     - unless: grep "Environment=PGDATA={{ postgres_directory }}/data" {{ unitFile }}
 
+systemctl-reload-on-pg-unit-change:
+  cmd.run:
+    - name: systemctl --system daemon-reload
+    - onchanges:
+        - file: change-db-location
 {%- endif %}
 
 start-postgresql:
   service.running:
     - enable: True
-    - require:
-      - cmd: init-db-with-utf8
 {%- if postgres_data_on_attached_disk %}
     - watch:
-      - file: {{ unitFile }}
+        - file: change-db-location
+    - require:
+        - cmd: systemctl-reload-on-pg-unit-change
 {%- endif %}
     - name: postgresql
 
