@@ -44,6 +44,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -148,6 +149,9 @@ class SaltOrchestratorTest {
     @InjectMocks
     private SaltOrchestrator saltOrchestrator;
 
+    @Captor
+    private ArgumentCaptor<Target<String>> targetCaptor;
+
     private List<SaltConnector> saltConnectors;
 
     @BeforeEach
@@ -162,6 +166,8 @@ class SaltOrchestratorTest {
         lenient().when(hostDiscoveryService.determineDomain("test", "test", false)).thenReturn(".example.com");
         lenient().when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(callable);
         lenient().when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), anyInt(), anyBoolean()))
+                .thenReturn(callable);
+        lenient().when(saltRunner.runnerWithUsingErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
                 .thenReturn(callable);
         lenient().when(callable.call()).thenReturn(true);
         lenient().when(saltService.createSaltConnector(any(GatewayConfig.class))).thenReturn(saltConnector);
@@ -751,6 +757,20 @@ class SaltOrchestratorTest {
         verify(callable).call();
         SaltUpload saltUpload = saltUploadCaptor.getValue();
         assertEquals(Set.of(gatewayConfig.getPrivateAddress()), saltUpload.getTargets());
+    }
+
+    @Test
+    void testRunCommandOnHosts() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
+        Map<String, String> response = new HashMap<>();
+        response.put("host1", "sample");
+        String command = "echo sample";
+        when(saltStateService.runCommandOnHosts(eq(retry), eq(saltConnector), any(), eq(command))).thenReturn(response);
+        Map<String, String> result = saltOrchestrator.runCommandOnHosts(allGatewayConfigs, targets, command);
+        assertEquals("sample", result.get("host1"));
+        verify(saltStateService).runCommandOnHosts(eq(retry), eq(saltConnector), targetCaptor.capture(), eq(command));
+        Target<String> target = targetCaptor.getValue();
+        assertEquals("10-0-0-1.example.com,10-0-0-2.example.com,10-0-0-3.example.com", target.getTarget());
     }
 
     @Test

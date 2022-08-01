@@ -452,6 +452,7 @@ public class StackOperationService {
     public FlowIdentifier rotateSaltPassword(@NotNull NameOrCrn nameOrCrn, String accountId, RotateSaltPasswordReason reason) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
+        rotateSaltPasswordService.validateRotateSaltPassword(stack);
         return rotateSaltPasswordService.triggerRotateSaltPassword(stack, reason);
     }
 }
