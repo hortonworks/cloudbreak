@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordFai
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordSuccessResponse;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
 import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -59,7 +60,8 @@ class RotateSaltPasswordHandlerTest {
     @BeforeEach
     void setUp() {
         when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
-        event = new HandlerEvent<>(new Event<>(new RotateSaltPasswordRequest(STACK_ID, RotateSaltPasswordReason.MANUAL)));
+        event = new HandlerEvent<>(new Event<>(
+                new RotateSaltPasswordRequest(STACK_ID, RotateSaltPasswordReason.MANUAL, RotateSaltPasswordType.SALT_BOOTSTRAP_ENDPOINT)));
     }
 
     @Test
@@ -86,6 +88,20 @@ class RotateSaltPasswordHandlerTest {
                 .extracting(RotateSaltPasswordSuccessResponse.class::cast)
                 .returns(STACK_ID, StackEvent::getResourceId);
         verify(rotateSaltPasswordService).rotateSaltPassword(stack);
+    }
+
+    @Test
+    void testFallback() throws CloudbreakOrchestratorFailedException {
+        event = new HandlerEvent<>(new Event<>(
+                new RotateSaltPasswordRequest(STACK_ID, RotateSaltPasswordReason.MANUAL, RotateSaltPasswordType.FALLBACK)));
+
+        Selectable result = underTest.doAccept(event);
+
+        assertThat(result)
+                .isInstanceOf(RotateSaltPasswordSuccessResponse.class)
+                .extracting(RotateSaltPasswordSuccessResponse.class::cast)
+                .returns(STACK_ID, StackEvent::getResourceId);
+        verify(rotateSaltPasswordService).rotateSaltPasswordFallback(stack);
     }
 
 }

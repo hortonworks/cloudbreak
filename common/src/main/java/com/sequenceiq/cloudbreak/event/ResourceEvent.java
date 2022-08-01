@@ -388,6 +388,7 @@ public enum ResourceEvent {
     CLUSTER_PILLAR_CONFIG_UPDATE_FINISHED("cluster.pillar.config.update.finished"),
     CLUSTER_PILLAR_CONFIG_UPDATE_STARTED("cluster.pillar.config.update.started"),
     CLUSTER_SALT_PASSWORD_ROTATE_STARTED("cluster.salt.passwordrotate.started"),
+    CLUSTER_SALT_PASSWORD_ROTATE_STARTED_FALLBACK("cluster.salt.passwordrotate.started.fallback"),
     CLUSTER_SALT_PASSWORD_ROTATE_FINISHED("cluster.salt.passwordrotate.finished"),
     CLUSTER_SALT_PASSWORD_ROTATE_FAILED("cluster.salt.passwordrotate.failed"),
     CLUSTER_STOPPING("cluster.stopping"),

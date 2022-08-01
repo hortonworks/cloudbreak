@@ -45,18 +45,19 @@ public class RotateSaltPasswordActions {
             protected void prepareExecution(RotateSaltPasswordRequest payload, Map<Object, Object> variables) {
                 super.prepareExecution(payload, variables);
                 variables.put(REASON, payload.getReason());
+                variables.put(TYPE, payload.getType());
             }
 
             @Override
             protected void doExecute(RotateSaltPasswordContext context, RotateSaltPasswordRequest payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Rotating salt password for stack {}", context.getStack().getResourceCrn());
-                saltUpdateService.rotateSaltPassword(context.getStackId());
+                saltUpdateService.rotateSaltPassword(context.getStackId(), context.getType());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(RotateSaltPasswordContext context) {
-                return new RotateSaltPasswordRequest(context.getStack().getId(), context.getReason());
+                return new RotateSaltPasswordRequest(context.getStack().getId(), context.getReason(), context.getType());
             }
         };
     }
