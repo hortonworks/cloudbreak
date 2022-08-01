@@ -929,6 +929,3 @@ existing-stack-patcher:
 clusterdns:
   host: localhost
   port: 8982
-
-testing:
-  remote-command-execution: false

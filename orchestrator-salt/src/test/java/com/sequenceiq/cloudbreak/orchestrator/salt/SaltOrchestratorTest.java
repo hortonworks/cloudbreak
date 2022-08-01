@@ -14,7 +14,6 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doThrow;
@@ -747,15 +746,5 @@ class SaltOrchestratorTest {
         verify(callable).call();
         SaltUpload saltUpload = saltUploadCaptor.getValue();
         assertEquals(Set.of(gatewayConfig.getPrivateAddress()), saltUpload.getTargets());
-    }
-
-    @Test
-    void testRunCommandOnHosts() throws Exception {
-        List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
-        Map<String, String> response = new HashMap<>();
-        response.put("host1", "sample");
-        when(saltStateService.runCommandOnHosts(any(), any(), any(), anyString())).thenReturn(response);
-        Map<String, String> result = saltOrchestrator.runCommandOnHosts(allGatewayConfigs, new HashSet<>(), "echo sample");
-        assertEquals("sample", result.get("host1"));
     }
 }
