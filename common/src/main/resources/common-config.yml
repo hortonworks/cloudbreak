@@ -101,6 +101,7 @@ telemetry:
       queueSizeLimit: 2000
       dbus-app-name: manowar_dev-mow-UsageEvents
       dbus-stream-name: manowar_dev-mow-UsageEvents
+      streaming-enabled: false
       headers:
         origin: CONTROL_PLANE
         processor: NO_EDH

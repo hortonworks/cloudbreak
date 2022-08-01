@@ -11,8 +11,9 @@ public class ClusterLogsCollectionConfiguration extends AbstractDatabusStreamCon
     public ClusterLogsCollectionConfiguration(
             @Value("${cluster.logs.collection.enabled:false}") boolean enabled,
             @Value("${cluster.logs.collection.dbus.app.name:}") String dbusAppName,
-            @Value("${cluster.logs.collection.dbus.stream.name:LogCollection}") String dbusStreamName) {
-        super(enabled, dbusAppName, dbusStreamName);
+            @Value("${cluster.logs.collection.dbus.stream.name:LogCollection}") String dbusStreamName,
+            @Value("${cluster.logs.collection.streaming-enabled:false}") boolean streamingEnabled) {
+        super(enabled, dbusAppName, dbusStreamName, streamingEnabled);
     }
 
     @Override

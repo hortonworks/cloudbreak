@@ -16,7 +16,7 @@ public class DatabusRequestConverterTest {
     @Test
     public void testConvert() {
         // GIVEN
-        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "CdpVmMetrics", "CdpVmMetrics");
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "CdpVmMetrics", "CdpVmMetrics", false);
         DatabusRequest input = DatabusRequest.Builder.newBuilder()
                 .withRawBody("{}")
                 .withContext(DatabusRequestContext.Builder.newBuilder()
@@ -35,7 +35,7 @@ public class DatabusRequestConverterTest {
     @Test
     public void testConvertWithoutPayload() {
         // GIVEN
-        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "CdpVmMetrics", "CdpVmMetrics");
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "CdpVmMetrics", "CdpVmMetrics", false);
         DatabusRequest input = DatabusRequest.Builder.newBuilder()
                 .withContext(DatabusRequestContext.Builder.newBuilder()
                         .withAccountId("cloudera")
@@ -51,7 +51,7 @@ public class DatabusRequestConverterTest {
     @Test
     public void testConvertWithoutAccountId() {
         // GIVEN
-        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "CdpVmMetrics", "CdpVmMetrics");
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "CdpVmMetrics", "CdpVmMetrics", false);
         DatabusRequest input = DatabusRequest.Builder.newBuilder()
                 .withRawBody("{}")
                 .withContext(DatabusRequestContext.Builder.newBuilder()
@@ -68,7 +68,7 @@ public class DatabusRequestConverterTest {
     @Test
     public void testConvertWithoutContext() {
         // GIVEN
-        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "CdpVmMetrics", "CdpVmMetrics");
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "CdpVmMetrics", "CdpVmMetrics", false);
         DatabusRequest input = DatabusRequest.Builder.newBuilder()
                 .withRawBody("{}")
                 .build();
@@ -87,7 +87,7 @@ public class DatabusRequestConverterTest {
                         .setStreamName("example")
                         .build())
                 .build();
-        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "CdpVmMetrics", "CdpVmMetrics");
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "CdpVmMetrics", "CdpVmMetrics", false);
         DatabusRequest input = DatabusRequest.Builder.newBuilder()
                 .withMessageBody(exampleProtoObj)
                 .withContext(DatabusRequestContext.Builder.newBuilder()

@@ -51,7 +51,7 @@ public class MetricsClient {
 
     public void processStackStatus(String resourceCrn, String platform, String status, Integer statusOrdinal,
             Optional<Boolean> computeMonitoringEnabled) {
-        if (!configuration.isEnabled()) {
+        if (!configuration.isStreamingEnabled()) {
             LOGGER.debug("Processing stack status (compute monitoring) is disabled.");
             return;
         }

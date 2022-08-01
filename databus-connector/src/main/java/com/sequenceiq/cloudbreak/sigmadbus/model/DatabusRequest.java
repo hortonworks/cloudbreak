@@ -3,27 +3,15 @@ package com.sequenceiq.cloudbreak.sigmadbus.model;
 import java.util.Optional;
 
 import com.google.protobuf.GeneratedMessageV3;
+import com.sequenceiq.cloudbreak.streaming.model.RecordRequest;
 
-public class DatabusRequest {
-
-    private final String rawBody;
-
-    private final GeneratedMessageV3 messageBody;
+public class DatabusRequest extends RecordRequest {
 
     private final DatabusRequestContext context;
 
     private DatabusRequest(Builder builder) {
-        this.rawBody = builder.rawBody;
-        this.messageBody = builder.messageBody;
+        super(builder.rawBody, builder.messageBody, 0, false);
         this.context = builder.context;
-    }
-
-    public Optional<String> getRawBody() {
-        return Optional.ofNullable(rawBody);
-    }
-
-    public Optional<GeneratedMessageV3> getMessageBody() {
-        return Optional.ofNullable(messageBody);
     }
 
     public Optional<DatabusRequestContext> getContext() {
@@ -33,8 +21,8 @@ public class DatabusRequest {
     @Override
     public String toString() {
         return "DatabusRequest{" +
-                "rawBody='" + rawBody + '\'' +
-                ", messageBody=" + messageBody +
+                "rawBody='" + getRawBody() + '\'' +
+                ", messageBody=" + getMessageBody() +
                 ", context=" + context +
                 '}';
     }

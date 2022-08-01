@@ -51,8 +51,8 @@ public class TelemetryConverterTest {
     @Before
     public void setUp() {
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, true, "****", "****");
-        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "app", "stream");
-        ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, "app", "stream");
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "app", "stream", false);
+        ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, "app", "stream", false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
         monitoringConfig.setEnabled(true);
         TelemetryConfiguration telemetryConfiguration =
@@ -230,8 +230,8 @@ public class TelemetryConverterTest {
         // GIVEN
         SdxClusterResponse sdxClusterResponse = null;
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
-        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, null, null);
-        ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null);
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, null, null, false);
+        ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null, false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
         monitoringConfig.setEnabled(true);
         TelemetryConfiguration telemetryConfiguration =
@@ -307,8 +307,8 @@ public class TelemetryConverterTest {
         sdxClusterResponse.setCrn("crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
         sdxClusterResponse.setName("sdxName");
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
-        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, null, null);
-        ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null);
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, null, null, false);
+        ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null, false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
         monitoringConfig.setEnabled(true);
         TelemetryConfiguration telemetryConfiguration =

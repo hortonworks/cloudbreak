@@ -59,6 +59,6 @@ public class UsageHttpRecordProcessor extends AbstractRecordProcessor<UsageHttpC
 
     @Override
     public boolean isProcessingEnabled() {
-        return getConfiguration() != null && getConfiguration().isEnabled() && StringUtils.isNotBlank(getConfiguration().getEndpoint());
+        return getConfiguration() != null && getConfiguration().isStreamingEnabled() && StringUtils.isNotBlank(getConfiguration().getEndpoint());
     }
 }

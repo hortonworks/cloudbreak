@@ -60,7 +60,7 @@ public class MetricsClientTest {
     @Test
     public void testProcessStackStatus() {
         // GIVEN
-        given(configuration.isEnabled()).willReturn(true);
+        given(configuration.isStreamingEnabled()).willReturn(true);
         given(configuration.isComputeMonitoringSupported()).willReturn(true);
         given(configuration.isPaasSupported()).willReturn(true);
         // WHEN
@@ -72,7 +72,7 @@ public class MetricsClientTest {
     @Test
     public void testProcessStackStatusWithEntitlement() {
         // GIVEN
-        given(configuration.isEnabled()).willReturn(true);
+        given(configuration.isStreamingEnabled()).willReturn(true);
         given(configuration.isComputeMonitoringSupported()).willReturn(true);
         given(configuration.isPaasSupported()).willReturn(false);
         given(entitlementService.isCdpSaasEnabled(anyString())).willReturn(true);
@@ -85,7 +85,7 @@ public class MetricsClientTest {
     @Test
     public void testProcessStackStatusWithNoPaasOrEntitlementSupport() {
         // GIVEN
-        given(configuration.isEnabled()).willReturn(true);
+        given(configuration.isStreamingEnabled()).willReturn(true);
         given(configuration.isComputeMonitoringSupported()).willReturn(true);
         // WHEN
         underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL, Optional.of(true));
@@ -96,7 +96,7 @@ public class MetricsClientTest {
     @Test
     public void testProcessStackStatusWithDisabledGlobalMonitoring() {
         // GIVEN
-        given(configuration.isEnabled()).willReturn(true);
+        given(configuration.isStreamingEnabled()).willReturn(true);
         given(configuration.isComputeMonitoringSupported()).willReturn(false);
         // WHEN
         underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL, Optional.of(true));
@@ -107,7 +107,7 @@ public class MetricsClientTest {
     @Test
     public void testProcessStackStatusWithDisabledProcessor() {
         // GIVEN
-        given(configuration.isEnabled()).willReturn(false);
+        given(configuration.isStreamingEnabled()).willReturn(false);
         // WHEN
         underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL, Optional.of(true));
         // THEN

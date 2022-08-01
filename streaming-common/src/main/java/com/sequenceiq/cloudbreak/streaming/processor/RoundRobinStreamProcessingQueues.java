@@ -7,8 +7,8 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.sequenceiq.cloudbreak.streaming.config.AbstractStreamingConfiguration;
 import com.sequenceiq.cloudbreak.streaming.model.RecordRequest;
+import com.sequenceiq.cloudbreak.telemetry.streaming.CommonStreamingConfiguration;
 
 /**
  * Holds list of processing queues (blocking) and record worker (as pairs) for record processing.
@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.streaming.model.RecordRequest;
  * @param <W> type of the worker that implements the client specific mechanism for the processing.
  */
 public class RoundRobinStreamProcessingQueues
-        <C extends AbstractStreamingConfiguration, R extends RecordRequest, W extends RecordWorker> implements Iterable<BlockingDeque<R>> {
+        <C extends CommonStreamingConfiguration, R extends RecordRequest, W extends RecordWorker> implements Iterable<BlockingDeque<R>> {
 
     private static final int DEFAULT_SIZE_LIMIT = 2000;
 

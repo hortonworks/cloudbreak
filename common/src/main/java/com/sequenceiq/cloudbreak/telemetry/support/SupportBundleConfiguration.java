@@ -11,8 +11,9 @@ public class SupportBundleConfiguration extends AbstractDatabusStreamConfigurati
     public SupportBundleConfiguration(
             @Value("${cluster.support.bundle.enabled:false}") boolean enabled,
             @Value("${cluster.support.bundle.dbus.app.name:}") String dbusAppName,
-            @Value("${cluster.support.bundle.dbus.stream.name:UnifiedDiagnostics}") String dbusStreamName) {
-        super(enabled, dbusAppName, dbusStreamName);
+            @Value("${cluster.support.bundle.dbus.stream.name:UnifiedDiagnostics}") String dbusStreamName,
+            @Value("${cluster.support.bundle.streaming-enabled:false}") boolean streamingEnabled) {
+        super(enabled, dbusAppName, dbusStreamName, streamingEnabled);
     }
 
     @Override

@@ -19,9 +19,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sigmadbus.SigmaDatabusClient;
-import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRecordProcessingException;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequest;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequestContext;
+import com.sequenceiq.cloudbreak.streaming.model.StreamProcessingException;
 import com.sequenceiq.cloudbreak.telemetry.databus.AbstractDatabusStreamConfiguration;
 
 import io.opentracing.Tracer;
@@ -53,7 +53,7 @@ public class DatabusRecordWorkerTest {
     }
 
     @Test
-    public void testProcessRecordInput() throws DatabusRecordProcessingException {
+    public void testProcessRecordInput() throws StreamProcessingException {
         // GIVEN
         underTest = spy(underTest);
         doReturn(dataBusClient).when(underTest).getClient();
@@ -65,22 +65,22 @@ public class DatabusRecordWorkerTest {
     }
 
     @Test
-    public void testProcessRecordInputThrowingDatabusRecordException() throws DatabusRecordProcessingException {
+    public void testProcessRecordInputThrowingDatabusRecordException() throws StreamProcessingException {
         // GIVEN
         underTest = spy(underTest);
         doReturn(dataBusClient).when(underTest).getClient();
-        doThrow(new DatabusRecordProcessingException("error")).when(dataBusClient).putRecord(any(DatabusRequest.class));
-        doNothing().when(databusRecordProcessor).handleDatabusRecordProcessingException(
-                any(DatabusRequest.class), any(DatabusRecordProcessingException.class));
+        doThrow(new StreamProcessingException("error")).when(dataBusClient).putRecord(any(DatabusRequest.class));
+        doNothing().when(databusRecordProcessor).handleDataStreamingException(
+                any(DatabusRequest.class), any(StreamProcessingException.class));
         // WHEN
         underTest.processRecordInput(createDatabusRequest());
         // THEN
-        verify(databusRecordProcessor, times(1)).handleDatabusRecordProcessingException(
-                any(DatabusRequest.class), any(DatabusRecordProcessingException.class));
+        verify(databusRecordProcessor, times(1)).handleDataStreamingException(
+                any(DatabusRequest.class), any(StreamProcessingException.class));
     }
 
     @Test
-    public void testProcessRecordInputThrowingUnexpectedException() throws DatabusRecordProcessingException {
+    public void testProcessRecordInputThrowingUnexpectedException() throws StreamProcessingException {
         // GIVEN
         underTest = spy(underTest);
         doReturn(dataBusClient).when(underTest).getClient();

@@ -8,9 +8,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sigmadbus.SigmaDatabusClient;
-import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRecordProcessingException;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequest;
+import com.sequenceiq.cloudbreak.streaming.model.StreamProcessingException;
+import com.sequenceiq.cloudbreak.streaming.processor.RecordWorker;
 import com.sequenceiq.cloudbreak.telemetry.databus.AbstractDatabusStreamConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.streaming.CommonStreamingConfiguration;
 
 import io.opentracing.Tracer;
 
@@ -19,15 +21,12 @@ import io.opentracing.Tracer;
  * It process data in order from a blocking queue. Blocking queues and workers has a one-to-one relation.
  * @param <C> type of a databus streaming configuration.
  */
-public class DatabusRecordWorker<C extends AbstractDatabusStreamConfiguration> extends Thread {
+public class DatabusRecordWorker<C extends AbstractDatabusStreamConfiguration>
+        extends RecordWorker<AbstractDatabusRecordProcessor<C>, CommonStreamingConfiguration, DatabusRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabusRecordWorker.class);
 
     private final Tracer tracer;
-
-    private final BlockingDeque<DatabusRequest> processingQueue;
-
-    private final AbstractDatabusRecordProcessor<C> databusRecordProcessor;
 
     private SigmaDatabusClient<C> dataBusClient;
 
@@ -36,17 +35,15 @@ public class DatabusRecordWorker<C extends AbstractDatabusStreamConfiguration> e
     public DatabusRecordWorker(String name, BlockingDeque<DatabusRequest> processingQueue,
             AbstractDatabusRecordProcessor<C> databusRecordProcessor, Tracer tracer,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-        super(name);
+        super(name, name, databusRecordProcessor, processingQueue, null);
         this.tracer = tracer;
-        this.processingQueue = processingQueue;
-        this.databusRecordProcessor = databusRecordProcessor;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public SigmaDatabusClient<C> getClient() {
         if (dataBusClient == null) {
-            dataBusClient = new SigmaDatabusClient<C>(tracer, databusRecordProcessor.getSigmaDatabusConfig(),
-                    databusRecordProcessor.getDatabusStreamConfiguration(), regionAwareInternalCrnGeneratorFactory);
+            dataBusClient = new SigmaDatabusClient<C>(tracer, getRecordProcessor().getSigmaDatabusConfig(),
+                    getRecordProcessor().getDatabusStreamConfiguration(), regionAwareInternalCrnGeneratorFactory);
         }
         return dataBusClient;
     }
@@ -56,7 +53,7 @@ public class DatabusRecordWorker<C extends AbstractDatabusStreamConfiguration> e
         LOGGER.info("Start processing databus records. [name:{}]", getName());
         while (true) {
             try {
-                processRecordInput(processingQueue.take());
+                processRecordInput(getProcessingQueue().take());
             } catch (InterruptedException ie) {
                 if (dataBusClient != null) {
                     dataBusClient.close();
@@ -68,13 +65,18 @@ public class DatabusRecordWorker<C extends AbstractDatabusStreamConfiguration> e
     }
 
     @VisibleForTesting
-    void processRecordInput(DatabusRequest request) {
+    @Override
+    public void processRecordInput(DatabusRequest input) {
         try {
-            getClient().putRecord(request);
-        } catch (DatabusRecordProcessingException ex) {
-            databusRecordProcessor.handleDatabusRecordProcessingException(request, ex);
+            getClient().putRecord(input);
+        } catch (StreamProcessingException ex) {
+            getRecordProcessor().handleDataStreamingException(input, ex);
         } catch (Exception ex) {
-            databusRecordProcessor.handleUnexpectedException(request, ex);
+            getRecordProcessor().handleUnexpectedException(input, ex);
         }
+    }
+
+    @Override
+    public void onInterrupt() {
     }
 }

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.streaming.config;
 
-public abstract class AbstractStreamingConfiguration {
+import com.sequenceiq.cloudbreak.telemetry.streaming.CommonStreamingConfiguration;
+
+public abstract class AbstractStreamingConfiguration extends CommonStreamingConfiguration {
 
     private final boolean enabled;
 
@@ -14,7 +16,7 @@ public abstract class AbstractStreamingConfiguration {
         this.queueSizeLimit = queueSizeLimit;
     }
 
-    public boolean isEnabled() {
+    public boolean isStreamingEnabled() {
         return enabled;
     }
 

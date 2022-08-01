@@ -41,8 +41,8 @@ public class TelemetryConverterTest {
     @BeforeEach
     public void setUp() {
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
-        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null);
-        ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null);
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null, false);
+        ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null, false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
         monitoringConfig.setEnabled(true);
         TelemetryConfiguration telemetryConfiguration =

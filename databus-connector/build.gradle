@@ -13,6 +13,7 @@ buildscript {
 dependencies {
   implementation project(':grpc-common')
   implementation project(':auth-connector')
+  implementation project(':streaming-common')
 
   implementation     group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: springBootVersion
   implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: '1.10.11'

@@ -5,17 +5,18 @@ import java.util.concurrent.BlockingDeque;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.streaming.config.AbstractStreamingConfiguration;
 import com.sequenceiq.cloudbreak.streaming.model.RecordRequest;
 import com.sequenceiq.cloudbreak.streaming.model.StreamProcessingException;
+import com.sequenceiq.cloudbreak.telemetry.streaming.CommonStreamingConfiguration;
 
 /**
  * Worker class that should use specific/custom clients for record processing.
  * It process data in order from a blocking queue. Blocking queues and workers has a one-to-one relation.
+ *
  * @param <C> type of the streaming configuration.
  * @param <R> type of the request that is processed.
  */
-public abstract class RecordWorker<P extends AbstractRecordProcessor, C extends AbstractStreamingConfiguration, R extends RecordRequest> extends Thread {
+public abstract class RecordWorker<P extends AbstractRecordProcessor, C extends CommonStreamingConfiguration, R extends RecordRequest> extends Thread {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRecordProcessor.class);
 
@@ -33,6 +34,18 @@ public abstract class RecordWorker<P extends AbstractRecordProcessor, C extends 
         this.recordProcessor = recordProcessor;
         this.processingQueue = processingQueue;
         this.configuration = configuration;
+    }
+
+    public BlockingDeque<R> getProcessingQueue() {
+        return processingQueue;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public P getRecordProcessor() {
+        return recordProcessor;
     }
 
     @Override
@@ -64,6 +77,7 @@ public abstract class RecordWorker<P extends AbstractRecordProcessor, C extends 
 
     /**
      * Consumes a record from the blocking queue (FIFO) and processing it with a custom client.
+     *
      * @param input incoming record from the blocking queue
      * @throws StreamProcessingException throws this exception in case of any kind of error
      */

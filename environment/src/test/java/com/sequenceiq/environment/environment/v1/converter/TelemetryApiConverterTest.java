@@ -49,8 +49,8 @@ public class TelemetryApiConverterTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration("", "", true, "****", "****");
-        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null);
-        ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null);
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null, false);
+        ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null, false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
         monitoringConfig.setEnabled(true);
         monitoringConfig.setRemoteWriteUrl("http://myaddress/api/v1/receive");

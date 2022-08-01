@@ -26,9 +26,9 @@ import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.cloudbreak.sigmadbus.config.SigmaDatabusConfig;
-import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRecordProcessingException;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequest;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequestContext;
+import com.sequenceiq.cloudbreak.streaming.model.StreamProcessingException;
 import com.sequenceiq.cloudbreak.telemetry.databus.AbstractDatabusStreamConfiguration;
 
 import io.grpc.ManagedChannel;
@@ -62,9 +62,9 @@ public class SigmaDatabusClient<D extends AbstractDatabusStreamConfiguration> im
     /**
      * Upload data into databus. If the payload is larger than 1 MB, the data will be uploaded to cloudera S3.
      * @param request databus record payload input
-     * @throws DatabusRecordProcessingException error during databus record processing
+     * @throws StreamProcessingException error during databus record processing
      */
-    public void putRecord(DatabusRequest request) throws DatabusRecordProcessingException {
+    public void putRecord(DatabusRequest request) throws StreamProcessingException {
         ManagedChannelWrapper channelWrapper = getMessageWrapper();
         DbusProto.PutRecordRequest recordRequest = convert(request, databusStreamConfiguration);
         String requestId = MDCBuilder.getOrGenerateRequestId();
@@ -85,11 +85,11 @@ public class SigmaDatabusClient<D extends AbstractDatabusStreamConfiguration> im
             LOGGER.debug("Dbus record can be uploaded to s3 [record id: {}], [s3 url: {}], [stream: {}]", recordId, s3BucketUrl, streamName);
             uploadRecordToS3(s3BucketUrl, request, recordId);
         } else {
-            throw new DatabusRecordProcessingException(String.format("Cannot process record to Sigma Databus. [stream: %s]", streamName));
+            throw new StreamProcessingException(String.format("Cannot process record to Sigma Databus. [stream: %s]", streamName));
         }
     }
 
-    private void uploadRecordToS3(String s3Url, DatabusRequest request, String recordId) throws DatabusRecordProcessingException {
+    private void uploadRecordToS3(String s3Url, DatabusRequest request, String recordId) throws StreamProcessingException {
             String payload = getPayload(request);
         try {
             HttpClient client = HttpClient.newHttpClient();
@@ -103,10 +103,10 @@ public class SigmaDatabusClient<D extends AbstractDatabusStreamConfiguration> im
             if (Response.Status.Family.SUCCESSFUL.equals(statusFamily) || Response.Status.Family.REDIRECTION.equals(statusFamily)) {
                 LOGGER.debug("Databus record with id {} successfully uploaded to s3.", recordId);
             } else {
-                throw new DatabusRecordProcessingException(String.format("S3 upload failed for databus record with id %s", recordId));
+                throw new StreamProcessingException(String.format("S3 upload failed for databus record with id %s", recordId));
             }
         } catch (URISyntaxException | IOException | InterruptedException e) {
-            throw new DatabusRecordProcessingException(String.format("Error during uploading record with id %s to s3", recordId), e);
+            throw new StreamProcessingException(String.format("Error during uploading record with id %s to s3", recordId), e);
         }
     }
 
