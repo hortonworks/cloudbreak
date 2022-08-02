@@ -4,6 +4,7 @@ import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base.DatabaseServerV4Base;
@@ -53,6 +54,9 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
 
     @ApiModelProperty(DatabaseServer.CLUSTER_CRN)
     private String clusterCrn;
+
+    @ApiModelProperty(DatabaseServer.MAJOR_VERSION)
+    private MajorVersion majorVersion;
 
     public Long getId() {
         return id;
@@ -150,6 +154,14 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
         this.clusterCrn = clusterCrn;
     }
 
+    public MajorVersion getMajorVersion() {
+        return majorVersion;
+    }
+
+    public void setMajorVersion(MajorVersion majorVersion) {
+        this.majorVersion = majorVersion;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", DatabaseServerV4Response.class.getSimpleName() + "[", "]")
@@ -162,9 +174,10 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
                 .add("creationDate=" + creationDate)
                 .add("resourceStatus=" + resourceStatus)
                 .add("status=" + status)
-                .add("sslConfig=" + sslConfig)
-                .add("clusterCrn=" + clusterCrn)
                 .add("statusReason='" + statusReason + "'")
+                .add("sslConfig=" + sslConfig)
+                .add("clusterCrn='" + clusterCrn + "'")
+                .add("majorVersion=" + majorVersion)
                 .toString();
     }
 }

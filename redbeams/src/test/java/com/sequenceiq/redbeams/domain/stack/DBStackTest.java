@@ -1,18 +1,19 @@
 package com.sequenceiq.redbeams.domain.stack;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.redbeams.api.model.common.Status;
@@ -28,6 +29,10 @@ public class DBStackTest {
     private static final Map<String, String> PARAMETERS = ImmutableMap.of("foo", "bar");
 
     private static final DBStackStatus STATUS = new DBStackStatus();
+
+    private static final String DATABASE_SERVER_ATTRIBUTES_WITH_ENGINE = "{ \"engineVersion\": \"10\", \"this\": \"that\" }";
+
+    private static final String DATABASE_SERVER_ATTRIBUTES_WITH_DB = "{ \"dbVersion\": \"10\", \"this\": \"that\" }";
 
     static {
         STATUS.setStatus(Status.AVAILABLE);
@@ -130,5 +135,22 @@ public class DBStackTest {
         dbStack.setParameters(Map.of("multiAZ", Boolean.FALSE.toString()));
 
         assertFalse(dbStack.isHa());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class)
+    public void testGetMajorVersion(CloudPlatform cloudPlatform) {
+        dbStack.setCloudPlatform(cloudPlatform.name());
+        setDatabaseServer(dbStack, cloudPlatform);
+        assertEquals(MajorVersion.VERSION_10, dbStack.getMajorVersion());
+    }
+
+    private static void setDatabaseServer(DBStack dbStack, CloudPlatform cloudPlatform) {
+        DatabaseServer databaseServer = new DatabaseServer();
+        databaseServer.setAttributes(new Json(
+                CloudPlatform.AZURE == cloudPlatform ?
+                        DATABASE_SERVER_ATTRIBUTES_WITH_DB :
+                        DATABASE_SERVER_ATTRIBUTES_WITH_ENGINE));
+        dbStack.setDatabaseServer(databaseServer);
     }
 }
