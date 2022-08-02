@@ -57,7 +57,7 @@ public class StopStartDownscaleStopInstancesHandlerTest {
     private StopStartDownscaleStopInstancesHandler underTest;
 
     @Mock
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @Mock
     private CloudContext cloudContext;

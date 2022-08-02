@@ -41,6 +41,7 @@ public class UpgradeCcmPushSaltStatesHandler extends AbstractUpgradeCcmEventHand
     @Override
     protected Selectable doAccept(HandlerEvent<UpgradeCcmEvent> event) {
         UpgradeCcmEvent request = event.getData();
+        upgradeCcmService.changeTunnel(request.getResourceId());
         if (request.getOldTunnel().useCcmV1()) {
             LOGGER.info("Pushing salt states for CCM upgrade...");
             try {

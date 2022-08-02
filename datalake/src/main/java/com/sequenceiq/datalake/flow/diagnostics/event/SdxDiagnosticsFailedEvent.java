@@ -1,15 +1,18 @@
 package com.sequenceiq.datalake.flow.diagnostics.event;
 
+import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS;
 import static com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsEvent.SDX_DIAGNOSTICS_COLLECTION_FAILED_EVENT;
 
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.sequenceiq.datalake.flow.SdxFailedEvent;
 
 public class SdxDiagnosticsFailedEvent extends SdxFailedEvent {
 
+    @JsonTypeInfo(use = CLASS, property = "@type")
     private final Map<String, Object> properties;
 
     @JsonCreator

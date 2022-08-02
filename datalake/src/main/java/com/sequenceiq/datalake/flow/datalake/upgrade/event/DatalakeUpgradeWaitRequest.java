@@ -30,4 +30,11 @@ public class DatalakeUpgradeWaitRequest extends SdxEvent {
     public String selector() {
         return "DatalakeUpgradeWaitRequest";
     }
+
+    @Override
+    public String toString() {
+        return "DatalakeUpgradeWaitRequest{" +
+                "imageId='" + imageId + '\'' +
+                "} " + super.toString();
+    }
 }

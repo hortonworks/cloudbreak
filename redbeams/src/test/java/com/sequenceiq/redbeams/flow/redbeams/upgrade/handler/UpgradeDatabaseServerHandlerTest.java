@@ -45,7 +45,7 @@ public class UpgradeDatabaseServerHandlerTest {
     private CloudPlatformVariant cloudPlatformVariant;
 
     @Mock
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @Mock
     private Authenticator authenticator;
@@ -54,7 +54,7 @@ public class UpgradeDatabaseServerHandlerTest {
     private AuthenticatedContext authenticatedContext;
 
     @Mock
-    private ResourceConnector<Object> resourceConnector;
+    private ResourceConnector resourceConnector;
 
     @InjectMocks
     private UpgradeDatabaseServerHandler underTest;

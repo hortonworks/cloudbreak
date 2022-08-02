@@ -492,10 +492,11 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     }
 
     public Stack getByNameOrCrnInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
-        Optional<Stack> foundStack = nameOrCrn.hasName()
-                ? stackRepository.findByNameAndWorkspaceId(nameOrCrn.getName(), workspaceId)
-                : stackRepository.findNotTerminatedByCrnAndWorkspaceId(nameOrCrn.getCrn(), workspaceId);
-        return foundStack.orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_OR_CRN_EXCEPTION_MESSAGE, nameOrCrn)));
+        if (nameOrCrn.hasName()) {
+            return getByNameInWorkspace(nameOrCrn.getName(), workspaceId);
+        } else {
+            return getNotTerminatedByCrnInWorkspace(nameOrCrn.getCrn(), workspaceId);
+        }
     }
 
     public Stack getByNameInWorkspace(String name, Long workspaceId) {

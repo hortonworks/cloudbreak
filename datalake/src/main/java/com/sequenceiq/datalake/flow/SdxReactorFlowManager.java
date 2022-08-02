@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RESIZE_TRIG
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_VALIDATION_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.recovery.DatalakeUpgradeRecoveryEvent.DATALAKE_RECOVERY_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.preparation.DatalakeUpgradePreparationEvent.DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
 import static com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent.SDX_RESIZE_FLOW_CHAIN_START_EVENT;
 import static com.sequenceiq.datalake.flow.detach.event.DatalakeResizeRecoveryFlowChainStartEvent.SDX_RESIZE_RECOVERY_FLOW_CHAIN_START_EVENT;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
@@ -41,6 +43,7 @@ import com.sequenceiq.datalake.flow.datalake.cmsync.event.SdxCmSyncStartEvent;
 import com.sequenceiq.datalake.flow.datalake.recovery.event.DatalakeRecoveryStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeStartEvent;
+import com.sequenceiq.datalake.flow.datalake.upgrade.preparation.event.DatalakeUpgradePreparationStartEvent;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
 import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeRecoveryFlowChainStartEvent;
@@ -124,6 +127,7 @@ public class SdxReactorFlowManager {
         LOGGER.info("Triggering recovery for failed SDX resize with original cluster: {} and resized cluster: {}",
                 oldSdxCluster, newSdxCluster);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
+        eventSenderService.sendEventAndNotification(newSdxCluster, userId, ResourceEvent.DATALAKE_RECOVERY_STARTED);
         return notify(
                 SDX_RESIZE_RECOVERY_FLOW_CHAIN_START_EVENT,
                 new DatalakeResizeRecoveryFlowChainStartEvent(oldSdxCluster, newSdxCluster, userId),
@@ -161,6 +165,14 @@ public class SdxReactorFlowManager {
             return notify(DATALAKE_UPGRADE_EVENT.event(), new DatalakeUpgradeStartEvent(DATALAKE_UPGRADE_EVENT.event(), cluster.getId(),
                     userId, imageId, replaceVms.getBooleanValue()), cluster.getClusterName());
         }
+    }
+
+    public FlowIdentifier triggerDatalakeRuntimeUpgradePreparationFlow(SdxCluster cluster, String imageId) {
+        LOGGER.info("Trigger Datalake runtime upgrade preparation for: {} with imageId: {}", cluster, imageId);
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
+        return notify(DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT.event(),
+                new DatalakeUpgradePreparationStartEvent(DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT.event(), cluster.getId(),
+                userId, imageId), cluster.getClusterName());
     }
 
     public FlowIdentifier triggerDatalakeSyncComponentVersionsFromCmFlow(SdxCluster cluster) {

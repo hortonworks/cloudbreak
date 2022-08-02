@@ -79,7 +79,7 @@ public class DatabaseServerSslCertificatePrescriptionService {
     }
 
     private Set<String> getAvailableSslCertificateIdentifiers(CloudContext cloudContext, CloudCredential cloudCredential, String cloudPlatform) {
-        CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+        CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         CloudDatabaseServerSslCertificates availableSslCertificates =
                 connector.platformResources().databaseServerGeneralSslRootCertificates(cloudCredential, cloudContext.getLocation().getRegion());
         Set<String> availableSslCertificateIdentifiers = availableSslCertificates.getSslCertificates().stream()

@@ -61,7 +61,7 @@ public class CloudProviderService {
         return noSqlConnector.deleteNoSqlTable(request);
     }
 
-    private CloudConnector<Object> getCloudConnector(CloudPlatformAware cloudPlatformAware) {
+    private CloudConnector getCloudConnector(CloudPlatformAware cloudPlatformAware) {
         return cloudPlatformConnectors.get(cloudPlatformAware.platform(), cloudPlatformAware.variant());
     }
 }

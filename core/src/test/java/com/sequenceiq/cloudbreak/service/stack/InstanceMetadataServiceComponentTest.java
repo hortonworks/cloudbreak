@@ -182,6 +182,9 @@ public class InstanceMetadataServiceComponentTest {
         private ResourceRetriever resourceRetriever;
 
         @MockBean
+        private StackDtoService stackDtoService;
+
+        @MockBean
         private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
     }
 }

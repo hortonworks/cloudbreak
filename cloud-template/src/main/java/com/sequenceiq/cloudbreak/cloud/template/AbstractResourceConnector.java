@@ -57,7 +57,7 @@ import com.sequenceiq.common.api.type.ResourceType;
  * <br>
  * Compute resource can be rolled back based on the different failure policies configured. Network resource failure immediately results in a failing deployment.
  */
-public abstract class AbstractResourceConnector implements ResourceConnector<List<CloudResource>> {
+public abstract class AbstractResourceConnector implements ResourceConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractResourceConnector.class);
 

@@ -85,6 +85,9 @@ public class SdxRecommendationService {
         } catch (NotFoundException | BadRequestException e) {
             throw e;
         } catch (Exception e) {
+            if (e.getMessage().contains("The provided client secret keys for app")) {
+                throw new BadRequestException(e.getMessage() + " Please update your CDP Credential with the newly generated application key value!");
+            }
             LOGGER.warn("Getting recommendation failed!", e);
             throw new RuntimeException("Getting recommendation failed: " + e.getMessage());
         }
@@ -122,6 +125,9 @@ public class SdxRecommendationService {
         } catch (NotFoundException | BadRequestException e) {
             throw e;
         } catch (Exception e) {
+            if (e.getMessage().contains("The provided client secret keys for app")) {
+                throw new BadRequestException(e.getMessage() + " Please update your CDP Credential with the newly generated application key value!");
+            }
             LOGGER.warn("Validate VM type override failed!", e);
             throw new RuntimeException("Validate VM type override failed: " + e.getMessage());
         }

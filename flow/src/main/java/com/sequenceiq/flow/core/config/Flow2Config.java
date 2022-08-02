@@ -38,6 +38,14 @@ public class Flow2Config {
     }
 
     @Bean
+    public Set<String> ignoredFromRetryEvents(List<IgnoreFromRetryableFlowConfiguration<?>> ignoreFromRetryableFlowConfigurations) {
+        return ignoreFromRetryableFlowConfigurations.stream()
+                .map(IgnoreFromRetryableFlowConfiguration::getIgnoredEvents)
+                .flatMap(events -> events.stream().map(FlowEvent::event))
+                .collect(Collectors.toSet());
+    }
+
+    @Bean
     public Set<String> failHandledEvents(List<AbstractFlowConfiguration<?, ?>> flowConfigurations) {
         return flowConfigurations.stream()
                 .map(AbstractFlowConfiguration::getFailHandledEvent)

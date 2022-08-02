@@ -60,7 +60,7 @@ public class LaunchLoadBalancerHandler implements CloudPlatformEventHandler<Laun
         LaunchLoadBalancerRequest request = launchLoadBalancerRequestEvent.getData();
         CloudContext cloudContext = request.getCloudContext();
         CloudStack cloudStack = request.getCloudStack();
-        CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+        CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
         try {
             LaunchLoadBalancerResult result;
@@ -90,7 +90,7 @@ public class LaunchLoadBalancerHandler implements CloudPlatformEventHandler<Laun
      * Launches the desired load balancers for the stack using the cloud provider resource connector.
      * Adds the results of the launch to the existing state poller result from the launch of the main stack instances.
      */
-    private ResourcesStatePollerResult launchLoadBalancers(CloudStack cloudStack, CloudConnector<Object> connector,
+    private ResourcesStatePollerResult launchLoadBalancers(CloudStack cloudStack, CloudConnector connector,
             AuthenticatedContext authenticatedContext, PersistenceNotifier persistenceNotifier, CloudContext cloudContext) throws Exception {
         List<CloudResourceStatus> loadBalancerResourceStatus = connector.resources().launchLoadBalancers(authenticatedContext, cloudStack,
             persistenceNotifier);

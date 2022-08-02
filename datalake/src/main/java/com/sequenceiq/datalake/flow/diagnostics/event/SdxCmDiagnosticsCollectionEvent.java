@@ -1,10 +1,13 @@
 package com.sequenceiq.datalake.flow.diagnostics.event;
 
+import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS;
+
 import java.util.Map;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -16,7 +19,7 @@ public class SdxCmDiagnosticsCollectionEvent extends BaseSdxCmDiagnosticsEvent {
     public SdxCmDiagnosticsCollectionEvent(
             @JsonProperty("resourceId") Long sdxId,
             @JsonProperty("userId") String userId,
-            @JsonProperty("properties") Map<String, Object> properties,
+            @JsonTypeInfo(use = CLASS, property = "@type") @JsonProperty("properties") Map<String, Object> properties,
             @JsonProperty("flowIdentifier") FlowIdentifier flowIdentifier) {
         super(sdxId, userId, properties);
         this.flowIdentifier = flowIdentifier;

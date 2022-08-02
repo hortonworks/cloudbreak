@@ -1,5 +1,7 @@
 package com.sequenceiq.mock.spi;
 
+import java.util.Set;
+
 public class MockResponse {
 
     private Object response;
@@ -15,6 +17,8 @@ public class MockResponse {
     private int statusCode;
 
     private String clss;
+
+    private Set<String> requestMatchers;
 
     public String getPath() {
         return path;
@@ -70,6 +74,14 @@ public class MockResponse {
 
     public void setClss(String clss) {
         this.clss = clss;
+    }
+
+    public Set<String> getRequestMatchers() {
+        return requestMatchers;
+    }
+
+    public void setRequestMatchers(Set<String> requestMatchers) {
+        this.requestMatchers = requestMatchers;
     }
 
     @Override

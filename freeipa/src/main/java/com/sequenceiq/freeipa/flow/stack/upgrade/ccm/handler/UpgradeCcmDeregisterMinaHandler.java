@@ -40,6 +40,7 @@ public class UpgradeCcmDeregisterMinaHandler extends AbstractUpgradeCcmEventHand
     @Override
     protected Selectable doAccept(HandlerEvent<UpgradeCcmEvent> event) {
         UpgradeCcmEvent request = event.getData();
+        upgradeCcmService.changeTunnel(request.getResourceId());
         if (request.getOldTunnel().useCcmV1()) {
             LOGGER.info("Deregistering mina for CCM upgrade...");
             upgradeCcmService.deregisterMina(request.getResourceId());

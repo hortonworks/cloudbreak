@@ -70,7 +70,7 @@ class EnvironmentNetworkServiceTest {
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:accountId:user:" + USER_NAME;
 
     @Mock
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @Mock
     private NetworkConnector networkConnector;
@@ -146,7 +146,7 @@ class EnvironmentNetworkServiceTest {
     @SuppressWarnings("unchecked")
     void testCreateNetworkIfUnableToObtainNetworkConnectorThenNetworkConnectorNotFoundExceptionComes() {
         EnvironmentDto environmentDto = EnvironmentDto.builder().withCloudPlatform(CLOUD_PLATFORM).build();
-        CloudConnector<Object> cloudConnector = mock(CloudConnector.class);
+        CloudConnector cloudConnector = mock(CloudConnector.class);
 
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
         when(cloudConnector.networkConnector()).thenReturn(null);

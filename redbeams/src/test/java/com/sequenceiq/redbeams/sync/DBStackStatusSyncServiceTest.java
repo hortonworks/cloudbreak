@@ -68,7 +68,7 @@ public class DBStackStatusSyncServiceTest {
     private CloudCredential cloudCredential;
 
     @Mock
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @Mock
     private Authenticator authenticator;
@@ -77,7 +77,7 @@ public class DBStackStatusSyncServiceTest {
     private AuthenticatedContext authenticatedContext;
 
     @Mock
-    private ResourceConnector<Object> resourceConnector;
+    private ResourceConnector resourceConnector;
 
     @Mock
     private Credential credential;

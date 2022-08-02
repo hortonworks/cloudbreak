@@ -105,4 +105,15 @@ public class SdxEvent implements IdempotentEvent<SdxEvent> {
                 && Objects.equals(sdxId, other.sdxId)
                 && equalsSubclass.test((T) other);
     }
+
+    @Override
+    public String toString() {
+        return "SdxEvent{" +
+                "selector='" + selector + '\'' +
+                ", sdxId=" + sdxId +
+                ", sdxName='" + sdxName + '\'' +
+                ", userId='" + userId + '\'' +
+                ", accepted=" + accepted +
+                '}';
+    }
 }

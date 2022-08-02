@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVer
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie.OozieHAConfigProvider.OOZIE_HTTPS_PORT;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static java.util.Map.entry;
 
 import java.util.Arrays;
@@ -434,10 +433,8 @@ public class LoadBalancerConfigService {
     private boolean isdatalakeLoadBalancerEntitlementEnabled(String accountId, String cloudPlatform) {
         if (AZURE.equalsIgnoreCase(cloudPlatform)) {
             return entitlementService.azureDatalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId());
-        } else if (GCP.equalsIgnoreCase(cloudPlatform)) {
-            return entitlementService.datalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId());
         } else {
-            return false;
+            return entitlementService.datalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId());
         }
     }
 

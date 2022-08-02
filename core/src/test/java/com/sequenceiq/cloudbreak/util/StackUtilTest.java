@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -151,15 +151,7 @@ class StackUtilTest {
     @Test
     void collectAndCheckReachableNodes() throws NodesUnreachableException {
         StackDto stack = mock(StackDto.class);
-        InstanceMetaData instanceMetaData1 = getInstanceMetaData("node1.example.com");
-        InstanceMetaData instanceMetaData2 = getInstanceMetaData("node2.example.com");
-        instanceMetaData2.setInstanceStatus(InstanceStatus.DELETED_BY_PROVIDER);
-        InstanceMetaData instanceMetaData3 = getInstanceMetaData("node3.example.com");
-        instanceMetaData3.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
-        InstanceGroup instanceGroup = getInstanceGroup();
-
-        when(stack.getInstanceGroupDtos()).thenReturn(List.of(new InstanceGroupDto(instanceGroup,
-                List.of(instanceMetaData1, instanceMetaData2, instanceMetaData3))));
+        mockGetInstanceGroups(stack);
         ArrayList<String> necessaryNodes = new ArrayList<>();
         necessaryNodes.add("node1.example.com");
         necessaryNodes.add("node3.example.com");
@@ -167,11 +159,11 @@ class StackUtilTest {
         Set<Node> nodes = new HashSet<>();
         nodes.add(new Node("1.1.1.1", "1.1.1.1", "1", "m5.xlarge", "node1.example.com", "worker"));
         nodes.add(new Node("1.1.1.3", "1.1.1.3", "3", "m5.xlarge", "node3.example.com", "worker"));
-        when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any(), anyBoolean())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
+        when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any(), eq(Boolean.FALSE))).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
 
         stackUtil.collectAndCheckReachableNodes(stack, necessaryNodes);
 
-        verify(hostOrchestrator).getResponsiveNodes(nodesCaptor.capture(), any(), anyBoolean());
+        verify(hostOrchestrator).getResponsiveNodes(nodesCaptor.capture(), any(), eq(Boolean.FALSE));
         List<String> fqdns = nodesCaptor.getValue().stream().map(Node::getHostname).collect(Collectors.toList());
         assertTrue(fqdns.contains("node1.example.com"));
         assertFalse("Terminated node should be filtered out", fqdns.contains("node2.example.com"));
@@ -187,7 +179,7 @@ class StackUtilTest {
 
         Set<Node> nodes = new HashSet<>();
         nodes.add(new Node("1.1.1.1", "1.1.1.1", "1", "m5.xlarge", "node1.example.com", "worker"));
-        when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any(), anyBoolean())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
+        when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any(), eq(Boolean.FALSE))).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
 
         NodesUnreachableException nodesUnreachableException = Assertions.assertThrows(NodesUnreachableException.class,
                 () -> stackUtil.collectAndCheckReachableNodes(stack, necessaryNodes));
@@ -199,6 +191,44 @@ class StackUtilTest {
     @Test
     void collectReachableNodesTest() {
         StackDto stackDto = mock(StackDto.class);
+        mockGetInstanceGroups(stackDto);
+        Set<Node> nodes = new HashSet<>();
+        nodes.add(new Node("1.1.1.1", "1.1.1.1", "1", "m5.xlarge", "node1.example.com", "worker"));
+        when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any(), eq(Boolean.FALSE))).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
+
+        stackUtil.collectReachableNodes(stackDto);
+
+        verify(hostOrchestrator).getResponsiveNodes(nodesCaptor.capture(), any(), eq(Boolean.FALSE));
+        List<String> fqdns = nodesCaptor.getValue().stream().map(Node::getHostname).collect(Collectors.toList());
+        assertTrue(fqdns.contains("node1.example.com"));
+        assertFalse("Terminated node should be filtered out", fqdns.contains("node2.example.com"));
+        assertTrue(fqdns.contains("node3.example.com"));
+    }
+
+    @Test
+    void collectReachableAndUnreachableNodesTest() {
+        StackDto stackDto = mock(StackDto.class);
+        mockGetInstanceGroups(stackDto);
+        Set<Node> reachableNodes = Set.of(
+                new Node("1.1.1.1", "1.1.1.1", "1", "m5.xlarge", "node1.example.com", "worker"));
+        Set<Node> unreachableNodes = Set.of(
+                new Node("1.1.1.1", "1.1.1.1", "2", "m5.xlarge", "node3.example.com", "master"));
+        when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any(), eq(Boolean.TRUE))).thenReturn(
+                new NodeReachabilityResult(reachableNodes, unreachableNodes));
+
+        NodeReachabilityResult nodeReachabilityResult = stackUtil.collectReachableAndUnreachableCandidateNodes(stackDto,
+                Set.of("node1.example.com", "node3.example.com"));
+
+        verify(hostOrchestrator).getResponsiveNodes(nodesCaptor.capture(), any(), eq(Boolean.TRUE));
+        List<String> fqdns = nodesCaptor.getValue().stream().map(Node::getHostname).collect(Collectors.toList());
+        assertTrue(fqdns.contains("node1.example.com"));
+        assertFalse("Terminated node should be filtered out", fqdns.contains("node2.example.com"));
+        assertTrue(fqdns.contains("node3.example.com"));
+        assertTrue(nodeReachabilityResult.getReachableNodes().stream().map(Node::getHostname).collect(Collectors.toSet()).contains("node1.example.com"));
+        assertTrue(nodeReachabilityResult.getUnreachableNodes().stream().map(Node::getHostname).collect(Collectors.toSet()).contains("node3.example.com"));
+    }
+
+    private void mockGetInstanceGroups(StackDto stackDto) {
         InstanceMetaData instanceMetaData1 = getInstanceMetaData("node1.example.com");
         InstanceMetaData instanceMetaData2 = getInstanceMetaData("node2.example.com");
         instanceMetaData2.setInstanceStatus(InstanceStatus.DELETED_BY_PROVIDER);
@@ -208,17 +238,6 @@ class StackUtilTest {
 
         when(stackDto.getInstanceGroupDtos()).thenReturn(List.of(new InstanceGroupDto(instanceGroup,
                 List.of(instanceMetaData1, instanceMetaData2, instanceMetaData3))));
-        Set<Node> nodes = new HashSet<>();
-        nodes.add(new Node("1.1.1.1", "1.1.1.1", "1", "m5.xlarge", "node1.example.com", "worker"));
-        when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any(), anyBoolean())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
-
-        stackUtil.collectReachableNodes(stackDto);
-
-        verify(hostOrchestrator).getResponsiveNodes(nodesCaptor.capture(), any(), anyBoolean());
-        List<String> fqdns = nodesCaptor.getValue().stream().map(Node::getHostname).collect(Collectors.toList());
-        assertTrue(fqdns.contains("node1.example.com"));
-        assertFalse("Terminated node should be filtered out", fqdns.contains("node2.example.com"));
-        assertTrue(fqdns.contains("node3.example.com"));
     }
 
     @Test

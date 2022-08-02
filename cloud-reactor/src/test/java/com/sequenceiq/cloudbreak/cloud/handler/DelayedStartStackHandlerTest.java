@@ -62,7 +62,7 @@ class DelayedStartStackHandlerTest {
         CloudInstance cloudInstance2 = mock(CloudInstance.class);
         CloudInstance cloudInstance3 = mock(CloudInstance.class);
         List<CloudInstance> cloudInstances = List.of(cloudInstance1, cloudInstance2, cloudInstance3);
-        CloudConnector<Object> cloudConnector = mock(CloudConnector.class);
+        CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         Authenticator authenticator = mock(Authenticator.class);
         when(cloudConnector.authentication()).thenReturn(authenticator);
@@ -95,7 +95,7 @@ class DelayedStartStackHandlerTest {
         CloudCredential cloudCredential = mock(CloudCredential.class);
         CloudInstance cloudInstance1 = mock(CloudInstance.class);
         List<CloudInstance> cloudInstances = List.of(cloudInstance1);
-        CloudConnector<Object> cloudConnector = mock(CloudConnector.class);
+        CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         Authenticator authenticator = mock(Authenticator.class);
         when(cloudConnector.authentication()).thenReturn(authenticator);
@@ -120,7 +120,7 @@ class DelayedStartStackHandlerTest {
         CloudContext cloudContext = mock(CloudContext.class);
         CloudCredential cloudCredential = mock(CloudCredential.class);
         List<CloudInstance> cloudInstances = List.of();
-        CloudConnector<Object> cloudConnector = mock(CloudConnector.class);
+        CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         Authenticator authenticator = mock(Authenticator.class);
         when(cloudConnector.authentication()).thenReturn(authenticator);
@@ -139,7 +139,7 @@ class DelayedStartStackHandlerTest {
         CloudContext cloudContext = mock(CloudContext.class);
         CloudCredential cloudCredential = mock(CloudCredential.class);
         List<CloudInstance> cloudInstances = List.of();
-        CloudConnector<Object> cloudConnector = mock(CloudConnector.class);
+        CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenThrow(new RuntimeException("test ex"));
 
         underTest.accept(new Event<>(new DelayedStartInstancesRequest(cloudContext, cloudCredential, List.of(), cloudInstances, DELAY)));

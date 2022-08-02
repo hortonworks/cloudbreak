@@ -45,6 +45,8 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
 class StackUpgradeOperationsTest {
@@ -316,6 +318,16 @@ class StackUpgradeOperationsTest {
         verify(upgradePreconditionService).checkForRunningAttachedClusters(stackViewV4Responses, stack);
         verify(upgradePreconditionService, times(0)).checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
         verifyNoInteractions(clusterDBValidationService);
+    }
+
+    @Test
+    public void testPrepareUpgrade() {
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollId");
+        when(upgradeService.prepareClusterUpgrade(WORKSPACE_ID, nameOrCrn, IMAGE_ID)).thenReturn(flowIdentifier);
+
+        FlowIdentifier result = underTest.prepareClusterUpgrade(nameOrCrn, WORKSPACE_ID, IMAGE_ID);
+
+        assertEquals(flowIdentifier, result);
     }
 
     private UpgradeV4Response createUpgradeResponse() {

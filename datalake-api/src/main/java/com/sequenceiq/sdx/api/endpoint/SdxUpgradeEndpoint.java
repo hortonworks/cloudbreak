@@ -43,6 +43,18 @@ public interface SdxUpgradeEndpoint {
     SdxUpgradeResponse upgradeClusterByCrn(@PathParam("crn") String crn,
             @Valid SdxUpgradeRequest upgradeSdxClusterRequest);
 
+    @POST
+    @Path("{name}/prepare_upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "prepares the data lake cluster for upgrade", nickname = "prepareDatalakeClusterUpgrade")
+    SdxUpgradeResponse prepareClusterUpgradeByName(@PathParam("name") String name, @Valid SdxUpgradeRequest distroxUpgradeRequest);
+
+    @POST
+    @Path("/crn/{crn}/prepare_upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "prepares the data lake cluster for upgrade", nickname = "prepareDatalakeClusterUpgradeByCrn")
+    SdxUpgradeResponse prepareClusterUpgradeByCrn(@PathParam("crn") String crn, @Valid SdxUpgradeRequest distroxUpgradeRequest);
+
     @PUT
     @Path("/internal/upgrade_ccm")
     @Produces(MediaType.APPLICATION_JSON)

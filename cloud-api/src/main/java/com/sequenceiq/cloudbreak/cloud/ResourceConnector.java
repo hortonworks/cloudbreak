@@ -29,12 +29,10 @@ import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
  * <br>
  * Cloud providers which support template based deployments (like AWS Cloudformation, Azure ARM) usually use only one {@link
  * CloudResource} which is  CLOUDFORMATION_STACK, HEAT_STACK or ARM_TEMPLATE and all the infrastructure related changes are done through that resource.
- * In other words when a new VM is removed from stack (cluster) then the CLoudbreak is not addressing that VM resource to be removed from stack, but uses the
+ * In other words when a new VM is removed from stack (cluster) then the CLoudbreak is not addressing that VM resource to be removed from stack, but uses
  * the template resource reference e.g HEAT_STACK to inform the Cloud provider to remove the VM instance from stack.
- * @param <R> the type of resources supported by {@link #downscale(AuthenticatedContext, CloudStack, List, List, Object)} and
- *           {@link #collectResourcesToRemove(AuthenticatedContext, CloudStack, List, List)}
  */
-public interface ResourceConnector<R> {
+public interface ResourceConnector {
 
     /**
      * Launch a complete stack on Cloud platform. The stack consist of the following resources:
@@ -266,7 +264,7 @@ public interface ResourceConnector<R> {
      * @return the status of updated resources
      */
     List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext,
-            CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms, R resourcesToRemove);
+            CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms, List<CloudResource> resourcesToRemove);
 
     /**
      * Collects resources to remove before do exact downscale
@@ -277,9 +275,10 @@ public interface ResourceConnector<R> {
      *                             {@link com.sequenceiq.cloudbreak.cloud.model.InstanceStatus} denotes that it is an instance that needs to be terminated.
      * @param resources            resources that needs to be updated (e.g HEAT_TEMPLATE)
      * @param vms                  the {@link CloudInstance}s are listed that needs to be deleted
-     * @return the status of updated resources
+     * @return the list of resources to be removed
      */
-    R collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms);
+    List<CloudResource> collectResourcesToRemove(AuthenticatedContext authenticatedContext,
+            CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms);
 
     /**
      * Gets the Cloud platform related tls info.

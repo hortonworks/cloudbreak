@@ -11,25 +11,20 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentLogging;
-import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.consumption.ConsumptionService;
@@ -41,25 +36,13 @@ import reactor.bus.Event;
 @ExtendWith(MockitoExtension.class)
 class StorageConsumptionCollectionUnschedulingHandlerTest {
 
-    private static final boolean CONSUMPTION_ENABLED = true;
-
-    private static final boolean CONSUMPTION_DISABLED = false;
-
     private static final String SELECTOR = "UNSCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT";
 
     private static final long ENVIRONMENT_ID = 12L;
 
-    private static final String ACCOUNT_ID = "accountId";
-
     private static final String ENVIRONMENT_CRN = "environmentCrn";
 
     private static final String ENVIRONMENT_NAME = "environmentName";
-
-    private static final String LOGGING_STORAGE_LOCATION = "s3a://foo/bar";
-
-    private static final String BACKUP_STORAGE_LOCATION = "s3a://baz";
-
-    private static final String EMPTY_STORAGE_LOCATION = "";
 
     @Mock
     private EventSender eventSender;
@@ -71,11 +54,9 @@ class StorageConsumptionCollectionUnschedulingHandlerTest {
     private HandlerExceptionProcessor exceptionProcessor;
 
     @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
     private ConsumptionService consumptionService;
 
+    @InjectMocks
     private StorageConsumptionCollectionUnschedulingHandler underTest;
 
     @Mock
@@ -95,12 +76,6 @@ class StorageConsumptionCollectionUnschedulingHandlerTest {
     @Captor
     private ArgumentCaptor<Event.Headers> headersCaptor;
 
-    @BeforeEach
-    void setUp() {
-        underTest = new StorageConsumptionCollectionUnschedulingHandler(eventSender, environmentService, exceptionProcessor, entitlementService,
-                consumptionService, CONSUMPTION_ENABLED);
-    }
-
     @Test
     void selectorTest() {
         assertThat(underTest.selector()).isEqualTo(SELECTOR);
@@ -115,6 +90,8 @@ class StorageConsumptionCollectionUnschedulingHandlerTest {
 
         underTest.accept(environmentDeletionDtoEvent);
 
+        verify(consumptionService, never()).unscheduleStorageConsumptionCollectionIfNeeded(any(EnvironmentDto.class));
+        verify(eventSender, never()).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
         verify(exceptionProcessor).handle(handlerFailureConjoinerCaptor.capture(), any(Logger.class), eq(eventSender), eq(SELECTOR));
 
         HandlerFailureConjoiner handlerFailureConjoiner = handlerFailureConjoinerCaptor.getValue();
@@ -127,19 +104,10 @@ class StorageConsumptionCollectionUnschedulingHandlerTest {
     }
 
     private void initEnvironmentDeletionDtoEvent(boolean forceDelete) {
-        EnvironmentLogging environmentLogging = new EnvironmentLogging();
-        environmentLogging.setStorageLocation(LOGGING_STORAGE_LOCATION);
-        EnvironmentTelemetry environmentTelemetry = new EnvironmentTelemetry();
-        environmentTelemetry.setLogging(environmentLogging);
-        EnvironmentBackup backup = new EnvironmentBackup();
-        backup.setStorageLocation(BACKUP_STORAGE_LOCATION);
         environmentDto = EnvironmentDto.builder()
                 .withId(ENVIRONMENT_ID)
-                .withAccountId(ACCOUNT_ID)
                 .withResourceCrn(ENVIRONMENT_CRN)
                 .withName(ENVIRONMENT_NAME)
-                .withTelemetry(environmentTelemetry)
-                .withBackup(backup)
                 .build();
         EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
                 .withEnvironmentDto(environmentDto)
@@ -167,8 +135,8 @@ class StorageConsumptionCollectionUnschedulingHandlerTest {
         underTest.accept(environmentDeletionDtoEvent);
 
         verifySuccessEvent(forceDelete);
-        verify(entitlementService, never()).isCdpSaasEnabled(anyString());
-        verify(consumptionService, never()).unscheduleStorageConsumptionCollection(anyString(), anyString(), anyString());
+        verify(consumptionService, never()).unscheduleStorageConsumptionCollectionIfNeeded(any(EnvironmentDto.class));
+        verify(exceptionProcessor, never()).handle(any(HandlerFailureConjoiner.class), any(Logger.class), any(EventSender.class), anyString());
     }
 
     private void verifySuccessEvent(boolean forceDelete) {
@@ -183,183 +151,15 @@ class StorageConsumptionCollectionUnschedulingHandlerTest {
 
     @ParameterizedTest(name = "forceDelete={0}")
     @ValueSource(booleans = {false, true})
-    void acceptTestSkipWhenDeploymentFlagDisabled(boolean forceDelete) {
-        underTest = new StorageConsumptionCollectionUnschedulingHandler(eventSender, environmentService, exceptionProcessor, entitlementService,
-                consumptionService, CONSUMPTION_DISABLED);
+    void acceptTestSuccess(boolean forceDelete) {
         initEnvironmentDeletionDtoEvent(forceDelete);
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
 
         underTest.accept(environmentDeletionDtoEvent);
 
         verifySuccessEvent(forceDelete);
-        verify(entitlementService, never()).isCdpSaasEnabled(anyString());
-        verify(consumptionService, never()).unscheduleStorageConsumptionCollection(anyString(), anyString(), anyString());
-    }
-
-    @ParameterizedTest(name = "forceDelete={0}")
-    @ValueSource(booleans = {false, true})
-    void acceptTestSkipWhenEntitlementDisabled(boolean forceDelete) {
-        initEnvironmentDeletionDtoEvent(forceDelete);
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
-        when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(false);
-
-        underTest.accept(environmentDeletionDtoEvent);
-
-        verifySuccessEvent(forceDelete);
-        verify(consumptionService, never()).unscheduleStorageConsumptionCollection(anyString(), anyString(), anyString());
-    }
-
-    @ParameterizedTest(name = "forceDelete={0}")
-    @ValueSource(booleans = {false, true})
-    void acceptTestSkipWhenNoTelemetryAndNoBackup(boolean forceDelete) {
-        initEnvironmentDeletionDtoEvent(forceDelete);
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
-        when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
-        environmentDto.setTelemetry(null);
-        environmentDto.setBackup(null);
-
-        underTest.accept(environmentDeletionDtoEvent);
-
-        verifySuccessEvent(forceDelete);
-        verify(consumptionService, never()).unscheduleStorageConsumptionCollection(anyString(), anyString(), anyString());
-    }
-
-    @ParameterizedTest(name = "forceDelete={0}")
-    @ValueSource(booleans = {false, true})
-    void acceptTestSkipWhenNoLoggingAndNoBackup(boolean forceDelete) {
-        initEnvironmentDeletionDtoEvent(forceDelete);
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
-        when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
-        environmentDto.getTelemetry().setLogging(null);
-        environmentDto.setBackup(null);
-
-        underTest.accept(environmentDeletionDtoEvent);
-
-        verifySuccessEvent(forceDelete);
-        verify(consumptionService, never()).unscheduleStorageConsumptionCollection(anyString(), anyString(), anyString());
-    }
-
-    static Object[][] noStorageLocationDataProvider() {
-        return new Object[][]{
-                // forceDelete storageLocation
-                {false, null},
-                {true, null},
-                {false, EMPTY_STORAGE_LOCATION},
-                {true, EMPTY_STORAGE_LOCATION},
-        };
-    }
-
-    @ParameterizedTest(name = "forceDelete={0}, storageLocation={1}")
-    @MethodSource("noStorageLocationDataProvider")
-    void acceptTestSkipWhenNoStorageLocations(boolean forceDelete, String storageLocation) {
-        initEnvironmentDeletionDtoEvent(forceDelete);
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
-        when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
-        environmentDto.getTelemetry().getLogging().setStorageLocation(storageLocation);
-        environmentDto.getBackup().setStorageLocation(storageLocation);
-
-        underTest.accept(environmentDeletionDtoEvent);
-
-        verifySuccessEvent(forceDelete);
-        verify(consumptionService, never()).unscheduleStorageConsumptionCollection(anyString(), anyString(), anyString());
-    }
-
-    @ParameterizedTest(name = "forceDelete={0}")
-    @ValueSource(booleans = {false, true})
-    void acceptTestSuccessWhenBothLocationsProvidedAndDifferent(boolean forceDelete) {
-        initEnvironmentDeletionDtoEvent(forceDelete);
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
-        when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
-
-        underTest.accept(environmentDeletionDtoEvent);
-
-        verifySuccessEvent(forceDelete);
-        verify(consumptionService).unscheduleStorageConsumptionCollection(ACCOUNT_ID, ENVIRONMENT_CRN, LOGGING_STORAGE_LOCATION);
-        verify(consumptionService).unscheduleStorageConsumptionCollection(ACCOUNT_ID, ENVIRONMENT_CRN, BACKUP_STORAGE_LOCATION);
-    }
-
-    @ParameterizedTest(name = "forceDelete={0}")
-    @ValueSource(booleans = {false, true})
-    void acceptTestSuccessWhenBothLocationsProvidedAndSameSoBackupIsSkipped(boolean forceDelete) {
-        initEnvironmentDeletionDtoEvent(forceDelete);
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
-        when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
-        environmentDto.getBackup().setStorageLocation(LOGGING_STORAGE_LOCATION);
-
-        underTest.accept(environmentDeletionDtoEvent);
-
-        verifySuccessEvent(forceDelete);
-        verify(consumptionService).unscheduleStorageConsumptionCollection(ACCOUNT_ID, ENVIRONMENT_CRN, LOGGING_STORAGE_LOCATION);
-    }
-
-    @ParameterizedTest(name = "forceDelete={0}")
-    @ValueSource(booleans = {false, true})
-    void acceptTestSuccessWhenOnlyLoggingLocationProvidedAndNoBackup(boolean forceDelete) {
-        initEnvironmentDeletionDtoEvent(forceDelete);
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
-        when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
-        environmentDto.setBackup(null);
-
-        underTest.accept(environmentDeletionDtoEvent);
-
-        verifySuccessEvent(forceDelete);
-        verify(consumptionService).unscheduleStorageConsumptionCollection(ACCOUNT_ID, ENVIRONMENT_CRN, LOGGING_STORAGE_LOCATION);
-    }
-
-    @ParameterizedTest(name = "forceDelete={0}, backupStorageLocation={1}")
-    @MethodSource("noStorageLocationDataProvider")
-    void acceptTestSuccessWhenOnlyLoggingLocationProvided(boolean forceDelete, String backupStorageLocation) {
-        initEnvironmentDeletionDtoEvent(forceDelete);
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
-        when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
-        environmentDto.getBackup().setStorageLocation(backupStorageLocation);
-
-        underTest.accept(environmentDeletionDtoEvent);
-
-        verifySuccessEvent(forceDelete);
-        verify(consumptionService).unscheduleStorageConsumptionCollection(ACCOUNT_ID, ENVIRONMENT_CRN, LOGGING_STORAGE_LOCATION);
-    }
-
-    @ParameterizedTest(name = "forceDelete={0}")
-    @ValueSource(booleans = {false, true})
-    void acceptTestSuccessWhenOnlyBackupLocationProvidedAndNoTelemetry(boolean forceDelete) {
-        initEnvironmentDeletionDtoEvent(forceDelete);
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
-        when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
-        environmentDto.setTelemetry(null);
-
-        underTest.accept(environmentDeletionDtoEvent);
-
-        verifySuccessEvent(forceDelete);
-        verify(consumptionService).unscheduleStorageConsumptionCollection(ACCOUNT_ID, ENVIRONMENT_CRN, BACKUP_STORAGE_LOCATION);
-    }
-
-    @ParameterizedTest(name = "forceDelete={0}")
-    @ValueSource(booleans = {false, true})
-    void acceptTestSuccessWhenOnlyBackupLocationProvidedAndNoLogging(boolean forceDelete) {
-        initEnvironmentDeletionDtoEvent(forceDelete);
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
-        when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
-        environmentDto.getTelemetry().setLogging(null);
-
-        underTest.accept(environmentDeletionDtoEvent);
-
-        verifySuccessEvent(forceDelete);
-        verify(consumptionService).unscheduleStorageConsumptionCollection(ACCOUNT_ID, ENVIRONMENT_CRN, BACKUP_STORAGE_LOCATION);
-    }
-
-    @ParameterizedTest(name = "forceDelete={0}, loggingStorageLocation={1}")
-    @MethodSource("noStorageLocationDataProvider")
-    void acceptTestSuccessWhenOnlyBackupLocationProvided(boolean forceDelete, String loggingStorageLocation) {
-        initEnvironmentDeletionDtoEvent(forceDelete);
-        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
-        when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
-        environmentDto.getTelemetry().getLogging().setStorageLocation(loggingStorageLocation);
-
-        underTest.accept(environmentDeletionDtoEvent);
-
-        verifySuccessEvent(forceDelete);
-        verify(consumptionService).unscheduleStorageConsumptionCollection(ACCOUNT_ID, ENVIRONMENT_CRN, BACKUP_STORAGE_LOCATION);
+        verify(consumptionService).unscheduleStorageConsumptionCollectionIfNeeded(environmentDto);
+        verify(exceptionProcessor, never()).handle(any(HandlerFailureConjoiner.class), any(Logger.class), any(EventSender.class), anyString());
     }
 
 }

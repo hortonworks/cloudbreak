@@ -208,6 +208,10 @@ message Event {
     RMUsageEvent rmUsageEvent = 95;
     // A CDP stack's salt password is rotated.
     CDPSaltPasswordRotationEvent cdpSaltPasswordRotationEvent = 100;
+    // A CDP trial account is assigned/requested/failed.
+    CDPAssignTrialAccount cdpAssignTrialAccount = 101;
+    // A CDP trial account status is changed/updated.
+    CDPTrialAccountStatusChanged cdpTrialAccountStatusChanged = 102;
   }
 }
 
@@ -1180,6 +1184,8 @@ message CDPLiftieRequested {
   string apiType = 16;
   // the paying customer
   string customer = 17;
+  // the cluster crn
+  string clusterCrn = 18;
 }
 
 // Generated when a CDP Liftie cluster's status changed.
@@ -1219,6 +1225,8 @@ message CDPLiftieClusterStatusChanged {
   string apiType = 16;
   // the paying customer
   string customer = 17;
+  // the cluster crn
+  string clusterCrn = 18;
 }
 
 // States of the nodes in a Liftie Cluster
@@ -1469,11 +1477,18 @@ message CDPClusterStatus {
     STOP_START_DOWNSCALE_FAILED = 42;
 
     // The status when a datalake trying to resize
-    DATALAKE_RESIZE_START = 43;
+    DATALAKE_RESIZE_STARTED = 43;
     // The status when a datalake resize finished
     DATALAKE_RESIZE_FINISHED = 44;
     // The status when a datalake resize failed
     DATALAKE_RESIZE_FAILED = 45;
+
+    // The status when a cluster validate and prepare upgrade operation is started.
+    UPGRADE_PREPARE_STARTED = 46;
+    // The status when a cluster validate and prepare upgrade operation completed.
+    UPGRADE_PREPARE_FINISHED = 47;
+    // The status when a cluster validate and prepare upgrade operation failed.
+    UPGRADE_PREPARE_FAILED = 48;
   }
 }
 
@@ -3414,3 +3429,119 @@ message CDPSaltPasswordRotationEventResult {
     FAILURE = 2;
   }
 }
+
+// Generated when a new CDP trial account has been assigned/requested/failed.
+message CDPAssignTrialAccount {
+  // CDP Account id
+  string accountId = 1;
+  // CDP User Id of the trial user.
+  string userId = 2;
+  // Skynet managed account id
+  string managedSkynetAccountId = 3;
+  // The ID of this user in the identity provider. This is not set for all
+  // users. If this is not set sfdcContactId will be set.
+  string identityProviderUserId = 4;
+  // The SFDC contact ID associated with this user. This may or may not be set
+  // for trial accounts or for accounts using a non-SFDC identity provider. If
+  // this is not set identityProviderUserId will be set.
+  string sfdcContactId = 5;
+  // CDP Trial details contain trial information like the current status and start and end time.
+  CDPTrialDetails cdpTrialDetails = 6;
+  // Details of the CDP trial environment
+  CDPTrialEnvironment cdpTrialEnvironment = 7;
+  // Status of CDP Assign Trial Request
+  CDPAssignTrialStatus.Value status = 8;
+}
+
+// Generated when a CDP trial account status is changed/updated.
+message CDPTrialAccountStatusChanged {
+  // CDP Account id
+  string accountId = 1;
+  // Old trial details contains old trial status, old trial start time and old trial end time
+  CDPTrialDetails oldCdpTrialDetails = 2;
+  // New trial details contains new trial status, new trial start time and new trial end time
+  CDPTrialDetails newCdpTrialDetails = 3;
+  // initiatorCrn contain the crn of caller of the request ie either trial monitoring service or admin api call
+  string initiatorCrn = 6;
+}
+
+// CDP Trial Details contains trial status, trial start time and trial end time
+message CDPTrialDetails {
+  // Status of Trial.
+  TrialStatus.Value status = 1;
+  // Starting datetime of the trial period.
+  uint64 startTime = 2;
+  // Ending datetime of the trial period.
+  uint64 endTime = 3;
+}
+
+// Status options for CDPTrials.
+message TrialStatus {
+  enum Value {
+    // Indicates trial status is active.
+    ACTIVE = 0;
+    // Indicates the trial period has expired.
+    // The associated environment will be stopped.
+    EXPIRED = 1;
+    // Indicates trial is being terminated after x days of expired status.
+    // Once the trial status is terminated, extending the trial is not possible.
+    TERMINATED = 2;
+  }
+}
+
+// Details of the CDP Trial Environment.
+message CDPTrialEnvironment {
+  // The CRN of the environment.
+  string crn = 1;
+  // The name of the environment.
+  string name = 2;
+  // List of CDP trial workloads deployed in the environment, each workload is for a specific pattern.
+  repeated CDPTrialWorkload workloads = 3;
+}
+
+// The pattern and status for CDP Trial workloads.
+message CDPTrialWorkload {
+  // Pattern used by the trial workload.
+  CDPTrialWorkloadPattern.Value pattern = 1;
+  // Status of the workload deployment for the trial.
+  CDPTrialWorkloadStatus.Value status = 3;
+}
+
+// Status options for CDP Trial Workload.
+message CDPTrialWorkloadStatus {
+  enum Value {
+    // Indicates the CDP Trial workload was not deployed.
+    NOT_DEPLOYED = 0;
+    // Indicates the deployment of the CDP Trial workload is in progress.
+    DEPLOYMENT_IN_PROGRESS = 1;
+    // Indicates the CDP Trial workload was deployed and is ready for us.
+    DEPLOYED = 2;
+  }
+}
+
+// Pattern options supported in CDP Trial.
+message CDPTrialWorkloadPattern {
+  enum Value {
+    // Self-service exploratory analytics pattern for CDP One.
+    CDPONE_SELF_SERVICE_EXPLORATORY_ANALYTICS = 0;
+    // Business intelligence at scale pattern for CDPOne.
+    CDPONE_BI_AT_SCALE = 1;
+    // Machine Learning discovery exploration pattern for CDPOne.
+    CDPONE_ML_DISCOVERY_EXPLORATION = 2;
+    // Real time operational insights patterns for CDPOne.
+    CDPONE_REAL_TIME_OPERATIONAL_INSIGHTS = 3;
+  }
+}
+
+// Status options for CDP Assign Trial.
+message CDPAssignTrialStatus {
+  enum Value {
+    // Indicates CAP Trial Request status is REQUESTED.
+    REQUESTED = 0;
+    // Indicates CAP Trial Request status is ASSIGNED.
+    ASSIGNED = 1;
+    // Indicates CAP Trial Request status is FAILED.
+    FAILED = 2;
+  }
+}
+

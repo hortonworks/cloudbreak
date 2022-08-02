@@ -27,7 +27,7 @@ public class PollTaskFactory {
 
     public PollTask<ResourcesStatePollerResult> newPollResourcesStateTask(AuthenticatedContext authenticatedContext,
             List<CloudResource> cloudResource, boolean cancellable) {
-        CloudConnector<Object> connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatformVariant());
+        CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatformVariant());
         return createPollTask(PollResourcesStateTask.NAME, authenticatedContext, connector.resources(), cloudResource, cancellable);
     }
 
@@ -38,7 +38,7 @@ public class PollTaskFactory {
 
     public PollTask<ExternalDatabaseStatus> newPollPermanentExternalDatabaseStateTask(AuthenticatedContext authenticatedContext,
             DatabaseStack dbStack) {
-        CloudConnector<Object> connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatformVariant());
+        CloudConnector connector = cloudPlatformConnectors.get(authenticatedContext.getCloudContext().getPlatformVariant());
         return createPollTask(PollPermanentExternalDatabaseStateTask.NAME, authenticatedContext, dbStack, connector.resources());
     }
 

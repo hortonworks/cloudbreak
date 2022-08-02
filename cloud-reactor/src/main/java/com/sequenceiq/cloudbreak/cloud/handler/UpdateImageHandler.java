@@ -43,7 +43,7 @@ public class UpdateImageHandler implements CloudPlatformEventHandler<UpdateImage
         UpdateImageRequest<UpdateImageResult> request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
-            CloudConnector<?> connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             CloudStack stack = request.getCloudStack();
 

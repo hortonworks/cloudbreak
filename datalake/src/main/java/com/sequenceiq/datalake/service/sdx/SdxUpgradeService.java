@@ -89,7 +89,7 @@ public class SdxUpgradeService {
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
-            String message = String.format("Stack upgrade failed on cluster: [%s]. Message: [%s]", sdxCluster.getClusterName(), exceptionMessage);
+            String message = String.format("Upgrade failed on cluster: [%s]. Message: [%s]", sdxCluster.getClusterName(), exceptionMessage);
             throw new CloudbreakApiException(message, e);
         }
     }

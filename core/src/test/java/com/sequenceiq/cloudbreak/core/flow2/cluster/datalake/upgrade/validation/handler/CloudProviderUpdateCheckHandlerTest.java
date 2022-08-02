@@ -32,7 +32,7 @@ class CloudProviderUpdateCheckHandlerTest {
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @InjectMocks
     private CloudProviderUpdateCheckHandler underTest;

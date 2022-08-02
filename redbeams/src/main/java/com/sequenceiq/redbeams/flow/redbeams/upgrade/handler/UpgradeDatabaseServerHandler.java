@@ -58,7 +58,7 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
         DatabaseStack databaseStack = request.getDatabaseStack();
         CloudCredential cloudCredential = request.getCloudCredential();
         CloudContext cloudContext = request.getCloudContext();
-        CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+        CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
         Selectable response;
         try {

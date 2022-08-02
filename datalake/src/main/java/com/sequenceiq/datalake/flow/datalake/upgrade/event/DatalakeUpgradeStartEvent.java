@@ -33,14 +33,17 @@ public class DatalakeUpgradeStartEvent extends SdxEvent {
     }
 
     @Override
-    public String selector() {
-        return "DatalakeUpgradeStartEvent";
-    }
-
-    @Override
     public boolean equalsEvent(SdxEvent other) {
         return isClassAndEqualsEvent(DatalakeUpgradeStartEvent.class, other,
                 event -> Objects.equals(imageId, event.imageId)
                         && replaceVms == event.replaceVms);
+    }
+
+    @Override
+    public String toString() {
+        return "DatalakeUpgradeStartEvent{" +
+                "imageId='" + imageId + '\'' +
+                ", replaceVms=" + replaceVms +
+                "} " + super.toString();
     }
 }

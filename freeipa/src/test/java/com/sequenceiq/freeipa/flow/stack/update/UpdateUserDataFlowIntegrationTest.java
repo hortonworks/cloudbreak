@@ -108,7 +108,7 @@ class UpdateUserDataFlowIntegrationTest {
     private CredentialService credentialService;
 
     @Mock
-    private ResourceConnector<Object> resourcesApi;
+    private ResourceConnector resourcesApi;
 
     @BeforeEach
     public void setup() {
@@ -121,7 +121,7 @@ class UpdateUserDataFlowIntegrationTest {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(stackService.getStackById(STACK_ID)).thenReturn(stack);
 
-        CloudConnector<Object> connector = mock(CloudConnector.class);
+        CloudConnector connector = mock(CloudConnector.class);
         AuthenticatedContext context = mock(AuthenticatedContext.class);
         Authenticator authApi = mock(Authenticator.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(connector);

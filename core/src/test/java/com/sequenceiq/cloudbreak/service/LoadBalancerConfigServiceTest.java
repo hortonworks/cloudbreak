@@ -55,8 +55,8 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerCreation;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -210,8 +210,8 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             assertEquals(1, loadBalancers.size());
             assertEquals(LoadBalancerType.PRIVATE, loadBalancers.iterator().next().getType());
             InstanceGroup masterInstanceGroup = stack.getInstanceGroups().stream()
-                .filter(ig -> "master".equals(ig.getGroupName()))
-                .findFirst().get();
+                    .filter(ig -> "master".equals(ig.getGroupName()))
+                    .findFirst().get();
             assertEquals(1, masterInstanceGroup.getTargetGroups().size());
         });
     }
@@ -340,8 +340,8 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             assertEquals(1, loadBalancers.size());
             assertEquals(LoadBalancerType.PRIVATE, loadBalancers.iterator().next().getType());
             InstanceGroup masterInstanceGroup = stack.getInstanceGroups().stream()
-                .filter(ig -> "master".equals(ig.getGroupName()))
-                .findFirst().get();
+                    .filter(ig -> "master".equals(ig.getGroupName()))
+                    .findFirst().get();
             assertEquals(1, masterInstanceGroup.getTargetGroups().size());
         });
     }
@@ -588,8 +588,8 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     public void testGetLoadBalancerUserFacingFQDNPublicMissingAll() {
         Set<LoadBalancer> loadBalancers = createLoadBalancers();
         LoadBalancer publicLoadBalancer = loadBalancers.stream()
-            .filter(lb -> LoadBalancerType.PUBLIC.equals(lb.getType()))
-            .findFirst().get();
+                .filter(lb -> LoadBalancerType.PUBLIC.equals(lb.getType()))
+                .findFirst().get();
         publicLoadBalancer.setFqdn(null);
         publicLoadBalancer.setIp(null);
         publicLoadBalancer.setDns(null);
@@ -663,15 +663,15 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     public void testGetLoadBalancerUserFacingFQDNNoFqdnSet() {
         Set<LoadBalancer> loadBalancers = createLoadBalancers();
         LoadBalancer publicLoadBalancer = loadBalancers.stream()
-            .filter(lb -> LoadBalancerType.PUBLIC.equals(lb.getType()))
-            .findFirst().get();
+                .filter(lb -> LoadBalancerType.PUBLIC.equals(lb.getType()))
+                .findFirst().get();
         publicLoadBalancer.setFqdn(null);
         publicLoadBalancer.setIp(null);
         publicLoadBalancer.setDns(null);
 
         LoadBalancer privateLoadBalancer = loadBalancers.stream()
-            .filter(lb -> LoadBalancerType.PRIVATE.equals(lb.getType()))
-            .findFirst().get();
+                .filter(lb -> LoadBalancerType.PRIVATE.equals(lb.getType()))
+                .findFirst().get();
         privateLoadBalancer.setFqdn(null);
         privateLoadBalancer.setDns(null);
         privateLoadBalancer.setIp(null);
@@ -712,7 +712,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             boolean result = underTest.isLoadBalancerCreationConfigured(stack, environment);
             assert result;
             assertEquals("Target groups should not be set on a dry run",
-                0, stack.getInstanceGroups().iterator().next().getTargetGroups().size());
+                    0, stack.getInstanceGroups().iterator().next().getTargetGroups().size());
         });
     }
 
@@ -735,8 +735,8 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             assert loadBalancers.stream().anyMatch(l -> LoadBalancerType.PRIVATE.equals(l.getType()));
             assert loadBalancers.stream().anyMatch(l -> LoadBalancerType.OUTBOUND.equals(l.getType()));
             InstanceGroup masterInstanceGroup = stack.getInstanceGroups().stream()
-                .filter(ig -> "master".equals(ig.getGroupName()))
-                .findFirst().get();
+                    .filter(ig -> "master".equals(ig.getGroupName()))
+                    .findFirst().get();
             assertEquals(1, masterInstanceGroup.getTargetGroups().size());
 
             checkAvailabilitySetAttributes(loadBalancers);
@@ -761,8 +761,8 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             assertEquals(1, loadBalancers.size());
             assertEquals(LoadBalancerType.PUBLIC, loadBalancers.iterator().next().getType());
             InstanceGroup masterInstanceGroup = stack.getInstanceGroups().stream()
-                .filter(ig -> "master".equals(ig.getGroupName()))
-                .findFirst().get();
+                    .filter(ig -> "master".equals(ig.getGroupName()))
+                    .findFirst().get();
             assertEquals(1, masterInstanceGroup.getTargetGroups().size());
 
             checkAvailabilitySetAttributes(loadBalancers);
@@ -788,8 +788,8 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             assert loadBalancers.stream().anyMatch(l -> LoadBalancerType.PRIVATE.equals(l.getType()));
             assert loadBalancers.stream().anyMatch(l -> LoadBalancerType.OUTBOUND.equals(l.getType()));
             InstanceGroup managerInstanceGroup = stack.getInstanceGroups().stream()
-                .filter(ig -> "manager".equals(ig.getGroupName()))
-                .findFirst().get();
+                    .filter(ig -> "manager".equals(ig.getGroupName()))
+                    .findFirst().get();
             assertEquals(2, managerInstanceGroup.getTargetGroups().size());
 
             checkAvailabilitySetAttributes(loadBalancers);
@@ -956,15 +956,16 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
 
     /**
      * Verifies that all instance groups routed to by a set of load balancers include an availability set.
-     *
+     * <p>
      * For an Azure load balancer using the basic SKU to route to a number of instances,
      * they must be in the same availability set.
-     *
+     * <p>
      * We group related Azure virtual machine instances into the same instance group,
      * so we ensure each of them has an availability set attribute.
-     *
+     * <p>
      * This check is only necessary as long as we're using availability sets in instance groups,
      * which is itself only necessary while using the basic, rather than standard, SKU.
+     *
      * @param loadBalancers the set of load balancers to check for a related availability set attribute.
      */
     private void checkAvailabilitySetAttributes(Set<LoadBalancer> loadBalancers) {
@@ -1007,6 +1008,17 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
                 // pass
             }
         });
+    }
+
+    @Test
+    public void isdatalakeLoadBalancerEntitlementEnabled() {
+        Stack azureStack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
+        azureStack.getInstanceGroups().clear();
+        CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AZURE");
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-multi-knox.bp"));
+        Set<LoadBalancer> loadBalancers = underTest.setupLoadBalancers(azureStack, environment, false, true, LoadBalancerSku.BASIC);
+        assertEquals(new HashSet<>(), loadBalancers);
     }
 
     private String getBlueprintText(String path) {

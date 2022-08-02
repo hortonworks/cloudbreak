@@ -22,14 +22,14 @@ public class InstanceStateQuery {
 
     public List<CloudVmInstanceStatus> getCloudVmInstanceStatuses(
             CloudCredential cloudCredential, CloudContext cloudContext, List<CloudInstance> instances) {
-        CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+        CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, cloudCredential);
         return connector.instances().check(auth, instances);
     }
 
     public List<CloudVmInstanceStatus> getCloudVmInstanceStatusesWithoutRetry(
             CloudCredential cloudCredential, CloudContext cloudContext, List<CloudInstance> instances) {
-        CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+        CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, cloudCredential);
         return connector.instances().checkWithoutRetry(auth, instances);
     }

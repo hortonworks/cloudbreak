@@ -21,10 +21,10 @@ public class PollResourcesStateTask extends AbstractPollTask<ResourcesStatePolle
 
     private final List<CloudResource> cloudResource;
 
-    private final ResourceConnector<?> resourceConnector;
+    private final ResourceConnector resourceConnector;
 
     @Inject
-    public PollResourcesStateTask(AuthenticatedContext authenticatedContext, ResourceConnector<?> resourceConnector,
+    public PollResourcesStateTask(AuthenticatedContext authenticatedContext, ResourceConnector resourceConnector,
             List<CloudResource> cloudResource, boolean cancellable) {
         super(authenticatedContext, cancellable);
         this.cloudResource = cloudResource;

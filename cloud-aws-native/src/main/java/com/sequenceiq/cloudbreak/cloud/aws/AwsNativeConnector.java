@@ -38,12 +38,11 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.validator.AwsStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.validator.AwsGatewaySubnetMultiAzValidator;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 @Service
-public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
+public class AwsNativeConnector implements CloudConnector {
 
     @Inject
     private AwsConstants awsConstants;
@@ -117,7 +116,7 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
     }
 
     @Override
-    public ResourceConnector<List<CloudResource>> resources() {
+    public ResourceConnector resources() {
         return awsNativeResourceConnector;
     }
 

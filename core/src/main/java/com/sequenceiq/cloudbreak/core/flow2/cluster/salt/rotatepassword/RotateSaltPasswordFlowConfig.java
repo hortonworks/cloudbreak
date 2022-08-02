@@ -7,13 +7,16 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.rotatepassword.R
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.rotatepassword.RotateSaltPasswordState.ROTATE_SALT_PASSWORD_SUCCESS_STATE;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
+import com.sequenceiq.flow.core.config.IgnoreFromRetryableFlowConfiguration;
 
 @Component
-public class RotateSaltPasswordFlowConfig extends StackStatusFinalizerAbstractFlowConfig<RotateSaltPasswordState, RotateSaltPasswordEvent> {
+public class RotateSaltPasswordFlowConfig extends StackStatusFinalizerAbstractFlowConfig<RotateSaltPasswordState, RotateSaltPasswordEvent>
+        implements IgnoreFromRetryableFlowConfiguration<RotateSaltPasswordEvent> {
 
     private static final List<Transition<RotateSaltPasswordState, RotateSaltPasswordEvent>> TRANSITIONS =
             new Transition.Builder<RotateSaltPasswordState, RotateSaltPasswordEvent>()
@@ -59,5 +62,10 @@ public class RotateSaltPasswordFlowConfig extends StackStatusFinalizerAbstractFl
     @Override
     public String getDisplayName() {
         return "Rotate SaltStack user password";
+    }
+
+    @Override
+    public Set<RotateSaltPasswordEvent> getIgnoredEvents() {
+        return Set.of(RotateSaltPasswordEvent.values());
     }
 }

@@ -174,6 +174,8 @@ public class ModelDescriptions {
 
     public static final String UNSTOPPABLE_REASON = "Reason why the cluster is not stoppable";
 
+    public static final String DATAHUB_CRNS_REFRESHED = "List of Data Hubs that are refreshed with CRN";
+
     private ModelDescriptions() {
     }
 }

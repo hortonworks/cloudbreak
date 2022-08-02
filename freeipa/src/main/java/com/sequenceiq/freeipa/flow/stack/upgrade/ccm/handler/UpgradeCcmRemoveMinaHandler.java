@@ -42,6 +42,7 @@ public class UpgradeCcmRemoveMinaHandler extends AbstractUpgradeCcmEventHandler 
     @Override
     protected Selectable doAccept(HandlerEvent<UpgradeCcmEvent> event) {
         UpgradeCcmEvent request = event.getData();
+        upgradeCcmService.changeTunnel(request.getResourceId());
         if (request.getOldTunnel().useCcmV1()) {
             LOGGER.info("Remove Mina for CCM upgrade...");
             try {

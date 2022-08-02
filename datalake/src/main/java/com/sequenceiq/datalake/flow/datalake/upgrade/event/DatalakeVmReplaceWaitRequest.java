@@ -17,4 +17,9 @@ public class DatalakeVmReplaceWaitRequest extends SdxEvent {
     public DatalakeVmReplaceWaitRequest(SdxContext context) {
         super(context);
     }
+
+    @Override
+    public String toString() {
+        return "DatalakeVmReplaceWaitRequest{} " + super.toString();
+    }
 }

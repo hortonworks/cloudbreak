@@ -15,4 +15,28 @@ public class AdlsGen2ConfigGeneratorTest {
         CloudbreakServiceException actual = Assertions.assertThrows(CloudbreakServiceException.class, () -> underTest.generateStorageConfig(loc));
         Assertions.assertEquals("Invalid ADLS storage location: " + loc, actual.getMessage());
     }
+
+    @Test
+    public void testGenerateStorageConfigWhenValidPath() {
+        String loc = "abfs://data@cdprestrictedenv1.dfs.core.windows.net/path/sub-directory";
+        AdlsGen2Config adlsGen2Config = underTest.generateStorageConfig(loc);
+        Assertions.assertEquals("cdprestrictedenv1", adlsGen2Config.getAccount());
+        Assertions.assertEquals("data", adlsGen2Config.getFileSystem());
+        Assertions.assertEquals("/path/sub-directory", adlsGen2Config.getFolderPrefix());
+    }
+
+    @Test
+    public void testGenerateStorageConfigWhenEmptyPath() {
+        String loc = "abfs://data@cdprestrictedenv1.dfs.core.windows.net/";
+        AdlsGen2Config adlsGen2Config = underTest.generateStorageConfig(loc);
+        Assertions.assertEquals("cdprestrictedenv1", adlsGen2Config.getAccount());
+        Assertions.assertEquals("data", adlsGen2Config.getFileSystem());
+        Assertions.assertEquals("/", adlsGen2Config.getFolderPrefix());
+
+        loc = "abfs://data@cdprestrictedenv1.dfs.core.windows.net";
+        adlsGen2Config = underTest.generateStorageConfig(loc);
+        Assertions.assertEquals("cdprestrictedenv1", adlsGen2Config.getAccount());
+        Assertions.assertEquals("data", adlsGen2Config.getFileSystem());
+        Assertions.assertEquals("", adlsGen2Config.getFolderPrefix());
+    }
 }

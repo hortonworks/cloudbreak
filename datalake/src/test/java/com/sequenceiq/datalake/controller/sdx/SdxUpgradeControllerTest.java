@@ -65,7 +65,7 @@ class SdxUpgradeControllerTest {
         doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, request));
 
         verify(sdxRuntimeUpgradeService, times(1)).triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request,
-                Crn.fromString(USER_CRN).getAccountId());
+                Crn.fromString(USER_CRN).getAccountId(), false);
     }
 
     @Test
@@ -73,7 +73,7 @@ class SdxUpgradeControllerTest {
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, request));
 
-        verify(sdxRuntimeUpgradeService).triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, Crn.fromString(USER_CRN).getAccountId());
+        verify(sdxRuntimeUpgradeService).triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, Crn.fromString(USER_CRN).getAccountId(), false);
     }
 
     @Test
@@ -84,11 +84,11 @@ class SdxUpgradeControllerTest {
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setDryRun(true);
 
-        when(sdxRuntimeUpgradeService.checkForUpgradeByName(eq(USER_CRN), eq(CLUSTER_NAME), eq(request), anyString())).thenReturn(sdxUpgradeResponse);
+        when(sdxRuntimeUpgradeService.checkForUpgradeByName(eq(CLUSTER_NAME), eq(request), anyString())).thenReturn(sdxUpgradeResponse);
 
         SdxUpgradeResponse response = doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, request));
 
-        verify(sdxRuntimeUpgradeService, times(1)).checkForUpgradeByName(eq(USER_CRN), eq(CLUSTER_NAME), eq(request), anyString());
+        verify(sdxRuntimeUpgradeService, times(1)).checkForUpgradeByName(eq(CLUSTER_NAME), eq(request), anyString());
         assertEquals("No image available to upgrade", response.getReason());
     }
 
@@ -101,11 +101,11 @@ class SdxUpgradeControllerTest {
         request.setDryRun(true);
         request.setLockComponents(true);
 
-        when(sdxRuntimeUpgradeService.checkForUpgradeByName(eq(USER_CRN), eq(CLUSTER_NAME), eq(request), anyString())).thenReturn(sdxUpgradeResponse);
+        when(sdxRuntimeUpgradeService.checkForUpgradeByName(eq(CLUSTER_NAME), eq(request), anyString())).thenReturn(sdxUpgradeResponse);
 
         SdxUpgradeResponse response = doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, request));
 
-        verify(sdxRuntimeUpgradeService, times(1)).checkForUpgradeByName(eq(USER_CRN), eq(CLUSTER_NAME), eq(request), anyString());
+        verify(sdxRuntimeUpgradeService, times(1)).checkForUpgradeByName(eq(CLUSTER_NAME), eq(request), anyString());
         assertEquals("No image available to upgrade", response.getReason());
     }
 
@@ -115,7 +115,7 @@ class SdxUpgradeControllerTest {
         request.setDryRun(true);
         request.setRuntime("7.1.0");
         doThrow(new BadRequestException("Runtime upgrade feature is not enabled"))
-                .when(sdxRuntimeUpgradeService).checkForUpgradeByName(eq(USER_CRN), eq(CLUSTER_NAME), eq(request), anyString());
+                .when(sdxRuntimeUpgradeService).checkForUpgradeByName(eq(CLUSTER_NAME), eq(request), anyString());
 
         BadRequestException exception = doAs(USER_CRN, () -> Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.upgradeClusterByName(CLUSTER_NAME, request)));
@@ -129,13 +129,13 @@ class SdxUpgradeControllerTest {
         request.setLockComponents(true);
         SdxUpgradeResponse sdxUpgradeResponse = new SdxUpgradeResponse();
         sdxUpgradeResponse.setReason("No image available to upgrade");
-        when(sdxRuntimeUpgradeService.triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, Crn.fromString(USER_CRN).getAccountId()))
+        when(sdxRuntimeUpgradeService.triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, Crn.fromString(USER_CRN).getAccountId(), false))
                 .thenReturn(sdxUpgradeResponse);
 
         SdxUpgradeResponse response = doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, request));
 
-        verify(sdxRuntimeUpgradeService, times(0)).checkForUpgradeByName(any(), any(), any(), anyString());
-        verify(sdxRuntimeUpgradeService, times(1)).triggerUpgradeByName(any(), any(), any(), anyString());
+        verify(sdxRuntimeUpgradeService, times(0)).checkForUpgradeByName(any(), any(), anyString());
+        verify(sdxRuntimeUpgradeService, times(1)).triggerUpgradeByName(any(), any(), any(), anyString(), eq(false));
         assertEquals("No image available to upgrade", response.getReason());
     }
 
@@ -144,7 +144,7 @@ class SdxUpgradeControllerTest {
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setRuntime("7.1.0");
         doThrow(new BadRequestException("Runtime upgrade feature is not enabled"))
-                .when(sdxRuntimeUpgradeService).triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, Crn.fromString(USER_CRN).getAccountId());
+                .when(sdxRuntimeUpgradeService).triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, Crn.fromString(USER_CRN).getAccountId(), false);
 
         BadRequestException exception = doAs(USER_CRN, () -> Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.upgradeClusterByName(CLUSTER_NAME, request)));
@@ -158,13 +158,13 @@ class SdxUpgradeControllerTest {
         request.setRuntime("7.1.0");
         SdxUpgradeResponse sdxUpgradeResponse = new SdxUpgradeResponse();
         sdxUpgradeResponse.setReason("No image available to upgrade");
-        when(sdxRuntimeUpgradeService.triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, Crn.fromString(USER_CRN).getAccountId()))
+        when(sdxRuntimeUpgradeService.triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, Crn.fromString(USER_CRN).getAccountId(), false))
                 .thenReturn(sdxUpgradeResponse);
 
         SdxUpgradeResponse response = doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, request));
 
-        verify(sdxRuntimeUpgradeService, times(0)).checkForUpgradeByName(any(), any(), any(), anyString());
-        verify(sdxRuntimeUpgradeService).triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, Crn.fromString(USER_CRN).getAccountId());
+        verify(sdxRuntimeUpgradeService, times(0)).checkForUpgradeByName(any(), any(), anyString());
+        verify(sdxRuntimeUpgradeService).triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, Crn.fromString(USER_CRN).getAccountId(), false);
         assertEquals("No image available to upgrade", response.getReason());
     }
 
@@ -173,7 +173,7 @@ class SdxUpgradeControllerTest {
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setImageId("imageId");
         doThrow(new BadRequestException("Runtime upgrade feature is not enabled"))
-                .when(sdxRuntimeUpgradeService).triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, Crn.fromString(USER_CRN).getAccountId());
+                .when(sdxRuntimeUpgradeService).triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, Crn.fromString(USER_CRN).getAccountId(), false);
 
         BadRequestException exception = doAs(USER_CRN, () -> Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.upgradeClusterByName(CLUSTER_NAME, request)));
@@ -187,13 +187,13 @@ class SdxUpgradeControllerTest {
         request.setImageId("imageId");
         SdxUpgradeResponse sdxUpgradeResponse = new SdxUpgradeResponse();
         sdxUpgradeResponse.setReason("No image available to upgrade");
-        when(sdxRuntimeUpgradeService.triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, Crn.fromString(USER_CRN).getAccountId()))
+        when(sdxRuntimeUpgradeService.triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, Crn.fromString(USER_CRN).getAccountId(), false))
                 .thenReturn(sdxUpgradeResponse);
 
         SdxUpgradeResponse response = doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, request));
 
-        verify(sdxRuntimeUpgradeService, times(0)).checkForUpgradeByName(any(), any(), any(), anyString());
-        verify(sdxRuntimeUpgradeService).triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, Crn.fromString(USER_CRN).getAccountId());
+        verify(sdxRuntimeUpgradeService, times(0)).checkForUpgradeByName(any(), any(), anyString());
+        verify(sdxRuntimeUpgradeService).triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, Crn.fromString(USER_CRN).getAccountId(), false);
         assertEquals("No image available to upgrade", response.getReason());
     }
 
@@ -205,12 +205,12 @@ class SdxUpgradeControllerTest {
 
         SdxUpgradeResponse sdxUpgradeResponse = new SdxUpgradeResponse();
         sdxUpgradeResponse.setReason("No image available to upgrade");
-        when(sdxRuntimeUpgradeService.checkForUpgradeByName(USER_CRN, CLUSTER_NAME, request, ACCOUNT_ID)).thenReturn(sdxUpgradeResponse);
+        when(sdxRuntimeUpgradeService.checkForUpgradeByName(CLUSTER_NAME, request, ACCOUNT_ID)).thenReturn(sdxUpgradeResponse);
 
         SdxUpgradeResponse response = doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, request));
 
         verify(sdxRuntimeUpgradeService, times(1))
-                .checkForUpgradeByName(any(), any(), upgradeRequestArgumentCaptor.capture(), anyString());
+                .checkForUpgradeByName(any(), upgradeRequestArgumentCaptor.capture(), anyString());
         //SdxUpgradeRequest capturedRequest = upgradeRequestArgumentCaptor.getValue();
         //assertTrue(capturedRequest.getLockComponents());
         assertEquals("No image available to upgrade", response.getReason());
@@ -224,12 +224,12 @@ class SdxUpgradeControllerTest {
 
         SdxUpgradeResponse sdxUpgradeResponse = new SdxUpgradeResponse();
         sdxUpgradeResponse.setReason("No image available to upgrade");
-        when(sdxRuntimeUpgradeService.checkForUpgradeByName(USER_CRN, CLUSTER_NAME, request, ACCOUNT_ID)).thenReturn(sdxUpgradeResponse);
+        when(sdxRuntimeUpgradeService.checkForUpgradeByName(CLUSTER_NAME, request, ACCOUNT_ID)).thenReturn(sdxUpgradeResponse);
 
         SdxUpgradeResponse response = doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, request));
 
         verify(sdxRuntimeUpgradeService, times(1))
-                .checkForUpgradeByName(any(), any(), upgradeRequestArgumentCaptor.capture(), anyString());
+                .checkForUpgradeByName(any(), upgradeRequestArgumentCaptor.capture(), anyString());
         //SdxUpgradeRequest capturedRequest = upgradeRequestArgumentCaptor.getValue();
         //assertTrue(capturedRequest.getLockComponents());
         assertEquals("No image available to upgrade", response.getReason());
@@ -243,12 +243,12 @@ class SdxUpgradeControllerTest {
 
         SdxUpgradeResponse sdxUpgradeResponse = new SdxUpgradeResponse();
         sdxUpgradeResponse.setReason("No image available to upgrade");
-        when(sdxRuntimeUpgradeService.checkForUpgradeByName(USER_CRN, CLUSTER_NAME, request, ACCOUNT_ID)).thenReturn(sdxUpgradeResponse);
+        when(sdxRuntimeUpgradeService.checkForUpgradeByName(CLUSTER_NAME, request, ACCOUNT_ID)).thenReturn(sdxUpgradeResponse);
 
         SdxUpgradeResponse response = doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, request));
 
         verify(sdxRuntimeUpgradeService, times(1))
-                .checkForUpgradeByName(any(), any(), upgradeRequestArgumentCaptor.capture(), anyString());
+                .checkForUpgradeByName(any(), upgradeRequestArgumentCaptor.capture(), anyString());
         SdxUpgradeRequest capturedRequest = upgradeRequestArgumentCaptor.getValue();
         assertNull(capturedRequest.getLockComponents());
         assertEquals("No image available to upgrade", response.getReason());
@@ -261,5 +261,51 @@ class SdxUpgradeControllerTest {
         when(sdxCcmUpgradeService.upgradeCcm(ENV_CRN)).thenReturn(response);
         SdxCcmUpgradeResponse sdxCcmUpgradeResponse = underTest.upgradeCcm(ENV_CRN, USER_CRN);
         assertThat(sdxCcmUpgradeResponse).isEqualTo(response);
+    }
+
+    @Test
+    public void testPrepareUpgradeByNameCheckForUpgrade() {
+        SdxUpgradeRequest request = new SdxUpgradeRequest();
+        request.setDryRun(true);
+        SdxUpgradeResponse response = new SdxUpgradeResponse();
+        when(sdxRuntimeUpgradeService.checkForUpgradeByName(CLUSTER_NAME, request, ACCOUNT_ID)).thenReturn(response);
+
+        SdxUpgradeResponse result = doAs(USER_CRN, () -> underTest.prepareClusterUpgradeByName(CLUSTER_NAME, request));
+
+        assertEquals(response, result);
+    }
+
+    @Test
+    public void testPrepareUpgradeByCrnCheckForUpgrade() {
+        SdxUpgradeRequest request = new SdxUpgradeRequest();
+        request.setDryRun(true);
+        SdxUpgradeResponse response = new SdxUpgradeResponse();
+        when(sdxRuntimeUpgradeService.checkForUpgradeByCrn(USER_CRN, CLUSTER_NAME, request, ACCOUNT_ID)).thenReturn(response);
+
+        SdxUpgradeResponse result = doAs(USER_CRN, () -> underTest.prepareClusterUpgradeByCrn(CLUSTER_NAME, request));
+
+        assertEquals(response, result);
+    }
+
+    @Test
+    public void testPrepareUpgradeByNameTriggerUpgrade() {
+        SdxUpgradeRequest request = new SdxUpgradeRequest();
+        SdxUpgradeResponse response = new SdxUpgradeResponse();
+        when(sdxRuntimeUpgradeService.triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, ACCOUNT_ID, true)).thenReturn(response);
+
+        SdxUpgradeResponse result = doAs(USER_CRN, () -> underTest.prepareClusterUpgradeByName(CLUSTER_NAME, request));
+
+        assertEquals(response, result);
+    }
+
+    @Test
+    public void testPrepareUpgradeByCrnTriggerUpgrade() {
+        SdxUpgradeRequest request = new SdxUpgradeRequest();
+        SdxUpgradeResponse response = new SdxUpgradeResponse();
+        when(sdxRuntimeUpgradeService.triggerUpgradeByCrn(USER_CRN, CLUSTER_NAME, request, ACCOUNT_ID, true)).thenReturn(response);
+
+        SdxUpgradeResponse result = doAs(USER_CRN, () -> underTest.prepareClusterUpgradeByCrn(CLUSTER_NAME, request));
+
+        assertEquals(response, result);
     }
 }

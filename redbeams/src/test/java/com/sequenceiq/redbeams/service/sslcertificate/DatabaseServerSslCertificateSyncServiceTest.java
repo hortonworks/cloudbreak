@@ -79,7 +79,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
     private CloudCredential cloudCredential;
 
     @Mock
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @Mock
     private Authenticator authenticator;
@@ -88,7 +88,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
     private AuthenticatedContext authenticatedContext;
 
     @Mock
-    private ResourceConnector<Object> resourceConnector;
+    private ResourceConnector resourceConnector;
 
     @Captor
     private ArgumentCaptor<DBStack> dbStackArgumentCaptor;

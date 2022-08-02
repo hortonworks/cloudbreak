@@ -7,7 +7,9 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.InternalOnly;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.common.api.command.RemoteCommandsExecutionRequest;
 import com.sequenceiq.common.api.command.RemoteCommandsExecutionResponse;
@@ -43,8 +45,7 @@ public class UtilV1Controller implements UtilV1Endpoint {
     }
 
     @Override
-    @InternalOnly
-    @AccountIdNotNeeded
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public RemoteCommandsExecutionResponse remoteCommandExecution(String environmentCrn, RemoteCommandsExecutionRequest request) {
         return remoteExecutionService.remoteExec(environmentCrn, request);
     }

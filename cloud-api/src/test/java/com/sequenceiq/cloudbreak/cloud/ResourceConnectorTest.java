@@ -39,7 +39,7 @@ class ResourceConnectorTest {
         assertThrows(UnsupportedOperationException.class, () -> underTest.getDatabaseServerActiveSslRootCertificate(authenticatedContext, stack));
     }
 
-    private static class ResourceConnectorImpl implements ResourceConnector<Object> {
+    private static class ResourceConnectorImpl implements ResourceConnector {
 
         @Override
         public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
@@ -55,7 +55,7 @@ class ResourceConnectorTest {
 
         @Override
         public List<CloudResourceStatus> upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-                PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion) throws Exception {
+                PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion) {
             return null;
         }
 
@@ -96,14 +96,14 @@ class ResourceConnectorTest {
         }
 
         @Override
-        public Object collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+        public List<CloudResource> collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
                 List<CloudInstance> vms) {
             return null;
         }
 
         @Override
         public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
-                List<CloudInstance> vms, Object resourcesToRemove) {
+                List<CloudInstance> vms, List<CloudResource> resourcesToRemove) {
             return null;
         }
 
@@ -124,8 +124,7 @@ class ResourceConnectorTest {
         }
 
         @Override
-        public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
-            return;
+        public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         }
 
         @Override

@@ -492,6 +492,7 @@ public class ModelDescriptions {
         public static final String PASSWORD = "Password of the administrative user of the database server";
         public static final String ENVIRONMENT_CRN = "CRN of the environment of the database server";
         public static final String CLUSTER_CRN = "CRN of the cluster of the database server";
+        public static final String MAJOR_VERSION = "Major version of the database server engine";
         public static final String CREATION_DATE = "Creation date / time of the database server, in epoch milliseconds";
         public static final String RESOURCE_STATUS = "Ownership status of the database server";
         public static final String STATUS = "Status of the database server stack";

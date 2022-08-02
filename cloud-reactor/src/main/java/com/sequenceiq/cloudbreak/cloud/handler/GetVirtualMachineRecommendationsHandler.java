@@ -33,7 +33,7 @@ public class GetVirtualMachineRecommendationsHandler implements CloudPlatformEve
         GetVirtualMachineRecommendtaionRequest request = gVMRRE.getData();
         String cloudPlatform = request.getCloudPlatform();
         try {
-            CloudConnector<Object> connector = cloudPlatformConnectors.getDefault(Platform.platform(cloudPlatform));
+            CloudConnector connector = cloudPlatformConnectors.getDefault(Platform.platform(cloudPlatform));
             VmRecommendations recommendations = connector.parameters().recommendedVms();
             GetVirtualMachineRecommendationResponse gVMRResponse = new GetVirtualMachineRecommendationResponse(request.getResourceId(), recommendations);
             request.getResult().onNext(gVMRResponse);

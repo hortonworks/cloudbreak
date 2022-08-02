@@ -64,7 +64,7 @@ class StackCreationServiceTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(underTest, "ephemeralVolumeChecker", new InstanceGroupEphemeralVolumeChecker());
-        CloudConnector<Object> cloudConnector = Mockito.mock(CloudConnector.class);
+        CloudConnector cloudConnector = Mockito.mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         MetadataCollector metadataCollector = Mockito.mock(MetadataCollector.class);
         when(cloudConnector.metadata()).thenReturn(metadataCollector);

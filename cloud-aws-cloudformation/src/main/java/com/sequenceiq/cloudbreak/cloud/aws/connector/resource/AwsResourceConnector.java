@@ -35,7 +35,7 @@ import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import freemarker.template.Configuration;
 
 @Service
-public class AwsResourceConnector implements ResourceConnector<Object> {
+public class AwsResourceConnector implements ResourceConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsResourceConnector.class);
 
     private static final List<String> CAPABILITY_IAM = singletonList("CAPABILITY_IAM");
@@ -189,14 +189,14 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public Object collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack,
+    public List<CloudResource> collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack,
             List<CloudResource> resources, List<CloudInstance> vms) {
         return null;
     }
 
     @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms,
-            Object resourcesToRemove) {
+            List<CloudResource> resourcesToRemove) {
         return awsDownscaleService.downscale(auth, stack, resources, vms);
     }
 

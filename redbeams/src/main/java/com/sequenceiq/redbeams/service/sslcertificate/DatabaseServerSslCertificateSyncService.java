@@ -46,7 +46,7 @@ public class DatabaseServerSslCertificateSyncService {
         String cloudPlatform = dbStack.getCloudPlatform();
         if (sslConfig != null && SslCertificateType.CLOUD_PROVIDER_OWNED.equals(sslConfig.getSslCertificateType())
                 && CloudPlatform.AWS.name().equals(cloudPlatform)) {
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
             CloudDatabaseServerSslCertificate activeSslRootCertificate = connector.resources().getDatabaseServerActiveSslRootCertificate(ac, databaseStack);
             if (activeSslRootCertificate == null) {

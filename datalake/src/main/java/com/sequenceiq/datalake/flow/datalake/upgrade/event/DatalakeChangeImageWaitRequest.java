@@ -33,4 +33,11 @@ public class DatalakeChangeImageWaitRequest extends SdxEvent {
     public UpgradeOptionV4Response getUpgradeOption() {
         return upgradeOption;
     }
+
+    @Override
+    public String toString() {
+        return "DatalakeChangeImageWaitRequest{" +
+                "upgradeOption=" + upgradeOption +
+                "} " + super.toString();
+    }
 }

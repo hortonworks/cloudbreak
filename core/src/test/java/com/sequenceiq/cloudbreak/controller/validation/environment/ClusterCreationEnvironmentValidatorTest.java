@@ -66,7 +66,7 @@ class ClusterCreationEnvironmentValidatorTest {
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Mock
-    private CloudConnector<Object> connector;
+    private CloudConnector connector;
 
     @Mock
     private PlatformParameters platformParameters;

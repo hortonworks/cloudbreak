@@ -67,6 +67,10 @@ public class AzureIDBrokerObjectStorageValidatorTest {
 
     private static final String STORAGE_LOCATION_RANGER = "abfs://fs@storageaccount.dfs.core.windows.net/ranger/audit";
 
+    private static final String LOG_LOCATION = "abfs://logs@storageaccount.dfs.core.windows.net/";
+
+    private static final String BACKUP_LOCATION = "abfs://backup@storageaccount.dfs.core.windows.net/";
+
     private static final String ABFS_STORAGE_ACCOUNT_NAME = "anAccount";
 
     private static final String SUBSCRIPTION_FULL_ID = "/subscriptions/" + SUBSCRIPTION_ID;
@@ -277,6 +281,25 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     }
 
     @Test
+    public void testValidateObjectStorageLogLocation() {
+        SpiFileSystem fileSystem = setupSpiFileSystem(true);
+        PagedList<Identity> identityPagedList = Mockito.spy(PagedList.class);
+        when(assumer.id()).thenReturn(USER_IDENTITY_1);
+        when(logger.id()).thenReturn(GROUP_IDENTITY_1);
+        identityPagedList.add(assumer);
+        identityPagedList.add(logger);
+        when(client.listIdentities()).thenReturn(identityPagedList);
+        new RoleASsignmentBuilder(client)
+                .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
+                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
+
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateObjectStorage(client, fileSystem, LOG_LOCATION, BACKUP_LOCATION, null, resultBuilder);
+        ValidationResult validationResult = resultBuilder.build();
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
     public void testValidateObjectStorageNoMappedRoles() {
         SpiFileSystem fileSystem = setupSpiFileSystem(true);
         PagedList<Identity> identityPagedList = Mockito.spy(PagedList.class);
@@ -299,7 +322,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
 
         ValidationResult validationResult = resultBuilder.build();
         assertTrue(validationResult.hasError());
-        assertEquals(5, validationResult.getErrors().size());
+        assertEquals(6, validationResult.getErrors().size());
         List<String> actual = validationResult.getErrors();
         assertTrue(actual.stream().anyMatch(item ->
                 item.contains(String.format("Identity with id %s has no role assignment.", USER_IDENTITY_1))));

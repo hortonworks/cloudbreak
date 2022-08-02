@@ -109,7 +109,7 @@ public class DatalakeUpgradeFlowConfig extends AbstractFlowConfiguration<Datalak
 
     @Override
     public String getDisplayName() {
-        return "Upgrade SDX";
+        return "Upgrade Data Lake";
     }
 
     @Override

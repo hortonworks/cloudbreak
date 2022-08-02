@@ -41,6 +41,7 @@ public class DeregisterAgentHandler extends ExceptionCatcherEventHandler<Upgrade
         UpgradeCcmDeregisterAgentRequest request = event.getData();
         Long stackId = request.getResourceId();
         LOGGER.info("Deregistering agent for CCM upgrade...");
+        upgradeCcmService.updateTunnel(stackId);
         upgradeCcmService.deregisterAgent(stackId, request.getOldTunnel());
         return new UpgradeCcmDeregisterAgentResult(stackId, request.getClusterId(), request.getOldTunnel());
     }

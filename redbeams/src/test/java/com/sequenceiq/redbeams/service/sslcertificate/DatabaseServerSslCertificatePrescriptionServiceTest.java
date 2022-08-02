@@ -61,7 +61,7 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
     private CloudCredential cloudCredential;
 
     @Mock
-    private CloudConnector<Object> cloudConnector;
+    private CloudConnector cloudConnector;
 
     @Mock
     private PlatformResources platformResources;
