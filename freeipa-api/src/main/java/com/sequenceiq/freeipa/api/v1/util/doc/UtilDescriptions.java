@@ -4,7 +4,6 @@ public final class UtilDescriptions {
     public static final String NOTES = "Miscellaneous utility operations";
     public static final String USED_IMAGES = "List the images that are in use";
     public static final String USED_RECIPES = "List the recipes that are in use by account";
-    public static final String REMOTE_EXEC = "Execute commands (sync) from API";
 
     private UtilDescriptions() {
     }

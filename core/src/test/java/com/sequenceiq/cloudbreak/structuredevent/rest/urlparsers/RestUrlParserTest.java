@@ -90,7 +90,7 @@ public class RestUrlParserTest {
 
     private final String[] excludes = {"/v1/distrox", "/v1/internal/distrox", "/flow-public", "/autoscale",
             "cluster_templates", "/v4/events", "/v4/diagnostics", "/v4/progress", "/v4/operation",
-            "/v4/custom_configurations", "/v4/utils"};
+            "/v4/custom_configurations"};
 
     private final String[] excludePaths = {"/stacks/internal/crn"};
 
