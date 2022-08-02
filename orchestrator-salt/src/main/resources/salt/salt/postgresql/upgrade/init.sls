@@ -1,3 +1,5 @@
+{% set configure_remote_db = salt['pillar.get']('postgres:configure_remote_db', 'None') %}
+
 /opt/salt/scripts/common_utils.sh:
   file.managed:
     - makedirs: True
@@ -22,5 +24,9 @@
 set_pgpassword:
   environ.setenv:
     - name: PGPASSWORD
+{%- if 'None' != configure_remote_db %}
     - value: {{ pillar['postgres']['clouderamanager']['remote_admin_pw'] }}
+{%- else %}
+    - value: postgres
+{%- endif %}
     - update_minion: True
