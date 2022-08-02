@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -62,10 +63,84 @@ public class AzureInstanceConnector implements InstanceConnector {
         return statuses;
     }
 
+    /**
+     *
+     * Attempts to start the given list of virtual machines within the timebound specified. If timebound is exceeded, the status of the instance is updated to UNKNOWN.
+     *
+     * @param ac                   the authenticated context which holds the client object
+     * @param resources            resources managed by Cloudbreak, can be used to figure out which resources are associated with the given VMs
+     *                             (e.g. floating IP) and they can be started as well
+     * @param vms                  VM instances to be started
+     * @param timeboundInMs        A timebound in ms for this call.
+     * @return status of instances
+     */
+
+    @Override
+    public List<CloudVmInstanceStatus> startWithLimitedRetry(AuthenticatedContext ac, List<CloudResource> resources,
+            List<CloudInstance> vms, Long timeboundInMs) {
+        LOGGER.info("Starting vms on Azure: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
+        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
+        List<Completable> startCompletables = new ArrayList<>();
+        for (CloudInstance vm : vms) {
+            String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm);
+            AzureClient azureClient = ac.getParameter(AzureClient.class);
+            startCompletables.add(azureClient.startVirtualMachineAsync(resourceGroupName, vm.getInstanceId(), timeboundInMs)
+                    .doOnError(throwable -> {
+                        if (throwable instanceof TimeoutException) {
+                            LOGGER.error("Timeout Error happened on azure instance start: {}", vm, throwable);
+                            statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.UNKNOWN, throwable.getMessage()));
+                        } else {
+                            LOGGER.error("Error happened on azure instance start: {}", vm, throwable);
+                            statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
+                        }})
+                    .doOnCompleted(() -> statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.STARTED)))
+                    .subscribeOn(Schedulers.io()));
+        }
+        Completable.merge(startCompletables).await();
+        return statuses;
+    }
+
     @Override
     public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         LOGGER.info("Stopping vms on Azure: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
         return azureUtils.deallocateInstances(ac, vms);
+    }
+
+    /**
+     *
+     * Attempts to stop the given list of virtual machines within the timebound specified. If timebound is exceeded, the status of the instance is updated to UNKNOWN.
+     *
+     * @param ac                   the authenticated context which holds the client object
+     * @param resources            resources managed by Cloudbreak, can be used to figure out which resources are associated with the given VMs
+     *                             (e.g. floating IP) and they can be started as well
+     * @param vms                  VM instances to be started
+     * @param timeboundInMs        A timebound in ms for this call.
+     * @return status of instances
+     */
+
+    @Override
+    public List<CloudVmInstanceStatus> stopWithLimitedRetry(AuthenticatedContext ac, List<CloudResource> resources,
+            List<CloudInstance> vms, Long timeboundInMs) {
+        LOGGER.info("Stopping vms on Azure: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
+        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
+        List<Completable> startCompletables = new ArrayList<>();
+        for (CloudInstance vm : vms) {
+            String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm);
+            AzureClient azureClient = ac.getParameter(AzureClient.class);
+            startCompletables.add(azureClient.deallocateVirtualMachineAsync(resourceGroupName, vm.getInstanceId(), timeboundInMs)
+                    .doOnError(throwable -> {
+                        if (throwable instanceof TimeoutException) {
+                            LOGGER.error("Timeout Error happened on azure instance stop: {}", vm, throwable);
+                            statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.UNKNOWN, throwable.getMessage()));
+                        } else {
+                            LOGGER.error("Error happened on azure instance start: {}", vm, throwable);
+                            statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
+                        }})
+                    .doOnCompleted(() -> statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.STOPPED)))
+                    .subscribeOn(Schedulers.io()));
+        }
+        Completable.merge(startCompletables).await();
+        return statuses;
     }
 
     @Override

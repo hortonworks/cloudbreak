@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -577,12 +578,27 @@ public class AzureClient {
         return handleAuthException(() -> azure.virtualMachines().deallocateAsync(resourceGroup, vmName));
     }
 
+    public Completable deallocateVirtualMachineAsync(String resourceGroup, String vmName, Long timeboundInMs) {
+        if(timeboundInMs==null) {
+            return deallocateVirtualMachineAsync(resourceGroup, vmName);
+        }
+        return handleAuthException(() -> azure.virtualMachines().deallocateAsync(resourceGroup, vmName)).timeout(timeboundInMs, TimeUnit.MILLISECONDS);
+    }
+
     public Completable deleteVirtualMachine(String resourceGroup, String vmName) {
         return handleAuthException(() -> azure.virtualMachines().deleteByResourceGroupAsync(resourceGroup, vmName));
     }
 
     public Completable startVirtualMachineAsync(String resourceGroup, String vmName) {
         return handleAuthException(() -> azure.virtualMachines().startAsync(resourceGroup, vmName));
+    }
+
+    public Completable startVirtualMachineAsync(String resourceGroup, String vmName, Long timeboundInMs) {
+        if(timeboundInMs==null)
+        {
+            return startVirtualMachineAsync(resourceGroup, vmName);
+        }
+        return handleAuthException(() -> azure.virtualMachines().startAsync(resourceGroup, vmName).timeout(timeboundInMs, TimeUnit.MILLISECONDS));
     }
 
     public Completable rebootVirtualMachineAsync(String resourceGroup, String vmName) {
