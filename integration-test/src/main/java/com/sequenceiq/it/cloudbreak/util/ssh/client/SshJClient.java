@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.ssh.client;
 
 import static java.lang.String.format;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -15,7 +16,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
@@ -27,6 +31,10 @@ import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.connection.channel.direct.Session.Command;
 import net.schmizz.sshj.transport.TransportException;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
+import net.schmizz.sshj.xfer.FileSystemFile;
+import net.schmizz.sshj.xfer.scp.SCPDownloadClient;
+import net.schmizz.sshj.xfer.scp.SCPFileTransfer;
+import net.schmizz.sshj.xfer.scp.SCPUploadClient;
 
 @Service
 public class SshJClient {
@@ -108,5 +116,26 @@ public class SshJClient {
         Session sshSession = ssh.startSession();
         sshSession.allocateDefaultPTY();
         return sshSession;
+    }
+
+    public void upload(SSHClient ssh, String localPath, String remoteDirectory) throws IOException {
+        String commandRunnerLocation = "classpath:/commands/qa_command_runner.py";
+        String sampleCommandLocation = "classpath:/commands/qa_sample_command.json";
+
+        try {
+            ssh.newSCPFileTransfer().upload(new FileSystemFile(localPath), remoteDirectory);
+        } catch (ConnectionException | TransportException e) {
+            Log.error(LOGGER, "Creating SSH client is not possible, because of host: '{}', user: '{}', password: '{}' and privateKey: '{}' are missing!",
+                    host, user, password, privateKeyFilePath);
+            throw new TestFailException(format("Creating SSH client is not possible, because of host: '%s', user: '%s', password: '%s'" +
+                    " and privateKey: '%s' are missing!", host, user, password, privateKeyFilePath));
+            throw new ArtifactConnectException("Upload [" + localPath + "] to [" + remoteDirectory + "] encountered connection error", e);
+        } catch (IOException e) {
+            ExceptionUtil.checkInterrupted(e);
+            throw new ArtifactUploadException("Fatal error happened while trying to upload", e);
+        } finally {
+            ssh.disconnect();
+            ssh.close();
+        }
     }
 }
