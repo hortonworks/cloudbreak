@@ -69,7 +69,7 @@ public class ImpalaVolumeConfigProvider implements CmHostGroupRoleConfigProvider
                             .convertGBToBytes(Math.min(minAttachedVolumeSize / 2, MAX_IMPALA_DATA_CACHE_SIZE_IN_GB / hostGroupView.getVolumeCount()));
 
                     configs.add(config(IMPALA_DATACACHE_ENABLED_PARAM, "true"));
-:q
+
                     if (checkTemporaryStorage(hostGroupView, temporaryStorageVolumeCount)) {
                         long temporaryStoragedataCacheCapacityInBytes = VolumeUtils
                                 .convertGBToBytes(Math.min(temporaryStorageVolumeSize / 2,
