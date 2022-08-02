@@ -474,6 +474,10 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     void updateCustomDomainByStackId(@Param("stackId") Long stackId, @Param("customDomain") String customDomain);
 
     @Modifying
+    @Query("UPDATE Stack s SET s.externalDatabaseEngineVersion = :externalDatabaseEngineVersion WHERE s.id = :stackId")
+    void updateExternalDatabaseEngineVersion(@Param("stackId") Long stackId, @Param("externalDatabaseEngineVersion") String externalDatabaseEngineVersion);
+
+    @Modifying
     @Query("UPDATE Stack s SET s.stackVersion = :stackVersion WHERE s.id = :stackId")
     void updateStackVersion(@Param("stackId") Long stackId, @Param("stackVersion") String stackVersion);
 
