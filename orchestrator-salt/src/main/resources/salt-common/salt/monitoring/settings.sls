@@ -38,7 +38,11 @@
 
 {% set request_signer_enabled = salt['pillar.get']('monitoring:requestSignerEnabled', False) %}
 {% set request_signer_port = salt['pillar.get']('monitoring:requestSignerPort', 61095) %}
-{% set request_signer_use_token = salt['pillar.get']('monitoring:requestSignerUseToken', True) %}
+{% if salt['pillar.get']('monitoring:requestSignerUseToken', True) %}
+  {% set request_signer_use_token = 'true' %}
+{% else %}
+  {% set request_signer_use_token = 'false' %}
+{% endif %}
 {% set request_signer_token_validity_min = salt['pillar.get']('monitoring:requestSignerTokenValidityMin', 60) %}
 {% set request_signer_user = salt['pillar.get']('monitoring:requestSignerUser', 'signer') %}
 
