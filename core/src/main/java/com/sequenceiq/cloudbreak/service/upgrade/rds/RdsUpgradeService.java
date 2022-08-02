@@ -53,14 +53,14 @@ public class RdsUpgradeService {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("RDS upgrade has been initiated for stack {}", nameOrCrn.getNameOrCrn());
 
-        if (checkCurrentRdsVersion(nameOrCrn).equals(targetMajorVersion.getVersion())) {
+        if (getCurrentRdsVersion(nameOrCrn).equals(targetMajorVersion.getVersion())) {
             return alreadyOnLatestAnswer(targetMajorVersion);
         } else {
             return checkStackStatusAndTrigger(stack, targetMajorVersion);
         }
     }
 
-    private String checkCurrentRdsVersion(NameOrCrn nameOrCrn) {
+    private String getCurrentRdsVersion(NameOrCrn nameOrCrn) {
         StackDatabaseServerResponse databaseServer = databaseService.getDatabaseServer(nameOrCrn);
         return databaseServer.getMajorVersion().getVersion();
     }

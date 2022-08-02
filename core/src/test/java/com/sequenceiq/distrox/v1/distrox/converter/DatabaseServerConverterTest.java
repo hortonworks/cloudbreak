@@ -48,6 +48,7 @@ class DatabaseServerConverterTest {
         sourceSslConfig.setSslMode(SslMode.ENABLED);
         sourceSslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
         source.setSslConfig(sourceSslConfig);
+        source.setMajorVersion(MajorVersion.VERSION_10);
 
         StackDatabaseServerResponse result = underTest.convert(source);
         assertThat(result.getCrn()).isEqualTo(source.getCrn());
@@ -58,8 +59,7 @@ class DatabaseServerConverterTest {
         assertThat(result.getPort()).isEqualTo(source.getPort());
         assertThat(result.getDatabaseVendor()).isEqualTo(source.getDatabaseVendor());
         assertThat(result.getDatabaseVendorDisplayName()).isEqualTo(source.getDatabaseVendorDisplayName());
-        // TODO: re-wire to fetch this from source once available
-        assertThat(result.getMajorVersion()).isEqualTo(MajorVersion.VERSION_10);
+        assertThat(result.getMajorVersion()).isEqualTo(source.getMajorVersion());
         assertThat(result.getCreationDate()).isEqualTo(source.getCreationDate());
         assertThat(result.getResourceStatus()).isEqualTo(DatabaseServerResourceStatus.SERVICE_MANAGED);
         assertThat(result.getStatus()).isEqualTo(DatabaseServerStatus.AVAILABLE);

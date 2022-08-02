@@ -21,11 +21,14 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDatabaseServerV4Parameters;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.gcp.GcpDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.converter.CrnConverter;
 
@@ -181,6 +184,26 @@ public class DBStack {
             ha = parameters == null || !Boolean.FALSE.toString().equalsIgnoreCase(parameters.get(AwsDatabaseServerV4Parameters.MULTI_AZ));
         }
         return ha;
+    }
+
+    public MajorVersion getMajorVersion() {
+        Map<String, Object> attributes = databaseServer.getAttributes().getMap();
+        switch (CloudPlatform.valueOf(cloudPlatform)) {
+            case AZURE:
+                AzureDatabaseServerV4Parameters azure = new AzureDatabaseServerV4Parameters();
+                azure.parse(attributes);
+                return MajorVersion.get(azure.getDbVersion()).orElse(MajorVersion.VERSION_10);
+            case AWS:
+                AwsDatabaseServerV4Parameters aws = new AwsDatabaseServerV4Parameters();
+                aws.parse(attributes);
+                return MajorVersion.get(aws.getEngineVersion()).orElse(MajorVersion.VERSION_10);
+            case GCP:
+                GcpDatabaseServerV4Parameters gcp = new GcpDatabaseServerV4Parameters();
+                gcp.parse(attributes);
+                return MajorVersion.get(gcp.getEngineVersion()).orElse(MajorVersion.VERSION_10);
+            default:
+                return MajorVersion.VERSION_10;
+        }
     }
 
     public String getCloudPlatform() {

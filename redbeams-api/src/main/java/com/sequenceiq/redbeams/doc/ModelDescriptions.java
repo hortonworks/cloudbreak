@@ -78,6 +78,7 @@ public final class ModelDescriptions {
         public static final String SSL_CERTIFICATE_ACTIVE_CLOUD_PROVIDER_IDENTIFIER =
                 "Cloud provider specific identifier of the SSL certificate currently active for the database server";
         public static final String TAGS = "UserDefined tags for the DB";
+        public static final String MAJOR_VERSION = "Major version of the database server engine";
     }
 
     public static class DatabaseServerTest {
