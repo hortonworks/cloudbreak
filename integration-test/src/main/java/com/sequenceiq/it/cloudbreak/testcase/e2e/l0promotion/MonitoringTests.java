@@ -2,8 +2,11 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion;
 
 import static java.lang.String.format;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +17,8 @@ import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseReque
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.it.cloudbreak.assertion.datalake.DatalakeMonitoringStatusesAssertions;
+import com.sequenceiq.it.cloudbreak.assertion.freeipa.FreeIpaMonitoringStatusesAssertions;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -30,7 +35,6 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackRemoteTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
@@ -90,11 +94,16 @@ public class MonitoringTests extends AbstractE2ETest {
                 and = "metering setting should be inherited from environment",
             then = "Metering Services, Scrapping and Metrics should be up and running on freeIpa")
     public void testMoniotoringOnEnvironment(TestContext testContext) {
+        List<String> verifyMetricNames = List.of("node_filesystem_free_bytes");
+        List<String> acceptableNokNames = List.of("cdp-request-signer");
+        String monitoringStatusCommand = format("sudo cdp-doctor monitoring status -m %s --format json", StringUtils.join(verifyMetricNames, ","));
+
         testContext
                 .given(EnvironmentNetworkTestDto.class)
                 .given("telemetry", TelemetryTestDto.class)
                     .withLogging()
                     .withReportClusterLogs()
+                    .withMonitoring(remoteWriteUrl)
                 .given(EnvironmentTestDto.class)
                     .withNetwork()
                     .withTelemetry("telemetry")
@@ -111,12 +120,9 @@ public class MonitoringTests extends AbstractE2ETest {
                     .withEnvironment()
                 .when(freeIpaTestClient.describe())
                 .given(FreeIpaRemoteTestDto.class)
-                    .withCommand("sudo ls -la")
+                    .withCommand(monitoringStatusCommand)
                 .when(remoteTestClient.executeCommandOnFreeIpa())
-                .then((tc, testDto, client) -> {
-                    Log.whenJson(LOGGER, format(" FreeIPA remote command done with result:%n"), testDto.getResponse());
-                    return testDto;
-                })
+                .then(new FreeIpaMonitoringStatusesAssertions(acceptableNokNames))
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe())
                 .validate();
@@ -135,12 +141,17 @@ public class MonitoringTests extends AbstractE2ETest {
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setCreate(false);
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+        List<String> verifyMetricNames = List.of("node_filesystem_free_bytes", "cm_health_check_info");
+        List<String> acceptableNokNames = List.of("cdp-request-signer", "smon-exporter", "cm_health_check_info");
+        String monitoringStatusCommand = format("sudo cdp-doctor monitoring status -m %s --format json",
+                StringUtils.join(verifyMetricNames, ","));
 
         testContext
                 .given(EnvironmentNetworkTestDto.class)
                 .given("telemetry", TelemetryTestDto.class)
                     .withLogging()
                     .withReportClusterLogs()
+                    .withMonitoring(remoteWriteUrl)
                 .given(EnvironmentTestDto.class)
                     .withNetwork()
                     .withTelemetry("telemetry")
@@ -162,12 +173,9 @@ public class MonitoringTests extends AbstractE2ETest {
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .given(FreeIpaRemoteTestDto.class)
-                    .withCommand("sudo ls -la")
+                    .withCommand(monitoringStatusCommand)
                 .when(remoteTestClient.executeCommandOnFreeIpa())
-                .then((tc, testDto, client) -> {
-                    Log.whenJson(LOGGER, format(" FreeIPA remote command done with result:%n"), testDto.getResponse());
-                    return testDto;
-                })
+                .then(new FreeIpaMonitoringStatusesAssertions(acceptableNokNames))
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe())
                 .given(SdxInternalTestDto.class)
@@ -178,13 +186,10 @@ public class MonitoringTests extends AbstractE2ETest {
                 .awaitForHealthyInstances()
                 .when(sdxTestClient.describeInternal())
                 .given(StackRemoteTestDto.class)
-                    .withCommand("sudo ls -la")
+                    .withCommand(monitoringStatusCommand)
                     .withSdx()
                 .when(remoteTestClient.executeCommandOnStack())
-                .then((tc, testDto, client) -> {
-                    Log.whenJson(LOGGER, format(" SDX remote command done with result:%n"), testDto.getResponse());
-                    return testDto;
-                })
+                .then(new DatalakeMonitoringStatusesAssertions(acceptableNokNames))
                 .given(DistroXTestDto.class)
                     .withExternalDatabase(distroXDatabaseRequest)
                     .withEnvironment()
@@ -193,13 +198,10 @@ public class MonitoringTests extends AbstractE2ETest {
                 .awaitForHealthyInstances()
                 .when(distroXTestClient.get())
                 .given(StackRemoteTestDto.class)
-                    .withCommand("sudo ls -la")
+                    .withCommand(monitoringStatusCommand)
                     .withDistrox()
                 .when(remoteTestClient.executeCommandOnStack())
-                .then((tc, testDto, client) -> {
-                    Log.whenJson(LOGGER, format(" DistroX remote command done with result:%n"), testDto.getResponse());
-                    return testDto;
-                })
+                .then(new DatalakeMonitoringStatusesAssertions(acceptableNokNames))
                 .validate();
     }
 }

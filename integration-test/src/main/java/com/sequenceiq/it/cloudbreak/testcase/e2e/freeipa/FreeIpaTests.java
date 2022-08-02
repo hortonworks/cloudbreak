@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
+import static java.lang.String.format;
 
 import java.util.Set;
 
@@ -16,15 +17,16 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.assertion.freeipa.RecipeTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
+import com.sequenceiq.it.cloudbreak.client.RemoteTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRemoteTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
-import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 
 public class FreeIpaTests extends AbstractE2ETest {
 
@@ -39,10 +41,10 @@ public class FreeIpaTests extends AbstractE2ETest {
     private RecipeTestClient recipeTestClient;
 
     @Inject
-    private SshJUtil sshJUtil;
+    private RecipeUtil recipeUtil;
 
     @Inject
-    private RecipeUtil recipeUtil;
+    private RemoteTestClient remoteTestClient;
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
@@ -57,6 +59,7 @@ public class FreeIpaTests extends AbstractE2ETest {
         String recipeName = resourcePropertyProvider().getName();
         String filePath = "/pre-ambari";
         String fileName = "pre-ambari";
+        String fileListCommand = format("sudo find %s -type f -name %s", filePath, fileName);
 
         int instanceGroupCount = 1;
         int instanceCountByGroup = 2;
@@ -77,7 +80,11 @@ public class FreeIpaTests extends AbstractE2ETest {
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .awaitForHealthyInstances()
-                .then(RecipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1, sshJUtil))
+                .given(FreeIpaRemoteTestDto.class)
+                    .withCommand(fileListCommand)
+                .when(remoteTestClient.executeCommandOnFreeIpa())
+                .then(RecipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1))
+                .given(freeIpa, FreeIpaTestDto.class)
                 .when(freeIpaTestClient.stop())
                 .await(Status.STOPPED)
                 .when(freeIpaTestClient.start())
@@ -87,12 +94,20 @@ public class FreeIpaTests extends AbstractE2ETest {
                 .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .await(FREEIPA_AVAILABLE)
                 .awaitForHealthyInstances()
-                .then(RecipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1, sshJUtil))
+                .given(FreeIpaRemoteTestDto.class)
+                    .withCommand(fileListCommand)
+                .when(remoteTestClient.executeCommandOnFreeIpa())
+                .then(RecipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1))
+                .given(freeIpa, FreeIpaTestDto.class)
                 .when(freeIpaTestClient.repair(InstanceMetadataType.GATEWAY))
                 .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .await(FREEIPA_AVAILABLE)
                 .awaitForHealthyInstances()
-                .then(RecipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1, sshJUtil))
+                .given(FreeIpaRemoteTestDto.class)
+                    .withCommand(fileListCommand)
+                .when(remoteTestClient.executeCommandOnFreeIpa())
+                .then(RecipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1))
+                .given(freeIpa, FreeIpaTestDto.class)
                 .given(FreeIpaUserSyncTestDto.class)
                 .forAllEnvironments()
                 .when(freeIpaTestClient.getLastSyncOperationStatus())

@@ -3,16 +3,16 @@ tests:
   - name: "aws_e2e_tests"
     excludedGroups: [ azure_singlerg ]
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.NewNetworkWithNoInternetEnvironmentTests
+#      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.NewNetworkWithNoInternetEnvironmentTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRebuildTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaScalingTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXEncryptedVolumeTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRepairTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXScaleTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.PrewarmImageValidatorE2ETest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxImagesTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxSecurityTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRecipeTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRangerRazEnabledTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxRepairWithRecipeTest
+#      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRebuildTests
+#      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaScalingTests
+#      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXEncryptedVolumeTest
+#      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRepairTests
+#      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXScaleTest
+#      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.PrewarmImageValidatorE2ETest
+#      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxImagesTests
+#      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxSecurityTests
+#      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRecipeTests
+#      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRangerRazEnabledTests
+#      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxRepairWithRecipeTest

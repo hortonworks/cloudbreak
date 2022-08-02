@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.environment;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
+import static java.lang.String.format;
 
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
+import com.sequenceiq.it.cloudbreak.client.RemoteTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -30,6 +32,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaRemoteTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -37,7 +40,6 @@ import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.cloudbreak.util.clouderamanager.ClouderaManagerUtil;
-import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class EnvironmentStopStartTests extends AbstractE2ETest {
@@ -74,7 +76,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
     private RecipeTestClient recipeTestClient;
 
     @Inject
-    private SshJUtil sshJUtil;
+    private RemoteTestClient remoteTestClient;
 
     @Inject
     private RecipeUtil recipeUtil;
@@ -100,6 +102,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
         String recipeName = resourcePropertyProvider().getName();
         String filePath = "/pre-ambari";
         String fileName = "pre-ambari";
+        String fileListCommand = format("find %s -type f -name %s", filePath, fileName);
 
         testContext
                 .given(RecipeTestDto.class)
@@ -128,7 +131,11 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .then(cloudProviderSideTagAssertion.verifyEnvironmentTags(ENV_TAGS))
                 .init(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
-                .then(RecipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1, sshJUtil))
+                .given(FreeIpaRemoteTestDto.class)
+                .withCommand(fileListCommand)
+                .when(remoteTestClient.executeCommandOnFreeIpa())
+                .then(RecipeTestAssertion.validateFilesOnFreeIpa(filePath, fileName, 1))
+                .given(FreeIpaTestDto.class)
                 .given(SdxInternalTestDto.class)
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then(cloudProviderSideTagAssertion.verifyInternalSdxTags(SDX_TAGS))
