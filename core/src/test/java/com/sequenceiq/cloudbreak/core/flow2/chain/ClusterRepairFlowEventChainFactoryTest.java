@@ -26,11 +26,13 @@ import org.junit.jupiter.api.Assertions;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
@@ -43,14 +45,16 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -88,9 +92,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
     private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
-    private BlueprintService blueprintService;
-
-    @Mock
     private KerberosConfigService kerberosConfigService;
 
     @Mock
@@ -99,18 +100,33 @@ public class ClusterRepairFlowEventChainFactoryTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private EmbeddedDatabaseService embeddedDatabaseService;
+
+    @Mock
+    private StackDto stackDto;
+
+    @Mock
+    private StackView stackView;
+
+    @Mock
+    private ClusterView clusterView;
+
     @InjectMocks
     private ClusterRepairFlowEventChainFactory underTest;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        ReflectionTestUtils.setField(underTest, "targetMajorVersion", TargetMajorVersion.VERSION_11);
+        when(entitlementService.isEmbeddedPostgresUpgradeEnabled(anyString())).thenReturn(false);
+        setupStackDto();
+        setupViews();
     }
 
     @Test
     public void testRepairSingleGatewayWithNoAttached() {
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
-        setupStackView();
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
         setupHostGroup(true);
 
@@ -125,10 +141,30 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     @Test
+    public void testRepairSingleGatewayWithNoAttachedWithEmbeddedDBUpgrade() {
+        Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
+        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
+        when(entitlementService.isEmbeddedPostgresUpgradeEnabled(anyString())).thenReturn(true);
+        when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto)).thenReturn(true);
+        setupHostGroup(true);
+
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(
+                new TriggerEventBuilder(stack).withFailedPrimaryGateway().withUpgrade().build());
+
+        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
+        assertEquals(List.of("FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "UPGRADE_EMBEDDEDDB_PREPARATION_TRIGGER_EVENT",
+                "STACK_DOWNSCALE_TRIGGER_EVENT",
+                "FULL_UPSCALE_TRIGGER_EVENT",
+                "UPGRADE_RDS_TRIGGER_EVENT",
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"), triggeredOperations);
+    }
+
+    @Test
     public void testRepairSingleGatewayWithAttached() {
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
-        setupStackView();
         setupHostGroup(true);
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
@@ -144,7 +180,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
     @Test
     public void testRepairSingleGatewayMultipleNodes() {
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
-        setupStackView();
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
 
         HostGroup masterHostGroup = setupHostGroup("hostGroup-master", setupInstanceGroup(InstanceGroupType.GATEWAY));
@@ -174,7 +209,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         when(ig.getNodeCount()).thenReturn(5);
         when(instanceGroupService.findViewByStackId(STACK_ID)).thenReturn(Set.of(ig));
         setupHostGroup(true);
-        setupStackView();
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
 
@@ -196,7 +230,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         when(ig.getNodeCount()).thenReturn(5);
         when(instanceGroupService.findViewByStackId(STACK_ID)).thenReturn(Set.of(ig));
         setupHostGroup(true);
-        setupStackView();
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
 
@@ -214,7 +247,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
         setupHostGroup(false);
-        setupStackView();
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
 
@@ -231,7 +263,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
         setupHostGroup(false);
-        setupStackView();
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
 
@@ -254,7 +285,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         HostGroup auxiliaryHostGroup = setupHostGroup("hostGroup-auxiliary", setupInstanceGroup(InstanceGroupType.CORE));
         when(hostGroupService.findHostGroupInClusterByName(anyLong(), eq("hostGroup-auxiliary"))).thenReturn(Optional.of(auxiliaryHostGroup));
         when(entitlementService.isDatalakeZduOSUpgradeEnabled(anyString())).thenReturn(true);
-        setupStackView();
         setupPrimaryGateway();
 
         InstanceMetaData primaryGWInstanceMetadata = new InstanceMetaData();
@@ -355,7 +385,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
     public void testAddAwsNativeMigrationIfNeedWhenNotUpgrade() {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
-        StackView stackView = setupStackView();
         ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent(stackView.getId(), Map.of(), false, false, "variant");
 
         underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);
@@ -368,7 +397,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
         String triggeredVariant = "triggeredVariant";
-        StackView stackView = setupStackView();
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), Map.of(), false, triggeredVariant);
 
@@ -382,7 +410,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
         String triggeredVariant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value();
-        StackView stackView = setupStackView();
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
         ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), Map.of(), false, triggeredVariant);
 
@@ -397,7 +424,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
         String triggeredVariant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value();
-        StackView stackView = setupStackView();
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), Map.of(), false, triggeredVariant);
 
@@ -412,7 +438,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
         String triggeredVariant = "AWS_NATIVE";
-        StackView stackView = setupStackView();
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
         ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), Map.of(), false, triggeredVariant);
 
@@ -446,17 +471,26 @@ public class ClusterRepairFlowEventChainFactoryTest {
         return stack;
     }
 
-    private StackView setupStackView() {
-        StackView stack = mock(StackView.class);
-        when(stack.getClusterId()).thenReturn(CLUSTER_ID);
-        when(stack.getId()).thenReturn(STACK_ID);
+    private void setupViews() {
+        when(stackView.getId()).thenReturn(STACK_ID);
         Crn exampleCrn = CrnTestUtil.getDatalakeCrnBuilder()
                 .setResource("aResource")
                 .setAccountId("anAccountId")
                 .build();
-        when(stack.getResourceCrn()).thenReturn(exampleCrn.toString());
-        when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stack);
-        return stack;
+        when(stackView.getResourceCrn()).thenReturn(exampleCrn.toString());
+        when(clusterView.getId()).thenReturn(CLUSTER_ID);
+    }
+
+    private void setupStackDto() {
+        Crn exampleCrn = CrnTestUtil.getDatalakeCrnBuilder()
+                .setResource("aResource")
+                .setAccountId("anAccountId")
+                .build();
+        when(stackDto.getResourceCrn()).thenReturn(exampleCrn.toString());
+        when(stackDto.getStack()).thenReturn(stackView);
+        when(stackDto.getCluster()).thenReturn(clusterView);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto)).thenReturn(false);
     }
 
     private HostGroup setupHostGroup(String hostGroupName, InstanceGroup instanceGroup) {
@@ -484,6 +518,8 @@ public class ClusterRepairFlowEventChainFactoryTest {
         private final List<String> failedAuxiliaryNodes = new ArrayList<>();
 
         private boolean oneNodeFromEachHostGroupAtOnce;
+
+        private boolean upgrade;
 
         private TriggerEventBuilder(Stack stack) {
             this.stack = stack;
@@ -521,6 +557,11 @@ public class ClusterRepairFlowEventChainFactoryTest {
             return this;
         }
 
+        private TriggerEventBuilder withUpgrade() {
+            upgrade = true;
+            return this;
+        }
+
         private ClusterRepairTriggerEvent build() {
             Map<String, List<String>> failedNodes = new HashMap<>();
             if (!failedGatewayNodes.isEmpty()) {
@@ -533,7 +574,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
                 failedNodes.put("hostGroup-auxiliary", failedAuxiliaryNodes);
             }
 
-            return new ClusterRepairTriggerEvent(stack.getId(), failedNodes, oneNodeFromEachHostGroupAtOnce, false, "variant");
+            return new ClusterRepairTriggerEvent(stack.getId(), failedNodes, oneNodeFromEachHostGroupAtOnce, false, "variant", upgrade);
         }
     }
 }

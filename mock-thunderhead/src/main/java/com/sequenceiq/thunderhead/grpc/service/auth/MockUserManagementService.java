@@ -61,6 +61,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EMBEDDED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
@@ -461,6 +462,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.workloadiam.sync.enable}")
     private boolean enableWorkloadIamSync;
+
+    @Value("${auth.mock.postgres.upgrade.embedded.enable}")
+    private boolean enablePostgresUpgradeEmbedded;
 
     private String cbLicense;
 
@@ -991,6 +995,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableUsersyncEnforceGroupMemberLimit) {
             builder.addEntitlements(createEntitlement(CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT));
+        }
+        if (enablePostgresUpgradeEmbedded) {
+            builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_EMBEDDED));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

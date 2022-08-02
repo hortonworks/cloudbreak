@@ -118,7 +118,7 @@ public class UpgradeService {
         FlowIdentifier flowIdentifier = null;
         try {
             // CHECKSTYLE:OFF - false recognition of unnecessary variable assignment
-            flowIdentifier = clusterRepairService.repairAll(stack);
+            flowIdentifier = clusterRepairService.repairAll(stack, true);
             // CHECKSTYLE:ON
             return flowIdentifier;
         } catch (RuntimeException e) {

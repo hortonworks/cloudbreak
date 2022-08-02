@@ -215,7 +215,7 @@ public class ClusterRepairServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false));
 
-        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1"))), eq(false), eq(false), any());
+        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1"))), eq(false), eq(false), any(), eq(false));
     }
 
     @Test
@@ -386,7 +386,7 @@ public class ClusterRepairServiceTest {
         ArgumentCaptor<List<Resource>> saveCaptor = ArgumentCaptor.forClass(List.class);
         verify(resourceService).saveAll(saveCaptor.capture());
         assertFalse(resourceAttributeUtil.getTypedAttributes(saveCaptor.getValue().get(0), VolumeSetAttributes.class).get().getDeleteOnTermination());
-        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(false), eq(false), any());
+        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(false), eq(false), any(), eq(false));
     }
 
     @Test

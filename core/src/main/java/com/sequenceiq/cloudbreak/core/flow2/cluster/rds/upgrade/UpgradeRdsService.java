@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -72,13 +73,14 @@ public class UpgradeRdsService {
         rdsUpgradeOrchestratorService.restoreRdsData(stackId);
     }
 
-    public void rdsUpgradeFinished(Long stackId, Long clusterId) {
+    public void rdsUpgradeFinished(Long stackId, Long clusterId, TargetMajorVersion targetMajorVersion) {
         String statusReason = "RDS upgrade finished";
         LOGGER.debug(statusReason);
         InMemoryStateStore.deleteStack(stackId);
         InMemoryStateStore.deleteCluster(clusterId);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, statusReason);
         flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_FINISHED);
+        stackUpdater.updateExternalDatabaseEngineVersion(stackId, targetMajorVersion.getVersion());
     }
 
     public void rdsUpgradeFailed(Long stackId, Long clusterId, Exception exception) {

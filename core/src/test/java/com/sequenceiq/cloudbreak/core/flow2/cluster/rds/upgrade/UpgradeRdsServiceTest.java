@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade;
 
-
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
@@ -15,11 +14,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeOrchestratorService;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,12 +53,18 @@ class UpgradeRdsServiceTest {
     @Mock
     private CloudbreakMessagesService messagesService;
 
+    @Mock
+    private StackService stackService;
+
+    @Mock
+    private Stack stack;
+
     @InjectMocks
     private UpgradeRdsService underTest;
 
     @Test
     public void testRdsUpgradeFinished() {
-        underTest.rdsUpgradeFinished(STACK_ID, CLUSTER_ID);
+        underTest.rdsUpgradeFinished(STACK_ID, CLUSTER_ID, TargetMajorVersion.VERSION_11);
 
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.AVAILABLE), eq("RDS upgrade finished"));
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(AVAILABLE.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_FINISHED));

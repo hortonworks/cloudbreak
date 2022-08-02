@@ -1021,6 +1021,10 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         stackRepository.updateStackVersion(stackId, stackVersion);
     }
 
+    public void updateExternalDatabaseEngineVersion(Long stackId, String databaseVersion) {
+        stackRepository.updateExternalDatabaseEngineVersion(stackId, databaseVersion);
+    }
+
     public void updateDomainDnsResolverByStackId(Long stackId, DnsResolverType actualDnsResolverType) {
         stackRepository.updateDomainDnsResolverByStackId(stackId, actualDnsResolverType);
     }

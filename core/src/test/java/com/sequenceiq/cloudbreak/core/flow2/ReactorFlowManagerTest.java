@@ -142,6 +142,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerStackRepairFlow(STACK_ID, new UnhealthyInstances());
         underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), false);
         underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), true, false, "variant");
+        underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), true, false, "variant", false);
         underTest.triggerStackImageUpdate(new ImageChangeDto(STACK_ID, "asdf"));
         underTest.triggerMaintenanceModeValidationFlow(STACK_ID);
         underTest.triggerClusterCertificationRenewal(STACK_ID);

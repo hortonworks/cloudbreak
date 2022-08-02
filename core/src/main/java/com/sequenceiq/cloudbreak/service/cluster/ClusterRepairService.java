@@ -134,9 +134,9 @@ public class ClusterRepairService {
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
-    public FlowIdentifier repairAll(StackView stack) {
+    public FlowIdentifier repairAll(StackView stackView, boolean upgrade) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
-                validateRepair(ManualClusterRepairMode.ALL, stack.getId(), Set.of(), false);
+                validateRepair(ManualClusterRepairMode.ALL, stackView.getId(), Set.of(), false);
         Set<String> repairableHostGroups;
         if (repairStart.isSuccess()) {
             repairableHostGroups = repairStart.getSuccess()
@@ -148,20 +148,20 @@ public class ClusterRepairService {
             repairableHostGroups = Set.of();
         }
         String userCrn = restRequestThreadLocalService.getUserCrn();
-        String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(stack, userCrn);
-        return triggerRepairOrThrowBadRequest(stack.getId(), repairStart, true, false, repairableHostGroups, upgradeVariant);
+        String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(stackView, userCrn);
+        return triggerRepairOrThrowBadRequest(stackView.getId(), repairStart, true, false, repairableHostGroups, upgradeVariant, upgrade);
     }
 
     public FlowIdentifier repairHostGroups(Long stackId, Set<String> hostGroups, boolean restartServices) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
                 validateRepair(ManualClusterRepairMode.HOST_GROUP, stackId, hostGroups, false);
-        return triggerRepairOrThrowBadRequest(stackId, repairStart, false, restartServices, hostGroups, null);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, false, restartServices, hostGroups, null, false);
     }
 
     public FlowIdentifier repairNodes(Long stackId, Set<String> nodeIds, boolean deleteVolumes, boolean restartServices) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
                 validateRepair(ManualClusterRepairMode.NODE_ID, stackId, nodeIds, deleteVolumes);
-        return triggerRepairOrThrowBadRequest(stackId, repairStart, false, restartServices, nodeIds, null);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, false, restartServices, nodeIds, null, false);
     }
 
     public Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairWithDryRun(Long stackId) {
@@ -442,9 +442,9 @@ public class ClusterRepairService {
         }
     }
 
-    private FlowIdentifier triggerRepairOrThrowBadRequest(Long stackId,
-            Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairValidationResult, boolean oneNodeFromEachHostGroupAtOnce,
-            boolean restartServices, Set<String> recoveryMessageArgument, String upgradeVariant) {
+    private FlowIdentifier triggerRepairOrThrowBadRequest(Long stackId, Result<Map<HostGroupName, Set<InstanceMetaData>>,
+            RepairValidation> repairValidationResult, boolean oneNodeFromEachHostGroupAtOnce, boolean restartServices, Set<String> recoveryMessageArgument,
+            String upgradeVariant, boolean upgrade) {
         if (repairValidationResult.isError()) {
             eventService.fireCloudbreakEvent(stackId, RECOVERY_FAILED, CLUSTER_MANUALRECOVERY_COULD_NOT_START,
                     repairValidationResult.getError().getValidationErrors());
@@ -452,7 +452,7 @@ public class ClusterRepairService {
         } else {
             if (!repairValidationResult.getSuccess().isEmpty()) {
                 FlowIdentifier flowIdentifier = flowManager.triggerClusterRepairFlow(stackId, toStringMap(repairValidationResult.getSuccess()),
-                        oneNodeFromEachHostGroupAtOnce, restartServices, upgradeVariant);
+                        oneNodeFromEachHostGroupAtOnce, restartServices, upgradeVariant, upgrade);
                 eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_REQUESTED,
                         List.of(String.join(",", recoveryMessageArgument)));
                 return flowIdentifier;
