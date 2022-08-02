@@ -1,5 +1,13 @@
 {%- from 'telemetry/settings.sls' import telemetry with context %}
 {%- from 'monitoring/settings.sls' import monitoring with context %}
+{%- set instance_name = salt['grains.get']('fqdn') %}
+{%- if telemetry.platform in ["AWS", "AZURE", "GCP"] %}
+  {%- set get_instance_cmd = "python3 /opt/salt/scripts/instanceid_retriever.py " +  telemetry.platform %}
+  {%- set instance_cmd_output = salt.cmd.run(get_instance_cmd) %}
+  {%- if instance_cmd_output %}
+    {%- set instance_name = instance_cmd_output %}
+  {%- endif %}
+{%- endif %}
 port: {{ monitoring.requestSignerPort }}
 endpoint: "{{ monitoring.remoteWriteUrl }}"
 credential:
@@ -16,6 +24,8 @@ sign:
   token_validity_min: {{ monitoring.requestSignerTokenValidityMin }}
   use_token_heder: {{ monitoring.requestSignerUseToken }}
   use_msg_header: true
+  resource_crn_header: "{{ telemetry.clusterCrn }}"
+  instance_header: "{{ instance_name }}"
 client:
   dump: false
 tls:
