@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.prep
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.FINALIZE_CLUSTER_UPGRADE_PREPARATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.HANDLED_FAILED_CLUSTER_UPGRADE_PREPARATION_EVENT;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -66,11 +67,11 @@ public class ClusterUpgradePreparationActions {
                 LOGGER.debug("Initiating cluster upgrade preparation {}", payload);
                 Long resourceId = payload.getResourceId();
                 ImageChangeDto imageChangeDto = payload.getImageChangeDto();
+                List<String> imageIdAsList = singletonList(imageChangeDto.getImageId());
                 ResourceEvent preparationStartedResourceEvent = ResourceEvent.CLUSTER_UPGRADE_PREPARATION_STARTED;
-                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(), preparationStartedResourceEvent,
-                        singletonList(imageChangeDto.getImageId()));
                 stackUpdater.updateStackStatus(resourceId, CLUSTER_UPGRADE_PREPARATION_STARTED,
-                        messagesService.getMessage(preparationStartedResourceEvent.getMessage()));
+                        messagesService.getMessage(preparationStartedResourceEvent.getMessage(), imageIdAsList));
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(), preparationStartedResourceEvent, imageIdAsList);
                 ClusterUpgradeParcelSettingsPreparationEvent nextEvent = new ClusterUpgradeParcelSettingsPreparationEvent(resourceId, imageChangeDto);
                 sendEvent(context, nextEvent.selector(), nextEvent);
             }
@@ -131,8 +132,8 @@ public class ClusterUpgradePreparationActions {
                 LOGGER.debug("Cluster upgrade preparation finish state started.");
                 Long resourceId = payload.getResourceId();
                 ResourceEvent resourceEvent = ResourceEvent.CLUSTER_UPGRADE_PREPARATION_FINISHED;
-                cloudbreakEventService.fireCloudbreakEvent(resourceId, AVAILABLE.name(), resourceEvent);
                 stackUpdater.updateStackStatus(resourceId, CLUSTER_UPGRADE_PREPARATION_FINISHED, messagesService.getMessage(resourceEvent.getMessage()));
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, AVAILABLE.name(), resourceEvent);
                 String nextEventSelector = FINALIZE_CLUSTER_UPGRADE_PREPARATION_EVENT.event();
                 sendEvent(context, nextEventSelector, createClusterUpgradePreparationEvent(nextEventSelector, payload));
             }
@@ -170,9 +171,10 @@ public class ClusterUpgradePreparationActions {
                 Long resourceId = payload.getResourceId();
                 LOGGER.error("Cluster upgrade preparation failed: {}", errorMessage, payload.getException());
                 ResourceEvent preparationFailedResourceEvent = ResourceEvent.CLUSTER_UPGRADE_PREPARATION_FAILED;
-                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_FAILED.name(), preparationFailedResourceEvent, singletonList(errorMessage));
+                List<String> errorMessageAsList = singletonList(errorMessage);
                 stackUpdater.updateStackStatus(resourceId, DetailedStackStatus.AVAILABLE,
-                        messagesService.getMessage(preparationFailedResourceEvent.getMessage()));
+                        messagesService.getMessage(preparationFailedResourceEvent.getMessage(), errorMessageAsList));
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_FAILED.name(), preparationFailedResourceEvent, errorMessageAsList);
                 sendEvent(context, HANDLED_FAILED_CLUSTER_UPGRADE_PREPARATION_EVENT.event(), payload);
             }
 
