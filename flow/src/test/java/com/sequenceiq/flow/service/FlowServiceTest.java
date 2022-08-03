@@ -332,13 +332,11 @@ public class FlowServiceTest {
 
     private void setUpFlowChain(FlowChainLog flowChainLog, boolean hasEventInQueue, List<FlowLogWithoutPayload> flowLogs) {
         List<FlowChainLog> chainLogs = List.of(flowChainLog);
-        when(flowChainLogService.findByFlowChainIdOrderByCreatedDesc(FLOW_CHAIN_ID))
-                .thenReturn(chainLogs);
+        when(flowChainLogService.findByFlowChainIdOrderByCreatedDesc(FLOW_CHAIN_ID)).thenReturn(chainLogs);
         when(flowLogDBService.getFlowIdsByChainIds(Set.of(FLOW_CHAIN_ID))).thenReturn(Set.of(FLOW_ID));
-        when(flowChainLogService.collectRelatedFlowChains(flowChainLog)).thenReturn(chainLogs);
         when(flowChainLogService.hasEventInFlowChainQueue(chainLogs)).thenReturn(hasEventInQueue);
-        when(flowLogDBService.getFlowLogsWithoutPayloadByFlowIdsCreatedDesc(Set.of(FLOW_ID)))
-                .thenReturn(flowLogs);
+        when(flowLogDBService.getFlowLogsWithoutPayloadByFlowIdsCreatedDesc(Set.of(FLOW_ID))).thenReturn(flowLogs);
+        when(flowChainLogService.getRelatedFlowChainLogs(chainLogs)).thenReturn(chainLogs);
     }
 
     private FlowChainLog flowChainLog() {

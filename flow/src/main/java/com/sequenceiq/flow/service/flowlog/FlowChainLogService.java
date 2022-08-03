@@ -3,6 +3,7 @@ package com.sequenceiq.flow.service.flowlog;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,14 @@ public class FlowChainLogService {
 
     public List<FlowChainLog> findByFlowChainIdOrderByCreatedDesc(String flowChainId) {
         return repository.findByFlowChainIdOrderByCreatedDesc(flowChainId);
+    }
+
+    public List<FlowChainLog> getRelatedFlowChainLogs(List<FlowChainLog> sourceFlowChains) {
+        Optional<FlowChainLog> flowChainWithParent = sourceFlowChains.stream()
+                .filter(flowChainLog -> StringUtils.isNotBlank(flowChainLog.getParentFlowChainId())).findFirst();
+        FlowChainLog lastFlowChain = sourceFlowChains.stream().max(Comparator.comparing(FlowChainLog::getCreated)).get();
+        FlowChainLog inputFlowChain = flowChainWithParent.orElse(lastFlowChain);
+        return collectRelatedFlowChains(inputFlowChain);
     }
 
     public List<FlowChainLog> collectRelatedFlowChains(FlowChainLog flowChain) {

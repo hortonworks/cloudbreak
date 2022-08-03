@@ -19,4 +19,6 @@ public interface StackStatusRepository extends CrudRepository<StackStatus, Long>
 
     List<StackStatus> findAllByStackIdOrderByCreatedAsc(long stackId);
 
+    List<StackStatus> findAllByStackIdAndCreatedGreaterThanEqualOrderByCreatedDesc(long stackId, long created);
+
 }

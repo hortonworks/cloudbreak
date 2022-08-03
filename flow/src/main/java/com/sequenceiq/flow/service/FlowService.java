@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.service.flowlog.FlowLogUtil.isFlowInFail
 import static java.util.stream.Collectors.toSet;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -129,7 +128,7 @@ public class FlowService {
         List<FlowChainLog> flowChains = flowChainLogService.findByFlowChainIdOrderByCreatedDesc(chainId);
         if (!flowChains.isEmpty()) {
             LOGGER.info("Checking if there is an active flow based on flow chain id {}", chainId);
-            List<FlowChainLog> relatedChains = getRelatedFlowChainLogs(flowChains);
+            List<FlowChainLog> relatedChains = flowChainLogService.getRelatedFlowChainLogs(flowChains);
             Set<String> relatedChainIds = relatedChains.stream().map(FlowChainLog::getFlowChainId).collect(toSet());
             Set<String> relatedFlowIds = flowLogDBService.getFlowIdsByChainIds(relatedChainIds);
             List<FlowLogWithoutPayload> relatedFlowLogs = flowLogDBService.getFlowLogsWithoutPayloadByFlowIdsCreatedDesc(relatedFlowIds);
@@ -148,7 +147,7 @@ public class FlowService {
         List<FlowChainLog> flowChains = flowChainLogService.findByFlowChainIdOrderByCreatedDesc(chainId);
         if (!flowChains.isEmpty()) {
             LOGGER.info("Checking if there is an active flow based on flow chain id {}", chainId);
-            List<FlowChainLog> relatedChains = getRelatedFlowChainLogs(flowChains);
+            List<FlowChainLog> relatedChains = flowChainLogService.getRelatedFlowChainLogs(flowChains);
             Set<String> relatedChainIds = relatedChains.stream().map(FlowChainLog::getFlowChainId).collect(toSet());
             Set<String> relatedFlowIds = flowLogDBService.getFlowIdsByChainIds(relatedChainIds);
             List<FlowLogWithoutPayload> relatedFlowLogs = flowLogDBService.getFlowLogsWithoutPayloadByFlowIdsCreatedDesc(relatedFlowIds);
@@ -176,14 +175,6 @@ public class FlowService {
         flowCheckResponse.setHasActiveFlow(!completed("Flow", flowId, List.of(), allByFlowIdOrderByCreatedDesc));
         flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowInFailedState(allByFlowIdOrderByCreatedDesc, failHandledEvents));
         return flowCheckResponse;
-    }
-
-    private List<FlowChainLog> getRelatedFlowChainLogs(List<FlowChainLog> sourceFlowChains) {
-        Optional<FlowChainLog> flowChainWithParent = sourceFlowChains.stream()
-                .filter(flowChainLog -> StringUtils.isNotBlank(flowChainLog.getParentFlowChainId())).findFirst();
-        FlowChainLog lastFlowChain = sourceFlowChains.stream().max(Comparator.comparing(FlowChainLog::getCreated)).get();
-        FlowChainLog inputFlowChain = flowChainWithParent.orElse(lastFlowChain);
-        return flowChainLogService.collectRelatedFlowChains(inputFlowChain);
     }
 
     private boolean completed(String marker, String flowChainId, List<FlowChainLog> flowChainLogs, List<FlowLogWithoutPayload> flowLogs) {

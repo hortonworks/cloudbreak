@@ -24,4 +24,8 @@ public class StackStatusService {
         return repository.findAllByStackIdOrderByCreatedAsc(stackId);
     }
 
+    public List<StackStatus> findAllStackStatusesById(long stackId, long createdAfter) {
+        return repository.findAllByStackIdAndCreatedGreaterThanEqualOrderByCreatedDesc(stackId, createdAfter);
+    }
+
 }
