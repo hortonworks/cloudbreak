@@ -79,14 +79,14 @@ public class UserStateDifferenceCalculator {
 
     public ImmutableSet<FmsUser> calculateUsersToAdd(UmsUsersState umsState, UsersState ipaState) {
         Map<String, FmsUser> umsUsers = umsState.getUsersState().getUsers().stream()
-                .collect(Collectors.toMap(FmsUser::getName, Function.identity()));
+                .collect(Collectors.toMap(FmsUser::getName, Function.identity(), (r1, r2) -> r1));
         Set<String> ipaUsers = ipaState.getUsers().stream()
                 .map(FmsUser::getName)
                 .collect(Collectors.toSet());
         ImmutableSet<FmsUser> usersToAdd = ImmutableSet.copyOf(Sets.difference(umsUsers.keySet(), ipaUsers)
                 .stream()
                 .filter(username -> !FreeIpaChecks.IPA_PROTECTED_USERS.contains(username))
-                .map(username -> umsUsers.get(username))
+                .map(umsUsers::get)
                 .collect(Collectors.toSet()));
 
         LOGGER.info("usersToAdd size = {}", usersToAdd.size());
