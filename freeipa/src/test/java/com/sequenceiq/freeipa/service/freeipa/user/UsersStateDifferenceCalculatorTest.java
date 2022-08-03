@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -9,26 +10,27 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import org.junit.jupiter.api.Test;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.freeipa.client.FreeIpaChecks;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 
 class UsersStateDifferenceCalculatorTest {
 
     @Test
     void testCalculateUsersToAdd() {
-        FmsUser userUms = new FmsUser().withName("userUms");
+        FmsUser userUms1 = new FmsUser().withName("userUms").withFirstName("user1");
+        FmsUser userUms2 = new FmsUser().withName("userUms").withFirstName("user2");
         FmsUser userDisabledUms = new FmsUser().withName("userDisabledUms")
                 .withState(FmsUser.State.DISABLED);
         FmsUser userProtected = new FmsUser().withName(FreeIpaChecks.IPA_PROTECTED_USERS.get(0));
@@ -46,7 +48,8 @@ class UsersStateDifferenceCalculatorTest {
 
         UmsUsersState umsUsersState = new UmsUsersState.Builder()
                 .setUsersState(new UsersState.Builder()
-                        .addUser(userUms)
+                        .addUser(userUms1)
+                        .addUser(userUms2)
                         .addUser(userDisabledUms)
                         .addUser(userProtected)
                         .addUser(userBothUms)
@@ -65,7 +68,7 @@ class UsersStateDifferenceCalculatorTest {
         ImmutableSet<FmsUser> usersToAdd = new UserStateDifferenceCalculator().calculateUsersToAdd(umsUsersState, ipaUsersState);
 
         // the user that exists only in the UMS will be added
-        assertTrue(usersToAdd.contains(userUms));
+        assertThat(usersToAdd).containsAnyOf(userUms1, userUms2);
         assertTrue(usersToAdd.contains(userDisabledUms));
         // protected users will be ignored
         assertFalse(usersToAdd.contains(userProtected));
