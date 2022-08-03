@@ -130,11 +130,6 @@ pgsql-vacuumdbman:
     - target: /usr/pgsql-11/bin/initdb
     - force: True
 
-/var/lib/pgsql/data:
-  file.symlink:
-    - target: /var/lib/pgsql/11/data
-    - force: True
-
 {% if salt['file.file_exists']('/usr/lib/systemd/system/postgresql-10.service') %}
 remove-pg10-alias:
   file.replace:
@@ -148,7 +143,15 @@ disable-postgresql-10:
     - name: postgresql-10
 {% endif %}
 
-{%- if postgres_data_on_attached_disk %}
+/var/lib/pgsql/data:
+  file.symlink:
+    - target: /var/lib/pgsql/11/data
+    - force: True
+    - failhard: True
+    - user: postgres
+    - group: postgres
+    - mode: 700
+    - makedirs: True
 
 change-db-location-11:
   file.replace:
@@ -156,8 +159,6 @@ change-db-location-11:
     - pattern: "Environment=PGDATA=.*"
     - repl: Environment=PGDATA={{ postgres_directory }}/data
     - unless: grep "Environment=PGDATA={{ postgres_directory }}/data" /usr/lib/systemd/system/postgresql-11.service
-
-{%- endif %}
 
 postgresql-systemd-link:
   file.replace:
