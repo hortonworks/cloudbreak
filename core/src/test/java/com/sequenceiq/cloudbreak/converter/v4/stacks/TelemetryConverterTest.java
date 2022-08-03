@@ -93,12 +93,12 @@ public class TelemetryConverterTest {
         Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD);
         // THEN
         assertNotNull(result.getFeatures().getWorkloadAnalytics());
-        assertFalse(result.getFeatures().getClusterLogsCollection().isEnabled());
-        assertFalse(result.getFeatures().getCloudStorageLogging().isEnabled());
-        assertTrue(result.getFeatures().getMetering().isEnabled());
-        assertTrue(result.getFeatures().getMonitoring().isEnabled());
-        assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
-        assertTrue(result.getFeatures().getUseSharedAltusCredential().isEnabled());
+        assertFalse(result.getFeatures().getClusterLogsCollection().getEnabled());
+        assertFalse(result.getFeatures().getCloudStorageLogging().getEnabled());
+        assertTrue(result.getFeatures().getMetering().getEnabled());
+        assertTrue(result.getFeatures().getMonitoring().getEnabled());
+        assertTrue(result.getFeatures().getWorkloadAnalytics().getEnabled());
+        assertTrue(result.getFeatures().getUseSharedAltusCredential().getEnabled());
         assertEquals(DATABUS_ENDPOINT, result.getDatabusEndpoint());
         assertEquals(DATABUS_ENDPOINT, result.getWorkloadAnalytics().getDatabusEndpoint());
     }
@@ -120,7 +120,7 @@ public class TelemetryConverterTest {
         TelemetryResponse result = underTest.convert(telemetry);
         // THEN
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
-        assertTrue(result.getFeatures().getClusterLogsCollection().isEnabled());
+        assertTrue(result.getFeatures().getClusterLogsCollection().getEnabled());
         assertNull(result.getFeatures().getWorkloadAnalytics());
         assertNull(result.getFeatures().getMetering());
     }
@@ -161,7 +161,7 @@ public class TelemetryConverterTest {
         Telemetry result = underTest.convert(input, StackType.WORKLOAD);
 
         assertNotNull(result);
-        assertFalse(result.getFeatures().getMonitoring().isEnabled());
+        assertFalse(result.getFeatures().getMonitoring().getEnabled());
     }
 
     @Test
@@ -172,7 +172,7 @@ public class TelemetryConverterTest {
         Telemetry result = underTest.convert(input, StackType.WORKLOAD);
 
         assertNotNull(result);
-        assertFalse(result.getFeatures().getClusterLogsCollection().isEnabled());
+        assertFalse(result.getFeatures().getClusterLogsCollection().getEnabled());
     }
 
     @Test
@@ -182,9 +182,9 @@ public class TelemetryConverterTest {
         // WHEN
         Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD);
         // THEN
-        assertFalse(result.getFeatures().getClusterLogsCollection().isEnabled());
-        assertTrue(result.getFeatures().getMetering().isEnabled());
-        assertTrue(result.getFeatures().getCloudStorageLogging().isEnabled());
+        assertFalse(result.getFeatures().getClusterLogsCollection().getEnabled());
+        assertTrue(result.getFeatures().getMetering().getEnabled());
+        assertTrue(result.getFeatures().getCloudStorageLogging().getEnabled());
     }
 
     @Test
@@ -197,8 +197,8 @@ public class TelemetryConverterTest {
         // WHEN
         Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD);
         // THEN
-        assertTrue(result.getFeatures().getClusterLogsCollection().isEnabled());
-        assertTrue(result.getFeatures().getMetering().isEnabled());
+        assertTrue(result.getFeatures().getClusterLogsCollection().getEnabled());
+        assertTrue(result.getFeatures().getMetering().getEnabled());
     }
 
     @Test
@@ -208,7 +208,7 @@ public class TelemetryConverterTest {
         // WHEN
         Telemetry result = underTest.convert(telemetryRequest, StackType.DATALAKE);
         // THEN
-        assertFalse(result.getFeatures().getClusterLogsCollection().isEnabled());
+        assertFalse(result.getFeatures().getClusterLogsCollection().getEnabled());
         assertNull(result.getFeatures().getMetering());
     }
 
@@ -221,7 +221,7 @@ public class TelemetryConverterTest {
         // THEN
         assertNotNull(result.getWorkloadAnalytics());
         assertNotNull(result.getFeatures());
-        assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
+        assertTrue(result.getFeatures().getWorkloadAnalytics().getEnabled());
         assertNull(result.getLogging());
     }
 
@@ -243,7 +243,7 @@ public class TelemetryConverterTest {
         assertNull(result.getWorkloadAnalytics());
         assertNull(result.getFeatures().getMonitoring());
         assertNotNull(result.getFeatures());
-        assertFalse(result.getFeatures().getWorkloadAnalytics().isEnabled());
+        assertFalse(result.getFeatures().getWorkloadAnalytics().getEnabled());
     }
 
     @Test
@@ -261,7 +261,7 @@ public class TelemetryConverterTest {
         // WHEN
         TelemetryRequest result = underTest.convert(response, sdxClusterResponse);
         // THEN
-        assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
+        assertTrue(result.getFeatures().getWorkloadAnalytics().getEnabled());
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
         assertEquals("sdxId", result.getWorkloadAnalytics().getAttributes().get("databus.header.sdx.id").toString());
         assertEquals("sdxName", result.getWorkloadAnalytics().getAttributes().get("databus.header.sdx.name").toString());
@@ -277,7 +277,7 @@ public class TelemetryConverterTest {
         // WHEN
         TelemetryRequest result = underTest.convert(response, sdxClusterResponse);
         // THEN
-        assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
+        assertTrue(result.getFeatures().getWorkloadAnalytics().getEnabled());
         assertEquals("sdxId", result.getWorkloadAnalytics().getAttributes().get("databus.header.sdx.id").toString());
         assertEquals("sdxName", result.getWorkloadAnalytics().getAttributes().get("databus.header.sdx.name").toString());
     }
@@ -296,7 +296,7 @@ public class TelemetryConverterTest {
         TelemetryRequest result = underTest.convert(response, sdxClusterResponse);
         // THEN
         assertNull(result.getWorkloadAnalytics());
-        assertFalse(result.getFeatures().getWorkloadAnalytics().isEnabled());
+        assertFalse(result.getFeatures().getWorkloadAnalytics().getEnabled());
     }
 
     @Test
@@ -330,7 +330,7 @@ public class TelemetryConverterTest {
         // WHEN
         TelemetryRequest result = underTest.convert(response, null);
         // THEN
-        assertTrue(result.getFeatures().getClusterLogsCollection().isEnabled());
+        assertTrue(result.getFeatures().getClusterLogsCollection().getEnabled());
     }
 
     @Test
@@ -346,7 +346,7 @@ public class TelemetryConverterTest {
         // WHEN
         TelemetryRequest result = underTest.convert(response, null);
         // THEN
-        assertTrue(result.getFeatures().getMonitoring().isEnabled());
+        assertTrue(result.getFeatures().getMonitoring().getEnabled());
         assertEquals(MONITORING_REMOTE_WRITE_URL, result.getMonitoring().getRemoteWriteUrl());
     }
 
@@ -362,7 +362,7 @@ public class TelemetryConverterTest {
         // WHEN
         TelemetryRequest result = underTest.convert(response, null);
         // THEN
-        assertFalse(result.getFeatures().getCloudStorageLogging().isEnabled());
+        assertFalse(result.getFeatures().getCloudStorageLogging().getEnabled());
     }
 
     @Test
@@ -375,7 +375,7 @@ public class TelemetryConverterTest {
         // WHEN
         TelemetryRequest result = underTest.convert(response, null);
         // THEN
-        assertFalse(result.getFeatures().getClusterLogsCollection().isEnabled());
+        assertFalse(result.getFeatures().getClusterLogsCollection().getEnabled());
     }
 
     @Test
@@ -407,8 +407,8 @@ public class TelemetryConverterTest {
         assertNotNull(result.getLogging().getS3());
         assertEquals("myValue", result.getFluentAttributes().get("myKey"));
         assertEquals("myWAValue", result.getWorkloadAnalytics().getAttributes().get("myWAKey"));
-        assertTrue(result.getFeatures().getClusterLogsCollection().isEnabled());
-        assertTrue(result.getFeatures().getMonitoring().isEnabled());
+        assertTrue(result.getFeatures().getClusterLogsCollection().getEnabled());
+        assertTrue(result.getFeatures().getMonitoring().getEnabled());
         assertEquals(MONITORING_REMOTE_WRITE_URL, result.getMonitoring().getRemoteWriteUrl());
     }
 

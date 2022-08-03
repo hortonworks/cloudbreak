@@ -2,6 +2,10 @@ package com.sequenceiq.environment.environment.dto;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class LocationDto {
 
     private final String name;
@@ -12,13 +16,19 @@ public class LocationDto {
 
     private final Double longitude;
 
-    public LocationDto(String name, String displayName, Double latitude, Double longitude) {
+    @JsonCreator
+    public LocationDto(
+            @JsonProperty("name") String name,
+            @JsonProperty("displayName") String displayName,
+            @JsonProperty("latitude") Double latitude,
+            @JsonProperty("longitude") Double longitude) {
         this.name = name;
         this.displayName = displayName;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
+    @JsonIgnore
     public boolean isEmpty() {
         return StringUtils.isEmpty(name) && latitude == null && longitude == null;
     }

@@ -188,7 +188,7 @@ class NetworkCreationRequestFactoryTest {
     private EnvironmentDto.EnvironmentDtoBuilder createAzureParametersDto(ServiceEndpointCreation serviceEndpointCreation) {
         return createEnvironmentDtoWithAzureParams(serviceEndpointCreation)
                 .withParameters(ParametersDto.builder()
-                        .withAzureParameters(
+                        .withAzureParametersDto(
                                 AzureParametersDto.builder()
                                         .withResourceGroup(AzureResourceGroupDto.builder()
                                                 .withName(SINGLE_RG)

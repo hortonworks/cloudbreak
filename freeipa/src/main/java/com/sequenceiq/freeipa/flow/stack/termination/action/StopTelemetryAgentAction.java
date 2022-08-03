@@ -17,7 +17,7 @@ public class StopTelemetryAgentAction extends AbstractStackTerminationAction<Ter
 
     @Override
     protected void doExecute(StackTerminationContext context, TerminationEvent payload, Map<Object, Object> variables) throws Exception {
-        StopTelemetryAgentRequest request = new StopTelemetryAgentRequest(payload.getResourceId(), payload.isForced());
+        StopTelemetryAgentRequest request = new StopTelemetryAgentRequest(payload.getResourceId(), payload.getForced());
         sendEvent(context, request);
     }
 }

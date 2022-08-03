@@ -46,7 +46,7 @@ public class CredentialConverter {
                 .azure(getIfNotNull(source.getAzure(), this::azure))
                 .crn(source.getCrn())
                 .description(source.getDescription())
-                .govCloud(source.isGovCloud() == null ? false : source.isGovCloud())
+                .govCloud(source.getGovCloud() == null ? false : source.getGovCloud())
                 .account(source.getAccountId())
                 .creator(source.getCreator())
                 .name(source.getName())
@@ -76,7 +76,7 @@ public class CredentialConverter {
     private AzureRoleBasedAttributes roleBased(RoleBasedResponse roleBased) {
         return AzureRoleBasedAttributes.builder()
                 .appObjectId(roleBased.getAppObjectId())
-                .codeGrantFlow(roleBased.isCodeGrantFlow())
+                .codeGrantFlow(roleBased.getCodeGrantFlow())
                 .deploymentAddress(roleBased.getDeploymentAddress())
                 .spDisplayName(roleBased.getSpDisplayName())
                 .build();

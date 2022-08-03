@@ -17,7 +17,7 @@ public class FeatureSetting implements Serializable {
     @ApiModelProperty(value = "enabled", required = true)
     private Boolean enabled;
 
-    public Boolean isEnabled() {
+    public Boolean getEnabled() {
         return enabled;
     }
 

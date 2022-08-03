@@ -9,6 +9,8 @@ import java.util.Set;
 
 import org.apache.commons.collections4.MapUtils;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.LoadBalancerCreation;
@@ -18,6 +20,7 @@ import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 
+@JsonDeserialize(builder = NetworkDto.Builder.class)
 public class NetworkDto {
 
     private Long id;
@@ -268,6 +271,7 @@ public class NetworkDto {
                 '}';
     }
 
+    @JsonPOJOBuilder
     public static final class Builder {
 
         private Long id;
@@ -388,12 +392,21 @@ public class NetworkDto {
             return this;
         }
 
+        /**
+         * Need this for Jackson deserialization
+         * @param cloudPlatform cloudPlatform
+         */
+        private Builder withCloudPlatform(CloudPlatform cloudPlatform) {
+            this.cloudPlatform = cloudPlatform;
+            return this;
+        }
+
         public Builder withSubnetMetas(Map<String, CloudSubnet> subnetMetas) {
             this.subnetMetas = subnetMetas;
             return this;
         }
 
-        public Builder withUsePublicEndpointAccessGateway(PublicEndpointAccessGateway publicEndpointAccessGateway) {
+        public Builder withPublicEndpointAccessGateway(PublicEndpointAccessGateway publicEndpointAccessGateway) {
             this.publicEndpointAccessGateway = publicEndpointAccessGateway;
             return this;
         }

@@ -80,11 +80,11 @@ public class TelemetryApiConverterTest {
         // THEN
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
         assertEquals("http://myaddress/api/v1/receive", result.getMonitoring().getRemoteWriteUrl());
-        assertTrue(result.getFeatures().getClusterLogsCollection().isEnabled());
-        assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
-        assertTrue(result.getFeatures().getUseSharedAltusCredential().isEnabled());
-        assertTrue(result.getFeatures().getMonitoring().isEnabled());
-        assertTrue(result.getFeatures().getCloudStorageLogging().isEnabled());
+        assertTrue(result.getFeatures().getClusterLogsCollection().getEnabled());
+        assertTrue(result.getFeatures().getWorkloadAnalytics().getEnabled());
+        assertTrue(result.getFeatures().getUseSharedAltusCredential().getEnabled());
+        assertTrue(result.getFeatures().getMonitoring().getEnabled());
+        assertTrue(result.getFeatures().getCloudStorageLogging().getEnabled());
     }
 
     @Test
@@ -119,7 +119,7 @@ public class TelemetryApiConverterTest {
         // WHEN
         EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
         // THEN
-        assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
+        assertTrue(result.getFeatures().getWorkloadAnalytics().getEnabled());
     }
 
     @Test
@@ -145,7 +145,7 @@ public class TelemetryApiConverterTest {
         // WHEN
         EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
         // THEN
-        assertTrue(result.getFeatures().getMonitoring().isEnabled());
+        assertTrue(result.getFeatures().getMonitoring().getEnabled());
         assertNull(result.getMonitoring().getRemoteWriteUrl());
     }
 
@@ -160,7 +160,7 @@ public class TelemetryApiConverterTest {
         // WHEN
         EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
         // THEN
-        assertFalse(result.getFeatures().getMonitoring().isEnabled());
+        assertFalse(result.getFeatures().getMonitoring().getEnabled());
         assertNotNull(result.getMonitoring().getRemoteWriteUrl());
     }
 
@@ -174,7 +174,7 @@ public class TelemetryApiConverterTest {
         // WHEN
         EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
         // THEN
-        assertFalse(result.getFeatures().getWorkloadAnalytics().isEnabled());
+        assertFalse(result.getFeatures().getWorkloadAnalytics().getEnabled());
     }
 
     @Test
@@ -226,8 +226,8 @@ public class TelemetryApiConverterTest {
         TelemetryRequest result = underTest.convertToRequest(telemetry);
         // THEN
         assertNotNull(result.getFeatures());
-        assertFalse(result.getFeatures().getClusterLogsCollection().isEnabled());
-        assertTrue(result.getFeatures().getMonitoring().isEnabled());
+        assertFalse(result.getFeatures().getClusterLogsCollection().getEnabled());
+        assertTrue(result.getFeatures().getMonitoring().getEnabled());
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
     }
 

@@ -54,7 +54,7 @@ public class AwsEnvironmentParametersConverter extends BaseEnvironmentParameters
     protected void postConvertToDto(Builder builder, BaseParameters source) {
         super.postConvertToDto(builder, source);
         AwsParameters awsParameters = (AwsParameters) source;
-        builder.withAwsParameters(AwsParametersDto.builder()
+        builder.withAwsParametersDto(AwsParametersDto.builder()
                 .withDynamoDbTableName(awsParameters.getS3guardTableName())
                 .withDynamoDbTableCreation(awsParameters.getS3guardTableCreation())
                 .withFreeIpaSpotPercentage(awsParameters.getFreeIpaSpotPercentage())

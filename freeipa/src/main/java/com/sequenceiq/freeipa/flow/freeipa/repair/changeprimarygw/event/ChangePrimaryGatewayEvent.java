@@ -44,7 +44,7 @@ public class ChangePrimaryGatewayEvent extends StackEvent {
         return repairInstanceIds;
     }
 
-    public Boolean isFinalChain() {
+    public Boolean getFinalChain() {
         return finalChain;
     }
 

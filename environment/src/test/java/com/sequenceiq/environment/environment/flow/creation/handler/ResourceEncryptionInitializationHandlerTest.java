@@ -95,7 +95,7 @@ class ResourceEncryptionInitializationHandlerTest {
                 .withName(ENVIRONMENT_NAME)
                 .withCloudPlatform("AZURE")
                 .withParameters(ParametersDto.builder()
-                        .withAzureParameters(AzureParametersDto.builder()
+                        .withAzureParametersDto(AzureParametersDto.builder()
                                 .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
                                         .withEncryptionKeyUrl("dummy-key-url")
                                         .build())

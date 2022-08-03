@@ -113,7 +113,7 @@ public class CmDiagnosticsParameters implements Serializable {
         this.clusterName = clusterName;
     }
 
-    public Boolean isEnableMonitorMetricsCollection() {
+    public Boolean getEnableMonitorMetricsCollection() {
         return enableMonitorMetricsCollection;
     }
 
@@ -193,7 +193,7 @@ public class CmDiagnosticsParameters implements Serializable {
         this.gcsLocation = gcsLocation;
     }
 
-    public Boolean isUpdatePackage() {
+    public Boolean getUpdatePackage() {
         return updatePackage;
     }
 
@@ -201,7 +201,7 @@ public class CmDiagnosticsParameters implements Serializable {
         this.updatePackage = updatePackage;
     }
 
-    public Boolean isSkipValidation() {
+    public Boolean getSkipValidation() {
         return skipValidation;
     }
 

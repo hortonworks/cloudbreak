@@ -57,7 +57,7 @@ class AwsEnvironmentParametersConverterTest {
         when(environmentViewConverter.convert(any(Environment.class))).thenReturn(ENVIRONMENT_VIEW);
         ParametersDto parameters = ParametersDto.builder()
                                 .withId(ID)
-                                .withAwsParameters(AwsParametersDto.builder()
+                                .withAwsParametersDto(AwsParametersDto.builder()
                                     .withDynamoDbTableName(TABLE_NAME)
                                     .withDynamoDbTableCreation(S3GuardTableCreation.CREATE_NEW)
                                     .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()

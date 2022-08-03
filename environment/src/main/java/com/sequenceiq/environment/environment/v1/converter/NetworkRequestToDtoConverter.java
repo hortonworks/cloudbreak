@@ -103,7 +103,7 @@ public class NetworkRequestToDtoConverter {
                 .withPrivateSubnetCreation(getPrivateSubnetCreation(network))
                 .withServiceEndpointCreation(getServiceEndpointCreation(network))
                 .withOutboundInternetTraffic(getOutboundInternetTraffic(network))
-                .withUsePublicEndpointAccessGateway(getUsePublicEndpointAccessGateway(network))
+                .withPublicEndpointAccessGateway(getUsePublicEndpointAccessGateway(network))
                 .withLoadBalancerCreation(getLoadBalancerCreation(network))
                 .build();
     }

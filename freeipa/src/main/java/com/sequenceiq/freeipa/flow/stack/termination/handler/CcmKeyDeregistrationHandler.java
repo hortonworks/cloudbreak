@@ -51,7 +51,7 @@ public class CcmKeyDeregistrationHandler implements EventHandler<CcmKeyDeregistr
             LOGGER.warn("CCM key de-registration failed", ex);
         }
 
-        Selectable result = new CcmKeyDeregistrationFinished(request.getResourceId(), request.isForced());
+        Selectable result = new CcmKeyDeregistrationFinished(request.getResourceId(), request.getForced());
         eventBus.notify(result.selector(), new Event<>(requestEvent.getHeaders(), result));
     }
 

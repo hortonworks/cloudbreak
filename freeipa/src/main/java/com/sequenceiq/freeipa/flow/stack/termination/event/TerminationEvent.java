@@ -21,7 +21,7 @@ public class TerminationEvent extends StackEvent {
         this.forced = forced;
     }
 
-    public Boolean isForced() {
+    public Boolean getForced() {
         return forced;
     }
 

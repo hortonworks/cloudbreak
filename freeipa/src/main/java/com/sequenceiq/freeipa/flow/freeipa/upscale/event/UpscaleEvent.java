@@ -39,7 +39,7 @@ public class UpscaleEvent extends StackEvent {
         return instanceCountByGroup;
     }
 
-    public Boolean isRepair() {
+    public Boolean getRepair() {
         return repair;
     }
 

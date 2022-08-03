@@ -248,7 +248,7 @@ class EnvironmentModificationServiceTest {
         EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
                 .withAccountId(ACCOUNT_ID)
                 .withParameters(ParametersDto.builder()
-                        .withAwsParameters(AwsParametersDto.builder()
+                        .withAwsParametersDto(AwsParametersDto.builder()
                                 .withFreeIpaSpotPercentage(50)
                                 .build())
                         .build())
@@ -288,7 +288,7 @@ class EnvironmentModificationServiceTest {
         String dynamotable = "dynamotable";
         ParametersDto parameters = ParametersDto.builder()
                 .withAccountId(ACCOUNT_ID)
-                .withAwsParameters(AwsParametersDto.builder()
+                .withAwsParametersDto(AwsParametersDto.builder()
                         .withDynamoDbTableName(dynamotable)
                         .build())
                 .build();
@@ -315,7 +315,7 @@ class EnvironmentModificationServiceTest {
         String dynamotable = "dynamotable";
         ParametersDto parameters = ParametersDto.builder()
                 .withAccountId(ACCOUNT_ID)
-                .withAwsParameters(AwsParametersDto.builder()
+                .withAwsParametersDto(AwsParametersDto.builder()
                         .withDynamoDbTableName(dynamotable)
                         .build())
                 .build();
@@ -347,7 +347,7 @@ class EnvironmentModificationServiceTest {
         String dynamotable = "dynamotable";
         ParametersDto parameters = ParametersDto.builder()
                 .withAccountId(ACCOUNT_ID)
-                .withAwsParameters(AwsParametersDto.builder()
+                .withAwsParametersDto(AwsParametersDto.builder()
                         .withDynamoDbTableName(dynamotable)
                         .build())
                 .build();
@@ -377,7 +377,7 @@ class EnvironmentModificationServiceTest {
     void testEditByNameGcpEncryptionResourcesThrowsErrorWhenKeyValidationFails() {
         ParametersDto parameters = ParametersDto.builder()
                 .withAccountId(ACCOUNT_ID)
-                .withGcpParameters(GcpParametersDto.builder()
+                .withGcpParametersDto(GcpParametersDto.builder()
                         .withEncryptionParameters(GcpResourceEncryptionParametersDto.builder()
                                 .withEncryptionKey("dummyEncryptionKey")
                                 .build())
@@ -406,7 +406,7 @@ class EnvironmentModificationServiceTest {
     void testEditByNameGcpEncryptionResourcesWhenKeyValidationPass() {
         ParametersDto parameters = ParametersDto.builder()
                 .withAccountId(ACCOUNT_ID)
-                .withGcpParameters(GcpParametersDto.builder()
+                .withGcpParametersDto(GcpParametersDto.builder()
                         .withEncryptionParameters(GcpResourceEncryptionParametersDto.builder()
                                 .withEncryptionKey("dummyEncryptionKey")
                                 .build())
@@ -675,7 +675,7 @@ class EnvironmentModificationServiceTest {
         environmentModificationServiceUnderTest.changeTelemetryFeaturesByEnvironmentName(accountId, envName, featuresInput);
 
         verify(environmentService).save(any());
-        assertTrue(environment.getTelemetry().getFeatures().getClusterLogsCollection().isEnabled());
+        assertTrue(environment.getTelemetry().getFeatures().getClusterLogsCollection().getEnabled());
     }
 
     @Test
@@ -695,8 +695,8 @@ class EnvironmentModificationServiceTest {
         environmentModificationServiceUnderTest.changeTelemetryFeaturesByEnvironmentCrn(accountId, envCrn, featuresInput);
 
         verify(environmentService).save(any());
-        assertFalse(environment.getTelemetry().getFeatures().getCloudStorageLogging().isEnabled());
-        assertTrue(environment.getTelemetry().getFeatures().getClusterLogsCollection().isEnabled());
+        assertFalse(environment.getTelemetry().getFeatures().getCloudStorageLogging().getEnabled());
+        assertTrue(environment.getTelemetry().getFeatures().getClusterLogsCollection().getEnabled());
     }
 
     @Test

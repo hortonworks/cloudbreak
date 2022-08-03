@@ -71,7 +71,7 @@ class CredentialViewConverterTest {
         assertEquals(DESCRIPTION, result.getDescription());
         assertEquals(VERIFICATION_STATUS_TEXT, result.getVerificationStatusText());
         assertEquals(CredentialType.ENVIRONMENT, result.getType());
-        assertTrue(result.isGovCloud());
+        assertTrue(result.getGovCloud());
     }
 
     @Test

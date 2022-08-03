@@ -537,7 +537,7 @@ public class AzureParameterValidatorTest {
         private final Builder parametersDtoBuilder = ParametersDto.builder();
 
         public EnvironmentDtoBuilder withAzureParameters(AzureParametersDto azureParametersDto) {
-            parametersDtoBuilder.withAzureParameters(azureParametersDto);
+            parametersDtoBuilder.withAzureParametersDto(azureParametersDto);
             return this;
         }
 

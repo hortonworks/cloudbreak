@@ -104,7 +104,7 @@ public class StackToCreateFreeIpaRequestConverter implements Converter<Stack, Cr
         request.setTelemetry(getTelemetry(source));
         request.setBackup(getBackup(source));
         request.setTags(getTags(source.getTags()));
-        request.setUseCcm(source.isUseCcm());
+        request.setUseCcm(source.getUseCcm());
         request.setTunnel(source.getTunnel());
         request.setVariant(source.getPlatformvariant());
 

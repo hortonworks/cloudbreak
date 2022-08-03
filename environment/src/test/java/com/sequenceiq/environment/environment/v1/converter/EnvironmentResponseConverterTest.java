@@ -317,10 +317,10 @@ public class EnvironmentResponseConverterTest {
 
     private ParametersDto createAzureParameters() {
         return ParametersDto.builder()
-                .withAwsParameters(AwsParametersDto.builder()
+                .withAwsParametersDto(AwsParametersDto.builder()
                         .withDynamoDbTableName("my-table")
                         .build())
-                .withAzureParameters(AzureParametersDto.builder()
+                .withAzureParametersDto(AzureParametersDto.builder()
                         .withResourceGroup(
                                 AzureResourceGroupDto.builder()
                                         .withName("my-resource-group-name")
@@ -339,7 +339,7 @@ public class EnvironmentResponseConverterTest {
 
     private ParametersDto createGcpParameters() {
         return ParametersDto.builder()
-                .withGcpParameters(GcpParametersDto.builder()
+                .withGcpParametersDto(GcpParametersDto.builder()
                         .withEncryptionParameters(
                                 GcpResourceEncryptionParametersDto.builder()
                                         .withEncryptionKey("dummy-encryption-key")
@@ -350,10 +350,10 @@ public class EnvironmentResponseConverterTest {
 
     private ParametersDto createAwsParameters() {
         return ParametersDto.builder()
-                .withAwsParameters(AwsParametersDto.builder()
+                .withAwsParametersDto(AwsParametersDto.builder()
                         .withDynamoDbTableName("my-table")
                         .build())
-                .withAwsParameters(AwsParametersDto.builder()
+                .withAwsParametersDto(AwsParametersDto.builder()
                         .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
                                 .withEncryptionKeyArn("dummy-key-arn")
                         .build())

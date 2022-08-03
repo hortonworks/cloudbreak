@@ -45,7 +45,7 @@ public class AwsCredentialParameters implements Serializable {
         this.roleBased = roleBased;
     }
 
-    public boolean getGovCloud() {
+    public Boolean getGovCloud() {
         return govCloud;
     }
 

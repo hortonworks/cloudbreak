@@ -2,6 +2,10 @@ package com.sequenceiq.environment.environment.dto;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+@JsonDeserialize(builder = FreeIpaCreationDto.Builder.class)
 public class FreeIpaCreationDto {
 
     private boolean create = true;
@@ -35,7 +39,7 @@ public class FreeIpaCreationDto {
         this.create = create;
     }
 
-    public boolean getCreate() {
+    public boolean isCreate() {
         return create;
     }
 
@@ -113,6 +117,7 @@ public class FreeIpaCreationDto {
         return new Builder();
     }
 
+    @JsonPOJOBuilder
     public static class Builder {
 
         private boolean create = true;

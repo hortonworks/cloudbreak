@@ -107,7 +107,7 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
         NetworkDto networkDto = NetworkDto.builder()
                 .withRegistrationType(RegistrationType.EXISTING)
                 .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED)
-                .withUsePublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED)
+                .withPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED)
                 .build();
 
         when(environmentDetails.getNetwork()).thenReturn(networkDto);

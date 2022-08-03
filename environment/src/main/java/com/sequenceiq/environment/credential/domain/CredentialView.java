@@ -90,7 +90,7 @@ public class CredentialView implements Serializable, AuthResource, AccountIdAwar
         this.cloudPlatform = cloudPlatform;
     }
 
-    public Boolean isGovCloud() {
+    public Boolean getGovCloud() {
         return govCloud;
     }
 

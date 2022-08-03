@@ -61,7 +61,7 @@ public class OperationService {
     private void handleProvisionOperation(String resourceCrn, OperationView response, boolean detailed) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto envDto = environmentService.getByCrnAndAccountId(resourceCrn, accountId);
-        boolean needsFreeipa = envDto.getFreeIpaCreation().getCreate();
+        boolean needsFreeipa = envDto.getFreeIpaCreation().isCreate();
         if (needsFreeipa) {
             Optional<OperationView> freeIpaFlows = freeIpaService.getFreeIpaOperation(resourceCrn, detailed);
             response.setSubOperationConditions(Map.of(OperationResource.FREEIPA, OperationCondition.REQUIRED));

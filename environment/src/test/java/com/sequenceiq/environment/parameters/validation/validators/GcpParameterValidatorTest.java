@@ -108,7 +108,7 @@ public class GcpParameterValidatorTest {
         private final Builder parametersDtoBuilder = ParametersDto.builder();
 
         public EnvironmentDtoBuilder withGcpParameters(GcpParametersDto gcpParametersDto) {
-            parametersDtoBuilder.withGcpParameters(gcpParametersDto);
+            parametersDtoBuilder.withGcpParametersDto(gcpParametersDto);
             return this;
         }
 

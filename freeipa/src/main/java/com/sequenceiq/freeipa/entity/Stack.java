@@ -223,7 +223,7 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         this.gatewayport = gatewayport;
     }
 
-    public boolean isUseCcm() {
+    public Boolean getUseCcm() {
         return Boolean.TRUE.equals(useCcm);
     }
 
@@ -239,7 +239,7 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         this.tunnel = tunnel;
     }
 
-    public boolean isClusterProxyRegistered() {
+    public Boolean getClusterProxyRegistered() {
         return Boolean.TRUE.equals(clusterProxyRegistered);
     }
 

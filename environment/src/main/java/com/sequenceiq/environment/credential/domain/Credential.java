@@ -135,7 +135,7 @@ public class Credential implements Serializable, AuthResource, AccountAwareResou
         this.attributes = attributes;
     }
 
-    public Boolean isGovCloud() {
+    public Boolean getGovCloud() {
         return govCloud;
     }
 

@@ -237,7 +237,7 @@ class EnvironmentCreationServiceTest {
 
     @Test
     void testCreateAzureDisabled() {
-        ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
         final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
                 .withCloudPlatform("AZURE")
@@ -280,7 +280,7 @@ class EnvironmentCreationServiceTest {
 
     @Test
     void testCreate() {
-        ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
         String environmentCrn = "crn";
         final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
@@ -325,7 +325,7 @@ class EnvironmentCreationServiceTest {
     @Test
     void testRecipeValidated() {
         Set<String> recipes = Set.of("recipe1", "recipe2");
-        ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
         String environmentCrn = "crn";
         final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
@@ -371,7 +371,7 @@ class EnvironmentCreationServiceTest {
 
     @Test
     void testCreateWithParentEnvironment() {
-        ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
         final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
                 .withCreator(CRN)
@@ -427,7 +427,7 @@ class EnvironmentCreationServiceTest {
 
     @Test
     void testCreationVerificationError() {
-        ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
         final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
                 .withAccountId(ACCOUNT_ID)
@@ -473,7 +473,7 @@ class EnvironmentCreationServiceTest {
 
     @Test
     void testParameterVerificationError() {
-        ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
         final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
                 .withAccountId(ACCOUNT_ID)
@@ -561,7 +561,7 @@ class EnvironmentCreationServiceTest {
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
                 .withParameters(ParametersDto.builder()
-                        .withAwsParameters(AwsParametersDto.builder()
+                        .withAwsParametersDto(AwsParametersDto.builder()
                                 .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
                                         .withEncryptionKeyArn("dummy-key-arn")
                                         .build())
@@ -600,7 +600,7 @@ class EnvironmentCreationServiceTest {
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
                 .withParameters(ParametersDto.builder()
-                        .withAzureParameters(AzureParametersDto.builder()
+                        .withAzureParametersDto(AzureParametersDto.builder()
                                 .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
                                         .withEncryptionKeyUrl("dummy-key-url")
                                         .build())

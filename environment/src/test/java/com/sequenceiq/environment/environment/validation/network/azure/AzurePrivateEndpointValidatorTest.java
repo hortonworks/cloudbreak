@@ -274,7 +274,7 @@ public class AzurePrivateEndpointValidatorTest {
     private EnvironmentDto getEnvironmentDto(String name, ResourceGroupUsagePattern resourceGroupUsagePattern) {
         return EnvironmentDto.builder()
                 .withParameters(ParametersDto.builder()
-                        .withAzureParameters(
+                        .withAzureParametersDto(
                                 AzureParametersDto.builder()
                                         .withResourceGroup(AzureResourceGroupDto.builder()
                                                 .withName(name)

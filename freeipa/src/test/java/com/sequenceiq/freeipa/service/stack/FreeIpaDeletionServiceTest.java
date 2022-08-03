@@ -110,7 +110,7 @@ class FreeIpaDeletionServiceTest {
         assertAll(
                 () -> assertEquals(TERMINATION_EVENT.event(), terminationEventArgumentCaptor.getValue().selector()),
                 () -> assertEquals(STACK_ID, terminationEventArgumentCaptor.getValue().getResourceId()),
-                () -> assertFalse(terminationEventArgumentCaptor.getValue().isForced())
+                () -> assertFalse(terminationEventArgumentCaptor.getValue().getForced())
         );
     }
 

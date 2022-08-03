@@ -318,7 +318,7 @@ class AzureEnvironmentNetworkValidatorTest {
                 .withValidationType(ValidationType.ENVIRONMENT_CREATION)
                 .withEnvironmentDto(EnvironmentDto.builder()
                         .withParameters(ParametersDto.builder()
-                                .withAzureParameters(
+                                .withAzureParametersDto(
                                         AzureParametersDto.builder()
                                                 .withResourceGroup(AzureResourceGroupDto.builder()
                                                         .withName(name)

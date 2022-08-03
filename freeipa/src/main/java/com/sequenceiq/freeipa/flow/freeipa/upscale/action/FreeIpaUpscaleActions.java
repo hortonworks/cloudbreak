@@ -149,7 +149,7 @@ public class FreeIpaUpscaleActions {
                 String operationId = payload.getOperationId();
                 setOperationId(variables, operationId);
                 setInstanceCountByGroup(variables, payload.getInstanceCountByGroup());
-                setRepair(variables, payload.isRepair());
+                setRepair(variables, payload.getRepair());
                 setChainedAction(variables, payload.isChained());
                 setFinalChain(variables, payload.isFinalChain());
                 LOGGER.info("Starting upscale {}", payload);

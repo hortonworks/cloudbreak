@@ -285,31 +285,31 @@ public class DiagnosticParameters {
         return additionalLogs;
     }
 
-    public Boolean isIncludeSaltLogs() {
+    public Boolean getIncludeSaltLogs() {
         return includeSaltLogs;
     }
 
-    public Boolean isIncludeSarOutput() {
+    public Boolean getIncludeSarOutput() {
         return includeSarOutput;
     }
 
-    public Boolean isIncludeNginxReport() {
+    public Boolean getIncludeNginxReport() {
         return includeNginxReport;
     }
 
-    public Boolean isUpdatePackage() {
+    public Boolean getUpdatePackage() {
         return updatePackage;
     }
 
-    public Boolean isSkipValidation() {
+    public Boolean getSkipValidation() {
         return skipValidation;
     }
 
-    public Boolean isSkipUnresponsiveHosts() {
+    public Boolean getSkipUnresponsiveHosts() {
         return skipUnresponsiveHosts;
     }
 
-    public Boolean isSkipWorkspaceCleanupOnStartup() {
+    public Boolean getSkipWorkspaceCleanupOnStartup() {
         return skipWorkspaceCleanupOnStartup;
     }
 

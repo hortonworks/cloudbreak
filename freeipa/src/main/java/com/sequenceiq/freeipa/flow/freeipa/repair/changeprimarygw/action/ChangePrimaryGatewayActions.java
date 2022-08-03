@@ -66,7 +66,7 @@ public class ChangePrimaryGatewayActions {
                 String operationId = payload.getOperationId();
                 setOperationId(variables, operationId);
                 setInstanceIds(variables, payload.getRepairInstanceIds());
-                setFinalChain(variables, payload.isFinalChain());
+                setFinalChain(variables, payload.getFinalChain());
                 LOGGER.info("Starting to change the primary gateway {}", payload);
                 stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_IN_PROGRESS, "Starting to change the primary gateway");
                 sendEvent(context, CHANGE_PRIMARY_GATEWAY_STARTING_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
