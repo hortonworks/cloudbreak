@@ -918,6 +918,9 @@ existing-stack-patcher:
       date-before: 2022-01-18
     logging-agent-auto-restart-v2:
       enabled: false
+    disable-region-for-fluentd:
+      enabled: true
+      affected-version-from: 0.2.16
     metering-azure-metadata:
       enabled: false
       date-before: 2022-01-18
