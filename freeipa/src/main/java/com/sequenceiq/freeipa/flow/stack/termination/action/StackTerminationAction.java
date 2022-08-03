@@ -24,7 +24,7 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Termi
 
     @Override
     protected void prepareExecution(TerminationEvent payload, Map<Object, Object> variables) {
-        variables.put("FORCEDTERMINATION", payload.isForced());
+        variables.put("FORCEDTERMINATION", payload.getForced());
     }
 
     @Override

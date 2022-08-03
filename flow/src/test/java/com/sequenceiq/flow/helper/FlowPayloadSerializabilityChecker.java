@@ -77,19 +77,21 @@ public class FlowPayloadSerializabilityChecker {
         boolean hasDeserializeAttributeWithBuilder = checkJacksonDeserializeAnnotationForBuilder(clazz);
         checkMissingGetters(clazz);
         checkMissingSetters(clazz);
-        checkSoloBuilder(clazz, constructors);
         boolean hasDefaultConstructor = hasDefaultConstructor(constructors);
         if (hasDefaultConstructor) {
             checkPrivateFields(clazz);
         }
-        if (!hasDeserializeAttributeWithBuilder && !hasDefaultConstructor) {
-            checkJacksonCreatorAnnotation(clazz, constructors);
+        if (!hasDeserializeAttributeWithBuilder) {
+            checkSoloBuilder(clazz, constructors);
+            if (!hasDefaultConstructor) {
+                checkJacksonCreatorAnnotation(clazz, constructors);
+            }
         }
         checkParameters(clazz, constructors);
     }
 
     private void checkPrivateFields(Class<?> clazz) {
-        for (Field f : clazz.getDeclaredFields()) {
+        for (Field f : getInheritedDeclaredFields(clazz)) {
             if (!Modifier.isFinal(f.getModifiers())) {
                 checkClassRecursive(clazz, f.getGenericType());
             }
@@ -300,7 +302,7 @@ public class FlowPayloadSerializabilityChecker {
     }
 
     private boolean isBooleanType(Class<?> clazz) {
-        return clazz.equals(boolean.class) || clazz.equals(Boolean.class);
+        return clazz.equals(boolean.class);
     }
 
     private boolean isGetterForFieldPresent(Class<?> clazz, String fieldName, boolean booleanField) {
@@ -364,5 +366,15 @@ public class FlowPayloadSerializabilityChecker {
         return String.format("%s%s", content, CollectionUtils.isEmpty(parentClasses)
                 ? StringUtils.EMPTY
                 : String.format(" Parent classes: %s", parentClasses));
+    }
+
+    List<Field> getInheritedDeclaredFields(Class<?> fromClass) {
+        Class<?> currentClass = fromClass;
+        List<Field> fields = new ArrayList<>();
+        do {
+            fields.addAll(Arrays.asList(currentClass.getDeclaredFields()));
+            currentClass = currentClass.getSuperclass();
+        } while (currentClass != null && currentClass.getPackageName().startsWith(BASE_PACKAGE));
+        return fields;
     }
 }

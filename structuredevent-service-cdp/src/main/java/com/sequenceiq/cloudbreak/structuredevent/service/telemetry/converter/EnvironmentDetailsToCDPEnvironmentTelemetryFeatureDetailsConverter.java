@@ -19,11 +19,11 @@ public class EnvironmentDetailsToCDPEnvironmentTelemetryFeatureDetailsConverter 
 
         if (environmentDetails != null && environmentDetails.getEnvironmentTelemetryFeatures() != null) {
             EnvironmentFeatures environmentFeatures = environmentDetails.getEnvironmentTelemetryFeatures();
-            if (environmentFeatures.getWorkloadAnalytics() != null && environmentFeatures.getWorkloadAnalytics().isEnabled() != null) {
-                cdpTelemetryFeatureDetailsBuilder.setWorkloadAnalytics(environmentFeatures.getWorkloadAnalytics().isEnabled().toString());
+            if (environmentFeatures.getWorkloadAnalytics() != null && environmentFeatures.getWorkloadAnalytics().getEnabled() != null) {
+                cdpTelemetryFeatureDetailsBuilder.setWorkloadAnalytics(environmentFeatures.getWorkloadAnalytics().getEnabled().toString());
             }
-            if (environmentFeatures.getClusterLogsCollection() != null && environmentFeatures.getClusterLogsCollection().isEnabled() != null) {
-                cdpTelemetryFeatureDetailsBuilder.setClusterLogsCollection(environmentFeatures.getClusterLogsCollection().isEnabled().toString());
+            if (environmentFeatures.getClusterLogsCollection() != null && environmentFeatures.getClusterLogsCollection().getEnabled() != null) {
+                cdpTelemetryFeatureDetailsBuilder.setClusterLogsCollection(environmentFeatures.getClusterLogsCollection().getEnabled().toString());
             }
         }
 

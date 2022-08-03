@@ -42,7 +42,7 @@ public class GcpEnvironmentParametersConverter extends BaseEnvironmentParameters
     protected void postConvertToDto(Builder builder, BaseParameters source) {
         super.postConvertToDto(builder, source);
         GcpParameters gcpParameters = (GcpParameters) source;
-        builder.withGcpParameters(GcpParametersDto.builder()
+        builder.withGcpParametersDto(GcpParametersDto.builder()
                 .withEncryptionParameters(
                         GcpResourceEncryptionParametersDto.builder()
                                 .withEncryptionKey(gcpParameters.getEncryptionKey())

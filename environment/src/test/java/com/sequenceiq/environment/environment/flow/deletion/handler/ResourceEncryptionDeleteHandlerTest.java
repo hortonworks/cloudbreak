@@ -90,7 +90,7 @@ class ResourceEncryptionDeleteHandlerTest {
                 .withName(ENVIRONMENT_NAME)
                 .withCloudPlatform("AZURE")
                 .withParameters(ParametersDto.builder()
-                        .withAzureParameters(AzureParametersDto.builder()
+                        .withAzureParametersDto(AzureParametersDto.builder()
                                 .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
                                         .withDiskEncryptionSetId("/subscriptions/dummySubscriptionId/resourceGroups/dummyResourceGroup/" +
                                                 "providers/Microsoft.Compute/diskEncryptionSets/dummyDesId")

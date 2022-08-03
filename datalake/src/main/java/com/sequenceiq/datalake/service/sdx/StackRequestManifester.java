@@ -464,7 +464,7 @@ public class StackRequestManifester {
     }
 
     private void setupGovCloud(SdxCluster sdxCluster, DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
-        if (environment.getCredential().isGovCloud()) {
+        if (environment.getCredential().getGovCloud()) {
             stackRequest.setVariant("AWS_NATIVE_GOV");
         }
     }

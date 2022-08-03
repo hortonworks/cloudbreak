@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.environment.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+@JsonDeserialize(builder = AuthenticationDto.Builder.class)
 public class AuthenticationDto {
 
     private final String publicKey;
@@ -47,6 +51,7 @@ public class AuthenticationDto {
                 '}';
     }
 
+    @JsonPOJOBuilder
     public static final class Builder {
 
         private String loginUserName;

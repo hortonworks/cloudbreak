@@ -152,7 +152,7 @@ public class AccountTelemetryServiceTest {
             testPatternWithOutput(rule, "- FPW: secret", "FPW");
             testPatternWithOutput(rule, "cdpHashedPassword='{SHA512}abcdef'", "[CDP");
         }
-        assertThat(result.getFeatures().getClusterLogsCollection().isEnabled()).isEqualTo(false);
+        assertThat(result.getFeatures().getClusterLogsCollection().getEnabled()).isEqualTo(false);
     }
 
     private void testPatternWithOutput(AnonymizationRule rule, String input, String startsWith) {

@@ -216,7 +216,7 @@ class EnvironmentDtoConverterTest {
         assertEquals("imagecatalog", freeIpaCreation.getImageCatalog());
         assertEquals(1, freeIpaCreation.getInstanceCountByGroup());
         assertTrue(freeIpaCreation.isEnableMultiAz());
-        assertTrue(freeIpaCreation.getCreate());
+        assertTrue(freeIpaCreation.isCreate());
         assertNull(freeIpaCreation.getAws());
         assertThat(freeIpaCreation.getRecipes()).containsExactlyInAnyOrder("recipe1", "recipe2");
     }
@@ -318,7 +318,7 @@ class EnvironmentDtoConverterTest {
 
         FreeIpaCreationDto freeIpaCreationDto = result.getFreeIpaCreation();
         assertThat(freeIpaCreationDto).isNotNull();
-        assertThat(freeIpaCreationDto.getCreate()).isEqualTo(CREATE_FREE_IPA);
+        assertThat(freeIpaCreationDto.isCreate()).isEqualTo(CREATE_FREE_IPA);
         assertThat(freeIpaCreationDto.getInstanceCountByGroup()).isEqualTo(FREE_IPA_INSTANCE_COUNT_BY_GROUP);
         assertThat(freeIpaCreationDto.getInstanceType()).isEqualTo(FREE_IPA_INSTANCE_TYPE);
         assertThat(freeIpaCreationDto.isEnableMultiAz()).isEqualTo(FREE_IPA_ENABLE_MULTI_AZ);
@@ -529,7 +529,7 @@ class EnvironmentDtoConverterTest {
 
         FreeIpaCreationDto freeIpaCreationDto = result.getFreeIpaCreation();
         assertThat(freeIpaCreationDto).isNotNull();
-        assertThat(freeIpaCreationDto.getCreate()).isEqualTo(CREATE_FREE_IPA);
+        assertThat(freeIpaCreationDto.isCreate()).isEqualTo(CREATE_FREE_IPA);
         assertThat(freeIpaCreationDto.getInstanceCountByGroup()).isEqualTo(FREE_IPA_INSTANCE_COUNT_BY_GROUP);
         assertThat(freeIpaCreationDto.getInstanceType()).isEqualTo(FREE_IPA_INSTANCE_TYPE);
         assertThat(freeIpaCreationDto.isEnableMultiAz()).isEqualTo(FREE_IPA_ENABLE_MULTI_AZ);

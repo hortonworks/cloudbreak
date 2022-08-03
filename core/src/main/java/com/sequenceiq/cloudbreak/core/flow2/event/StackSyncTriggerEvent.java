@@ -29,7 +29,7 @@ public class StackSyncTriggerEvent extends StackEvent {
         this.statusUpdateEnabled = statusUpdateEnabled;
     }
 
-    public Boolean isStatusUpdateEnabled() {
+    public Boolean getStatusUpdateEnabled() {
         return statusUpdateEnabled;
     }
 

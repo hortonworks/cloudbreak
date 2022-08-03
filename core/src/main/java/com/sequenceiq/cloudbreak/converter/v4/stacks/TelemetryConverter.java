@@ -198,7 +198,7 @@ public class TelemetryConverter {
         WorkloadAnalyticsRequest workloadAnalyticsRequest = null;
         if (response != null && response.getFeatures() != null
                 && response.getFeatures().getWorkloadAnalytics() != null) {
-            if (response.getFeatures().getWorkloadAnalytics().isEnabled()) {
+            if (response.getFeatures().getWorkloadAnalytics().getEnabled()) {
                 LOGGER.debug("Workload analytics feature is enabled. Filling telemetry request with datalake details.");
                 workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
                 workloadAnalyticsRequest.setAttributes(enrichWithSdxData(waDefaultAttributes, sdxClusterResponse));

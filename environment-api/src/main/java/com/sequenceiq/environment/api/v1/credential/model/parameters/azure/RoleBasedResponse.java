@@ -42,7 +42,7 @@ public class RoleBasedResponse implements Serializable {
         this.spDisplayName = spDisplayName;
     }
 
-    public Boolean isCodeGrantFlow() {
+    public Boolean getCodeGrantFlow() {
         return codeGrantFlow;
     }
 

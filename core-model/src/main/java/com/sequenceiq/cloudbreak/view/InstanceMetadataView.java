@@ -1,15 +1,16 @@
 package com.sequenceiq.cloudbreak.view;
 
-import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS;
-
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceLifeCycle;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@JsonTypeInfo(use = CLASS, property = "@type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
+@JsonSubTypes(@JsonSubTypes.Type(value = InstanceMetaData.class, name = "instanceMetaData"))
 public interface InstanceMetadataView {
 
     Long getId();

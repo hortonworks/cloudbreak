@@ -67,9 +67,9 @@ public class TelemetryConverterTest {
         Telemetry result = underTest.convert(telemetryRequest);
         // THEN
         assertThat(result.getFeatures().getWorkloadAnalytics(), nullValue());
-        assertThat(result.getFeatures().getClusterLogsCollection().isEnabled(), is(false));
-        assertThat(result.getFeatures().getCloudStorageLogging().isEnabled(), is(true));
-        assertThat(result.getFeatures().getMonitoring().isEnabled(), is(true));
+        assertThat(result.getFeatures().getClusterLogsCollection().getEnabled(), is(false));
+        assertThat(result.getFeatures().getCloudStorageLogging().getEnabled(), is(true));
+        assertThat(result.getFeatures().getMonitoring().getEnabled(), is(true));
         assertThat(result.getDatabusEndpoint(), is(DATABUS_ENDPOINT));
         assertThat(result.getMonitoring().getRemoteWriteUrl(), is(MONITORING_REMOTE_WRITE_URL));
     }
@@ -108,7 +108,7 @@ public class TelemetryConverterTest {
         Telemetry result = underTest.convert(telemetryRequest);
         // THEN
         assertThat(result.getFeatures().getWorkloadAnalytics(), nullValue());
-        assertThat(result.getFeatures().getClusterLogsCollection().isEnabled(), is(false));
+        assertThat(result.getFeatures().getClusterLogsCollection().getEnabled(), is(false));
         assertThat(result.getDatabusEndpoint(), is(DATABUS_ENDPOINT));
         assertThat(result.getLogging().getGcs(), notNullValue());
         assertThat(result.getLogging().getGcs().getServiceAccountEmail(), is(EMAIL));

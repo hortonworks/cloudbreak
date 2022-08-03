@@ -212,7 +212,7 @@ public class ClusterProxyService {
     }
 
     public boolean isCreateConfigForClusterProxy(Stack stack) {
-        return useClusterProxyForCommunication(stack) && stack.isClusterProxyRegistered();
+        return useClusterProxyForCommunication(stack) && stack.getClusterProxyRegistered();
     }
 
     public void deregisterFreeIpa(String accountId, String environmentCrn) {

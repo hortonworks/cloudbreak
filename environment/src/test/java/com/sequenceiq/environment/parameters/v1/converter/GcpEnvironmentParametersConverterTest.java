@@ -53,7 +53,7 @@ class GcpEnvironmentParametersConverterTest {
         when(environmentViewConverter.convert(any(Environment.class))).thenReturn(ENVIRONMENT_VIEW);
         ParametersDto parameters = ParametersDto.builder()
                 .withId(ID)
-                .withGcpParameters(GcpParametersDto.builder()
+                .withGcpParametersDto(GcpParametersDto.builder()
                         .withEncryptionParameters(GcpResourceEncryptionParametersDto.builder()
                                 .withEncryptionKey(ENCRYPTION_KEY)
                                 .build())

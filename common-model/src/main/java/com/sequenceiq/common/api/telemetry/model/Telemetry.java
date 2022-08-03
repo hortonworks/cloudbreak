@@ -97,19 +97,19 @@ public class Telemetry implements Serializable {
     @JsonIgnore
     public boolean isMeteringFeatureEnabled() {
         return features != null && features.getMetering() != null
-                && features.getMetering().isEnabled();
+                && features.getMetering().getEnabled();
     }
 
     @JsonIgnore
     public boolean isMonitoringFeatureEnabled() {
         return features == null || (features.getMonitoring() != null
-                && features.getMonitoring().isEnabled());
+                && features.getMonitoring().getEnabled());
     }
 
     @JsonIgnore
     public boolean isClusterLogsCollectionEnabled() {
         return features != null && features.getClusterLogsCollection() != null
-                && features.getClusterLogsCollection().isEnabled();
+                && features.getClusterLogsCollection().getEnabled();
     }
 
     @JsonIgnore
@@ -120,7 +120,7 @@ public class Telemetry implements Serializable {
     @JsonIgnore
     public boolean isUseSharedAltusCredentialEnabled() {
         return features != null && features.getUseSharedAltusCredential() != null
-                && features.getUseSharedAltusCredential().isEnabled();
+                && features.getUseSharedAltusCredential().getEnabled();
     }
 
     @JsonIgnore
@@ -131,7 +131,7 @@ public class Telemetry implements Serializable {
     @JsonIgnore
     public boolean isCloudStorageLoggingEnabled() {
         return features == null || (features.getCloudStorageLogging() != null
-                && features.getCloudStorageLogging().isEnabled());
+                && features.getCloudStorageLogging().getEnabled());
     }
 
 }

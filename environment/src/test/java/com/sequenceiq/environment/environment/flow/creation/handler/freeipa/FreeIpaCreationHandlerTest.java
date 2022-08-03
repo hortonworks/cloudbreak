@@ -214,7 +214,7 @@ public class FreeIpaCreationHandlerTest {
         Environment environment = mock(Environment.class);
 
         when(environment.getCloudPlatform()).thenReturn(environmentDto.getCloudPlatform());
-        when(environment.isCreateFreeIpa()).thenReturn(environmentDto.getFreeIpaCreation().getCreate());
+        when(environment.isCreateFreeIpa()).thenReturn(environmentDto.getFreeIpaCreation().isCreate());
 
         ExtendedPollingResult result = mock(ExtendedPollingResult.class);
 

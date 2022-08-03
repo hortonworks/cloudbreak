@@ -46,7 +46,7 @@ public class DiagnosticsCollectionValidator extends AbstractCMDiagnosticsCollect
     @Override
     public boolean isClusterLogCollectionDisabled(TelemetryResponse telemetry) {
         return !(telemetry.getFeatures() != null && telemetry.getFeatures().getClusterLogsCollection() != null
-                && telemetry.getFeatures().getClusterLogsCollection().isEnabled());
+                && telemetry.getFeatures().getClusterLogsCollection().getEnabled());
     }
 
     @Override

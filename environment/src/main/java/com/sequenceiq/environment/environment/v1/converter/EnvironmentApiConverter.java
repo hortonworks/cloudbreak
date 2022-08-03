@@ -181,32 +181,32 @@ public class EnvironmentApiConverter {
             return null;
         }
         return ParametersDto.builder()
-                .withAwsParameters(awsParamsToAwsParameters(aws, awsFreeIpa))
+                .withAwsParametersDto(awsParamsToAwsParameters(aws, awsFreeIpa))
                 .build();
     }
 
     private ParametersDto azureParamsToParametersDto(AzureEnvironmentParameters azureEnvironmentParameters) {
         if (Objects.isNull(azureEnvironmentParameters)) {
             return ParametersDto.builder()
-                    .withAzureParameters(AzureParametersDto.builder()
+                    .withAzureParametersDto(AzureParametersDto.builder()
                             .withResourceGroup(buildDefaultResourceGroupDto())
                             .build())
                     .build();
         }
         return ParametersDto.builder()
-                .withAzureParameters(azureParamsToAzureParametersDto(azureEnvironmentParameters))
+                .withAzureParametersDto(azureParamsToAzureParametersDto(azureEnvironmentParameters))
                 .build();
     }
 
     private ParametersDto gcpParamsToParametersDto(GcpEnvironmentParameters gcpEnvironmentParameters) {
         if (Objects.isNull(gcpEnvironmentParameters)) {
             return ParametersDto.builder()
-                    .withGcpParameters(GcpParametersDto.builder()
+                    .withGcpParametersDto(GcpParametersDto.builder()
                             .build())
                     .build();
         }
         return ParametersDto.builder()
-                .withGcpParameters(gcpParamsToGcpParametersDto(gcpEnvironmentParameters))
+                .withGcpParametersDto(gcpParamsToGcpParametersDto(gcpEnvironmentParameters))
                 .build();
     }
 

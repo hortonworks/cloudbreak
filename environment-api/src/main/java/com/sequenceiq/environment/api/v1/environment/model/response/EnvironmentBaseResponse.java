@@ -130,7 +130,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
     @JsonIgnore
     public boolean isCloudStorageLoggingEnabled() {
         return telemetry != null && telemetry.getFeatures() != null && telemetry.getFeatures().getCloudStorageLogging() != null
-                && telemetry.getFeatures().getCloudStorageLogging().isEnabled();
+                && telemetry.getFeatures().getCloudStorageLogging().getEnabled();
     }
 
     public String getCrn() {

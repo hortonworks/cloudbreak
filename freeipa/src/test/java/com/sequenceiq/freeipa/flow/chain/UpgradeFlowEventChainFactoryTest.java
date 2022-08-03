@@ -62,7 +62,7 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(STACK_ID, upscaleEvent1.getResourceId());
         assertTrue(upscaleEvent1.isChained());
         assertFalse(upscaleEvent1.isFinalChain());
-        assertFalse(upscaleEvent1.isRepair());
+        assertFalse(upscaleEvent1.getRepair());
         assertEquals(UpscaleFlowEvent.UPSCALE_EVENT.event(), upscaleEvent1.selector());
         assertEquals(4, upscaleEvent1.getInstanceCountByGroup());
 
@@ -83,7 +83,7 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(STACK_ID, upscaleEvent2.getResourceId());
         assertTrue(upscaleEvent2.isChained());
         assertFalse(upscaleEvent2.isFinalChain());
-        assertFalse(upscaleEvent2.isRepair());
+        assertFalse(upscaleEvent2.getRepair());
         assertEquals(UpscaleFlowEvent.UPSCALE_EVENT.event(), upscaleEvent2.selector());
         assertEquals(4, upscaleEvent2.getInstanceCountByGroup());
 
@@ -106,14 +106,14 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(STACK_ID, upscaleEvent3.getResourceId());
         assertTrue(upscaleEvent3.isChained());
         assertFalse(upscaleEvent3.isFinalChain());
-        assertFalse(upscaleEvent3.isRepair());
+        assertFalse(upscaleEvent3.getRepair());
         assertEquals(UpscaleFlowEvent.UPSCALE_EVENT.event(), upscaleEvent3.selector());
         assertEquals(4, upscaleEvent3.getInstanceCountByGroup());
 
         ChangePrimaryGatewayEvent changePrimaryGatewayEvent = (ChangePrimaryGatewayEvent) queue.poll();
         assertEquals(OPERATION_ID, changePrimaryGatewayEvent.getOperationId());
         assertEquals(STACK_ID, changePrimaryGatewayEvent.getResourceId());
-        assertFalse(changePrimaryGatewayEvent.isFinalChain());
+        assertFalse(changePrimaryGatewayEvent.getFinalChain());
         assertEquals(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), changePrimaryGatewayEvent.selector());
         assertEquals(3, changePrimaryGatewayEvent.getRepairInstanceIds().size());
         assertTrue(List.of("repl1", "repl2", "pgw").containsAll(changePrimaryGatewayEvent.getRepairInstanceIds()));

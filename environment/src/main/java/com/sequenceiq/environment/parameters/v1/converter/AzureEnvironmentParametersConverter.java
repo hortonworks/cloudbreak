@@ -58,7 +58,7 @@ public class AzureEnvironmentParametersConverter extends BaseEnvironmentParamete
     protected void postConvertToDto(ParametersDto.Builder builder, BaseParameters source) {
         super.postConvertToDto(builder, source);
         AzureParameters azureParameters = (AzureParameters) source;
-        builder.withAzureParameters(AzureParametersDto.builder()
+        builder.withAzureParametersDto(AzureParametersDto.builder()
                 .withResourceGroup(
                         AzureResourceGroupDto.builder()
                                 .withName(azureParameters.getResourceGroupName())

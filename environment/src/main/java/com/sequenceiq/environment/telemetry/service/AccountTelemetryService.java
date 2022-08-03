@@ -85,22 +85,22 @@ public class AccountTelemetryService {
                 finalFeatures.setCloudStorageLogging(features.getCloudStorageLogging());
                 if (newFeatures.getClusterLogsCollection() != null) {
                     LOGGER.debug("Account telemetry feature request contains log collection feature " +
-                            "for account {} (set: {})", accountId, newFeatures.getClusterLogsCollection().isEnabled());
+                            "for account {} (set: {})", accountId, newFeatures.getClusterLogsCollection().getEnabled());
                     finalFeatures.setClusterLogsCollection(newFeatures.getClusterLogsCollection());
                 }
                 if (newFeatures.getWorkloadAnalytics() != null) {
                     LOGGER.debug("Account telemetry feature request contains workload analytics feature " +
-                            "for account {} (set: {})", accountId, newFeatures.getWorkloadAnalytics().isEnabled());
+                            "for account {} (set: {})", accountId, newFeatures.getWorkloadAnalytics().getEnabled());
                     finalFeatures.setWorkloadAnalytics(newFeatures.getWorkloadAnalytics());
                 }
                 if (newFeatures.getMonitoring() != null) {
                     LOGGER.debug("Account telemetry feature request contains monitoring feature " +
-                            "for account {} (set: {})", accountId, newFeatures.getMonitoring().isEnabled());
+                            "for account {} (set: {})", accountId, newFeatures.getMonitoring().getEnabled());
                     finalFeatures.setMonitoring(newFeatures.getMonitoring());
                 }
                 if (newFeatures.getCloudStorageLogging() != null) {
                     LOGGER.debug("Account telemetry feature request contains cloud storage logging feature " +
-                            "for account {} (set: {})", accountId, newFeatures.getCloudStorageLogging().isEnabled());
+                            "for account {} (set: {})", accountId, newFeatures.getCloudStorageLogging().getEnabled());
                     finalFeatures.setMonitoring(newFeatures.getCloudStorageLogging());
                 }
             }

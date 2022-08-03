@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -20,6 +21,7 @@ public class EnvironmentTags {
 
     private final Map<String, String> defaultTags;
 
+    @JsonCreator
     public EnvironmentTags(@JsonProperty("userDefinedTags") Map<String, String> userDefinedTags,
         @JsonProperty("defaultTags") Map<String, String> defaultTags) {
         this.defaultTags = defaultTags;

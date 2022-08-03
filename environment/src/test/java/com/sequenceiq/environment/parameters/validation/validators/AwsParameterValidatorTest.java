@@ -80,7 +80,7 @@ class AwsParameterValidatorTest {
                 .build();
 
         ParametersDto parametersDto = ParametersDto.builder()
-                .withAwsParameters(awsParameters)
+                .withAwsParametersDto(awsParameters)
                 .build();
         when(parametersService.isS3GuardTableUsed(any(), any(), any(), any())).thenReturn(true);
 
@@ -101,7 +101,7 @@ class AwsParameterValidatorTest {
                 .withDynamoDbTableName("tablename")
                 .build();
         ParametersDto parametersDto = ParametersDto.builder()
-                .withAwsParameters(awsParameters)
+                .withAwsParametersDto(awsParameters)
                 .build();
         EnvironmentDto environmentDto = new AwsParameterValidatorTest.EnvironmentDtoBuilder()
                 .withAwsParameters(AwsParametersDto.builder()
@@ -121,7 +121,7 @@ class AwsParameterValidatorTest {
                 .build();
 
         ParametersDto parametersDto = ParametersDto.builder()
-                .withAwsParameters(awsParameters)
+                .withAwsParametersDto(awsParameters)
                 .build();
 
         EnvironmentDto environmentDto = new AwsParameterValidatorTest.EnvironmentDtoBuilder()
@@ -150,7 +150,7 @@ class AwsParameterValidatorTest {
                 .withDynamoDbTableName("tablename")
                 .build();
         ParametersDto parametersDto = ParametersDto.builder()
-                .withAwsParameters(awsParameters)
+                .withAwsParametersDto(awsParameters)
                 .build();
         when(parametersService.isS3GuardTableUsed(any(), any(), any(), any())).thenReturn(false);
         when(noSqlTableCreationModeDeterminerService.determineCreationMode(any(), any())).thenReturn(creation);
@@ -218,7 +218,7 @@ class AwsParameterValidatorTest {
                 .withFreeIpaSpotPercentage(percentage)
                 .build();
         ParametersDto parametersDto = ParametersDto.builder()
-                .withAwsParameters(awsParameters)
+                .withAwsParametersDto(awsParameters)
                 .build();
 
         ValidationResult validationResult = underTest.validate(environmentValidationDto, parametersDto, ValidationResult.builder());
@@ -250,7 +250,7 @@ class AwsParameterValidatorTest {
         private final ParametersDto.Builder parametersDtoBuilder = ParametersDto.builder();
 
         public AwsParameterValidatorTest.EnvironmentDtoBuilder withAwsParameters(AwsParametersDto awsParametersDto) {
-            parametersDtoBuilder.withAwsParameters(awsParametersDto);
+            parametersDtoBuilder.withAwsParametersDto(awsParametersDto);
             return this;
         }
 

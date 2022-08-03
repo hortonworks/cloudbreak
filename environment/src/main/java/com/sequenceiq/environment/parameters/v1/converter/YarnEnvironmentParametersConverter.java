@@ -32,6 +32,6 @@ public class YarnEnvironmentParametersConverter extends BaseEnvironmentParameter
     @Override
     protected void postConvertToDto(Builder builder, BaseParameters source) {
         super.postConvertToDto(builder, source);
-        builder.withYarnParameters(YarnParametersDto.builder().build());
+        builder.withYarnParametersDto(YarnParametersDto.builder().build());
     }
 }

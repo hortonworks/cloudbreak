@@ -2,19 +2,27 @@ package com.sequenceiq.environment.environment.dto;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.validation.SubnetValidator;
 
+@JsonDeserialize(builder = SecurityAccessDto.Builder.class)
 public class SecurityAccessDto {
 
-    private String securityGroupIdForKnox;
+    private final String securityGroupIdForKnox;
 
-    private String defaultSecurityGroupId;
+    private final String defaultSecurityGroupId;
 
-    private String cidr;
+    private final String cidr;
 
-    private String securityAccessType;
+    private final String securityAccessType;
 
-    private SecurityAccessDto() {
+    private SecurityAccessDto(Builder builder) {
+        this.cidr = builder.cidr;
+        this.securityGroupIdForKnox = builder.securityGroupIdForKnox;
+        this.defaultSecurityGroupId = builder.defaultSecurityGroupId;
+        this.securityAccessType = builder.securityAccessType;
+
     }
 
     public String getSecurityGroupIdForKnox() {
@@ -47,6 +55,7 @@ public class SecurityAccessDto {
         return new Builder();
     }
 
+    @JsonPOJOBuilder
     public static class Builder {
 
         private String securityGroupIdForKnox;
@@ -75,15 +84,18 @@ public class SecurityAccessDto {
             return this;
         }
 
+        /**
+         * Need this for Jackson deserialization
+         * @param securityAccessType securityAccessType
+         */
+        private Builder withSecurityAccessType(String securityAccessType) {
+            this.securityAccessType = securityAccessType;
+            return this;
+        }
+
         public SecurityAccessDto build() {
             determineAccessType();
-
-            SecurityAccessDto response = new SecurityAccessDto();
-            response.cidr = cidr;
-            response.securityGroupIdForKnox = securityGroupIdForKnox;
-            response.defaultSecurityGroupId = defaultSecurityGroupId;
-            response.securityAccessType = securityAccessType;
-            return response;
+            return new SecurityAccessDto(this);
         }
 
         private void determineAccessType() {

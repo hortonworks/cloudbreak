@@ -61,7 +61,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
                 .withOutboundInternetTraffic(source.getOutboundInternetTraffic())
                 .withRegistrationType(source.getRegistrationType())
                 .withNetworkId(source.getNetworkId())
-                .withUsePublicEndpointAccessGateway(source.getPublicEndpointAccessGateway())
+                .withPublicEndpointAccessGateway(source.getPublicEndpointAccessGateway())
                 .withLoadBalancerCreation(source.getLoadBalancerCreation())
                 .withEndpointGatewaySubnetMetas(source.getEndpointGatewaySubnetMetas());
 

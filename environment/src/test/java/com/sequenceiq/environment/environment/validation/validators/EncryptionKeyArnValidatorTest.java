@@ -144,7 +144,7 @@ class EncryptionKeyArnValidatorTest {
                 .withCredential(credential)
                 .withCloudPlatform("AWS")
                 .withParameters(ParametersDto.builder()
-                        .withAwsParameters(null)
+                        .withAwsParametersDto(null)
                                 .build())
                     .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
@@ -167,7 +167,7 @@ class EncryptionKeyArnValidatorTest {
                 .withCredential(credential)
                 .withCloudPlatform("AWS")
                 .withParameters(ParametersDto.builder()
-                        .withAwsParameters(AwsParametersDto.builder()
+                        .withAwsParametersDto(AwsParametersDto.builder()
                                 .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
                                         .withEncryptionKeyArn(encryptionKeyArn).build())
                                 .build())

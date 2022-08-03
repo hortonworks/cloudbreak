@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.parameter.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+@JsonDeserialize(builder = ParametersDto.Builder.class)
 public class ParametersDto {
 
     private Long id;
@@ -77,6 +81,7 @@ public class ParametersDto {
                 '}';
     }
 
+    @JsonPOJOBuilder
     public static final class Builder {
         private Long id;
 
@@ -107,22 +112,22 @@ public class ParametersDto {
             return this;
         }
 
-        public Builder withAwsParameters(AwsParametersDto awsParametersDto) {
+        public Builder withAwsParametersDto(AwsParametersDto awsParametersDto) {
             this.awsParametersDto = awsParametersDto;
             return this;
         }
 
-        public Builder withAzureParameters(AzureParametersDto azureParametersDto) {
+        public Builder withAzureParametersDto(AzureParametersDto azureParametersDto) {
             this.azureParametersDto = azureParametersDto;
             return this;
         }
 
-        public Builder withGcpParameters(GcpParametersDto gcpParametersDto) {
+        public Builder withGcpParametersDto(GcpParametersDto gcpParametersDto) {
             this.gcpParametersDto = gcpParametersDto;
             return this;
         }
 
-        public Builder withYarnParameters(YarnParametersDto yarnParametersDto) {
+        public Builder withYarnParametersDto(YarnParametersDto yarnParametersDto) {
             this.yarnParametersDto = yarnParametersDto;
             return this;
         }
