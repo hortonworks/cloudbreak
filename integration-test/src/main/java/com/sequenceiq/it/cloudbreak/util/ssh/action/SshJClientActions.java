@@ -246,7 +246,7 @@ public class SshJClientActions extends SshJClient {
         }
     }
 
-    private Pair<Integer, String> executeSshCommand(String instanceIp, String command) {
+    protected Pair<Integer, String> executeSshCommand(String instanceIp, String command) {
         return executeSshCommand(instanceIp, null, null, null, command);
     }
 

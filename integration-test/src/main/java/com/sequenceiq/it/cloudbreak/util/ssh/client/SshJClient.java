@@ -81,12 +81,28 @@ public class SshJClient {
         return client;
     }
 
+    protected void upload(SSHClient ssh, String sourceFilePath, String destinationPath) throws IOException {
+        LOGGER.info("Waiting for [{}] file to be uploaded to [{}]...", sourceFilePath, destinationPath);
+        ssh.setTimeout(120000);
+        ssh.newSCPFileTransfer().upload(sourceFilePath, destinationPath);
+    }
+
+    protected void uploadToHost(String instanceIP, String sourceFile, String destinationPath) {
+        try (SSHClient sshClient = createSshClient(instanceIP, null, null, null)) {
+            upload(sshClient, sourceFile, destinationPath);
+            Log.log(LOGGER, format("File upload [%s] to host [%s] has been done.", sourceFile, instanceIP));
+        } catch (Exception e) {
+            Log.error(LOGGER, format("File upload [%s] to host [%s] is failing! %s", sourceFile, instanceIP, e.getMessage()));
+            throw new TestFailException(format("File upload [%s] to host [%s] is failing!", sourceFile, instanceIP), e);
+        }
+    }
+
     protected Pair<Integer, String> execute(SSHClient ssh, String command) throws IOException {
         LOGGER.info("Waiting to SSH command to be executed...");
         try (Session session = startSshSession(ssh);
             Command cmd = session.exec(command);
             OutputStream os = IOUtils.readFully(cmd.getInputStream())) {
-            Log.log(LOGGER, format("The following SSH command [%s] is going to be executed on host [%s]", command,
+            Log.log(LOGGER, format("The following SSH command [%s] is going to be executed on host [%s]...", command,
                     ssh.getConnection().getTransport().getRemoteHost()));
             cmd.join(10L, TimeUnit.SECONDS);
             return Pair.of(cmd.getExitStatus(), os.toString());
