@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageSizeRequ
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageSizeResponse;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
@@ -75,7 +76,7 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
         String accountId = Crn.safeFromString(request.getCredential().getId()).getAccountId();
         if (!entitlementService.azureCloudStorageValidationEnabled(accountId)) {
             LOGGER.info("Azure Cloud storage validation entitlement is missing, not validating cloudStorageRequest: {}",
-                    JsonUtil.writeValueAsStringSilent(request));
+                    AnonymizerUtil.anonymize(JsonUtil.writeValueAsStringSilent(request)));
             return ObjectStorageValidateResponse.builder().withStatus(ResponseStatus.OK).build();
         }
         AzureClient client = azureClientService.getClient(request.getCredential());
