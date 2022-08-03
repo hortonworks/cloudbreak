@@ -57,6 +57,8 @@ public class FreeIpaTests extends AbstractE2ETest {
         String recipeName = resourcePropertyProvider().getName();
         String filePath = "/pre-ambari";
         String fileName = "pre-ambari";
+        String commandRunnerLocation = "classpath:/commands/qa_command_runner.py";
+        String sampleCommandLocation = "classpath:/commands/qa_sample_command.json";
 
         int instanceGroupCount = 1;
         int instanceCountByGroup = 2;

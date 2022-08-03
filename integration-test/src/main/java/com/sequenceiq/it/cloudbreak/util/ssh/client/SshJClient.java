@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.util.ssh.client;
 
 import static java.lang.String.format;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -16,10 +15,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StreamUtils;
 
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
@@ -29,6 +25,11 @@ import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.connection.ConnectionException;
 import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.connection.channel.direct.Session.Command;
+import net.schmizz.sshj.sftp.FileAttributes;
+import net.schmizz.sshj.sftp.FileMode;
+import net.schmizz.sshj.sftp.Response;
+import net.schmizz.sshj.sftp.SFTPClient;
+import net.schmizz.sshj.sftp.SFTPException;
 import net.schmizz.sshj.transport.TransportException;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import net.schmizz.sshj.xfer.FileSystemFile;
@@ -118,24 +119,57 @@ public class SshJClient {
         return sshSession;
     }
 
-    public void upload(SSHClient ssh, String localPath, String remoteDirectory) throws IOException {
-        String commandRunnerLocation = "classpath:/commands/qa_command_runner.py";
-        String sampleCommandLocation = "classpath:/commands/qa_sample_command.json";
+    private SCPUploadClient scpUploadClient(SSHClient ssh) {
+        SCPFileTransfer scpFileTransfer = ssh.newSCPFileTransfer();
+        return scpFileTransfer.newSCPUploadClient();
+    }
 
+    private SCPDownloadClient scpDownloadClient(SSHClient ssh) {
+        SCPFileTransfer scpFileTransfer = ssh.newSCPFileTransfer();
+        return scpFileTransfer.newSCPDownloadClient();
+    }
+
+    public void upload(SSHClient ssh, String localPath, String remotePath) {
+//        String localFile = "src/main/resources/sample.txt";
+//        String remoteDir = "remote_sftp_test/jschFile.txt";
+        FileSystemFile uploadFile = new FileSystemFile(localPath);
+
+        if (uploadFile.isFile()) {
+            try (SFTPClient sftpClient = ssh.newSFTPClient()) {
+                FileAttributes fileAttributes = sftpClient.stat(remotePath);
+                sftpClient.put(uploadFile, remotePath);
+            } catch (ConnectionException | TransportException e) {
+                Log.error(LOGGER, "Upload [\" + localPath + \"] to [\" + remoteDirectory + \"] encountered connection error");
+                throw new TestFailException(format("Upload [\" + localPath + \"] to [\" + remoteDirectory + \"] encountered connection error"));
+            } catch (IOException e) {
+                throw new TestFailException("Fatal error happened while trying to upload", e);
+            } catch (SFTPException e) {
+
+            } finally {
+                ssh.disconnect();
+                ssh.close();
+            }
+        } else {
+
+        }
+    }
+
+    private boolean makeDirIfNotExists(SFTPClient sftpClient, String remote) throws IOException {
         try {
-            ssh.newSCPFileTransfer().upload(new FileSystemFile(localPath), remoteDirectory);
-        } catch (ConnectionException | TransportException e) {
-            Log.error(LOGGER, "Creating SSH client is not possible, because of host: '{}', user: '{}', password: '{}' and privateKey: '{}' are missing!",
-                    host, user, password, privateKeyFilePath);
-            throw new TestFailException(format("Creating SSH client is not possible, because of host: '%s', user: '%s', password: '%s'" +
-                    " and privateKey: '%s' are missing!", host, user, password, privateKeyFilePath));
-            throw new ArtifactConnectException("Upload [" + localPath + "] to [" + remoteDirectory + "] encountered connection error", e);
-        } catch (IOException e) {
-            ExceptionUtil.checkInterrupted(e);
-            throw new ArtifactUploadException("Fatal error happened while trying to upload", e);
-        } finally {
-            ssh.disconnect();
-            ssh.close();
+            FileAttributes attrs = sftpClient.stat(remote);
+            if (attrs.getMode().getType() != FileMode.Type.DIRECTORY) {
+                throw new IOException(remote + " exists and should be a directory, but was a " + attrs.getMode().getType());
+            }
+            // Was not created, but existed.
+            return false;
+        } catch (SFTPException e) {
+            if (e.getStatusCode() == Response.StatusCode.NO_SUCH_FILE) {
+                log.debug("makeDir: {} does not exist, creating", remote);
+                sftpClient.mkdir(remote);
+                return true;
+            } else {
+                throw e;
+            }
         }
     }
 }
