@@ -29,8 +29,8 @@ public interface ClusterDtoRepository extends Repository<Cluster, Long> {
             "c.extendedBlueprintText as extendedBlueprintTextSecret, " +
             "c.attributes as attributesSecret, " +
             "c.customContainerDefinition as customContainerDefinition, " +
-            "c.dpAmbariUser as dpAmbariUserSecret, " +
-            "c.dpAmbariPassword as dpAmbariPasswordSecret, " +
+            "c.dpClusterManagerUser as dpClusterManagerUserSecret," +
+            "c.dpClusterManagerPassword as dpClusterManagerPasswordSecret," +
             "c.password as passwordSecret, " +
             "c.userName as userNameSecret, " +
             "c.executorType as executorType, " +

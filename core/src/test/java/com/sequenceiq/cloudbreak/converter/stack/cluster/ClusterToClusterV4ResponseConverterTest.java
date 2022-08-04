@@ -111,8 +111,8 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         when(stackUtil.extractClusterManagerAddress(any(StackDtoDelegate.class))).thenReturn("some.fqdn");
         TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariUser", source, "user", "secret/path");
         TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariPassword", source, "pass", "secret/path");
-        TestUtil.setSecretField(Cluster.class, "dpAmbariUser", source, "user", "secret/path");
-        TestUtil.setSecretField(Cluster.class, "dpAmbariPassword", source, "pass", "secret/path");
+        TestUtil.setSecretField(Cluster.class, "dpClusterManagerUser", source, "user", "secret/path");
+        TestUtil.setSecretField(Cluster.class, "dpClusterManagerPassword", source, "pass", "secret/path");
         when(stringToSecretResponseConverter.convert("secret/path")).thenReturn(new SecretResponse("kv", "pass"));
         when(blueprintToBlueprintV4ResponseConverter.convert(blueprint)).thenReturn(new BlueprintV4Response());
         when(serviceEndpointCollector.getManagerServerUrl(any(StackDtoDelegate.class), anyString())).thenReturn("http://server/");

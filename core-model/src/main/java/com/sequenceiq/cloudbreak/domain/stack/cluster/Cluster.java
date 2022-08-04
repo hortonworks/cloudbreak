@@ -606,16 +606,16 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
     }
 
     public String getDpAmbariUserSecretPath() {
-        return isNotEmpty(getDpClusterManagerUserSecret()) ? getDpClusterManagerUserSecret() : dpAmbariUser.getSecret();
+        return isNotEmpty(getDpClusterManagerUserSecretPath()) ? getDpClusterManagerUserSecretPath() : dpAmbariUser.getSecret();
+    }
+
+    public Secret getDpAmbariPasswordSecret() {
+        return isNotEmpty(getDpClusterManagerPassword()) ? dpClusterManagerPassword : dpAmbariPassword;
     }
 
     @Override
-    public Secret getDpAmbariPasswordSecret() {
-        return dpAmbariPassword;
-    }
-
-    public String getDpClusterManagerUserSecret() {
-        return getIfNotNull(dpClusterManagerUser, Secret::getSecret);
+    public Secret getDpClusterManagerUserSecret() {
+        return dpClusterManagerUser;
     }
 
     public void setDpAmbariUser(String dpAmbariUser) {
@@ -640,7 +640,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
     }
 
     public String getDpAmbariPasswordSecretPath() {
-        return isNotEmpty(getDpClusterManagerPasswordSecret()) ? getDpClusterManagerPasswordSecret() : dpAmbariPassword.getSecret();
+        return isNotEmpty(getDpClusterManagerPasswordSecretPath()) ? getDpClusterManagerPasswordSecretPath() : dpAmbariPassword.getSecret();
     }
 
     @Override
@@ -653,8 +653,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         return cloudbreakAmbariPassword;
     }
 
-    public String getDpClusterManagerPasswordSecret() {
-        return getIfNotNull(dpClusterManagerPassword, Secret::getSecret);
+    @Override
+    public Secret getDpClusterManagerPasswordSecret() {
+        return dpClusterManagerPassword;
     }
 
     public void setDpAmbariPassword(String dpAmbariPassword) {
@@ -700,9 +701,8 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         return customContainerDefinition;
     }
 
-    @Override
     public Secret getDpAmbariUserSecret() {
-        return dpAmbariUser;
+        return isNotEmpty(getDpClusterManagerUser()) ? dpClusterManagerUser : dpAmbariUser;
     }
 
     public void setCustomContainerDefinition(Json customContainerDefinition) {
