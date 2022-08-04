@@ -169,7 +169,7 @@ public interface ImageCatalogV4Endpoint {
             @PathParam("imageId") String imageId) throws Exception;
 
     @GET
-    @Path("image/type/{type}/provider/{provider}/runtime/{runtime}")
+    @Path("image/type/{type}/provider/{provider}/runtime/{runtime}/govCloud/{govCloud}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_FROM_DEFAULT, produces = MediaType.APPLICATION_JSON,
             notes = IMAGE_CATALOG_NOTES, nickname = "getImageFromDefaultWithRuntime")
