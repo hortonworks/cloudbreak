@@ -104,7 +104,7 @@ public class NodeStatusJob extends StatusCheckerJob {
                 logReportResult(primaryGateway, nodeStatuses.getServicesReport().get(), "services");
             }
             if (nodeStatuses.getSystemMetricsReport().isPresent()) {
-                logReportResult(primaryGateway, nodeStatuses.getServicesReport().get(), "system metrics");
+                logReportResult(primaryGateway, nodeStatuses.getSystemMetricsReport().get(), "system metrics");
             }
         } catch (Exception e) {
             LOGGER.info("FreeIpaClientException occurred during node status check: " + e.getMessage(), e);
