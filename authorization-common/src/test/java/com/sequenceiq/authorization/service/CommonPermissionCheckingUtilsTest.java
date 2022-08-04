@@ -306,17 +306,17 @@ public class CommonPermissionCheckingUtilsTest {
 
     private static class ExampleAuthorizationResourceClass {
 
-        @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
         public void exampleMethodWithParamAnnotation(@ResourceName String name, String other) {
             LOGGER.info(name + other);
         }
 
-        @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
         public void exampleMethodWithoutParamAnnotation(String name, String other) {
             LOGGER.info(name + other);
         }
 
-        @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
         public void exampleMethodWithTooManyParamAnnotation(@ResourceCrn String name, @ResourceCrn String other) {
             LOGGER.info(name + other);
         }
