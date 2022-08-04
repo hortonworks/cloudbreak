@@ -1,5 +1,7 @@
 package com.sequenceiq.flow.component.sleep.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 
 public class SleepFailedEvent implements Selectable {
@@ -8,7 +10,8 @@ public class SleepFailedEvent implements Selectable {
 
     private final String reason;
 
-    public SleepFailedEvent(Long resourceId, String reason) {
+    @JsonCreator
+    public SleepFailedEvent(@JsonProperty("resourceId") Long resourceId, @JsonProperty("reason") String reason) {
         this.resourceId = resourceId;
         this.reason = reason;
     }

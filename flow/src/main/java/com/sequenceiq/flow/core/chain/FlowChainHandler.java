@@ -13,10 +13,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -65,12 +63,7 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
         if (chainLogOpt.isPresent()) {
             FlowChainLog chainLog = chainLogOpt.get();
             String flowChainType = chainLog.getFlowChainType();
-            Queue<Selectable> queue;
-            if (null != chainLog.getChainJackson()) {
-                queue = TypedJsonUtil.readValueWithJsonIoFallback(chainLog.getChainJackson(), chainLog.getChain(), Queue.class);
-            } else {
-                queue = (Queue<Selectable>) JsonReader.jsonToJava(chainLog.getChain());
-            }
+            Queue<Selectable> queue = chainLog.getChainAsQueue();
             Payload triggerEvent = tryDeserializeTriggerEvent(chainLog);
             FlowTriggerEventQueue chain = new FlowTriggerEventQueue(flowChainType, triggerEvent, queue);
             if (chainLog.getParentFlowChainId() != null) {

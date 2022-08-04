@@ -5,10 +5,10 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkScaleV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
-import com.sequenceiq.common.api.type.AdjustmentType;
-import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupAdjustmentModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
+import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -84,4 +84,14 @@ public class InstanceGroupAdjustmentV4Request implements JsonEntity {
         }
     }
 
+    @Override
+    public String toString() {
+        return "InstanceGroupAdjustmentV4Request{" +
+                "instanceGroup='" + instanceGroup + '\'' +
+                ", scalingAdjustment=" + scalingAdjustment +
+                ", networkScaleRequest=" + networkScaleRequest +
+                ", adjustmentType=" + adjustmentType +
+                ", threshold=" + threshold +
+                '}';
+    }
 }

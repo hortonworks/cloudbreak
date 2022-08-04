@@ -147,7 +147,6 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 finalizeFlow(flowParameters, flowChainId, payload.getResourceId(), getContextParams(event));
             } else if (flowParameters.getFlowId() == null) {
                 AcceptResult result = handleNewFlowRequest(key, payload, flowParameters, flowChainId, flowChainType, getContextParams(event));
-                LOGGER.info("Create new flow result {}", result);
                 if (isAcceptablePayload(payload)) {
                     ((Acceptable) payload).accepted().accept(result);
                 }
@@ -358,6 +357,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             logFlowId(flowId);
             flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload, flowParameters.getSpanContext(),
                     flowParameters.getFlowOperationType());
+            LOGGER.info("Flow started '{}'. Start event: {}", flowConfig.getDisplayName(), payload);
             return getFlowAcceptResult(flowChainId, flowParameters.getFlowId());
         } catch (Exception e) {
             LOGGER.error("Can't save flow: {}", flowId);

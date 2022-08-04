@@ -1,12 +1,15 @@
 package com.sequenceiq.flow.component.sleep.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 
 public class SleepCompletedEvent implements Selectable {
 
     private final Long resourceId;
 
-    public SleepCompletedEvent(Long resourceId) {
+    @JsonCreator
+    public SleepCompletedEvent(@JsonProperty("resourceId") Long resourceId) {
         this.resourceId = resourceId;
     }
 
