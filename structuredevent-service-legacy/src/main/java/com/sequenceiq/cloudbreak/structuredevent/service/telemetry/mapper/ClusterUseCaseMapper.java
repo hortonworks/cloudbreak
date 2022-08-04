@@ -48,13 +48,24 @@ public class ClusterUseCaseMapper {
         firstStepUseCaseMap.put(Pair.of("StopFlowEventChainFactory", "ClusterStopFlowConfig"), UsageProto.CDPClusterStatus.Value.SUSPEND_STARTED);
         firstStepUseCaseMap.put(Pair.of("ClusterRepairFlowEventChainFactory", "FlowChainInitFlowConfig"), UsageProto.CDPClusterStatus.Value.REPAIR_STARTED);
         firstStepUseCaseMap.put(Pair.of(DISTROX_UPGRADE_REPAIR_FLOWCHAIN, "FlowChainInitFlowConfig"), UsageProto.CDPClusterStatus.Value.REPAIR_STARTED);
-        firstStepUseCaseMap.put(Pair.of("UpgradeDatalakeFlowEventChainFactory", "SaltUpdateFlowConfig"), UsageProto.CDPClusterStatus.Value.UPGRADE_STARTED);
-        firstStepUseCaseMap.put(Pair.of("UpgradeDistroxFlowEventChainFactory", "SaltUpdateFlowConfig"), UsageProto.CDPClusterStatus.Value.UPGRADE_STARTED);
         firstStepUseCaseMap.put(Pair.of("", "ClusterCertificateRenewFlowConfig"), UsageProto.CDPClusterStatus.Value.RENEW_PUBLIC_CERT_STARTED);
         firstStepUseCaseMap.put(Pair.of("", "CertRotationFlowConfig"), UsageProto.CDPClusterStatus.Value.RENEW_CLUSTER_INTERNAL_CERT_STARTED);
         firstStepUseCaseMap.put(Pair.of("BackupDatalakeDatabaseFlowEventChainFactory", "SaltUpdateFlowConfig"),
                 UsageProto.CDPClusterStatus.Value.BACKUP_STARTED);
         firstStepUseCaseMap.put(Pair.of("", "DiagnosticsCollectionFlowConfig"), UsageProto.CDPClusterStatus.Value.DIAGNOSTIC_COLLECTION_STARTED);
+
+        firstStepUseCaseMap.put(Pair.of("UpgradeDatalakeFlowEventChainFactory", "SaltUpdateFlowConfig"), UsageProto.CDPClusterStatus.Value.UPGRADE_SALT_STARTED);
+        firstStepUseCaseMap.put(Pair.of("UpgradeDistroxFlowEventChainFactory", "SaltUpdateFlowConfig"), UsageProto.CDPClusterStatus.Value.UPGRADE_SALT_STARTED);
+
+        firstStepUseCaseMap.put(Pair.of("UpgradeDatalakeFlowEventChainFactory", "SaltUpdateFlowConfig"), UsageProto.CDPClusterStatus.Value.UPGRADE_SALT_STARTED);
+        firstStepUseCaseMap.put(Pair.of("UpgradeDistroxFlowEventChainFactory", "SaltUpdateFlowConfig"), UsageProto.CDPClusterStatus.Value.UPGRADE_SALT_STARTED);
+
+        firstStepUseCaseMap.put(Pair.of("UpgradeDatalakeFlowEventChainFactory", "SaltUpdateFlowConfig"), UsageProto.CDPClusterStatus.Value.UPGRADE_SALT_STARTED);
+        firstStepUseCaseMap.put(Pair.of("UpgradeDistroxFlowEventChainFactory", "SaltUpdateFlowConfig"), UsageProto.CDPClusterStatus.Value.UPGRADE_SALT_STARTED);
+
+        firstStepUseCaseMap.put(Pair.of("UpgradeDatalakeFlowEventChainFactory", "SaltUpdateFlowConfig"), UsageProto.CDPClusterStatus.Value.UPGRADE_SALT_STARTED);
+        firstStepUseCaseMap.put(Pair.of("UpgradeDistroxFlowEventChainFactory", "SaltUpdateFlowConfig"), UsageProto.CDPClusterStatus.Value.UPGRADE_SALT_STARTED);
+
     }
 
     // At the moment we need to introduce a complex logic to figure out the use case

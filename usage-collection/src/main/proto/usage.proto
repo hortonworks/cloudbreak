@@ -1381,11 +1381,11 @@ message CDPClusterStatus {
     // The status when a cluster failed to resume.
     RESUME_FAILED = 12;
 
-    // The status when a cluster is trying to upgrade.
+    // DEPRECATED - The status when a cluster is trying to upgrade.
     UPGRADE_STARTED = 13;
-    // The status when a cluster completed upgrading.
+    // DEPRECATED - The status when a cluster completed upgrading.
     UPGRADE_FINISHED = 14;
-    // The status when a cluster failed to upgrade.
+    // DEPRECATED - The status when a cluster failed to upgrade.
     UPGRADE_FAILED = 15;
 
     // The status when a cluster is trying to repair.
@@ -1450,6 +1450,41 @@ message CDPClusterStatus {
     STOP_START_DOWNSCALE_FINISHED = 41;
     // The status when a cluster failed to downscale via stop-start
     STOP_START_DOWNSCALE_FAILED = 42;
+
+    // Validation for upgrade
+    UPGRADE_VALIDATION_STARTED = 43;
+    // Validation for upgrade
+    UPGRADE_VALIDATION_FINISHED = 44;
+    // Validation for upgrade
+    UPGRADE_VALIDATION_FAILED = 45;
+
+    // Download CM and parcels
+    UPGRADE_DOWNLOAD_STARTED = 46;
+    // Download CM and parcels
+    UPGRADE_DOWNLOAD_FINISHED = 47;
+    // Download CM and parcels
+    UPGRADE_DOWNLOAD_FAILED = 48;
+
+    // Upgrade Salt states
+    UPGRADE_SALT_STARTED = 49;
+    // Upgrade Salt states
+    UPGRADE_SALT_FINISHED = 50;
+    // Upgrade Salt states
+    UPGRADE_SALT_FAILED = 51;
+
+    // Upgrade CM and Cloudera Runtime
+    UPGRADE_CR_STARTED = 52;
+    // Upgrade CM and Cloudera Runtime
+    UPGRADE_CR_FINISHED = 53;
+    // Upgrade CM and Cloudera Runtime
+    UPGRADE_CR_FAILED = 54;
+
+    // Upgrade OS
+    UPGRADE_OS_STARTED = 55;
+    // Upgrade OS
+    UPGRADE_OS_FINISHED = 56;
+    // Upgrade OS
+    UPGRADE_OS_FAILED = 57;
   }
 }
 
