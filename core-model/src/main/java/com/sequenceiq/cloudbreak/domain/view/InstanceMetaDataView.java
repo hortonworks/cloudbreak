@@ -198,4 +198,33 @@ public class InstanceMetaDataView implements ProvisionEntity {
     public Json getImage() {
         return image;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceMetaDataView{" +
+                "id=" + id +
+                ", instanceGroup=" + instanceGroup +
+                ", instanceStatus=" + instanceStatus +
+                ", instanceName='" + instanceName + '\'' +
+                ", statusReason='" + statusReason + '\'' +
+                ", privateId=" + privateId +
+                ", privateIp='" + privateIp + '\'' +
+                ", publicIp='" + publicIp + '\'' +
+                ", sshPort=" + sshPort +
+                ", instanceId='" + instanceId + '\'' +
+                ", ambariServer=" + ambariServer +
+                ", clusterManagerServer=" + clusterManagerServer +
+                ", discoveryFQDN='" + discoveryFQDN + '\'' +
+                ", instanceMetadataType=" + instanceMetadataType +
+                ", localityIndicator='" + localityIndicator + '\'' +
+                ", startDate=" + startDate +
+                ", terminationDate=" + terminationDate +
+                ", subnetId='" + subnetId + '\'' +
+                ", availabilityZone='" + availabilityZone + '\'' +
+                ", image=" + image +
+                ", rackId='" + rackId + '\'' +
+                ", lifeCycle=" + lifeCycle +
+                ", variant='" + variant + '\'' +
+                '}';
+    }
 }
