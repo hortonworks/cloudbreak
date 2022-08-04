@@ -285,6 +285,7 @@ public class StackCreationService {
             Template template = instanceGroup.getTemplate();
             if (template != null) {
                 Integer instanceStorageCount = instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled(template.getInstanceType());
+                Integer instanceStorageSize = instanceStoreMetadata.mapInstanceTypeToInstanceSizeNullHandled(template.getInstanceType());
                 if (ephemeralVolumeChecker.instanceGroupContainsOnlyDatabaseAndEphemeralVolumes(instanceGroup)) {
                     LOGGER.debug("Instance storage was already requested. Setting temporary storage in template to: {}. " +
                             "Group name: {}, Template id: {}, instance type: {}",
@@ -299,6 +300,7 @@ public class StackCreationService {
                 LOGGER.debug("Setting instance storage count in template. " +
                         "Group name: {}, Template id: {}, instance type: {}", instanceGroup.getGroupName(), template.getId(), template.getInstanceType());
                 template.setInstanceStorageCount(instanceStorageCount);
+                template.setInstanceStorageSize(instanceStorageSize);
                 templateService.savePure(template);
             }
         }

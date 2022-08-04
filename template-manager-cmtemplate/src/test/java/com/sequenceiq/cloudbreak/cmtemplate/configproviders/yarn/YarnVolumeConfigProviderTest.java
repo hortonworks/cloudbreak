@@ -53,7 +53,7 @@ class YarnVolumeConfigProviderTest {
     @Test
     void getRoleConfigsWithMultipleEphemeralVolumes() {
         HostgroupView worker = hostGroupWithVolumeTemplatesAndTemporaryStorage(2,
-                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.EPHEMERAL_VOLUMES, 3);
+                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.EPHEMERAL_VOLUMES, 3, 300);
 
         List<ApiClusterTemplateConfig> roleConfigs = subject.getRoleConfigs(YarnRoles.NODEMANAGER, worker, preparatorWithHostGroups(worker));
 
@@ -70,7 +70,7 @@ class YarnVolumeConfigProviderTest {
     @Test
     void getRoleConfigsWithMultipleAttachedVolumes() {
         HostgroupView worker = hostGroupWithVolumeTemplatesAndTemporaryStorage(2,
-                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.ATTACHED_VOLUMES, 0);
+                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.ATTACHED_VOLUMES, 0, 0);
 
         List<ApiClusterTemplateConfig> roleConfigs = subject.getRoleConfigs(YarnRoles.NODEMANAGER, worker, preparatorWithHostGroups(worker));
 

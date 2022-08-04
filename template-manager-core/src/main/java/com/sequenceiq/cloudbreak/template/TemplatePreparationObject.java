@@ -317,8 +317,10 @@ public class TemplatePreparationObject {
                             .collect(Collectors.toSet());
                     TemporaryStorage temporaryStorage = template == null ? null : template.getTemporaryStorage();
                     Integer temporaryStorageVolumeCount = template == null ? null : template.getInstanceStorageCount();
+                    Integer temporaryStorageVolumeSize = template == null ? null : template.getInstanceStorageSize();
                     hostgroupViews.add(new HostgroupView(hostGroup.getName(), volumeCount,
-                            instanceGroup.getInstanceGroupType(), fqdns, volumeTemplates, temporaryStorage, temporaryStorageVolumeCount));
+                            instanceGroup.getInstanceGroupType(), fqdns, volumeTemplates,
+                            temporaryStorage, temporaryStorageVolumeCount, temporaryStorageVolumeSize));
                 } else {
                     hostgroupViews.add(new HostgroupView(hostGroup.getName()));
                 }
