@@ -53,9 +53,9 @@ public interface ClusterView extends MdcContextInfoProvider {
 
     Json getCustomContainerDefinition();
 
-    Secret getDpAmbariUserSecret();
+    Secret getDpClusterManagerUserSecret();
 
-    Secret getDpAmbariPasswordSecret();
+    Secret getDpClusterManagerPasswordSecret();
 
     Secret getCloudbreakAmbariUserSecret();
 
@@ -100,19 +100,19 @@ public interface ClusterView extends MdcContextInfoProvider {
     }
 
     default String getDpAmbariUser() {
-        return getIfNotNull(getDpAmbariUserSecret(), Secret::getRaw);
-    }
-
-    default String getDpAmbariUserPath() {
-        return getIfNotNull(getDpAmbariUserSecret(), Secret::getSecret);
+        return getIfNotNull(getDpClusterManagerUserSecret(), Secret::getRaw);
     }
 
     default String getDpAmbariPassword() {
-        return getIfNotNull(getDpAmbariPasswordSecret(), Secret::getRaw);
+        return getIfNotNull(getDpClusterManagerPasswordSecret(), Secret::getRaw);
     }
 
-    default String getDpAmbariPasswordPath() {
-        return getIfNotNull(getDpAmbariPasswordSecret(), Secret::getSecret);
+    default String getDpClusterManagerUserSecretPath() {
+        return getIfNotNull(getDpClusterManagerUserSecret(), Secret::getSecret);
+    }
+
+    default String getDpClusterManagerPasswordSecretPath() {
+        return getIfNotNull(getDpClusterManagerPasswordSecret(), Secret::getSecret);
     }
 
     default String getCloudbreakAmbariUser() {

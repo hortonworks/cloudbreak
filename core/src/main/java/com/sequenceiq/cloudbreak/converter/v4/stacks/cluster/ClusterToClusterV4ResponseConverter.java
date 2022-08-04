@@ -227,9 +227,9 @@ public class ClusterToClusterV4ResponseConverter {
     }
 
     private void convertDpSecrets(ClusterView source, ClusterV4Response response) {
-        if (isNotEmpty(source.getDpAmbariUserPath()) && isNotEmpty(source.getDpAmbariPasswordPath())) {
-            response.setCmMgmtUser(stringToSecretResponseConverter.convert(source.getDpAmbariUserPath()));
-            response.setCmMgmtPassword(stringToSecretResponseConverter.convert(source.getDpAmbariPasswordPath()));
+        if (isNotEmpty(source.getDpClusterManagerUserSecretPath()) && isNotEmpty(source.getDpClusterManagerPasswordSecretPath())) {
+            response.setCmMgmtUser(stringToSecretResponseConverter.convert(source.getDpClusterManagerUserSecretPath()));
+            response.setCmMgmtPassword(stringToSecretResponseConverter.convert(source.getDpClusterManagerPasswordSecretPath()));
         }
     }
 }
