@@ -27,7 +27,8 @@ public abstract class RecipeV4Base implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(value = RecipeModelDescription.TYPE,
-            allowableValues = "PRE_CLOUDERA_MANAGER_START,PRE_TERMINATION,POST_CLOUDERA_MANAGER_START,POST_CLUSTER_INSTALL")
+            allowableValues = "PRE_CLOUDERA_MANAGER_START,PRE_SERVICE_DEPLOYMENT,PRE_TERMINATION,POST_CLOUDERA_MANAGER_START,POST_CLUSTER_INSTALL," +
+                    "POST_SERVICE_DEPLOYMENT")
     private RecipeV4Type type = RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
 
     @ApiModelProperty(RecipeModelDescription.CONTENT)
