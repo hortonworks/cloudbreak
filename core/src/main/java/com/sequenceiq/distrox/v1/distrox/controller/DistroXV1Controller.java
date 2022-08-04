@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
@@ -514,8 +513,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
-    public Object getCreateAwsClusterForCli(DistroXV1Request request) {
+    @CheckPermissionByRequestProperty(path = "environmentName", type = NAME, action = DESCRIBE_ENVIRONMENT)
+    public Object getCreateAwsClusterForCli(@RequestObject DistroXV1Request request) {
         throw new UnsupportedOperationException("not supported request");
     }
 

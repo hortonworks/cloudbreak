@@ -43,11 +43,11 @@ public class AccountAuthorizationServiceTest {
 
             @Override
             public AuthorizationResourceAction action() {
-                return AuthorizationResourceAction.ENVIRONMENT_WRITE;
+                return AuthorizationResourceAction.CREATE_ENVIRONMENT;
             }
         };
         underTest.authorize(methodAnnotation, USER_CRN);
 
-        verify(commonPermissionCheckingUtils).checkPermissionForUser(eq(AuthorizationResourceAction.ENVIRONMENT_WRITE), eq(USER_CRN));
+        verify(commonPermissionCheckingUtils).checkPermissionForUser(eq(AuthorizationResourceAction.CREATE_ENVIRONMENT), eq(USER_CRN));
     }
 }
