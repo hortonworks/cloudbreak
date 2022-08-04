@@ -204,6 +204,7 @@
   {% set binary = 'cdp-logging-agent' %}
   {% set uninstall_td_agent = False %}
 {% endif %}
+{% set cdp_logging_agent_package_version = salt['pkg.version']('cdp-logging-agent') %}
 {% do fluent.update({
     "enabled": fluent_enabled,
     "is_systemd" : is_systemd,
@@ -265,5 +266,6 @@
     "fluentVersion": fluent_version,
     "cdpLoggingAgentInstalled": cdp_logging_agent_installed,
     "cdpLoggingAgentRpm": cdp_logging_agent_rpm,
+    "cdpLoggingAgentPackageVersion": cdp_logging_agent_package_version,
     "uninstallTdAgent": uninstall_td_agent
 }) %}

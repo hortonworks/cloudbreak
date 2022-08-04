@@ -52,12 +52,12 @@ public class ClusterUpgradeActions {
     @Inject
     private ClusterUpgradeService clusterUpgradeService;
 
+    @Inject
+    private ImageComponentUpdaterService imageComponentUpdaterService;
+
     @Bean(name = "CLUSTER_UPGRADE_INIT_STATE")
     public Action<?, ?> initClusterUpgrade() {
         return new AbstractClusterUpgradeAction<>(ClusterUpgradeTriggerEvent.class) {
-
-            @Inject
-            private ImageComponentUpdaterService imageComponentUpdaterService;
 
             @Inject
             private ClusterUpgradeTargetImageService clusterUpgradeTargetImageService;
@@ -65,7 +65,7 @@ public class ClusterUpgradeActions {
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeTriggerEvent payload, Map<Object, Object> variables) {
                 try {
-                    UpgradeImageInfo images = imageComponentUpdaterService.updateForUpgrade(payload.getImageId(), payload.getResourceId());
+                    UpgradeImageInfo images = imageComponentUpdaterService.updateComponentsForUpgrade(payload.getImageId(), payload.getResourceId());
                     variables.put(CURRENT_IMAGE, images.getCurrentStatedImage());
                     variables.put(TARGET_IMAGE, images.getTargetStatedImage());
                     clusterUpgradeTargetImageService.saveImage(context.getStackId(), images.getTargetStatedImage());
@@ -107,7 +107,9 @@ public class ClusterUpgradeActions {
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeInitSuccess payload, Map<Object, Object> variables) {
                 Image currentImage = getCurrentImage(variables).getImage();
-                Image targetImage = getTargetImage(variables).getImage();
+                StatedImage targetStatedImage = getTargetImage(variables);
+                Image targetImage = targetStatedImage.getImage();
+                imageComponentUpdaterService.updateComponentsForUpgrade(targetStatedImage, payload.getResourceId());
                 clusterUpgradeService.upgradeClusterManager(context.getStackId());
                 Selectable event = new ClusterManagerUpgradeRequest(context.getStackId(),
                         !clusterUpgradeService.isClusterRuntimeUpgradeNeeded(currentImage, targetImage));
@@ -134,7 +136,9 @@ public class ClusterUpgradeActions {
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterManagerUpgradeSuccess payload, Map<Object, Object> variables) {
                 Image currentImage = getCurrentImage(variables).getImage();
-                Image targetImage = getTargetImage(variables).getImage();
+                StatedImage targetStatedImage = getTargetImage(variables);
+                Image targetImage = targetStatedImage.getImage();
+                imageComponentUpdaterService.updateComponentsForUpgrade(targetStatedImage, payload.getResourceId());
                 boolean clusterRuntimeUpgradeNeeded = clusterUpgradeService.upgradeCluster(context.getStackId(), currentImage, targetImage);
                 Selectable event;
                 if (clusterRuntimeUpgradeNeeded) {
