@@ -16,6 +16,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -30,6 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -52,6 +54,7 @@ import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidato
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
+import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
@@ -64,6 +67,8 @@ import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameters.dao.domain.GcpParameters;
 import com.sequenceiq.environment.parameters.dao.repository.AzureParametersRepository;
 import com.sequenceiq.environment.parameters.service.ParametersService;
+import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
 
 @ExtendWith(SpringExtension.class)
 class EnvironmentModificationServiceTest {
@@ -103,6 +108,9 @@ class EnvironmentModificationServiceTest {
 
     @MockBean
     private AzureParametersRepository azureParametersRepository;
+
+    @MockBean
+    private DnsV1Endpoint dnsV1Endpoint;
 
     @Mock
     private EnvironmentValidatorService validatorService;
@@ -803,6 +811,45 @@ class EnvironmentModificationServiceTest {
         environmentModificationServiceUnderTest.updateAzureResourceEncryptionParametersByEnvironmentCrn(ACCOUNT_ID,
                 ENVIRONMENT_NAME, updateAzureResourceEncryptionDto);
         verify(environmentDtoConverter, times(1)).environmentToDto(env);
+    }
+
+    @Test
+    void editByNameSubnetIdChangehange() {
+        BaseNetwork awsNetwork = new AwsNetwork();
+
+        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withNetwork(
+                        NetworkDto.builder()
+                                .withNetworkId("abs-123")
+                                .withSubnetMetas(Map.of("subnet-1", new CloudSubnet()))
+                                .build())
+                .build();
+        Environment environment = new Environment();
+        when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID)))
+                .thenReturn(Optional.of(environment));
+        when(networkService.validate(any(), any(), any()))
+                .thenReturn(awsNetwork);
+        when(networkService.refreshMetadataFromCloudProvider(any(), any(), any()))
+                .thenReturn(awsNetwork);
+        when(dnsV1Endpoint.addDnsZoneForSubnetIds(any())).thenReturn(new AddDnsZoneForSubnetsResponse());
+        when(environmentService.save(any()))
+                .thenReturn(environment);
+        when(environmentDtoConverter.environmentToDto(environment))
+                .thenReturn(new EnvironmentDto());
+        when(environmentDtoConverter.networkToNetworkDto(any()))
+                .thenReturn(NetworkDto.builder().withNetworkId("abs-123").build());
+
+        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+
+        verify(environmentService, times(1)).findByNameAndAccountIdAndArchivedIsFalse(any(), anyString());
+        verify(networkService, times(1)).validate(any(), any(), any());
+        verify(networkService, times(1)).refreshMetadataFromCloudProvider(any(), any(), any());
+        verify(dnsV1Endpoint, times(1)).addDnsZoneForSubnetIds(any());
+        verify(environmentService, times(1)).save(any());
+        verify(environmentDtoConverter, times(1)).environmentToDto(any());
+        verify(environmentDtoConverter, times(1)).networkToNetworkDto(any());
+
     }
 
     @Configuration

@@ -28,6 +28,7 @@ import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
+import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
@@ -202,6 +203,15 @@ public class EnvironmentDtoConverter {
         environment.setExperimentalFeaturesJson(creationDto.getExperimentalFeatures());
         setRegions(creationDto, environment);
         return environment;
+    }
+
+    public NetworkDto networkToNetworkDto(Environment environment) {
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
+        NetworkDto result = null;
+        if (environment.getNetwork() != null) {
+            result = environmentNetworkConverterMap.get(cloudPlatform).convertToDto(environment.getNetwork());
+        }
+        return result;
     }
 
     private void setRegions(EnvironmentCreationDto creationDto, Environment environment) {

@@ -39,6 +39,7 @@ import com.sequenceiq.environment.environment.validation.EnvironmentValidatorSer
 import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
 import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
@@ -48,6 +49,9 @@ import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameters.dao.repository.AzureParametersRepository;
 import com.sequenceiq.environment.parameters.service.ParametersService;
+import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
+import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneNetwork;
 
 @Service
 public class EnvironmentModificationService {
@@ -74,11 +78,20 @@ public class EnvironmentModificationService {
 
     private final AzureParametersRepository azureParametersRepository;
 
-    public EnvironmentModificationService(EnvironmentDtoConverter environmentDtoConverter, EnvironmentService environmentService,
-            CredentialService credentialService, NetworkService networkService, AuthenticationDtoConverter authenticationDtoConverter,
-            ParametersService parametersService, EnvironmentFlowValidatorService environmentFlowValidatorService,
-            EnvironmentResourceService environmentResourceService, EnvironmentEncryptionService environmentEncryptionService,
-            AzureParametersRepository azureParametersRepository) {
+    private final DnsV1Endpoint dnsV1Endpoint;
+
+    public EnvironmentModificationService(
+            EnvironmentDtoConverter environmentDtoConverter,
+            EnvironmentService environmentService,
+            CredentialService credentialService,
+            NetworkService networkService,
+            AuthenticationDtoConverter authenticationDtoConverter,
+            ParametersService parametersService,
+            EnvironmentFlowValidatorService environmentFlowValidatorService,
+            EnvironmentResourceService environmentResourceService,
+            EnvironmentEncryptionService environmentEncryptionService,
+            AzureParametersRepository azureParametersRepository,
+            DnsV1Endpoint dnsV1Endpoint) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentService = environmentService;
         this.credentialService = credentialService;
@@ -89,6 +102,7 @@ public class EnvironmentModificationService {
         this.environmentResourceService = environmentResourceService;
         this.environmentEncryptionService = environmentEncryptionService;
         this.azureParametersRepository = azureParametersRepository;
+        this.dnsV1Endpoint = dnsV1Endpoint;
     }
 
     public EnvironmentDto editByName(String environmentName, EnvironmentEditDto editDto) {
@@ -161,6 +175,7 @@ public class EnvironmentModificationService {
         editCloudStorageValidation(editDto, env);
         editTunnelIfChanged(editDto, env);
         editEnvironmentParameters(editDto, env);
+        editFreeIPA(editDto, env);
         Environment saved = environmentService.save(env);
         return environmentDtoConverter.environmentToDto(saved);
     }
@@ -355,6 +370,36 @@ public class EnvironmentModificationService {
         if (editDto.getAdminGroupName() != null) {
             environmentService.setAdminGroupName(environment, editDto.getAdminGroupName());
         }
+    }
+
+    private boolean shouldSendSubnetIdsToFreeIpa(AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest) {
+        AddDnsZoneNetwork addDnsZoneNetwork = addDnsZoneForSubnetIdsRequest.getAddDnsZoneNetwork();
+        return StringUtils.isNotBlank(addDnsZoneNetwork.getNetworkId())
+                && addDnsZoneNetwork.getSubnetIds() != null
+                && !addDnsZoneNetwork.getSubnetIds().isEmpty();
+    }
+
+    private void editFreeIPA(EnvironmentEditDto editDto, Environment environment) {
+        NetworkDto networkDto = environmentDtoConverter.networkToNetworkDto(environment);
+        AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(editDto, environment, networkDto);
+        if (shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
+            dnsV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
+        }
+    }
+
+    private AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest(EnvironmentEditDto environmentEditDto,
+            Environment environment, NetworkDto networkDto) {
+        AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = new AddDnsZoneForSubnetIdsRequest();
+        addDnsZoneForSubnetIdsRequest.setEnvironmentCrn(environment.getResourceCrn());
+        AddDnsZoneNetwork addDnsZoneNetwork = new AddDnsZoneNetwork();
+        if (networkDto != null) {
+            addDnsZoneNetwork.setNetworkId(networkDto.getNetworkId());
+        }
+        if (environmentEditDto.getNetworkDto() != null) {
+            addDnsZoneNetwork.setSubnetIds(environmentEditDto.getNetworkDto().getSubnetIds());
+        }
+        addDnsZoneForSubnetIdsRequest.setAddDnsZoneNetwork(addDnsZoneNetwork);
+        return addDnsZoneForSubnetIdsRequest;
     }
 
     private void editEnvironmentParameters(EnvironmentEditDto editDto, Environment environment) {
