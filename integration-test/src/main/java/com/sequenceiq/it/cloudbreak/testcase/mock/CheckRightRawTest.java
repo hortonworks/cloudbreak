@@ -33,7 +33,7 @@ public class CheckRightRawTest extends AbstractMockTest {
                 .withRequest("{\"rights\":[\"ENV_CREATE\",\"DISTROX_READ2\"]}")
                 .when(utilTestClient.checkRightRaw())
                 .then((context, dto, client) -> {
-                    Assertions.assertThat(dto.getResponse()).contains("ENVIRONMENT_READ");
+                    Assertions.assertThat(dto.getResponse()).contains("ENV_DESCRIBE");
                     return dto;
                 })
                 .validate();

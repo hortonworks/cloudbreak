@@ -37,14 +37,14 @@ public class UmsAccountAuthorizationServiceTest {
 
     @Test
     public void testCheckRight() {
-        when(umsRightProvider.getRight(any())).thenReturn(AuthorizationResourceAction.DATALAKE_READ.getRight());
+        when(umsRightProvider.getRight(any())).thenReturn(AuthorizationResourceAction.DESCRIBE_DATALAKE.getRight());
 
         AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
                     checkRightOfUser(USER_CRN, AuthorizationResourceAction.DESCRIBE_DATALAKE));
         });
 
-        assertEquals("You have no right to perform datalake/read in account 1234", exception.getMessage());
+        assertEquals("You have no right to perform datalake/describeDatalake in account 1234", exception.getMessage());
     }
 
     @Test
@@ -65,17 +65,17 @@ public class UmsAccountAuthorizationServiceTest {
         String userInDifferentAccount = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
         AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
-                checkCallerIsSelfOrHasRight(USER_CRN, userInDifferentAccount, AuthorizationResourceAction.DATALAKE_READ)));
+                checkCallerIsSelfOrHasRight(USER_CRN, userInDifferentAccount, AuthorizationResourceAction.DESCRIBE_DATALAKE)));
         assertEquals("Unauthorized to run this operation in a different account", exception.getMessage());
     }
 
     @Test
     public void testActorAndTargetDifferentAndMissingRight() {
         String user2 = "crn:cdp:iam:us-west-1:1234:user:someOtherUserId";
-        when(umsRightProvider.getRight(any())).thenReturn(AuthorizationResourceAction.DATALAKE_READ.getRight());
+        when(umsRightProvider.getRight(any())).thenReturn(AuthorizationResourceAction.DESCRIBE_DATALAKE.getRight());
         AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
-                checkCallerIsSelfOrHasRight(USER_CRN, user2, AuthorizationResourceAction.DATALAKE_READ)));
-        assertEquals("You have no right to perform datalake/read in account 1234", exception.getMessage());
+                checkCallerIsSelfOrHasRight(USER_CRN, user2, AuthorizationResourceAction.DESCRIBE_DATALAKE)));
+        assertEquals("You have no right to perform datalake/describeDatalake in account 1234", exception.getMessage());
     }
 
     @Test
@@ -85,6 +85,6 @@ public class UmsAccountAuthorizationServiceTest {
         when(umsClient.checkAccountRight(any(), any(), any())).thenReturn(true);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
-                checkCallerIsSelfOrHasRight(USER_CRN, user2, AuthorizationResourceAction.DATALAKE_READ));
+                checkCallerIsSelfOrHasRight(USER_CRN, user2, AuthorizationResourceAction.DESCRIBE_DATALAKE));
     }
 }

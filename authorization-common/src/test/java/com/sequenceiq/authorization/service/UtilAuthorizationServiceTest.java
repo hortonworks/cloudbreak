@@ -92,14 +92,14 @@ public class UtilAuthorizationServiceTest {
         when(grpcUmsClient.hasRights(anyString(), any(), any())).thenReturn(Lists.newArrayList(Boolean.TRUE, Boolean.FALSE));
 
         CheckRightV4Request rightReq = new CheckRightV4Request();
-        rightReq.setRights(Lists.newArrayList(RightV4.ENV_CREATE, RightV4.DISTROX_READ));
+        rightReq.setRights(Lists.newArrayList(RightV4.ENV_CREATE, RightV4.DH_DESCRIBE));
         CheckRightV4Response rightResult = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.checkRights(rightReq));
 
         rightResult.getResponses().forEach(checkRightV4SingleResponse -> {
             if (checkRightV4SingleResponse.getRight().equals(RightV4.ENV_CREATE)) {
                 assertTrue(checkRightV4SingleResponse.getResult());
             }
-            if (checkRightV4SingleResponse.getRight().equals(RightV4.DISTROX_READ)) {
+            if (checkRightV4SingleResponse.getRight().equals(RightV4.DH_DESCRIBE)) {
                 assertFalse(checkRightV4SingleResponse.getResult());
             }
         });
