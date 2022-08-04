@@ -79,6 +79,12 @@ public class RestUrlParserTest {
 
     private static final String SLASH = "/";
 
+    private static final String[] EXCLUDES = {"/v1/distrox", "/v1/internal/distrox", "/flow-public", "/autoscale",
+            "cluster_templates", "/v4/events", "/v4/diagnostics", "/v4/progress", "/v4/operation",
+            "/v4/custom_configurations"};
+
+    private static final String[] EXCLUDEPATHS = {"/stacks/internal/crn", "/govCloud"};
+
     @Mock
     private ContainerRequestContext containerRequestContext;
 
@@ -87,12 +93,6 @@ public class RestUrlParserTest {
 
     @Autowired
     private List<LegacyRestUrlParser> restUrlParsers;
-
-    private final String[] excludes = {"/v1/distrox", "/v1/internal/distrox", "/flow-public", "/autoscale",
-            "cluster_templates", "/v4/events", "/v4/diagnostics", "/v4/progress", "/v4/operation",
-            "/v4/custom_configurations"};
-
-    private final String[] excludePaths = {"/stacks/internal/crn", "/govCloud"};
 
     @Test
     void testEventUrlParser() {
@@ -132,7 +132,7 @@ public class RestUrlParserTest {
                     .findFirst();
             if (endpointClass.isPresent()) {
                 String rootPath = checkAndReturnPath(endpointClass);
-                if (Arrays.stream(excludes).parallel().noneMatch(rootPath::contains)) {
+                if (Arrays.stream(EXCLUDES).parallel().noneMatch(rootPath::contains)) {
                     for (Method method : endpointClass.get().getMethods()) {
                         String methodPath = getMethodPath(rootPath, method);
                         String requestMethod = getRequestMethod(method);
@@ -170,7 +170,7 @@ public class RestUrlParserTest {
 
     private boolean doWeWantToExcludeThePath(String methodPath) {
         boolean exclude = false;
-        for (String excludePath : excludePaths) {
+        for (String excludePath : EXCLUDEPATHS) {
             if (methodPath.contains(excludePath)) {
                 exclude = true;
                 break;

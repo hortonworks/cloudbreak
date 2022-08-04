@@ -52,6 +52,7 @@ import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
+import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -877,6 +878,28 @@ class EnvironmentDtoConverterTest {
 
         assertThat(badRequestException).hasMessage("Failed to convert dynamic tags. This operation is not supported");
         assertThat(badRequestException).hasCauseReference(unsupportedOperationException);
+    }
+
+    @Test
+    public void testNetworkConversionWhenNetworkNotNull() {
+        Environment source = new Environment();
+        source.setId(1L);
+        source.setFreeIpaInstanceType("large");
+        source.setFreeIpaImageId("imageid");
+        source.setFreeIpaImageCatalog("imagecatalog");
+        source.setFreeIpaInstanceCountByGroup(1);
+        source.setFreeIpaEnableMultiAz(true);
+        source.setCreateFreeIpa(true);
+        source.setNetwork(new AwsNetwork());
+        source.setCloudPlatform("AWS");
+        source.setAuthentication(new EnvironmentAuthentication());
+
+        ReflectionTestUtils.setField(underTest, "environmentNetworkConverterMap", Map.ofEntries(entry(CloudPlatform.AWS, environmentNetworkConverter)));
+        when(environmentNetworkConverter.convertToDto(any(BaseNetwork.class))).thenReturn(NetworkDto.builder().build());
+
+        NetworkDto networkDto = underTest.networkToNetworkDto(source);
+
+        assertThat(networkDto).isNotNull();
     }
 
 }
