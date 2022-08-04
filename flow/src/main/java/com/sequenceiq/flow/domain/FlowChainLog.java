@@ -1,6 +1,7 @@
 package com.sequenceiq.flow.domain;
 
 import java.util.Date;
+import java.util.Queue;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,6 +9,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
+
+import com.cedarsoftware.util.io.JsonReader;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 
 @Entity
 public class FlowChainLog {
@@ -91,6 +96,14 @@ public class FlowChainLog {
 
     public String getChain() {
         return chain;
+    }
+
+    public Queue<Selectable> getChainAsQueue() {
+        if (null != chainJackson) {
+            return TypedJsonUtil.readValueWithJsonIoFallback(chainJackson, chain, Queue.class);
+        } else {
+            return (Queue<Selectable>) JsonReader.jsonToJava(chain);
+        }
     }
 
     public void setChain(String chain) {

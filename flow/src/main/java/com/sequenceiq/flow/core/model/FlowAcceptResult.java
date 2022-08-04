@@ -1,5 +1,7 @@
 package com.sequenceiq.flow.core.model;
 
+import static com.sequenceiq.flow.core.model.ResultType.ALREADY_EXISTING_FLOW;
+
 import java.util.Collections;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -28,7 +30,7 @@ public class FlowAcceptResult implements AcceptResult {
     }
 
     public static FlowAcceptResult alreadyExistingFlow(Set<FlowLogIdWithTypeAndTimestamp> alreadyRunningFlows) {
-        return new FlowAcceptResult(ResultType.ALREADY_EXISTING_FLOW, alreadyRunningFlows);
+        return new FlowAcceptResult(ALREADY_EXISTING_FLOW, alreadyRunningFlows);
     }
 
     public static FlowAcceptResult runningInFlow(String flowId) {
@@ -63,9 +65,22 @@ public class FlowAcceptResult implements AcceptResult {
 
     @Override
     public String toString() {
+        String body;
+        switch (resultType) {
+            case RUNNING_IN_FLOW:
+                body = "flowId=" + pollableId;
+                break;
+            case RUNNING_IN_FLOW_CHAIN:
+                body = "flowChainId=" + pollableId;
+                break;
+            case ALREADY_EXISTING_FLOW:
+                body = ALREADY_EXISTING_FLOW.name().toLowerCase();
+                break;
+            default:
+                body = "resultType=" + resultType + ", pollableId=" + pollableId;
+        }
         return new StringJoiner(", ", FlowAcceptResult.class.getSimpleName() + "[", "]")
-                .add("resultType=" + resultType)
-                .add("pollableId='" + pollableId + "'")
+                .add(body)
                 .toString();
     }
 }

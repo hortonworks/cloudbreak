@@ -77,7 +77,7 @@ class FlowChainLogServiceTest {
     }
 
     @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = { false, true })
+    @ValueSource(booleans = {false, true})
     void testCheckIfThereIsEventInQueues(boolean useJackson) {
         List<FlowChainLog> flowChains = List.of(
                 flowChainLog("1", true, 1L, useJackson),
@@ -89,7 +89,7 @@ class FlowChainLogServiceTest {
     }
 
     @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = { false, true })
+    @ValueSource(booleans = {false, true})
     void testCheckIfThereIsNoEventInQueues(boolean useJackson) {
         List<FlowChainLog> flowChains = List.of(
                 flowChainLog("1", true, 1L, useJackson),
@@ -101,7 +101,7 @@ class FlowChainLogServiceTest {
     }
 
     @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = { false, true })
+    @ValueSource(booleans = {false, true})
     void testCheckIfThereIsEventInQueuesBasedOnlatestChains(boolean useJackson) {
         List<FlowChainLog> flowChains = List.of(
                 flowChainLog("1", false, 1L, useJackson),
@@ -157,6 +157,7 @@ class FlowChainLogServiceTest {
         flowChainLog.setFlowChainId(flowChainId);
         flowChainLog.setParentFlowChainId(parentFlowChainId);
         flowChainLog.setCreated(created);
+        flowChainLog.setChain(JsonWriter.objectToJson(new ConcurrentLinkedQueue<>()));
         return flowChainLog;
     }
 

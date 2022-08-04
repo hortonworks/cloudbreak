@@ -98,4 +98,13 @@ public class SleepStartEvent implements IdempotentEvent<SleepStartEvent> {
     public int hashCode() {
         return Objects.hash(resourceId, sleepDuration, failUntil);
     }
+
+    @Override
+    public String toString() {
+        return "SleepStartEvent{" +
+                "resourceId=" + resourceId +
+                ", sleepDuration=" + sleepDuration +
+                ", failUntil=" + failUntil +
+                '}';
+    }
 }
