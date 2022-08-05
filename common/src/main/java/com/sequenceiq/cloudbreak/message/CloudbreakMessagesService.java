@@ -33,4 +33,12 @@ public class CloudbreakMessagesService {
             return e.getMessage();
         }
     }
+
+    public String getMessageWithArgs(String code, Object... args) {
+        try {
+            return messageSource.getMessage(code, args, Locale.getDefault());
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
 }

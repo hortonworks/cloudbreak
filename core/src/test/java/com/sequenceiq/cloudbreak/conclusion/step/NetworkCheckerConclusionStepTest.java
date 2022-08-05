@@ -1,9 +1,17 @@
 package com.sequenceiq.cloudbreak.conclusion.step;
 
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_CCM_NOT_ACCESSIBLE;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_CCM_NOT_ACCESSIBLE_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_NEIGHBOUR_NOT_ACCESSIBLE;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_NEIGHBOUR_NOT_ACCESSIBLE_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NODE_STATUS_MONITOR_UNREACHABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,6 +33,7 @@ import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetai
 import com.sequenceiq.cloudbreak.client.RPCMessage;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,17 +42,21 @@ class NetworkCheckerConclusionStepTest {
     @Mock
     private NodeStatusService nodeStatusService;
 
+    @Mock
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
     @InjectMocks
     private NetworkCheckerConclusionStep underTest;
 
     @Test
     public void checkShouldBeSuccessfulIfNetworkReportFailedForOlderImageVersions() {
+        when(cloudbreakMessagesService.getMessage(eq(NODE_STATUS_MONITOR_UNREACHABLE))).thenReturn("node status unreachable");
         when(nodeStatusService.getNetworkReport(eq(1L))).thenThrow(new CloudbreakServiceException("error"));
         Conclusion stepResult = underTest.check(1L);
 
-        assertFalse(stepResult.isFailureFound());
-        assertNull(stepResult.getConclusion());
-        assertNull(stepResult.getDetails());
+        assertTrue(stepResult.isFailureFound());
+        assertEquals("node status unreachable", stepResult.getConclusion());
+        assertEquals("error", stepResult.getDetails());
         assertEquals(NetworkCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(nodeStatusService, times(1)).getNetworkReport(eq(1L));
     }
@@ -84,6 +97,8 @@ class NetworkCheckerConclusionStepTest {
 
     @Test
     public void checkShouldFailAndReturnConclusionIfCcmIsNotAccessible() {
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(NETWORK_CCM_NOT_ACCESSIBLE), any())).thenReturn("ccm error");
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(NETWORK_CCM_NOT_ACCESSIBLE_DETAILS), any())).thenReturn("ccm error details");
         NetworkDetails networkDetails = NetworkDetails.newBuilder()
                 .setCcmEnabled(true)
                 .setCcmAccessible(HealthStatus.NOK)
@@ -94,14 +109,16 @@ class NetworkCheckerConclusionStepTest {
         Conclusion stepResult = underTest.check(1L);
 
         assertTrue(stepResult.isFailureFound());
-        assertEquals("[CCM is not accessible from node host1. Please check network settings!]", stepResult.getConclusion());
-        assertEquals("[CCM health status is NOK for node host1]", stepResult.getDetails());
+        assertEquals("[ccm error]", stepResult.getConclusion());
+        assertEquals("[ccm error details]", stepResult.getDetails());
         assertEquals(NetworkCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(nodeStatusService, times(1)).getNetworkReport(eq(1L));
     }
 
     @Test
     public void checkShouldFailAndReturnConclusionIfClouderaComIsNotAccessible() {
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE), any())).thenReturn("cloudera.com error");
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE_DETAILS), any())).thenReturn("cloudera.com error details");
         NetworkDetails networkDetails = NetworkDetails.newBuilder()
                 .setCcmEnabled(true)
                 .setCcmAccessible(HealthStatus.OK)
@@ -112,14 +129,16 @@ class NetworkCheckerConclusionStepTest {
         Conclusion stepResult = underTest.check(1L);
 
         assertTrue(stepResult.isFailureFound());
-        assertEquals("[Cloudera.com is not accessible from node: host1. Please check network settings!]", stepResult.getConclusion());
-        assertEquals("[Cloudera.com accessibility status is NOK for node host1]", stepResult.getDetails());
+        assertEquals("[cloudera.com error]", stepResult.getConclusion());
+        assertEquals("[cloudera.com error details]", stepResult.getDetails());
         assertEquals(NetworkCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(nodeStatusService, times(1)).getNetworkReport(eq(1L));
     }
 
     @Test
     public void checkShouldFailAndReturnConclusionIfNeighboursAreNotAccessible() {
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(NETWORK_NEIGHBOUR_NOT_ACCESSIBLE), any())).thenReturn("neighbour error");
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(NETWORK_NEIGHBOUR_NOT_ACCESSIBLE_DETAILS), any())).thenReturn("neighbour error details");
         NetworkDetails networkDetails = NetworkDetails.newBuilder()
                 .setCcmEnabled(true)
                 .setNeighbourScan(true)
@@ -131,8 +150,8 @@ class NetworkCheckerConclusionStepTest {
         Conclusion stepResult = underTest.check(1L);
 
         assertTrue(stepResult.isFailureFound());
-        assertEquals("[Node host1 cannot reach any neighbour nodes. Please check nodes and network settings!]", stepResult.getConclusion());
-        assertEquals("[Neighbours accessibility status is NOK for node host1]", stepResult.getDetails());
+        assertEquals("[neighbour error]", stepResult.getConclusion());
+        assertEquals("[neighbour error details]", stepResult.getDetails());
         assertEquals(NetworkCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(nodeStatusService, times(1)).getNetworkReport(eq(1L));
     }
