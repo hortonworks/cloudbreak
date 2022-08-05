@@ -14,7 +14,7 @@ class GcpParametersDtoTest {
     @Test
     void testGcpParametersDtoWithEncryptionParametersWithEncryptionKey() {
         GcpParametersDto dummyGcpParametersDto = GcpParametersDto.builder()
-                .withEncryptionParameters(GcpResourceEncryptionParametersDto.builder()
+                .withGcpResourceEncryptionParametersDto(GcpResourceEncryptionParametersDto.builder()
                         .withEncryptionKey(ENCRYPTION_KEY)
                         .build())
                 .build();

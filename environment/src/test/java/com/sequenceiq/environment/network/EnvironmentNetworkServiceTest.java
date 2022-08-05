@@ -288,7 +288,7 @@ class EnvironmentNetworkServiceTest {
                         .build())
                 .withParameters(
                         ParametersDto.builder().withAzureParametersDto(
-                                AzureParametersDto.builder().withResourceGroup(
+                                AzureParametersDto.builder().withAzureResourceGroupDto(
                                         AzureResourceGroupDto.builder()
                                                 .withResourceGroupUsagePattern(resourceGroupUsagePattern)
                                                 .withName(singleRgName)

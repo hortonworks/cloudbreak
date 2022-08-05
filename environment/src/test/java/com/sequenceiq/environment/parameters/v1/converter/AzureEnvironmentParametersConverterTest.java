@@ -57,7 +57,7 @@ public class AzureEnvironmentParametersConverterTest {
             ParametersDto parameters = ParametersDto.builder()
                     .withId(ID)
                     .withAzureParametersDto(AzureParametersDto.builder()
-                            .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                            .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
                                     .withEncryptionKeyUrl(KEY_URL)
                                     .withEncryptionKeyResourceGroupName(KEY_RESOURCE_GROUP_NAME)
                                     .build())

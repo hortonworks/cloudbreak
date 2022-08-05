@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.network.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+@JsonDeserialize(builder = YarnParams.Builder.class)
 public class YarnParams {
 
     private String queue;
@@ -39,6 +43,7 @@ public class YarnParams {
                 '}';
     }
 
+    @JsonPOJOBuilder
     public static final class Builder {
 
         private String queue;

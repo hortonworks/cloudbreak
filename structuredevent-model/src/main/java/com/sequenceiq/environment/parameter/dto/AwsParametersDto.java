@@ -1,8 +1,11 @@
 package com.sequenceiq.environment.parameter.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardParameters;
 import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
 
+@JsonDeserialize(builder = AwsParametersDto.Builder.class)
 public class AwsParametersDto implements S3GuardParameters {
 
     private final String dynamoDbTableName;
@@ -13,7 +16,7 @@ public class AwsParametersDto implements S3GuardParameters {
 
     private Double freeIpaSpotMaxPrice;
 
-    private AwsDiskEncryptionParametersDto awsDiskEncryptionParametersDto;
+    private final AwsDiskEncryptionParametersDto awsDiskEncryptionParametersDto;
 
     private AwsParametersDto(Builder builder) {
         dynamoDbTableName = builder.dynamoDbTableName;
@@ -72,6 +75,7 @@ public class AwsParametersDto implements S3GuardParameters {
                 + '}';
     }
 
+    @JsonPOJOBuilder
     public static final class Builder {
 
         private String dynamoDbTableName;
@@ -107,7 +111,7 @@ public class AwsParametersDto implements S3GuardParameters {
             return this;
         }
 
-        public Builder withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto awsDiskEncryptionParametersDto) {
+        public Builder withAwsDiskEncryptionParametersDto(AwsDiskEncryptionParametersDto awsDiskEncryptionParametersDto) {
             this.awsDiskEncryptionParametersDto = awsDiskEncryptionParametersDto;
             return this;
         }

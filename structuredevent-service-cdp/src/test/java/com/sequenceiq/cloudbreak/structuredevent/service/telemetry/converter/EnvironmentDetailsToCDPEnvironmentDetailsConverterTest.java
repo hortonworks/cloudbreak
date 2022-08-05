@@ -81,7 +81,7 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
     void testConversionSingleResourceGroupWhenAzureUsingSingleResourceGroupShouldReturnSingleResourceGroupTrue() {
         ParametersDto parametersDto = ParametersDto.builder()
                 .withAzureParametersDto(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
                                 .build())
                         .build())
@@ -98,7 +98,7 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
     void testConversionSingleResourceGroupWhenAzureNOTUsingSingleResourceGroupShouldReturnSingleResourceGroupFalse() {
         ParametersDto parametersDto = ParametersDto.builder()
                 .withAzureParametersDto(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
                                 .build())
                         .build())
@@ -115,10 +115,10 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
     void testConversionResourceEncryptionEnabledWhenAzureUsingResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledTrue() {
         ParametersDto parametersDto = ParametersDto.builder()
                 .withAzureParametersDto(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
                                 .build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
                                 .withEncryptionKeyUrl("dummyEncryptionKeyUrl")
                                 .build())
                         .build())
@@ -135,7 +135,7 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
     void testConversionResourceEncryptionEnabledWhenAzureNOTResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledFalse() {
         ParametersDto parametersDto = ParametersDto.builder()
                 .withAzureParametersDto(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
                                 .build())
                         .build())
@@ -152,7 +152,7 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
     void testConversionResourceEncryptionEnabledWhenAWSUsingResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledTrue() {
         ParametersDto parametersDto = ParametersDto.builder()
                 .withAwsParametersDto(AwsParametersDto.builder()
-                        .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                        .withAwsDiskEncryptionParametersDto(AwsDiskEncryptionParametersDto.builder()
                                 .withEncryptionKeyArn("dummyEncryptionKeyArn")
                                 .build())
                         .build())
@@ -180,7 +180,7 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
     void testConversionResourceEncryptionEnabledWhenGcpUsingResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledTrue() {
         ParametersDto parametersDto = ParametersDto.builder()
                 .withGcpParametersDto(GcpParametersDto.builder()
-                        .withEncryptionParameters(GcpResourceEncryptionParametersDto.builder()
+                        .withGcpResourceEncryptionParametersDto(GcpResourceEncryptionParametersDto.builder()
                                 .withEncryptionKey("dummyEncryptionKeyUrl")
                                 .build())
                         .build())

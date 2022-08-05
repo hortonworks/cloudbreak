@@ -7,7 +7,7 @@ public class AwsParametersDtoTest {
     @Test
     void testAwsParametersDtoWithEncryptionParameters() {
         AwsParametersDto dummyAwsParametersDto = AwsParametersDto.builder()
-                .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                .withAwsDiskEncryptionParametersDto(AwsDiskEncryptionParametersDto.builder()
                         .withEncryptionKeyArn("dummy-key-arn")
                         .build())
                 .build();

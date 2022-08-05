@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.parameter.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+@JsonDeserialize(builder = YarnParametersDto.Builder.class)
 public class YarnParametersDto {
 
     private YarnParametersDto(Builder builder) {
@@ -14,6 +18,7 @@ public class YarnParametersDto {
         return "YarnParametersDto{}";
     }
 
+    @JsonPOJOBuilder
     public static final class Builder {
 
         private Builder() {

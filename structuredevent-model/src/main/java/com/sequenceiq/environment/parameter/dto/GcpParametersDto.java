@@ -1,8 +1,12 @@
 package com.sequenceiq.environment.parameter.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+@JsonDeserialize(builder = GcpParametersDto.Builder.class)
 public class GcpParametersDto {
 
-    private GcpResourceEncryptionParametersDto gcpResourceEncryptionParametersDto;
+    private final GcpResourceEncryptionParametersDto gcpResourceEncryptionParametersDto;
 
     private GcpParametersDto(Builder builder) {
         gcpResourceEncryptionParametersDto = builder.gcpResourceEncryptionParametersDto;
@@ -23,10 +27,11 @@ public class GcpParametersDto {
                 "}";
     }
 
+    @JsonPOJOBuilder
     public static final class Builder {
         private GcpResourceEncryptionParametersDto gcpResourceEncryptionParametersDto;
 
-        public Builder withEncryptionParameters(GcpResourceEncryptionParametersDto gcpResourceEncryptionParametersDto) {
+        public Builder withGcpResourceEncryptionParametersDto(GcpResourceEncryptionParametersDto gcpResourceEncryptionParametersDto) {
             this.gcpResourceEncryptionParametersDto = gcpResourceEncryptionParametersDto;
             return this;
         }

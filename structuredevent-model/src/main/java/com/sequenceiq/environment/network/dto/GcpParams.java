@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.network.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+@JsonDeserialize(builder = GcpParams.Builder.class)
 public class GcpParams {
 
     private final String networkId;
@@ -47,6 +51,7 @@ public class GcpParams {
                 '}';
     }
 
+    @JsonPOJOBuilder
     public static final class Builder {
 
         private String networkId;

@@ -60,7 +60,7 @@ class AwsEnvironmentParametersConverterTest {
                                 .withAwsParametersDto(AwsParametersDto.builder()
                                     .withDynamoDbTableName(TABLE_NAME)
                                     .withDynamoDbTableCreation(S3GuardTableCreation.CREATE_NEW)
-                                    .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                                    .withAwsDiskEncryptionParametersDto(AwsDiskEncryptionParametersDto.builder()
                                             .withEncryptionKeyArn(ENCRYPTION_KEY_ARN)
                                     .build())
                                 .build())

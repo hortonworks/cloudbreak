@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.network.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+@JsonDeserialize(builder = AwsParams.Builder.class)
 public class AwsParams {
 
     private final String vpcId;
@@ -23,6 +27,7 @@ public class AwsParams {
         return new AwsParams.Builder();
     }
 
+    @JsonPOJOBuilder
     public static final class Builder {
         private String vpcId;
 

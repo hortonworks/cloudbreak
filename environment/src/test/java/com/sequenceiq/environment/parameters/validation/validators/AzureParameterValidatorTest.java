@@ -92,9 +92,9 @@ public class AzureParameterValidatorTest {
     public void testWhenUseMultipleResourceGroupsAndNoEncryptionParametersThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
@@ -108,11 +108,11 @@ public class AzureParameterValidatorTest {
     public void testWhenUseExistingResourceGroupAndExistsAndNoEncryptionParametersThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
                                 .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .withName(RESOURCE_GROUP_NAME).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
@@ -131,11 +131,11 @@ public class AzureParameterValidatorTest {
     public void testWhenMultipleResourceGroupAndEmptyNameAndNoEncryptionParametersThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
                                 .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
@@ -154,11 +154,11 @@ public class AzureParameterValidatorTest {
     public void testWhenMultipleResourceGroupAndNonEmptyNameAndNoEncryptionParametersThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
                                 .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .withName(RESOURCE_GROUP_NAME).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
@@ -180,10 +180,10 @@ public class AzureParameterValidatorTest {
     public void testWhenMultipleResourceGroupAndEncryptionKeyUrlAndNoEncryptionKeyResourceGroupNameThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
                                 .build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
                                 .withEncryptionKeyUrl("dummyKeyUrl")
                                 .build())
                         .build())
@@ -207,11 +207,11 @@ public class AzureParameterValidatorTest {
     public void testWhenUseExistingResourceGroupAndEmptyNameAndNoEncryptionParametersThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
                                 .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .withName("").build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
@@ -231,10 +231,10 @@ public class AzureParameterValidatorTest {
     public void testWhenUseExistingResourceGroupAndEmptyResourceGroupUsageAndNoEncryptionParametersThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .withName(RESOURCE_GROUP_NAME).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
@@ -254,11 +254,11 @@ public class AzureParameterValidatorTest {
     public void testWhenUseExistingResourceGroupAndNotExistsAndNoEncryptionParametersThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
                                 .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .withName(RESOURCE_GROUP_NAME).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
@@ -279,9 +279,9 @@ public class AzureParameterValidatorTest {
     public void testWhenFeatureTurnedOffAndUseMultipleAndNoEncryptionParametersThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
@@ -304,11 +304,11 @@ public class AzureParameterValidatorTest {
     public void testWhenFeatureTurnedOffAndUseSingleAndNoEncryptionParametersThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
                                 .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .withName(RESOURCE_GROUP_NAME).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
@@ -330,11 +330,11 @@ public class AzureParameterValidatorTest {
     public void testWhenDedicatedStorageAccountFeatureTurnedOffAndUseSingleAndNoEncryptionParametersThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT)
                                 .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .withName(RESOURCE_GROUP_NAME).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
@@ -357,9 +357,9 @@ public class AzureParameterValidatorTest {
     public void testWhenUseMultipleResourceGroupsAndResourceEncryptionParameterKeyUrlAndEntitlementDisabledThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
                                 .withEncryptionKeyUrl(KEY_URL).build())
                         .build())
                 .build();
@@ -377,9 +377,9 @@ public class AzureParameterValidatorTest {
     public void testWhenUseMultipleResourceGroupsAndResourceEncryptionParameterKeyUrlAndEncryptionKeyResourceGroupAndEntitlementEnabledThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
                                 .withEncryptionKeyUrl(KEY_URL)
                                 .withEncryptionKeyResourceGroupName(RESOURCE_GROUP_NAME)
                                 .build())
@@ -423,8 +423,8 @@ public class AzureParameterValidatorTest {
     public void testWhenResourceEncryptionParameterDiskEncryptionSetIdThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder().build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder().build())
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
                                 .withDiskEncryptionSetId("DummyDesId").build())
                         .build())
                 .build();
@@ -446,9 +446,9 @@ public class AzureParameterValidatorTest {
     public void testWhenUseMultipleResourceGroupsAndResourceEncryptionParameterKeyUrlAndEncryptionKeyResourceGroupNameAndEntitlementEnabledThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
                                 .withEncryptionKeyUrl(KEY_URL)
                                 .withEncryptionKeyResourceGroupName(ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
                                 .build())
@@ -466,9 +466,9 @@ public class AzureParameterValidatorTest {
     public void testWhenUseMultipleResourceGroupsAndResourceEncryptionParameterKeyUrlAndEncryptionKeyResourceGroupNameAndNoEntitlementThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
                                 .withEncryptionKeyUrl(KEY_URL)
                                 .withEncryptionKeyResourceGroupName(ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
                                 .build())
@@ -488,9 +488,9 @@ public class AzureParameterValidatorTest {
     public void testWhenUseMultipleResourceGroupsAndEncryptionKeyResourceGroupNameAndNoEntitlementThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
                                 .withEncryptionKeyResourceGroupName(ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
                                 .build())
                         .build())
@@ -510,9 +510,9 @@ public class AzureParameterValidatorTest {
     public void testWhenUseMultipleResourceGroupsAndEncryptionKeyResourceGroupNameAndNoResourceEncryptionParameterKeyUrlAndEntitlementThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
+                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                        .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
                                 .withEncryptionKeyResourceGroupName(ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
                                 .build())
                         .build())

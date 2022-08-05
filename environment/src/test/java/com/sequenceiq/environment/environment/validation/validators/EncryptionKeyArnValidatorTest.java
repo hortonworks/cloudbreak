@@ -168,7 +168,7 @@ class EncryptionKeyArnValidatorTest {
                 .withCloudPlatform("AWS")
                 .withParameters(ParametersDto.builder()
                         .withAwsParametersDto(AwsParametersDto.builder()
-                                .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                                .withAwsDiskEncryptionParametersDto(AwsDiskEncryptionParametersDto.builder()
                                         .withEncryptionKeyArn(encryptionKeyArn).build())
                                 .build())
                         .build())

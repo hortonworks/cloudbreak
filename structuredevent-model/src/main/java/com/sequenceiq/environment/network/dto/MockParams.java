@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.network.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+@JsonDeserialize(builder = MockParams.Builder.class)
 public class MockParams {
 
     private final String vpcId;
@@ -31,6 +35,7 @@ public class MockParams {
                 '}';
     }
 
+    @JsonPOJOBuilder
     public static final class Builder {
 
         private String vpcId;
