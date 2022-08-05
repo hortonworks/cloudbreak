@@ -8,6 +8,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.conclusion.step.InfoCollectorConclusionStep;
 import com.sequenceiq.cloudbreak.conclusion.step.NetworkCheckerConclusionStep;
 import com.sequenceiq.cloudbreak.conclusion.step.NodeServicesCheckerConclusionStep;
 import com.sequenceiq.cloudbreak.conclusion.step.SaltCheckerConclusionStep;
@@ -36,10 +37,11 @@ public class ConclusionStepNodeFactory {
     }
 
     private static ConclusionStepNode initDefaultConclusionCheckerType() {
-        ConclusionStepNode root = stepNode(SaltCheckerConclusionStep.class)
-                .withSuccessNode(stepNode(NodeServicesCheckerConclusionStep.class)
-                        .withSuccessNode(stepNode(NetworkCheckerConclusionStep.class)))
-                .withFailureNode(stepNode(VmStatusCheckerConclusionStep.class));
+        ConclusionStepNode root = stepNode(InfoCollectorConclusionStep.class)
+                .withSuccessNode(stepNode(SaltCheckerConclusionStep.class)
+                        .withSuccessNode(stepNode(NodeServicesCheckerConclusionStep.class)
+                                .withSuccessNode(stepNode(NetworkCheckerConclusionStep.class)))
+                        .withFailureNode(stepNode(VmStatusCheckerConclusionStep.class)));
         return root;
     }
 }
