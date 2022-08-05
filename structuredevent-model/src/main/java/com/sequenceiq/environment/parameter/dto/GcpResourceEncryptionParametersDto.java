@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.parameter.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+@JsonDeserialize(builder = GcpResourceEncryptionParametersDto.Builder.class)
 public class GcpResourceEncryptionParametersDto {
 
     private final String encryptionKey;
@@ -23,6 +27,7 @@ public class GcpResourceEncryptionParametersDto {
                 '}';
     }
 
+    @JsonPOJOBuilder
     public static final class Builder {
         private String encryptionKey;
 

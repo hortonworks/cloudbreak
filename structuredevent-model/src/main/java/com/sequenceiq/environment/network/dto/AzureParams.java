@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.network.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+@JsonDeserialize(builder = AzureParams.Builder.class)
 public class AzureParams {
 
     private String networkId;
@@ -63,6 +67,7 @@ public class AzureParams {
         return new Builder();
     }
 
+    @JsonPOJOBuilder
     public static final class Builder {
         private String networkId;
 

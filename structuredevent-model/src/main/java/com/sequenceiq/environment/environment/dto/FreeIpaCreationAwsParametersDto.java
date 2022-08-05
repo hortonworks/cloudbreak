@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.environment.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+@JsonDeserialize(builder = FreeIpaCreationAwsParametersDto.Builder.class)
 public class FreeIpaCreationAwsParametersDto {
 
     private final FreeIpaCreationAwsSpotParametersDto spot;
@@ -23,6 +27,7 @@ public class FreeIpaCreationAwsParametersDto {
                 '}';
     }
 
+    @JsonPOJOBuilder
     public static class Builder {
 
         private FreeIpaCreationAwsSpotParametersDto spot;

@@ -190,7 +190,7 @@ class NetworkCreationRequestFactoryTest {
                 .withParameters(ParametersDto.builder()
                         .withAzureParametersDto(
                                 AzureParametersDto.builder()
-                                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                        .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                                 .withName(SINGLE_RG)
                                                 .build())
                                         .build())

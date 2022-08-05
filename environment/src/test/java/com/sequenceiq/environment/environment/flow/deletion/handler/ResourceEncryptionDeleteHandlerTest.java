@@ -91,7 +91,7 @@ class ResourceEncryptionDeleteHandlerTest {
                 .withCloudPlatform("AZURE")
                 .withParameters(ParametersDto.builder()
                         .withAzureParametersDto(AzureParametersDto.builder()
-                                .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                                .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
                                         .withDiskEncryptionSetId("/subscriptions/dummySubscriptionId/resourceGroups/dummyResourceGroup/" +
                                                 "providers/Microsoft.Compute/diskEncryptionSets/dummyDesId")
                                         .withEncryptionKeyUrl("https://dummyVault.vault.azure.net/keys/dummyKey/dummyKeyVersion")

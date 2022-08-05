@@ -189,7 +189,7 @@ public class EnvironmentApiConverter {
         if (Objects.isNull(azureEnvironmentParameters)) {
             return ParametersDto.builder()
                     .withAzureParametersDto(AzureParametersDto.builder()
-                            .withResourceGroup(buildDefaultResourceGroupDto())
+                            .withAzureResourceGroupDto(buildDefaultResourceGroupDto())
                             .build())
                     .build();
         }
@@ -216,7 +216,7 @@ public class EnvironmentApiConverter {
                         .map(AwsEnvironmentParameters::getS3guard)
                         .map(S3GuardRequestParameters::getDynamoDbTableName)
                         .orElse(null))
-                .withAwsDiskEncryptionParameters(Optional.ofNullable(aws)
+                .withAwsDiskEncryptionParametersDto(Optional.ofNullable(aws)
                         .map(AwsEnvironmentParameters::getAwsDiskEncryptionParameters)
                         .filter(awsDiskEncryptionParameters ->  Objects.nonNull(awsDiskEncryptionParameters.getEncryptionKeyArn()))
                         .map(this::awsDiskEncryptionParametersToAwsDiskEncryptionParametersDto)
@@ -242,7 +242,7 @@ public class EnvironmentApiConverter {
 
     private AzureParametersDto azureParamsToAzureParametersDto(AzureEnvironmentParameters azureEnvironmentParameters) {
         return AzureParametersDto.builder()
-                .withResourceGroup(
+                .withAzureResourceGroupDto(
                         Optional.ofNullable(azureEnvironmentParameters)
                                 .map(AzureEnvironmentParameters::getResourceGroup)
                                 .filter(resourceGroup -> Objects.nonNull(resourceGroup.getResourceGroupUsage())
@@ -250,7 +250,7 @@ public class EnvironmentApiConverter {
                                 .map(this::azureResourceGroupToAzureResourceGroupDto)
                                 .orElse(buildDefaultResourceGroupDto())
                 )
-                .withEncryptionParameters(
+                .withAzureResourceEncryptionParametersDto(
                         Optional.ofNullable(azureEnvironmentParameters)
                                 .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
                                 .filter(resourceEncryptionParameters -> Objects.nonNull(resourceEncryptionParameters.getEncryptionKeyUrl()))
@@ -262,7 +262,7 @@ public class EnvironmentApiConverter {
 
     private GcpParametersDto gcpParamsToGcpParametersDto(GcpEnvironmentParameters gcpEnvironmentParameters) {
         return GcpParametersDto.builder()
-                .withEncryptionParameters(
+                .withGcpResourceEncryptionParametersDto(
                         Optional.ofNullable(gcpEnvironmentParameters)
                                 .map(GcpEnvironmentParameters::getGcpResourceEncryptionParameters)
                                 .filter(gcpResourceEncryptionParameters -> Objects.nonNull(gcpResourceEncryptionParameters.getEncryptionKey()))

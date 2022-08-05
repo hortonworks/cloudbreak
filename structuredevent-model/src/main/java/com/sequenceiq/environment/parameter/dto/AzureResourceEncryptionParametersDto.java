@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.parameter.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+@JsonDeserialize(builder = AzureResourceEncryptionParametersDto.Builder.class)
 public class AzureResourceEncryptionParametersDto {
     private final String encryptionKeyUrl;
 
@@ -38,6 +42,7 @@ public class AzureResourceEncryptionParametersDto {
                 '}';
     }
 
+    @JsonPOJOBuilder
     public static final class Builder {
         private String encryptionKeyUrl;
 

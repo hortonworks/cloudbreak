@@ -51,7 +51,7 @@ public class GcpParameterValidatorTest {
     public void testWhenFeatureTurnedOffAndEncryptionKeyProvidedThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withGcpParameters(GcpParametersDto.builder()
-                        .withEncryptionParameters(GcpResourceEncryptionParametersDto.builder()
+                        .withGcpResourceEncryptionParametersDto(GcpResourceEncryptionParametersDto.builder()
                                 .withEncryptionKey(ENCRYPTION_KEY)
                                 .build())
                         .build())
@@ -69,7 +69,7 @@ public class GcpParameterValidatorTest {
     public void testWhenFeatureTurnedONAndEncryptionKeyNotProvidedThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withGcpParameters(GcpParametersDto.builder()
-                        .withEncryptionParameters(GcpResourceEncryptionParametersDto.builder().build())
+                        .withGcpResourceEncryptionParametersDto(GcpResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
@@ -85,7 +85,7 @@ public class GcpParameterValidatorTest {
     public void testWhenFeatureTurnedONAndEncryptionKeyProvidedThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withGcpParameters(GcpParametersDto.builder()
-                        .withEncryptionParameters(GcpResourceEncryptionParametersDto.builder()
+                        .withGcpResourceEncryptionParametersDto(GcpResourceEncryptionParametersDto.builder()
                                 .withEncryptionKey(ENCRYPTION_KEY)
                                 .build())
                         .build())

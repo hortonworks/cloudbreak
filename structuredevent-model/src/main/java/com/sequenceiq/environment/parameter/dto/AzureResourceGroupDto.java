@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.parameter.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+@JsonDeserialize(builder = AzureResourceGroupDto.Builder.class)
 public class AzureResourceGroupDto {
 
     private final String name;
@@ -39,6 +43,7 @@ public class AzureResourceGroupDto {
                 '}';
     }
 
+    @JsonPOJOBuilder
     public static final class Builder {
         private String name;
 

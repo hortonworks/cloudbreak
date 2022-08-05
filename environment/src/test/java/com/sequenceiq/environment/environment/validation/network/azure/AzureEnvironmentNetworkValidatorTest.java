@@ -320,7 +320,7 @@ class AzureEnvironmentNetworkValidatorTest {
                         .withParameters(ParametersDto.builder()
                                 .withAzureParametersDto(
                                         AzureParametersDto.builder()
-                                                .withResourceGroup(AzureResourceGroupDto.builder()
+                                                .withAzureResourceGroupDto(AzureResourceGroupDto.builder()
                                                         .withName(name)
                                                         .withResourceGroupUsagePattern(resourceGroupUsagePattern)
                                                         .build())

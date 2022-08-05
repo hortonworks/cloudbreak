@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.environment.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+@JsonDeserialize(builder = FreeIpaCreationAwsSpotParametersDto.Builder.class)
 public class FreeIpaCreationAwsSpotParametersDto {
 
     private final Integer percentage;
@@ -31,6 +35,7 @@ public class FreeIpaCreationAwsSpotParametersDto {
                 '}';
     }
 
+    @JsonPOJOBuilder
     public static class Builder {
 
         private Integer percentage;

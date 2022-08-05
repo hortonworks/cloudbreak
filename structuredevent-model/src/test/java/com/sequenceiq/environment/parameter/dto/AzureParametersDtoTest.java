@@ -13,7 +13,7 @@ public class AzureParametersDtoTest {
     @Test
     void testAzureParametersDtoWithEncryptionParametersWithEncryptionKeyUrlAndEncryptionKeyResourceGroupName() {
         AzureParametersDto dummyAzureParametersDto = AzureParametersDto.builder()
-                .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
                         .withEncryptionKeyUrl("dummy-key-url")
                         .withEncryptionKeyResourceGroupName("dummyResourceGroupName")
                         .build())
@@ -25,7 +25,7 @@ public class AzureParametersDtoTest {
     @Test
     void testAzureParametersDtoWithEncryptionParametersWithEncryptionKeyUrl() {
         AzureParametersDto dummyAzureParametersDto = AzureParametersDto.builder()
-                .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
                         .withEncryptionKeyUrl("dummy-key-url")
                         .build())
                 .build();

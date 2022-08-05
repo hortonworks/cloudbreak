@@ -321,13 +321,13 @@ public class EnvironmentResponseConverterTest {
                         .withDynamoDbTableName("my-table")
                         .build())
                 .withAzureParametersDto(AzureParametersDto.builder()
-                        .withResourceGroup(
+                        .withAzureResourceGroupDto(
                                 AzureResourceGroupDto.builder()
                                         .withName("my-resource-group-name")
                                         .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                         .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
                                         .build())
-                        .withEncryptionParameters(
+                        .withAzureResourceEncryptionParametersDto(
                                 AzureResourceEncryptionParametersDto.builder()
                                         .withEncryptionKeyUrl("dummy-key-url")
                                         .withDiskEncryptionSetId("dummy-des-id")
@@ -340,7 +340,7 @@ public class EnvironmentResponseConverterTest {
     private ParametersDto createGcpParameters() {
         return ParametersDto.builder()
                 .withGcpParametersDto(GcpParametersDto.builder()
-                        .withEncryptionParameters(
+                        .withGcpResourceEncryptionParametersDto(
                                 GcpResourceEncryptionParametersDto.builder()
                                         .withEncryptionKey("dummy-encryption-key")
                                         .build())
@@ -354,7 +354,7 @@ public class EnvironmentResponseConverterTest {
                         .withDynamoDbTableName("my-table")
                         .build())
                 .withAwsParametersDto(AwsParametersDto.builder()
-                        .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                        .withAwsDiskEncryptionParametersDto(AwsDiskEncryptionParametersDto.builder()
                                 .withEncryptionKeyArn("dummy-key-arn")
                         .build())
                         .build())

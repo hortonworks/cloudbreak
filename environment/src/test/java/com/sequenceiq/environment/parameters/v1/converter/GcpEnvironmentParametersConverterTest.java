@@ -54,7 +54,7 @@ class GcpEnvironmentParametersConverterTest {
         ParametersDto parameters = ParametersDto.builder()
                 .withId(ID)
                 .withGcpParametersDto(GcpParametersDto.builder()
-                        .withEncryptionParameters(GcpResourceEncryptionParametersDto.builder()
+                        .withGcpResourceEncryptionParametersDto(GcpResourceEncryptionParametersDto.builder()
                                 .withEncryptionKey(ENCRYPTION_KEY)
                                 .build())
                         .build())

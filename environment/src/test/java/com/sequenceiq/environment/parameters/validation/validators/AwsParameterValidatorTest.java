@@ -126,7 +126,7 @@ class AwsParameterValidatorTest {
 
         EnvironmentDto environmentDto = new AwsParameterValidatorTest.EnvironmentDtoBuilder()
                 .withAwsParameters(AwsParametersDto.builder()
-                        .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                        .withAwsDiskEncryptionParametersDto(AwsDiskEncryptionParametersDto.builder()
                                 .withEncryptionKeyArn("dummy-key-arn")
                                 .build())
                         .build())
@@ -179,7 +179,7 @@ class AwsParameterValidatorTest {
     public void testWhenEncryptionKeyArnPresentAndEntitlementDisabledThenError() {
         EnvironmentDto environmentDto = new AwsParameterValidatorTest.EnvironmentDtoBuilder()
                                         .withAwsParameters(AwsParametersDto.builder()
-                                        .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                                        .withAwsDiskEncryptionParametersDto(AwsDiskEncryptionParametersDto.builder()
                                             .withEncryptionKeyArn("dummy-key-arn")
                                             .build())
                                             .build())
@@ -199,7 +199,7 @@ class AwsParameterValidatorTest {
     public void testWhenEncryptionKeyArnPresentAndEntitlementEnabledThenNoError() {
         EnvironmentDto environmentDto = new AwsParameterValidatorTest.EnvironmentDtoBuilder()
                                             .withAwsParameters(AwsParametersDto.builder()
-                                            .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                                            .withAwsDiskEncryptionParametersDto(AwsDiskEncryptionParametersDto.builder()
                                                     .withEncryptionKeyArn("dummy-key-arn")
                                                     .build())
                                                     .build())

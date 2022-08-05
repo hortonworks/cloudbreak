@@ -78,7 +78,7 @@ public class FlowPayloadSerializabilityChecker {
         checkMissingGetters(clazz);
         checkMissingSetters(clazz);
         boolean hasDefaultConstructor = hasDefaultConstructor(constructors);
-        if (hasDefaultConstructor) {
+        if (hasDefaultConstructor || hasDeserializeAttributeWithBuilder) {
             checkPrivateFields(clazz);
         }
         if (!hasDeserializeAttributeWithBuilder) {
@@ -92,7 +92,7 @@ public class FlowPayloadSerializabilityChecker {
 
     private void checkPrivateFields(Class<?> clazz) {
         for (Field f : getInheritedDeclaredFields(clazz)) {
-            if (!Modifier.isFinal(f.getModifiers())) {
+            if (!Modifier.isStatic(f.getModifiers())) {
                 checkClassRecursive(clazz, f.getGenericType());
             }
         }

@@ -1,10 +1,14 @@
 package com.sequenceiq.environment.parameter.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+
+@JsonDeserialize(builder = AzureParametersDto.Builder.class)
 public class AzureParametersDto {
 
-    private AzureResourceGroupDto azureResourceGroupDto;
+    private final AzureResourceGroupDto azureResourceGroupDto;
 
-    private AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto;
+    private final AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto;
 
     private AzureParametersDto(Builder builder) {
         azureResourceGroupDto = builder.azureResourceGroupDto;
@@ -31,18 +35,19 @@ public class AzureParametersDto {
                 + '}';
     }
 
+    @JsonPOJOBuilder
     public static final class Builder {
 
         private AzureResourceGroupDto azureResourceGroupDto;
 
         private AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto;
 
-        public Builder withResourceGroup(AzureResourceGroupDto azureResourceGroupDto) {
+        public Builder withAzureResourceGroupDto(AzureResourceGroupDto azureResourceGroupDto) {
             this.azureResourceGroupDto = azureResourceGroupDto;
             return this;
         }
 
-        public Builder withEncryptionParameters(AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto) {
+        public Builder withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto) {
             this.azureResourceEncryptionParametersDto = azureResourceEncryptionParametersDto;
             return this;
         }

@@ -59,7 +59,7 @@ public class AwsEnvironmentParametersConverter extends BaseEnvironmentParameters
                 .withDynamoDbTableCreation(awsParameters.getS3guardTableCreation())
                 .withFreeIpaSpotPercentage(awsParameters.getFreeIpaSpotPercentage())
                 .withFreeIpaSpotMaxPrice(awsParameters.getFreeIpaSpotMaxPrice())
-                .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                .withAwsDiskEncryptionParametersDto(AwsDiskEncryptionParametersDto.builder()
                         .withEncryptionKeyArn(awsParameters.getEncryptionKeyArn())
                         .build())
                 .build());

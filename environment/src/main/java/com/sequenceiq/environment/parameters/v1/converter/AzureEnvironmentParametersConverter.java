@@ -59,13 +59,13 @@ public class AzureEnvironmentParametersConverter extends BaseEnvironmentParamete
         super.postConvertToDto(builder, source);
         AzureParameters azureParameters = (AzureParameters) source;
         builder.withAzureParametersDto(AzureParametersDto.builder()
-                .withResourceGroup(
+                .withAzureResourceGroupDto(
                         AzureResourceGroupDto.builder()
                                 .withName(azureParameters.getResourceGroupName())
                                 .withResourceGroupCreation(azureParameters.getResourceGroupCreation())
                                 .withResourceGroupUsagePattern(azureParameters.getResourceGroupUsagePattern())
                                 .build())
-                .withEncryptionParameters(
+                .withAzureResourceEncryptionParametersDto(
                         AzureResourceEncryptionParametersDto.builder()
                                 .withEncryptionKeyUrl(azureParameters.getEncryptionKeyUrl())
                                 .withDiskEncryptionSetId(azureParameters.getDiskEncryptionSetId())
