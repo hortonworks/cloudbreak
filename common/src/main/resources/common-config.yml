@@ -132,3 +132,7 @@ jobs:
     enabled: true
     interval-in-minutes: 60
     password-expiry-threshold-in-days: 14
+cb:
+  db.override:
+    minRuntimeVersion: 7.2.7
+    engineVersion: 11
