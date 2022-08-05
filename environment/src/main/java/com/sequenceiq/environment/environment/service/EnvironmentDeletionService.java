@@ -52,7 +52,7 @@ public class EnvironmentDeletionService {
             boolean cascading, boolean forced) {
         EnvironmentView environment = environmentViewService.getByNameAndAccountId(environmentName, accountId);
         MDCBuilder.buildMdcContext(environment);
-        LOGGER.debug(String.format("Deleting environment [name: %s]", environment.getName()));
+        LOGGER.debug("Deleting environment [name: {}]", environment.getName());
         delete(environment, actualUserCrn, cascading, forced);
         return environmentDtoConverter.environmentViewToViewDto(environment);
     }
@@ -61,29 +61,31 @@ public class EnvironmentDeletionService {
             boolean cascading, boolean forced) {
         EnvironmentView environment = environmentViewService.getByCrnAndAccountId(crn, accountId);
         MDCBuilder.buildMdcContext(environment);
-        LOGGER.debug(String.format("Deleting  environment [name: %s]", environment.getName()));
+        LOGGER.debug("Deleting environment [name: {}]", environment.getName());
         delete(environment, actualUserCrn, cascading, forced);
         return environmentDtoConverter.environmentViewToViewDto(environment);
     }
 
-    public EnvironmentView delete(EnvironmentView environment, String userCrn,
+    @VisibleForTesting
+    EnvironmentView delete(EnvironmentView environment, String userCrn,
             boolean cascading, boolean forced) {
+        LOGGER.debug("Deleting environment [name: {}, cascading={}, forced={}]", environment.getName(), cascading, forced);
         MDCBuilder.buildMdcContext(environment);
-        validateDeletion(environment, cascading);
-        updateEnvironmentDeletionType(environment, forced);
-        LOGGER.debug("Deleting environment with name: {}", environment.getName());
-        environmentJobService.unschedule(environment.getId());
         if (cascading) {
+            prepareForDeletion(environment, forced);
             reactorFlowManager.triggerCascadingDeleteFlow(environment, userCrn, forced);
         } else {
-            if (!forced) {
-                checkIsEnvironmentDeletable(environment);
-            } else {
-                LOGGER.debug("Checking whether the environment has any experience dependency or not is cancelled since force deletion was requested.");
-            }
+            validateDeletionWithoutCascadingWhenChildEnvironments(environment);
+            checkIsEnvironmentDeletableWithoutCascadingWhenAttachedResources(environment);
+            prepareForDeletion(environment, forced);
             reactorFlowManager.triggerDeleteFlow(environment, userCrn, forced);
         }
         return environment;
+    }
+
+    private void prepareForDeletion(EnvironmentView environment, boolean forced) {
+        updateEnvironmentDeletionType(environment, forced);
+        environmentJobService.unschedule(environment.getId());
     }
 
     private void updateEnvironmentDeletionType(EnvironmentView environment, boolean forced) {
@@ -105,7 +107,7 @@ public class EnvironmentDeletionService {
     private List<EnvironmentViewDto> deleteMultiple(String actualUserCrn, boolean cascading, boolean forced, Collection<EnvironmentView> environments) {
         return new ArrayList<>(environments).stream()
                 .map(environment -> {
-                    LOGGER.debug(String.format("Starting to archive environment [name: %s, CRN: %s]", environment.getName(), environment.getResourceCrn()));
+                    LOGGER.debug("Starting to delete environment [name: {}, CRN: {}]", environment.getName(), environment.getResourceCrn());
                     delete(environment, actualUserCrn, cascading, forced);
                     return environmentDtoConverter.environmentViewToViewDto(environment);
                 })
@@ -113,53 +115,63 @@ public class EnvironmentDeletionService {
     }
 
     @VisibleForTesting
-    void checkIsEnvironmentDeletable(EnvironmentView env) {
-        LOGGER.info("Checking if environment [name: {}] is deletable", env.getName());
+    void checkIsEnvironmentDeletableWithoutCascadingWhenAttachedResources(EnvironmentView env) {
+        LOGGER.info("Checking if environment [name: {}] is deletable without cascading: inspecting attached clusters & experiences.", env.getName());
 
         Set<String> distroXClusterNames = environmentResourceDeletionService.getAttachedDistroXClusterNames(env);
         if (!distroXClusterNames.isEmpty()) {
-            throw new BadRequestException(String.format("The following Data Hub cluster(s) must be terminated before Environment deletion [%s]",
-                    String.join(", ", distroXClusterNames)));
+            throw new BadRequestException(String.format("The following Data Hub cluster(s) are attached to the Environment: [%s]. " +
+                            getMustUseCascadingDeleteError("they"), String.join(", ", distroXClusterNames)));
         }
 
-        int amountOfConnectedExperiences = 0;
+        int amountOfConnectedExperiences;
         try {
             amountOfConnectedExperiences = environmentResourceDeletionService.getConnectedExperienceAmount(env);
         } catch (IllegalStateException | IllegalArgumentException | ExperienceOperationFailedException re) {
-            LOGGER.info("Something has occurred during checking the connected experiences!", re);
-            throw new IllegalStateException("Unable to access (due to: " + re.getMessage() + ") all experience to check whether the environment "
-                    + "have any connected one(s)! If you would like to bypass the issue, you can use the force deletion option, but please keep in mind that "
-                    + "- in some cases - it can leave resources on the cloud provider side that needs to be checked and cleaned by hand afterwards.");
+            LOGGER.error("Something has occurred during checking the connected experiences!", re);
+            throw new IllegalStateException("Unable to access all experiences (data services) to check whether the Environment "
+                    + "has any connected one(s)! If you would like to bypass the issue, you can use the force deletion option, but please keep in mind that "
+                    + "- in some cases - it may leave resources on the cloud provider side that need to be checked and cleaned by hand afterwards. " +
+                    "Error reason: " + re.getMessage());
         }
         if (amountOfConnectedExperiences == 1) {
-            throw new BadRequestException("The given environment [" + env.getName() + "] has 1 connected experience. " +
-                    "This must be terminated before Environment deletion.");
+            throw new BadRequestException("The Environment has 1 connected experience (data service). " + getMustUseCascadingDeleteError("this"));
         } else if (amountOfConnectedExperiences > 1) {
-            throw new BadRequestException("The given environment [" + env.getName() + "] has " + amountOfConnectedExperiences +
-                    " connected experiences. " + "These must be terminated before Environment deletion.");
+            throw new BadRequestException("The Environment has " + amountOfConnectedExperiences + " connected experiences (data services). " +
+                    getMustUseCascadingDeleteError("these"));
         }
 
         Set<String> datalakes = environmentResourceDeletionService.getAttachedSdxClusterCrns(env);
-        // if someone use create the clusters via internal cluster API, in this case the SDX service does not know about these clusters,
+        // If someone creates the clusters via internal cluster API, in this case the SDX service does not know about these clusters,
         // so we need to check against legacy DL API from Core service
         if (datalakes.isEmpty()) {
             datalakes = environmentResourceDeletionService.getDatalakeClusterNames(env);
         }
         if (!datalakes.isEmpty()) {
-            throw new BadRequestException(String.format("The following Data Lake cluster(s) must be terminated before Environment deletion [%s]",
-                    String.join(", ", datalakes)));
+            throw new BadRequestException(String.format("The following Data Lake cluster(s) are attached to the Environment: [%s]. " +
+                    getMustUseCascadingDeleteError("they"), String.join(", ", datalakes)));
         }
+
+        LOGGER.info("No attached clusters or experiences have been found for environment [name: {}], deletion without cascading may proceed.",
+                env.getName());
     }
 
-    void validateDeletion(EnvironmentView environmentView, boolean cascading) {
-        if (!cascading) {
-            List<String> childEnvNames =
-                    environmentViewService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(environmentView.getAccountId(), environmentView.getId());
-            if (!childEnvNames.isEmpty()) {
-                throw new BadRequestException(String.format("The following Environment(s) must be deleted before Environment deletion [%s]",
-                        String.join(", ", childEnvNames)));
-            }
+    private String getMustUseCascadingDeleteError(String subject) {
+        return String.format("Either %s must be terminated before Environment deletion, " +
+                "or the cascading delete option (\"I would like to delete all connected resources\") shall be utilized.", subject);
+    }
+
+    private void validateDeletionWithoutCascadingWhenChildEnvironments(EnvironmentView environmentView) {
+        LOGGER.info("Checking if environment [name: {}] is deletable without cascading: inspecting child environments.", environmentView.getName());
+
+        List<String> childEnvNames =
+                environmentViewService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(environmentView.getAccountId(), environmentView.getId());
+        if (!childEnvNames.isEmpty()) {
+            throw new BadRequestException(String.format("The following child Environment(s) are attached to the Environment: [%s]. " +
+                    getMustUseCascadingDeleteError("these"), String.join(", ", childEnvNames)));
         }
+
+        LOGGER.info("No child environments have been found for environment [name: {}], deletion without cascading may proceed.", environmentView.getName());
     }
 
 }
