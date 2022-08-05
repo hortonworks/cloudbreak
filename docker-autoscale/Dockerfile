@@ -1,4 +1,4 @@
-FROM docker-private.infra.cloudera.com/cloudera_base/cldr-java:11.0.13-cldr-jre-slim-buster-15122021
+FROM docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-ubi-minimal-java:jdk11-ubi8.5-218
 # We can not use alpine based image because of https://github.com/grpc/grpc-java/issues/8751
 MAINTAINER info@cloudera.com
 
@@ -10,7 +10,7 @@ ENV VERSION ${VERSION}
 
 WORKDIR /
 
-RUN apt-get install unzip
+RUN microdnf install unzip
 
 # install the periscope app
 ADD ${REPO_URL}/com/sequenceiq/periscope/$VERSION/periscope-$VERSION.jar /periscope.jar
