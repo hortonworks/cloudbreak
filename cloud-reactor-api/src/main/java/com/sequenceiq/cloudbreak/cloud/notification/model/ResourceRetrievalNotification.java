@@ -64,12 +64,10 @@ public class ResourceRetrievalNotification {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("ResourceRetrievalNotification{");
-        sb.append("resourceReference=").append(resourceReference);
-        sb.append("status=").append(status);
-        sb.append("resourceType=").append(resourceType);
-        sb.append(", promise=").append(promise);
-        sb.append(", stackId=").append(stackId);
-        return sb.toString();
+        return "ResourceRetrievalNotification{" + "resourceReference=" + resourceReference
+                + "status=" + status
+                + "resourceType=" + resourceType
+                + ", promise=" + promise
+                + ", stackId=" + stackId;
     }
 }

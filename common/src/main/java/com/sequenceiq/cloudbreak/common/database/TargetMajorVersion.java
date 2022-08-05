@@ -21,5 +21,4 @@ public enum TargetMajorVersion implements Version {
     public MajorVersion convertToMajorVersion() {
         return MajorVersion.valueOf(name());
     }
-
 }

@@ -29,8 +29,11 @@ import com.sequenceiq.cloudbreak.service.externaldatabase.PollingConfig;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseServerParameter;
 import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackConfig;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTargetMajorVersion;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 
@@ -132,6 +135,25 @@ public class ExternalDatabaseService {
         }
     }
 
+    public void upgradeDatabase(ClusterView cluster, UpgradeTargetMajorVersion targetMajorVersion) {
+        LOGGER.info("Upgrading external database server to version {} for DataHub {}",
+                targetMajorVersion.name(), cluster.getName());
+        String databaseCrn = cluster.getDatabaseServerCrn();
+
+            if (externalDatabaseReferenceExist(databaseCrn)) {
+                try {
+                    UpgradeDatabaseServerV4Request request = new UpgradeDatabaseServerV4Request();
+                    request.setUpgradeTargetMajorVersion(targetMajorVersion);
+                    redbeamsClient.upgradeByCrn(databaseCrn, request);
+                    waitAndGetDatabase(cluster, databaseCrn, DatabaseOperation.UPGRADE, false);
+                } catch (NotFoundException notFoundException) {
+                    LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
+                }
+            } else {
+                LOGGER.warn("[INVESTIGATE] The external database crn reference was not present");
+            }
+    }
+
     private Optional<DatabaseServerV4Response> findExistingDatabase(Cluster cluster, String environmentCrn) {
         if (cluster.getStack() != null) {
             String clusterCrn = cluster.getStack().getResourceCrn();
@@ -203,7 +225,7 @@ public class ExternalDatabaseService {
         return request;
     }
 
-    private void waitAndGetDatabase(Cluster cluster, String databaseCrn,
+    private void waitAndGetDatabase(ClusterView cluster, String databaseCrn,
             DatabaseOperation databaseOperation, boolean cancellable) {
 
         PollingConfig pollingConfig = PollingConfig.builder()
@@ -216,7 +238,7 @@ public class ExternalDatabaseService {
         waitAndGetDatabase(cluster, databaseCrn, pollingConfig, databaseOperation, cancellable);
     }
 
-    private void waitAndGetDatabase(Cluster cluster, String databaseCrn, PollingConfig pollingConfig, DatabaseOperation databaseOperation,
+    private void waitAndGetDatabase(ClusterView cluster, String databaseCrn, PollingConfig pollingConfig, DatabaseOperation databaseOperation,
             boolean cancellable) {
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())

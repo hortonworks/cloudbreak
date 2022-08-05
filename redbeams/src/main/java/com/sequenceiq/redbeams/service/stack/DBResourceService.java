@@ -11,8 +11,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.redbeams.converter.stack.DbResourceTocloudResourceConverter;
+import com.sequenceiq.redbeams.converter.spi.DBResourceToCloudResourceConverter;
 import com.sequenceiq.redbeams.domain.stack.DBResource;
 import com.sequenceiq.redbeams.repository.DBResourceRepository;
 
@@ -23,7 +24,7 @@ public class DBResourceService {
     private DBResourceRepository dbResourceRepository;
 
     @Inject
-    private DbResourceTocloudResourceConverter dbResourceTocloudResourceConverter;
+    private DBResourceToCloudResourceConverter dbResourceTocloudResourceConverter;
 
     public List<CloudResourceStatus> getAllAsCloudResourceStatus(Long dbStackId) {
         return getAllAsCloudResource(dbStackId).stream()
@@ -50,5 +51,9 @@ public class DBResourceService {
 
     public boolean existsByStackAndNameAndType(Long dbStackId, String name, ResourceType type) {
         return dbResourceRepository.existsByStackAndNameAndType(dbStackId, name, type);
+    }
+
+    public Optional<DBResource> findByStatusAndTypeAndStack(CommonStatus status, ResourceType resourceType, Long stackId) {
+        return dbResourceRepository.findByResourceStatusAndResourceTypeAndDbStack(status, resourceType, stackId);
     }
 }

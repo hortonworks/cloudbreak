@@ -24,6 +24,7 @@ import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentExportResult;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDatabaseResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImageProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
@@ -33,12 +34,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -109,6 +112,9 @@ public class AzureResourceConnectorTest {
 
     @Mock
     private AzureTerminationHelperService azureTerminationHelperService;
+
+    @Mock
+    private AzureDatabaseResourceService azureDatabaseResourceService;
 
     private List<CloudResource> instances;
 
@@ -219,7 +225,7 @@ public class AzureResourceConnectorTest {
     }
 
     @Test
-    public void testTermiate() {
+    public void testTerminate() {
         when(azureTerminationHelperService.handleTransientDeployment(any(), any(), any())).thenReturn(List.of());
         when(azureTerminationHelperService.terminate(any(), any(), any()))
                 .thenReturn(List.of(new CloudResourceStatus(instances.get(0), ResourceStatus.DELETED)));
@@ -227,5 +233,15 @@ public class AzureResourceConnectorTest {
         for (CloudResourceStatus status : statuses) {
             Assert.assertEquals(ResourceStatus.DELETED, status.getStatus());
         }
+    }
+
+    @Test
+    public void testUpgradeDatabaseServer() {
+        DatabaseStack databaseStack = mock(DatabaseStack.class);
+        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
+
+        underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11);
+        verify(azureDatabaseResourceService, times(1))
+                .upgradeDatabaseServer(eq(ac), eq(databaseStack), eq(persistenceNotifier), eq(TargetMajorVersion.VERSION_11));
     }
 }

@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.flow.redbeams.upgrade.handler;
 
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -13,10 +14,12 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsUpgradeFailedEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.UpgradeDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.UpgradeDatabaseServerSuccess;
@@ -62,7 +65,11 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
         AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
         Selectable response;
         try {
-            connector.resources().upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, request.getTargetMajorVersion());
+            TargetMajorVersion targetMajorVersion = request.getTargetMajorVersion();
+            connector.resources().upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, targetMajorVersion);
+            DBStack dbStack = dbStackService.getById(request.getResourceId());
+            dbStack.setMajorVersion(targetMajorVersion.convertToMajorVersion());
+            dbStackService.save(dbStack);
             response = new UpgradeDatabaseServerSuccess(request.getResourceId());
             LOGGER.debug("Successfully upgraded the database server {}", databaseStack);
         } catch (Exception e) {

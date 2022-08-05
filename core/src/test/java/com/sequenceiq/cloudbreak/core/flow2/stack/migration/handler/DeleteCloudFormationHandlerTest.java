@@ -81,7 +81,7 @@ public class DeleteCloudFormationHandlerTest {
         Event<DeleteCloudFormationRequest> event = new Event<>(request);
 
         when(cloudContext.getId()).thenReturn(RESOUCE_ID);
-        when(resourceRetriever.findFirstByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.CLOUDFORMATION_STACK, RESOUCE_ID))
+        when(resourceRetriever.findByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.CLOUDFORMATION_STACK, RESOUCE_ID))
                 .thenReturn(Optional.empty());
 
         ArgumentCaptor<Event<DeleteCloudFormationResult>> resultCaptor = ArgumentCaptor.forClass(Event.class);
@@ -102,7 +102,7 @@ public class DeleteCloudFormationHandlerTest {
         when(cloudContext.getId()).thenReturn(RESOUCE_ID);
         when(awsAuthenticator.authenticate(cloudContext, cloudCredential)).thenReturn(ac);
         when(awsMigrationUtil.allInstancesDeletedFromCloudFormation(ac, cloudResource)).thenReturn(true);
-        when(resourceRetriever.findFirstByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.CLOUDFORMATION_STACK, RESOUCE_ID))
+        when(resourceRetriever.findByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.CLOUDFORMATION_STACK, RESOUCE_ID))
                 .thenReturn(Optional.of(cloudResource));
 
         ArgumentCaptor<Event<DeleteCloudFormationResult>> resultCaptor = ArgumentCaptor.forClass(Event.class);
@@ -125,7 +125,7 @@ public class DeleteCloudFormationHandlerTest {
         when(cloudContext.getId()).thenReturn(RESOUCE_ID);
         when(awsAuthenticator.authenticate(cloudContext, cloudCredential)).thenReturn(ac);
         when(awsMigrationUtil.allInstancesDeletedFromCloudFormation(ac, cloudResource)).thenReturn(false);
-        when(resourceRetriever.findFirstByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.CLOUDFORMATION_STACK, RESOUCE_ID))
+        when(resourceRetriever.findByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.CLOUDFORMATION_STACK, RESOUCE_ID))
                 .thenReturn(Optional.of(cloudResource));
 
         ArgumentCaptor<Event<DeleteCloudFormationResult>> resultCaptor = ArgumentCaptor.forClass(Event.class);

@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeOrchestratorService;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,9 +53,6 @@ class UpgradeRdsServiceTest {
     private CloudbreakMessagesService messagesService;
 
     @Mock
-    private StackService stackService;
-
-    @Mock
     private Stack stack;
 
     @InjectMocks
@@ -78,9 +74,9 @@ class UpgradeRdsServiceTest {
         underTest.rdsUpgradeFailed(STACK_ID, CLUSTER_ID, exception);
 
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_FAILED),
-                eq("RDS upgrade failed with exception " + exception.getMessage()));
-        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_FAILED.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_FAILED));
-
+                eq("RDS upgrade failed with exception: " + exception.getMessage()));
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_FAILED.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_FAILED),
+                eq("Backup for RDS upgrade has failed"));
     }
 
     @Test

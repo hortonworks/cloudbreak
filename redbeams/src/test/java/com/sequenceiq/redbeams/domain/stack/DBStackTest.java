@@ -6,10 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -33,6 +36,8 @@ public class DBStackTest {
     private static final String DATABASE_SERVER_ATTRIBUTES_WITH_ENGINE = "{ \"engineVersion\": \"10\", \"this\": \"that\" }";
 
     private static final String DATABASE_SERVER_ATTRIBUTES_WITH_DB = "{ \"dbVersion\": \"10\", \"this\": \"that\" }";
+
+    private static final Json SAMPLE_JSON = new Json("{\"test\": \"test\"}");
 
     static {
         STATUS.setStatus(Status.AVAILABLE);
@@ -152,5 +157,30 @@ public class DBStackTest {
                         DATABASE_SERVER_ATTRIBUTES_WITH_DB :
                         DATABASE_SERVER_ATTRIBUTES_WITH_ENGINE));
         dbStack.setDatabaseServer(databaseServer);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideJsonContentsPerProvider")
+    public void testSetMajorVersion(CloudPlatform cloudPlatform, Json expectedJson) {
+        dbStack.setCloudPlatform(cloudPlatform.name());
+        DatabaseServer databaseServer = new DatabaseServer();
+        databaseServer.setAttributes(SAMPLE_JSON);
+        dbStack.setDatabaseServer(databaseServer);
+        dbStack.setMajorVersion(MajorVersion.VERSION_11);
+        assertEquals(expectedJson, dbStack.getDatabaseServer().getAttributes());
+    }
+
+    private static Stream<Arguments> provideJsonContentsPerProvider() {
+        return Stream.of(
+                Arguments.of(CloudPlatform.AWS,
+                        new Json("{\"engineVersion\":\"11\",\"cloudPlatform\":\"AWS\"}")),
+                Arguments.of(CloudPlatform.GCP,
+                        new Json("{\"engineVersion\":\"11\",\"cloudPlatform\":\"GCP\"}")),
+                Arguments.of(CloudPlatform.AZURE,
+                        new Json("{\"cloudPlatform\":\"AZURE\",\"geoRedundantBackup\":false,\"dbVersion\":\"11\",\"storageAutoGrow\":false}")),
+                Arguments.of(CloudPlatform.MOCK, SAMPLE_JSON),
+                Arguments.of(CloudPlatform.YARN, SAMPLE_JSON),
+                Arguments.of(CloudPlatform.OPENSTACK, SAMPLE_JSON)
+        );
     }
 }

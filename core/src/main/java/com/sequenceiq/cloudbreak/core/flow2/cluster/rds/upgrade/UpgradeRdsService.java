@@ -84,14 +84,14 @@ public class UpgradeRdsService {
     }
 
     public void rdsUpgradeFailed(Long stackId, Long clusterId, Exception exception) {
-        String statusReason = "RDS upgrade failed with exception " + exception.getMessage();
-        LOGGER.debug(statusReason);
+        String statusReason = "RDS upgrade failed with exception: " + exception.getMessage();
+        LOGGER.warn("RDS upgrade failed with exception: ", exception);
         InMemoryStateStore.deleteStack(stackId);
         if (Objects.nonNull(clusterId)) {
             InMemoryStateStore.deleteCluster(clusterId);
         }
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DATABASE_UPGRADE_FAILED, statusReason);
-        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_FAILED);
+        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_FAILED, exception.getMessage());
     }
 
     private String getMessage(ResourceEvent resourceEvent) {

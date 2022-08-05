@@ -356,7 +356,7 @@ class InstanceMetaDataServiceTest {
         stack.setCloudPlatform(CloudPlatform.GCP.name());
         String actual = underTest.getAzFromDiskOrNullIfRepair(stack, true, "ig", "hostname");
         assertThat(actual).isNull();
-        verify(resourceRetriever, never()).findFirstByStatusAndTypeAndStack(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L);
+        verify(resourceRetriever, never()).findByStatusAndTypeAndStack(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L);
     }
 
     @Test
