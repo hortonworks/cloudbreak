@@ -18,6 +18,7 @@ import java.util.Map;
 
 import javax.ws.rs.BadRequestException;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,8 @@ import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackCon
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTargetMajorVersion;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
@@ -220,8 +223,7 @@ class ExternalDatabaseServiceTest {
     void stopDatabase() throws JsonProcessingException {
         Cluster cluster = spy(new Cluster());
         cluster.setDatabaseServerCrn(RDBMS_CRN);
-        DatabaseServerV4Response deleteResponse = new DatabaseServerV4Response();
-        deleteResponse.setCrn(RDBMS_CRN);
+
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.STOP), eq(RDBMS_CRN), eq(false)))
                 .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
 
@@ -238,5 +240,33 @@ class ExternalDatabaseServiceTest {
         underTest.stopDatabase(cluster, DatabaseAvailabilityType.HA, environmentResponse);
 
         verify(redbeamsClient, never()).stopByCrn(anyString());
+    }
+
+    @Test
+    void upgradeDatabase() throws JsonProcessingException {
+        Cluster cluster = spy(new Cluster());
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+
+        UpgradeTargetMajorVersion targetMajorVersion = UpgradeTargetMajorVersion.VERSION_11;
+
+        when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.UPGRADE), eq(RDBMS_CRN), eq(false)))
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+
+        underTest.upgradeDatabase(cluster, targetMajorVersion);
+
+        ArgumentCaptor<UpgradeDatabaseServerV4Request> argumentCaptor = ArgumentCaptor.forClass(UpgradeDatabaseServerV4Request.class);
+        verify(redbeamsClient).upgradeByCrn(eq(RDBMS_CRN), argumentCaptor.capture());
+        Assertions.assertEquals(targetMajorVersion, argumentCaptor.getValue().getUpgradeTargetMajorVersion());
+    }
+
+    @Test
+    void upgradeDatabaseWhenCrnNull() {
+        Cluster cluster = spy(new Cluster());
+        cluster.setDatabaseServerCrn(null);
+        UpgradeTargetMajorVersion targetMajorVersion = UpgradeTargetMajorVersion.VERSION_11;
+
+        underTest.upgradeDatabase(cluster, targetMajorVersion);
+
+        verify(redbeamsClient, never()).upgradeByCrn(anyString(), any());
     }
 }

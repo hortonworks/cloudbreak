@@ -16,9 +16,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterPollingCheckerService;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseOperation;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
 @Service
@@ -39,7 +39,7 @@ class DatabaseObtainerService {
         this.databaseCriteriaResolver = databaseCriteriaResolver;
     }
 
-    AttemptResult<Object> obtainAttemptResult(Cluster cluster, DatabaseOperation databaseOperation, String databaseCrn, boolean cancellable)
+    AttemptResult<Object> obtainAttemptResult(ClusterView cluster, DatabaseOperation databaseOperation, String databaseCrn, boolean cancellable)
             throws JsonProcessingException {
 
         Optional<AttemptResult<Object>> result = Optional.ofNullable(clusterPollingCheckerService.checkClusterCancelledState(cluster, cancellable));

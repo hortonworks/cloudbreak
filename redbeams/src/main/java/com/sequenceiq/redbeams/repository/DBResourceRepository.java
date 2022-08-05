@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.redbeams.domain.stack.DBResource;
 
@@ -25,4 +26,10 @@ public interface DBResourceRepository extends JpaRepository<DBResource, Long> {
 
     @Query("SELECT count(r) > 0 FROM DBResource r WHERE r.dbStack.id = :stackId AND r.resourceName = :name AND r.resourceType = :type")
     boolean existsByStackAndNameAndType(@Param("stackId") Long stackId, @Param("name") String name, @Param("type") ResourceType type);
+
+    @Query("SELECT r FROM DBResource r WHERE r.dbStack.id = :stackId AND r.resourceStatus = :resourceStatus AND r.resourceType = :resourceType")
+    Optional<DBResource> findByResourceStatusAndResourceTypeAndDbStack(
+            @Param("resourceStatus") CommonStatus resourceStatus,
+            @Param("resourceType") ResourceType resourceType,
+            @Param("stackId") Long stackId);
 }

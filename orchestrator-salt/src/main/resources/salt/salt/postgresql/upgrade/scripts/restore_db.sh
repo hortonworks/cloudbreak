@@ -62,7 +62,9 @@ export PGSSLMODE=verify-full
 restore_global_objects() {
   GLOBAL_OBJECT_BACKUP="${BACKUP_DIR}"/roles.sql
   if [ -f "${GLOBAL_OBJECT_BACKUP}" ]; then
+    set -x
     psql -f ${GLOBAL_OBJECT_BACKUP} --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to restore global objects from ${GLOBAL_OBJECT_BACKUP}"
+    set +x
   else
       errorExit "INFO Not restoring global objects as ${GLOBAL_OBJECT_BACKUP} does not exist"
   fi
@@ -77,9 +79,11 @@ restore_database_for_service() {
       limit_incomming_connection $SERVICE 0
       close_existing_connections $SERVICE
       doLog "INFO Restoring $SERVICE"
+      set -x
       psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "drop database if exists ${SERVICE} ;" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to drop database ${SERVICE}"
       psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "create database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to re-create database ${SERVICE}"
       pg_restore -v --host="$HOST" --port="$PORT" --dbname="$SERVICE" --username="$USERNAME" -j 8 ${BACKUP} > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to restore ${SERVICE}"
+      set +x
       doLog "INFO Successfully restored ${SERVICE}"
       limit_incomming_connection $SERVICE -1
   else

@@ -31,7 +31,7 @@ public class UpgradeEmbeddedDBPreparationService {
     private CloudbreakFlowMessageService flowMessageService;
 
     public void prepareEmbeddedDbUpgrade(Long stackId) {
-        setStatusAndNotify(stackId, UPDATE_IN_PROGRESS, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_IN_PROGRESS, "Prepare embedded database upgrade",
+        setStatusAndNotify(stackId, UPDATE_IN_PROGRESS, DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS, "Prepare embedded database upgrade",
                 ResourceEvent.CLUSTER_PREPARE_EMBEDDEDDB_UPGRADE_IN_PROGRESS);
     }
 

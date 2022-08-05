@@ -14,15 +14,18 @@ public enum DatabaseOperation {
     START(Status::isAvailable, Status.START_FAILED::equals,
             ResourceEvent.CLUSTER_EXTERNAL_DATABASE_START_FINISHED, ResourceEvent.CLUSTER_EXTERNAL_DATABASE_START_FAILED),
     STOP(Status.STOPPED::equals, Status.STOP_FAILED::equals,
-            ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED, ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FAILED);
+            ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED, ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FAILED),
 
-    private Function<Status, Boolean> exitCriteria;
+    UPGRADE(Status::isAvailable, Status.UPGRADE_FAILED::equals,
+            ResourceEvent.CLUSTER_RDS_UPGRADE_FINISHED, ResourceEvent.CLUSTER_RDS_UPGRADE_FAILED);
 
-    private Function<Status, Boolean> failureCriteria;
+    private final Function<Status, Boolean> exitCriteria;
 
-    private ResourceEvent finishedEvent;
+    private final Function<Status, Boolean> failureCriteria;
 
-    private ResourceEvent failedEvent;
+    private final ResourceEvent finishedEvent;
+
+    private final ResourceEvent failedEvent;
 
     DatabaseOperation(Function<Status, Boolean> exitCriteria, Function<Status, Boolean> failureCriteria,
             ResourceEvent finishedEvent, ResourceEvent failedEvent) {

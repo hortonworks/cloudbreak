@@ -12,7 +12,7 @@ import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @Service
 public class ClusterPollingCheckerService {
@@ -20,7 +20,7 @@ public class ClusterPollingCheckerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterPollingCheckerService.class);
 
     @Nullable
-    public AttemptResult<Object> checkClusterCancelledState(Cluster cluster, boolean cancellable) {
+    public AttemptResult<Object> checkClusterCancelledState(ClusterView cluster, boolean cancellable) {
         checkArgument(cluster != null, "Cluster must not be null!");
         AttemptResult<Object> result = null;
         if (cancellable && PollGroup.CANCELLED.equals(InMemoryStateStore.getCluster(cluster.getId()))) {

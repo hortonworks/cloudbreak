@@ -611,6 +611,11 @@ public class AzureUtils {
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public Optional<String> deletePrivateEndpoint(AzureClient azureClient, String id, boolean cancelException) {
+        return handleDeleteErrors(azureClient::deleteGenericResourceById, "PrivateEndpoint", id, cancelException);
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public Optional<String> deleteResourceGroup(AzureClient azureClient, String resourceGroupId, boolean cancelException) {
         return handleDeleteErrors(azureClient::deleteResourceGroup, "ResourceGroup", resourceGroupId, cancelException);
     }

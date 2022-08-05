@@ -5,8 +5,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 
 public class AzureDatabaseServerView {
 
-    @VisibleForTesting
-    static final String DB_VERSION = "dbVersion";
+    public static final String DB_VERSION = "dbVersion";
 
     @VisibleForTesting
     static final String BACKUP_RETENTION_DAYS = "backupRetentionDays";

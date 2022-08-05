@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -40,6 +41,10 @@ public class RdsUpgradeOrchestratorService {
     private static final int DB_SPACE_MULTIPLIER = 3;
 
     private static final int KB_TO_MB = 1024;
+
+    private static final int MAX_RETRY_ON_ERROR = 5;
+
+    private static final int MAX_RETRY = 10;
 
     @Inject
     private StackDtoService stackDtoService;
@@ -135,6 +140,10 @@ public class RdsUpgradeOrchestratorService {
         stateParams.setState(saltState);
         stateParams.setPrimaryGatewayConfig(primaryGatewayConfig);
         stateParams.setTargetHostNames(gatewayNodes.stream().map(Node::getHostname).collect(Collectors.toSet()));
+        OrchestratorStateRetryParams retryParams = new OrchestratorStateRetryParams();
+        retryParams.setMaxRetryOnError(MAX_RETRY_ON_ERROR);
+        retryParams.setMaxRetry(MAX_RETRY);
+        stateParams.setStateRetryParams(retryParams);
         stateParams.setExitCriteriaModel(new ClusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
         return stateParams;
     }

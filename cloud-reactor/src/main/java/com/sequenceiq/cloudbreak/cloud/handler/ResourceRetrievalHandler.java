@@ -38,7 +38,7 @@ public class ResourceRetrievalHandler implements Consumer<Event<ResourceRetrieva
             result = cloudResourceRetrieverService.findByResourceReferenceAndStatusAndTypeAndStack(data.getResourceReference(),
                     data.getStatus(), data.getResourceType(), data.getStackId());
         } else if (data.getStackId() != null && StringUtils.isEmpty(data.getResourceReference())) {
-            result = cloudResourceRetrieverService.findFirstByStatusAndTypeAndStack(data.getStatus(), data.getResourceType(), data.getStackId());
+            result = cloudResourceRetrieverService.findByStatusAndTypeAndStack(data.getStatus(), data.getResourceType(), data.getStackId());
         } else {
             result = cloudResourceRetrieverService.findByResourceReferenceAndStatusAndType(data.getResourceReference(), data.getStatus(),
                     data.getResourceType());

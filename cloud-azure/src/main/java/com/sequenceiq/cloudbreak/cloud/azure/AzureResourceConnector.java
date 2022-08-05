@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
@@ -356,7 +357,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
                 }
             }
         }
-        LOGGER.debug("Collected deletable resources for downscale are: {}", result.toString());
+        LOGGER.debug("Collected deletable resources for downscale are: {}", result);
         return result;
     }
 
@@ -378,5 +379,11 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     @Override
     public String getDBStackTemplate() {
         return azureDatabaseResourceService.getDBStackTemplate();
+    }
+
+    @Override
+    public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion) {
+        azureDatabaseResourceService.upgradeDatabaseServer(authenticatedContext, stack, persistenceNotifier, targetMajorVersion);
     }
 }

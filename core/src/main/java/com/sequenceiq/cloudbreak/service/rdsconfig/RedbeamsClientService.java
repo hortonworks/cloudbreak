@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
@@ -89,6 +90,18 @@ public class RedbeamsClientService {
                     () -> redbeamsServerEndpoint.stop(crn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to stop DatabaseServer with CRN %s", crn);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    public void upgradeByCrn(String crn, UpgradeDatabaseServerV4Request request) {
+        try {
+            ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> redbeamsServerEndpoint.upgrade(crn, request));
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to upgrade DatabaseServer with CRN %s to version %s", crn, request.getUpgradeTargetMajorVersion());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }

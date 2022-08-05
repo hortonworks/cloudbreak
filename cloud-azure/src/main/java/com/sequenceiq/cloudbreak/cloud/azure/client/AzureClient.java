@@ -853,8 +853,8 @@ public class AzureClient {
         return azure.subscriptions().list();
     }
 
-    public void deleteGenericResourceById(String databaseServerId) {
-        handleAuthException(() -> azure.genericResources().deleteById(databaseServerId));
+    public void deleteGenericResourceById(String id) {
+        handleAuthException(() -> azure.genericResources().deleteById(id));
     }
 
     public PagedList<PrivateZone> getPrivateDnsZoneList() {
@@ -962,8 +962,8 @@ public class AzureClient {
         azureAuthExceptionHandler.handleAuthException(function);
     }
 
-    public Completable deleteGenericResourceByIdAsync(String databaseServerId) {
-        return handleAuthException(() -> azure.genericResources().deleteByIdAsync(databaseServerId));
+    public Completable deleteGenericResourceByIdAsync(String id) {
+        return handleAuthException(() -> azure.genericResources().deleteByIdAsync(id));
     }
 
     private DiskEncryptionSetInner createDiskEncryptionSetInner(String sourceVaultId, String encryptionKeyUrl, String location, Map<String, String> tags) {

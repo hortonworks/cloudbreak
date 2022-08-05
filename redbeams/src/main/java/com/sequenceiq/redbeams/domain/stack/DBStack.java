@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.domain.stack;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.gcp.GcpDatabaseServerV4Parameters;
@@ -203,6 +205,32 @@ public class DBStack {
                 return MajorVersion.get(gcp.getEngineVersion()).orElse(MajorVersion.VERSION_10);
             default:
                 return MajorVersion.VERSION_10;
+        }
+    }
+
+    public void setMajorVersion(MajorVersion version) {
+        Map<String, Object> attributes = NullUtil.getIfNotNullOtherwise(databaseServer.getAttributes(), Json::getMap, new HashMap<>());
+        switch (CloudPlatform.valueOf(cloudPlatform)) {
+            case AZURE:
+                AzureDatabaseServerV4Parameters azure = new AzureDatabaseServerV4Parameters();
+                azure.parse(attributes);
+                azure.setDbVersion(version.getMajorVersion());
+                databaseServer.setAttributes(new Json(azure.asMap()));
+                break;
+            case AWS:
+                AwsDatabaseServerV4Parameters aws = new AwsDatabaseServerV4Parameters();
+                aws.parse(attributes);
+                aws.setEngineVersion(version.getMajorVersion());
+                databaseServer.setAttributes(new Json(aws.asMap()));
+                break;
+            case GCP:
+                GcpDatabaseServerV4Parameters gcp = new GcpDatabaseServerV4Parameters();
+                gcp.parse(attributes);
+                gcp.setEngineVersion(version.getMajorVersion());
+                databaseServer.setAttributes(new Json(gcp.asMap()));
+                break;
+            default:
+                // This is needed for checkstyle and spotbugs
         }
     }
 
