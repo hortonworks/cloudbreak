@@ -27,6 +27,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.MapBindingResult;
@@ -323,6 +324,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                     // sometimes the blueprinttext is null during the save, but why?
                     try {
                         return blueprintRepository.save(b);
+                    } catch (DataIntegrityViolationException e) {
+                        LOGGER.debug("Blueprint already exists in the database: {}", b.getName(), e);
+                        return b;
                     } catch (Exception e) {
                         LOGGER.debug("Cannot update the blueprint: {}, blueprinttext is null: {}", b.getName(), b.getBlueprintText() == null, e);
                         throw e;
