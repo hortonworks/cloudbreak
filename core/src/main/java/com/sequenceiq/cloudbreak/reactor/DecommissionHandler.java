@@ -203,7 +203,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
 
     private Set<String> getHostNamesForPrivateIds(DecommissionRequest request, StackDto stackDto) {
         return request.getPrivateIds().stream().map(privateId -> {
-            Optional<InstanceMetadataView> instanceMetadata = stackDto.getInstanceMetadata(privateId);
+            Optional<InstanceMetadataView> instanceMetadata = stackDto.getNotDeletedInstanceMetadata(privateId);
             return instanceMetadata.map(InstanceMetadataView::getDiscoveryFQDN).orElse(null);
         }).filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
     }

@@ -61,6 +61,7 @@ import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceState;
 import com.cloudera.api.swagger.model.HTTPMethod;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
@@ -87,6 +88,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.ScalingException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.URLUtils;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -179,6 +181,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     public List<String> upscaleCluster(Map<HostGroup, Set<InstanceMetaData>> instanceMetaDatasByHostGroup) throws CloudbreakException {
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
         Set<InstanceMetaData> instanceMetaDatas = instanceMetaDatasByHostGroup.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+        Map<String, InstanceMetaData> upscaleInstancesMap = Maps.newHashMap();
         try {
             LOGGER.debug("Starting cluster upscale with hosts: {}.", instanceMetaDatas.stream()
                     .map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.joining(", ")));
@@ -190,7 +193,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             setHostRackIdForOutdatedClusterHosts(instanceMetaDatas, clusterHostnames, hosts);
 
             LOGGER.debug("Processing upscaled cluster hosts.");
-            Map<String, InstanceMetaData> upscaleInstancesMap = getInstancesMap(clusterHostnames, instanceMetaDatas, true);
+            upscaleInstancesMap = getInstancesMap(clusterHostnames, instanceMetaDatas, true);
             if (!upscaleInstancesMap.isEmpty()) {
                 Map<String, ApiHost> upscaleHostsMap = getHostsMap(upscaleInstancesMap, hosts);
                 setHostRackIdBatch(upscaleInstancesMap, upscaleHostsMap);
@@ -214,7 +217,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                     .collect(Collectors.toList());
         } catch (ApiException e) {
             LOGGER.error(String.format("Failed to upscale. Response: %s", e.getResponseBody()), e);
-            throw new CloudbreakException("Failed to upscale", e);
+            throw new ScalingException("Failed to upscale", e,
+                    upscaleInstancesMap.values().stream().map(InstanceMetaData::getInstanceId).collect(Collectors.toSet()));
         }
     }
 

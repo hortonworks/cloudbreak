@@ -323,6 +323,12 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
                 .findFirst();
     }
 
+    public Optional<InstanceMetadataView> getNotDeletedInstanceMetadata(Long privateId) {
+        return getNotDeletedInstanceMetaData().stream()
+                .filter(instanceMetaData -> privateId.equals(instanceMetaData.getPrivateId()))
+                .findFirst();
+    }
+
     public List<String> getInstanceIdsForPrivateIds(Set<Long> privateIds) {
         List<InstanceMetadataView> instanceMetaDataForPrivateIds = getInstanceMetaDataForPrivateIds(privateIds);
         return instanceMetaDataForPrivateIds.stream()

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_WITH_ZOMBIE_NODES;
 import static java.lang.String.format;
 
 import java.util.HashSet;
@@ -15,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Joiner;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
@@ -24,8 +27,11 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.ScalingException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
@@ -61,6 +67,12 @@ public class ClusterUpscaleService {
     @Inject
     private ParcelService parcelService;
 
+    @Inject
+    private ClusterService clusterService;
+
+    @Inject
+    private FlowMessageService flowMessageService;
+
     public void installServicesOnNewHosts(Long stackId, Set<String> hostGroupNames, Boolean repair, Boolean restartServices,
             Map<String, Set<String>> hostGroupsWithHostNames, Map<String, Integer> hostGroupWithAdjustment) throws CloudbreakException {
         StackDto stackDto = stackDtoService.getById(stackId);
@@ -78,12 +90,22 @@ public class ClusterUpscaleService {
                         .flatMap(hostGroup -> hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet().stream())
                         .collect(Collectors.toSet());
         ClusterApi connector = getClusterConnector(stackDto);
-        List<String> upscaledHosts = connector.upscaleCluster(instanceMetaDatasByHostGroup);
-        if (Boolean.TRUE.equals(repair)) {
-            recommissionHostsIfNeeded(connector, hostGroupsWithHostNames);
-            restartServicesIfNecessary(restartServices, stackDto, connector);
+        try {
+            List<String> upscaledHosts = connector.upscaleCluster(instanceMetaDatasByHostGroup);
+            if (Boolean.TRUE.equals(repair)) {
+                recommissionHostsIfNeeded(connector, hostGroupsWithHostNames);
+                restartServicesIfNecessary(restartServices, stackDto, connector);
+            }
+            setInstanceStatus(runningInstanceMetaDataSet, upscaledHosts);
+        } catch (ScalingException se) {
+            if (Boolean.FALSE.equals(repair)) {
+                clusterService.updateInstancesToZombieByIds(stackId, se.getFailedInstanceIds());
+                flowMessageService.fireEventAndLog(stackDto.getId(), Status.UPDATE_IN_PROGRESS.name(),
+                        CLUSTER_SCALING_WITH_ZOMBIE_NODES, Joiner.on(",").join(se.getFailedInstanceIds()));
+            } else {
+                throw se;
+            }
         }
-        setInstanceStatus(runningInstanceMetaDataSet, upscaledHosts);
     }
 
     private void removeUnusedParcelComponents(StackDto stackDto) throws CloudbreakException {

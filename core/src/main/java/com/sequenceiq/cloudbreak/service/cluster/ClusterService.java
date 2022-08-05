@@ -222,6 +222,10 @@ public class ClusterService {
         Set<String> unreachableInstanceIds = unreachableNodes.stream()
                 .map(Node::getInstanceId)
                 .collect(Collectors.toSet());
+        updateInstancesToZombieByIds(stackId, unreachableInstanceIds);
+    }
+
+    public void updateInstancesToZombieByIds(Long stackId, Set<String> unreachableInstanceIds) {
         LOGGER.debug("Update instance statuses to ZOMBIE, instanceIds: {}", unreachableInstanceIds);
         List<? extends InstanceMetadataView> notDeletedInstanceMetadatas = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stackId);
         List<Long> instanceMetadataIds = notDeletedInstanceMetadatas.stream()
