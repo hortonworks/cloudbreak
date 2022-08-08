@@ -73,7 +73,7 @@ public class EnvironmentReactorFlowManager {
     }
 
     public FlowIdentifier triggerDeleteFlow(EnvironmentView environment, String userCrn, boolean forced) {
-        LOGGER.info("Environment deletion flow triggered for '{}'.", environment.getName());
+        LOGGER.info("Environment simple (FreeIPA) deletion flow triggered for '{}', forced={}.", environment.getName(), forced);
         flowCancelService.cancelRunningFlows(environment.getId());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
                 .withAccepted(new Promise<>())
@@ -87,7 +87,7 @@ public class EnvironmentReactorFlowManager {
     }
 
     public FlowIdentifier triggerCascadingDeleteFlow(EnvironmentView environment, String userCrn, boolean forced) {
-        LOGGER.info("Environment forced deletion flow triggered for '{}'.", environment.getName());
+        LOGGER.info("Environment cascading deletion flow triggered for '{}', forced={}.", environment.getName(), forced);
         flowCancelService.cancelRunningFlows(environment.getId());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
                 .withAccepted(new Promise<>())
@@ -114,7 +114,7 @@ public class EnvironmentReactorFlowManager {
 
     public FlowIdentifier triggerStartFlow(long envId, String envName, String userCrn, DataHubStartAction dataHubStartAction) {
         LOGGER.info("Environment start flow triggered.");
-        EnvStartEvent envSrartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
+        EnvStartEvent envStartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
                 .withAccepted(new Promise<>())
                 .withSelector(EnvStartStateSelectors.ENV_START_FREEIPA_EVENT.selector())
                 .withResourceId(envId)
@@ -122,7 +122,7 @@ public class EnvironmentReactorFlowManager {
                 .withDataHubStartAction(dataHubStartAction)
                 .build();
 
-        return eventSender.sendEvent(envSrartEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        return eventSender.sendEvent(envStartEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 
     public FlowIdentifier triggerStackConfigUpdatesFlow(EnvironmentView environment, String userCrn) {
