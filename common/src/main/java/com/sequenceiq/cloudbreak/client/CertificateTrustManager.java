@@ -1,16 +1,12 @@
 package com.sequenceiq.cloudbreak.client;
 
-import java.security.KeyManagementException;
-import java.security.SecureRandom;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.glassfish.jersey.SslConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,53 +28,15 @@ public class CertificateTrustManager {
     }
 
     public static SSLContext sslContext() {
-        // Create a trust manager that does not validate certificate chains
-        TrustManager[] trustAllCerts = {trustEverythingTrustManager()};
         try {
-            // Install the all-trusting trust manager
-            SSLContext sc = SslConfigurator.newInstance().createSSLContext();
-            sc.init(null, trustAllCerts, new SecureRandom());
-            LOGGER.debug("Trust all SSL certificates has been installed");
-            return sc;
-        } catch (KeyManagementException e) {
-            LOGGER.error(e.getMessage(), e);
-            throw new RuntimeException("F", e);
+            SSLContext defaultSslContext = SSLContext.getDefault();
+            LOGGER.debug("Default SSL context has been initialised");
+            return defaultSslContext;
+        } catch (NoSuchAlgorithmException e) {
+            String errorMessage = String.format("Failed to initialise SSL context due to: '%s'", e.getMessage());
+            LOGGER.error(errorMessage, e);
+            throw new RuntimeException(errorMessage, e);
         }
-    }
-
-    public static SSLContext sslSavingTrustStoreContext() {
-        TrustManager[] trustManagers = {new CertificateTrustManager.SavingX509TrustManager()};
-        SSLContext sslContext = SslConfigurator.newInstance().createSSLContext();
-        HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-        try {
-            sslContext.init(null, trustManagers, new SecureRandom());
-        } catch (KeyManagementException e) {
-            LOGGER.error(e.getMessage(), e);
-            throw new RuntimeException("FF", e);
-        }
-        return sslContext;
-    }
-
-    private static X509TrustManager trustEverythingTrustManager() {
-        return new X509TrustManager() {
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                LOGGER.debug("accept all issuer");
-                return null;
-            }
-
-            @Override
-            public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {
-                LOGGER.debug("checkClientTrusted");
-                // Trust everything
-            }
-
-            @Override
-            public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
-                LOGGER.debug("checkServerTrusted");
-                // Trust everything
-            }
-        };
     }
 
     public static class SavingX509TrustManager implements X509TrustManager {
@@ -103,5 +61,4 @@ public class CertificateTrustManager {
             return chain;
         }
     }
-
 }
