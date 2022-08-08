@@ -324,4 +324,12 @@ public interface InstanceMetaDataRepository extends JpaRepository<InstanceMetaDa
             "AND i.privateId in :privateIds")
     List<InstanceMetadataViewDelegate> findInstanceMetadataViewsByStackIdAndPrivateIds(@Param("stackId") Long stackId,
             @Param("privateIds") Collection<Long> privateIds);
+
+    @Query("SELECT im.privateId " +
+            "FROM InstanceMetaData im " +
+            "LEFT JOIN im.instanceGroup ig  " +
+            "LEFT JOIN ig.stack s " +
+            "WHERE s.id = :stackId " +
+            "ORDER BY im.privateId desc")
+    Page<Long> findLastPrivateIdForStack(@Param("stackId") Long stackId, Pageable page);
 }

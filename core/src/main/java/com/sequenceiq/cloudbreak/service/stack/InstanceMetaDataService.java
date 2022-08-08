@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -20,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -75,9 +75,6 @@ public class InstanceMetaDataService {
     private ResourceRetriever resourceRetriever;
 
     @Inject
-    private StackDtoService stackDtoService;
-
-    @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public void updateInstanceStatuses(Collection<Long> instanceIds, InstanceStatus newStatus,
@@ -117,8 +114,7 @@ public class InstanceMetaDataService {
         Map<String, String> subnetAzPairs = multiAzCalculatorService.prepareSubnetAzMap(environment);
         String stackSubnetId = getStackSubnetIdIfExists(stack);
         String stackAz = stackSubnetId == null ? null : subnetAzPairs.get(stackSubnetId);
-        List<InstanceGroupDto> allInstanceMetadataByInstanceGroup = stackDtoService.getInstanceMetadataByInstanceGroup(stack.getId());
-        long privateId = getFirstValidPrivateId(allInstanceMetadataByInstanceGroup);
+        long privateId = getFirstValidPrivateId(stack.getId());
         List<InstanceGroupDto> instanceGroupDtos = stack.getInstanceGroupDtos();
         for (Map.Entry<String, Integer> hostGroupWithInstanceCount : hostGroupsWithInstanceCountToCreate.entrySet()) {
             String hostGroup = hostGroupWithInstanceCount.getKey();
@@ -169,17 +165,12 @@ public class InstanceMetaDataService {
         return hostNameIterator;
     }
 
-    private long getFirstValidPrivateId(List<InstanceGroupDto> instanceGroups) {
+    private long getFirstValidPrivateId(Long stackId) {
         LOGGER.debug("Get first valid PrivateId of instanceGroups");
-        long id = instanceGroups.stream()
-                .flatMap(ig -> ig.getInstanceMetadataViews().stream())
-                .map(InstanceMetadataView::getPrivateId)
-                .filter(Objects::nonNull)
-                .map(i -> i + 1)
-                .max(Long::compare)
-                .orElse(0L);
-        LOGGER.debug("First valid privateId: {}", id);
-        return id;
+        long id = repository.findLastPrivateIdForStack(stackId, Pageable.ofSize(1)).stream().findFirst().orElse(0L);
+        long validId = id + 1;
+        LOGGER.debug("First valid privateId: {}", validId);
+        return validId;
     }
 
     @VisibleForTesting
