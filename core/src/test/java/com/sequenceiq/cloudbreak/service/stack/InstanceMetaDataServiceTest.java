@@ -31,6 +31,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -99,9 +100,6 @@ class InstanceMetaDataServiceTest {
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
-    @Mock
-    private StackDtoService stackDtoService;
-
     @Captor
     private ArgumentCaptor<InstanceMetaData> instanceMetaDataCaptor;
 
@@ -128,7 +126,7 @@ class InstanceMetaDataServiceTest {
     void saveInstanceAndGetUpdatedStackTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobin(String testCaseName, boolean save, List<String> hostnames,
             String subnetId, String availabilityZone, String rackId) {
         Stack stack = stack(INSTANCE_GROUP_COUNT);
-        when(stackDtoService.getInstanceMetadataByInstanceGroup(any())).thenReturn(stack.getInstanceGroupDtos());
+        when(repository.findLastPrivateIdForStack(any(), any())).thenReturn(new PageImpl<>(List.of(0L)));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
@@ -208,7 +206,7 @@ class InstanceMetaDataServiceTest {
             List<String> hostnames, String subnetId, String availabilityZone, String rackId) {
         Stack stack = stack(INSTANCE_GROUP_COUNT);
 
-        when(stackDtoService.getInstanceMetadataByInstanceGroup(any())).thenReturn(stack.getInstanceGroupDtos());
+        when(repository.findLastPrivateIdForStack(any(), any())).thenReturn(new PageImpl<>(List.of(0L)));
         InstanceMetaData existingInstance = new InstanceMetaData();
         existingInstance.setPrivateId(1234L);
         existingInstance.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING);
@@ -258,7 +256,7 @@ class InstanceMetaDataServiceTest {
     void saveInstanceAndGetUpdatedStackTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobinAndCloudInstanceWithBadGroupName(String testCaseName,
             boolean save, List<String> hostnames, String subnetId, String availabilityZone, String rackId) {
         Stack stack = stack(INSTANCE_GROUP_COUNT);
-        when(stackDtoService.getInstanceMetadataByInstanceGroup(any())).thenReturn(stack.getInstanceGroupDtos());
+        when(repository.findLastPrivateIdForStack(any(), any())).thenReturn(new PageImpl<>(List.of(0L)));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
@@ -281,7 +279,7 @@ class InstanceMetaDataServiceTest {
     void saveInstanceAndGetUpdatedStackTestWhenSubnetAndAvailabilityZoneAndRackIdAndStackFallback(String testCaseName, boolean save, List<String> hostnames,
             String subnetId, String availabilityZone, String rackId) {
         Stack stack = stack(INSTANCE_GROUP_COUNT);
-        when(stackDtoService.getInstanceMetadataByInstanceGroup(any())).thenReturn(stack.getInstanceGroupDtos());
+        when(repository.findLastPrivateIdForStack(any(), any())).thenReturn(new PageImpl<>(List.of(0L)));
         Network network = new Network();
         network.setAttributes(Json.silent(subnetId == null ? Map.of() : Map.of("subnetId", subnetId)));
         stack.setNetwork(network);
@@ -311,7 +309,7 @@ class InstanceMetaDataServiceTest {
     void saveInstanceAndGetUpdatedStackTestWhenNoCloudInstances() {
         Stack stack = stack(1);
 
-        when(stackDtoService.getInstanceMetadataByInstanceGroup(any())).thenReturn(stack.getInstanceGroupDtos());
+        when(repository.findLastPrivateIdForStack(any(), any())).thenReturn(new PageImpl<>(List.of(0L)));
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(Map.of());
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
