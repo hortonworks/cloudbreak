@@ -16,3 +16,4 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRecipeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRangerRazEnabledTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxRepairWithRecipeTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.saltpassword.RotateSaltPasswordE2ETest

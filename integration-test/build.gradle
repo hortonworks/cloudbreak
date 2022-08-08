@@ -163,7 +163,7 @@ dependencies {
   implementation (group: 'com.cloudera.api.swagger',     name: 'cloudera-manager-api-swagger',   version: cmClientVersion) {
     transitive = false
   }
-  implementation (group: 'com.hierynomus',                name: 'sshj',                           version: '0.27.0') {
+  implementation (group: 'com.hierynomus',                name: 'sshj',                           version: '0.33.0') {
     exclude group: "net.i2p.crypto"
   }
   implementation group: 'org.jetbrains',                 name: 'annotations',                    version: '20.1.0'
