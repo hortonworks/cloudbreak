@@ -3,8 +3,6 @@ package com.sequenceiq.periscope.config;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.SQLException;
 
 import javax.inject.Inject;
@@ -92,9 +90,9 @@ public class DatabaseConfig {
     public DataSource dataSource() throws SQLException {
         DatabaseUtil.createSchemaIfNeeded("postgresql", databaseAddress, dbName, dbUser, dbPassword, dbSchemaName);
         HikariConfig config = new HikariConfig();
-        if (ssl && Files.exists(Paths.get(certFile))) {
+        if (ssl) {
             config.addDataSourceProperty("ssl", "true");
-            config.addDataSourceProperty("sslrootcert", certFile);
+            config.addDataSourceProperty("sslfactory", "org.postgresql.ssl.DefaultJavaSSLFactory");
         }
         if (periscopeNodeConfig.isNodeIdSpecified()) {
             config.addDataSourceProperty("ApplicationName", periscopeNodeConfig.getId());
