@@ -283,9 +283,12 @@ public class CloudFormationStackUtil {
         }
     }
 
+    //our metadata on the Group might not have the latest set of instances, but if the name matches it is being added
     private Set<String> getInstanceIdsForGroups(List<CloudResource> resources, Set<Group> groups) {
+        List<String> groupNames = groups.stream().map(Group::getName).collect(Collectors.toList());
         return resources.stream()
                 .filter(instance -> instance.getInstanceId() != null)
+                .filter(resource -> groupNames.contains(resource.getGroup()))
                 .map(CloudResource::getInstanceId)
                 .collect(Collectors.toSet());
     }
