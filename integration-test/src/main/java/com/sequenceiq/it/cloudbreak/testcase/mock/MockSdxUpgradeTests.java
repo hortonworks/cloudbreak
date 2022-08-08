@@ -80,10 +80,6 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
         String imageSettings = "imageSettingsUpgrade";
         String networkKey = "someOtherNetwork";
         testContext
-                .getTestContext()
-                .commonCloudProperties()
-                .setCloudProvider("MOCK");
-        testContext
                 .given(networkKey, EnvironmentNetworkTestDto.class)
                 .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
@@ -132,11 +128,6 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
         String imageSettings = "imageSettingsUpgrade";
         String networkKey = "someOtherNetwork";
         String clusterCrn = TestCrnGenerator.getDatalakeCrn(UUID.randomUUID().toString(), "cloudera");
-
-        testContext
-                .getTestContext()
-                .commonCloudProperties()
-                .setCloudProvider("MOCK");
 
         testContext
                 .given(networkKey, EnvironmentNetworkTestDto.class)
