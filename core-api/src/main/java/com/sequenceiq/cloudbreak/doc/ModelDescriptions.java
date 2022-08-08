@@ -515,8 +515,7 @@ public class ModelDescriptions {
                 + "or performing advanced cluster configuration. For example, you can use a recipe to put a JAR file "
                 + "on the Hadoop classpath.";
         public static final String CONTENT = "content of recipe";
-        public static final String TYPE = "type of recipe [PRE_CLOUDERA_MANAGER_START,PRE_TERMINATION,POST_CLOUDERA_MANAGER_START,POST_CLUSTER_INSTALL]. "
-                + "The default is PRE_CLOUDERA_MANAGER_START";
+        public static final String TYPE = "type of recipe";
         public static final String WORKSPACE_ID = "id of the workspace";
         public static final String WORKSPACE_NAME = "name of the workspace";
     }
