@@ -19,6 +19,8 @@ import com.amazonaws.services.cloudformation.model.ListStackResourcesRequest;
 import com.amazonaws.services.cloudformation.model.ListStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
 import com.amazonaws.services.cloudformation.model.UpdateStackResult;
+import com.amazonaws.services.cloudformation.model.ValidateTemplateRequest;
+import com.amazonaws.services.cloudformation.model.ValidateTemplateResult;
 import com.amazonaws.services.cloudformation.waiters.AmazonCloudFormationWaiters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonClient;
 import com.sequenceiq.cloudbreak.service.Retry;
@@ -60,6 +62,10 @@ public class AmazonCloudFormationClient extends AmazonClient {
 
     public UpdateStackResult updateStack(UpdateStackRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.updateStack(request));
+    }
+
+    public ValidateTemplateResult validateTemplate(ValidateTemplateRequest request) {
+        return client.validateTemplate(request);
     }
 
     public ListStackResourcesResult listStackResources(ListStackResourcesRequest request) {

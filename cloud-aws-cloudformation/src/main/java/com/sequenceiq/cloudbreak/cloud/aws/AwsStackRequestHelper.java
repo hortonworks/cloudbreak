@@ -18,6 +18,7 @@ import com.amazonaws.services.cloudformation.model.ListStackResourcesRequest;
 import com.amazonaws.services.cloudformation.model.OnFailure;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
+import com.amazonaws.services.cloudformation.model.ValidateTemplateRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.Image;
@@ -74,6 +75,11 @@ public class AwsStackRequestHelper {
                 .withTags(awsTaggingService.prepareCloudformationTags(ac, stack.getTags()))
                 .withCapabilities(CAPABILITY_IAM)
                 .withParameters(getStackParameters(ac, stack, true));
+    }
+
+    public ValidateTemplateRequest createValidateTemplateRequest(String cfTemplate) {
+        return new ValidateTemplateRequest()
+                .withTemplateBody(cfTemplate);
     }
 
     public UpdateStackRequest createUpdateStackRequest(AuthenticatedContext ac, CloudStack stack, String cFStackName, String cfTemplate) {

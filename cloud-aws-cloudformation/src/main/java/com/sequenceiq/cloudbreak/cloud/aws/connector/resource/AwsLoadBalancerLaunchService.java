@@ -18,10 +18,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.ListStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.ResourceStatus;
 import com.amazonaws.services.cloudformation.model.StackResourceSummary;
+import com.amazonaws.services.cloudformation.model.ValidateTemplateResult;
 import com.amazonaws.waiters.Waiter;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
@@ -54,6 +56,8 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 public class AwsLoadBalancerLaunchService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsLoadBalancerLaunchService.class);
+
+    private static final String VALIDATION_ERROR = "ValidationError";
 
     @Inject
     private CloudFormationStackUtil cfStackUtil;
@@ -185,8 +189,15 @@ public class AwsLoadBalancerLaunchService {
 
         String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
         LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
-        cfClient.updateStack(awsStackRequestHelper.createUpdateStackRequest(ac, stack, cFStackName, cfTemplate));
-
+        try {
+            cfClient.updateStack(awsStackRequestHelper.createUpdateStackRequest(ac, stack, cFStackName, cfTemplate));
+        } catch (AmazonServiceException e) {
+            if (VALIDATION_ERROR.equalsIgnoreCase(e.getErrorCode())) {
+                ValidateTemplateResult result = cfClient.validateTemplate(awsStackRequestHelper.createValidateTemplateRequest(cfTemplate));
+                LOGGER.debug("Validation result for the CloudFormationTemplate: {}", result);
+            }
+            throw e;
+        }
         Waiter<DescribeStacksRequest> updateWaiter = cfClient.waiters().stackUpdateComplete();
         StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
         run(updateWaiter, describeStacksRequest, stackCancellationCheck, String.format("CloudFormation stack %s update failed.", cFStackName),
