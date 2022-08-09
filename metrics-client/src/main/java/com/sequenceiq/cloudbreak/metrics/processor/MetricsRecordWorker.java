@@ -42,6 +42,7 @@ public class MetricsRecordWorker extends RecordWorker<MetricsRecordProcessor, Me
                     .addHeader("Content-Encoding", "snappy")
                     .addHeader("User-Agent", "cb-prometheus-java-client")
                     .addHeader("X-Prometheus-Remote-Write-Version", "0.1.0")
+                    .addHeader("THANOS-TENANT", input.getAccountId())
                     .post(body)
                     .build();
             Response response = client.newCall(request).execute();
