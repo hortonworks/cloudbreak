@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -33,10 +34,20 @@ public class DefaultBlueprintCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBlueprintCache.class);
 
+    private static final String TEMPLATE_PATH = "blueprints/%s/%s.bp";
+
+    private static final String DEV_TEMPLATE_PATH = "devblueprints/%s/%s.bp";
+
     private final Map<String, BlueprintFile> defaultBlueprints = new HashMap<>();
+
+    @Value("${cb.devblueprint.enabled}")
+    private boolean devBlueprintEnabled;
 
     @Inject
     private BlueprintEntities blueprintEntities;
+
+    @Inject
+    private DevBlueprintEntities devBlueprintEntities;
 
     @Inject
     private BlueprintUtils blueprintUtils;
@@ -46,7 +57,14 @@ public class DefaultBlueprintCache {
 
     @PostConstruct
     public void loadBlueprintsFromFile() {
-        Map<String, Set<String>> blueprints = blueprints();
+        loadBlueprintByPath(TEMPLATE_PATH);
+        if (devBlueprintEnabled) {
+            loadBlueprintByPath(DEV_TEMPLATE_PATH);
+        }
+    }
+
+    private void loadBlueprintByPath(String path) {
+        Map<String, Set<String>> blueprints = blueprints(path);
         for (Map.Entry<String, Set<String>> blueprintEntry : blueprints.entrySet()) {
             try {
                 for (String blueprintText : blueprintEntry.getValue()) {
@@ -56,7 +74,7 @@ public class DefaultBlueprintCache {
                         BlueprintV4Request blueprintJson = new BlueprintV4Request();
                         blueprintJson.setName(split[0].trim());
                         JsonNode jsonNode = blueprintUtils.convertStringToJsonNode(
-                                blueprintUtils.readDefaultBlueprintFromFile(blueprintEntry.getKey(), split));
+                                blueprintUtils.readDefaultBlueprintFromFile(blueprintEntry.getKey(), split, path));
                         JsonNode blueprintNode = jsonNode.get("blueprint");
                         blueprintJson.setBlueprint(blueprintNode.toString());
                         Blueprint bp = converter.convert(blueprintJson);
@@ -90,8 +108,9 @@ public class DefaultBlueprintCache {
         return defaultBlueprints;
     }
 
-    private Map<String, Set<String>> blueprints() {
-        return blueprintEntities.getDefaults()
+    private Map<String, Set<String>> blueprints(String path) {
+        AbstractBlueprintEntities actualBlueprintEntities = StringUtils.equals(path, DEV_TEMPLATE_PATH) ? devBlueprintEntities : blueprintEntities;
+        return actualBlueprintEntities.getDefaults()
                 .entrySet()
                 .stream()
                 .filter(e -> StringUtils.isNoneBlank(e.getValue()))

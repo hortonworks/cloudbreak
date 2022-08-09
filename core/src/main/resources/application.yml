@@ -616,6 +616,14 @@ cb:
           7.2.16 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
           7.2.16 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
           7.2.16 - COD Edge Node=cdp-cod-edge-node
+  devblueprint:
+      enabled: false
+      cm:
+        defaults:
+          7.2.15: >
+            [DEV] 7.2.15 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
+          7.2.16: >
+            [DEV] 7.2.16 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
   custom.user.data: |

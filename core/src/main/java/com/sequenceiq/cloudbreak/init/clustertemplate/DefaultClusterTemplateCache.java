@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
@@ -51,7 +52,12 @@ public class DefaultClusterTemplateCache {
     @Value("#{'${cb.clustertemplate.defaults:}'.split(',')}")
     private List<String> clusterTemplates;
 
+    @Value("${cb.devblueprint.enabled}")
+    private boolean devBlueprintEnabled;
+
     private String defaultTemplateDir = "defaults/clustertemplates";
+
+    private String devTemplateDir = "defaults/devclustertemplates";
 
     @Inject
     private WorkspaceService workspaceService;
@@ -201,15 +207,22 @@ public class DefaultClusterTemplateCache {
 
     private List<String> getFiles() throws IOException {
         ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
-        return Arrays.stream(patternResolver.getResources("classpath:" + defaultTemplateDir + "/**/*.json"))
-                .map(resource -> {
-                    try {
-                        String[] path = resource.getURL().getPath().split(defaultTemplateDir);
-                        return String.format("%s%s", defaultTemplateDir, path[1]);
-                    } catch (IOException e) {
-                        // wrap to runtime exception because of lambda and log the error in the caller method.
-                        throw new RuntimeException(e);
-                    }
-                }).collect(Collectors.toList());
+        List<String> defaultTemplateList = Arrays.stream(patternResolver.getResources("classpath:" + defaultTemplateDir + "/**/*.json"))
+                .map(resource -> getTemplateFromResource(resource, defaultTemplateDir)).collect(Collectors.toList());
+        if (devBlueprintEnabled) {
+            defaultTemplateList.addAll(Arrays.stream(patternResolver.getResources("classpath:" + devTemplateDir + "/**/*.json"))
+                    .map(resource -> getTemplateFromResource(resource, devTemplateDir)).collect(Collectors.toList()));
+        }
+        return defaultTemplateList;
+    }
+
+    private String getTemplateFromResource(Resource resource, String templateDir) {
+        try {
+            String[] path = resource.getURL().getPath().split(templateDir);
+            return String.format("%s%s", templateDir, path[1]);
+        } catch (IOException e) {
+            // wrap to runtime exception because of lambda and log the error in the caller method.
+            throw new RuntimeException(e);
+        }
     }
 }

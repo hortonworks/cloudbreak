@@ -1,0 +1,59 @@
+{
+  "name": "[DEV] 7.2.15 - Data Engineering for Azure",
+  "description": "",
+  "type": "DATAENGINEERING",
+  "cloudPlatform": "AZURE",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "[DEV] 7.2.15 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    },
+    "instanceGroups": [
+      {
+        "name": "gateway",
+        "template": {
+          "attachedVolumes": [
+            {
+              "size": 64,
+              "count": 1,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D8_v3"
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "worker",
+        "template": {
+          "attachedVolumes": [
+            {
+              "size": 64,
+              "count": 1,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D13_v2"
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

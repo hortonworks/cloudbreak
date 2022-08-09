@@ -1,0 +1,56 @@
+{
+  "name": "[DEV] 7.2.16 - Data Engineering for AWS",
+  "description": "",
+  "type": "DATAENGINEERING",
+  "featureState": "RELEASED",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "[DEV] 7.2.16 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    },
+    "instanceGroups": [
+      {
+        "name": "gateway",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 64,
+              "type": "gp2"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.xlarge"
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "worker",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 64,
+              "type": "gp2"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r5d.xlarge"
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}
