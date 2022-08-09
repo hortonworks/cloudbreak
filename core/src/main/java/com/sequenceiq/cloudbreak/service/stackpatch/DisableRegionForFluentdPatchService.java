@@ -68,7 +68,7 @@ public class DisableRegionForFluentdPatchService extends AbstractTelemetryPatchS
             boolean loggingAgentContentMatches = compressUtil.compareCompressedContent(currentSaltState, fluentSaltStateConfig, loggingAgentSaltStateDef);
             if (!loggingAgentContentMatches) {
                 Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stack.getId());
-                List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+                List<GatewayConfig> gatewayConfigs = List.of(gatewayConfigService.getPrimaryGatewayConfig(stack));
                 ClusterDeletionBasedExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.nonCancellableModel();
                 Set<Node> availableNodes = getAvailableNodes(instanceMetaDataSet, gatewayConfigs, exitModel);
                 if (CollectionUtils.isEmpty(availableNodes)) {
