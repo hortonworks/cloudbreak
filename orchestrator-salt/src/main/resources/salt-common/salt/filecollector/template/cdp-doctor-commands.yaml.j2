@@ -41,6 +41,10 @@ commands:
       output: /tmp/doctor_freeipa_consistency_check.txt
   {%- endif %}
 {%- else %}
+    {%- if salt['pkg.version_cmp'](telemetry.cdpTelemetryPackageVersion,'0.4.29-1') >= 0 %}
+    - command: cdp-doctor ipa status
+      output: /tmp/doctor_ipa_status.txt
+    {%- endif %}
     - command: cdp-doctor recipe results
       output: /tmp/doctor_recipes.txt
     - command: cdp-doctor scm list-commands
