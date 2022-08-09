@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_START_FINISHED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_STOP_FINISHED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
@@ -198,7 +200,8 @@ public interface StackView extends MdcContextInfoProvider {
     }
 
     default boolean isStartInProgress() {
-        return START_IN_PROGRESS.equals(getStatus()) || START_REQUESTED.equals(getStatus());
+        return START_IN_PROGRESS.equals(getStatus()) || START_REQUESTED.equals(getStatus())
+                || EXTERNAL_DATABASE_START_IN_PROGRESS.equals(getStatus()) || EXTERNAL_DATABASE_START_FINISHED.equals(getStatus());
     }
 
     default boolean isCreateInProgress() {
