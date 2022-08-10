@@ -17,8 +17,6 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
 
     public static final String DESIRED_CDP_TELEMETRY_VERSION = "desiredCdpTelemetryVersion";
 
-    public static final String DESIRED_CDP_VMAGENT_VERSION = "desiredCdpVmAgentVersion";
-
     public static final String DESIRED_CDP_REQUEST_SIGNER_VERSION = "desiredCdpRequestSignerVersion";
 
     private final TelemetryClusterDetails clusterDetails;
@@ -38,8 +36,6 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
     private final String desiredCdpLoggingAgentVersion;
 
     private final String desiredCdpTelemetryVersion;
-
-    private final String desiredCdpVmAgentVersion;
 
     private final String desiredCdpRequestSignerVersion;
 
@@ -61,7 +57,6 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
         databusConnectRetryMaxTime = builder.databusConnectRetryMaxTime;
         desiredCdpLoggingAgentVersion = builder.desiredCdpLoggingAgentVersion;
         desiredCdpTelemetryVersion = builder.desiredCdpTelemetryVersion;
-        desiredCdpVmAgentVersion = builder.desiredCdpVmAgentVersion;
         desiredCdpRequestSignerVersion = builder.desiredCdpRequestSignerVersion;
         repoName = builder.repoName;
         repoBaseUrl = builder.repoBaseUrl;
@@ -87,7 +82,6 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
         map.put("databusConnectRetryMaxTime", databusConnectRetryMaxTime);
         map.put(DESIRED_CDP_LOGGING_AGENT_VERSION, desiredCdpLoggingAgentVersion);
         map.put(DESIRED_CDP_TELEMETRY_VERSION, desiredCdpTelemetryVersion);
-        map.put(DESIRED_CDP_VMAGENT_VERSION, desiredCdpVmAgentVersion);
         map.put(DESIRED_CDP_REQUEST_SIGNER_VERSION, desiredCdpRequestSignerVersion);
         map.put("repoName", repoName);
         map.put("repoBaseUrl", repoBaseUrl);
@@ -115,8 +109,6 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
         private String desiredCdpLoggingAgentVersion;
 
         private String desiredCdpTelemetryVersion;
-
-        private String desiredCdpVmAgentVersion;
 
         private String desiredCdpRequestSignerVersion;
 
@@ -174,11 +166,6 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
 
         public Builder withDesiredCdpTelemetryVersion(String desiredCdpTelemetryVersion) {
             this.desiredCdpTelemetryVersion = desiredCdpTelemetryVersion;
-            return this;
-        }
-
-        public Builder withDesiredCdpVmAgentVersion(String desiredCdpVmAgentVersion) {
-            this.desiredCdpVmAgentVersion = desiredCdpVmAgentVersion;
             return this;
         }
 

@@ -15,8 +15,6 @@ public class TelemetryUpgradeConfiguration {
 
     private TelemetryComponentUpgradeConfiguration meteringAgent;
 
-    private TelemetryComponentUpgradeConfiguration cdpVmAgent;
-
     private TelemetryComponentUpgradeConfiguration cdpRequestSigner;
 
     public boolean isEnabled() {
@@ -49,14 +47,6 @@ public class TelemetryUpgradeConfiguration {
 
     public void setMeteringAgent(TelemetryComponentUpgradeConfiguration meteringAgent) {
         this.meteringAgent = meteringAgent;
-    }
-
-    public TelemetryComponentUpgradeConfiguration getCdpVmAgent() {
-        return cdpVmAgent;
-    }
-
-    public void setCdpVmAgent(TelemetryComponentUpgradeConfiguration cdpVmAgent) {
-        this.cdpVmAgent = cdpVmAgent;
     }
 
     public TelemetryComponentUpgradeConfiguration getCdpRequestSigner() {
