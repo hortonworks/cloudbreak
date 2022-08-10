@@ -97,4 +97,16 @@ public class ClusterApiView extends CompactView {
     public void setCertExpirationState(CertExpirationState certExpirationState) {
         this.certExpirationState = certExpirationState;
     }
+
+    @Override
+    public String toString() {
+        return "ClusterApiView{" +
+                ", hostGroups=" + hostGroups +
+                ", blueprint=" + blueprint +
+                ", clusterManagerIp='" + clusterManagerIp + '\'' +
+                ", status=" + status +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                ", certExpirationState=" + certExpirationState +
+                "} " + super.toString();
+    }
 }

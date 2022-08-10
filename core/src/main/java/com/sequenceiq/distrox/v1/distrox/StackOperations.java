@@ -168,9 +168,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     }
 
     public StackViewV4Responses listByEnvironmentCrn(Long workspaceId, String environmentCrn, List<StackType> stackTypes) {
-        Set<StackViewV4Response> stackViewResponses;
         LOGGER.info("List for Stack in workspace {} and environmentCrn {}.", workspaceId, environmentCrn);
-        stackViewResponses = stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, environmentCrn, stackTypes)
+        Set<StackViewV4Response> stackViewResponses =
+                stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, environmentCrn, stackTypes)
                 .stream()
                 .map(s -> stackApiViewToStackViewV4ResponseConverter.convert(s))
                 .collect(Collectors.toSet());

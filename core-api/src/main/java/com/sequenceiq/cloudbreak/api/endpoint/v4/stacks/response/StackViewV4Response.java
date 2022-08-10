@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.UserViewV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -65,6 +66,9 @@ public class StackViewV4Response implements JsonEntity {
     private String stackVersion;
 
     private boolean upgradeable;
+
+    @ApiModelProperty(StackModelDescription.EXTERNAL_DATABASE)
+    private DatabaseResponse externalDatabase;
 
     public String getCrn() {
         return crn;
@@ -210,12 +214,19 @@ public class StackViewV4Response implements JsonEntity {
         this.govCloud = govCloud;
     }
 
+    public DatabaseResponse getExternalDatabase() {
+        return externalDatabase;
+    }
+
+    public void setExternalDatabase(DatabaseResponse externalDatabase) {
+        this.externalDatabase = externalDatabase;
+    }
+
     @Override
     public String toString() {
         return "StackViewV4Response{" +
                 "crn='" + crn + '\'' +
                 ", name='" + name + '\'' +
-                ", govCloud='" + govCloud + '\'' +
                 ", hdpVersion='" + hdpVersion + '\'' +
                 ", cluster=" + cluster +
                 ", status=" + status +
@@ -226,11 +237,13 @@ public class StackViewV4Response implements JsonEntity {
                 ", environmentCrn='" + environmentCrn + '\'' +
                 ", environmentName='" + environmentName + '\'' +
                 ", credentialName='" + credentialName + '\'' +
+                ", govCloud=" + govCloud +
                 ", cloudPlatform='" + cloudPlatform + '\'' +
                 ", variant='" + variant + '\'' +
                 ", tunnel=" + tunnel +
                 ", stackVersion='" + stackVersion + '\'' +
                 ", upgradeable=" + upgradeable +
+                ", externalDatabase=" + externalDatabase +
                 '}';
     }
 }
