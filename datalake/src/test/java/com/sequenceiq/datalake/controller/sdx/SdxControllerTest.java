@@ -55,6 +55,8 @@ class SdxControllerTest {
 
     private static final String SDX_CLUSTER_NAME = "test-sdx-cluster";
 
+    private static final String BACKUP_LOCATION = "abfs://backup@location/to/backup";
+
     @Mock
     private SdxStatusService sdxStatusService;
 
@@ -197,22 +199,39 @@ class SdxControllerTest {
     }
 
     @Test
-    void validateBackupStorage() {
+    void validateBackupStorageWithDefaultLocation() {
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
         ValidationResult validationResult = resultBuilder.build();
 
         SdxCluster sdxCluster = getValidSdxCluster();
         sdxCluster.setClusterName(SDX_CLUSTER_NAME);
         SdxBackupLocationValidationRequest sdxBackupLocationValidationRequest = new SdxBackupLocationValidationRequest(SDX_CLUSTER_NAME);
-        when(storageValidationService.validateBackupStorage(sdxCluster)).thenReturn(validationResult);
+        when(storageValidationService.validateBackupStorage(sdxCluster, null)).thenReturn(validationResult);
         when(sdxService.getByNameInAccount(USER_CRN, SDX_CLUSTER_NAME)).thenReturn(sdxCluster);
 
         ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.validateBackupStorage(sdxBackupLocationValidationRequest));
 
         verify(sdxService, times(1)).getByNameInAccount(USER_CRN, SDX_CLUSTER_NAME);
-        verify(storageValidationService, times(1)).validateBackupStorage(sdxCluster);
+        verify(storageValidationService, times(1)).validateBackupStorage(sdxCluster, null);
         assertEquals(ValidationResult.State.VALID, result.getState());
+    }
 
+    @Test
+    void validateBackupStorageWithNonDefaultLocation() {
+        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
+        ValidationResult validationResult = resultBuilder.build();
+
+        SdxCluster sdxCluster = getValidSdxCluster();
+        sdxCluster.setClusterName(SDX_CLUSTER_NAME);
+        SdxBackupLocationValidationRequest sdxBackupLocationValidationRequest = new SdxBackupLocationValidationRequest(SDX_CLUSTER_NAME, BACKUP_LOCATION);
+        when(storageValidationService.validateBackupStorage(sdxCluster, BACKUP_LOCATION)).thenReturn(validationResult);
+        when(sdxService.getByNameInAccount(USER_CRN, SDX_CLUSTER_NAME)).thenReturn(sdxCluster);
+
+        ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.validateBackupStorage(sdxBackupLocationValidationRequest));
+
+        verify(sdxService, times(1)).getByNameInAccount(USER_CRN, SDX_CLUSTER_NAME);
+        verify(storageValidationService, times(1)).validateBackupStorage(sdxCluster, BACKUP_LOCATION);
+        assertEquals(ValidationResult.State.VALID, result.getState());
     }
 
     private SdxCluster getValidSdxCluster() {

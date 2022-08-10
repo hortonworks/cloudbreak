@@ -39,6 +39,10 @@ public class CloudStorageValidatorTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1:user:2";
 
+    private static final String CUSTOM_BACKUP_LOCATION = "/location/to/custom/backup";
+
+    private static final String BACKUP_LOCATION = "/location/to/backup";
+
     @Mock
     private EntitlementService entitlementService;
 
@@ -108,6 +112,7 @@ public class CloudStorageValidatorTest {
     @Test
     public void validateBackupLocation() {
         when(environment.getCredential()).thenReturn(new CredentialResponse());
+        when(environment.getBackupLocation()).thenReturn(BACKUP_LOCATION);
         when(secretService.getByResponse(any())).thenReturn("secret");
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
@@ -116,7 +121,26 @@ public class CloudStorageValidatorTest {
 
         when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(new ObjectStorageValidateResponse());
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), environment, validationResultBuilder));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), environment, null, validationResultBuilder));
+        assertFalse(validationResultBuilder.build().hasError());
+    }
+
+    @Test
+    public void validateCustomBackupLocation() {
+        ArgumentCaptor<ObjectStorageValidateRequest> captor = ArgumentCaptor.forClass(ObjectStorageValidateRequest.class);
+        when(environment.getCredential()).thenReturn(new CredentialResponse());
+        when(secretService.getByResponse(any())).thenReturn("secret");
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(
+                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc", false));
+
+        when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(new ObjectStorageValidateResponse());
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), environment, CUSTOM_BACKUP_LOCATION,
+                validationResultBuilder));
+        verify(cloudProviderServicesV4Endpoint, times(1)).validateObjectStorage(captor.capture());
+        assertEquals(CUSTOM_BACKUP_LOCATION, captor.getValue().getBackupLocationBase());
         assertFalse(validationResultBuilder.build().hasError());
     }
 
@@ -125,7 +149,7 @@ public class CloudStorageValidatorTest {
         ArgumentCaptor<ObjectStorageValidateRequest> captor = ArgumentCaptor.forClass(ObjectStorageValidateRequest.class);
         when(environment.getCredential()).thenReturn(new CredentialResponse());
         when(environment.getCloudPlatform()).thenReturn("AWS");
-        when(environment.getBackupLocation()).thenReturn("/location/to/backup");
+        when(environment.getBackupLocation()).thenReturn(BACKUP_LOCATION);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(
@@ -136,13 +160,40 @@ public class CloudStorageValidatorTest {
         objectStorageValidateResponse.setError("dummy failure");
         when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(objectStorageValidateResponse);
         ValidationResultBuilder validationResultBuilderforFailure = new ValidationResultBuilder();
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), environment,
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), environment, null,
                 validationResultBuilderforFailure));
         verify(cloudProviderServicesV4Endpoint, times(1)).validateObjectStorage(captor.capture());
         assertTrue(captor.getValue().getCloudStorageRequest().getLocations().isEmpty());
         assertEquals("id", captor.getValue().getCredential().getId());
         assertEquals("acc", captor.getValue().getCredential().getAccountId());
-        assertEquals("/location/to/backup", captor.getValue().getBackupLocationBase());
+        assertEquals(BACKUP_LOCATION, captor.getValue().getBackupLocationBase());
+        assertEquals("AWS", captor.getValue().getCloudPlatform());
+        assertTrue(validationResultBuilderforFailure.build().hasError());
+        assertEquals("dummy failure", validationResultBuilderforFailure.build().getFormattedErrors());
+    }
+
+    @Test
+    public void validateCustomBackupLocationOnError() {
+        ArgumentCaptor<ObjectStorageValidateRequest> captor = ArgumentCaptor.forClass(ObjectStorageValidateRequest.class);
+        when(environment.getCredential()).thenReturn(new CredentialResponse());
+        when(environment.getCloudPlatform()).thenReturn("AWS");
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(
+                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc", false));
+
+        ObjectStorageValidateResponse objectStorageValidateResponse = new ObjectStorageValidateResponse();
+        objectStorageValidateResponse.setStatus(ResponseStatus.ERROR);
+        objectStorageValidateResponse.setError("dummy failure");
+        when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(objectStorageValidateResponse);
+        ValidationResultBuilder validationResultBuilderforFailure = new ValidationResultBuilder();
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), environment, CUSTOM_BACKUP_LOCATION,
+                validationResultBuilderforFailure));
+        verify(cloudProviderServicesV4Endpoint, times(1)).validateObjectStorage(captor.capture());
+        assertTrue(captor.getValue().getCloudStorageRequest().getLocations().isEmpty());
+        assertEquals("id", captor.getValue().getCredential().getId());
+        assertEquals("acc", captor.getValue().getCredential().getAccountId());
+        assertEquals(CUSTOM_BACKUP_LOCATION, captor.getValue().getBackupLocationBase());
         assertEquals("AWS", captor.getValue().getCloudPlatform());
         assertTrue(validationResultBuilderforFailure.build().hasError());
         assertEquals("dummy failure", validationResultBuilderforFailure.build().getFormattedErrors());

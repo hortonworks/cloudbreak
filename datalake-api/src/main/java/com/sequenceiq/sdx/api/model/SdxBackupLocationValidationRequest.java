@@ -18,6 +18,9 @@ public class SdxBackupLocationValidationRequest {
     @ApiModelProperty(ModelDescriptions.DATA_LAKE_NAME)
     private String clusterName;
 
+    @ApiModelProperty(value = ModelDescriptions.BACKUP_LOCATION)
+    private String backupLocation;
+
     public SdxBackupLocationValidationRequest() {
     }
 
@@ -25,7 +28,24 @@ public class SdxBackupLocationValidationRequest {
         this.clusterName = clusterName;
     }
 
+    public SdxBackupLocationValidationRequest(String clusterName, String backupLocation) {
+        this.clusterName = clusterName;
+        this.backupLocation = backupLocation;
+    }
+
+    public String getBackupLocation() {
+        return backupLocation;
+    }
+
     public String getClusterName() {
         return clusterName;
+    }
+
+    @Override
+    public String toString() {
+        return "SdxBackupLocationValidationRequest{" +
+                "ClusterName='" + clusterName + '\'' +
+                "BackupLocation='" + backupLocation + '\'' +
+                '}';
     }
 }

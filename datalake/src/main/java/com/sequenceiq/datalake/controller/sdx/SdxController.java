@@ -191,7 +191,7 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByRequestProperty(path = "clusterName", type = NAME, action = DESCRIBE_DATALAKE)
     public ValidationResult validateBackupStorage(@RequestObject @Valid SdxBackupLocationValidationRequest sdxBackupLocationValidationRequest) {
         SdxCluster sdxCluster = getSdxClusterByName(sdxBackupLocationValidationRequest.getClusterName());
-        return storageValidationService.validateBackupStorage(sdxCluster);
+        return storageValidationService.validateBackupStorage(sdxCluster, sdxBackupLocationValidationRequest.getBackupLocation());
     }
 
     @Override
