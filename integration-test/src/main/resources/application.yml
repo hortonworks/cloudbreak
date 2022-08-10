@@ -37,9 +37,6 @@ integrationtest:
     server: http://localhost
   redbeams:
     server: http://localhost
-  idbmms:
-    # Here we need a valid idbroker mapping management host (Manowar Dev)!
-    host:
   ums:
     host: ums.thunderhead-dev.cloudera.com
     # Possible values: default, legacy
@@ -145,8 +142,6 @@ integrationtest:
         instanceProfile:
       baseLocation:
       fileSystemType: S3
-      dataAccessRole:
-      rangerAuditRole:
     hybridCloudSecurityGroupID: sg-0c73a7f815c452e9d
     freeipa:
       upgrade:
@@ -197,8 +192,6 @@ integrationtest:
         assumerIdentity:
         loggerIdentity:
       secure: false
-      dataAccessRole:
-      rangerAuditRole:
     resourcegroup:
       usage: MULTIPLE
       name:
@@ -252,8 +245,6 @@ integrationtest:
       fileSystemType: GCS
       gcs:
         serviceAccountEmail:
-      dataAccessRole:
-      rangerAuditRole:
     freeipa:
       upgrade:
         imageId: bbc059cd-d7c7-4938-bb34-5c7fc09f1204
@@ -315,8 +306,6 @@ integrationtest:
         instanceProfile: "arn:aws:iam::1234567890:instance-profile/mock.testing.instance.profile"
       baseLocation: "s3a://mock-test"
       fileSystemType: S3
-      dataAccessRole:
-      rangerAuditRole:
     diskEncryption:
       environmentKey:
       datahubKey:

@@ -183,7 +183,6 @@ public class EnvironmentChildTest extends AbstractMockTest {
                 .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
                 .withParentEnvironment()
-                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given("child2", EnvironmentTestDto.class)
