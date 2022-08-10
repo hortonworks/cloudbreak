@@ -30,7 +30,6 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXChangeImageCatalogT
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeipaChangeImageCatalogTestDto;
-import com.sequenceiq.it.cloudbreak.dto.idbmms.IdbmmsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxChangeImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -93,7 +92,6 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .init(IdbmmsTestDto.class)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
@@ -145,7 +143,6 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .init(IdbmmsTestDto.class)
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -195,7 +192,6 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .init(IdbmmsTestDto.class)
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -248,7 +244,6 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .init(IdbmmsTestDto.class)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
@@ -304,7 +299,6 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .init(IdbmmsTestDto.class)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)

@@ -314,16 +314,6 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getRangerAuditRole() {
-        return null;
-    }
-
-    @Override
-    public String getDataAccessRole() {
-        return null;
-    }
-
-    @Override
     public EnvironmentTestDto withResourceEncryption(EnvironmentTestDto environmentTestDto) {
         return environmentTestDto;
     }

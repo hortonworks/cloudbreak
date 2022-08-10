@@ -218,7 +218,7 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
     public void testParallelMultiTenantStacks(MockedTestContext testContext) {
         testContext
                 .given(EnvironmentNetworkTestDto.class)
-                .given(EnvironmentTestDto.class).withNetwork().withMockIDBMMS()
+                .given(EnvironmentTestDto.class).withNetwork()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class).withEnvironment()

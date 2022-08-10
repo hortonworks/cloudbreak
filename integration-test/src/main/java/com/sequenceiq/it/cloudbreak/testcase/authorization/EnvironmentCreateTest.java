@@ -34,7 +34,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
-import com.sequenceiq.it.cloudbreak.dto.idbmms.IdbmmsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.mock.AbstractMockTest;
 import com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil;
@@ -94,7 +93,6 @@ public class EnvironmentCreateTest extends AbstractMockTest {
                 .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage(
                         "Doesn't have 'environments/describeEnvironment' right on environment "
                         + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
-                .init(IdbmmsTestDto.class)
                 .validate();
 
         testFreeipaCreation(testContext);

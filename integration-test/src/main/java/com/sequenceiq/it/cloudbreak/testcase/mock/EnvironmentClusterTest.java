@@ -80,7 +80,6 @@ public class EnvironmentClusterTest extends AbstractMockTest {
     public void testWlClusterChangeCred(MockedTestContext testContext) {
         testContext
                 .given(EnvironmentTestDto.class)
-                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .when(environmentTestClient.describe())
                 .given(StackTestDto.class)
@@ -105,7 +104,6 @@ public class EnvironmentClusterTest extends AbstractMockTest {
     public void testClusterWithEmptyEnvironmentRequest(MockedTestContext testContext) {
         testContext
                 .given(EnvironmentTestDto.class)
-                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .when(environmentTestClient.describe())
                 .given(StackTestDto.class)
@@ -116,7 +114,6 @@ public class EnvironmentClusterTest extends AbstractMockTest {
 
     private void createEnvWithResources(MockedTestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
-                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .when(environmentTestClient.describe());
     }

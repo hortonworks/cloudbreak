@@ -24,7 +24,6 @@ dependencyManagement {
 
 dependencies {
   implementation project(':grpc-common')
-  implementation project(':auth-connector')
 
   implementation     group: 'com.google.protobuf',                 name: 'protobuf-java',                  version: protobufVersion
 
