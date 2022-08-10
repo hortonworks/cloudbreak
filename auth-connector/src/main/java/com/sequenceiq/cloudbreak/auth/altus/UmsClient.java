@@ -104,7 +104,6 @@ public class UmsClient {
     /**
      * Create new user group if it does not exist.
      *
-     * @param requestId the request ID for the request
      * @param accountId the account ID
      * @param groupName the newly created group name
      * @return the new or existing user group.
@@ -142,7 +141,6 @@ public class UmsClient {
     /**
      * Delete user group if it exist.
      *
-     * @param requestId the request ID for the request
      * @param accountId the account ID
      * @param groupName the newly created group name
      */
@@ -170,7 +168,6 @@ public class UmsClient {
     /**
      * Add member to the selected user group if it exist.
      *
-     * @param requestId the request ID for the request
      * @param accountId the account ID
      * @param groupName the group where user is going to be assigned
      * @param memberCrn member (e.g., user) CRN
@@ -215,7 +212,6 @@ public class UmsClient {
     /**
      * Remove member from the selected user group if it is exist.
      *
-     * @param requestId the request ID for the request
      * @param accountId the account ID
      * @param groupName the group where user is going to be assigned
      * @param memberCrn member (e.g., user) CRN
@@ -258,7 +254,6 @@ public class UmsClient {
     /**
      * List members from the selected user group if it is exist.
      *
-     * @param requestId the request ID for the request
      * @param accountId the account ID
      * @param groupName the group where user is going to be assigned
      * @return list of user group member CRNs or NULL if the user group does not exist.
@@ -297,7 +292,6 @@ public class UmsClient {
     /**
      * Wraps calls to ListGroups with an Account ID.
      *
-     * @param requestId          the request ID for the request
      * @param accountId          the account ID
      * @param groupNameOrCrnList the groups to list. if null or empty then all groups will be listed
      * @return the list of groups
@@ -327,7 +321,6 @@ public class UmsClient {
     /**
      * Wraps calls to ListGroupsForMember with an Account ID and member CRN.
      *
-     * @param requestId the request ID for the request
      * @param accountId the account ID
      * @param memberCrn member (e.g., user) CRN for which groups are fetched.
      * @return the list of group CRNs
@@ -368,7 +361,6 @@ public class UmsClient {
     /**
      * Wraps a call to getUser.
      *
-     * @param requestId the request ID for the request
      * @param userCrn   the user CRN
      * @return the user
      */
@@ -387,7 +379,6 @@ public class UmsClient {
     /**
      * Wraps calls to ListUsers with an Account ID.
      *
-     * @param requestId       the request ID for the request
      * @param accountId       the account ID
      * @param userIdOrCrnList a list of users to list. If null or empty then all users will be listed
      * @return the list of users
@@ -438,7 +429,6 @@ public class UmsClient {
     /**
      * Wraps calls to ListMachineUsers with an Account ID.
      *
-     * @param requestId                   the request ID for the request
      * @param accountId                   the account ID
      * @param machineUserNameOrCrnList    a list of users to list. If null or empty then all users will be listed
      * @param includeInternal             whether to include internal machine users
@@ -474,7 +464,6 @@ public class UmsClient {
     /**
      * Create new machine user - only if it does not exist (returns the machine user crn if the user newly created)
      *
-     * @param requestId       id of the request
      * @param userCrn         actor useridentifier
      * @param machineUserName machine user name that will be created
      */
@@ -521,7 +510,6 @@ public class UmsClient {
     /**
      * Remove machine user
      *
-     * @param requestId       id of the request
      * @param userCrn         actor identifier
      * @param machineUserName machine user to remove
      */
@@ -548,7 +536,6 @@ public class UmsClient {
     /**
      * Wraps a call to ListServicePrincipalCloudIdentities.
      *
-     * @param requestId      the request ID for the request
      * @param accountId      the account id
      * @param environmentCrn the environment crn
      * @return the list of service principal cloud identities
