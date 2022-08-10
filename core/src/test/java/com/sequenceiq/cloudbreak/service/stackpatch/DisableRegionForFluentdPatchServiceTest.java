@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
@@ -136,7 +137,9 @@ public class DisableRegionForFluentdPatchServiceTest {
         InstanceGroup instanceGroup = createInstanceGroup();
         instanceMetaData.setInstanceGroup(instanceGroup);
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         given(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong())).willReturn(instanceMetaDataSet);
+        given(gatewayConfigService.getPrimaryGatewayConfig(any(Stack.class))).willReturn(gatewayConfig);
         given(clusterComponentConfigProvider.getSaltStateComponent(anyLong())).willReturn(currentSaltState);
         given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(fluentConfig);
         given(compressUtil.compareCompressedContent(any(), any(), any())).willReturn(false);
@@ -156,7 +159,9 @@ public class DisableRegionForFluentdPatchServiceTest {
         InstanceGroup instanceGroup = createInstanceGroup();
         instanceMetaData.setInstanceGroup(instanceGroup);
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         given(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong())).willReturn(instanceMetaDataSet);
+        given(gatewayConfigService.getPrimaryGatewayConfig(any(Stack.class))).willReturn(gatewayConfig);
         given(telemetryOrchestrator.collectUnresponsiveNodes(any(), any(), any())).willReturn(Set.of(new Node(null, null, null, null)));
         given(clusterComponentConfigProvider.getSaltStateComponent(anyLong())).willReturn(currentSaltState);
         given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(fluentConfig);
@@ -201,7 +206,9 @@ public class DisableRegionForFluentdPatchServiceTest {
         InstanceGroup instanceGroup = createInstanceGroup();
         instanceMetaData.setInstanceGroup(instanceGroup);
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         given(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong())).willReturn(instanceMetaDataSet);
+        given(gatewayConfigService.getPrimaryGatewayConfig(any(Stack.class))).willReturn(gatewayConfig);
         given(clusterComponentConfigProvider.getSaltStateComponent(anyLong())).willReturn(currentSaltState);
         given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(fluentConfig);
         given(compressUtil.compareCompressedContent(any(), any(), any())).willReturn(false);
