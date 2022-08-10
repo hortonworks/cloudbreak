@@ -85,8 +85,6 @@ telemetry:
       desired-version: 0.4.23
     cdp-logging-agent:
       desired-version: 0.2.16
-    cdp-vm-agent:
-      desired-version: 1.73.1
     cdp-request-signer:
       desired-version: 0.1.1
     metering-agent:

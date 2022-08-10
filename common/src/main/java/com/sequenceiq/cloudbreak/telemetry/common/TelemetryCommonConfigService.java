@@ -53,9 +53,6 @@ public class TelemetryCommonConfigService {
             if (telemetryUpgradeConfiguration.getCdpLoggingAgent() != null) {
                 builder.withDesiredCdpLoggingAgentVersion(telemetryUpgradeConfiguration.getCdpLoggingAgent().getDesiredVersion());
             }
-            if (telemetryUpgradeConfiguration.getCdpVmAgent() != null) {
-                builder.withDesiredCdpVmAgentVersion(telemetryUpgradeConfiguration.getCdpVmAgent().getDesiredVersion());
-            }
             if (telemetryUpgradeConfiguration.getCdpRequestSigner() != null) {
                 builder.withDesiredCdpRequestSignerVersion(telemetryUpgradeConfiguration.getCdpRequestSigner().getDesiredVersion());
             }
