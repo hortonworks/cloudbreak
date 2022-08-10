@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -105,14 +106,14 @@ public class CloudStorageValidator {
      * @param environment Details of the environment on which validation is performed.
      * @param validationResultBuilder Builder to gather the failures.
      */
-    public void validateBackupLocation(CloudStorageRequest cloudStorageRequest, DetailedEnvironmentResponse environment,
+    public void validateBackupLocation(CloudStorageRequest cloudStorageRequest, DetailedEnvironmentResponse environment, String customBackupLocation,
             ValidationResult.ValidationResultBuilder validationResultBuilder) {
-
-        LOGGER.info("Validating backup Location: {}", getBackupLocationBase(environment));
+        String backupLocation = !Strings.isNullOrEmpty(customBackupLocation) ? customBackupLocation : getBackupLocationBase(environment);
+        LOGGER.info("Validating backup Location: {}", backupLocation);
         Credential credential = getCredential(environment);
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
         List<StorageLocationBase> locations = cloudStorageRequest.getLocations();
-        ObjectStorageValidateRequest request = createBackupLocationValidateRequest(cloudCredential, cloudStorageRequest, environment);
+        ObjectStorageValidateRequest request = createBackupLocationValidateRequest(cloudCredential, cloudStorageRequest, environment, backupLocation);
         ObjectStorageValidateResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> cloudProviderServicesV4Endpoint.validateObjectStorage(request));
@@ -155,13 +156,13 @@ public class CloudStorageValidator {
 
     private ObjectStorageValidateRequest createBackupLocationValidateRequest(
             CloudCredential credential, CloudStorageRequest cloudStorageRequest,
-            DetailedEnvironmentResponse environment) {
+            DetailedEnvironmentResponse environment, String backupLocation) {
         cloudStorageRequest.setLocations(Collections.emptyList());
         ObjectStorageValidateRequest.Builder result = ObjectStorageValidateRequest.builder()
                 .withCloudPlatform(environment.getCloudPlatform())
                 .withCredential(credential)
                 .withCloudStorageRequest(cloudStorageRequest)
-                .withBackupLocationBase(getBackupLocationBase(environment))
+                .withBackupLocationBase(backupLocation)
                 .withAzureParameters(getSingleResourceGroupName(environment));
         if (environment.getIdBrokerMappingSource() == MOCK) {
             result.withMockSettings(environment.getLocation().getName(), environment.getAdminGroupName());
