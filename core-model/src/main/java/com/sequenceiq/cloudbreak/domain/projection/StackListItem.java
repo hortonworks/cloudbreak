@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.domain.projection;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.common.api.type.CertExpirationState;
@@ -68,4 +69,8 @@ public interface StackListItem {
     Tunnel getTunnel();
 
     CertExpirationState getCertExpirationState();
+
+    DatabaseAvailabilityType getExternalDatabaseCreationType();
+
+    String getExternalDatabaseEngineVersion();
 }
