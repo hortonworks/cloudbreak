@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -14,15 +15,17 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
@@ -33,6 +36,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.SdxEventsService;
 
+@ExtendWith(MockitoExtension.class)
 public class SdxEventsServiceTests {
 
     private static final Integer TEST_PAGE = 1;
@@ -42,8 +46,13 @@ public class SdxEventsServiceTests {
     private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:460c0d8f-ae8e-4dce-9cd7-2351762eb9ac:environment:" +
             "6b2b1600-8ac6-4c26-aa34-dab36f4bd243";
 
-    private static final String DATALAKE_CRN = "crn:cdp:environments:us-west-1:460c0d8f-ae8e-4dce-9cd7-2351762eb9ac:environment:" +
+    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:460c0d8f-ae8e-4dce-9cd7-2351762eb9ac:datalake:" +
             "6b2b1600-8ac6-4c26-aa34-dab36f4bd243";
+
+    private static final String DATAHUB_CRN = "crn:cdp:datahub:us-west-1:460c0d8f-ae8e-4dce-9cd7-2351762eb9ac:cluster:" +
+            "6b2b1600-8ac6-4c26-aa34-dab36f4bd243";
+
+    private static final String INTERNAL_ACTOR = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
 
     private static final List<StructuredEventType> TEST_EVENT_TYPES = List.of(StructuredEventType.FLOW, StructuredEventType.NOTIFICATION);
 
@@ -70,10 +79,7 @@ public class SdxEventsServiceTests {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setCrn(DATALAKE_CRN);
-        sdxCluster.setEnvCrn(ENVIRONMENT_CRN);
+        SdxCluster sdxCluster = getSdxCluster(DATALAKE_CRN, DATALAKE_CRN, ENVIRONMENT_CRN);
         when(mockSdxClusterRepository.findByAccountIdAndEnvCrn(any(), any())).thenReturn(List.of(sdxCluster));
         when(sdxService.listSdxByEnvCrn(any())).thenReturn(List.of(sdxCluster));
     }
@@ -86,7 +92,7 @@ public class SdxEventsServiceTests {
                 createTestCDPStructuredEvent(StructuredEventType.FLOW)));
         when(mockCdpStructuredEventDBService.getPagedEventsOfResources(eq(TEST_EVENT_TYPES), any(), any()))
                 .thenReturn(mockPage);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_ACTOR);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         List<CDPStructuredEvent> result = sdxEventsService.getPagedDatalakeAuditEvents(DATALAKE_CRN, TEST_EVENT_TYPES, TEST_PAGE, TEST_SIZE);
 
@@ -102,8 +108,7 @@ public class SdxEventsServiceTests {
         when(mockPage.getContent()).thenReturn(List.of(createTestCDPStructuredEvent(StructuredEventType.NOTIFICATION)));
         when(mockCdpStructuredEventDBService.getPagedEventsOfResources(eq(List.of(StructuredEventType.NOTIFICATION)), any(), any()))
                 .thenReturn(mockPage);
-        when(eventV4Endpoint.getPagedCloudbreakEventListByStack(any(), any(), any(), any())).thenReturn(Collections.EMPTY_LIST);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_ACTOR);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         List<CDPStructuredEvent> result = sdxEventsService.getPagedDatalakeAuditEvents(DATALAKE_CRN,
                 Collections.singletonList(StructuredEventType.NOTIFICATION), TEST_PAGE, TEST_SIZE);
@@ -122,7 +127,7 @@ public class SdxEventsServiceTests {
                 .thenReturn(mockPage);
         when(eventV4Endpoint.getPagedCloudbreakEventListByCrn(any(), any(), any(), anyBoolean()))
                 .thenReturn(List.of(createCloudbreakEventV4Response()));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_ACTOR);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         List<CDPStructuredEvent> result = sdxEventsService.getPagedDatalakeAuditEvents(DATALAKE_CRN,
                 Collections.singletonList(StructuredEventType.NOTIFICATION), TEST_PAGE, TEST_SIZE);
@@ -142,7 +147,7 @@ public class SdxEventsServiceTests {
                 .thenReturn(mockPage);
         when(eventV4Endpoint.getPagedCloudbreakEventListByCrn(any(), any(), any(), anyBoolean()))
                 .thenReturn(List.of(createCloudbreakEventV4Response(1L)));
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_ACTOR);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         List<CDPStructuredEvent> result = sdxEventsService.getPagedDatalakeAuditEvents(DATALAKE_CRN,
                 Collections.singletonList(StructuredEventType.NOTIFICATION), TEST_PAGE, TEST_SIZE);
@@ -152,6 +157,50 @@ public class SdxEventsServiceTests {
         assertEquals(3, result.stream().filter(notification -> notification.getOperation().getEventType().equals(StructuredEventType.NOTIFICATION)).count());
         assertTrue(result.get(0).getOperation().getTimestamp() > result.get(1).getOperation().getTimestamp());
         assertTrue(result.get(1).getOperation().getTimestamp() > result.get(2).getOperation().getTimestamp());
+    }
+
+    @Test
+    public void testGetAuditEventsWhenCbAndDlCrnIsDifferent() {
+        when(mockSdxClusterRepository.findByAccountIdAndEnvCrn(any(), any())).thenReturn(List.of(getSdxCluster(DATALAKE_CRN, DATAHUB_CRN, ENVIRONMENT_CRN)));
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_ACTOR);
+        when(eventV4Endpoint.structuredByCrn(any(), anyBoolean())).thenReturn(new StructuredEventContainer());
+
+        sdxEventsService.getDatalakeAuditEvents(ENVIRONMENT_CRN, List.of(StructuredEventType.NOTIFICATION));
+
+        verify(eventV4Endpoint).structuredByCrn(eq(DATAHUB_CRN), anyBoolean());
+    }
+
+    @Test
+    public void testGetAuditEventsWhenCbAndDlCrnIsEquals() {
+        when(mockSdxClusterRepository.findByAccountIdAndEnvCrn(any(), any())).thenReturn(List.of(getSdxCluster(DATALAKE_CRN, DATALAKE_CRN, ENVIRONMENT_CRN)));
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_ACTOR);
+        when(eventV4Endpoint.structuredByCrn(any(), anyBoolean())).thenReturn(new StructuredEventContainer());
+
+        sdxEventsService.getDatalakeAuditEvents(ENVIRONMENT_CRN, List.of(StructuredEventType.NOTIFICATION));
+
+        verify(eventV4Endpoint).structuredByCrn(eq(DATALAKE_CRN), anyBoolean());
+    }
+
+    @Test
+    public void testGetAuditEventsWhenCbCrnIsNull() {
+        when(mockSdxClusterRepository.findByAccountIdAndEnvCrn(any(), any())).thenReturn(List.of(getSdxCluster(DATALAKE_CRN, null, ENVIRONMENT_CRN)));
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_ACTOR);
+        when(eventV4Endpoint.structuredByCrn(any(), anyBoolean())).thenReturn(new StructuredEventContainer());
+
+        sdxEventsService.getDatalakeAuditEvents(ENVIRONMENT_CRN, List.of(StructuredEventType.NOTIFICATION));
+
+        verify(eventV4Endpoint).structuredByCrn(eq(DATALAKE_CRN), anyBoolean());
+    }
+
+    private SdxCluster getSdxCluster(String crn, String stackCrn, String envCrn) {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setCrn(crn);
+        cluster.setStackCrn(stackCrn);
+        cluster.setEnvCrn(envCrn);
+        return cluster;
     }
 
     private CloudbreakEventV4Response createCloudbreakEventV4Response() {
