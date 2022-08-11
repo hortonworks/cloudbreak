@@ -10,26 +10,34 @@ public class RotateSaltPasswordContext extends CommonContext {
 
     private final Stack stack;
 
-    private final RotateSaltPasswordReason reason;
-
     private final StackStatus previousStackStatus;
 
-    public RotateSaltPasswordContext(FlowParameters flowParameters, Stack stack, StackStatus previousStackStatus, RotateSaltPasswordReason reason) {
+    private final RotateSaltPasswordReason reason;
+
+    private final RotateSaltPasswordType type;
+
+    public RotateSaltPasswordContext(FlowParameters flowParameters, Stack stack, StackStatus previousStackStatus, RotateSaltPasswordReason reason,
+            RotateSaltPasswordType type) {
         super(flowParameters);
         this.stack = stack;
         this.previousStackStatus = previousStackStatus;
         this.reason = reason;
+        this.type = type;
     }
 
     public Stack getStack() {
         return stack;
     }
 
+    public StackStatus getPreviousStackStatus() {
+        return previousStackStatus;
+    }
+
     public RotateSaltPasswordReason getReason() {
         return reason;
     }
 
-    public StackStatus getPreviousStackStatus() {
-        return previousStackStatus;
+    public RotateSaltPasswordType getType() {
+        return type;
     }
 }
