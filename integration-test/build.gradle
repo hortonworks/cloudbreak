@@ -168,12 +168,6 @@ dependencies {
   }
   implementation group: 'org.jetbrains',                 name: 'annotations',                    version: '20.1.0'
 
-  implementation(group: 'com.nimbusds', name: 'oauth2-oidc-sdk') {
-    version {
-      strictly oauth2OidcSdkVersion
-    }
-    because 'java.lang.NoClassDefFoundError: com/nimbusds/oauth2/sdk/http/CommonContentTypes caused by multiple oauth2-oidc-sdk versions on classpath.'
-  }
   implementation(group: 'net.minidev', name: 'json-smart') {
     version {
       strictly jsonSmartVersion

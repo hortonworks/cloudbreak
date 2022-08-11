@@ -27,7 +27,7 @@ dependencies {
   implementation group: 'com.squareup.okhttp3',          name: 'okhttp-urlconnection',       version: okhttpVersion
   implementation group: 'com.squareup.okhttp3',          name: 'logging-interceptor',        version: okhttpVersion
 
-  implementation (group: 'com.microsoft.azure',         name: 'azure-client-authentication') {
+  implementation (group: 'com.microsoft.azure',         name: 'azure-client-authentication', version: azureClientAuthVersion) {
     exclude group: 'org.slf4j'
   }
   implementation (group: 'com.microsoft.azure',         name: 'azure',                      version: azureSdkVersion) {
