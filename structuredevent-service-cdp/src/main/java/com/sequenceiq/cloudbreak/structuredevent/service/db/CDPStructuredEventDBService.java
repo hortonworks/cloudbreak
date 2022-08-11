@@ -155,6 +155,19 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
         }
     }
 
+    public Optional<Exception> deleteStructuredEventByResourceCrnThatIsOlderThan(String resourceCrn, long since) {
+        Optional<Exception> exception = Optional.empty();
+        try {
+            LOGGER.debug("About to delete structured event(s) for CRN: {} that has a smaller - or equal - timestamp than the following: {}", resourceCrn, since);
+            structuredEventRepository.deleteByResourceCrnOlderThan(resourceCrn, since);
+        } catch (Exception e) {
+            LOGGER.debug("deleteByResourceCrnOlderThan() repository deletion has failed for {} due to: {}",
+                    CDPStructuredEventEntity.class.getSimpleName(), e.getMessage());
+            exception = Optional.of(e);
+        }
+        return exception;
+    }
+
     private List<StructuredEventType> getAllEventTypeIfEmpty(List<StructuredEventType> eventTypes) {
         List<StructuredEventType> types = new ArrayList<>(eventTypes);
         if (CollectionUtils.isEmpty(eventTypes)) {

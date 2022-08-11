@@ -40,11 +40,13 @@ import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.StructuredEventCleanUpService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
 @Configuration
@@ -75,6 +77,9 @@ public class SdxDeleteActions {
 
     @Inject
     private FlowChainLogService flowChainLogService;
+
+    @Inject
+    private StructuredEventCleanUpService structuredEventCleanUpService;
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
@@ -189,10 +194,13 @@ public class SdxDeleteActions {
                     metricService.incrementMetricCounter(MetricType.SDX_DELETION_FINISHED, sdxCluster);
                 }
                 eventSenderService.notifyEvent(context, ResourceEvent.SDX_CLUSTER_DELETION_FINISHED);
+                Optional<FlowLogWithoutPayload> lastFlowLog = flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId());
                 if (flowChainLogService.isFlowTriggeredByFlowChain(
                         DatalakeResizeFlowEventChainFactory.class.getSimpleName(),
-                        flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId()))) {
+                        lastFlowLog)) {
                     eventSenderService.notifyEvent(context, ResourceEvent.DATALAKE_RESIZE_COMPLETE);
+                } else {
+                    structuredEventCleanUpService.cleanUpStructuredEvents(payload.getResourceId());
                 }
                 sendEvent(context, SDX_DELETE_FINALIZED_EVENT.event(), payload);
             }
