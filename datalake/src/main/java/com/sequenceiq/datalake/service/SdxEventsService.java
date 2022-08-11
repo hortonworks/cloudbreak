@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -131,7 +132,7 @@ public class SdxEventsService {
             List<CloudbreakEventV4Response> cloudbreakEventV4Responses = ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () ->
-                            eventV4Endpoint.getPagedCloudbreakEventListByCrn(sdxCluster.getCrn(), page, size, false));
+                            eventV4Endpoint.getPagedCloudbreakEventListByCrn(getCloudbreakCrn(sdxCluster), page, size, false));
             return cloudbreakEventV4Responses.stream().map(entry -> convert(entry, sdxCluster.getCrn())).collect(toList());
         } catch (NotFoundException notFoundException) {
             LOGGER.error("Failed to retrieve paged cloudbreak service events due to not found exception!", notFoundException);
@@ -158,7 +159,7 @@ public class SdxEventsService {
             StructuredEventContainer structuredEventContainer = ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () ->
-                    eventV4Endpoint.structuredByCrn(sdxCluster.getCrn(), false));
+                    eventV4Endpoint.structuredByCrn(getCloudbreakCrn(sdxCluster), false));
             return structuredEventContainer.getNotification().stream().map(entry -> convert(entry, sdxCluster.getCrn())).collect(toList());
         } catch (Exception exception) {
             LOGGER.error("Failed to retrieve cloudbreak service events!", exception);
@@ -258,5 +259,12 @@ public class SdxEventsService {
         cdpStructuredNotificationEvent.setStatusReason(structuredNotificationEvent.getNotificationDetails().getNotification());
 
         return cdpStructuredNotificationEvent;
+    }
+
+    private String getCloudbreakCrn(SdxCluster sdxCluster) {
+        if (StringUtils.isNotEmpty(sdxCluster.getStackCrn()) && !StringUtils.equals(sdxCluster.getStackCrn(), sdxCluster.getCrn())) {
+            return sdxCluster.getStackCrn();
+        }
+        return sdxCluster.getCrn();
     }
 }
