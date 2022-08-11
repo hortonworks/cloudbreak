@@ -17,7 +17,7 @@ public enum RecipeExecutionPhase {
 
     RecipeExecutionPhase(String value) {
         this.value = value;
-        this.oldRecipeExecutionPhase = null;
+        this.oldRecipeExecutionPhase = this;
     }
 
     RecipeExecutionPhase(String value, RecipeExecutionPhase oldRecipeExecutionPhase) {
