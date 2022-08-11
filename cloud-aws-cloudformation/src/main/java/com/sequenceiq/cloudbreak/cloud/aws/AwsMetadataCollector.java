@@ -168,7 +168,7 @@ public class AwsMetadataCollector implements MetadataCollector {
         if (!unknownInstancesForGroup.isEmpty()) {
             LOGGER.info("Unknown instances from AWS for group {}: {}", groupName,
                     unknownInstancesForGroup.stream().map(Instance::getInstanceId).collect(Collectors.joining(",")));
-            Instance selectedInstance = findInstance(cloudInstance, resources, unknownInstancesForGroup);
+            Instance selectedInstance = findInstanceByFQDNIfFQDNDefinedInCloudInstance(cloudInstance, resources, unknownInstancesForGroup);
             CloudInstance newCloudInstance = new CloudInstance(selectedInstance.getInstanceId(),
                     cloudInstance.getTemplate(),
                     cloudInstance.getAuthentication(),
@@ -189,7 +189,8 @@ public class AwsMetadataCollector implements MetadataCollector {
         }
     }
 
-    private Instance findInstance(CloudInstance cloudInstance, List<CloudResource> resources, Collection<Instance> unknownInstancesForGroup) {
+    private Instance findInstanceByFQDNIfFQDNDefinedInCloudInstance(CloudInstance cloudInstance, List<CloudResource> resources,
+            Collection<Instance> unknownInstancesForGroup) {
         List<CloudResource> volumeResources =
                 resources.stream().filter(cloudResource -> ResourceType.AWS_VOLUMESET.equals(cloudResource.getType())).collect(Collectors.toList());
         List<String> allKnownVolumes = listVolumes(volumeResources);
@@ -208,7 +209,13 @@ public class AwsMetadataCollector implements MetadataCollector {
                     privateId, instanceFQDN);
             List<String> volumesForFqdn = listVolumesForFQDN(volumeResources, instanceFQDN);
             LOGGER.info("Volumes for FQDN ({}), {}", instanceFQDN, volumesForFqdn);
-            selectedInstance = findInstanceByVolumes(unknownInstancesForGroup, volumesForFqdn);
+            if (!volumesForFqdn.isEmpty()) {
+                LOGGER.info("We found volume with the given FQDN, so lets find the instance with this volume");
+                selectedInstance = findInstanceByVolumes(unknownInstancesForGroup, volumesForFqdn);
+            } else {
+                LOGGER.info("We can't found any volume with the given FQDN, this means disk was deleted, we can chose any machine with FQDN less volumes");
+                selectedInstance = findInstanceByVolumes(unknownInstancesForGroup, volumesWithoutFQDN);
+            }
         }
         return selectedInstance.or(() -> {
             List<Instance> instancesWithoutKnownVolumes = getInstancesWithoutKnownVolumes(unknownInstancesForGroup, allKnownVolumes);

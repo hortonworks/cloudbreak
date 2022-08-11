@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.FQDN;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -7,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,7 +35,9 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
+import com.amazonaws.services.ec2.model.EbsInstanceBlockDevice;
 import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.InstanceBlockDeviceMapping;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
@@ -52,16 +56,21 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceLifeCycle;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsMetaDataCollectorTest {
@@ -155,7 +164,7 @@ public class AwsMetaDataCollectorTest {
 
         when(amazonEC2Client.describeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
 
-        Instance instance = Mockito.mock(Instance.class);
+        Instance instance = mock(Instance.class);
         when(instance.getInstanceId()).thenReturn("i-1");
         when(instance.getPrivateIpAddress()).thenReturn("privateIp");
         when(instance.getPublicIpAddress()).thenReturn("publicIp");
@@ -189,7 +198,7 @@ public class AwsMetaDataCollectorTest {
     }
 
     private Subnet initSubnet(String subnetId, String availabilityZone) {
-        Subnet subnet = Mockito.mock(Subnet.class);
+        Subnet subnet = mock(Subnet.class);
         when(subnet.getSubnetId()).thenReturn(subnetId);
         when(subnet.getAvailabilityZone()).thenReturn(availabilityZone);
         return subnet;
@@ -216,6 +225,67 @@ public class AwsMetaDataCollectorTest {
             assertThat(statuses.get(i).getCloudVmInstanceStatus().getCloudInstance().getAvailabilityZone())
                     .isEqualTo(availabilityZonesExpected[i]);
         }
+    }
+
+    @Test
+    public void collectInCaseOfRepairButVolumesAreDeleted() {
+        List<CloudInstance> vms = new ArrayList<>();
+        List<Volume> volumes = new ArrayList<>();
+        List<CloudResource> resources = new ArrayList<>();
+        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "fstab",
+                List.of(new VolumeSetAttributes.Volume("volid1", "device", 100, "type", CloudVolumeUsageType.GENERAL)),
+                100, "type");
+        resources.add(CloudResource.builder().type(ResourceType.AWS_VOLUMESET).status(CommonStatus.REQUESTED).name("volume1").group("worker")
+                .params(Map.of("attributes",
+                        volumeSetAttributes))
+                        .build());
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+        vms.add(new CloudInstance(null,
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, Map.of(FQDN, "fqdn1"), 0L,
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L),
+                instanceAuthentication,
+                "subnet-1",
+                "az1", Map.of(FQDN, "fqdn1")));
+
+        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
+        when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
+
+        when(cloudFormationStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("cbgateway")))
+                .thenReturn("cbgateway-AAA");
+
+        List<String> gatewayIds = Collections.singletonList("i-1");
+        when(cloudFormationStackUtil.getInstanceIds(any(AmazonAutoScalingClient.class), eq("cbgateway-AAA")))
+                .thenReturn(gatewayIds);
+
+        when(cloudFormationStackUtil.createDescribeInstancesRequest(eq(gatewayIds))).thenReturn(describeInstancesRequestGw);
+
+        when(amazonEC2Client.describeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
+
+        List<Instance> instances = new ArrayList<>();
+        Instance instance = mock(Instance.class);
+        when(instance.getInstanceId()).thenReturn("i-1");
+        InstanceBlockDeviceMapping instanceBlockDeviceMapping = mock(InstanceBlockDeviceMapping.class);
+        EbsInstanceBlockDevice ebsInstanceBlockDevice = new EbsInstanceBlockDevice();
+        ebsInstanceBlockDevice.setVolumeId("volid1");
+        when(instanceBlockDeviceMapping.getEbs()).thenReturn(ebsInstanceBlockDevice);
+        when(instance.getBlockDeviceMappings()).thenReturn(List.of(instanceBlockDeviceMapping));
+        when(instance.getPrivateIpAddress()).thenReturn("privateIp1");
+        when(instance.getPublicIpAddress()).thenReturn("publicIp1");
+        when(instance.getSubnetId()).thenReturn(SUBNET_ID_1);
+        instances.add(instance);
+        Instance[] instancesArray = new Instance[instances.size()];
+        List<Reservation> gatewayReservations = Collections.singletonList(getReservation(instances.toArray(instancesArray)));
+
+        when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
+
+        initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_1, AVAILABILITY_ZONE_1), entry(SUBNET_ID_2, AVAILABILITY_ZONE_2)));
+
+        AuthenticatedContext ac = authenticatedContext();
+        List<CloudVmMetaDataStatus> statuses = awsMetadataCollector.collect(ac, resources, vms, Collections.emptyList());
+        assertEquals(1L, statuses.size());
+        assertEquals("i-1", statuses.get(0).getCloudVmInstanceStatus().getCloudInstance().getInstanceId());
+        assertEquals("privateIp1", statuses.get(0).getMetaData().getPrivateIp());
+        assertEquals("publicIp1", statuses.get(0).getMetaData().getPublicIp());
     }
 
     @Test
@@ -258,7 +328,7 @@ public class AwsMetaDataCollectorTest {
 
         List<Instance> instances = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            Instance instance = Mockito.mock(Instance.class);
+            Instance instance = mock(Instance.class);
             when(instance.getInstanceId()).thenReturn("i-" + i);
             when(instance.getPrivateIpAddress()).thenReturn("privateIp" + i);
             when(instance.getPublicIpAddress()).thenReturn("publicIp" + i);
@@ -324,13 +394,13 @@ public class AwsMetaDataCollectorTest {
 
         Mockito.when(awsLifeCycleMapper.getLifeCycle(any())).thenReturn(CLOUD_INSTANCE_LIFE_CYCLE);
 
-        Instance instance1 = Mockito.mock(Instance.class);
+        Instance instance1 = mock(Instance.class);
         when(instance1.getInstanceId()).thenReturn("i-1");
         when(instance1.getPrivateIpAddress()).thenReturn("privateIp1");
         when(instance1.getPublicIpAddress()).thenReturn("publicIp1");
         when(instance1.getSubnetId()).thenReturn(SUBNET_ID_1);
 
-        Instance instance2 = Mockito.mock(Instance.class);
+        Instance instance2 = mock(Instance.class);
         when(instance2.getInstanceId()).thenReturn("i-2");
         when(instance2.getPrivateIpAddress()).thenReturn("privateIp2");
         when(instance2.getPublicIpAddress()).thenReturn("publicIp2");
@@ -397,11 +467,11 @@ public class AwsMetaDataCollectorTest {
 
         when(amazonEC2Client.describeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
 
-        Instance instance1 = Mockito.mock(Instance.class);
+        Instance instance1 = mock(Instance.class);
         when(instance1.getInstanceId()).thenReturn("i-1");
         when(instance1.getSubnetId()).thenReturn(SUBNET_ID_1);
 
-        Instance instance2 = Mockito.mock(Instance.class);
+        Instance instance2 = mock(Instance.class);
         when(instance2.getInstanceId()).thenReturn("i-2");
         when(instance2.getPrivateIpAddress()).thenReturn("privateIp2");
         when(instance2.getPublicIpAddress()).thenReturn("publicIp2");
