@@ -45,6 +45,7 @@ import com.sequenceiq.datalake.flow.cert.rotation.event.SdxStartCertRotationEven
 import com.sequenceiq.datalake.flow.datalake.cmsync.event.SdxCmSyncStartEvent;
 import com.sequenceiq.datalake.flow.datalake.recovery.event.DatalakeRecoveryStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
+import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradePreparationFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.preparation.event.DatalakeUpgradePreparationStartEvent;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
@@ -187,12 +188,23 @@ public class SdxReactorFlowManager {
         return notify(SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT.event(), event, cluster.getClusterName());
     }
 
-    public FlowIdentifier triggerDatalakeRuntimeUpgradePreparationFlow(SdxCluster cluster, String imageId) {
-        LOGGER.info("Trigger Datalake runtime upgrade preparation for: {} with imageId: {}", cluster, imageId);
+    public FlowIdentifier triggerDatalakeRuntimeUpgradePreparationFlow(SdxCluster cluster, String imageId, boolean skipBackup) {
+        LOGGER.info("Trigger Datalake runtime upgrade preparation for: {} with imageId: {}", cluster.getClusterName(), imageId);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT.event(),
-                new DatalakeUpgradePreparationStartEvent(DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT.event(), cluster.getId(),
-                        userId, imageId), cluster.getClusterName());
+        if (!skipBackup && sdxBackupRestoreService.shouldSdxBackupBePerformed(
+                cluster, entitlementService.isDatalakeBackupOnUpgradeEnabled(ThreadBasedUserCrnProvider.getAccountId())
+        )) {
+            LOGGER.info("Triggering backup/upgrade preparations");
+            return notify(DatalakeUpgradePreparationFlowChainStartEvent.DATALAKE_UPGRADE_PREPARATION_FLOW_CHAIN_EVENT,
+                    new DatalakeUpgradePreparationFlowChainStartEvent(cluster.getId(), userId, imageId,
+                            environmentClientService.getBackupLocation(cluster.getEnvCrn())),
+                    cluster.getClusterName());
+        } else {
+            LOGGER.info("Triggering upgrade preparation");
+            return notify(DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT.event(),
+                    new DatalakeUpgradePreparationStartEvent(DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT.event(), cluster.getId(),
+                            userId, imageId), cluster.getClusterName());
+        }
     }
 
     public FlowIdentifier triggerDatalakeSyncComponentVersionsFromCmFlow(SdxCluster cluster) {

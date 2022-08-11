@@ -1014,6 +1014,21 @@ public final class datalakeDRProto {
      * <code>.datalakedr.BackupRestoreOperationStatus startServices = 2;</code>
      */
     com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getStartServicesOrBuilder();
+
+    /**
+     * <code>.datalakedr.BackupRestoreOperationStatus precheckStoragePermission = 3;</code>
+     * @return Whether the precheckStoragePermission field is set.
+     */
+    boolean hasPrecheckStoragePermission();
+    /**
+     * <code>.datalakedr.BackupRestoreOperationStatus precheckStoragePermission = 3;</code>
+     * @return The precheckStoragePermission.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getPrecheckStoragePermission();
+    /**
+     * <code>.datalakedr.BackupRestoreOperationStatus precheckStoragePermission = 3;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getPrecheckStoragePermissionOrBuilder();
   }
   /**
    * <pre>
@@ -1086,6 +1101,19 @@ public final class datalakeDRProto {
               if (subBuilder != null) {
                 subBuilder.mergeFrom(startServices_);
                 startServices_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 26: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
+              if (precheckStoragePermission_ != null) {
+                subBuilder = precheckStoragePermission_.toBuilder();
+              }
+              precheckStoragePermission_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(precheckStoragePermission_);
+                precheckStoragePermission_ = subBuilder.buildPartial();
               }
 
               break;
@@ -1198,6 +1226,32 @@ public final class datalakeDRProto {
       return getStartServices();
     }
 
+    public static final int PRECHECKSTORAGEPERMISSION_FIELD_NUMBER = 3;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus precheckStoragePermission_;
+    /**
+     * <code>.datalakedr.BackupRestoreOperationStatus precheckStoragePermission = 3;</code>
+     * @return Whether the precheckStoragePermission field is set.
+     */
+    @java.lang.Override
+    public boolean hasPrecheckStoragePermission() {
+      return precheckStoragePermission_ != null;
+    }
+    /**
+     * <code>.datalakedr.BackupRestoreOperationStatus precheckStoragePermission = 3;</code>
+     * @return The precheckStoragePermission.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getPrecheckStoragePermission() {
+      return precheckStoragePermission_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : precheckStoragePermission_;
+    }
+    /**
+     * <code>.datalakedr.BackupRestoreOperationStatus precheckStoragePermission = 3;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getPrecheckStoragePermissionOrBuilder() {
+      return getPrecheckStoragePermission();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -1218,6 +1272,9 @@ public final class datalakeDRProto {
       if (startServices_ != null) {
         output.writeMessage(2, getStartServices());
       }
+      if (precheckStoragePermission_ != null) {
+        output.writeMessage(3, getPrecheckStoragePermission());
+      }
       unknownFields.writeTo(output);
     }
 
@@ -1234,6 +1291,10 @@ public final class datalakeDRProto {
       if (startServices_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, getStartServices());
+      }
+      if (precheckStoragePermission_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, getPrecheckStoragePermission());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1260,6 +1321,11 @@ public final class datalakeDRProto {
         if (!getStartServices()
             .equals(other.getStartServices())) return false;
       }
+      if (hasPrecheckStoragePermission() != other.hasPrecheckStoragePermission()) return false;
+      if (hasPrecheckStoragePermission()) {
+        if (!getPrecheckStoragePermission()
+            .equals(other.getPrecheckStoragePermission())) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -1278,6 +1344,10 @@ public final class datalakeDRProto {
       if (hasStartServices()) {
         hash = (37 * hash) + STARTSERVICES_FIELD_NUMBER;
         hash = (53 * hash) + getStartServices().hashCode();
+      }
+      if (hasPrecheckStoragePermission()) {
+        hash = (37 * hash) + PRECHECKSTORAGEPERMISSION_FIELD_NUMBER;
+        hash = (53 * hash) + getPrecheckStoragePermission().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -1428,6 +1498,12 @@ public final class datalakeDRProto {
           startServices_ = null;
           startServicesBuilder_ = null;
         }
+        if (precheckStoragePermissionBuilder_ == null) {
+          precheckStoragePermission_ = null;
+        } else {
+          precheckStoragePermission_ = null;
+          precheckStoragePermissionBuilder_ = null;
+        }
         return this;
       }
 
@@ -1463,6 +1539,11 @@ public final class datalakeDRProto {
           result.startServices_ = startServices_;
         } else {
           result.startServices_ = startServicesBuilder_.build();
+        }
+        if (precheckStoragePermissionBuilder_ == null) {
+          result.precheckStoragePermission_ = precheckStoragePermission_;
+        } else {
+          result.precheckStoragePermission_ = precheckStoragePermissionBuilder_.build();
         }
         onBuilt();
         return result;
@@ -1517,6 +1598,9 @@ public final class datalakeDRProto {
         }
         if (other.hasStartServices()) {
           mergeStartServices(other.getStartServices());
+        }
+        if (other.hasPrecheckStoragePermission()) {
+          mergePrecheckStoragePermission(other.getPrecheckStoragePermission());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -1855,6 +1939,125 @@ public final class datalakeDRProto {
           startServices_ = null;
         }
         return startServicesBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus precheckStoragePermission_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> precheckStoragePermissionBuilder_;
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckStoragePermission = 3;</code>
+       * @return Whether the precheckStoragePermission field is set.
+       */
+      public boolean hasPrecheckStoragePermission() {
+        return precheckStoragePermissionBuilder_ != null || precheckStoragePermission_ != null;
+      }
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckStoragePermission = 3;</code>
+       * @return The precheckStoragePermission.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getPrecheckStoragePermission() {
+        if (precheckStoragePermissionBuilder_ == null) {
+          return precheckStoragePermission_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : precheckStoragePermission_;
+        } else {
+          return precheckStoragePermissionBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckStoragePermission = 3;</code>
+       */
+      public Builder setPrecheckStoragePermission(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (precheckStoragePermissionBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          precheckStoragePermission_ = value;
+          onChanged();
+        } else {
+          precheckStoragePermissionBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckStoragePermission = 3;</code>
+       */
+      public Builder setPrecheckStoragePermission(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder builderForValue) {
+        if (precheckStoragePermissionBuilder_ == null) {
+          precheckStoragePermission_ = builderForValue.build();
+          onChanged();
+        } else {
+          precheckStoragePermissionBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckStoragePermission = 3;</code>
+       */
+      public Builder mergePrecheckStoragePermission(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (precheckStoragePermissionBuilder_ == null) {
+          if (precheckStoragePermission_ != null) {
+            precheckStoragePermission_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder(precheckStoragePermission_).mergeFrom(value).buildPartial();
+          } else {
+            precheckStoragePermission_ = value;
+          }
+          onChanged();
+        } else {
+          precheckStoragePermissionBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckStoragePermission = 3;</code>
+       */
+      public Builder clearPrecheckStoragePermission() {
+        if (precheckStoragePermissionBuilder_ == null) {
+          precheckStoragePermission_ = null;
+          onChanged();
+        } else {
+          precheckStoragePermission_ = null;
+          precheckStoragePermissionBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckStoragePermission = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder getPrecheckStoragePermissionBuilder() {
+        
+        onChanged();
+        return getPrecheckStoragePermissionFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckStoragePermission = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getPrecheckStoragePermissionOrBuilder() {
+        if (precheckStoragePermissionBuilder_ != null) {
+          return precheckStoragePermissionBuilder_.getMessageOrBuilder();
+        } else {
+          return precheckStoragePermission_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : precheckStoragePermission_;
+        }
+      }
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckStoragePermission = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> 
+          getPrecheckStoragePermissionFieldBuilder() {
+        if (precheckStoragePermissionBuilder_ == null) {
+          precheckStoragePermissionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder>(
+                  getPrecheckStoragePermission(),
+                  getParentForChildren(),
+                  isClean());
+          precheckStoragePermission_ = null;
+        }
+        return precheckStoragePermissionBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -7688,6 +7891,26 @@ public final class datalakeDRProto {
      * @return The skipRangerAudits.
      */
     com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipRangerAudits();
+
+    /**
+     * <pre>
+     * Used to bypass Validation checks for cases where we need to ignore the results.
+     * </pre>
+     *
+     * <code>bool skipValidation = 8;</code>
+     * @return The skipValidation.
+     */
+    boolean getSkipValidation();
+
+    /**
+     * <pre>
+     * will only run validation and return results.
+     * </pre>
+     *
+     * <code>bool validationOnly = 9;</code>
+     * @return The validationOnly.
+     */
+    boolean getValidationOnly();
   }
   /**
    * <pre>
@@ -7784,6 +8007,16 @@ public final class datalakeDRProto {
               int rawValue = input.readEnum();
 
               skipRangerAudits_ = rawValue;
+              break;
+            }
+            case 64: {
+
+              skipValidation_ = input.readBool();
+              break;
+            }
+            case 72: {
+
+              validationOnly_ = input.readBool();
               break;
             }
             default: {
@@ -8052,6 +8285,36 @@ public final class datalakeDRProto {
       return result == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.UNRECOGNIZED : result;
     }
 
+    public static final int SKIPVALIDATION_FIELD_NUMBER = 8;
+    private boolean skipValidation_;
+    /**
+     * <pre>
+     * Used to bypass Validation checks for cases where we need to ignore the results.
+     * </pre>
+     *
+     * <code>bool skipValidation = 8;</code>
+     * @return The skipValidation.
+     */
+    @java.lang.Override
+    public boolean getSkipValidation() {
+      return skipValidation_;
+    }
+
+    public static final int VALIDATIONONLY_FIELD_NUMBER = 9;
+    private boolean validationOnly_;
+    /**
+     * <pre>
+     * will only run validation and return results.
+     * </pre>
+     *
+     * <code>bool validationOnly = 9;</code>
+     * @return The validationOnly.
+     */
+    @java.lang.Override
+    public boolean getValidationOnly() {
+      return validationOnly_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -8087,6 +8350,12 @@ public final class datalakeDRProto {
       if (skipRangerAudits_ != com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.NOT_SET.getNumber()) {
         output.writeEnum(7, skipRangerAudits_);
       }
+      if (skipValidation_ != false) {
+        output.writeBool(8, skipValidation_);
+      }
+      if (validationOnly_ != false) {
+        output.writeBool(9, validationOnly_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -8121,6 +8390,14 @@ public final class datalakeDRProto {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(7, skipRangerAudits_);
       }
+      if (skipValidation_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(8, skipValidation_);
+      }
+      if (validationOnly_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(9, validationOnly_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -8147,6 +8424,10 @@ public final class datalakeDRProto {
       if (skipRangerHmsMetadata_ != other.skipRangerHmsMetadata_) return false;
       if (skipAtlasMetadata_ != other.skipAtlasMetadata_) return false;
       if (skipRangerAudits_ != other.skipRangerAudits_) return false;
+      if (getSkipValidation()
+          != other.getSkipValidation()) return false;
+      if (getValidationOnly()
+          != other.getValidationOnly()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -8173,6 +8454,12 @@ public final class datalakeDRProto {
       hash = (53 * hash) + skipAtlasMetadata_;
       hash = (37 * hash) + SKIPRANGERAUDITS_FIELD_NUMBER;
       hash = (53 * hash) + skipRangerAudits_;
+      hash = (37 * hash) + SKIPVALIDATION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSkipValidation());
+      hash = (37 * hash) + VALIDATIONONLY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getValidationOnly());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -8325,6 +8612,10 @@ public final class datalakeDRProto {
 
         skipRangerAudits_ = 0;
 
+        skipValidation_ = false;
+
+        validationOnly_ = false;
+
         return this;
       }
 
@@ -8358,6 +8649,8 @@ public final class datalakeDRProto {
         result.skipRangerHmsMetadata_ = skipRangerHmsMetadata_;
         result.skipAtlasMetadata_ = skipAtlasMetadata_;
         result.skipRangerAudits_ = skipRangerAudits_;
+        result.skipValidation_ = skipValidation_;
+        result.validationOnly_ = validationOnly_;
         onBuilt();
         return result;
       }
@@ -8429,6 +8722,12 @@ public final class datalakeDRProto {
         }
         if (other.skipRangerAudits_ != 0) {
           setSkipRangerAuditsValue(other.getSkipRangerAuditsValue());
+        }
+        if (other.getSkipValidation() != false) {
+          setSkipValidation(other.getSkipValidation());
+        }
+        if (other.getValidationOnly() != false) {
+          setValidationOnly(other.getValidationOnly());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -9008,6 +9307,92 @@ public final class datalakeDRProto {
       public Builder clearSkipRangerAudits() {
         
         skipRangerAudits_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean skipValidation_ ;
+      /**
+       * <pre>
+       * Used to bypass Validation checks for cases where we need to ignore the results.
+       * </pre>
+       *
+       * <code>bool skipValidation = 8;</code>
+       * @return The skipValidation.
+       */
+      @java.lang.Override
+      public boolean getSkipValidation() {
+        return skipValidation_;
+      }
+      /**
+       * <pre>
+       * Used to bypass Validation checks for cases where we need to ignore the results.
+       * </pre>
+       *
+       * <code>bool skipValidation = 8;</code>
+       * @param value The skipValidation to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSkipValidation(boolean value) {
+        
+        skipValidation_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Used to bypass Validation checks for cases where we need to ignore the results.
+       * </pre>
+       *
+       * <code>bool skipValidation = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSkipValidation() {
+        
+        skipValidation_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean validationOnly_ ;
+      /**
+       * <pre>
+       * will only run validation and return results.
+       * </pre>
+       *
+       * <code>bool validationOnly = 9;</code>
+       * @return The validationOnly.
+       */
+      @java.lang.Override
+      public boolean getValidationOnly() {
+        return validationOnly_;
+      }
+      /**
+       * <pre>
+       * will only run validation and return results.
+       * </pre>
+       *
+       * <code>bool validationOnly = 9;</code>
+       * @param value The validationOnly to set.
+       * @return This builder for chaining.
+       */
+      public Builder setValidationOnly(boolean value) {
+        
+        validationOnly_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * will only run validation and return results.
+       * </pre>
+       *
+       * <code>bool validationOnly = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearValidationOnly() {
+        
+        validationOnly_ = false;
         onChanged();
         return this;
       }
@@ -11967,6 +12352,26 @@ public final class datalakeDRProto {
      * @return The skipRangerAudits.
      */
     com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipRangerAudits();
+
+    /**
+     * <pre>
+     * Used to bypass Validation checks for cases where we need to ignore the results.
+     * </pre>
+     *
+     * <code>bool skipValidation = 10;</code>
+     * @return The skipValidation.
+     */
+    boolean getSkipValidation();
+
+    /**
+     * <pre>
+     * will only run validation and return results.
+     * </pre>
+     *
+     * <code>bool validationOnly = 11;</code>
+     * @return The validationOnly.
+     */
+    boolean getValidationOnly();
   }
   /**
    * <pre>
@@ -12075,6 +12480,16 @@ public final class datalakeDRProto {
               int rawValue = input.readEnum();
 
               skipRangerAudits_ = rawValue;
+              break;
+            }
+            case 80: {
+
+              skipValidation_ = input.readBool();
+              break;
+            }
+            case 88: {
+
+              validationOnly_ = input.readBool();
               break;
             }
             default: {
@@ -12410,6 +12825,36 @@ public final class datalakeDRProto {
       return result == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.UNRECOGNIZED : result;
     }
 
+    public static final int SKIPVALIDATION_FIELD_NUMBER = 10;
+    private boolean skipValidation_;
+    /**
+     * <pre>
+     * Used to bypass Validation checks for cases where we need to ignore the results.
+     * </pre>
+     *
+     * <code>bool skipValidation = 10;</code>
+     * @return The skipValidation.
+     */
+    @java.lang.Override
+    public boolean getSkipValidation() {
+      return skipValidation_;
+    }
+
+    public static final int VALIDATIONONLY_FIELD_NUMBER = 11;
+    private boolean validationOnly_;
+    /**
+     * <pre>
+     * will only run validation and return results.
+     * </pre>
+     *
+     * <code>bool validationOnly = 11;</code>
+     * @return The validationOnly.
+     */
+    @java.lang.Override
+    public boolean getValidationOnly() {
+      return validationOnly_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -12450,6 +12895,12 @@ public final class datalakeDRProto {
       }
       if (skipRangerAudits_ != com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.NOT_SET.getNumber()) {
         output.writeEnum(9, skipRangerAudits_);
+      }
+      if (skipValidation_ != false) {
+        output.writeBool(10, skipValidation_);
+      }
+      if (validationOnly_ != false) {
+        output.writeBool(11, validationOnly_);
       }
       unknownFields.writeTo(output);
     }
@@ -12492,6 +12943,14 @@ public final class datalakeDRProto {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(9, skipRangerAudits_);
       }
+      if (skipValidation_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(10, skipValidation_);
+      }
+      if (validationOnly_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(11, validationOnly_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -12522,6 +12981,10 @@ public final class datalakeDRProto {
       if (skipRangerHmsMetadata_ != other.skipRangerHmsMetadata_) return false;
       if (skipAtlasMetadata_ != other.skipAtlasMetadata_) return false;
       if (skipRangerAudits_ != other.skipRangerAudits_) return false;
+      if (getSkipValidation()
+          != other.getSkipValidation()) return false;
+      if (getValidationOnly()
+          != other.getValidationOnly()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -12553,6 +13016,12 @@ public final class datalakeDRProto {
       hash = (53 * hash) + skipAtlasMetadata_;
       hash = (37 * hash) + SKIPRANGERAUDITS_FIELD_NUMBER;
       hash = (53 * hash) + skipRangerAudits_;
+      hash = (37 * hash) + SKIPVALIDATION_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSkipValidation());
+      hash = (37 * hash) + VALIDATIONONLY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getValidationOnly());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -12709,6 +13178,10 @@ public final class datalakeDRProto {
 
         skipRangerAudits_ = 0;
 
+        skipValidation_ = false;
+
+        validationOnly_ = false;
+
         return this;
       }
 
@@ -12744,6 +13217,8 @@ public final class datalakeDRProto {
         result.skipRangerHmsMetadata_ = skipRangerHmsMetadata_;
         result.skipAtlasMetadata_ = skipAtlasMetadata_;
         result.skipRangerAudits_ = skipRangerAudits_;
+        result.skipValidation_ = skipValidation_;
+        result.validationOnly_ = validationOnly_;
         onBuilt();
         return result;
       }
@@ -12822,6 +13297,12 @@ public final class datalakeDRProto {
         }
         if (other.skipRangerAudits_ != 0) {
           setSkipRangerAuditsValue(other.getSkipRangerAuditsValue());
+        }
+        if (other.getSkipValidation() != false) {
+          setSkipValidation(other.getSkipValidation());
+        }
+        if (other.getValidationOnly() != false) {
+          setValidationOnly(other.getValidationOnly());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -13555,6 +14036,92 @@ public final class datalakeDRProto {
       public Builder clearSkipRangerAudits() {
         
         skipRangerAudits_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean skipValidation_ ;
+      /**
+       * <pre>
+       * Used to bypass Validation checks for cases where we need to ignore the results.
+       * </pre>
+       *
+       * <code>bool skipValidation = 10;</code>
+       * @return The skipValidation.
+       */
+      @java.lang.Override
+      public boolean getSkipValidation() {
+        return skipValidation_;
+      }
+      /**
+       * <pre>
+       * Used to bypass Validation checks for cases where we need to ignore the results.
+       * </pre>
+       *
+       * <code>bool skipValidation = 10;</code>
+       * @param value The skipValidation to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSkipValidation(boolean value) {
+        
+        skipValidation_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Used to bypass Validation checks for cases where we need to ignore the results.
+       * </pre>
+       *
+       * <code>bool skipValidation = 10;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSkipValidation() {
+        
+        skipValidation_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean validationOnly_ ;
+      /**
+       * <pre>
+       * will only run validation and return results.
+       * </pre>
+       *
+       * <code>bool validationOnly = 11;</code>
+       * @return The validationOnly.
+       */
+      @java.lang.Override
+      public boolean getValidationOnly() {
+        return validationOnly_;
+      }
+      /**
+       * <pre>
+       * will only run validation and return results.
+       * </pre>
+       *
+       * <code>bool validationOnly = 11;</code>
+       * @param value The validationOnly to set.
+       * @return This builder for chaining.
+       */
+      public Builder setValidationOnly(boolean value) {
+        
+        validationOnly_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * will only run validation and return results.
+       * </pre>
+       *
+       * <code>bool validationOnly = 11;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearValidationOnly() {
+        
+        validationOnly_ = false;
         onChanged();
         return this;
       }
@@ -30382,133 +30949,137 @@ public final class datalakeDRProto {
     java.lang.String[] descriptorData = {
       "\n\020datalakedr.proto\022\ndatalakedr\032\rversion." +
       "proto\"E\n\034BackupRestoreOperationStatus\022\016\n" +
-      "\006status\030\001 \001(\t\022\025\n\rfailureReason\030\002 \001(\t\"\244\001\n" +
+      "\006status\030\001 \001(\t\022\025\n\rfailureReason\030\002 \001(\t\"\361\001\n" +
       "!AdminOperationsBackupRestoreState\022>\n\014st" +
       "opServices\030\001 \001(\0132(.datalakedr.BackupRest" +
       "oreOperationStatus\022?\n\rstartServices\030\002 \001(" +
       "\0132(.datalakedr.BackupRestoreOperationSta" +
-      "tus\"\252\001\n\027HbaseBackupRestoreState\022L\n\032atlas" +
-      "EntityAuditEventTable\030\001 \001(\0132(.datalakedr" +
-      ".BackupRestoreOperationStatus\022A\n\017atlasJa" +
-      "nusTable\030\002 \001(\0132(.datalakedr.BackupRestor" +
-      "eOperationStatus\"\372\004\n\026SolrBackupRestoreSt" +
-      "ate\022E\n\023edgeIndexCollection\030\001 \001(\0132(.datal" +
-      "akedr.BackupRestoreOperationStatus\022I\n\027fu" +
-      "lltextIndexCollection\030\002 \001(\0132(.datalakedr" +
-      ".BackupRestoreOperationStatus\022H\n\026rangerA" +
-      "uditsCollection\030\003 \001(\0132(.datalakedr.Backu" +
-      "pRestoreOperationStatus\022G\n\025vertexIndexCo" +
-      "llection\030\004 \001(\0132(.datalakedr.BackupRestor" +
-      "eOperationStatus\022K\n\031edgeIndexCollectionD" +
-      "elete\030\005 \001(\0132(.datalakedr.BackupRestoreOp" +
-      "erationStatus\022O\n\035fulltextIndexCollection" +
-      "Delete\030\006 \001(\0132(.datalakedr.BackupRestoreO" +
-      "perationStatus\022N\n\034rangerAuditsCollection" +
-      "Delete\030\007 \001(\0132(.datalakedr.BackupRestoreO" +
-      "perationStatus\022M\n\033vertexIndexCollectionD" +
-      "elete\030\010 \001(\0132(.datalakedr.BackupRestoreOp" +
-      "erationStatus\"X\n\032DatabaseBackupRestoreSt" +
-      "ate\022:\n\010database\030\001 \001(\0132(.datalakedr.Backu" +
-      "pRestoreOperationStatus\"\204\002\n\032InternalBack" +
-      "upRestoreState\022F\n\017adminOperations\030\001 \001(\0132" +
-      "-.datalakedr.AdminOperationsBackupRestor" +
-      "eState\0222\n\005hbase\030\002 \001(\0132#.datalakedr.Hbase" +
-      "BackupRestoreState\0220\n\004solr\030\003 \001(\0132\".datal" +
-      "akedr.SolrBackupRestoreState\0228\n\010database" +
-      "\030\004 \001(\0132&.datalakedr.DatabaseBackupRestor" +
-      "eState\"\213\002\n\025BackupDatalakeRequest\022\024\n\014data" +
-      "lakeName\030\001 \001(\t\022\022\n\nbackupName\030\002 \001(\t\022\026\n\016ba" +
-      "ckupLocation\030\003 \001(\t\022\032\n\022closeDbConnections" +
-      "\030\004 \001(\010\0223\n\025skipRangerHmsMetadata\030\005 \001(\0162\024." +
-      "datalakedr.SkipFlag\022/\n\021skipAtlasMetadata" +
-      "\030\006 \001(\0162\024.datalakedr.SkipFlag\022.\n\020skipRang" +
-      "erAudits\030\007 \001(\0162\024.datalakedr.SkipFlag\"\305\002\n" +
-      "\026BackupDatalakeResponse\022\022\n\nbackupName\030\001 " +
-      "\001(\t\022\021\n\taccountId\030\002 \001(\t\022\017\n\007userCrn\030\003 \001(\t\022" +
-      "\020\n\010backupId\030\004 \001(\t\022\025\n\rinternalState\030\005 \001(\t" +
-      "\022\024\n\014overallState\030\006 \001(\t\022\026\n\016startTimestamp" +
-      "\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backupLo" +
-      "cation\030\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\022?\n\017o" +
-      "perationStates\030\013 \001(\0132&.datalakedr.Intern" +
-      "alBackupRestoreState\022\026\n\016runtimeVersion\030\014" +
-      " \001(\t\"\262\002\n\026RestoreDatalakeRequest\022\024\n\014datal" +
-      "akeName\030\001 \001(\t\022\022\n\nbackupName\030\002 \001(\t\022\020\n\010bac" +
-      "kupId\030\003 \001(\t\022\027\n\017includeDatabase\030\004 \001(\010\022\r\n\005" +
-      "force\030\005 \001(\010\022\036\n\026backupLocationOverride\030\006 " +
-      "\001(\t\0223\n\025skipRangerHmsMetadata\030\007 \001(\0162\024.dat" +
-      "alakedr.SkipFlag\022/\n\021skipAtlasMetadata\030\010 " +
+      "tus\022K\n\031precheckStoragePermission\030\003 \001(\0132(" +
+      ".datalakedr.BackupRestoreOperationStatus" +
+      "\"\252\001\n\027HbaseBackupRestoreState\022L\n\032atlasEnt" +
+      "ityAuditEventTable\030\001 \001(\0132(.datalakedr.Ba" +
+      "ckupRestoreOperationStatus\022A\n\017atlasJanus" +
+      "Table\030\002 \001(\0132(.datalakedr.BackupRestoreOp" +
+      "erationStatus\"\372\004\n\026SolrBackupRestoreState" +
+      "\022E\n\023edgeIndexCollection\030\001 \001(\0132(.datalake" +
+      "dr.BackupRestoreOperationStatus\022I\n\027fullt" +
+      "extIndexCollection\030\002 \001(\0132(.datalakedr.Ba" +
+      "ckupRestoreOperationStatus\022H\n\026rangerAudi" +
+      "tsCollection\030\003 \001(\0132(.datalakedr.BackupRe" +
+      "storeOperationStatus\022G\n\025vertexIndexColle" +
+      "ction\030\004 \001(\0132(.datalakedr.BackupRestoreOp" +
+      "erationStatus\022K\n\031edgeIndexCollectionDele" +
+      "te\030\005 \001(\0132(.datalakedr.BackupRestoreOpera" +
+      "tionStatus\022O\n\035fulltextIndexCollectionDel" +
+      "ete\030\006 \001(\0132(.datalakedr.BackupRestoreOper" +
+      "ationStatus\022N\n\034rangerAuditsCollectionDel" +
+      "ete\030\007 \001(\0132(.datalakedr.BackupRestoreOper" +
+      "ationStatus\022M\n\033vertexIndexCollectionDele" +
+      "te\030\010 \001(\0132(.datalakedr.BackupRestoreOpera" +
+      "tionStatus\"X\n\032DatabaseBackupRestoreState" +
+      "\022:\n\010database\030\001 \001(\0132(.datalakedr.BackupRe" +
+      "storeOperationStatus\"\204\002\n\032InternalBackupR" +
+      "estoreState\022F\n\017adminOperations\030\001 \001(\0132-.d" +
+      "atalakedr.AdminOperationsBackupRestoreSt" +
+      "ate\0222\n\005hbase\030\002 \001(\0132#.datalakedr.HbaseBac" +
+      "kupRestoreState\0220\n\004solr\030\003 \001(\0132\".datalake" +
+      "dr.SolrBackupRestoreState\0228\n\010database\030\004 " +
+      "\001(\0132&.datalakedr.DatabaseBackupRestoreSt" +
+      "ate\"\273\002\n\025BackupDatalakeRequest\022\024\n\014datalak" +
+      "eName\030\001 \001(\t\022\022\n\nbackupName\030\002 \001(\t\022\026\n\016backu" +
+      "pLocation\030\003 \001(\t\022\032\n\022closeDbConnections\030\004 " +
+      "\001(\010\0223\n\025skipRangerHmsMetadata\030\005 \001(\0162\024.dat" +
+      "alakedr.SkipFlag\022/\n\021skipAtlasMetadata\030\006 " +
       "\001(\0162\024.datalakedr.SkipFlag\022.\n\020skipRangerA" +
-      "udits\030\t \001(\0162\024.datalakedr.SkipFlag\"\305\002\n\027Re" +
-      "storeDatalakeResponse\022\021\n\taccountId\030\001 \001(\t" +
-      "\022\020\n\010backupId\030\002 \001(\t\022\021\n\trestoreId\030\003 \001(\t\022\017\n" +
-      "\007userCrn\030\004 \001(\t\022\025\n\rinternalState\030\005 \001(\t\022\024\n" +
-      "\014overallState\030\006 \001(\t\022\026\n\016startTimestamp\030\007 " +
-      "\001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backupLocat" +
-      "ion\030\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\022?\n\017oper" +
-      "ationStates\030\013 \001(\0132&.datalakedr.InternalB" +
-      "ackupRestoreState\022\026\n\016runtimeVersion\030\014 \001(" +
-      "\t\"Y\n\033BackupDatalakeStatusRequest\022\024\n\014data" +
-      "lakeName\030\001 \001(\t\022\020\n\010backupId\030\002 \001(\t\022\022\n\nback" +
-      "upName\030\003 \001(\t\"\313\002\n\034BackupDatalakeStatusRes" +
-      "ponse\022\022\n\nbackupName\030\001 \001(\t\022\021\n\taccountId\030\002" +
-      " \001(\t\022\017\n\007userCrn\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022" +
-      "\025\n\rinternalState\030\005 \001(\t\022\024\n\014overallState\030\006" +
-      " \001(\t\022\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTimes" +
-      "tamp\030\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfa" +
-      "ilureReason\030\n \001(\t\022?\n\017operationStates\030\013 \001" +
-      "(\0132&.datalakedr.InternalBackupRestoreSta" +
-      "te\022\026\n\016runtimeVersion\030\014 \001(\t\"Y\n\034RestoreDat" +
-      "alakeStatusRequest\022\024\n\014datalakeName\030\001 \001(\t" +
-      "\022\021\n\trestoreId\030\002 \001(\tJ\004\010\003\020\004R\nbackupName\"\313\002" +
-      "\n\035RestoreDatalakeStatusResponse\022\021\n\taccou" +
-      "ntId\030\001 \001(\t\022\021\n\trestoreId\030\002 \001(\t\022\020\n\010backupI" +
-      "d\030\003 \001(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n\rinternalStat" +
-      "e\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016startTi" +
-      "mestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016b" +
-      "ackupLocation\030\t \001(\t\022\025\n\rfailureReason\030\n \001" +
-      "(\t\022?\n\017operationStates\030\013 \001(\0132&.datalakedr" +
-      ".InternalBackupRestoreState\022\026\n\016runtimeVe" +
-      "rsion\030\014 \001(\t\"\301\002\n\022DatalakeBackupInfo\022\022\n\nba" +
-      "ckupName\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\017\n\007use" +
-      "rCrn\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022\025\n\rinternal" +
-      "State\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016sta" +
-      "rtTimestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022" +
-      "\026\n\016backupLocation\030\t \001(\t\022\025\n\rfailureReason" +
-      "\030\n \001(\t\022?\n\017operationStates\030\013 \001(\0132&.datala" +
-      "kedr.InternalBackupRestoreState\022\026\n\016runti" +
-      "meVersion\030\014 \001(\t\"1\n\031ListDatalakeBackupReq" +
-      "uest\022\024\n\014datalakeName\030\001 \001(\t\"S\n\032ListDatala" +
-      "keBackupResponse\0225\n\rdatalake_info\030\001 \003(\0132" +
-      "\036.datalakedr.DatalakeBackupInfo\"/\n\033Cance" +
-      "lDatalakeBackupRequest\022\020\n\010backupId\030\001 \001(\t" +
-      "\".\n\034CancelDatalakeBackupResponse\022\016\n\006resu" +
-      "lt\030\001 \001(\t\"1\n\034CancelDatalakeRestoreRequest" +
-      "\022\021\n\trestoreId\030\001 \001(\t\"/\n\035CancelDatalakeRes" +
-      "toreResponse\022\016\n\006result\030\001 \001(\t*.\n\010SkipFlag" +
-      "\022\013\n\007NOT_SET\020\000\022\010\n\004SKIP\020\001\022\013\n\007INCLUDE\020\0022\252\006\n" +
-      "\ndatalakeDR\022A\n\nGetVersion\022\027.version.Vers" +
-      "ionRequest\032\030.version.VersionResponse\"\000\022Y" +
-      "\n\016BackupDatalake\022!.datalakedr.BackupData" +
-      "lakeRequest\032\".datalakedr.BackupDatalakeR" +
-      "esponse\"\000\022\\\n\017RestoreDatalake\022\".datalaked" +
-      "r.RestoreDatalakeRequest\032#.datalakedr.Re" +
-      "storeDatalakeResponse\"\000\022k\n\024BackupDatalak" +
-      "eStatus\022\'.datalakedr.BackupDatalakeStatu" +
-      "sRequest\032(.datalakedr.BackupDatalakeStat" +
-      "usResponse\"\000\022n\n\025RestoreDatalakeStatus\022(." +
-      "datalakedr.RestoreDatalakeStatusRequest\032" +
-      ").datalakedr.RestoreDatalakeStatusRespon" +
-      "se\"\000\022f\n\023ListDatalakeBackups\022%.datalakedr" +
-      ".ListDatalakeBackupRequest\032&.datalakedr." +
-      "ListDatalakeBackupResponse\"\000\022k\n\024CancelDa" +
-      "talakeBackup\022\'.datalakedr.CancelDatalake" +
-      "BackupRequest\032(.datalakedr.CancelDatalak" +
-      "eBackupResponse\"\000\022n\n\025CancelDatalakeResto" +
-      "re\022(.datalakedr.CancelDatalakeRestoreReq" +
-      "uest\032).datalakedr.CancelDatalakeRestoreR" +
-      "esponse\"\000B>\n+com.cloudera.thunderhead.se" +
-      "rvice.datalakedrB\017datalakeDRProtob\006proto" +
-      "3"
+      "udits\030\007 \001(\0162\024.datalakedr.SkipFlag\022\026\n\016ski" +
+      "pValidation\030\010 \001(\010\022\026\n\016validationOnly\030\t \001(" +
+      "\010\"\305\002\n\026BackupDatalakeResponse\022\022\n\nbackupNa" +
+      "me\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\017\n\007userCrn\030\003" +
+      " \001(\t\022\020\n\010backupId\030\004 \001(\t\022\025\n\rinternalState\030" +
+      "\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016startTime" +
+      "stamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016bac" +
+      "kupLocation\030\t \001(\t\022\025\n\rfailureReason\030\n \001(\t" +
+      "\022?\n\017operationStates\030\013 \001(\0132&.datalakedr.I" +
+      "nternalBackupRestoreState\022\026\n\016runtimeVers" +
+      "ion\030\014 \001(\t\"\342\002\n\026RestoreDatalakeRequest\022\024\n\014" +
+      "datalakeName\030\001 \001(\t\022\022\n\nbackupName\030\002 \001(\t\022\020" +
+      "\n\010backupId\030\003 \001(\t\022\027\n\017includeDatabase\030\004 \001(" +
+      "\010\022\r\n\005force\030\005 \001(\010\022\036\n\026backupLocationOverri" +
+      "de\030\006 \001(\t\0223\n\025skipRangerHmsMetadata\030\007 \001(\0162" +
+      "\024.datalakedr.SkipFlag\022/\n\021skipAtlasMetada" +
+      "ta\030\010 \001(\0162\024.datalakedr.SkipFlag\022.\n\020skipRa" +
+      "ngerAudits\030\t \001(\0162\024.datalakedr.SkipFlag\022\026" +
+      "\n\016skipValidation\030\n \001(\010\022\026\n\016validationOnly" +
+      "\030\013 \001(\010\"\305\002\n\027RestoreDatalakeResponse\022\021\n\tac" +
+      "countId\030\001 \001(\t\022\020\n\010backupId\030\002 \001(\t\022\021\n\tresto" +
+      "reId\030\003 \001(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n\rinternalS" +
+      "tate\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016star" +
+      "tTimestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026" +
+      "\n\016backupLocation\030\t \001(\t\022\025\n\rfailureReason\030" +
+      "\n \001(\t\022?\n\017operationStates\030\013 \001(\0132&.datalak" +
+      "edr.InternalBackupRestoreState\022\026\n\016runtim" +
+      "eVersion\030\014 \001(\t\"Y\n\033BackupDatalakeStatusRe" +
+      "quest\022\024\n\014datalakeName\030\001 \001(\t\022\020\n\010backupId\030" +
+      "\002 \001(\t\022\022\n\nbackupName\030\003 \001(\t\"\313\002\n\034BackupData" +
+      "lakeStatusResponse\022\022\n\nbackupName\030\001 \001(\t\022\021" +
+      "\n\taccountId\030\002 \001(\t\022\017\n\007userCrn\030\003 \001(\t\022\020\n\010ba" +
+      "ckupId\030\004 \001(\t\022\025\n\rinternalState\030\005 \001(\t\022\024\n\014o" +
+      "verallState\030\006 \001(\t\022\026\n\016startTimestamp\030\007 \001(" +
+      "\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backupLocatio" +
+      "n\030\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\022?\n\017operat" +
+      "ionStates\030\013 \001(\0132&.datalakedr.InternalBac" +
+      "kupRestoreState\022\026\n\016runtimeVersion\030\014 \001(\t\"" +
+      "Y\n\034RestoreDatalakeStatusRequest\022\024\n\014datal" +
+      "akeName\030\001 \001(\t\022\021\n\trestoreId\030\002 \001(\tJ\004\010\003\020\004R\n" +
+      "backupName\"\313\002\n\035RestoreDatalakeStatusResp" +
+      "onse\022\021\n\taccountId\030\001 \001(\t\022\021\n\trestoreId\030\002 \001" +
+      "(\t\022\020\n\010backupId\030\003 \001(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n" +
+      "\rinternalState\030\005 \001(\t\022\024\n\014overallState\030\006 \001" +
+      "(\t\022\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTimesta" +
+      "mp\030\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfail" +
+      "ureReason\030\n \001(\t\022?\n\017operationStates\030\013 \001(\013" +
+      "2&.datalakedr.InternalBackupRestoreState" +
+      "\022\026\n\016runtimeVersion\030\014 \001(\t\"\301\002\n\022DatalakeBac" +
+      "kupInfo\022\022\n\nbackupName\030\001 \001(\t\022\021\n\taccountId" +
+      "\030\002 \001(\t\022\017\n\007userCrn\030\003 \001(\t\022\020\n\010backupId\030\004 \001(" +
+      "\t\022\025\n\rinternalState\030\005 \001(\t\022\024\n\014overallState" +
+      "\030\006 \001(\t\022\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTim" +
+      "estamp\030\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\r" +
+      "failureReason\030\n \001(\t\022?\n\017operationStates\030\013" +
+      " \001(\0132&.datalakedr.InternalBackupRestoreS" +
+      "tate\022\026\n\016runtimeVersion\030\014 \001(\t\"1\n\031ListData" +
+      "lakeBackupRequest\022\024\n\014datalakeName\030\001 \001(\t\"" +
+      "S\n\032ListDatalakeBackupResponse\0225\n\rdatalak" +
+      "e_info\030\001 \003(\0132\036.datalakedr.DatalakeBackup" +
+      "Info\"/\n\033CancelDatalakeBackupRequest\022\020\n\010b" +
+      "ackupId\030\001 \001(\t\".\n\034CancelDatalakeBackupRes" +
+      "ponse\022\016\n\006result\030\001 \001(\t\"1\n\034CancelDatalakeR" +
+      "estoreRequest\022\021\n\trestoreId\030\001 \001(\t\"/\n\035Canc" +
+      "elDatalakeRestoreResponse\022\016\n\006result\030\001 \001(" +
+      "\t*.\n\010SkipFlag\022\013\n\007NOT_SET\020\000\022\010\n\004SKIP\020\001\022\013\n\007" +
+      "INCLUDE\020\0022\252\006\n\ndatalakeDR\022A\n\nGetVersion\022\027" +
+      ".version.VersionRequest\032\030.version.Versio" +
+      "nResponse\"\000\022Y\n\016BackupDatalake\022!.datalake" +
+      "dr.BackupDatalakeRequest\032\".datalakedr.Ba" +
+      "ckupDatalakeResponse\"\000\022\\\n\017RestoreDatalak" +
+      "e\022\".datalakedr.RestoreDatalakeRequest\032#." +
+      "datalakedr.RestoreDatalakeResponse\"\000\022k\n\024" +
+      "BackupDatalakeStatus\022\'.datalakedr.Backup" +
+      "DatalakeStatusRequest\032(.datalakedr.Backu" +
+      "pDatalakeStatusResponse\"\000\022n\n\025RestoreData" +
+      "lakeStatus\022(.datalakedr.RestoreDatalakeS" +
+      "tatusRequest\032).datalakedr.RestoreDatalak" +
+      "eStatusResponse\"\000\022f\n\023ListDatalakeBackups" +
+      "\022%.datalakedr.ListDatalakeBackupRequest\032" +
+      "&.datalakedr.ListDatalakeBackupResponse\"" +
+      "\000\022k\n\024CancelDatalakeBackup\022\'.datalakedr.C" +
+      "ancelDatalakeBackupRequest\032(.datalakedr." +
+      "CancelDatalakeBackupResponse\"\000\022n\n\025Cancel" +
+      "DatalakeRestore\022(.datalakedr.CancelDatal" +
+      "akeRestoreRequest\032).datalakedr.CancelDat" +
+      "alakeRestoreResponse\"\000B>\n+com.cloudera.t" +
+      "hunderhead.service.datalakedrB\017datalakeD" +
+      "RProtob\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -30526,7 +31097,7 @@ public final class datalakeDRProto {
     internal_static_datalakedr_AdminOperationsBackupRestoreState_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_AdminOperationsBackupRestoreState_descriptor,
-        new java.lang.String[] { "StopServices", "StartServices", });
+        new java.lang.String[] { "StopServices", "StartServices", "PrecheckStoragePermission", });
     internal_static_datalakedr_HbaseBackupRestoreState_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_datalakedr_HbaseBackupRestoreState_fieldAccessorTable = new
@@ -30556,7 +31127,7 @@ public final class datalakeDRProto {
     internal_static_datalakedr_BackupDatalakeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_BackupDatalakeRequest_descriptor,
-        new java.lang.String[] { "DatalakeName", "BackupName", "BackupLocation", "CloseDbConnections", "SkipRangerHmsMetadata", "SkipAtlasMetadata", "SkipRangerAudits", });
+        new java.lang.String[] { "DatalakeName", "BackupName", "BackupLocation", "CloseDbConnections", "SkipRangerHmsMetadata", "SkipAtlasMetadata", "SkipRangerAudits", "SkipValidation", "ValidationOnly", });
     internal_static_datalakedr_BackupDatalakeResponse_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_datalakedr_BackupDatalakeResponse_fieldAccessorTable = new
@@ -30568,7 +31139,7 @@ public final class datalakeDRProto {
     internal_static_datalakedr_RestoreDatalakeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_RestoreDatalakeRequest_descriptor,
-        new java.lang.String[] { "DatalakeName", "BackupName", "BackupId", "IncludeDatabase", "Force", "BackupLocationOverride", "SkipRangerHmsMetadata", "SkipAtlasMetadata", "SkipRangerAudits", });
+        new java.lang.String[] { "DatalakeName", "BackupName", "BackupId", "IncludeDatabase", "Force", "BackupLocationOverride", "SkipRangerHmsMetadata", "SkipAtlasMetadata", "SkipRangerAudits", "SkipValidation", "ValidationOnly", });
     internal_static_datalakedr_RestoreDatalakeResponse_descriptor =
       getDescriptor().getMessageTypes().get(9);
     internal_static_datalakedr_RestoreDatalakeResponse_fieldAccessorTable = new

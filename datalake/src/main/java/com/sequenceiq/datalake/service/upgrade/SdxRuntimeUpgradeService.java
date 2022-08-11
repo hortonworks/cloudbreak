@@ -103,20 +103,22 @@ public class SdxRuntimeUpgradeService {
     public SdxUpgradeResponse triggerUpgradeByName(String userCrn, String clusterName, SdxUpgradeRequest upgradeRequest, String accountId,
             boolean upgradePreparation) {
         SdxCluster cluster = sdxService.getByNameInAccount(userCrn, clusterName);
+        boolean skipBackup = upgradeRequest != null && Boolean.TRUE.equals(upgradeRequest.getSkipBackup());
         MDCBuilder.buildMdcContext(cluster);
         SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByName(clusterName, upgradeRequest, accountId, upgradePreparation);
         validateUpgradeCandidates(clusterName, sdxUpgradeResponse);
-        return upgradePreparation ? initSdxUpgradePreparation(userCrn, sdxUpgradeResponse.getUpgradeCandidates(), upgradeRequest, cluster)
+        return upgradePreparation ? initSdxUpgradePreparation(userCrn, sdxUpgradeResponse.getUpgradeCandidates(), upgradeRequest, cluster, skipBackup)
                 : initSdxUpgrade(userCrn, sdxUpgradeResponse.getUpgradeCandidates(), upgradeRequest, cluster);
     }
 
     public SdxUpgradeResponse triggerUpgradeByCrn(String userCrn, String clusterCrn, SdxUpgradeRequest upgradeRequest, String accountId,
             boolean upgradePreparation) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
+        boolean skipBackup = upgradeRequest != null && Boolean.TRUE.equals(upgradeRequest.getSkipBackup());
         MDCBuilder.buildMdcContext(cluster);
         SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByCrn(userCrn, clusterCrn, upgradeRequest, accountId, upgradePreparation);
         validateUpgradeCandidates(cluster.getClusterName(), sdxUpgradeResponse);
-        return upgradePreparation ? initSdxUpgradePreparation(userCrn, sdxUpgradeResponse.getUpgradeCandidates(), upgradeRequest, cluster)
+        return upgradePreparation ? initSdxUpgradePreparation(userCrn, sdxUpgradeResponse.getUpgradeCandidates(), upgradeRequest, cluster, skipBackup)
                 : initSdxUpgrade(userCrn, sdxUpgradeResponse.getUpgradeCandidates(), upgradeRequest, cluster);
     }
 
@@ -156,13 +158,13 @@ public class SdxRuntimeUpgradeService {
     }
 
     private SdxUpgradeResponse initSdxUpgradePreparation(String userCrn, List<ImageInfoV4Response> upgradeCandidates, SdxUpgradeRequest request,
-            SdxCluster cluster) {
+            SdxCluster cluster, boolean skipBackup) {
         if (Boolean.TRUE.equals(request.getLockComponents())) {
             throw new BadRequestException("Upgrade preparation is not necessary in case of OS upgrade.");
         }
         verifyPaywallAccess(userCrn, request);
         String imageId = determineImageId(request, upgradeCandidates);
-        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeRuntimeUpgradePreparationFlow(cluster, imageId);
+        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeRuntimeUpgradePreparationFlow(cluster, imageId, skipBackup);
         String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE_PREPARATION.getMessage(), Collections.singletonList(imageId));
         return new SdxUpgradeResponse(message, flowIdentifier);
     }
