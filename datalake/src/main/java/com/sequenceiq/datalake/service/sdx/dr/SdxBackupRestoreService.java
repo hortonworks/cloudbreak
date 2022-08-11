@@ -147,6 +147,13 @@ public class SdxBackupRestoreService {
                 skipOptions.isSkipAtlasMetadata(), skipOptions.isSkipRangerAudits(), skipOptions.isSkipRangerMetadata());
     }
 
+    public DatalakeBackupStatusResponse triggerDatalakeBackupValidation(Long id, String backupLocation, String userCrn) {
+        SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
+        LOGGER.info("Triggering datalake backup validation for datalake: '{}' in '{}' env",
+                sdxCluster.getClusterName(), sdxCluster.getEnvName());
+        return datalakeDrClient.triggerBackupValidation(sdxCluster.getClusterName(), backupLocation, userCrn);
+    }
+
     public SdxDatabaseRestoreResponse triggerDatabaseRestore(SdxCluster sdxCluster, String backupId, String restoreId, String backupLocation) {
         MDCBuilder.buildMdcContext(sdxCluster);
         return triggerDatalakeDatabaseRestoreFlow(sdxCluster, backupId, restoreId, backupLocation);

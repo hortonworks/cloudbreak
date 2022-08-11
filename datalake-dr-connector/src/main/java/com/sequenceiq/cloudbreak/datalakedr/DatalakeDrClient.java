@@ -87,6 +87,27 @@ public class DatalakeDrClient {
         }
     }
 
+    public DatalakeBackupStatusResponse triggerBackupValidation(String datalakeName, String backupLocation, String actorCrn) {
+        if (!datalakeDrConfig.isConfigured()) {
+            return missingConnectorResponseOnBackup();
+        }
+
+        checkNotNull(datalakeName);
+        checkNotNull(actorCrn, "actorCrn should not be null.");
+        checkNotNull(backupLocation);
+
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            BackupDatalakeRequest.Builder builder = BackupDatalakeRequest.newBuilder()
+                    .setDatalakeName(datalakeName)
+                    .setBackupLocation(backupLocation)
+                    .setValidationOnly(true);
+            return statusConverter.convert(
+                    newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                            .backupDatalake(builder.build())
+            );
+        }
+    }
+
     public DatalakeRestoreStatusResponse triggerRestore(String datalakeName, String backupId, String backupLocationOverride, String actorCrn,
             boolean skipAtlasMetadata, boolean skipRangerAudits, boolean skipRangerMetadata) {
         if (!datalakeDrConfig.isConfigured()) {
