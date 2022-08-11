@@ -7,16 +7,20 @@ import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATAL
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_TRIGGER_RESTORE_EVENT;
 import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FINISHED;
 import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.RUNNING;
+import static java.util.Objects.isNull;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto;
@@ -34,6 +38,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Res
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -86,6 +91,9 @@ public class SdxBackupRestoreService {
     private static final int MAX_SIZE_OF_FAILURE_REASON = 1999;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxBackupRestoreService.class);
+
+    @Value("${last.backup.seconds:86400}")
+    private int lastBackupInSeconds;
 
     @Inject
     private SdxReactorFlowManager sdxReactorFlowManager;
@@ -588,6 +596,21 @@ public class SdxBackupRestoreService {
             return false;
         }
         return true;
+    }
+
+    public void checkExistingBackup(SdxCluster newSdxCluster, String userId) {
+        if (!datalakeDrConfig.isConfigured()) {
+            return;
+        }
+        datalakeDRProto.DatalakeBackupInfo lastSuccessfulBackup = datalakeDrClient
+                .getLastSuccessfulBackup(newSdxCluster.getClusterName(), userId, Optional.empty());
+        if (isNull(lastSuccessfulBackup)) {
+            throw new BadRequestException("The restore cannot be executed because there is no backup.");
+        }
+        Date backupTime = new Date(Long.parseLong(lastSuccessfulBackup.getEndTimestamp()));
+        if (TimeUnit.DAYS.convert(new Date().getTime() - backupTime.getTime(), TimeUnit.MILLISECONDS) > 0) {
+            throw new BadRequestException(String.format("The restore cannot be executed because the last backup is older than %d days", lastBackupInSeconds));
+        }
     }
 
     private static boolean isVersionOlderThan(SdxCluster cluster, String baseVersion) {
