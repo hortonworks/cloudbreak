@@ -236,6 +236,14 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return sdxStatusEntities.stream().map(sdxStatusEntity -> sdxStatusEntity.getDatalake().getId()).collect(Collectors.toSet());
     }
 
+    public Optional<String> findResourceCrnById(Long id) {
+        LOGGER.debug("Trying to fetch resource CRN based on the following {} id: {}", SdxCluster.class.getSimpleName(), id);
+        Optional<String> resourceCrn = sdxClusterRepository.findCrnById(id);
+        resourceCrn.ifPresentOrElse(s -> LOGGER.debug("Resource CRN has found [for stack id: {}]: {}", id, s),
+                () -> LOGGER.debug("No resource CRN has been found for stack id: {}", id));
+        return resourceCrn;
+    }
+
     public SdxCluster getById(Long id) {
         LOGGER.info("Searching for SDX cluster by id {}", id);
         Optional<SdxCluster> sdxClusters = sdxClusterRepository.findById(id);
