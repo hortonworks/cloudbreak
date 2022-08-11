@@ -44,6 +44,7 @@ public class RotateSaltPasswordActions {
             protected void prepareExecution(RotateSaltPasswordRequest payload, Map<Object, Object> variables) {
                 super.prepareExecution(payload, variables);
                 variables.put(REASON, payload.getReason());
+                variables.put(TYPE, payload.getType());
             }
 
             @Override
@@ -55,7 +56,7 @@ public class RotateSaltPasswordActions {
 
             @Override
             protected Selectable createRequest(RotateSaltPasswordContext context) {
-                return new RotateSaltPasswordRequest(context.getStack().getId(), context.getReason());
+                return new RotateSaltPasswordRequest(context.getStack().getId(), context.getReason(), context.getType());
             }
         };
     }

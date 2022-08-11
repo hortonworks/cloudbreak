@@ -21,6 +21,8 @@ public abstract class RotateSaltPasswordAction<P extends Payload>
 
     public static final String REASON = "reason";
 
+    public static final String TYPE = "type";
+
     private static final String PREVIOUS_STACK_STATUS = "previousStackStatus";
 
     @Inject
@@ -37,7 +39,8 @@ public abstract class RotateSaltPasswordAction<P extends Payload>
         Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
         StackStatus previousStackStatus = (StackStatus) variables.computeIfAbsent(PREVIOUS_STACK_STATUS, o -> stack.getStackStatus());
         RotateSaltPasswordReason reason = (RotateSaltPasswordReason) variables.getOrDefault(REASON, RotateSaltPasswordReason.MANUAL);
-        return new RotateSaltPasswordContext(flowParameters, stack, previousStackStatus, reason);
+        RotateSaltPasswordType type = (RotateSaltPasswordType) variables.getOrDefault(TYPE, RotateSaltPasswordType.FALLBACK);
+        return new RotateSaltPasswordContext(flowParameters, stack, previousStackStatus, reason, type);
     }
 
     @Override

@@ -3,8 +3,11 @@ package com.sequenceiq.freeipa.orchestrator;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -16,6 +19,7 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -26,10 +30,13 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.RotateSaltPasswordEvent;
+import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.RotateSaltPasswordType;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordReason;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordRequest;
+import com.sequenceiq.freeipa.service.BootstrapService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
@@ -38,6 +45,8 @@ import com.sequenceiq.freeipa.util.SaltBootstrapVersionChecker;
 
 @Service
 public class RotateSaltPasswordService {
+
+    protected static final String SALTUSER_DELETE_COMMAND = "userdel saltuser";
 
     protected static final String SALTUSER = "saltuser";
 
@@ -70,6 +79,9 @@ public class RotateSaltPasswordService {
     private SaltBootstrapVersionChecker saltBootstrapVersionChecker;
 
     @Inject
+    private BootstrapService bootstrapService;
+
+    @Inject
     private FreeIpaFlowManager flowManager;
 
     @Inject
@@ -78,8 +90,11 @@ public class RotateSaltPasswordService {
     public FlowIdentifier triggerRotateSaltPassword(String environmentCrn, String accountId, RotateSaltPasswordReason reason) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         validateRotateSaltPassword(stack);
+        RotateSaltPasswordType type = saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)
+                ? RotateSaltPasswordType.SALT_BOOTSTRAP_ENDPOINT
+                : RotateSaltPasswordType.FALLBACK;
         String selector = RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.event();
-        return flowManager.notify(selector, new RotateSaltPasswordRequest(stack.getId(), reason));
+        return flowManager.notify(selector, new RotateSaltPasswordRequest(stack.getId(), reason, type));
     }
 
     public void rotateSaltPassword(Stack stack) {
@@ -96,6 +111,40 @@ public class RotateSaltPasswordService {
         }
     }
 
+    public void rotateSaltPasswordFallback(Stack stack) {
+        List<GatewayConfig> allGatewayConfig = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
+        tryRemoveSaltuserFromGateways(stack, allGatewayConfig);
+
+        String newPassword = PasswordUtil.generatePassword();
+        SecurityConfig securityConfig = stack.getSecurityConfig();
+        securityConfig.getSaltSecurityConfig().setSaltPassword(newPassword);
+        try {
+            bootstrapService.reBootstrap(stack);
+            securityConfigService.changeSaltPassword(stack, newPassword);
+        } catch (CloudbreakOrchestratorException e) {
+            Set<String> gatewayConfigAddresses = allGatewayConfig.stream()
+                    .map(GatewayConfig::getPrivateAddress)
+                    .collect(Collectors.toSet());
+            LOGGER.warn("Failed to re-bootstrap gateway nodes after saltuser password delete", e);
+            String message = String.format("Failed to re-bootstrap gateway nodes after saltuser password delete. " +
+                            "Please check the salt-bootstrap service status on node(s) %s. " +
+                            "If the saltuser password was changed manually, " +
+                            "please remove the user manually with the command '%s' on node(s) %s and retry the operation.",
+                    gatewayConfigAddresses, SALTUSER_DELETE_COMMAND, gatewayConfigAddresses);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    private void tryRemoveSaltuserFromGateways(Stack stack, List<GatewayConfig> allGatewayConfig) {
+        try {
+            Set<String> targets = stack.getAllNodes().stream().map(Node::getHostname).collect(Collectors.toSet());
+            Map<String, String> response = hostOrchestrator.runCommandOnHosts(allGatewayConfig, targets, SALTUSER_DELETE_COMMAND);
+            LOGGER.debug("Saltuser delete command response: {}", response);
+        } catch (CloudbreakOrchestratorException e) {
+            LOGGER.warn("Failed to run saltuser delete command, assuming it is already deleted", e);
+        }
+    }
+
     public void validateRotateSaltPassword(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         if (stack.isStopped()) {
@@ -103,10 +152,6 @@ public class RotateSaltPasswordService {
         }
         if (!entitlementService.isSaltUserPasswordRotationEnabled(stack.getAccountId())) {
             throw new BadRequestException("Rotating SaltStack user password is not supported in your account");
-        }
-        if (!saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)) {
-            throw new BadRequestException("Rotating SaltStack user password is not supported with your image version, " +
-                    "please upgrade to an image with salt-bootstrap version >= 0.13.6 (you can find this information in the image catalog)");
         }
     }
 

@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.RotateSaltPasswordType;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordFailureResponse;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordReason;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordRequest;
@@ -34,7 +35,7 @@ class RotateSaltPasswordHandlerTest {
     private static final long STACK_ID = 1L;
 
     private static final HandlerEvent<RotateSaltPasswordRequest> EVENT = new HandlerEvent<>(new Event<>(
-            new RotateSaltPasswordRequest(STACK_ID, RotateSaltPasswordReason.MANUAL)));
+            new RotateSaltPasswordRequest(STACK_ID, RotateSaltPasswordReason.MANUAL, RotateSaltPasswordType.SALT_BOOTSTRAP_ENDPOINT)));
 
     @Mock
     private EventBus eventBus;
@@ -53,7 +54,7 @@ class RotateSaltPasswordHandlerTest {
 
     @BeforeEach
     void setUp() {
-        when(stackService.getStackById(STACK_ID)).thenReturn(stack);
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
     }
 
     @Test
@@ -64,6 +65,19 @@ class RotateSaltPasswordHandlerTest {
                 .isInstanceOf(RotateSaltPasswordSuccessResponse.class)
                 .returns(STACK_ID, Payload::getResourceId);
         verify(rotateSaltPasswordService).rotateSaltPassword(stack);
+    }
+
+    @Test
+    void testSuccessFallback() {
+        HandlerEvent<RotateSaltPasswordRequest> event = new HandlerEvent<>(new Event<>(
+                new RotateSaltPasswordRequest(STACK_ID, RotateSaltPasswordReason.MANUAL, RotateSaltPasswordType.FALLBACK)));
+
+        Selectable result = underTest.doAccept(event);
+
+        Assertions.assertThat(result)
+                .isInstanceOf(RotateSaltPasswordSuccessResponse.class)
+                .returns(STACK_ID, Payload::getResourceId);
+        verify(rotateSaltPasswordService).rotateSaltPasswordFallback(stack);
     }
 
     @Test

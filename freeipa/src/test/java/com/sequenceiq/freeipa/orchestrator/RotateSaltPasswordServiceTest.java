@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.orchestrator;
 
+import static com.sequenceiq.freeipa.orchestrator.RotateSaltPasswordService.SALTUSER_DELETE_COMMAND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -7,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +33,7 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -46,6 +50,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.RotateSaltPasswordEvent;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordReason;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
+import com.sequenceiq.freeipa.service.BootstrapService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
@@ -62,6 +67,8 @@ class RotateSaltPasswordServiceTest {
     private static final String OLD_PASSWORD = "old-password";
 
     private static final long STACK_ID = 1L;
+
+    private static final String FQDN = "fqdn";
 
     @Mock
     private StackService stackService;
@@ -80,6 +87,9 @@ class RotateSaltPasswordServiceTest {
 
     @Mock
     private SaltBootstrapVersionChecker saltBootstrapVersionChecker;
+
+    @Mock
+    private BootstrapService bootstrapService;
 
     @Mock
     private FreeIpaFlowManager flowManager;
@@ -110,6 +120,8 @@ class RotateSaltPasswordServiceTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(gatewayConfig.getPrivateAddress()).thenReturn("8.8.8.8");
+
         lenient().when(entitlementService.isSaltUserPasswordRotationEnabled(ACCOUNT_ID)).thenReturn(true);
         lenient().when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)).thenReturn(true);
         lenient().when(stackService.getByEnvironmentCrnAndAccountId(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
@@ -118,6 +130,9 @@ class RotateSaltPasswordServiceTest {
         lenient().when(stack.getId()).thenReturn(STACK_ID);
         lenient().when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
         lenient().when(stack.isStopped()).thenReturn(false);
+        Node node = mock(Node.class);
+        lenient().when(node.getHostname()).thenReturn(FQDN);
+        lenient().when(stack.getAllNodes()).thenReturn(Set.of(node));
 
         SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
         saltSecurityConfig.setSaltPassword(OLD_PASSWORD);
@@ -145,13 +160,43 @@ class RotateSaltPasswordServiceTest {
     }
 
     @Test
-    void rotateSaltPasswordWithOldSBVersion() {
-        when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)).thenReturn(false);
+    void rotateSaltPasswordFallback() throws Exception {
+        underTest.rotateSaltPasswordFallback(stack);
 
-        Assertions.assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Rotating SaltStack user password is not supported with your image version, " +
-                        "please upgrade to an image with salt-bootstrap version >= 0.13.6 (you can find this information in the image catalog)");
+        verify(hostOrchestrator).runCommandOnHosts(List.of(gatewayConfig), Set.of(FQDN), SALTUSER_DELETE_COMMAND);
+        verify(bootstrapService).reBootstrap(stack);
+        verify(securityConfigService).changeSaltPassword(eq(stack), anyString());
+    }
+
+    @Test
+    void rotateSaltPasswordFallbackWithFailedUserDelete() throws Exception {
+        when(hostOrchestrator.runCommandOnHosts(List.of(gatewayConfig), Set.of(FQDN), SALTUSER_DELETE_COMMAND))
+                .thenThrow(CloudbreakOrchestratorFailedException.class);
+
+        underTest.rotateSaltPasswordFallback(stack);
+
+        verify(hostOrchestrator).runCommandOnHosts(List.of(gatewayConfig), Set.of(FQDN), SALTUSER_DELETE_COMMAND);
+        verify(bootstrapService).reBootstrap(stack);
+        verify(securityConfigService).changeSaltPassword(eq(stack), anyString());
+    }
+
+    @Test
+    void rotateSaltPasswordFallbackWithFailedReBootstrap() throws Exception {
+        CloudbreakOrchestratorFailedException cause = new CloudbreakOrchestratorFailedException("");
+        doThrow(cause).when(bootstrapService).reBootstrap(stack);
+
+        assertThatThrownBy(() -> underTest.rotateSaltPasswordFallback(stack))
+                .isInstanceOf(CloudbreakServiceException.class)
+                .hasCause(cause)
+                .hasMessage("Failed to re-bootstrap gateway nodes after saltuser password delete. " +
+                        "Please check the salt-bootstrap service status on node(s) %s. " +
+                        "If the saltuser password was changed manually, " +
+                        "please remove the user manually with the command '%s' on node(s) %s and retry the operation.",
+                        List.of("8.8.8.8"), SALTUSER_DELETE_COMMAND, List.of("8.8.8.8"));
+
+        verify(hostOrchestrator).runCommandOnHosts(List.of(gatewayConfig), Set.of(FQDN), SALTUSER_DELETE_COMMAND);
+        verify(bootstrapService).reBootstrap(stack);
+        verify(securityConfigService, never()).changeSaltPassword(eq(stack), anyString());
     }
 
     @Test
