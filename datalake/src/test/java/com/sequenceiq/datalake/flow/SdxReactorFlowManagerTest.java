@@ -168,7 +168,8 @@ class SdxReactorFlowManagerTest {
 
     @Test
     public void testTriggerDatalakeRuntimeUpgradePreparationFlow() {
-        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerDatalakeRuntimeUpgradePreparationFlow(sdxCluster, IMAGE_ID));
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerDatalakeRuntimeUpgradePreparationFlow(sdxCluster, IMAGE_ID,
+                false));
         verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT.event()), any(Event.class));
         assertEquals(FLOW, result.getType());
         assertEquals("flowId", result.getPollableId());

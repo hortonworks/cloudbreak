@@ -77,6 +77,7 @@ message BackupRestoreOperationStatus {
 message AdminOperationsBackupRestoreState {
   BackupRestoreOperationStatus stopServices = 1; // Stopping services before a backup or restore.
   BackupRestoreOperationStatus startServices = 2; // Restarting services after the backup or restore is complete.
+  BackupRestoreOperationStatus precheckStoragePermission = 3;
 }
 
 // HbaseBackupRestoreState
@@ -121,6 +122,8 @@ message BackupDatalakeRequest {
   SkipFlag skipRangerHmsMetadata = 5; // Indicates whether or not to skip the Ranger and HMS database backup.
   SkipFlag skipAtlasMetadata = 6; // Indicates whether or not to skip the Atlas metadata backup.
   SkipFlag skipRangerAudits = 7; // Indicates whether or not to skip the Ranger audits backup.
+  bool skipValidation = 8; // Used to bypass Validation checks for cases where we need to ignore the results.
+  bool validationOnly = 9; // will only run validation and return results.
 }
 
 /**
@@ -166,6 +169,8 @@ message RestoreDatalakeRequest {
   // Indicates whether or not to skip the Ranger audit restore. If the backup used doesn't include the database information
   // and this flag is set to INCLUDE, the request will fail.
   SkipFlag skipRangerAudits = 9;
+  bool skipValidation = 10; // Used to bypass Validation checks for cases where we need to ignore the results.
+  bool validationOnly = 11; // will only run validation and return results.
 }
 
 /**
