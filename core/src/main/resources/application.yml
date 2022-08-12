@@ -932,3 +932,7 @@ existing-stack-patcher:
 clusterdns:
   host: localhost
   port: 8982
+
+sssd:
+  entry.cache.timeout: 300
+  memcache.timeout: 300
