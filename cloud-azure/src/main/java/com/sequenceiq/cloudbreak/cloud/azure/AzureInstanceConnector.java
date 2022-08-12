@@ -121,27 +121,6 @@ public class AzureInstanceConnector implements InstanceConnector {
     @Override
     public List<CloudVmInstanceStatus> stopWithLimitedRetry(AuthenticatedContext ac, List<CloudResource> resources,
             List<CloudInstance> vms, Long timeboundInMs) {
-//        LOGGER.info("Stopping vms on Azure: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
-//        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
-//        List<Completable> startCompletables = new ArrayList<>();
-//        for (CloudInstance vm : vms) {
-//            String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm);
-//            AzureClient azureClient = ac.getParameter(AzureClient.class);
-//            startCompletables.add(azureClient.deallocateVirtualMachineAsync(resourceGroupName, vm.getInstanceId(), timeboundInMs)
-//                    .doOnError(throwable -> {
-//                        if (throwable instanceof TimeoutException) {
-//                            LOGGER.error("Timeout Error happened on azure instance stop: {}", vm, throwable);
-//                            statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.UNKNOWN, throwable.getMessage()));
-//                        } else {
-//                            LOGGER.error("Error happened on azure instance start: {}", vm, throwable);
-//                            statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
-//                        }})
-//                    .doOnCompleted(() -> statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.STOPPED)))
-//                    .subscribeOn(Schedulers.io()));
-//        }
-//        Completable.merge(startCompletables).await();
-//        return statuses;
-
         return azureUtils.deallocateInstances(ac, vms, timeboundInMs);
     }
 
