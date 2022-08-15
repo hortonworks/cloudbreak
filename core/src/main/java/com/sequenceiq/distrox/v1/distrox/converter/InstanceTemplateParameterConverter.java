@@ -40,7 +40,9 @@ public class InstanceTemplateParameterConverter {
 
     public AwsInstanceTemplateV4Parameters convert(AwsInstanceTemplateV1Parameters source, DetailedEnvironmentResponse environment) {
         AwsInstanceTemplateV4Parameters response = new AwsInstanceTemplateV4Parameters();
-        response.setEncryption(getIfNotNull(source.getEncryption(), environment, this::convert));
+        if (environment != null) {
+            response.setEncryption(getIfNotNull(source.getEncryption(), environment, this::convert));
+        }
         response.setSpot(getIfNotNull(source.getSpot(), this::convert));
         response.setPlacementGroup(getIfNotNull(source.getPlacementGroup(), this::convert));
         return response;
@@ -86,7 +88,9 @@ public class InstanceTemplateParameterConverter {
 
     public GcpInstanceTemplateV4Parameters convert(GcpInstanceTemplateV1Parameters source, DetailedEnvironmentResponse environment) {
         GcpInstanceTemplateV4Parameters response = new GcpInstanceTemplateV4Parameters();
-        initGcpEncryptionFromEnvironment(response, environment);
+        if (environment != null) {
+            initGcpEncryptionFromEnvironment(response, environment);
+        }
         return response;
     }
 
@@ -97,7 +101,9 @@ public class InstanceTemplateParameterConverter {
     public AzureInstanceTemplateV4Parameters convert(AzureInstanceTemplateV1Parameters source, DetailedEnvironmentResponse environment) {
         AzureInstanceTemplateV4Parameters response = new AzureInstanceTemplateV4Parameters();
         response.setEncrypted(source.getEncrypted());
-        initAzureEncryptionFromEnvironment(response, environment);
+        if (environment != null) {
+            initAzureEncryptionFromEnvironment(response, environment);
+        }
         response.setManagedDisk(source.getManagedDisk());
         response.setPrivateId(source.getPrivateId());
         return response;

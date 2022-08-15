@@ -11,6 +11,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEve
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.CLUSTER_UPSCALE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd.ClusterCredentialChangeEvent.CLUSTER_CREDENTIALCHANGE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTriggerEvent.MANUAL_STACK_REPAIR_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STACK_STOP_EVENT;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGrou
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
@@ -52,6 +54,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterRecoveryTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
@@ -258,6 +261,12 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerClusterCredentialReplace(Long stackId, String userName, String password) {
         String selector = CLUSTER_CREDENTIALCHANGE_EVENT.event();
         ClusterCredentialChangeTriggerEvent event = new ClusterCredentialChangeTriggerEvent(selector, stackId, userName, password, Type.REPLACE);
+        return reactorNotifier.notify(stackId, selector, event);
+    }
+
+    public FlowIdentifier triggerVerticalScale(Long stackId, StackVerticalScaleV4Request request) {
+        String selector = STACK_VERTICALSCALE_EVENT.event();
+        CoreVerticalScalingTriggerEvent event = new CoreVerticalScalingTriggerEvent(selector, stackId, request);
         return reactorNotifier.notify(stackId, selector, event);
     }
 

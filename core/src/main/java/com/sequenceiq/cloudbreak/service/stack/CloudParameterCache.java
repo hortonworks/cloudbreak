@@ -28,6 +28,15 @@ public class CloudParameterCache {
         return isUpScalingSupported(Platform.platform(platform));
     }
 
+    public boolean isVerticalScalingSupported(String platform) {
+        return isVerticalScalingSupported(Platform.platform(platform));
+    }
+
+    public boolean isVerticalScalingSupported(Platform platform) {
+        Boolean result = getSpecialParameters(platform).get(PlatformParametersConsts.VERTICAL_SCALING_SUPPORTED);
+        return result == null || result;
+    }
+
     public boolean isUpScalingSupported(Platform platform) {
         Boolean result = getSpecialParameters(platform).get(PlatformParametersConsts.UPSCALING_SUPPORTED);
         return result == null || result;

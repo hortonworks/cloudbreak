@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
@@ -576,5 +577,15 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public FlowIdentifier reRegisterClusterProxyConfig(Long workspaceId, String crn, @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperationService.reRegisterClusterProxyConfig(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId());
+    }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier putVerticalScalingByNameInternal(
+            Long workspaceId,
+            String name,
+            @InitiatorUserCrn String initiatorUserCrn,
+            @Valid StackVerticalScaleV4Request updateRequest) {
+        return stackOperations.putVerticalScaling(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), updateRequest);
     }
 }
