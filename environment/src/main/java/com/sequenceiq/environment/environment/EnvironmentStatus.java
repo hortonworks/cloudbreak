@@ -142,7 +142,14 @@ public enum EnvironmentStatus {
     UPGRADE_CCM_ON_DATAHUB_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_ON_DATAHUB_IN_PROGRESS),
     UPGRADE_CCM_ON_DATAHUB_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_ON_DATAHUB_FAILED),
     UPGRADE_CCM_ROLLING_BACK(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_ROLLING_BACK),
-    UPGRADE_CCM_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_FAILED);
+    UPGRADE_CCM_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_FAILED),
+
+    // Vertical Scale FreeIPA
+    VERTICAL_SCALE_VALIDATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.VERTICAL_SCALE_VALIDATION_IN_PROGRESS),
+    VERTICAL_SCALE_VALIDATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.VERTICAL_SCALE_VALIDATION_FAILED),
+    VERTICAL_SCALE_ON_FREEIPA_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.VERTICAL_SCALE_ON_FREEIPA_IN_PROGRESS),
+    VERTICAL_SCALE_ON_FREEIPA_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.VERTICAL_SCALE_ON_FREEIPA_FAILED),
+    VERTICAL_SCALE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.VERTICAL_SCALE_FAILED);
 
     public static final Set<EnvironmentStatus> AVAILABLE_STATUSES = Set.of(
             CREATION_INITIATED,
@@ -180,6 +187,10 @@ public enum EnvironmentStatus {
             UPGRADE_CCM_FAILED
     );
 
+    public static final Set<EnvironmentStatus> VERTICAL_SCALABLE_STATES = Set.of(
+            ENV_STOPPED
+    );
+
     private final com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus responseStatus;
 
     EnvironmentStatus(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus responseStatus) {
@@ -200,5 +211,9 @@ public enum EnvironmentStatus {
 
     public boolean isCcmUpgradeablePhase() {
         return CCM_UPGRADEABLE_STATES.contains(this);
+    }
+
+    public boolean isVerticallyScalablePhase() {
+        return VERTICAL_SCALABLE_STATES.contains(this);
     }
 }

@@ -18,6 +18,8 @@ import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
@@ -33,11 +35,17 @@ public class FreeIpaPollerService {
     @Value("${env.upgradeccm.freeipa.polling.attempt:60}")
     private Integer upgradeccmAttempt;
 
+    @Value("${env.verticalscale.freeipa.polling.attempt:60}")
+    private Integer verticalscaleAttempt;
+
     @Value("${env.stop.polling.sleep.time:10}")
     private Integer startStopSleeptime;
 
     @Value("${env.upgradeccm.freeipa.polling.sleeptime:20}")
     private Integer upgradeccmSleeptime;
+
+    @Value("${env.verticalscale.freeipa.polling.sleeptime:30}")
+    private Integer verticalscaleSleeptime;
 
     private final FreeIpaService freeIpaService;
 
@@ -72,6 +80,21 @@ public class FreeIpaPollerService {
             } catch (PollerStoppedException e) {
                 LOGGER.info("FreeIPA Upgrade CCM timed out or error happened.", e);
                 throw new FreeIpaOperationFailedException("FreeIPA upgrade of Cluster Connectivity Manager timed out or error happened: " + e.getMessage());
+            }
+        }
+    }
+
+    public void waitForVerticalScale(Long envId, String envCrn, FreeIPAVerticalScaleRequest freeIPAVerticalScaleRequest) {
+        FreeIPAVerticalScaleResponse response = freeIpaService.verticalScale(envCrn, freeIPAVerticalScaleRequest);
+        if (response.getFlowIdentifier() != null) {
+            try {
+                Polling.stopAfterAttempt(verticalscaleAttempt)
+                        .stopIfException(true)
+                        .waitPeriodly(verticalscaleSleeptime, TimeUnit.SECONDS)
+                        .run(() -> freeipaPollerProvider.verticalScalePoller(envId, envCrn, response.getFlowIdentifier().getPollableId()));
+            } catch (PollerStoppedException e) {
+                LOGGER.info("FreeIPA Vertical Scale timed out or error happened.", e);
+                throw new FreeIpaOperationFailedException("FreeIPA Vertical Scale timed out or error happened: " + e.getMessage());
             }
         }
     }

@@ -28,11 +28,14 @@ import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelectors;
 import com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmEvent;
 import com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmStateSelectors;
+import com.sequenceiq.environment.environment.flow.verticalscale.freeipa.event.EnvironmentVerticalScaleEvent;
+import com.sequenceiq.environment.environment.flow.verticalscale.freeipa.event.EnvironmentVerticalScaleStateSelectors;
 import com.sequenceiq.environment.environment.service.stack.StackService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.service.FlowCancelService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest;
 
 import reactor.bus.Event;
 import reactor.rx.Promise;
@@ -178,6 +181,21 @@ public class EnvironmentReactorFlowManager {
                 .build();
         FlowIdentifier flowIdentifier = eventSender.sendEvent(upgradeCcmEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
         LOGGER.debug("Environment CCM upgrade flow trigger event sent for environment {}", environment.getName());
+        return flowIdentifier;
+    }
+
+    public FlowIdentifier triggerVerticalScaleFlow(EnvironmentDto environment, String userCrn, FreeIPAVerticalScaleRequest updateRequest) {
+        LOGGER.info("Environment Vertical Scale flow triggered for environment {}", environment.getName());
+        EnvironmentVerticalScaleEvent environmentVerticalScaleEvent = EnvironmentVerticalScaleEvent.builder()
+                .withAccepted(new Promise<>())
+                .withResourceCrn(environment.getResourceCrn())
+                .withResourceId(environment.getId())
+                .withResourceName(environment.getName())
+                .withFreeIPAVerticalScaleRequest(updateRequest)
+                .withSelector(EnvironmentVerticalScaleStateSelectors.VERTICAL_SCALING_FREEIPA_VALIDATION_EVENT.selector())
+                .build();
+        FlowIdentifier flowIdentifier = eventSender.sendEvent(environmentVerticalScaleEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        LOGGER.debug("Environment Vertical Scale flow trigger event sent for environment {}", environment.getName());
         return flowIdentifier;
     }
 }
