@@ -23,7 +23,10 @@ public enum MetricType implements Metric {
     ENV_LOAD_BALANCER_UPDATE_FAILED("environment.loadbalancer.update.failed"),
 
     ENV_UPGRADE_CCM_FINISHED("environment.upgrade.ccm.finished"),
-    ENV_UPGRADE_CCM_FAILED("environment.upgrade.ccm.failed");
+    ENV_UPGRADE_CCM_FAILED("environment.upgrade.ccm.failed"),
+
+    ENV_VERTICAL_SCALE_FINISHED("environment.vertical.scale.finished"),
+    ENV_VERTICAL_SCALE_FAILED("environment.vertical.scale.failed");
 
     private final String metricName;
 
