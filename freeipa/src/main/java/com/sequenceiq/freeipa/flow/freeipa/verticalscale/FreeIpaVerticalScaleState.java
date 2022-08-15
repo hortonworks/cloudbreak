@@ -4,7 +4,7 @@ import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.freeipa.flow.FillInMemoryStateStoreRestartAction;
 
-public enum FreeIPAVerticalScaleState implements FlowState {
+public enum FreeIpaVerticalScaleState implements FlowState {
     INIT_STATE,
     STACK_VERTICALSCALE_FAILED_STATE,
     STACK_VERTICALSCALE_STATE,

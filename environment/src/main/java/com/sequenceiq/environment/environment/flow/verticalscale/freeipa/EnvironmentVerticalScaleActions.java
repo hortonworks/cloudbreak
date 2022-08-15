@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.verticalscale.freeipa;
 
 import static com.sequenceiq.environment.environment.flow.verticalscale.freeipa.event.EnvironmentVerticalScaleHandlerSelectors.VERTICAL_SCALING_FREEIPA_HANDLER;
 import static com.sequenceiq.environment.environment.flow.verticalscale.freeipa.event.EnvironmentVerticalScaleHandlerSelectors.VERTICAL_SCALING_FREEIPA_VALIDATION_HANDLER;
+import static com.sequenceiq.environment.environment.flow.verticalscale.freeipa.event.EnvironmentVerticalScaleStateSelectors.FINALIZE_VERTICAL_SCALING_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.verticalscale.freeipa.event.EnvironmentVerticalScaleStateSelectors.HANDLED_FAILED_VERTICAL_SCALING_FREEIPA_EVENT;
 
 import java.util.Map;
@@ -72,7 +73,7 @@ public class EnvironmentVerticalScaleActions {
                         .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.AVAILABLE,
                                 ResourceEvent.ENVIRONMENT_VERTICAL_SCALE_FINISHED, EnvironmentVerticalScaleState.VERTICAL_SCALING_FREEIPA_FINISHED_STATE);
                 metricService.incrementMetricCounter(MetricType.ENV_VERTICAL_SCALE_FINISHED, environmentDto);
-                sendEvent(context);
+                sendEvent(context, FINALIZE_VERTICAL_SCALING_FREEIPA_EVENT.event(), payload);
             }
         };
     }

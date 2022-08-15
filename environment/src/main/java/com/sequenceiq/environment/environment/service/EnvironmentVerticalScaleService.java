@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 
 @Service
 public class EnvironmentVerticalScaleService {
@@ -26,19 +26,19 @@ public class EnvironmentVerticalScaleService {
         this.entitlementService = entitlementService;
     }
 
-    public FlowIdentifier verticalScaleByName(String name, FreeIPAVerticalScaleRequest updateRequest) {
+    public FlowIdentifier verticalScaleByName(String name, VerticalScaleRequest updateRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environment = environmentService.getByNameAndAccountId(name, accountId);
         return verticalScale(environment, updateRequest);
     }
 
-    public FlowIdentifier verticalScaleByCrn(String crn, FreeIPAVerticalScaleRequest updateRequest) {
+    public FlowIdentifier verticalScaleByCrn(String crn, VerticalScaleRequest updateRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environment = environmentService.getByCrnAndAccountId(crn, accountId);
         return verticalScale(environment, updateRequest);
     }
 
-    private FlowIdentifier verticalScale(EnvironmentDto environment, FreeIPAVerticalScaleRequest updateRequest) {
+    private FlowIdentifier verticalScale(EnvironmentDto environment, VerticalScaleRequest updateRequest) {
         validateEntitlements(environment);
         validateUpgrade(environment);
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
@@ -46,7 +46,7 @@ public class EnvironmentVerticalScaleService {
     }
 
     private void validateEntitlements(EnvironmentDto environment) {
-        if (!entitlementService.verticalScaleEnabled(environment.getAccountId())) {
+        if (!entitlementService.awsVerticalScaleEnabled(environment.getAccountId())) {
             throw new BadRequestException(
                     String.format("The account is not entitled for Vertical Scaling.",
                             environment.getName(), environment.getTunnel()));

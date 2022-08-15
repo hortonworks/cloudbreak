@@ -26,19 +26,25 @@ public class ClusterCredentialChangeFlowConfig extends StackStatusFinalizerAbstr
                     .from(INIT_STATE)
                     .to(CLUSTER_CREDENTIALCHANGE_STATE)
                     .event(CLUSTER_CREDENTIALCHANGE_EVENT)
-                        .noFailureEvent()
+                    .noFailureEvent()
+
                     .from(CLUSTER_CREDENTIALCHANGE_STATE)
                     .to(CLUSTER_CREDENTIALCHANGE_FINISHED_STATE)
                     .event(CLUSTER_CREDENTIALCHANGE_FINISHED_EVENT)
-                            .failureEvent(CLUSTER_CREDENTIALCHANGE_FINISHED_FAILURE_EVENT)
+                    .failureEvent(CLUSTER_CREDENTIALCHANGE_FINISHED_FAILURE_EVENT)
+
                     .from(CLUSTER_CREDENTIALCHANGE_FINISHED_STATE)
                     .to(FINAL_STATE)
                     .event(FINALIZED_EVENT)
-                        .failureEvent(FAILURE_EVENT)
+                    .failureEvent(FAILURE_EVENT)
+
                     .build();
 
-    private static final FlowEdgeConfig<ClusterCredentialChangeState, ClusterCredentialChangeEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
-            CLUSTER_CREDENTIALCHANGE_FAILED_STATE, FAIL_HANDLED_EVENT);
+    private static final FlowEdgeConfig<ClusterCredentialChangeState, ClusterCredentialChangeEvent> EDGE_CONFIG = new FlowEdgeConfig<>(
+            INIT_STATE,
+            FINAL_STATE,
+            CLUSTER_CREDENTIALCHANGE_FAILED_STATE,
+            FAIL_HANDLED_EVENT);
 
     public ClusterCredentialChangeFlowConfig() {
         super(ClusterCredentialChangeState.class, ClusterCredentialChangeEvent.class);

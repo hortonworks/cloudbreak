@@ -14,7 +14,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DataLakeVerticalScaleRequest implements JsonEntity {
+public class DatalakeVerticalScaleRequest implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(ModelDescriptions.HOST_GROUP_NAME)

@@ -8,7 +8,9 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 
 public abstract class AbstractAwsNativeComputeBuilder extends AbstractAwsNativeResourceBuilder implements ComputeResourceBuilder<AwsContext> {
@@ -25,6 +27,12 @@ public abstract class AbstractAwsNativeComputeBuilder extends AbstractAwsNativeR
     @Override
     public CloudVmInstanceStatus stop(AwsContext context, AuthenticatedContext auth, CloudInstance instance) {
         return null;
+    }
+
+    @Override
+    public List<CloudResource> update(AwsContext context, CloudInstance instance, long privateId,
+        AuthenticatedContext auth, Group group, CloudStack cloudStack) throws Exception {
+        return List.of();
     }
 
     @Override

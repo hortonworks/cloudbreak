@@ -61,6 +61,10 @@ public class InstanceGroupService {
         return viewRepository.findInstanceGroupsInStack(stackId);
     }
 
+    public Optional<InstanceGroup> getByStackIdAndInstanceGroupNameWithFetchTemplate(Long stackId, String groupName) {
+        return repository.getByStackIdAndInstanceGroupNameWithFetchTemplate(stackId, groupName);
+    }
+
     public Set<InstanceGroup> findNotTerminatedAndNotZombieByStackId(Long stackId) {
         try {
             return transactionService.required(() -> {
@@ -124,14 +128,6 @@ public class InstanceGroupService {
 
     public List<com.sequenceiq.cloudbreak.view.InstanceGroupView> findAllInstanceGroupViewByStackIdAndGroupName(Long stackId, Collection<String> groupNames) {
         return new ArrayList<>(repository.findAllInstanceGroupViewByStackIdAndGroupNames(stackId, groupNames));
-    }
-
-    public Optional<InstanceGroup> findOneByStackIdAndGroupNameWithTemplate(Long stackId, String groupName) {
-        return repository.getByStackIdAndInstanceGroupNameWithFetchTemplate(stackId, groupName);
-    }
-
-    public Optional<InstanceGroup> findInstanceGroupInStackByHostName(Long stackId, String hostName) {
-        return repository.findInstanceGroupInStackByHostName(stackId, hostName);
     }
 
     public InstanceGroup save(InstanceGroup instanceGroup) {

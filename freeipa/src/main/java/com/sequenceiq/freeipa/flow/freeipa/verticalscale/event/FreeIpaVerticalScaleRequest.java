@@ -9,20 +9,21 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.CloudStackRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 
-public class FreeIPAVerticalScaleRequest<T> extends CloudStackRequest<T> {
+public class FreeIpaVerticalScaleRequest extends CloudStackRequest<FreeIpaVerticalScaleResult> {
 
     private final List<CloudResource> resourceList;
 
-    private final com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest freeIPAVerticalScaleRequest;
+    private final VerticalScaleRequest freeIPAVerticalScaleRequest;
 
-    public FreeIPAVerticalScaleRequest(
+    public FreeIpaVerticalScaleRequest(
             @JsonProperty("cloudContext") CloudContext cloudContext,
             @JsonProperty("cloudCredential") CloudCredential cloudCredential,
             @JsonProperty("stack") CloudStack stack,
             @JsonProperty("resourceList") List<CloudResource> resourceList,
             @JsonProperty("freeIPAVerticalScaleRequest")
-                    com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest freeIPAVerticalScaleRequest) {
+                    VerticalScaleRequest freeIPAVerticalScaleRequest) {
         super(cloudContext, cloudCredential, stack);
         this.resourceList = resourceList;
         this.freeIPAVerticalScaleRequest = freeIPAVerticalScaleRequest;
@@ -32,14 +33,15 @@ public class FreeIPAVerticalScaleRequest<T> extends CloudStackRequest<T> {
         return resourceList;
     }
 
-    public com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest getFreeIPAVerticalScaleRequest() {
+    public VerticalScaleRequest getFreeIPAVerticalScaleRequest() {
         return freeIPAVerticalScaleRequest;
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", FreeIPAVerticalScaleRequest.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", FreeIpaVerticalScaleRequest.class.getSimpleName() + "[", "]")
                 .add("resourceList=" + resourceList)
+                .add(super.toString())
                 .toString();
     }
 }

@@ -129,6 +129,12 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
     }
 
     @Override
+    public List<CloudResource> update(AwsContext context, CloudInstance instance, long privateId,
+        AuthenticatedContext auth, Group group, CloudStack cloudStack) throws Exception {
+        return List.of();
+    }
+
+    @Override
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource) throws PreserveResourceException {
         throw new PreserveResourceException("Prevent volume resource deletion.");
     }

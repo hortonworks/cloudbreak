@@ -290,7 +290,7 @@ public class StackCommonService {
     }
 
     public FlowIdentifier putVerticalScalingInWorkspace(NameOrCrn nameOrCrn, String accountId, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
-        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         stackVerticalScaleV4Request.setStackId(stack.getId());
         validateVerticalScalingRequest(stack, stackVerticalScaleV4Request);
@@ -307,7 +307,7 @@ public class StackCommonService {
         nodeCountLimitValidator.validateScale(stack.getId(), scalingAdjustment, Crn.safeFromString(stack.getResourceCrn()).getAccountId());
     }
 
-    private void validateVerticalScalingRequest(StackDto stack, StackVerticalScaleV4Request verticalScaleV4Request) {
+    private void validateVerticalScalingRequest(StackView stack, StackVerticalScaleV4Request verticalScaleV4Request) {
         if (!cloudParameterCache.isVerticalScalingSupported(stack.getCloudPlatform())) {
             throw new BadRequestException(String.format("Vertical scaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
         }

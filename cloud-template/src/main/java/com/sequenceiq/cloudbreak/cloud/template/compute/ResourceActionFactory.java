@@ -39,4 +39,13 @@ public class ResourceActionFactory {
     public ResourceStopStartCallable buildStopStartCallable(ResourceStopStartCallablePayload payload) {
         return new ResourceStopStartCallable(payload);
     }
+
+    public ResourceUpdateCallable buildUpdateCallable(ResourceUpdateCallablePayload payload) {
+        return new ResourceUpdateCallable(
+                payload,
+                resourceBuilders,
+                syncPollingScheduler,
+                resourcePollTaskFactory,
+                persistenceNotifier);
+    }
 }

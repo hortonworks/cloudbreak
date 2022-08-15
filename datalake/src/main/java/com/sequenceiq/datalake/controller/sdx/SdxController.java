@@ -465,7 +465,7 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
     public FlowIdentifier verticalScalingByCrn(@ResourceCrn @TenantAwareParam String crn, @Valid StackVerticalScaleV4Request updateRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(crn);
@@ -473,7 +473,7 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATALAKE)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
     public FlowIdentifier verticalScalingByName(@ResourceName String name, @Valid StackVerticalScaleV4Request updateRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);

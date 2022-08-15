@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.flow.verticalscale.event;
 
-import static com.sequenceiq.datalake.flow.verticalscale.event.DataLakeVerticalScaleStateSelectors.FAILED_VERTICAL_SCALING_DATALAKE_EVENT;
+import static com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleStateSelectors.FAILED_VERTICAL_SCALING_DATALAKE_EVENT;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,16 +10,16 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.flow.reactor.api.event.BaseFailedFlowEvent;
 
-@JsonDeserialize(builder = DataLakeVerticalScaleFailedEvent.Builder.class)
-public class DataLakeVerticalScaleFailedEvent extends BaseFailedFlowEvent implements Selectable {
+@JsonDeserialize(builder = DatalakeVerticalScaleFailedEvent.Builder.class)
+public class DatalakeVerticalScaleFailedEvent extends BaseFailedFlowEvent implements Selectable {
 
-    private final DataLakeVerticalScaleEvent dataLakeVerticalScaleEvent;
+    private final DatalakeVerticalScaleEvent dataLakeVerticalScaleEvent;
 
     private final DatalakeStatusEnum datalakeStatus;
 
     @JsonCreator
-    public DataLakeVerticalScaleFailedEvent(
-            @JsonProperty("dataLakeVerticalScaleEvent") DataLakeVerticalScaleEvent dataLakeVerticalScaleEvent,
+    public DatalakeVerticalScaleFailedEvent(
+            @JsonProperty("dataLakeVerticalScaleEvent") DatalakeVerticalScaleEvent dataLakeVerticalScaleEvent,
             @JsonProperty("exception") Exception exception,
             @JsonProperty("datalakeStatus") DatalakeStatusEnum datalakeStatus) {
         super(FAILED_VERTICAL_SCALING_DATALAKE_EVENT.name(),
@@ -32,7 +32,7 @@ public class DataLakeVerticalScaleFailedEvent extends BaseFailedFlowEvent implem
         this.datalakeStatus = datalakeStatus;
     }
 
-    public DataLakeVerticalScaleEvent getDataLakeVerticalScaleEvent() {
+    public DatalakeVerticalScaleEvent getDataLakeVerticalScaleEvent() {
         return dataLakeVerticalScaleEvent;
     }
 
@@ -43,7 +43,7 @@ public class DataLakeVerticalScaleFailedEvent extends BaseFailedFlowEvent implem
     @JsonPOJOBuilder
     public static final class Builder {
 
-        private DataLakeVerticalScaleEvent dataLakeVerticalScaleEvent;
+        private DatalakeVerticalScaleEvent dataLakeVerticalScaleEvent;
 
         private DatalakeStatusEnum datalakeStatus;
 
@@ -56,7 +56,7 @@ public class DataLakeVerticalScaleFailedEvent extends BaseFailedFlowEvent implem
             return new Builder();
         }
 
-        public Builder withDataLakeVerticalScaleEvent(DataLakeVerticalScaleEvent dataLakeVerticalScaleEvent) {
+        public Builder withDataLakeVerticalScaleEvent(DatalakeVerticalScaleEvent dataLakeVerticalScaleEvent) {
             this.dataLakeVerticalScaleEvent = dataLakeVerticalScaleEvent;
             return this;
         }
@@ -71,8 +71,8 @@ public class DataLakeVerticalScaleFailedEvent extends BaseFailedFlowEvent implem
             return this;
         }
 
-        public DataLakeVerticalScaleFailedEvent build() {
-            return new DataLakeVerticalScaleFailedEvent(dataLakeVerticalScaleEvent, exception, datalakeStatus);
+        public DatalakeVerticalScaleFailedEvent build() {
+            return new DatalakeVerticalScaleFailedEvent(dataLakeVerticalScaleEvent, exception, datalakeStatus);
         }
     }
 }

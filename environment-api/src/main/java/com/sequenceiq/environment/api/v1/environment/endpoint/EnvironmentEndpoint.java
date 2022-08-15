@@ -41,7 +41,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnviro
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -321,7 +321,7 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.VERTICAL_SCALING, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "verticalScalingByEnvironmentNameV1")
-    void verticalScalingByName(@PathParam("name") String name, @Valid FreeIPAVerticalScaleRequest updateRequest);
+    void verticalScalingByName(@PathParam("name") String name, @Valid VerticalScaleRequest updateRequest);
 
     @PUT
     @Path("/crn/{crn}/vertical_scaling")
@@ -329,7 +329,7 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.VERTICAL_SCALING, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "verticalScalingByEnvironmentCrnV1")
     void verticalScalingByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
-        @Valid FreeIPAVerticalScaleRequest updateRequest);
+        @Valid VerticalScaleRequest updateRequest);
 
     @GET
     @Path("/crn/{crn}/upgrade_ccm_available")

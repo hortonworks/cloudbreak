@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale;
 
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_VERTICALSCALED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_VERTICALSCALING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALING;
 
 import java.util.Optional;
 import java.util.Set;
@@ -19,11 +19,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.te
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
 @Service
 public class CoreVerticalScaleService {
@@ -40,19 +39,19 @@ public class CoreVerticalScaleService {
     private CloudbreakFlowMessageService flowMessageService;
 
     public void verticalScale(Long stackId) {
-        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), STACK_VERTICALSCALING);
+        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_VERTICALSCALING);
     }
 
-    public void finishVerticalScale(Long stackId, Long clusterId) {
-        Cluster cluster = clusterService.getCluster(clusterId);
-        finishVerticalScale(stackId, cluster);
+    public void finishVerticalScale(Long stackId) {
+        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.STOPPED);
+        flowMessageService.fireEventAndLog(stackId, Status.STOPPED.name(), CLUSTER_VERTICALSCALED);
     }
 
     public void updateTemplateWithVerticalScaleInformation(Long stackId, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
-        Optional<InstanceGroup> optionalGroup = instanceGroupService
-                .findOneByStackIdAndGroupNameWithTemplate(stackId, stackVerticalScaleV4Request.getGroup());
+        Optional<InstanceGroupView> optionalGroup = instanceGroupService
+                .findInstanceGroupViewByStackIdAndGroupName(stackId, stackVerticalScaleV4Request.getGroup());
         if (optionalGroup.isPresent() && stackVerticalScaleV4Request.getTemplate() != null) {
-            InstanceGroup group = optionalGroup.get();
+            InstanceGroupView group = optionalGroup.get();
             Template template = templateService.get(group.getTemplate().getId());
             InstanceTemplateV4Request requestedTemplate = stackVerticalScaleV4Request.getTemplate();
             String instanceType = requestedTemplate.getInstanceType();
@@ -76,11 +75,5 @@ public class CoreVerticalScaleService {
             }
             templateService.savePure(template);
         }
-    }
-
-    private void finishVerticalScale(Long stackId, Cluster cluster) {
-        clusterService.updateCluster(cluster);
-        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.STOPPED);
-        flowMessageService.fireEventAndLog(stackId, Status.STOPPED.name(), STACK_VERTICALSCALED);
     }
 }

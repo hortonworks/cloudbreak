@@ -95,7 +95,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.VERTICAL_SCALE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
 import static java.util.Collections.newSetFromMap;
 import static java.util.Optional.ofNullable;
@@ -822,7 +822,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             builder.addEntitlements(createEntitlement(CDP_CCM_V2_JUMPGATE));
         }
         if (verticalScaleEnabled) {
-            builder.addEntitlements(createEntitlement(VERTICAL_SCALE));
+            builder.addEntitlements(createEntitlement(CDP_CB_AWS_VERTICAL_SCALE));
         }
         if (ccmV2UseOneWayTls) {
             builder.addEntitlements(createEntitlement(CDP_CCM_V2_USE_ONE_WAY_TLS));

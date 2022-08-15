@@ -111,6 +111,7 @@ public interface PlatformParameters {
         specialParameters.put(PlatformParametersConsts.STARTSTOP_SUPPORTED, Boolean.TRUE);
         specialParameters.put(PlatformParametersConsts.REGIONS_SUPPORTED, Boolean.TRUE);
         specialParameters.put(PlatformParametersConsts.VOLUME_ATTACHMENT_SUPPORTED, Boolean.TRUE);
+        specialParameters.put(PlatformParametersConsts.VERTICAL_SCALING_SUPPORTED, Boolean.TRUE);
         return new SpecialParameters(specialParameters);
     }
 

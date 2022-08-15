@@ -9,23 +9,23 @@ import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
-import com.sequenceiq.datalake.flow.verticalscale.event.DataLakeVerticalScaleStateSelectors;
+import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleStateSelectors;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
 
-abstract class AbstractDataLakeVerticalScaleAction<P extends ResourceCrnPayload>
-        extends AbstractAction<DataLakeVerticalScaleState, DataLakeVerticalScaleStateSelectors, CommonContext, P> {
+abstract class AbstractDatalakeVerticalScaleAction<P extends ResourceCrnPayload>
+        extends AbstractAction<DatalakeVerticalScaleState, DatalakeVerticalScaleStateSelectors, CommonContext, P> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDataLakeVerticalScaleAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDatalakeVerticalScaleAction.class);
 
-    protected AbstractDataLakeVerticalScaleAction(Class<P> payloadClass) {
+    protected AbstractDatalakeVerticalScaleAction(Class<P> payloadClass) {
         super(payloadClass);
     }
 
     @Override
-    protected CommonContext createFlowContext(FlowParameters flowParameters, StateContext<DataLakeVerticalScaleState,
-            DataLakeVerticalScaleStateSelectors> stateContext, P payload) {
+    protected CommonContext createFlowContext(FlowParameters flowParameters, StateContext<DatalakeVerticalScaleState,
+            DatalakeVerticalScaleStateSelectors> stateContext, P payload) {
         return new CommonContext(flowParameters);
     }
 

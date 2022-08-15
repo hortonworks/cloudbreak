@@ -26,8 +26,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaReq
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
@@ -215,15 +215,15 @@ public class FreeIpaService {
         }
     }
 
-    public FreeIPAVerticalScaleResponse verticalScale(String environmentCrn, FreeIPAVerticalScaleRequest freeIPAVerticalScaleRequest) {
+    public VerticalScaleResponse verticalScale(String environmentCrn, VerticalScaleRequest freeIPAVerticalScaleRequest) {
         try {
             LOGGER.debug("Calling FreeIPA CCM upgrade for environment {}", environmentCrn);
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> freeIpaV1Endpoint.putVerticalScalingFreeIPAV1ByEnvironmentCrn(environmentCrn, freeIPAVerticalScaleRequest));
+                    () -> freeIpaV1Endpoint.putVerticalScalingFreeIpaV1ByEnvironmentCrn(environmentCrn, freeIPAVerticalScaleRequest));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error("Failed to upgrade CCM on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
+            LOGGER.error("Failed to vertical scale on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }

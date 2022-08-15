@@ -2,7 +2,7 @@ package com.sequenceiq.datalake.flow.verticalscale.event;
 
 import com.sequenceiq.flow.core.FlowEvent;
 
-public enum DataLakeVerticalScaleHandlerSelectors implements FlowEvent {
+public enum DatalakeVerticalScaleHandlerSelectors implements FlowEvent {
 
     VERTICAL_SCALING_DATALAKE_VALIDATION_HANDLER,
     VERTICAL_SCALING_DATALAKE_HANDLER;

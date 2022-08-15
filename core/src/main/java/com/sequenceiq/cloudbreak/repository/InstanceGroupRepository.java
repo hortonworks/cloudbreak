@@ -132,4 +132,5 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
 
     @Query("SELECT i FROM InstanceGroup i JOIN FETCH i.template WHERE i.stack.id = :stackId AND i.groupName = :groupName")
     Optional<InstanceGroup> getByStackIdAndInstanceGroupNameWithFetchTemplate(@Param("stackId") Long stackId, @Param("groupName") String groupName);
+
 }

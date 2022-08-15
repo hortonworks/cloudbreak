@@ -4,28 +4,28 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 
 import reactor.rx.Promise;
 
 @JsonDeserialize(builder = EnvironmentVerticalScaleEvent.Builder.class)
 public class EnvironmentVerticalScaleEvent extends BaseNamedFlowEvent {
 
-    private final FreeIPAVerticalScaleRequest freeIPAVerticalScaleRequest;
+    private final VerticalScaleRequest freeIPAVerticalScaleRequest;
 
     public EnvironmentVerticalScaleEvent(String selector, Long resourceId, String resourceName, String resourceCrn,
-            FreeIPAVerticalScaleRequest freeIPAVerticalScaleRequest) {
+            VerticalScaleRequest freeIPAVerticalScaleRequest) {
         super(selector, resourceId, resourceName, resourceCrn);
         this.freeIPAVerticalScaleRequest = freeIPAVerticalScaleRequest;
     }
 
     public EnvironmentVerticalScaleEvent(String selector, Long resourceId, Promise<AcceptResult> accepted, String resourceName,
-            String resourceCrn, FreeIPAVerticalScaleRequest freeIPAVerticalScaleRequest) {
+            String resourceCrn, VerticalScaleRequest freeIPAVerticalScaleRequest) {
         super(selector, resourceId, accepted, resourceName, resourceCrn);
         this.freeIPAVerticalScaleRequest = freeIPAVerticalScaleRequest;
     }
 
-    public FreeIPAVerticalScaleRequest getFreeIPAVerticalScaleRequest() {
+    public VerticalScaleRequest getFreeIPAVerticalScaleRequest() {
         return freeIPAVerticalScaleRequest;
     }
 
@@ -45,7 +45,7 @@ public class EnvironmentVerticalScaleEvent extends BaseNamedFlowEvent {
 
         private Promise<AcceptResult> accepted;
 
-        private FreeIPAVerticalScaleRequest freeIPAVerticalScaleRequest;
+        private VerticalScaleRequest freeIPAVerticalScaleRequest;
 
         private Builder() {
         }
@@ -75,7 +75,7 @@ public class EnvironmentVerticalScaleEvent extends BaseNamedFlowEvent {
             return this;
         }
 
-        public Builder withFreeIPAVerticalScaleRequest(FreeIPAVerticalScaleRequest freeIPAVerticalScaleRequest) {
+        public Builder withFreeIPAVerticalScaleRequest(VerticalScaleRequest freeIPAVerticalScaleRequest) {
             this.freeIPAVerticalScaleRequest = freeIPAVerticalScaleRequest;
             return this;
         }

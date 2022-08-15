@@ -15,7 +15,6 @@ import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPStructuredEventV1Controller;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPStructuredEventFilter;
-import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 import com.sequenceiq.freeipa.api.FreeIpaApi;
 import com.sequenceiq.freeipa.controller.ClientTestV1Controller;
@@ -61,7 +60,6 @@ public class EndpointConfig extends ResourceConfig {
             CDPStructuredEventV1Controller.class,
             UtilV1Controller.class,
             FreeIpaUpgradeV1Controller.class,
-            FlowController.class,
             RecipeV1Controller.class);
 
     @Value("${info.app.version:unspecified}")

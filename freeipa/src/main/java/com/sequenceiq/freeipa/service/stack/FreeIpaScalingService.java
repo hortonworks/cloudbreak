@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.RUNNING;
-import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIPAVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +20,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.ScaleRequestBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.ScalingPath;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleRequest;
@@ -34,7 +34,7 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
-import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIPAVerticalScalingTriggerEvent;
+import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScalingTriggerEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
@@ -64,8 +64,9 @@ public class FreeIpaScalingService {
         return triggerUpscale(request, stack, originalAvailabilityType);
     }
 
-    public FreeIPAVerticalScaleResponse verticalScale(String accountId, String environmentCrn, FreeIPAVerticalScaleRequest request) {
+    public VerticalScaleResponse verticalScale(String accountId, String environmentCrn, VerticalScaleRequest request) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
+        LOGGER.debug("{} request received for vertical scaling stack {}", request, stack.getResourceCrn());
         validationService.validateStackForVerticalUpscale(stack, request);
         return triggerVerticalScale(request, stack);
     }
@@ -102,13 +103,13 @@ public class FreeIpaScalingService {
         }
     }
 
-    private FreeIPAVerticalScaleResponse triggerVerticalScale(FreeIPAVerticalScaleRequest request, Stack stack) {
+    private VerticalScaleResponse triggerVerticalScale(VerticalScaleRequest request, Stack stack) {
         try {
             String selector = STACK_VERTICALSCALE_EVENT.event();
-            FreeIPAVerticalScalingTriggerEvent event = new FreeIPAVerticalScalingTriggerEvent(selector, stack.getId(), request);
+            FreeIpaVerticalScalingTriggerEvent event = new FreeIpaVerticalScalingTriggerEvent(selector, stack.getId(), request);
             LOGGER.info("Trigger vertical scale flow with event: {}", event);
             FlowIdentifier flowIdentifier = flowManager.notify(STACK_VERTICALSCALE_EVENT.event(), event);
-            FreeIPAVerticalScaleResponse response = new FreeIPAVerticalScaleResponse();
+            VerticalScaleResponse response = new VerticalScaleResponse();
             response.setRequest(request);
             response.setFlowIdentifier(flowIdentifier);
             return response;

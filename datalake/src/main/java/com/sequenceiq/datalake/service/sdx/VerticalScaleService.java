@@ -12,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.dyngr.core.AttemptResult;
-import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -23,8 +21,8 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessage
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.flow.verticalscale.event.DataLakeVerticalScaleEvent;
-import com.sequenceiq.datalake.flow.verticalscale.event.DataLakeVerticalScaleStateSelectors;
+import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleEvent;
+import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleStateSelectors;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -72,23 +70,17 @@ public class VerticalScaleService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    private AttemptResult<StackV4Response> sdxCreationFailed(String statusReason) {
-        String errorMessage = "Data Lake creation failed: " + statusReason;
-        LOGGER.error(errorMessage);
-        return AttemptResults.breakFor(errorMessage);
-    }
-
     public FlowIdentifier verticalScaleDatalake(SdxCluster sdxCluster, StackVerticalScaleV4Request request, String userCrn) {
         MDCBuilder.buildMdcContext(sdxCluster);
         LOGGER.info("Environment Vertical Scale flow triggered for environment {}", sdxCluster.getName());
-        DataLakeVerticalScaleEvent environmentVerticalScaleEvent = DataLakeVerticalScaleEvent.builder()
+        DatalakeVerticalScaleEvent environmentVerticalScaleEvent = DatalakeVerticalScaleEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceCrn(sdxCluster.getResourceCrn())
                 .withResourceId(sdxCluster.getId())
                 .withResourceName(sdxCluster.getName())
                 .withVerticalScaleRequest(request)
                 .withStackCrn(sdxCluster.getStackCrn())
-                .withSelector(DataLakeVerticalScaleStateSelectors.VERTICAL_SCALING_DATALAKE_VALIDATION_EVENT.selector())
+                .withSelector(DatalakeVerticalScaleStateSelectors.VERTICAL_SCALING_DATALAKE_VALIDATION_EVENT.selector())
                 .build();
         FlowIdentifier flowIdentifier = eventSender.sendEvent(environmentVerticalScaleEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
         LOGGER.debug("Environment Vertical Scale flow trigger event sent for environment {}", sdxCluster.getName());
@@ -108,7 +100,7 @@ public class VerticalScaleService {
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () ->
                     stackV4Endpoint.putVerticalScalingByNameInternal(0L, sdxCluster.getClusterName(), initiatorUserCrn, request));
-            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS,
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS,
                     "Data Lake vertical scale in progress", sdxCluster);
         } catch (NotFoundException e) {
             LOGGER.info("Cannot find stack on cloudbreak side {}", sdxCluster.getClusterName());

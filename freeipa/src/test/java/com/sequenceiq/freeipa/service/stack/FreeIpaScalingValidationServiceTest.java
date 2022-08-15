@@ -12,17 +12,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.ScalingPath;
 import com.sequenceiq.freeipa.configuration.AllowedScalingPaths;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -44,6 +49,76 @@ class FreeIpaScalingValidationServiceTest {
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.validateStackForUpscale(Set.of(), stack, null));
         assertEquals("There are no instances available for scaling!", exception.getMessage());
+    }
+
+    @Test
+    public void testVerticalScaleIfValidationFailsBecauseStackNotStoppedThenErrorThrown() {
+        Stack stack = mock(Stack.class);
+        VerticalScaleRequest request = createVerticalScaleRequest();
+        when(stack.isStopped()).thenReturn(false);
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.validateStackForVerticalUpscale(stack, request));
+
+        assertEquals(exception.getMessage(), "Vertical scaling currently only available for FreeIPA when it is stopped");
+    }
+
+    @Test
+    public void testVerticalScaleIfValidationFailsBecauseStackNotSupportedPlatformThenErrorThrown() {
+        Stack stack = mock(Stack.class);
+        VerticalScaleRequest request = createVerticalScaleRequest();
+        ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of("AWS"));
+        when(stack.isStopped()).thenReturn(true);
+        when(stack.getCloudPlatform()).thenReturn("AWS1");
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.validateStackForVerticalUpscale(stack, request));
+
+        assertEquals(exception.getMessage(), "Vertical scaling is not supported on AWS1 cloud platform");
+    }
+
+    @Test
+    public void testVerticalScaleIfValidationFailsBecauseRequestDoesNotContainTemplateThenErrorThrown() {
+        Stack stack = mock(Stack.class);
+        VerticalScaleRequest request = createVerticalScaleRequest();
+        request.setTemplate(null);
+        ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of("AWS"));
+        when(stack.isStopped()).thenReturn(true);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.validateStackForVerticalUpscale(stack, request));
+
+        assertEquals(exception.getMessage(), "Define an exiting instancetype to vertically scale the AWS FreeIPA.");
+    }
+
+    @Test
+    public void testVerticalScaleIfValidationFailsBecauseRequestDoesNotContainInstanceTypeThenErrorThrown() {
+        Stack stack = mock(Stack.class);
+        VerticalScaleRequest request = createVerticalScaleRequest();
+        request.getTemplate().setInstanceType(null);
+        ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of("AWS"));
+        when(stack.isStopped()).thenReturn(true);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.validateStackForVerticalUpscale(stack, request));
+
+        assertEquals(exception.getMessage(), "Define an exiting instancetype to vertically scale the AWS FreeIPA.");
+    }
+
+    @Test
+    public void testVerticalScaleIfValidationFailsBecauseRequestContainDiskThenErrorThrown() {
+        Stack stack = mock(Stack.class);
+        VerticalScaleRequest request = createVerticalScaleRequest();
+        request.getTemplate().setAttachedVolumes(Set.of(new VolumeRequest()));
+        ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of("AWS"));
+        when(stack.isStopped()).thenReturn(true);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.validateStackForVerticalUpscale(stack, request));
+
+        assertEquals(exception.getMessage(), "Only instance type modification is supported on AWS FreeIPA.");
+    }
+
+    private VerticalScaleRequest createVerticalScaleRequest() {
+        VerticalScaleRequest request = new VerticalScaleRequest();
+        request.setGroup("master");
+        InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
+        instanceTemplateRequest.setInstanceType("ec2bug");
+        request.setTemplate(instanceTemplateRequest);
+        return request;
     }
 
     @Test

@@ -35,7 +35,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.service.FlowCancelService;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 
 import reactor.bus.Event;
 import reactor.rx.Promise;
@@ -184,7 +184,7 @@ public class EnvironmentReactorFlowManager {
         return flowIdentifier;
     }
 
-    public FlowIdentifier triggerVerticalScaleFlow(EnvironmentDto environment, String userCrn, FreeIPAVerticalScaleRequest updateRequest) {
+    public FlowIdentifier triggerVerticalScaleFlow(EnvironmentDto environment, String userCrn, VerticalScaleRequest updateRequest) {
         LOGGER.info("Environment Vertical Scale flow triggered for environment {}", environment.getName());
         EnvironmentVerticalScaleEvent environmentVerticalScaleEvent = EnvironmentVerticalScaleEvent.builder()
                 .withAccepted(new Promise<>())

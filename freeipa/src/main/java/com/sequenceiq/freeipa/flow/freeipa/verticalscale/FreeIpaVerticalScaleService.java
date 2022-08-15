@@ -6,6 +6,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
@@ -15,15 +17,17 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.Template;
-import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIPAVerticalScaleRequest;
-import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIPAVerticalScaleResult;
+import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleRequest;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 import com.sequenceiq.freeipa.service.stack.instance.TemplateService;
 
 @Service
-public class FreeIPAVerticalScaleService {
+public class FreeIpaVerticalScaleService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaVerticalScaleService.class);
 
     @Inject
     private InstanceGroupService instanceGroupService;
@@ -32,7 +36,7 @@ public class FreeIPAVerticalScaleService {
     private TemplateService templateService;
 
     public void updateTemplateWithVerticalScaleInformation(Long stackId,
-            com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest request) {
+            VerticalScaleRequest request) {
         Optional<InstanceGroup> optionalGroup = instanceGroupService
                 .getByStackIdAndInstanceGroupNameWithFetchTemplate(stackId, request.getGroup());
         if (optionalGroup.isPresent() && request.getTemplate() != null) {
@@ -41,10 +45,12 @@ public class FreeIPAVerticalScaleService {
             InstanceTemplateRequest instanceTemplateRequest = request.getTemplate();
             String instanceType = instanceTemplateRequest.getInstanceType();
             if (!Strings.isNullOrEmpty(instanceType)) {
+                LOGGER.info("Set instancetype to {} in group {} on stackid {}", instanceType, template.getName(), stackId);
                 template.setInstanceType(instanceType);
             }
             Set<VolumeRequest> requestedAttachedVolumes = instanceTemplateRequest.getAttachedVolumes();
             if (requestedAttachedVolumes != null) {
+                LOGGER.info("Set volume to {} in group {} on stackid {}", requestedAttachedVolumes, template.getName(), stackId);
                 VolumeRequest requestedAttachedVolume = requestedAttachedVolumes.iterator().next();
                 template.setVolumeCount(requestedAttachedVolume.getCount());
                 template.setVolumeSize(requestedAttachedVolume.getSize());
@@ -54,22 +60,22 @@ public class FreeIPAVerticalScaleService {
         }
     }
 
-    public List<CloudResourceStatus> verticalScale(AuthenticatedContext ac, FreeIPAVerticalScaleRequest<FreeIPAVerticalScaleResult> request,
+    public List<CloudResourceStatus> verticalScale(AuthenticatedContext ac, FreeIpaVerticalScaleRequest request,
             CloudConnector connector) throws Exception {
         CloudStack cloudStack = request.getCloudStack();
         try {
             return connector.resources().update(ac, cloudStack, request.getResourceList());
         } catch (Exception e) {
-            return handleExceptionAndRetryUpdate(request, connector, ac, cloudStack, e);
+            LOGGER.info("Exception occured on update process retrying the operation. Error was: {}", e.getMessage(), e);
+            return handleExceptionAndRetryUpdate(request, connector, ac, cloudStack);
         }
     }
 
     private List<CloudResourceStatus> handleExceptionAndRetryUpdate(
-            FreeIPAVerticalScaleRequest<FreeIPAVerticalScaleResult> request,
+            FreeIpaVerticalScaleRequest request,
             CloudConnector connector,
             AuthenticatedContext ac,
-            CloudStack cloudStack,
-            Exception e) throws Exception {
+            CloudStack cloudStack) throws Exception {
         return connector.resources().update(ac, cloudStack, request.getResourceList());
     }
 }

@@ -25,16 +25,16 @@ import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.AbstractCommonChainAction;
-import com.sequenceiq.freeipa.flow.freeipa.verticalscale.FreeIPAVerticalScaleState;
-import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIPAVerticalScaleEvent;
-import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIPAVerticalScaleFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.verticalscale.FreeIpaVerticalScaleState;
+import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent;
+import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
-public abstract class AbstractFreeIPAVerticalScaleAction<P extends Payload>
-        extends AbstractCommonChainAction<FreeIPAVerticalScaleState, FreeIPAVerticalScaleEvent, StackContext, P> {
+public abstract class AbstractFreeIpaVerticalScaleAction<P extends Payload>
+        extends AbstractCommonChainAction<FreeIpaVerticalScaleState, FreeIpaVerticalScaleEvent, StackContext, P> {
 
     @Inject
     private StackService stackService;
@@ -57,12 +57,12 @@ public abstract class AbstractFreeIPAVerticalScaleAction<P extends Payload>
     @Inject
     private InstanceMetaDataToCloudInstanceConverter instanceConverter;
 
-    protected AbstractFreeIPAVerticalScaleAction(Class<P> payloadClass) {
+    protected AbstractFreeIpaVerticalScaleAction(Class<P> payloadClass) {
         super(payloadClass);
     }
 
     @Override
-    protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<FreeIPAVerticalScaleState, FreeIPAVerticalScaleEvent> stateContext,
+    protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<FreeIpaVerticalScaleState, FreeIpaVerticalScaleEvent> stateContext,
             P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
@@ -85,7 +85,7 @@ public abstract class AbstractFreeIPAVerticalScaleAction<P extends Payload>
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackContext> flowContext, Exception ex) {
-        return new FreeIPAVerticalScaleFailureEvent(
+        return new FreeIpaVerticalScaleFailureEvent(
                 payload.getResourceId(),
                 "Unexpected error during vertical scale action",
                 Set.of(),

@@ -60,6 +60,8 @@ public class ClusterUseCaseMapper {
                 UsageProto.CDPClusterStatus.Value.UPGRADE_PREPARE_STARTED);
         firstStepUseCaseMap.put(Pair.of("UpgradeCcmFlowEventChainFactory", "UpgradeCcmFlowConfig"),
                 UsageProto.CDPClusterStatus.Value.CCM_UPGRADE_STARTED);
+        firstStepUseCaseMap.put(Pair.of("", "CoreVerticalScaleFlowConfig"),
+                UsageProto.CDPClusterStatus.Value.VERTICAL_SCALE_STARTED);
     }
 
     // At the moment we need to introduce a complex logic to figure out the use case
@@ -149,6 +151,11 @@ public class ClusterUseCaseMapper {
                     useCase = getClusterStatus(nextFlowState, "UPDATE_USERDATA_FINISHED_STATE",
                             UsageProto.CDPClusterStatus.Value.CCM_UPGRADE_FINISHED,
                             UsageProto.CDPClusterStatus.Value.CCM_UPGRADE_FAILED);
+                    break;
+                case "CoreVerticalScaleFlowConfig":
+                    useCase = getClusterStatus(nextFlowState, "STACK_VERTICALSCALE_FINISHED_STATE",
+                            UsageProto.CDPClusterStatus.Value.VERTICAL_SCALE_FINISHED,
+                            UsageProto.CDPClusterStatus.Value.VERTICAL_SCALE_FAILED);
                     break;
                 case "BackupDatalakeDatabaseFlowEventChainFactory":
                     useCase = getClusterStatus(nextFlowState, "DATABASE_BACKUP_FINISHED_STATE",
