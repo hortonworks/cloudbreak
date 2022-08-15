@@ -54,7 +54,7 @@ public class CmTemplateProcessorTest {
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         configs.add(new ApiClusterTemplateConfig().name("hive_metastore_database_type").variable("hive-hive_metastore_database_type"));
 
-        underTest.addServiceConfigs("HIVE", List.of("HIVEMETASTORE"), configs);
+        underTest.addServiceConfigs("HIVE", configs);
 
         ApiClusterTemplateService service = underTest.getTemplate().getServices().stream().filter(srv -> "HIVE".equals(srv.getServiceType())).findAny().get();
         List<ApiClusterTemplateConfig> serviceConfigs = service.getServiceConfigs();
@@ -70,7 +70,7 @@ public class CmTemplateProcessorTest {
         configs.add(new ApiClusterTemplateConfig().name("redaction_policy_enabled").value("true"));
         configs.add(new ApiClusterTemplateConfig().name("not_present_in_template").value("some_value"));
 
-        underTest.addServiceConfigs("HDFS", List.of("NAMENODE"), configs);
+        underTest.addServiceConfigs("HDFS", configs);
 
         ApiClusterTemplateService service = underTest.getTemplate().getServices().stream().filter(srv -> "HDFS".equals(srv.getServiceType())).findAny().get();
         List<ApiClusterTemplateConfig> serviceConfigs = service.getServiceConfigs();
@@ -88,7 +88,7 @@ public class CmTemplateProcessorTest {
                             .name("hive_service_config_safety_valve")
                             .value("<property><name>testkey</name><value>testvalue</value></property>"));
 
-        underTest.addServiceConfigs("HIVE", List.of("GATEWAY", "HIVEMETASTORE"), configs);
+        underTest.addServiceConfigs("HIVE", configs);
 
         ApiClusterTemplateService service = underTest.getTemplate().getServices().stream().filter(srv -> "HIVE".equals(srv.getServiceType())).findAny().get();
         List<ApiClusterTemplateConfig> serviceConfigs = service.getServiceConfigs();

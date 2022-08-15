@@ -1,7 +1,7 @@
 {
-  "cdhVersion": "7.0.1",
+  "cdhVersion": "7.2.16",
   "displayName": "CDP HA Streaming Cluster",
-  "cmVersion": "7.0.1",
+  "cmVersion": "7.7.1",
   "services": [
     {
       "refName": "streams_messaging_manager",

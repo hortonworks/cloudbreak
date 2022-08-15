@@ -23,8 +23,7 @@ public class CmTemplateComponentConfigProviderProcessor {
             cmTemplateProcessor.extendTemplateWithAdditionalServices(provider.getAdditionalServices(cmTemplateProcessor, template));
             if (provider.isConfigurationNeeded(cmTemplateProcessor, template)) {
                 LOGGER.info("{} is configuring", provider.getClass().getSimpleName());
-                cmTemplateProcessor.addServiceConfigs(provider.getServiceType(), provider.getRoleTypes(),
-                        provider.getServiceConfigs(cmTemplateProcessor, template));
+                cmTemplateProcessor.addServiceConfigs(provider.getServiceType(), provider.getServiceConfigs(cmTemplateProcessor, template));
                 cmTemplateProcessor.addVariables(provider.getServiceConfigVariables(template));
                 cmTemplateProcessor.addRoleConfigs(provider.getServiceType(), provider.getRoleConfigs(cmTemplateProcessor, template));
                 cmTemplateProcessor.addVariables(provider.getRoleConfigVariables(cmTemplateProcessor, template));

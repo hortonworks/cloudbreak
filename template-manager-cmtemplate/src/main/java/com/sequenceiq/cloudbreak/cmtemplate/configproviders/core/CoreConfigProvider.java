@@ -1,14 +1,19 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.core;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionOlderThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_DEFAULTFS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS_REF_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS_SERVICE_REF_NAME;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SITE_SAFETY_VALVE;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.STORAGEOPERATIONS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles.HDFS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles.NAMENODE;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,12 +22,15 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
@@ -33,12 +41,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Component
 public class CoreConfigProvider extends AbstractRoleConfigProvider {
-
-    public static final String CORE_DEFAULTFS = "core_defaultfs";
-
-    private static final String CORE_SITE_SAFETY_VALVE = "core_site_safety_valve";
-
-    private static final String HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD = "hadoop.security.groups.cache.background.reload";
+    private static final Logger LOGGER = LoggerFactory.getLogger(CoreConfigProvider.class);
 
     @Inject
     private S3ConfigProvider s3ConfigProvider;
@@ -62,6 +65,7 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
         hdfsCoreSiteSafetyValveValue.append(ConfigUtils.getSafetyValveProperty(HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD, "true"));
 
         if (!hdfsCoreSiteSafetyValveValue.toString().isEmpty()) {
+            LOGGER.info("Adding '{}' to the cluster template config.", CORE_SITE_SAFETY_VALVE);
             apiClusterTemplateConfigs.add(config(CORE_SITE_SAFETY_VALVE, hdfsCoreSiteSafetyValveValue.toString()));
         }
 
@@ -72,7 +76,8 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
     public Map<String, ApiClusterTemplateService> getAdditionalServices(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         if (isConfigurationNeeded(cmTemplateProcessor, source)
                 && cmTemplateProcessor.getServiceByType(CORE_SETTINGS).isEmpty()) {
-            ApiClusterTemplateService coreSettings = createBaseCoreSettingsService();
+            LOGGER.info("Adding '{}' as additional service.", CORE_SETTINGS);
+            ApiClusterTemplateService coreSettings = createBaseCoreSettingsService(cmTemplateProcessor);
             Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
             return hostgroupViews.stream()
                     .filter(hg -> InstanceGroupType.GATEWAY.equals(hg.getInstanceGroupType()))
@@ -81,16 +86,26 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
         return Map.of();
     }
 
-    private ApiClusterTemplateService createBaseCoreSettingsService() {
+    private ApiClusterTemplateService createBaseCoreSettingsService(CmTemplateProcessor cmTemplateProcessor) {
         ApiClusterTemplateService coreSettings = new ApiClusterTemplateService()
                 .serviceType(CORE_SETTINGS)
                 .refName(CORE_SETTINGS_SERVICE_REF_NAME);
-        ApiClusterTemplateRoleConfigGroup coreSettingsRole = new ApiClusterTemplateRoleConfigGroup()
-                .roleType(STORAGEOPERATIONS)
-                .base(true)
-                .refName(CORE_SETTINGS_REF_NAME);
-        coreSettings.roleConfigGroups(List.of(coreSettingsRole));
+        if (needToAddStorageOperationsRole(cmTemplateProcessor)) {
+            LOGGER.info("CM version is older then 7.7.1, adding '{}' role to '{}' service.", STORAGEOPERATIONS, CORE_SETTINGS);
+            ApiClusterTemplateRoleConfigGroup coreSettingsRole = new ApiClusterTemplateRoleConfigGroup()
+                    .roleType(STORAGEOPERATIONS)
+                    .base(true)
+                    .refName(CORE_SETTINGS_REF_NAME);
+            coreSettings.roleConfigGroups(List.of(coreSettingsRole));
+        } else {
+            coreSettings.roleConfigGroups(new LinkedList<>());
+        }
         return coreSettings;
+    }
+
+    private boolean needToAddStorageOperationsRole(CmTemplateProcessor cmTemplateProcessor) {
+        return cmTemplateProcessor.getCmVersion().isPresent()
+                && isVersionOlderThanLimited(cmTemplateProcessor.getCmVersion().get(), CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_7_1);
     }
 
     @Override

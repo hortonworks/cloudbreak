@@ -1,7 +1,7 @@
 {
-  "cdhVersion": "7.0.1",
-  "displayName": "CDP HA Streaming Cluster",
-  "cmVersion": "7.0.1",
+  "cdhVersion": "7.2.16",
+  "displayName": "testcluster",
+  "cmVersion": "7.7.1",
   "services": [
     {
       "refName": "streams_messaging_manager",
@@ -74,6 +74,32 @@
           "base": true
         }
       ]
+    },
+    {
+      "refName": "core_settings",
+      "serviceType": "CORE_SETTINGS",
+      "serviceConfigs": [
+        {
+          "name": "core_defaultfs",
+          "value": "s3a://cloudbreak-bucket/kafka"
+        },
+        {
+          "name": "core_site_safety_valve",
+          "value": "<property><name>hadoop.security.groups.cache.background.reload</name><value>true</value></property>"
+        }
+      ],
+      "roleConfigGroups": []
+    },
+    {
+      "refName": "stub_dfs",
+      "serviceType": "STUB_DFS",
+      "roleConfigGroups": [
+        {
+          "refName": "stub_dfs-STORAGEOPERATIONS-BASE",
+          "roleType": "STORAGEOPERATIONS",
+          "base": true
+        }
+      ]
     }
   ],
   "hostTemplates": [
@@ -83,7 +109,8 @@
       "roleConfigGroupsRefNames": [
         "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
         "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
-        "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE"
+        "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE",
+        "stub_dfs-STORAGEOPERATIONS-BASE"
       ]
     },
     {
@@ -101,5 +128,8 @@
         "zookeeper-SERVER-BASE"
       ]
     }
-  ]
+  ],
+  "instantiator": {
+    "clusterName": "testcluster"
+  }
 }
