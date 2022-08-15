@@ -30,6 +30,7 @@ import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxStatusRepository;
+import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
 
 @Service
 public class SdxStatusService {
@@ -53,6 +54,9 @@ public class SdxStatusService {
     @Inject
     private Clock clock;
 
+    @Inject
+    private SdxNotificationService sdxNotificationService;
+
     public void setStatusForDatalakeAndNotify(DatalakeStatusEnum status, String statusReason, SdxCluster sdxCluster) {
         setStatusForDatalake(status, statusReason, sdxCluster);
         eventSenderService.sendEventAndNotification(sdxCluster, status.getDefaultResourceEvent());
@@ -70,6 +74,7 @@ public class SdxStatusService {
         return sdxClusterRepository.findById(datalakeId).map(cluster -> {
             setStatusForDatalake(status, statusReason, cluster);
             eventSenderService.sendEventAndNotification(cluster, status.getDefaultResourceEvent(), messageArgs);
+            sdxNotificationService.send(status.getDefaultResourceEvent(), messageArgs, cluster);
             return cluster;
         }).orElseThrow(() -> new NotFoundException("SdxCluster was not found with ID: " + datalakeId));
     }
@@ -77,6 +82,7 @@ public class SdxStatusService {
     public void setStatusForDatalakeAndNotify(DatalakeStatusEnum status, ResourceEvent event, String statusReason,
             SdxCluster sdxCluster) {
         setStatusForDatalake(status, statusReason, sdxCluster);
+        sdxNotificationService.send(event, sdxCluster);
         eventSenderService.sendEventAndNotification(sdxCluster, event);
     }
 
@@ -84,12 +90,16 @@ public class SdxStatusService {
             SdxCluster sdxCluster) {
         setStatusForDatalake(status, statusReason, sdxCluster);
         eventSenderService.sendEventAndNotification(sdxCluster, event, messageArgs);
+        sdxNotificationService.send(event, messageArgs, sdxCluster);
+        eventSenderService.sendEventAndNotification(sdxCluster, event);
     }
 
     public SdxCluster setStatusForDatalakeAndNotify(DatalakeStatusEnum status, ResourceEvent event, String statusReason, Long datalakeId) {
         return sdxClusterRepository.findById(datalakeId).map(cluster -> {
             setStatusForDatalake(status, statusReason, cluster);
             eventSenderService.sendEventAndNotification(cluster, event);
+            sdxNotificationService.send(event, Set.of(), cluster);
+            eventSenderService.sendEventAndNotification(cluster, event, Set.of(statusReason));
             return cluster;
         }).orElseThrow(() -> new NotFoundException("SdxCluster was not found with ID: " + datalakeId));
     }

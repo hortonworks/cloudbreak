@@ -20,6 +20,7 @@ import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmStateSelectors.UPGRADE_CCM_UPGRADE_STACK_EVENT;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -129,14 +130,14 @@ public class SdxReactorFlowManager {
                 skipOptions), newSdxCluster.getClusterName());
     }
 
-    public FlowIdentifier triggerSdxResizeRecovery(SdxCluster oldSdxCluster, SdxCluster newSdxCluster) {
+    public FlowIdentifier triggerSdxResizeRecovery(SdxCluster oldSdxCluster, Optional<SdxCluster> newSdxCluster) {
         LOGGER.info("Triggering recovery for failed SDX resize with original cluster: {} and resized cluster: {}",
                 oldSdxCluster, newSdxCluster);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         eventSenderService.sendEventAndNotification(oldSdxCluster, ResourceEvent.DATALAKE_RECOVERY_STARTED);
         return notify(
                 SDX_RESIZE_RECOVERY_FLOW_CHAIN_START_EVENT,
-                new DatalakeResizeRecoveryFlowChainStartEvent(oldSdxCluster, newSdxCluster, userId),
+                new DatalakeResizeRecoveryFlowChainStartEvent(oldSdxCluster, newSdxCluster.orElse(null), userId),
                 oldSdxCluster.getClusterName()
         );
     }
