@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 import java.util.List;
 import java.util.StringJoiner;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.CloudStackRequest;
@@ -16,11 +17,12 @@ public class CoreVerticalScaleRequest<T> extends CloudStackRequest<T> {
 
     private final StackVerticalScaleV4Request stackVerticalScaleV4Request;
 
-    public CoreVerticalScaleRequest(CloudContext cloudContext,
-                                    CloudCredential cloudCredential,
-                                    CloudStack stack,
-                                    List<CloudResource> resourceList,
-                                    StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+    public CoreVerticalScaleRequest(
+            @JsonProperty("cloudContext") CloudContext cloudContext,
+            @JsonProperty("cloudCredential") CloudCredential cloudCredential,
+            @JsonProperty("stack") CloudStack stack,
+            @JsonProperty("resourceList") List<CloudResource> resourceList,
+            @JsonProperty("stackVerticalScaleV4Request") StackVerticalScaleV4Request stackVerticalScaleV4Request) {
         super(cloudContext, cloudCredential, stack);
         this.resourceList = resourceList;
         this.stackVerticalScaleV4Request = stackVerticalScaleV4Request;

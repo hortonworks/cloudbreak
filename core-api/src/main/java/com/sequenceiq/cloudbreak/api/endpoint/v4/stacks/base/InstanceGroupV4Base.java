@@ -28,7 +28,6 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
     @Min(value = 0, message = "The node count has to be greater or equals than 0")
     @Max(value = 400, message = "The node count has to be less than 400")
     @Digits(fraction = 0, integer = 10, message = "The node count has to be a number")
-    @NotNull
     @ApiModelProperty(value = InstanceGroupModelDescription.NODE_COUNT, required = true)
     private int nodeCount;
 

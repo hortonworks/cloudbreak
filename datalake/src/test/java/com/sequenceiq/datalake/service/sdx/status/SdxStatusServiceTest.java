@@ -32,6 +32,7 @@ import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxStatusRepository;
+import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
 
 @ExtendWith(MockitoExtension.class)
 class SdxStatusServiceTest {
@@ -51,7 +52,7 @@ class SdxStatusServiceTest {
     private SdxClusterRepository sdxClusterRepository;
 
     @Mock
-    private EventSenderService eventSenderService;
+    private SdxNotificationService sdxNotificationService;
 
     @Spy
     private Clock clock;
@@ -100,6 +101,7 @@ class SdxStatusServiceTest {
         DatalakeStatusEnum status = DatalakeStatusEnum.DELETED;
         ResourceEvent resourceEvent = ResourceEvent.SDX_RDS_DELETION_FINISHED;
         doNothing().when(eventSenderService).sendEventAndNotification(any(), any());
+        doNothing().when(sdxNotificationService).send(any(), any(), any());
 
         sdxStatusService.setStatusForDatalakeAndNotify(status, resourceEvent, "deleted", sdxCluster);
 
@@ -115,7 +117,8 @@ class SdxStatusServiceTest {
         oldStatus.setStatus(DatalakeStatusEnum.RUNNING);
         DatalakeStatusEnum status = DatalakeStatusEnum.SALT_PASSWORD_ROTATION_FAILED;
         Set<String> messageArgs = Collections.singleton("exception-message");
-        doNothing().when(eventSenderService).sendEventAndNotification(any(), any());
+        doNothing().when(sdxNotificationService).send(any(), any(), any());
+        doNothing().when(eventSenderService).sendEventAndNotification(any(), any(), any());
 
         sdxStatusService.setStatusForDatalakeAndNotify(status, messageArgs, "Rotating SaltStack user password failed", sdxCluster.getId());
 

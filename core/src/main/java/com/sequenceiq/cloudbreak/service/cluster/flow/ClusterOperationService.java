@@ -276,8 +276,7 @@ public class ClusterOperationService {
     }
 
     public FlowIdentifier verticalScale(Long stackId, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
-        Stack stack = stackService.getById(stackId);
-        return flowManager.triggerVerticalScale(stack.getId(), stackVerticalScaleV4Request);
+        return flowManager.triggerVerticalScale(stackId, stackVerticalScaleV4Request);
     }
 
     public void reportHealthChange(String crn, Map<String, Optional<String>> failedNodes, Set<String> newHealthyNodes) {

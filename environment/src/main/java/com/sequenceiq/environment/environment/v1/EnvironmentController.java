@@ -91,7 +91,7 @@ import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConvert
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -494,7 +494,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
     public void verticalScalingByName(
             @ResourceName String name,
-            @RequestObject @Valid FreeIPAVerticalScaleRequest updateRequest) {
+            @RequestObject @Valid VerticalScaleRequest updateRequest) {
         environmentVerticalScaleService.verticalScaleByName(name, updateRequest);
     }
 
@@ -502,7 +502,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
     public void verticalScalingByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn,
-            @RequestObject @Valid FreeIPAVerticalScaleRequest updateRequest) {
+            @RequestObject @Valid VerticalScaleRequest updateRequest) {
         environmentVerticalScaleService.verticalScaleByCrn(crn, updateRequest);
     }
 

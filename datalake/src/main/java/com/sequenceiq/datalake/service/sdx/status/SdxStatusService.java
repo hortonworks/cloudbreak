@@ -82,7 +82,7 @@ public class SdxStatusService {
     public void setStatusForDatalakeAndNotify(DatalakeStatusEnum status, ResourceEvent event, String statusReason,
             SdxCluster sdxCluster) {
         setStatusForDatalake(status, statusReason, sdxCluster);
-        sdxNotificationService.send(event, sdxCluster);
+        sdxNotificationService.send(event, Set.of(), sdxCluster);
         eventSenderService.sendEventAndNotification(sdxCluster, event);
     }
 

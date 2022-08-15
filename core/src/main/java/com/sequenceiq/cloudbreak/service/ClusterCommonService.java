@@ -149,8 +149,7 @@ public class ClusterCommonService {
     }
 
     public FlowIdentifier putVerticalScaling(String crn, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
-        Stack stack = stackService.getByCrn(crn);
-        stack = stackService.getByIdWithLists(stack.getId());
+        StackDto stack = stackDtoService.getByCrn(crn);
         Long stackId = stack.getId();
         MDCBuilder.buildMdcContext(stack);
         FlowIdentifier flowIdentifier;
@@ -215,7 +214,7 @@ public class ClusterCommonService {
         return clusterOperationService.updateUserNamePassword(stack.getId(), userNamePasswordJson);
     }
 
-    private FlowIdentifier verticalScalingOnStack(Long stackId, Stack stack, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+    private FlowIdentifier verticalScalingOnStack(Long stackId, StackDto stack, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
         if (!stack.isStackInStopPhase()) {
             throw new BadRequestException(String.format(
                     "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,

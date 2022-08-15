@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.ScalingPath;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.configuration.AllowedScalingPaths;
@@ -42,14 +42,14 @@ public class FreeIpaScalingValidationService {
         executeCommonValidations(allInstances, stack, scalingPath, OperationType.UPSCALE);
     }
 
-    public void validateStackForVerticalUpscale(Stack stack, FreeIPAVerticalScaleRequest request) {
-//        if (!stack.isStopped()) {
-//            throw new BadRequestException("Vertical scaling currently only available for FreeIPA when it is stopped");
-//        }
+    public void validateStackForVerticalUpscale(Stack stack, VerticalScaleRequest request) {
+        if (!stack.isStopped()) {
+            throw new BadRequestException("Vertical scaling currently only available for FreeIPA when it is stopped");
+        }
         validateVerticalScalingRequest(stack, request);
     }
 
-    private void validateVerticalScalingRequest(Stack stack, FreeIPAVerticalScaleRequest verticalScaleV4Request) {
+    private void validateVerticalScalingRequest(Stack stack, VerticalScaleRequest verticalScaleV4Request) {
         if (!verticalScalingSupported.contains(stack.getCloudPlatform())) {
             throw new BadRequestException(String.format("Vertical scaling is not supported on %s cloud platform", stack.getCloudPlatform()));
         }
@@ -64,7 +64,7 @@ public class FreeIpaScalingValidationService {
         }
     }
 
-    private boolean anyAttachedVolumePropertyDefinedInVerticalScalingRequest(FreeIPAVerticalScaleRequest verticalScaleV4Request) {
+    private boolean anyAttachedVolumePropertyDefinedInVerticalScalingRequest(VerticalScaleRequest verticalScaleV4Request) {
         return verticalScaleV4Request.getTemplate().getAttachedVolumes() != null
                 && !verticalScaleV4Request.getTemplate().getAttachedVolumes().isEmpty();
     }

@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModel;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FreeIPAVerticalScaleRequest implements JsonEntity {
+public class VerticalScaleRequest implements JsonEntity {
 
     @NotNull
     private String group;
@@ -34,5 +34,13 @@ public class FreeIPAVerticalScaleRequest implements JsonEntity {
 
     public void setTemplate(InstanceTemplateRequest template) {
         this.template = template;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + "VerticalScaleRequest{" +
+                "group='" + group + '\'' +
+                ", template=" + template +
+                '}';
     }
 }

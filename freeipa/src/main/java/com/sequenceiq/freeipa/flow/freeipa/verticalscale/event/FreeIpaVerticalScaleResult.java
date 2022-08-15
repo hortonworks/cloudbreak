@@ -1,41 +1,41 @@
-package com.sequenceiq.cloudbreak.reactor.api.event.resource;
+package com.sequenceiq.freeipa.flow.freeipa.verticalscale.event;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.event.FlowPayload;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 
-public class CoreVerticalScaleResult extends CloudPlatformResult implements FlowPayload {
+public class FreeIpaVerticalScaleResult extends CloudPlatformResult implements FlowPayload {
 
     private final ResourceStatus resourceStatus;
 
     private final List<CloudResourceStatus> results;
 
-    private final StackVerticalScaleV4Request stackVerticalScaleV4Request;
+    private final VerticalScaleRequest freeIPAVerticalScaleRequest;
 
     @JsonCreator
-    public CoreVerticalScaleResult(
+    public FreeIpaVerticalScaleResult(
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("resourceStatus") ResourceStatus resourceStatus,
             @JsonProperty("results") List<CloudResourceStatus> results,
-            @JsonProperty("stackVerticalScaleV4Request") StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+            @JsonProperty("freeIPAVerticalScaleRequest") VerticalScaleRequest freeIPAVerticalScaleRequest) {
         super(resourceId);
         this.resourceStatus = resourceStatus;
         this.results = results;
-        this.stackVerticalScaleV4Request = stackVerticalScaleV4Request;
+        this.freeIPAVerticalScaleRequest = freeIPAVerticalScaleRequest;
     }
 
-    public CoreVerticalScaleResult(String statusReason, Exception errorDetails, Long resourceId,
-            StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+    public FreeIpaVerticalScaleResult(String statusReason, Exception errorDetails, Long resourceId,
+            VerticalScaleRequest freeIPAVerticalScaleRequest) {
         super(statusReason, errorDetails, resourceId);
         this.resourceStatus = ResourceStatus.FAILED;
-        this.stackVerticalScaleV4Request = stackVerticalScaleV4Request;
+        this.freeIPAVerticalScaleRequest = freeIPAVerticalScaleRequest;
         this.results = new ArrayList<>();
     }
 
@@ -51,7 +51,16 @@ public class CoreVerticalScaleResult extends CloudPlatformResult implements Flow
         return resourceStatus == ResourceStatus.FAILED;
     }
 
-    public StackVerticalScaleV4Request getStackVerticalScaleV4Request() {
-        return stackVerticalScaleV4Request;
+    public VerticalScaleRequest getFreeIPAVerticalScaleRequest() {
+        return freeIPAVerticalScaleRequest;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + "FreeIpaVerticalScaleResult{" +
+                "resourceStatus=" + resourceStatus +
+                ", results=" + results +
+                ", freeIPAVerticalScaleRequest=" + freeIPAVerticalScaleRequest +
+                '}';
     }
 }

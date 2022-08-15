@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.dto;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.util.ArrayList;
@@ -421,4 +423,9 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
         });
         return ret;
     }
+
+    public boolean isStackInStopPhase() {
+        return STOP_IN_PROGRESS.equals(getStatus()) || STOPPED.equals(getStatus());
+    }
+
 }

@@ -4,10 +4,11 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAI
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_VERTICALSCALED_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALED_FAILED;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -35,13 +36,12 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleResult;
-import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Configuration
@@ -61,10 +61,7 @@ public class CoreVerticalScaleActions {
     private StackToCloudStackConverter cloudStackConverter;
 
     @Inject
-    private StackService stackService;
-
-    @Inject
-    private ResourceService resourceService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
@@ -76,8 +73,8 @@ public class CoreVerticalScaleActions {
             protected void doExecute(ClusterViewContext ctx, CoreVerticalScalingTriggerEvent payload, Map<Object, Object> variables) {
                 StackVerticalScaleV4Request stackVerticalScaleV4Request = payload.getRequest();
                 coreVerticalScaleService.verticalScale(ctx.getStackId());
-                Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
-                List<Resource> resources = (List<Resource>) resourceService.getAllByStackId(payload.getResourceId());
+                StackDto stack = stackDtoService.getById(payload.getResourceId());
+                Set<Resource> resources = stack.getResources();
                 List<CloudResource> cloudResources =
                         resources.stream().map(resource -> cloudResourceConverter.convert(resource)).collect(Collectors.toList());
                 CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
@@ -88,7 +85,7 @@ public class CoreVerticalScaleActions {
                         .withId(stack.getId())
                         .withName(stack.getName())
                         .withCrn(stack.getResourceCrn())
-                        .withPlatform(stack.cloudPlatform())
+                        .withPlatform(stack.getCloudPlatform())
                         .withVariant(stack.getPlatformVariant())
                         .withLocation(location)
                         .withWorkspaceId(stack.getWorkspace().getId())
@@ -111,7 +108,7 @@ public class CoreVerticalScaleActions {
             @Override
             protected void doExecute(ClusterViewContext context, CoreVerticalScaleResult payload, Map<Object, Object> variables) {
                 coreVerticalScaleService.updateTemplateWithVerticalScaleInformation(context.getStackId(), payload.getStackVerticalScaleV4Request());
-                coreVerticalScaleService.finishVerticalScale(context.getStackId(), context.getClusterId());
+                coreVerticalScaleService.finishVerticalScale(context.getStackId());
                 sendEvent(context);
             }
 
@@ -128,7 +125,7 @@ public class CoreVerticalScaleActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Exception during vertical scaling!: {}", payload.getException().getMessage());
-                flowMessageService.fireEventAndLog(payload.getResourceId(), UPDATE_FAILED.name(), STACK_VERTICALSCALED_FAILED);
+                flowMessageService.fireEventAndLog(payload.getResourceId(), UPDATE_FAILED.name(), CLUSTER_VERTICALSCALED_FAILED);
                 sendEvent(context);
             }
 

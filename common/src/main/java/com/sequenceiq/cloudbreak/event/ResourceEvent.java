@@ -279,9 +279,9 @@ public enum ResourceEvent {
     CLUSTER_DELETE_STARTED("cluster.termination.started"),
     CLUSTER_CHANGING_CREDENTIAL("cluster.changing.credential"),
     CLUSTER_CHANGED_CREDENTIAL("cluster.changed.credential"),
-    STACK_VERTICALSCALING("cluster.changing.verticalscale"),
-    STACK_VERTICALSCALED("cluster.changed.verticalscale"),
-    STACK_VERTICALSCALED_FAILED("cluster.change.verticalscale.failed"),
+    CLUSTER_VERTICALSCALING("cluster.changing.verticalscale"),
+    CLUSTER_VERTICALSCALED("cluster.changed.verticalscale"),
+    CLUSTER_VERTICALSCALED_FAILED("cluster.change.verticalscale.failed"),
     CLUSTER_CREATE_FAILED("cluster.create.failed"),
     CLUSTER_STARTING("cluster.starting"),
     CLUSTER_DNS_ENTRY_UPDATE_FINISHED("cluster.dns.update.finished"),
@@ -541,11 +541,11 @@ public enum ResourceEvent {
     DATALAKE_SALT_PASSWORD_ROTATION_FAILED("datalake.salt.passwordrotation.failed"),
     DATALAKE_SALT_PASSWORD_ROTATION_FINISHED("datalake.salt.passwordrotation.finished"),
 
-    VERTICAL_SCALE_VALIDATION_IN_PROGRESS("datalake.verticalscale.validation.in.progress"),
-    VERTICAL_SCALE_VALIDATION_FAILED("datalake.verticalscale.validation.failed"),
-    VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS("datalake.verticalscale.datalake.in.progress"),
-    VERTICAL_SCALE_ON_DATALAKE_FAILED("datalake.verticalscale.datalake.failed"),
-    VERTICAL_SCALE_FAILED("datalake.verticalscale.failed"),
+    DATALAKE_VERTICAL_SCALE_VALIDATION_IN_PROGRESS("datalake.verticalscale.validation.in.progress"),
+    DATALAKE_VERTICAL_SCALE_VALIDATION_FAILED("datalake.verticalscale.validation.failed"),
+    DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS("datalake.verticalscale.datalake.in.progress"),
+    DATALAKE_VERTICAL_SCALE_ON_DATALAKE_FAILED("datalake.verticalscale.datalake.failed"),
+    DATALAKE_VERTICAL_SCALE_FAILED("datalake.verticalscale.failed"),
 
     // deprecated
     STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.skipped");

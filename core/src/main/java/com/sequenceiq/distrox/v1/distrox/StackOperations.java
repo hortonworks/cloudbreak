@@ -259,6 +259,10 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return stackCommonService.retryInWorkspace(nameOrCrn, workspaceId);
     }
 
+    public Long getResourceIdByResourceName(String resourceName) {
+        return stackService.getResourceIdByResourceName(resourceName);
+    }
+
     public FlowIdentifier putStop(NameOrCrn nameOrCrn, String accountId) {
         return stackCommonService.putStopInWorkspace(nameOrCrn, accountId);
     }
@@ -392,6 +396,10 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     @Override
     public String getResourceCrnByResourceName(String resourceName) {
         return stackService.getResourceCrnInTenant(resourceName, ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    public Long getResourceIdByResourceCrn(String crn) {
+        return stackService.getResourceIdByResourceCrn(crn);
     }
 
     @Override

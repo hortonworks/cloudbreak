@@ -5,12 +5,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.freeipa.api.model.Backup;
 import org.junit.Before;
 import org.junit.Rule;
@@ -22,6 +31,8 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
@@ -35,7 +46,11 @@ import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 
 import javax.ws.rs.BadRequestException;
+
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class StackToCloudStackConverterTest {
 
@@ -98,6 +113,75 @@ public class StackToCloudStackConverterTest {
         when(template.getVolumeCount()).thenReturn(VOLUME_COUNT);
         CloudInstance cloudInstance = underTest.buildInstance(stack, instanceMetaData, instanceGroup, stackAuthentication, 0L, InstanceStatus.CREATED);
         assertEquals(INSTANCE_ID, cloudInstance.getInstanceId());
+    }
+
+    @Test
+    public void testUpdateWithVerticalScaleRequest() throws Exception {
+        InstanceTemplate instanceTemplate = new InstanceTemplate(
+                null,
+                GROUP_NAME,
+                1L,
+                Collections.emptyList(),
+                null,
+                Collections.emptyMap(),
+                null,
+                null,
+                TemporaryStorage.ATTACHED_VOLUMES,
+                0L);
+
+
+        CloudInstance cloudInstance = new CloudInstance(
+                "i1",
+                instanceTemplate,
+                new InstanceAuthentication("key", "id", "cb"),
+                "subnet",
+                "az");
+
+        Group group = new Group(
+                GROUP_NAME,
+                InstanceGroupType.CORE,
+                Set.of(cloudInstance),
+                new Security(Set.of(), Set.of()),
+                cloudInstance,
+                new InstanceAuthentication("publicKey", "publicKeyId", "loginuser"),
+                "cb",
+                "ssh",
+                80,
+                Optional.empty(),
+                new GroupNetwork(OutboundInternetTraffic.DISABLED, Set.of(), Map.of()),
+                Map.of());
+
+        CloudStack cloudStack = new CloudStack(
+                Set.of(group),
+                null,
+                null,
+                Map.of(),
+                Map.of(),
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+
+        VerticalScaleRequest freeIPAVerticalScaleRequest = new VerticalScaleRequest();
+        freeIPAVerticalScaleRequest.setGroup(GROUP_NAME);
+        InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
+        instanceTemplateRequest.setInstanceType("ec2big");
+        freeIPAVerticalScaleRequest.setTemplate(instanceTemplateRequest);
+
+        CloudStack result = underTest.updateWithVerticalScaleRequest(cloudStack, freeIPAVerticalScaleRequest);
+        String resultFlavor = result.getGroups()
+                .iterator()
+                .next()
+                .getInstances()
+                .iterator()
+                .next()
+                .getTemplate()
+                .getFlavor();
+
+        assertEquals("ec2big", resultFlavor);
     }
 
     @Test

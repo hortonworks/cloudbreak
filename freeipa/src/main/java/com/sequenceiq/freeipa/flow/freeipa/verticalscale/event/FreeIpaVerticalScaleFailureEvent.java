@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
-public class FreeIPAVerticalScaleFailureEvent extends StackEvent {
+public class FreeIpaVerticalScaleFailureEvent extends StackEvent {
 
     private final Exception exception;
 
@@ -17,20 +17,14 @@ public class FreeIPAVerticalScaleFailureEvent extends StackEvent {
 
     private final Map<String, String> failureDetails;
 
-    public FreeIPAVerticalScaleFailureEvent(Long stackId, String failedPhase, Set<String> success, Map<String, String> failureDetails,
-                                            Exception exception) {
-        this(null, stackId, failedPhase, success, failureDetails, exception);
-    }
-
     @JsonCreator
-    public FreeIPAVerticalScaleFailureEvent(
-            @JsonProperty("selector") String selector,
+    public FreeIpaVerticalScaleFailureEvent(
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("failedPhase") String failedPhase,
             @JsonProperty("success") Set<String> success,
             @JsonProperty("failureDetails") Map<String, String> failureDetails,
             @JsonProperty("exception") Exception exception) {
-        super(selector, stackId);
+        super(stackId);
         this.exception = exception;
         this.failedPhase = failedPhase;
         this.success = success;
@@ -51,5 +45,15 @@ public class FreeIPAVerticalScaleFailureEvent extends StackEvent {
 
     public Map<String, String> getFailureDetails() {
         return failureDetails;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + "FreeIpaVerticalScaleFailureEvent{" +
+                "exception=" + exception +
+                ", failedPhase='" + failedPhase + '\'' +
+                ", success=" + success +
+                ", failureDetails=" + failureDetails +
+                '}';
     }
 }

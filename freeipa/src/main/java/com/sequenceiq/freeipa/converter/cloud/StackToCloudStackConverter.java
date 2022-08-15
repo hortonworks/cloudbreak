@@ -69,7 +69,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.Resourc
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
@@ -323,21 +323,15 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         return new Security(rules, ig.getSecurityGroup().getSecurityGroupIds(), true);
     }
 
-    public CloudStack updateWithVerticalScaleRequest(CloudStack cloudStack, FreeIPAVerticalScaleRequest request) {
-        if (request != null && request.getGroup() != null) {
-            for (Group group : cloudStack.getGroups()) {
-                InstanceTemplateRequest template = request.getTemplate();
-                if (group.getName().equals(request.getGroup())) {
-                    for (CloudInstance instance : group.getInstances()) {
-                        if (template != null) {
-                            if (!Strings.isNullOrEmpty(template.getInstanceType())) {
-                                instance.getTemplate().setFlavor(template.getInstanceType());
-                            }
-                        }
-                    }
-
-                }
-            }
+    public CloudStack updateWithVerticalScaleRequest(CloudStack cloudStack, VerticalScaleRequest request) {
+        InstanceTemplateRequest template = request.getTemplate();
+        if (template != null) {
+            cloudStack.getGroups()
+                .stream()
+                .filter(group -> group.getName().equals(request.getGroup()))
+                .flatMap(group -> group.getInstances().stream())
+                .filter(instance -> !Strings.isNullOrEmpty(template.getInstanceType()))
+                .forEach(instance -> instance.getTemplate().setFlavor(template.getInstanceType()));
         }
         return cloudStack;
     }

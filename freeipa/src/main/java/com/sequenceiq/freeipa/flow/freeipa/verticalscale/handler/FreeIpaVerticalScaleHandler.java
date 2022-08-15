@@ -1,6 +1,10 @@
 package com.sequenceiq.freeipa.flow.freeipa.verticalscale.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_FAILURE_EVENT;
+
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -11,22 +15,23 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.handler.CloudPlatformEventHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.freeipa.flow.freeipa.verticalscale.FreeIPAVerticalScaleService;
-import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIPAVerticalScaleRequest;
-import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIPAVerticalScaleResult;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
+import com.sequenceiq.freeipa.flow.freeipa.verticalscale.FreeIpaVerticalScaleService;
+import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleRequest;
+import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleResult;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class FreeIPAVerticalScaleHandler implements CloudPlatformEventHandler<FreeIPAVerticalScaleRequest> {
+public class FreeIpaVerticalScaleHandler implements CloudPlatformEventHandler<FreeIpaVerticalScaleRequest> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIPAVerticalScaleHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaVerticalScaleHandler.class);
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -35,26 +40,26 @@ public class FreeIPAVerticalScaleHandler implements CloudPlatformEventHandler<Fr
     private EventBus eventBus;
 
     @Inject
-    private FreeIPAVerticalScaleService verticalScale;
+    private FreeIpaVerticalScaleService verticalScale;
 
     @Override
-    public Class<FreeIPAVerticalScaleRequest> type() {
-        return FreeIPAVerticalScaleRequest.class;
+    public Class<FreeIpaVerticalScaleRequest> type() {
+        return FreeIpaVerticalScaleRequest.class;
     }
 
     @Override
-    public void accept(Event<FreeIPAVerticalScaleRequest> event) {
+    public void accept(Event<FreeIpaVerticalScaleRequest> event) {
         LOGGER.debug("Received event: {}", event);
-        FreeIPAVerticalScaleRequest<FreeIPAVerticalScaleResult> request = event.getData();
+        FreeIpaVerticalScaleRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
-        com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest freeIPAVerticalScaleV1Request
+        VerticalScaleRequest freeIPAVerticalScaleV1Request
                 = request.getFreeIPAVerticalScaleRequest();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudResourceStatus> resourceStatus = verticalScale.verticalScale(ac, request, connector);
             LOGGER.info("Vertical scaling resource statuses: {}", resourceStatus);
-            FreeIPAVerticalScaleResult result = new FreeIPAVerticalScaleResult(
+            FreeIpaVerticalScaleResult result = new FreeIpaVerticalScaleResult(
                     request.getResourceId(),
                     ResourceStatus.UPDATED,
                     resourceStatus,
@@ -64,14 +69,13 @@ public class FreeIPAVerticalScaleHandler implements CloudPlatformEventHandler<Fr
             LOGGER.debug("Vertical scaling successfully finished for {}, and the result is: {}", cloudContext, result);
         } catch (Exception e) {
             LOGGER.error("Vertical scaling stack failed", e);
-            FreeIPAVerticalScaleResult result = new FreeIPAVerticalScaleResult(
-                    e.getMessage(),
-                    e,
+            FreeIpaVerticalScaleFailureEvent result = new FreeIpaVerticalScaleFailureEvent(
                     request.getResourceId(),
-                    request.getFreeIPAVerticalScaleRequest());
-            request.getResult().onNext(result);
-            eventBus.notify(CloudPlatformResult.failureSelector(FreeIPAVerticalScaleResult.class),
-                    new Event<>(event.getHeaders(), result));
+                    "Unexpected failure in during action",
+                    Set.of(),
+                    Map.of(),
+                    e);
+            eventBus.notify(STACK_VERTICALSCALE_FAILURE_EVENT.event(), new Event<>(event.getHeaders(), result));
         }
     }
 

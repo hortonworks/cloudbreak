@@ -8,11 +8,11 @@ import io.swagger.annotations.ApiModel;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FreeIPAVerticalScaleResponse implements JsonEntity {
+public class VerticalScaleResponse implements JsonEntity {
 
     private FlowIdentifier flowIdentifier;
 
-    private FreeIPAVerticalScaleRequest request;
+    private VerticalScaleRequest request;
 
     public FlowIdentifier getFlowIdentifier() {
         return flowIdentifier;
@@ -22,11 +22,19 @@ public class FreeIPAVerticalScaleResponse implements JsonEntity {
         this.flowIdentifier = flowIdentifier;
     }
 
-    public FreeIPAVerticalScaleRequest getRequest() {
+    public VerticalScaleRequest getRequest() {
         return request;
     }
 
-    public void setRequest(FreeIPAVerticalScaleRequest request) {
+    public void setRequest(VerticalScaleRequest request) {
         this.request = request;
+    }
+
+    @Override
+    public String toString() {
+        return "VerticalScaleResponse{" +
+                "flowIdentifier=" + flowIdentifier +
+                ", request=" + request +
+                '}';
     }
 }

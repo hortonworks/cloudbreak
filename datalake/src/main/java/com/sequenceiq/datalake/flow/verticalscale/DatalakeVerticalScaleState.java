@@ -4,7 +4,7 @@ import com.sequenceiq.datalake.flow.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
 
-public enum DataLakeVerticalScaleState implements FlowState {
+public enum DatalakeVerticalScaleState implements FlowState {
 
     INIT_STATE,
     VERTICAL_SCALING_DATALAKE_VALIDATION_STATE,

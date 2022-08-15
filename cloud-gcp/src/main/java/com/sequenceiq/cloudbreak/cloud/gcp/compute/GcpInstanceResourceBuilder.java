@@ -118,7 +118,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Override
     public List<CloudResource> build(GcpContext context, CloudInstance cloudInstance, long privateId, AuthenticatedContext auth,
-            Group group, List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
+        Group group, List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         InstanceTemplate template = group.getReferenceInstanceTemplate();
         String projectId = context.getProjectId();
         String location = cloudInstance.getAvailabilityZone();
@@ -224,7 +224,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
      * also provides aggrigated monitoring
      */
     private void assignToExistingInstanceGroup(GcpContext context,
-            Group group, Instance instance, List<CloudResource> buildableResource) throws IOException {
+        Group group, Instance instance, List<CloudResource> buildableResource) throws IOException {
         Compute compute = context.getCompute();
         String projectId = context.getProjectId();
         String zone = context.getLocation().getAvailabilityZone().value();
@@ -408,7 +408,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     private List<NetworkInterface> getNetworkInterface(GcpContext context, List<CloudResource> computeResources, Group group,
-            CloudStack stack, CloudInstance instance) throws IOException {
+        CloudStack stack, CloudInstance instance) throws IOException {
 
         boolean noPublicIp = context.getNoPublicIp();
         String projectId = context.getProjectId();
@@ -436,7 +436,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     private void prepareNetworkAndSubnet(String projectId, Region region, Network network, NetworkInterface networkInterface,
-            CloudInstance instance) {
+        CloudInstance instance) {
         String subnetId = Strings.isNullOrEmpty(instance.getSubnetId()) ? gcpStackUtil.getSubnetId(network) : instance.getSubnetId();
         if (StringUtils.isNotEmpty(gcpStackUtil.getSharedProjectId(network))) {
             networkInterface.setNetwork(gcpStackUtil.getNetworkUrl(gcpStackUtil.getSharedProjectId(network), gcpStackUtil.getCustomNetworkId(network)));
@@ -486,7 +486,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     private Operation executeStartOperation(String projectId, String availabilityZone, Compute compute, String instanceId, InstanceTemplate template,
-            List<AttachedDisk> disks) throws IOException {
+                                            List<AttachedDisk> disks) throws IOException {
 
         if (customGcpDiskEncryptionService.hasCustomEncryptionRequested(template)) {
             LOGGER.info("Start the instance with custom encryption: {}", instanceId);

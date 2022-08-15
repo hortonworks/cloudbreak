@@ -1,10 +1,10 @@
 package com.sequenceiq.freeipa.api.client;
 
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
-import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.freeipa.api.v1.diagnostics.DiagnosticsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.test.ClientTestV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.FreeIpaUpgradeV1Endpoint;
@@ -37,7 +37,7 @@ public interface FreeIpaClient {
 
     DiagnosticsV1Endpoint getDiagnosticsEndpoint();
 
-    FlowEndpoint getFlowEndpoint();
+    FreeIpaV1FlowEndpoint getFlowEndpoint();
 
     FlowPublicEndpoint getFlowPublicEndpoint();
 

@@ -1,15 +1,15 @@
 package com.sequenceiq.datalake.flow.verticalscale.handler;
 
-import static com.sequenceiq.datalake.flow.verticalscale.event.DataLakeVerticalScaleHandlerSelectors.VERTICAL_SCALING_DATALAKE_VALIDATION_HANDLER;
+import static com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleHandlerSelectors.VERTICAL_SCALING_DATALAKE_VALIDATION_HANDLER;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
-import com.sequenceiq.datalake.flow.verticalscale.event.DataLakeVerticalScaleEvent;
-import com.sequenceiq.datalake.flow.verticalscale.event.DataLakeVerticalScaleFailedEvent;
-import com.sequenceiq.datalake.flow.verticalscale.event.DataLakeVerticalScaleStateSelectors;
+import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleEvent;
+import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleFailedEvent;
+import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleStateSelectors;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -17,11 +17,11 @@ import reactor.bus.Event;
 import reactor.rx.Promise;
 
 @Component
-public class DataLakeValidateVerticalScaleHandler extends EventSenderAwareHandler<DataLakeVerticalScaleEvent> {
+public class DatalakeValidateVerticalScaleHandler extends EventSenderAwareHandler<DatalakeVerticalScaleEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataLakeValidateVerticalScaleHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeValidateVerticalScaleHandler.class);
 
-    protected DataLakeValidateVerticalScaleHandler(EventSender eventSender) {
+    protected DatalakeValidateVerticalScaleHandler(EventSender eventSender) {
         super(eventSender);
     }
 
@@ -31,12 +31,12 @@ public class DataLakeValidateVerticalScaleHandler extends EventSenderAwareHandle
     }
 
     @Override
-    public void accept(Event<DataLakeVerticalScaleEvent> verticalScaleDataLakeEvent) {
+    public void accept(Event<DatalakeVerticalScaleEvent> verticalScaleDataLakeEvent) {
         LOGGER.debug("In ValidateVerticalScaleDataLakeHandler.accept");
         try {
-            DataLakeVerticalScaleEvent result = DataLakeVerticalScaleEvent.builder()
+            DatalakeVerticalScaleEvent result = DatalakeVerticalScaleEvent.builder()
                     .withAccepted(new Promise<>())
-                    .withSelector(DataLakeVerticalScaleStateSelectors.VERTICAL_SCALING_DATALAKE_EVENT.selector())
+                    .withSelector(DatalakeVerticalScaleStateSelectors.VERTICAL_SCALING_DATALAKE_EVENT.selector())
                     .withResourceCrn(verticalScaleDataLakeEvent.getData().getResourceCrn())
                     .withResourceId(verticalScaleDataLakeEvent.getData().getResourceId())
                     .withResourceName(verticalScaleDataLakeEvent.getData().getResourceName())
@@ -47,10 +47,12 @@ public class DataLakeValidateVerticalScaleHandler extends EventSenderAwareHandle
             eventSender().sendEvent(result, verticalScaleDataLakeEvent.getHeaders());
             LOGGER.debug("VERTICAL_SCALE_DATALAKE_EVENT event sent");
         } catch (Exception e) {
-            DataLakeVerticalScaleFailedEvent failedEvent =
-                    new DataLakeVerticalScaleFailedEvent(verticalScaleDataLakeEvent.getData(), e, DatalakeStatusEnum.VERTICAL_SCALE_FAILED);
+            DatalakeVerticalScaleFailedEvent failedEvent =
+                    new DatalakeVerticalScaleFailedEvent(verticalScaleDataLakeEvent.getData(), e, DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_FAILED);
             eventSender().sendEvent(failedEvent, verticalScaleDataLakeEvent.getHeaders());
-            LOGGER.debug("VERTICAL_SCALE_DATALAKE_FAILED event sent");
+            LOGGER.debug("VERTICAL_SCALE_DATALAKE_FAILED event sent with error: {} on stack {}",
+                    e.getMessage(),
+                    verticalScaleDataLakeEvent.getData().getStackCrn());
         }
     }
 }

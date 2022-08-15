@@ -361,7 +361,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public FlowIdentifier putScalingByName(@ResourceName String name, @Valid DistroXScaleV1Request updateRequest) {
         StackScaleV4Request stackScaleV4Request = scaleRequestConverter.convert(updateRequest);
-        stackScaleV4Request.setStackId(stackOperations.getStackByName(name).getId());
+        stackScaleV4Request.setStackId(stackOperations.getResourceIdByResourceName(name));
         return stackOperations.putScaling(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), stackScaleV4Request);
     }
 
@@ -378,7 +378,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public FlowIdentifier putVerticalScalingByName(@ResourceName String name, @Valid DistroXVerticalScaleV1Request updateRequest) {
         StackVerticalScaleV4Request stackVerticalScaleV4Request = verticalScaleV4RequestConverter.convert(updateRequest);
-        stackVerticalScaleV4Request.setStackId(stackOperations.getStackByName(name).getId());
+        stackVerticalScaleV4Request.setStackId(stackOperations.getResourceIdByResourceName(name));
         return stackOperations.putVerticalScaling(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), stackVerticalScaleV4Request);
     }
 
@@ -387,7 +387,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public FlowIdentifier putVerticalScalingByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn,
             @Valid DistroXVerticalScaleV1Request updateRequest) {
         StackVerticalScaleV4Request stackVerticalScaleV4Request = verticalScaleV4RequestConverter.convert(updateRequest);
-        stackVerticalScaleV4Request.setStackId(stackOperations.getStackByCrn(crn).getId());
+        stackVerticalScaleV4Request.setStackId(stackOperations.getResourceIdByResourceCrn(crn));
         return stackOperations.putVerticalScaling(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), stackVerticalScaleV4Request);
     }
 

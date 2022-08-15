@@ -496,20 +496,14 @@ public class StackToCloudStackConverter {
     }
 
     public CloudStack updateWithVerticalScaleRequest(CloudStack cloudStack, StackVerticalScaleV4Request request) {
-        if (request != null && request.getGroup() != null) {
-            for (Group group : cloudStack.getGroups()) {
-                InstanceTemplateV4Request template = request.getTemplate();
-                if (group.getName().equals(request.getGroup())) {
-                    for (CloudInstance instance : group.getInstances()) {
-                        if (template != null) {
-                            if (!Strings.isNullOrEmpty(template.getInstanceType())) {
-                                instance.getTemplate().setFlavor(template.getInstanceType());
-                            }
-                        }
-                    }
-
-                }
-            }
+        InstanceTemplateV4Request template = request.getTemplate();
+        if (template != null) {
+            cloudStack.getGroups()
+                .stream()
+                .filter(group -> group.getName().equals(request.getGroup()))
+                .flatMap(group -> group.getInstances().stream())
+                .filter(instance -> !Strings.isNullOrEmpty(template.getInstanceType()))
+                .forEach(instance -> instance.getTemplate().setFlavor(template.getInstanceType()));
         }
         return cloudStack;
     }

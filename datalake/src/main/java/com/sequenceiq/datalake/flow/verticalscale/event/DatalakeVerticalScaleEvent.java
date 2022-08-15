@@ -10,14 +10,14 @@ import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 import reactor.rx.Promise;
 
-@JsonDeserialize(builder = DataLakeVerticalScaleEvent.Builder.class)
-public class DataLakeVerticalScaleEvent extends BaseNamedFlowEvent implements Selectable {
+@JsonDeserialize(builder = DatalakeVerticalScaleEvent.Builder.class)
+public class DatalakeVerticalScaleEvent extends BaseNamedFlowEvent implements Selectable {
 
     private final StackVerticalScaleV4Request verticalScaleRequest;
 
     private final String stackCrn;
 
-    public DataLakeVerticalScaleEvent(
+    public DatalakeVerticalScaleEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("accepted") Promise<AcceptResult> accepted,
@@ -96,8 +96,8 @@ public class DataLakeVerticalScaleEvent extends BaseNamedFlowEvent implements Se
             return this;
         }
 
-        public DataLakeVerticalScaleEvent build() {
-            return new DataLakeVerticalScaleEvent(selector, resourceId, accepted, resourceName, resourceCrn, stackCrn, verticalScaleRequest);
+        public DatalakeVerticalScaleEvent build() {
+            return new DatalakeVerticalScaleEvent(selector, resourceId, accepted, resourceName, resourceCrn, stackCrn, verticalScaleRequest);
         }
     }
 }

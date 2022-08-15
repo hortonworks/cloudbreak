@@ -18,8 +18,8 @@ import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
@@ -84,8 +84,8 @@ public class FreeIpaPollerService {
         }
     }
 
-    public void waitForVerticalScale(Long envId, String envCrn, FreeIPAVerticalScaleRequest freeIPAVerticalScaleRequest) {
-        FreeIPAVerticalScaleResponse response = freeIpaService.verticalScale(envCrn, freeIPAVerticalScaleRequest);
+    public void waitForVerticalScale(Long envId, String envCrn, VerticalScaleRequest freeIPAVerticalScaleRequest) {
+        VerticalScaleResponse response = freeIpaService.verticalScale(envCrn, freeIPAVerticalScaleRequest);
         if (response.getFlowIdentifier() != null) {
             try {
                 Polling.stopAfterAttempt(verticalscaleAttempt)

@@ -15,6 +15,9 @@ import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.template.GroupResourceBuilder;
 
 public abstract class AbstractGcpGroupBuilder extends AbstractGcpResourceBuilder implements GroupResourceBuilder<GcpContext> {
@@ -24,6 +27,12 @@ public abstract class AbstractGcpGroupBuilder extends AbstractGcpResourceBuilder
     @Override
     public List<CloudResourceStatus> checkResources(GcpContext context, AuthenticatedContext auth, List<CloudResource> resources) {
         return checkResources(resourceType(), context, auth, resources);
+    }
+
+    @Override
+    public CloudResourceStatus update(GcpContext context, AuthenticatedContext auth, Group group, Network network,
+            Security security, CloudResource resource) {
+        return null;
     }
 
     protected CloudResource executeOperationalRequest(CloudResource resource, ComputeRequest<Operation> request) throws IOException {
