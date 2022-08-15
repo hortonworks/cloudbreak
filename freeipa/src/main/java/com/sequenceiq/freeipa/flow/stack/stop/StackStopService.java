@@ -12,8 +12,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.StackStartStopService;
-import com.sequenceiq.freeipa.service.stack.instance.InstanceUpdater;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceUpdater;
 
 @Component
 public class StackStopService {

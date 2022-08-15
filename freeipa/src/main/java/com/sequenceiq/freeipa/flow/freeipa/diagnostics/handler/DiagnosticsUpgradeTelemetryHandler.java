@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentType;
 import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadataFilter;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentType;
 import com.sequenceiq.cloudbreak.telemetry.upgrade.TelemetryUpgradeService;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;

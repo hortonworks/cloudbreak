@@ -1,9 +1,10 @@
 package com.sequenceiq.freeipa.service.freeipa.backup.cloud;
 
-import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 
 /**
  *

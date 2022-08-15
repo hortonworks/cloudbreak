@@ -11,7 +11,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -24,6 +23,7 @@ import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 
 @Service

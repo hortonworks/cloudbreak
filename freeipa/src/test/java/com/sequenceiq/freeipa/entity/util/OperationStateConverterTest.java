@@ -1,9 +1,9 @@
 package com.sequenceiq.freeipa.entity.util;
 
+import javax.persistence.AttributeConverter;
+
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
-
-import javax.persistence.AttributeConverter;
 
 public class OperationStateConverterTest extends DefaultEnumConverterBaseTest<OperationState> {
 

@@ -2,13 +2,13 @@ package com.sequenceiq.freeipa.service.freeipa.user.conversion;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 
 @Component

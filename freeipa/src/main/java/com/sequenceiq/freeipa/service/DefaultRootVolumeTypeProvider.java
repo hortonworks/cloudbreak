@@ -1,16 +1,18 @@
 package com.sequenceiq.freeipa.service;
 
-import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
-import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
+import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 
 /**
  * This class reads the environment properties of default root volume type configurations for each cloud provider platform.

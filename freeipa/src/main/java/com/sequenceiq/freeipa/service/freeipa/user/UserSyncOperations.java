@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +32,7 @@ import com.sequenceiq.freeipa.client.operation.UserDisableOperation;
 import com.sequenceiq.freeipa.client.operation.UserEnableOperation;
 import com.sequenceiq.freeipa.client.operation.UserRemoveOperation;
 import com.sequenceiq.freeipa.configuration.BatchPartitionSizeProperties;
+import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.util.ThreadInterruptChecker;

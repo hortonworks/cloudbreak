@@ -5,8 +5,8 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
-import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
+import com.sequenceiq.freeipa.entity.Stack;
 
 @Component
 public class FreeipaJobService {

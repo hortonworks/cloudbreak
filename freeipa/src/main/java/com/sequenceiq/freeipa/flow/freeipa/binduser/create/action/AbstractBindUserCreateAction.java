@@ -10,10 +10,10 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.freeipa.flow.freeipa.binduser.create.CreateBindUserState;
 import com.sequenceiq.freeipa.flow.freeipa.binduser.create.event.CreateBindUserEvent;
 import com.sequenceiq.freeipa.flow.freeipa.binduser.create.event.CreateBindUserFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.binduser.create.event.CreateBindUserFlowEvent;
-import com.sequenceiq.freeipa.flow.freeipa.binduser.create.CreateBindUserState;
 
 public abstract class AbstractBindUserCreateAction<P extends CreateBindUserEvent>
         extends AbstractAction<CreateBindUserState, CreateBindUserFlowEvent, CommonContext, P> {

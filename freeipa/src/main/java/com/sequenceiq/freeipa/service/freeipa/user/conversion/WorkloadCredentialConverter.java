@@ -1,11 +1,12 @@
 package com.sequenceiq.freeipa.service.freeipa.user.conversion;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
-import org.springframework.stereotype.Component;
-
 import java.time.Instant;
 import java.util.Optional;
+
+import org.springframework.stereotype.Component;
+
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 
 @Component
 public class WorkloadCredentialConverter {

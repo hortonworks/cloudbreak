@@ -3,13 +3,13 @@ package com.sequenceiq.freeipa.service.freeipa.backup.cloud;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.freeipa.api.model.Backup;
 

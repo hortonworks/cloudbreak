@@ -1,15 +1,16 @@
 package com.sequenceiq.freeipa.service.freeipa.user.conversion;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import org.junit.jupiter.api.Test;
+
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 
 class WorkloadCredentialConverterTest {
     private WorkloadCredentialConverter underTest = new WorkloadCredentialConverter();

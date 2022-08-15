@@ -1,12 +1,12 @@
 package com.sequenceiq.freeipa.client;
 
+import java.util.Optional;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.googlecode.jsonrpc4j.JsonRpcClient;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
-
-import java.util.Optional;
 
 public class ClusterProxyErrorRpcListener implements JsonRpcClient.RequestListener {
 

@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,6 +25,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsGroupConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsUserConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.WorkloadCredentialConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 

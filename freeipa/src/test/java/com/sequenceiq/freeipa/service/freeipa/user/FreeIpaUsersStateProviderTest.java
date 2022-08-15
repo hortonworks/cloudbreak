@@ -17,10 +17,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.googlecode.jsonrpc4j.JsonRpcClientException;
-import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
-import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.client.FreeIpaErrorCodes;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +26,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.googlecode.jsonrpc4j.JsonRpcClientException;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaErrorCodes;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConverter;

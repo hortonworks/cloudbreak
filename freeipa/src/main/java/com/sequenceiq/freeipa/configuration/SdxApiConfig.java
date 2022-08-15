@@ -1,12 +1,13 @@
 package com.sequenceiq.freeipa.configuration;
 
-import com.sequenceiq.sdx.client.internal.SdxApiClientParams;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import com.sequenceiq.sdx.client.internal.SdxApiClientParams;
 
 @Configuration
 public class SdxApiConfig {
