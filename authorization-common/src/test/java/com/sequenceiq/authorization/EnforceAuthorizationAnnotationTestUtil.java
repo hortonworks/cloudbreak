@@ -74,9 +74,16 @@ public class EnforceAuthorizationAnnotationTestUtil {
         Set<Class<?>> apiClasses = EnforceAuthorizationTestUtil.getReflections().getTypesAnnotatedWith(Path.class);
         Set<String> controllersClasses = Sets.newHashSet();
         apiClasses.stream().forEach(apiClass -> controllersClasses.addAll(EnforceAuthorizationTestUtil.getReflections()
-                .getSubTypesOf((Class<Object>) apiClass).stream().map(Class::getSimpleName).collect(Collectors.toSet())));
-        Set<String> classesWithControllerAnnotation = EnforceAuthorizationTestUtil.getReflections().getTypesAnnotatedWith(Controller.class)
-                .stream().map(Class::getSimpleName).collect(Collectors.toSet());
+                .getSubTypesOf((Class<Object>) apiClass)
+                .stream()
+                .filter(e -> !e.isInterface())
+                .map(Class::getSimpleName)
+                .collect(Collectors.toSet())));
+        Set<String> classesWithControllerAnnotation = EnforceAuthorizationTestUtil.getReflections()
+                .getTypesAnnotatedWith(Controller.class)
+                .stream()
+                .map(Class::getSimpleName)
+                .collect(Collectors.toSet());
         Set<String> controllersWithoutAnnotation = Sets.difference(controllersClasses, classesWithControllerAnnotation);
 
         assertTrue("These classes are missing @Controller annotation: " + Joiner.on(",").join(controllersWithoutAnnotation),
