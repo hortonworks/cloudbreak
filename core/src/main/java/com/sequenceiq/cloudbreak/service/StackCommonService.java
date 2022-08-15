@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChange
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
@@ -288,6 +289,14 @@ public class StackCommonService {
         return flowIdentifier;
     }
 
+    public FlowIdentifier putVerticalScalingInWorkspace(NameOrCrn nameOrCrn, String accountId, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        MDCBuilder.buildMdcContext(stack);
+        stackVerticalScaleV4Request.setStackId(stack.getId());
+        validateVerticalScalingRequest(stack, stackVerticalScaleV4Request);
+        return clusterCommonService.putVerticalScaling(stack.getResourceCrn(), stackVerticalScaleV4Request);
+    }
+
     private void validateScalingRequest(StackView stack, Integer scalingAdjustment) {
         if (scalingAdjustment > 0 && !cloudParameterCache.isUpScalingSupported(stack.getCloudPlatform())) {
             throw new BadRequestException(String.format("Upscaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
@@ -296,6 +305,28 @@ public class StackCommonService {
             throw new BadRequestException(String.format("Downscaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
         }
         nodeCountLimitValidator.validateScale(stack.getId(), scalingAdjustment, Crn.safeFromString(stack.getResourceCrn()).getAccountId());
+    }
+
+    private void validateVerticalScalingRequest(StackDto stack, StackVerticalScaleV4Request verticalScaleV4Request) {
+        if (!cloudParameterCache.isVerticalScalingSupported(stack.getCloudPlatform())) {
+            throw new BadRequestException(String.format("Vertical scaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
+        }
+        if (verticalScaleV4Request.getTemplate() == null) {
+            throw new BadRequestException(String.format("Define an exiting instancetype to vertically scale the %s Data Hubs.", stack.getCloudPlatform()));
+        }
+        if (verticalScaleV4Request.getTemplate().getInstanceType() == null) {
+            throw new BadRequestException(String.format("Define an exiting instancetype to vertically scale the %s Data Hubs.", stack.getCloudPlatform()));
+        }
+        if (anyAttachedVolumePropertyDefinedInVerticalScalingRequest(verticalScaleV4Request)) {
+            throw new BadRequestException(String.format("Only instance type modification is supported on %s Data Hubs.", stack.getCloudPlatform()));
+        }
+    }
+
+    private boolean anyAttachedVolumePropertyDefinedInVerticalScalingRequest(StackVerticalScaleV4Request verticalScaleV4Request) {
+        return verticalScaleV4Request.getTemplate().getEphemeralVolume() != null
+                || verticalScaleV4Request.getTemplate().getRootVolume() != null
+                || (verticalScaleV4Request.getTemplate().getAttachedVolumes() != null && !verticalScaleV4Request.getTemplate().getAttachedVolumes().isEmpty())
+                || verticalScaleV4Request.getTemplate().getTemporaryStorage() != null;
     }
 
     public void deleteWithKerberosInWorkspace(NameOrCrn nameOrCrn, String accountId, boolean forced) {

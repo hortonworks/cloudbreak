@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRota
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
@@ -147,8 +148,23 @@ public class ClusterCommonService {
         return flowIdentifier;
     }
 
+    public FlowIdentifier putVerticalScaling(String crn, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+        Stack stack = stackService.getByCrn(crn);
+        stack = stackService.getByIdWithLists(stack.getId());
+        Long stackId = stack.getId();
+        MDCBuilder.buildMdcContext(stack);
+        FlowIdentifier flowIdentifier;
+        if (stackVerticalScaleV4Request != null) {
+            flowIdentifier = verticalScalingOnStack(stackId, stack, stackVerticalScaleV4Request);
+        } else {
+            LOGGER.info("Invalid cluster update request received. Stack id: {}", stackId);
+            throw new BadRequestException("Invalid update cluster request!");
+        }
+        return flowIdentifier;
+    }
+
     private FlowIdentifier clusterHostgroupAdjustmentChange(Long stackId, UpdateClusterV4Request updateJson, StackDto stack) {
-        if (!stack.getStack().isAvailable() && !stack.getStack().hasNodeFailure()) {
+        if (!stack.isAvailable() && !stack.getStack().hasNodeFailure()) {
             throw new BadRequestException(String.format(
                     "Stack '%s' is currently in '%s' status. Cluster scale can only be made " +
                             "if the underlying stack status is 'AVAILABLE' or 'NODE_FAILURE'.", stackId, stack.getStatus()));
@@ -197,6 +213,15 @@ public class ClusterCommonService {
         LOGGER.debug("Cluster username password update request received. Stack id: {}, name: {}, username: {}",
                 stack.getId(), stack.getName(), userNamePasswordJson.getUserName());
         return clusterOperationService.updateUserNamePassword(stack.getId(), userNamePasswordJson);
+    }
+
+    private FlowIdentifier verticalScalingOnStack(Long stackId, Stack stack, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+        if (!stack.isStackInStopPhase()) {
+            throw new BadRequestException(String.format(
+                    "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
+                    stack.getStatus()));
+        }
+        return clusterOperationService.verticalScale(stackId, stackVerticalScaleV4Request);
     }
 
     public FlowIdentifier setMaintenanceMode(StackView stack, MaintenanceModeStatus maintenanceMode) {

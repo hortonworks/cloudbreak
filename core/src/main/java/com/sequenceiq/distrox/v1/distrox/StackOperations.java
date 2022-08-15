@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Requ
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
@@ -276,6 +277,10 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     public FlowIdentifier putScaling(@NotNull NameOrCrn nameOrCrn, String accountId, @Valid StackScaleV4Request updateRequest) {
         return stackCommonService.putScalingInWorkspace(nameOrCrn, accountId, updateRequest);
+    }
+
+    public FlowIdentifier putVerticalScaling(@NotNull NameOrCrn nameOrCrn, String accountId, @Valid StackVerticalScaleV4Request updateRequest) {
+        return stackCommonService.putVerticalScalingInWorkspace(nameOrCrn, accountId, updateRequest);
     }
 
     public FlowIdentifier repairCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid ClusterRepairV4Request clusterRepairRequest) {

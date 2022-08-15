@@ -55,6 +55,8 @@ class InstanceTemplateV1ToInstanceTemplateV4ConverterTest {
                 .thenReturn(null);
         when(instanceTemplateParameterConverter.convert(any(AzureInstanceTemplateV1Parameters.class), eq(environment)))
                 .thenReturn(azureInstanceTemplateV4Parameters);
+        when(instanceTemplateParameterConverter.convert(any(AwsInstanceTemplateV1Parameters.class), any(DetailedEnvironmentResponse.class)))
+                .thenReturn(new AwsInstanceTemplateV4Parameters());
 
         InstanceTemplateV4Request instanceTemplateV4Request = underTest.convert(source, environment);
 
@@ -76,6 +78,9 @@ class InstanceTemplateV1ToInstanceTemplateV4ConverterTest {
 
         RootVolumeV4Request rootVolumeV4Request = new RootVolumeV4Request();
         when(volumeConverter.convert(rootVolumeV1Request)).thenReturn(rootVolumeV4Request);
+
+        when(instanceTemplateParameterConverter.convert(any(AwsInstanceTemplateV1Parameters.class), any(DetailedEnvironmentResponse.class)))
+                .thenReturn(new AwsInstanceTemplateV4Parameters());
 
         AzureInstanceTemplateV4Parameters azureInstanceTemplateV4Parameters = new AzureInstanceTemplateV4Parameters();
         when(instanceTemplateParameterConverter.convert(any(AwsInstanceTemplateV1Parameters.class), eq(environment))).thenReturn(null);

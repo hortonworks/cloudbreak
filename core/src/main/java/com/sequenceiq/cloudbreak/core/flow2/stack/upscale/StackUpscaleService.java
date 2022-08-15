@@ -42,6 +42,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowCont
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -215,6 +217,16 @@ public class StackUpscaleService {
         }
     }
 
+    public List<CloudResourceStatus> verticalScale(AuthenticatedContext ac, CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
+            CloudConnector connector) throws Exception {
+        CloudStack cloudStack = request.getCloudStack();
+        try {
+            return connector.resources().update(ac, cloudStack, request.getResourceList());
+        } catch (Exception e) {
+            return handleExceptionAndRetryUpdate(request, connector, ac, cloudStack, e);
+        }
+    }
+
     private List<CloudResourceStatus> handleQuotaExceptionAndRetryUpscale(UpscaleStackRequest<UpscaleStackResult> request, CloudConnector connector,
             AuthenticatedContext ac, CloudStack cloudStack, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold,
             QuotaExceededException quotaExceededException) throws QuotaExceededException {
@@ -225,6 +237,15 @@ public class StackUpscaleService {
         decreaseInstances(groups, removableNodeCount);
         return connector.resources().upscale(ac, cloudStack, request.getResourceList(),
                 adjustmentTypeWithThreshold);
+    }
+
+    private List<CloudResourceStatus> handleExceptionAndRetryUpdate(CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
+                                                                    CloudConnector connector,
+                                                                    AuthenticatedContext ac, CloudStack cloudStack,
+                                                                    Exception e) throws Exception {
+        flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
+                e.getMessage());
+        return connector.resources().update(ac, cloudStack, request.getResourceList());
     }
 
     private int getRemovableNodeCount(AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, QuotaExceededException quotaExceededException,

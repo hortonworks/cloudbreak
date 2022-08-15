@@ -126,6 +126,14 @@ public class InstanceGroupService {
         return new ArrayList<>(repository.findAllInstanceGroupViewByStackIdAndGroupNames(stackId, groupNames));
     }
 
+    public Optional<InstanceGroup> findOneByStackIdAndGroupNameWithTemplate(Long stackId, String groupName) {
+        return repository.getByStackIdAndInstanceGroupNameWithFetchTemplate(stackId, groupName);
+    }
+
+    public Optional<InstanceGroup> findInstanceGroupInStackByHostName(Long stackId, String hostName) {
+        return repository.findInstanceGroupInStackByHostName(stackId, hostName);
+    }
+
     public InstanceGroup save(InstanceGroup instanceGroup) {
         return repository.save(instanceGroup);
     }
