@@ -3,8 +3,6 @@ package com.sequenceiq.consumption.endpoint;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -80,7 +78,7 @@ public class ConsumptionInternalV1ControllerTest {
 
         underTest.scheduleStorageConsumptionCollection(ACCOUNT_ID, request, INITIATOR_USER_CRN);
 
-        verify(jobService, never()).schedule(anyLong());
+        verify(jobService, never()).schedule(any(Consumption.class));
     }
 
     @Test
@@ -89,11 +87,12 @@ public class ConsumptionInternalV1ControllerTest {
         ConsumptionCreationDto consumptionCreationDto = consumptionCreationDto(LOCATION);
 
         when(consumptionApiConverter.initCreationDtoForStorage(request)).thenReturn(consumptionCreationDto);
-        when(consumptionService.create(consumptionCreationDto)).thenReturn(Optional.of(consumption()));
+        Consumption consumption = consumption();
+        when(consumptionService.create(consumptionCreationDto)).thenReturn(Optional.of(consumption));
 
         underTest.scheduleStorageConsumptionCollection(ACCOUNT_ID, request, INITIATOR_USER_CRN);
 
-        verify(jobService).schedule(CONSUMPTION_ID);
+        verify(jobService).schedule(consumption);
     }
 
     @Test
@@ -102,7 +101,7 @@ public class ConsumptionInternalV1ControllerTest {
 
         underTest.unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_CRN, LOCATION, INITIATOR_USER_CRN);
 
-        verify(jobService, never()).unschedule(anyString());
+        verify(jobService, never()).unschedule(any(Consumption.class));
         verify(consumptionService, never()).delete(any(Consumption.class));
     }
 
@@ -113,7 +112,7 @@ public class ConsumptionInternalV1ControllerTest {
 
         underTest.unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_CRN, LOCATION, INITIATOR_USER_CRN);
 
-        verify(jobService).unschedule("123");
+        verify(jobService).unschedule(consumption);
         verify(consumptionService).delete(consumption);
     }
 

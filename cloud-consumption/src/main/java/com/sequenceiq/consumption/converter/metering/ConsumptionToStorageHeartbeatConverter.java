@@ -1,5 +1,7 @@
 package com.sequenceiq.consumption.converter.metering;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,11 +18,14 @@ public class ConsumptionToStorageHeartbeatConverter {
 
     private static final long NO_BYTE_IN_MB = 1000L * 1000L;
 
+    @Inject
+    private CloudStorageLocationUtil cloudStorageLocationUtil;
+
     public MeteringEventsProto.StorageHeartbeat convertToS3StorageHeartBeat(Consumption consumption, StorageConsumptionResult storage) {
         MeteringEventsProto.StorageHeartbeat.Builder storageHeartbeatBuilder = MeteringEventsProto.StorageHeartbeat.newBuilder();
 
         MeteringEventsProto.Storage.Builder storageBuilder = MeteringEventsProto.Storage.newBuilder();
-        storageBuilder.setId(CloudStorageLocationUtil.getS3BucketName(consumption.getStorageLocation()));
+        storageBuilder.setId(cloudStorageLocationUtil.getS3BucketName(consumption.getStorageLocation()));
         storageBuilder.setSizeInMB(storage.getStorageInBytes() / NO_BYTE_IN_MB);
         storageBuilder.setType(MeteringEventsProto.StorageType.Value.S3);
         storageHeartbeatBuilder.addStorages(storageBuilder.build());
