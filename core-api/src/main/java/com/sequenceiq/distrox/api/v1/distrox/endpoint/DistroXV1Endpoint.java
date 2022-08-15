@@ -47,6 +47,8 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.STO
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.STOP_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SYNC_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SYNC_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.VERTICAL_SCALE_BY_CRN;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.VERTICAL_SCALE_BY_NAME;
 
 import java.util.List;
 import java.util.Set;
@@ -93,6 +95,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Reque
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXVerticalScaleV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.MultipleInstanceDeleteRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.docs.DiagnosticsOperationDescriptions;
@@ -270,6 +273,22 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = SCALE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "putScalingDistroXV1ByCrn")
     void putScalingByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn, @Valid DistroXScaleV1Request updateRequest);
+
+    @PUT
+    @Path("name/{name}/vertical_scaling")
+    @ApiOperation(value = VERTICAL_SCALE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "putVerticalScalingDistroXV1ByName")
+    FlowIdentifier putVerticalScalingByName(
+            @PathParam("name") String name,
+            @Valid DistroXVerticalScaleV1Request updateRequest);
+
+    @PUT
+    @Path("crn/{crn}/vertical_scaling")
+    @ApiOperation(value = VERTICAL_SCALE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "putVerticalScalingDistroXV1ByCrn")
+    FlowIdentifier putVerticalScalingByCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+            @Valid DistroXVerticalScaleV1Request updateRequest);
 
     @POST
     @Path("name/{name}/manual_repair")

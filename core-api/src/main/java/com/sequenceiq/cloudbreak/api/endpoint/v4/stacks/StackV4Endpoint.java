@@ -58,6 +58,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_LOAD_BALANCERS;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_LOAD_BALANCER_DNS_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPGRADE_CLUSTER_IN_WORKSPACE;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.VERTICAL_SCALE_BY_NAME;
 
 import java.util.List;
 import java.util.Set;
@@ -86,6 +87,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
@@ -648,4 +650,15 @@ public interface StackV4Endpoint {
     @ApiOperation(value = RE_REGISTER_CLUSTER_PROXY_CONFIG, nickname = "reRegisterClusterProxyConfig")
     FlowIdentifier reRegisterClusterProxyConfig(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
+    @Path("internal/{name}/vertical_scaling")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = VERTICAL_SCALE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "putVerticalScalingStackByNameInternal")
+    FlowIdentifier putVerticalScalingByNameInternal(
+            @PathParam("workspaceId") Long workspaceId,
+            @PathParam("name") String name,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn,
+            @Valid StackVerticalScaleV4Request updateRequest);
 }

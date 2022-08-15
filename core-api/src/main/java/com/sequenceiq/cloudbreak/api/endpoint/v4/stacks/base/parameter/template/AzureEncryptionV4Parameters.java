@@ -25,7 +25,7 @@ public class AzureEncryptionV4Parameters extends EncryptionParametersV4Base {
         this.diskEncryptionSetId = diskEncryptionSetId;
     }
 
-    public Boolean isEncryptionAtHostEnabled() {
+    public Boolean getEncryptionAtHostEnabled() {
         return encryptionAtHostEnabled;
     }
 

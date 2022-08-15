@@ -4,7 +4,6 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.Range;
-import org.apache.commons.lang3.StringUtils;
 
 public class StackNameLengthValidator implements ConstraintValidator<ValidStackNameLength, String> {
 
@@ -14,9 +13,6 @@ public class StackNameLengthValidator implements ConstraintValidator<ValidStackN
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (!StringUtils.isEmpty(value)) {
-            return Range.between(MIN_LENGTH, MAX_LENGTH).contains(value.length());
-        }
-        return false;
+        return value != null && Range.between(MIN_LENGTH, MAX_LENGTH).contains(value.length());
     }
 }
