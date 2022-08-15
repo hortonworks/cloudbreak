@@ -1,11 +1,11 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 
 @Component
 public class EnvironmentAccessCheckerFactory {

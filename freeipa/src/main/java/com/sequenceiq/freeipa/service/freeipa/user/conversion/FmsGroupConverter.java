@@ -1,11 +1,12 @@
 package com.sequenceiq.freeipa.service.freeipa.user.conversion;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
+import org.springframework.stereotype.Component;
+
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.base.Strings;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
-import org.springframework.stereotype.Component;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 @Component
 public class FmsGroupConverter {

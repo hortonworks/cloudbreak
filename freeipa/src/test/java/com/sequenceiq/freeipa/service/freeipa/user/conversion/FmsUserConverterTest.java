@@ -1,14 +1,15 @@
 package com.sequenceiq.freeipa.service.freeipa.user.conversion;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
-import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.Test;
+
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 
 class FmsUserConverterTest {
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();

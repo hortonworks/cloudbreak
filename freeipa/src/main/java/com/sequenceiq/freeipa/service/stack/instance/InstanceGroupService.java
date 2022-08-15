@@ -27,6 +27,10 @@ public class InstanceGroupService {
         return repository.findOneByGroupNameInStack(stackId, groupName);
     }
 
+    public Optional<InstanceGroup> getByStackIdAndInstanceGroupNameWithFetchTemplate(Long stackId, String groupName) {
+        return repository.findOneByGroupNameInStack(stackId, groupName);
+    }
+
     public InstanceGroup save(InstanceGroup instanceGroup) {
         return repository.save(instanceGroup);
     }

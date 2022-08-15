@@ -1,12 +1,13 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
-import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
-import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
-import org.springframework.stereotype.Component;
+import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 
-import static java.util.Objects.requireNonNull;
+import org.springframework.stereotype.Component;
+
+import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 
 @Component
 public class AuthorizationRightChecksFactory {

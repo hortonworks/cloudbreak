@@ -9,9 +9,9 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
-import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 
 @Entity
 public class UserSyncStatus implements AccountIdAwareResource {

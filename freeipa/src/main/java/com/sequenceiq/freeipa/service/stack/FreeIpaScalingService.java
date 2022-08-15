@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.RUNNING;
+import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIPAVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.ScaleRequestBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.ScalingPath;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleRequest;
@@ -31,6 +34,7 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
+import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIPAVerticalScalingTriggerEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
@@ -58,6 +62,12 @@ public class FreeIpaScalingService {
         logRequest(OperationType.UPSCALE, request, originalAvailabilityType);
         validationService.validateStackForUpscale(allInstances, stack, new ScalingPath(originalAvailabilityType, request.getTargetAvailabilityType()));
         return triggerUpscale(request, stack, originalAvailabilityType);
+    }
+
+    public FreeIPAVerticalScaleResponse verticalScale(String accountId, String environmentCrn, FreeIPAVerticalScaleRequest request) {
+        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
+        validationService.validateStackForVerticalUpscale(stack, request);
+        return triggerVerticalScale(request, stack);
     }
 
     private void logRequest(OperationType operationType, ScaleRequestBase request, AvailabilityType originalAvailabilityType) {
@@ -92,10 +102,32 @@ public class FreeIpaScalingService {
         }
     }
 
+    private FreeIPAVerticalScaleResponse triggerVerticalScale(FreeIPAVerticalScaleRequest request, Stack stack) {
+        try {
+            String selector = STACK_VERTICALSCALE_EVENT.event();
+            FreeIPAVerticalScalingTriggerEvent event = new FreeIPAVerticalScalingTriggerEvent(selector, stack.getId(), request);
+            LOGGER.info("Trigger vertical scale flow with event: {}", event);
+            FlowIdentifier flowIdentifier = flowManager.notify(STACK_VERTICALSCALE_EVENT.event(), event);
+            FreeIPAVerticalScaleResponse response = new FreeIPAVerticalScaleResponse();
+            response.setRequest(request);
+            response.setFlowIdentifier(flowIdentifier);
+            return response;
+        } catch (Exception e) {
+            String exception = handleFlowException(e, stack);
+            throw new BadRequestException(exception);
+        }
+    }
+
     private String handleFlowException(Operation operation, Exception e, Stack stack) {
-        String message = String.format("Couldn't start %s flow: %s", operation.getOperationType().name().toLowerCase(), e.getMessage());
+        String message = String.format("Couldn't start %s flow (operation-id): %s", operation.getOperationType().name().toLowerCase(), e.getMessage());
         LOGGER.error(message, e);
         operationService.failOperation(stack.getAccountId(), operation.getOperationId(), message);
+        return message;
+    }
+
+    private String handleFlowException(Exception e, Stack stack) {
+        String message = String.format("Couldn't start operation on %s FreeIPA: %s", stack.getName(), e.getMessage());
+        LOGGER.error(message, e);
         return message;
     }
 

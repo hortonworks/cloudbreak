@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
+
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.service.FlowService;
 

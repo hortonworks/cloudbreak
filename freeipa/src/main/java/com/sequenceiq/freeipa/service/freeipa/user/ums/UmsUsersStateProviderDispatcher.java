@@ -6,13 +6,13 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 
 @Service
 public class UmsUsersStateProviderDispatcher {

@@ -1,9 +1,7 @@
 package com.sequenceiq.freeipa.service.filter;
 
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.freeipa.entity.Network;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,8 +9,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.freeipa.entity.Network;
 
 public class GcpNetworkFilterProviderTest {
 

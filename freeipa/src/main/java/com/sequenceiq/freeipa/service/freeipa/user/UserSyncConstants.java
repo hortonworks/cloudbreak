@@ -1,12 +1,12 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 
 public final class UserSyncConstants {
 

@@ -60,6 +60,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
@@ -436,4 +438,14 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public FreeIpaRecommendationResponse getRecommendation(String credentialCrn, String region, String availabilityZone) {
         return freeIpaRecommendationService.getRecommendation(credentialCrn, region, availabilityZone);
     }
+
+    @Override
+    @InternalOnly
+    public FreeIPAVerticalScaleResponse putVerticalScalingFreeIPAV1ByEnvironmentCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn,
+            @RequestObject @Valid @NotNull FreeIPAVerticalScaleRequest updateRequest) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        return freeIpaScalingService.verticalScale(accountId, environmentCrn, updateRequest);
+    }
+
 }

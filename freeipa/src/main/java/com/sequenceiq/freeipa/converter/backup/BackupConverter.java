@@ -1,16 +1,16 @@
 package com.sequenceiq.freeipa.converter.backup;
 
-import com.sequenceiq.common.api.backup.request.BackupRequest;
-import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
-import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
+import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.configuration.BackupConfiguration;
 

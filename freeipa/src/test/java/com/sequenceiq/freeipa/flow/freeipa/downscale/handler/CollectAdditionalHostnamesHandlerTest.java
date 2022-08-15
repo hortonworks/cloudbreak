@@ -7,11 +7,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.sequenceiq.freeipa.client.FreeIpaClient;
-import com.sequenceiq.freeipa.client.model.IpaServer;
-import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesRequest;
-import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesResponse;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -19,10 +16,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.sequenceiq.freeipa.client.FreeIpaClient;
+import com.sequenceiq.freeipa.client.model.IpaServer;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesRequest;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesResponse;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
-import java.util.Set;
 
 @ExtendWith(MockitoExtension.class)
 class CollectAdditionalHostnamesHandlerTest {

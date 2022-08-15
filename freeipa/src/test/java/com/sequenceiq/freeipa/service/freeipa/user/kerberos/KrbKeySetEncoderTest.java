@@ -2,9 +2,9 @@ package com.sequenceiq.freeipa.service.freeipa.user.kerberos;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
-
 import org.junit.jupiter.api.Test;
+
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 
 public class KrbKeySetEncoderTest {
 
