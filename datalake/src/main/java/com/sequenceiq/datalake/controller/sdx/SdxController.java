@@ -1,8 +1,8 @@
 package com.sequenceiq.datalake.controller.sdx;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CREDENTIAL;
-import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATALAKE;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 
@@ -30,7 +30,9 @@ import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
+<<<<<<< HEAD
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
@@ -57,6 +59,7 @@ import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxRetryService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.StorageValidationService;
+import com.sequenceiq.datalake.service.sdx.VerticalScaleService;
 import com.sequenceiq.datalake.service.sdx.cert.CertRenewalService;
 import com.sequenceiq.datalake.service.sdx.cert.CertRotationService;
 import com.sequenceiq.datalake.service.sdx.start.SdxStartService;
@@ -131,6 +134,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private SdxRecommendationService sdxRecommendationService;
+
+    @Inject
+    private VerticalScaleService verticalScaleService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -457,6 +463,22 @@ public class SdxController implements SdxEndpoint {
         SdxCluster sdxCluster = sdxService.getByCrn(initiatorUserCrn, crn);
         Optional<String> unstoppableReason = sdxStopService.checkIfStoppable(sdxCluster);
         return new SdxStopValidationResponse(unstoppableReason.isEmpty(), unstoppableReason.orElse(null));
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
+    public FlowIdentifier verticalScalingByCrn(@ResourceCrn @TenantAwareParam String crn, @Valid StackVerticalScaleV4Request updateRequest) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getByCrn(crn);
+        return verticalScaleService.verticalScaleDatalake(sdxCluster, updateRequest, userCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATALAKE)
+    public FlowIdentifier verticalScalingByName(@ResourceName String name, @Valid StackVerticalScaleV4Request updateRequest) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);
+        return verticalScaleService.verticalScaleDatalake(sdxCluster, updateRequest, userCrn);
     }
 
     private SdxCluster getSdxClusterByName(String name) {

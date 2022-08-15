@@ -95,9 +95,9 @@ public class ResizeRecoveryService implements RecoveryService {
     public SdxRecoveryResponse triggerRecovery(SdxCluster sdxCluster, SdxRecoveryRequest sdxRecoveryRequest) {
         Optional<SdxCluster> detachedCluster = getDetachedCluster(sdxCluster);
         if (detachedCluster.isPresent()) {
-            return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(detachedCluster.get(), sdxCluster));
+            return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(detachedCluster.get(), Optional.ofNullable(sdxCluster)));
         }
-        return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(sdxCluster, null));
+        return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(sdxCluster, Optional.empty()));
     }
 
     private Optional<SdxCluster> getDetachedCluster(SdxCluster cluster) {
