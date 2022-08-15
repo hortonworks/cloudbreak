@@ -95,6 +95,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
 import static java.util.Collections.newSetFromMap;
 import static java.util.Optional.ofNullable;
@@ -349,6 +350,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.ccmv2.upgradeToV2Jumpgate.enable}")
     private boolean ccmV2UpgradeToV2JumpgateEnabled;
+
+    @Value("${auth.mock.verticalScaleEnabled.enable}")
+    private boolean verticalScaleEnabled;
 
     @Value("${auth.mock.microdutysdx.enable}")
     private boolean microDutySdxEnabled;
@@ -816,6 +820,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (ccmV2JumpgateEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CCM_V2_JUMPGATE));
+        }
+        if (verticalScaleEnabled) {
+            builder.addEntitlements(createEntitlement(VERTICAL_SCALE));
         }
         if (ccmV2UseOneWayTls) {
             builder.addEntitlements(createEntitlement(CDP_CCM_V2_USE_ONE_WAY_TLS));

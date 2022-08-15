@@ -100,6 +100,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH_ONE_HOUR_TOKEN;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PERSONAL_VIEW_CB_BY_RIGHT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
 
 import java.util.List;
@@ -324,6 +325,10 @@ public class EntitlementService {
 
     public boolean ccmV2JumpgateEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CCM_V2_JUMPGATE);
+    }
+
+    public boolean verticalScaleEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, VERTICAL_SCALE);
     }
 
     public boolean ccmV1ToV2JumpgateUpgradeEnabled(String accountId) {
