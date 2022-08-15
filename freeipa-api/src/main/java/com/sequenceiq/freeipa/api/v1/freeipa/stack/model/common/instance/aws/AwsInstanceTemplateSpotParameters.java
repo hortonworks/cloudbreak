@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws;
 
+import java.io.Serializable;
+
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
@@ -11,7 +13,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "AwsInstanceTemplateSpotParameters")
-public class AwsInstanceTemplateSpotParameters {
+public class AwsInstanceTemplateSpotParameters implements Serializable {
 
     @ApiModelProperty(FreeIpaModelDescriptions.AWS_SPOT_PERCENTAGE)
     @Min(value = 0, message = "Spot percentage must be between 0 and 100 percent")

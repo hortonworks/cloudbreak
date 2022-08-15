@@ -4,6 +4,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDe
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.LIST_RETRYABLE_FLOWS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.RETRY;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.UPDATE_SALT;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.VERTICAL_SCALE_BY_CRN;
 
 import java.util.List;
 
@@ -47,6 +48,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.FreeIPAVerticalScaleResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
@@ -302,4 +305,14 @@ public interface FreeIpaV1Endpoint {
             @ValidCrn(resource = CrnResourceDescriptor.CREDENTIAL) @QueryParam("credentialCrn") @NotEmpty String credentialCrn,
             @QueryParam("region") @NotEmpty String region,
             @QueryParam("availabilityZone") String availabilityZone);
+
+    @PUT
+    @Path("vertical_scaling")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = VERTICAL_SCALE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "putVerticalScalingFreeIPAV1ByEnvironmentCrn")
+    FreeIPAVerticalScaleResponse putVerticalScalingFreeIPAV1ByEnvironmentCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
+            @Valid @NotNull FreeIPAVerticalScaleRequest updateRequest);
+
 }

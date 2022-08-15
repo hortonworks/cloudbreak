@@ -2,9 +2,11 @@ package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.TemplateModelDescription;
 
+import java.io.Serializable;
+
 import io.swagger.annotations.ApiModelProperty;
 
-public abstract class VolumeBase {
+public abstract class VolumeBase implements Serializable {
     @ApiModelProperty(TemplateModelDescription.VOLUME_COUNT)
     private Integer count;
 
