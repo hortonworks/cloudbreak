@@ -54,7 +54,7 @@ public class ConsumptionInternalV1Controller implements ConsumptionInternalEndpo
         LOGGER.info("Registering storage consumption collection for resource with CRN [{}] and location [{}]",
                 consumptionCreationDto.getMonitoredResourceCrn(), consumptionCreationDto.getStorageLocation());
         Optional<Consumption> consumptionOpt = consumptionService.create(consumptionCreationDto);
-        consumptionOpt.ifPresent(consumption -> jobService.schedule(consumption.getId()));
+        consumptionOpt.ifPresent(jobService::schedule);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class ConsumptionInternalV1Controller implements ConsumptionInternalEndpo
         Optional<Consumption> consumptionOpt =
                 consumptionService.findStorageConsumptionByMonitoredResourceCrnAndLocation(monitoredResourceCrn, storageLocation);
         consumptionOpt.ifPresent(consumption -> {
-            jobService.unschedule(consumption.getId().toString());
+            jobService.unschedule(consumption);
             consumptionService.delete(consumption);
         });
     }

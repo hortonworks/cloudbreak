@@ -62,6 +62,9 @@ public class StorageConsumptionCollectionHandler  extends AbstractStorageOperati
     @Inject
     private EnvironmentService environmentService;
 
+    @Inject
+    private CloudStorageLocationUtil cloudStorageLocationUtil;
+
     @Override
     public Selectable executeOperation(HandlerEvent<StorageConsumptionCollectionHandlerEvent> event) throws Exception {
         StorageConsumptionCollectionHandlerEvent data = event.getData();
@@ -76,8 +79,8 @@ public class StorageConsumptionCollectionHandler  extends AbstractStorageOperati
             String cloudPlatform = detailedEnvironmentResponse.getCloudPlatform();
             if (cloudPlatform.equals(CloudPlatform.AWS.name())) {
                 LOGGER.debug("Validating storage location '{}'.", consumption.getStorageLocation());
-                CloudStorageLocationUtil.validateCloudStorageType(FileSystemType.S3, consumption.getStorageLocation());
-                String bucketName = CloudStorageLocationUtil.getS3BucketName(consumption.getStorageLocation());
+                cloudStorageLocationUtil.validateCloudStorageType(FileSystemType.S3, consumption.getStorageLocation());
+                String bucketName = cloudStorageLocationUtil.getS3BucketName(consumption.getStorageLocation());
 
                 LOGGER.debug("Getting credential for environment with CRN '{}'.", environmentCrn);
                 Credential credential = credentialService.getCredentialByEnvCrn(environmentCrn);
