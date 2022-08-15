@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.freeipa.api.FreeIpaApi;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.FreeIpaUpgradeV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
@@ -111,5 +112,11 @@ public class FreeIpaApiClientConfig {
     @ConditionalOnBean(name = "freeIpaApiClientWebTarget")
     RecipeV1Endpoint recipeV1Endpoint(WebTarget freeIpaApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(freeIpaApiClientWebTarget, RecipeV1Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "freeIpaApiClientWebTarget")
+    FreeIpaV1FlowEndpoint freeIpaV1FlowEndpoint(WebTarget freeIpaApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(freeIpaApiClientWebTarget, FreeIpaV1FlowEndpoint.class);
     }
 }

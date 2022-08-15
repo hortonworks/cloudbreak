@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.api.client;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.test.ClientTestV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
@@ -31,4 +32,6 @@ public interface FreeIpaApiEndpoint {
     UtilV1Endpoint getUtilV1Endpoint();
 
     RecipeV1Endpoint getRecipeV1Endpoint();
+
+    FreeIpaV1FlowEndpoint getFreeIpaV1FlowEndpoint();
 }
