@@ -256,6 +256,7 @@ public class ClusterService {
                 Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
                 clusterApiConnectors.getConnector(stackDto).clusterModificationService().cleanupCluster(telemetry);
                 altusMachineUserService.clearFluentMachineUser(stack, stackDto.getCluster(), telemetry);
+                altusMachineUserService.clearMonitoringMachineUser(stack, stackDto.getCluster(), telemetry);
             } catch (CloudbreakServiceException se) {
                 LOGGER.error("Cluster specific cleanup failed during obtaining telemetry component.", se);
             } catch (CloudbreakException e) {
@@ -463,6 +464,12 @@ public class ClusterService {
     public void updateDatabusCredentialByClusterId(Long clusterId, String databusCredentialJsonString) {
         Cluster cluster = repository.findById(clusterId).orElseThrow(NotFoundException.notFound("Cluster", clusterId));
         cluster.setDatabusCredential(databusCredentialJsonString);
+        updateCluster(cluster);
+    }
+
+    public void updateMonitoringCredentialByClusterId(Long clusterId, String databusCredentialJsonString) {
+        Cluster cluster = repository.findById(clusterId).orElseThrow(NotFoundException.notFound("Cluster", clusterId));
+        cluster.setMonitoringCredential(databusCredentialJsonString);
         updateCluster(cluster);
     }
 

@@ -125,6 +125,7 @@ import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
+import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Component
@@ -537,15 +538,9 @@ public class ClusterHostServiceRunner {
         StackView stack = stackDto.getStack();
         ClusterView cluster = stackDto.getCluster();
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
-        DataBusCredential dataBusCredential = null;
-        if (StringUtils.isNotBlank(cluster.getDatabusCredential())) {
-            try {
-                dataBusCredential = new Json(cluster.getDatabusCredential()).get(DataBusCredential.class);
-            } catch (IOException e) {
-                LOGGER.error("Cannot read DataBus secrets from cluster entity. Continue without databus secrets", e);
-            }
-        }
-        telemetryDecorator.decoratePillar(servicePillar, stack, cluster, telemetry, dataBusCredential);
+        DataBusCredential dataBusCredential = convertOrReturnNull(cluster.getDatabusCredential(), DataBusCredential.class);
+        MonitoringCredential monitoringCredential = convertOrReturnNull(cluster.getMonitoringCredential(), MonitoringCredential.class);
+        telemetryDecorator.decoratePillar(servicePillar, stack, cluster, telemetry, dataBusCredential, monitoringCredential);
         decoratePillarWithTags(stack, servicePillar);
         decorateWithClouderaManagerEntrerpriseDetails(telemetry, servicePillar);
         Optional<String> licenseOpt = decoratePillarWithClouderaManagerLicense(stack, servicePillar);
@@ -555,6 +550,17 @@ public class ClusterHostServiceRunner {
         decoratePillarWithClouderaManagerAutoTls(cluster, servicePillar);
         csdParcelDecorator.decoratePillarWithCsdParcels(stackDto, servicePillar);
         servicePillar.putAll(createPillarWithClouderaManagerSettings(clouderaManagerRepo, stackDto, primaryGatewayConfig));
+    }
+
+    private <T> T convertOrReturnNull(String value, Class<T> type) {
+        if (StringUtils.isNotBlank(value)) {
+            try {
+                return new Json(value).get(type);
+            } catch (IOException e) {
+                LOGGER.error("Cannot read {} from cluster entity. Continue without value.", type.getSimpleName(), e);
+            }
+        }
+        return null;
     }
 
     private VirtualGroupRequest getVirtualGroupRequest(String virtualGroupsEnvironmentCrn, Optional<LdapView> ldapView) {

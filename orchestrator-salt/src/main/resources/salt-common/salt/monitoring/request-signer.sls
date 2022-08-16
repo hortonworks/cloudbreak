@@ -1,5 +1,5 @@
 {%- from 'monitoring/settings.sls' import monitoring with context %}
-{%- if monitoring.enabled and monitoring.requestSignerEnabled and monitoring.databusEnabled %}
+{%- if monitoring.enabled and monitoring.requestSignerEnabled %}
 {% set request_signer_installed = salt['file.directory_exists' ]('/opt/cdp-request-signer/bin') %}
 {%- if not request_signer_installed %}
 install_request_signer:
@@ -12,9 +12,9 @@ generate_request_signer_cert_and_key:
   cmd.run:
     - name: "/opt/salt/scripts/cert-helper.sh -b /opt/cdp-request-signer/conf/request-signer"
 
-/opt/cdp-request-signer/conf/databus_credential:
+/opt/cdp-request-signer/conf/monitoring_credential:
   file.managed:
-    - source: salt://monitoring/template/databus_credential.j2
+    - source: salt://monitoring/template/monitoring_credential.j2
     - template: jinja
     - user: "root"
     - group: "root"
@@ -43,4 +43,5 @@ start_cdp_request_signer:
     - watch:
       - file: /etc/systemd/system/cdp-request-signer.service
       - file: /opt/cdp-request-signer/conf/cdp-request-signer.yaml
+      - file: /opt/cdp-request-signer/conf/monitoring_credential
 {%- endif %}

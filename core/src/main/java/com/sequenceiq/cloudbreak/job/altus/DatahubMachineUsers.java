@@ -8,10 +8,13 @@ public class DatahubMachineUsers {
 
     private final String telemetryPublisherUser;
 
-    public DatahubMachineUsers(String accountId, String fluentUser, String telemetryPublisherUser) {
+    private final String monitoringUser;
+
+    public DatahubMachineUsers(String accountId, String fluentUser, String telemetryPublisherUser, String monitoringUser) {
         this.accountId = accountId;
         this.fluentUser = fluentUser;
         this.telemetryPublisherUser = telemetryPublisherUser;
+        this.monitoringUser = monitoringUser;
     }
 
     public String getAccountId() {
@@ -24,5 +27,9 @@ public class DatahubMachineUsers {
 
     public String getTelemetryPublisherUser() {
         return telemetryPublisherUser;
+    }
+
+    public String getMonitoringUser() {
+        return monitoringUser;
     }
 }

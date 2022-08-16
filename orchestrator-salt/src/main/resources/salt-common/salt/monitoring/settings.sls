@@ -46,13 +46,8 @@
 {% set request_signer_token_validity_min = salt['pillar.get']('monitoring:requestSignerTokenValidityMin', 60) %}
 {% set request_signer_user = salt['pillar.get']('monitoring:requestSignerUser', 'signer') %}
 
-{% if salt['pillar.get']('databus:enabled') %}
-    {% set databus_enabled = True %}
-{% else %}
-    {% set databus_enabled = False %}
-{% endif %}
-{% set databus_access_key_id = salt['pillar.get']('databus:accessKeyId') %}
-{% set databus_access_key_secret = salt['pillar.get']('databus:accessKeySecret') %}
+{% set monitoring_access_key_id = salt['pillar.get']('monitoring:monitoringAccessKeyId') %}
+{% set monitoring_access_key_secret = salt['pillar.get']('monitoring:monitoringPrivateKey') %}
 
 {%- if use_dev_stack %}
   {%- if salt['pillar.get']('cloudera-manager:address') %}
@@ -103,7 +98,6 @@
     "requestSignerUseToken" : request_signer_use_token,
     "requestSignerTokenValidityMin" : request_signer_token_validity_min,
     "requestSignerUser" : request_signer_user,
-    "databusEnabled": databus_enabled,
-    "databusAccessKeyId": databus_access_key_id,
-    "databusAccessKeySecret": databus_access_key_secret
+    "monitoringAccessKeyId": monitoring_access_key_id,
+    "monitoringPrivateKey": monitoring_access_key_secret
 }) %}

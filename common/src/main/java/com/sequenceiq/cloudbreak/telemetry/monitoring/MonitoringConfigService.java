@@ -21,8 +21,10 @@ public class MonitoringConfigService {
         this.monitoringGlobalAuthConfig = monitoringGlobalAuthConfig;
     }
 
+    // CHECKSTYLE:OFF
     public MonitoringConfigView createMonitoringConfig(Monitoring monitoring, MonitoringClusterType clusterType,
-            MonitoringAuthConfig cmAuthConfig, char[] localPassword, boolean cdpSaasEnabled, boolean computeMonitoringEnabled) {
+            MonitoringAuthConfig cmAuthConfig, char[] localPassword, boolean cdpSaasEnabled, boolean computeMonitoringEnabled,
+            String accessKeyId, char[] privateKey, String accessKeyType) {
         final MonitoringConfigView.Builder builder = new MonitoringConfigView.Builder();
         boolean enabled = isMonitoringEnabled(cdpSaasEnabled, computeMonitoringEnabled);
         LOGGER.debug("Tyring to set monitoring configurations.");
@@ -42,6 +44,9 @@ public class MonitoringConfigService {
             builder.withRetentionMinTime(monitoringConfiguration.getAgent().getRetentionMinTime());
             builder.withRetentionMaxTime(monitoringConfiguration.getAgent().getRetentionMaxTime());
             builder.withWalTruncateFrequency(monitoringConfiguration.getAgent().getWalTruncateFrequency());
+            builder.withAccessKeyId(accessKeyId);
+            builder.withPrivateKey(privateKey);
+            builder.withAccessKeyType(accessKeyType);
             fillExporterConfigs(builder, localPassword);
             fillRequestSignerConfigs(monitoringConfiguration.getRequestSigner(), builder);
         }
@@ -58,6 +63,7 @@ public class MonitoringConfigService {
                 .withEnabled(enabled)
                 .build();
     }
+    // CHECKSTYLE:ON
 
     private void fillExporterConfigs(MonitoringConfigView.Builder builder, char[] localPassword) {
         builder.withLocalPassword(localPassword);
@@ -101,7 +107,7 @@ public class MonitoringConfigService {
         }
     }
 
-    private boolean isMonitoringEnabled(boolean cdpSaasEnabled, boolean computeMonitoringEnabled) {
+    public boolean isMonitoringEnabled(boolean cdpSaasEnabled, boolean computeMonitoringEnabled) {
         return computeMonitoringEnabled || (monitoringConfiguration.isEnabled() && (cdpSaasEnabled || monitoringConfiguration.isPaasSupport()));
     }
 
