@@ -14,9 +14,9 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -31,7 +31,7 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
     private LockedComponentService lockedComponentService;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Override
     public String initEvent() {
@@ -50,7 +50,7 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
 
     private void addUpgradeValidationToChain(ClusterUpgradeTriggerEvent event, Queue<Selectable> flowEventChain) {
         if (upgradeValidationEnabled) {
-            Stack stack = stackService.getById(event.getResourceId());
+            StackDto stack = stackDtoService.getById(event.getResourceId());
             boolean lockComponents = lockedComponentService.isComponentsLocked(stack, event.getImageId());
             flowEventChain.add(new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageId(), lockComponents));
         }

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
@@ -42,9 +43,9 @@ public class ImageFilterParamsFactory {
                 stack.getPlatformVariant()), stack.cloudPlatform(), stack.getRegion());
     }
 
-    public Map<String, String> getStackRelatedParcels(Stack stack) {
+    public Map<String, String> getStackRelatedParcels(StackDtoDelegate stack) {
         Set<ClusterComponentView> componentsByBlueprint = parcelService.getParcelComponentsByBlueprint(stack);
-        if (stack.isDatalake()) {
+        if (stack.getStack().isDatalake()) {
             ClouderaManagerProduct stackProduct = getCdhProduct(componentsByBlueprint);
             LOGGER.debug("For datalake clusters only the CDH parcel is related in CM: {}", stackProduct);
             return Map.of(stackProduct.getName(), stackProduct.getVersion());

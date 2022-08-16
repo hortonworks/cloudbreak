@@ -237,6 +237,14 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
                 .collect(Collectors.toList());
     }
 
+    public List<InstanceMetadataView> getNotTerminatedGatewayInstanceMetadata() {
+        return instanceGroups.values().stream()
+                .flatMap(ig -> ig.getInstanceMetadataViews().stream())
+                .filter(im -> im.getInstanceGroupType() == InstanceGroupType.GATEWAY)
+                .filter(im -> !im.isTerminated())
+                .collect(Collectors.toList());
+    }
+
     public List<InstanceGroupDto> getNotTerminatedAndNotZombieGatewayInstanceMetadataWithInstanceGroup() {
         List<InstanceGroupDto> ret = new ArrayList<>();
         instanceGroups.values().forEach(ig -> {

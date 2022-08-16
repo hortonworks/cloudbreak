@@ -19,12 +19,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageFilterParamsFactory;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LockedComponentServiceTest {
@@ -58,16 +57,14 @@ public class LockedComponentServiceTest {
     @Mock
     private ImageCatalogService imageCatalogService;
 
-    private Stack stack;
+    @Mock
+    private StackDto stack;
 
     @Before
     public void setup() {
-        stack = new Stack();
-        stack.setId(STACK_ID);
-
-        Workspace workspace = new Workspace();
-        workspace.setId(WORKSPACE_ID);
-        stack.setWorkspace(workspace);
+        stack = mock(StackDto.class);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getWorkspaceId()).thenReturn(WORKSPACE_ID);
     }
 
     @Test

@@ -112,8 +112,8 @@ class StackV4ControllerTest {
     public void testPrepareClusterUpgradeByCrnInternal() {
         String imageId = "imageId";
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollId");
-        when(stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(STACK_CRN), WORKSPACE_ID, imageId))
-                .thenReturn(flowIdentifier);
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
+        when(stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(STACK_CRN), ACCOUNT_ID, imageId)).thenReturn(flowIdentifier);
 
         FlowIdentifier result = underTest.prepareClusterUpgradeByCrnInternal(WORKSPACE_ID, STACK_CRN, imageId, USER_CRN);
 

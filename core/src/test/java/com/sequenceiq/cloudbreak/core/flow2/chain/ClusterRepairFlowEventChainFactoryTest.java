@@ -42,17 +42,16 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.StackViewService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
@@ -80,7 +79,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     private StackService stackService;
 
     @Mock
-    private StackViewService stackViewService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private HostGroupService hostGroupService;
@@ -357,7 +356,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
         StackView stackView = setupStackView();
-        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent(stackView.getId(), Map.of(), false, false);
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent(stackView.getId(), Map.of(), false, false, "variant");
 
         underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);
 
@@ -449,16 +448,14 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     private StackView setupStackView() {
         StackView stack = mock(StackView.class);
-        ClusterView cluster = mock(ClusterView.class);
-        when(stack.getClusterView()).thenReturn(cluster);
+        when(stack.getClusterId()).thenReturn(CLUSTER_ID);
         when(stack.getId()).thenReturn(STACK_ID);
-        when(cluster.getId()).thenReturn(CLUSTER_ID);
         Crn exampleCrn = CrnTestUtil.getDatalakeCrnBuilder()
                 .setResource("aResource")
                 .setAccountId("anAccountId")
                 .build();
         when(stack.getResourceCrn()).thenReturn(exampleCrn.toString());
-        when(stackViewService.getById(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stack);
         return stack;
     }
 
@@ -536,7 +533,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
                 failedNodes.put("hostGroup-auxiliary", failedAuxiliaryNodes);
             }
 
-            return new ClusterRepairTriggerEvent(stack.getId(), failedNodes, oneNodeFromEachHostGroupAtOnce, false);
+            return new ClusterRepairTriggerEvent(stack.getId(), failedNodes, oneNodeFromEachHostGroupAtOnce, false, "variant");
         }
     }
 }

@@ -332,15 +332,15 @@ public class ReactorFlowManager {
     }
 
     public FlowIdentifier triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap, boolean oneNodeFromEachHostGroupAtOnce,
-            boolean restartServices) {
+            boolean restartServices, String triggeredVariant) {
         return reactorNotifier.notify(stackId, FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT,
-                new ClusterRepairTriggerEvent(stackId, failedNodesMap, oneNodeFromEachHostGroupAtOnce, restartServices));
+                new ClusterRepairTriggerEvent(stackId, failedNodesMap, oneNodeFromEachHostGroupAtOnce, restartServices, triggeredVariant));
     }
 
     public FlowIdentifier triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap,
             boolean restartServices) {
         return reactorNotifier.notify(stackId, FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT,
-                new ClusterRepairTriggerEvent(stackId, failedNodesMap, restartServices));
+                new ClusterRepairTriggerEvent(stackId, failedNodesMap, false, restartServices, null));
     }
 
     public FlowIdentifier triggerStackImageUpdate(ImageChangeDto imageChangeDto) {

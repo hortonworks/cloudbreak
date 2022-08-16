@@ -63,6 +63,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -77,9 +79,11 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -109,7 +113,7 @@ public class ClusterRepairServiceTest {
     private TransactionService transactionService;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private StackUpdater stackUpdater;
@@ -161,6 +165,8 @@ public class ClusterRepairServiceTest {
 
     private Stack stack;
 
+    private StackDto stackDto;
+
     private Cluster cluster;
 
     @BeforeEach
@@ -168,6 +174,7 @@ public class ClusterRepairServiceTest {
         cluster = new Cluster();
         cluster.setId(CLUSTER_ID);
         cluster.setRdsConfigs(Set.of());
+        stackDto = spy(new StackDto());
         stack = spy(new Stack());
         stack.setId(STACK_ID);
         stack.setResourceCrn(STACK_CRN);
@@ -182,9 +189,12 @@ public class ClusterRepairServiceTest {
 
         Workspace workspace = new Workspace();
         workspace.setId(WORKSPACE_ID);
+        workspace.setTenant(new Tenant());
         stack.setWorkspace(workspace);
 
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
+        lenient().when(stackDto.getStack()).thenReturn(stack);
+        lenient().when(stackDto.getCluster()).thenReturn(cluster);
     }
 
     @Test
@@ -197,16 +207,15 @@ public class ClusterRepairServiceTest {
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
         when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
-        when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1));
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(true);
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
+        when(stackDto.getNotTerminatedInstanceMetaData()).thenReturn(List.of(host1));
+        when(freeipaService.checkFreeipaRunning(stackDto.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
-        when(stackStopRestrictionService.isInfrastructureStoppable(stack)).thenReturn(StopRestrictionReason.NONE);
+        when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false));
 
-        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1"))), eq(false), eq(false));
+        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1"))), eq(false), eq(false), any());
     }
 
     @Test
@@ -220,9 +229,9 @@ public class ClusterRepairServiceTest {
         host1.getInstanceGroup().getAllInstanceMetaData().add(host2);
         hostGroup1.setInstanceGroup(host1.getInstanceGroup());
 
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
-        when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1));
-        when(stack.getInstanceGroups()).thenReturn(Set.of(host1.getInstanceGroup()));
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
+        when(stackDto.getNotTerminatedInstanceMetaData()).thenReturn(List.of(host1));
+        when(stackDto.getInstanceGroupDtos()).thenReturn(List.of(new InstanceGroupDto(host1.getInstanceGroup(), List.of(host1, host2))));
         when(stack.getTunnel()).thenReturn(Tunnel.CLUSTER_PROXY);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
@@ -245,14 +254,14 @@ public class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(host1.getInstanceGroup());
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setStatus(AVAILABLE);
         when(redbeamsClientService.getByCrn(eq("dbCrn"))).thenReturn(databaseServerV4Response);
-        when(stackStopRestrictionService.isInfrastructureStoppable(stack)).thenReturn(StopRestrictionReason.NONE);
+        when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
 
         Result result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairWithDryRun(stack.getId()));
 
@@ -269,7 +278,7 @@ public class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(host1.getInstanceGroup());
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(componentConfigProviderService.getImage(stack.getId())).thenReturn(mock(Image.class));
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         when(image.isPrewarmed()).thenReturn(true);
@@ -278,7 +287,7 @@ public class ClusterRepairServiceTest {
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
-        when(stackStopRestrictionService.isInfrastructureStoppable(stack)).thenReturn(StopRestrictionReason.NONE);
+        when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
 
         Result result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairWithDryRun(stack.getId()));
 
@@ -295,7 +304,7 @@ public class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(host1.getInstanceGroup());
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(componentConfigProviderService.getImage(stack.getId())).thenReturn(mock(Image.class));
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         when(image.isPrewarmed()).thenReturn(false);
@@ -320,7 +329,7 @@ public class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(host1.getInstanceGroup());
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(componentConfigProviderService.getImage(stack.getId())).thenReturn(mock(Image.class));
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         when(image.isPrewarmed()).thenReturn(true);
@@ -366,10 +375,10 @@ public class ClusterRepairServiceTest {
         FlowLog flowLog = new FlowLog();
         flowLog.setStateStatus(StateStatus.SUCCESSFUL);
         when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
-        when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(instance1md));
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
+        when(stackDto.getNotTerminatedInstanceMetaData()).thenReturn(List.of(instance1md));
         when(resourceService.findByStackIdAndType(stack.getId(), volumeSet.getResourceType())).thenReturn(List.of(volumeSet));
-        when(stackStopRestrictionService.isInfrastructureStoppable(stack)).thenReturn(StopRestrictionReason.NONE);
+        when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairNodes(1L, Set.of("instanceId1"), false, false));
         verify(resourceService).findByStackIdAndType(stack.getId(), volumeSet.getResourceType());
@@ -377,7 +386,7 @@ public class ClusterRepairServiceTest {
         ArgumentCaptor<List<Resource>> saveCaptor = ArgumentCaptor.forClass(List.class);
         verify(resourceService).saveAll(saveCaptor.capture());
         assertFalse(resourceAttributeUtil.getTypedAttributes(saveCaptor.getValue().get(0), VolumeSetAttributes.class).get().getDeleteOnTermination());
-        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(false), eq(false));
+        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(false), eq(false), any());
     }
 
     @Test
@@ -389,8 +398,8 @@ public class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(host1.getInstanceGroup());
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
-        when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1));
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
+        when(stackDto.getNotTerminatedInstanceMetaData()).thenReturn(List.of(host1));
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
@@ -408,7 +417,7 @@ public class ClusterRepairServiceTest {
     public void repairShouldFailIfNotAvailableDatabaseExistsForCluster() {
         cluster.setDatabaseServerCrn("dbCrn");
 
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setStatus(STOPPED);
         when(redbeamsClientService.getByCrn(eq("dbCrn"))).thenReturn(databaseServerV4Response);
@@ -439,8 +448,8 @@ public class ClusterRepairServiceTest {
         InstanceMetaData host2 = getHost("host2", hostGroup2.getName(), InstanceStatus.STOPPED, InstanceGroupType.CORE);
         hostGroup2.setInstanceGroup(host2.getInstanceGroup());
 
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
-        when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1, host2));
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
+        when(stackDto.getNotTerminatedInstanceMetaData()).thenReturn(List.of(host1, host2));
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
@@ -462,7 +471,7 @@ public class ClusterRepairServiceTest {
 
     @Test
     public void testValidateRepairWhenFreeIpaNotAvailable() {
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(false);
 
@@ -476,7 +485,7 @@ public class ClusterRepairServiceTest {
 
     @Test
     public void testValidateRepairWhenEnvNotAvailable() {
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(false);
@@ -491,7 +500,7 @@ public class ClusterRepairServiceTest {
 
     @Test
     public void testValidateRepairWhenOneGWUnhealthyAndNotSelected() {
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
@@ -506,11 +515,11 @@ public class ClusterRepairServiceTest {
         secondaryGW.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
         secondaryGW.setInstanceGroup(instanceGroup);
 
-        ArrayList<InstanceMetaData> gatewayInstances = new ArrayList<>();
+        ArrayList<InstanceMetadataView> gatewayInstances = new ArrayList<>();
         gatewayInstances.add(primaryGW);
         gatewayInstances.add(secondaryGW);
 
-        when(stack.getNotTerminatedGatewayInstanceMetadata()).thenReturn(gatewayInstances);
+        when(stackDto.getNotTerminatedGatewayInstanceMetadata()).thenReturn(gatewayInstances);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
@@ -523,7 +532,7 @@ public class ClusterRepairServiceTest {
 
     @Test
     public void testValidateRepairWhenTwoGWUnhealthyAndNotSelected() {
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
@@ -538,11 +547,11 @@ public class ClusterRepairServiceTest {
         secondaryGW.setInstanceStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE);
         secondaryGW.setInstanceGroup(instanceGroup);
 
-        ArrayList<InstanceMetaData> gatewayInstances = new ArrayList<>();
+        ArrayList<InstanceMetadataView> gatewayInstances = new ArrayList<>();
         gatewayInstances.add(primaryGW);
         gatewayInstances.add(secondaryGW);
 
-        when(stack.getNotTerminatedGatewayInstanceMetadata()).thenReturn(gatewayInstances);
+        when(stackDto.getNotTerminatedGatewayInstanceMetadata()).thenReturn(gatewayInstances);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
@@ -555,11 +564,11 @@ public class ClusterRepairServiceTest {
 
     @Test
     public void testValidateRepairWhenNoUnhealthyGWAndNotSelected() {
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
-        when(stackStopRestrictionService.isInfrastructureStoppable(stack)).thenReturn(StopRestrictionReason.NONE);
+        when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("idbroker");
         hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
@@ -577,11 +586,11 @@ public class ClusterRepairServiceTest {
         secondaryGW.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
         secondaryGW.setInstanceGroup(instanceGroup);
 
-        ArrayList<InstanceMetaData> gatewayInstances = new ArrayList<>();
+        ArrayList<InstanceMetadataView> gatewayInstances = new ArrayList<>();
         gatewayInstances.add(primaryGW);
         gatewayInstances.add(secondaryGW);
 
-        when(stack.getNotTerminatedGatewayInstanceMetadata()).thenReturn(gatewayInstances);
+        when(stackDto.getNotTerminatedGatewayInstanceMetadata()).thenReturn(gatewayInstances);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
@@ -592,11 +601,11 @@ public class ClusterRepairServiceTest {
 
     @Test
     public void testValidateRepairWhenReattachSupported() {
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
-        when(stackStopRestrictionService.isInfrastructureStoppable(stack)).thenReturn(StopRestrictionReason.NONE);
+        when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
 
         String idbrokerGroupName = "idbroker";
         HostGroup idbrokerHg = new HostGroup();
@@ -618,11 +627,11 @@ public class ClusterRepairServiceTest {
 
     @Test
     public void testValidateRepairWhenReattachNotSupported() {
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
-        when(stackStopRestrictionService.isInfrastructureStoppable(stack)).thenReturn(StopRestrictionReason.EPHEMERAL_VOLUMES);
+        when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.EPHEMERAL_VOLUMES);
 
         String idbrokerGroupName = "idbroker";
         HostGroup idbrokerHg = new HostGroup();

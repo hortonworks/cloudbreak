@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -36,11 +37,13 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
@@ -49,8 +52,9 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -61,7 +65,7 @@ public class UpgradeService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeService.class);
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private ImageService imageService;
@@ -93,25 +97,28 @@ public class UpgradeService {
     @Inject
     private LockedComponentService lockedComponentService;
 
-    public UpgradeOptionV4Response getOsUpgradeOptionByStackNameOrCrn(Long workspaceId, NameOrCrn nameOrCrn, User user) {
-        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+    @Inject
+    private BlueprintService blueprintService;
+
+    public UpgradeOptionV4Response getOsUpgradeOptionByStackNameOrCrn(String accountId, NameOrCrn nameOrCrn, User user) {
+        StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         try {
-            return getUpgradeOption(stack, workspaceId, user);
+            return getUpgradeOption(stack, user);
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
             LOGGER.warn("Error retrieving image", e);
             throw new BadRequestException(e.getMessage(), e);
         }
     }
 
-    public FlowIdentifier upgradeOs(Long workspaceId, NameOrCrn stackNameOrCrn) {
-        Stack stack = stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, workspaceId);
+    public FlowIdentifier upgradeOs(String accountId, NameOrCrn stackNameOrCrn) {
+        StackView stack = stackDtoService.getStackViewByNameOrCrn(stackNameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         ClusterComponent clusterComponent = clusterBootstrapper.updateSaltComponent(stack);
         FlowIdentifier flowIdentifier = null;
         try {
             // CHECKSTYLE:OFF - false recognition of unnecessary variable assignment
-            flowIdentifier = clusterRepairService.repairAll(stack.getId());
+            flowIdentifier = clusterRepairService.repairAll(stack);
             // CHECKSTYLE:ON
             return flowIdentifier;
         } catch (RuntimeException e) {
@@ -126,14 +133,14 @@ public class UpgradeService {
         }
     }
 
-    public FlowIdentifier upgradeCluster(Long workspaceId, NameOrCrn stackNameOrCrn, String imageId) {
-        Stack stack = stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, workspaceId);
+    public FlowIdentifier upgradeCluster(String accountId, NameOrCrn stackNameOrCrn, String imageId) {
+        StackView stack = stackDtoService.getStackViewByNameOrCrn(stackNameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         return flowManager.triggerDatalakeClusterUpgrade(stack.getId(), imageId);
     }
 
-    public FlowIdentifier prepareClusterUpgrade(Long workspaceId, NameOrCrn stackNameOrCrn, String imageId) {
-        Stack stack = stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, workspaceId);
+    public FlowIdentifier prepareClusterUpgrade(String accountId, NameOrCrn stackNameOrCrn, String imageId) {
+        StackDto stack = stackDtoService.getByNameOrCrn(stackNameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         if (lockedComponentService.isComponentsLocked(stack, imageId)) {
             throw new BadRequestException("Upgrade preparation is not necessary in case of OS upgrade.");
@@ -151,26 +158,26 @@ public class UpgradeService {
         return Boolean.TRUE.equals(request.getLockComponents()) && StringUtils.isEmpty(request.getRuntime());
     }
 
-    private UpgradeOptionV4Response getUpgradeOption(Stack stack, Long workspaceId, User user)
+    private UpgradeOptionV4Response getUpgradeOption(StackView stack, User user)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image image = componentConfigProviderService.getImage(stack.getId());
         UpgradeOptionV4Response upgradeResponse;
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairResult = clusterRepairService.repairWithDryRun(stack.getId());
         if (repairResult.isSuccess()) {
-            StatedImage latestImage = getLatestImage(workspaceId, stack, image, user);
+            StatedImage latestImage = getLatestImage(stack.getWorkspaceId(), stack, image, user);
             if (!isLatestImage(stack, image, latestImage)) {
                 upgradeResponse = currentImageNotLatest(stack, image, latestImage);
             } else {
-                upgradeResponse = notUpgradable(stack.getWorkspace().getId(), image,
+                upgradeResponse = notUpgradable(stack.getWorkspaceId(), image,
                         String.format("According to the image catalog, the current image %s is already the latest version.", image.getImageId()));
             }
         } else {
-            upgradeResponse = notUpgradableWithValidationResult(stack.getWorkspace().getId(), image, repairResult.getError());
+            upgradeResponse = notUpgradableWithValidationResult(stack.getWorkspaceId(), image, repairResult.getError());
         }
         return upgradeResponse;
     }
 
-    private UpgradeOptionV4Response currentImageNotLatest(Stack stack, Image image, StatedImage latestImage)
+    private UpgradeOptionV4Response currentImageNotLatest(StackView stack, Image image, StatedImage latestImage)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         UpgradeOptionV4Response upgradeResponse;
         if (attachedClustersStoppedOrDeleted(stack)) {
@@ -181,18 +188,18 @@ public class UpgradeService {
         return upgradeResponse;
     }
 
-    private boolean isLatestImage(Stack stack, Image currentImage, StatedImage latestImage) {
+    private boolean isLatestImage(StackView stack, Image currentImage, StatedImage latestImage) {
         String latestImageName = getImageNameForStack(stack, latestImage);
         return Objects.equals(currentImage.getImageName(), latestImageName);
     }
 
-    private String getImageNameForStack(Stack stack, StatedImage statedImage) {
+    private String getImageNameForStack(StackView stack, StatedImage statedImage) {
         return statedImage.getImage().getImageSetsByProvider()
                 .get(stack.getPlatformVariant().toLowerCase())
                 .get(stack.getRegion());
     }
 
-    private boolean attachedClustersStoppedOrDeleted(Stack stack) {
+    private boolean attachedClustersStoppedOrDeleted(StackView stack) {
         StackViewV4Responses stackViewV4Responses = distroXV1Endpoint.list(null, stack.getEnvironmentCrn());
         for (StackViewV4Response stackViewV4Response : stackViewV4Responses.getResponses()) {
             if (!Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getStatus())
@@ -204,15 +211,16 @@ public class UpgradeService {
         return true;
     }
 
-    private StatedImage getLatestImage(Long workspaceId, Stack stack, Image image, User user)
+    private StatedImage getLatestImage(Long workspaceId, StackView stack, Image image, User user)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Optional<Blueprint> optionalBlueprint = blueprintService.getByClusterId(stack.getClusterId());
         return imageService
                 .determineImageFromCatalog(
                         workspaceId,
                         toImageSettingsRequest(image),
                         stack.getCloudPlatform().toLowerCase(),
                         stack.getPlatformVariant(),
-                        stack.getCluster().getBlueprint(),
+                        optionalBlueprint.orElse(null),
                         false,
                         false,
                         user,
@@ -226,9 +234,9 @@ public class UpgradeService {
         return imageSettingsV4Request;
     }
 
-    private UpgradeOptionV4Response upgradeable(Image image, StatedImage latestImage, Stack stack)
+    private UpgradeOptionV4Response upgradeable(Image image, StatedImage latestImage, StackView stack)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        UpgradeOptionV4Response response = createUpgradeBaseWithCurrent(stack.getWorkspace().getId(), image);
+        UpgradeOptionV4Response response = createUpgradeBaseWithCurrent(stack.getWorkspaceId(), image);
         ImageInfoV4Response upgradeImageInfo = new ImageInfoV4Response(
                 getImageNameForStack(stack, latestImage),
                 latestImage.getImage().getUuid(),
@@ -241,9 +249,9 @@ public class UpgradeService {
         return response;
     }
 
-    private UpgradeOptionV4Response upgradeableAfterAction(Image image, StatedImage latestImage, Stack stack, String reason)
+    private UpgradeOptionV4Response upgradeableAfterAction(Image image, StatedImage latestImage, StackView stack, String reason)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        UpgradeOptionV4Response response = notUpgradable(stack.getWorkspace().getId(), image, reason);
+        UpgradeOptionV4Response response = notUpgradable(stack.getWorkspaceId(), image, reason);
         ImageInfoV4Response upgradeImageInfo = new ImageInfoV4Response(
                 getImageNameForStack(stack, latestImage),
                 latestImage.getImage().getUuid(),
@@ -291,7 +299,7 @@ public class UpgradeService {
         return response;
     }
 
-    private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> getImageFilter(Image image, Stack stack) {
+    private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> getImageFilter(Image image, StackView stack) {
         return packageVersionFilter(image.getPackageVersions()).and(parcelFilter(stack));
     }
 
@@ -305,13 +313,13 @@ public class UpgradeService {
         };
     }
 
-    private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> parcelFilter(Stack stack) {
-        Set<String> originalClusterComponentUrls = clusterComponentConfigProvider.getClouderaManagerProductDetails(stack.getCluster().getId())
+    private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> parcelFilter(StackView stack) {
+        Set<String> originalClusterComponentUrls = clusterComponentConfigProvider.getClouderaManagerProductDetails(stack.getClusterId())
                 .stream()
                 .map(ClouderaManagerProduct::getParcel)
                 .filter(url -> url.endsWith("parcel"))
                 .collect(toSet());
-        originalClusterComponentUrls.add(clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId()).getBaseUrl());
+        originalClusterComponentUrls.add(clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getClusterId()).getBaseUrl());
         return imageFromCatalog -> {
             if (imageFromCatalog.getPreWarmParcels() == null) {
                 return false;

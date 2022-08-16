@@ -67,4 +67,8 @@ public class CloudbreakRestRequestThreadLocalService implements LegacyRestReques
     public String getAccountId() {
         return ThreadBasedUserCrnProvider.getAccountId();
     }
+
+    public String getUserCrn() {
+        return ThreadBasedUserCrnProvider.getUserCrn();
+    }
 }
