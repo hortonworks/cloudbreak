@@ -91,11 +91,15 @@ public class ClouderaManagerMgmtTelemetryService {
 
     private static final String CM_SMON_SUPPORT_FROM_VERSION = "7.2.15";
 
+    private static final String CM_SMON_PROMETHEUS_ADAPTER_SUPPORT_FROM_VERSION = "7.2.16";
+
     private static final String SMON_PROMETHEUS_PORT = "prometheus_metrics_endpoint_port";
 
     private static final String SMON_PROMETHEUS_USERNAME = "prometheus_metrics_endpoint_username";
 
     private static final String SMON_PROMETHEUS_PASSWORD =  "prometheus_metrics_endpoint_password";
+
+    private static final String SMON_PROMETHEUS_ADAPTER_ENABLED = "prometheus_adapter_enabled";
 
     @Inject
     private ClouderaManagerExternalAccountService externalAccountService;
@@ -161,6 +165,7 @@ public class ClouderaManagerMgmtTelemetryService {
             final Telemetry telemetry) throws ApiException {
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         if (isMonitoringSupported(stack, telemetry, accountId)) {
+            Version cmSmonPrometheusAdapterVersion = Version.parse(CM_SMON_PROMETHEUS_ADAPTER_SUPPORT_FROM_VERSION);
             Version cmSmonVersion = Version.parse(CM_SMON_SUPPORT_FROM_VERSION);
             Version runtimeVersion = Version.parse(stack.getStackVersion());
             if (runtimeVersion.compareTo(cmSmonVersion) >= 0) {
@@ -172,6 +177,10 @@ public class ClouderaManagerMgmtTelemetryService {
                 configsToUpdate.put(SMON_PROMETHEUS_USERNAME, monitoringUser);
                 configsToUpdate.put(SMON_PROMETHEUS_PASSWORD, monitoringPassword);
                 configsToUpdate.put(SMON_PROMETHEUS_PORT, String.valueOf(exporterPort));
+                if (runtimeVersion.compareTo(cmSmonPrometheusAdapterVersion) >= 0) {
+                    LOGGER.debug("Prometheus adapter is enabled for service monitor.");
+                    configsToUpdate.put(SMON_PROMETHEUS_ADAPTER_ENABLED, "true");
+                }
                 ApiConfigList configList = makeApiConfigList(configsToUpdate);
                 mgmtRoleConfigGroupsResourceApi.updateConfig(String.format(MGMT_CONFIG_GROUP_NAME_PATTERN, SERVICE_MONITOR),
                         "Set service monitoring configs for CM metrics exporter by CB", configList);
