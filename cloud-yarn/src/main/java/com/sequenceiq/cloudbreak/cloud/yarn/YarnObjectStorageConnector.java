@@ -3,14 +3,11 @@ package com.sequenceiq.cloudbreak.cloud.yarn;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
-import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageSizeRequest;
-import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageSizeResponse;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 
@@ -29,11 +26,6 @@ public class YarnObjectStorageConnector implements ObjectStorageConnector {
         return ObjectStorageValidateResponse.builder()
                 .withStatus(ResponseStatus.OK)
                 .build();
-    }
-
-    @Override
-    public ObjectStorageSizeResponse getObjectStorageSize(ObjectStorageSizeRequest request) {
-        throw new CloudOperationNotSupportedException("Get object storage size is not supported on YARN");
     }
 
     @Override

@@ -1,13 +1,13 @@
-package com.sequenceiq.cloudbreak.cloud.model.objectstorage;
+package com.sequenceiq.cloudbreak.cloud.model;
 
-public class ObjectStorageSizeResponse {
+public class StorageSizeResponse {
 
     private double storageInBytes;
 
-    public ObjectStorageSizeResponse() {
+    public StorageSizeResponse() {
     }
 
-    public ObjectStorageSizeResponse(Builder builder) {
+    public StorageSizeResponse(Builder builder) {
         this.storageInBytes = builder.storageInBytes;
     }
 
@@ -39,8 +39,8 @@ public class ObjectStorageSizeResponse {
             return this;
         }
 
-        public ObjectStorageSizeResponse build() {
-            return new ObjectStorageSizeResponse(this);
+        public StorageSizeResponse build() {
+            return new StorageSizeResponse(this);
         }
     }
 }

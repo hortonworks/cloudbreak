@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
+import com.sequenceiq.cloudbreak.cloud.ConsumptionCalculator;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.IdentityService;
@@ -40,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.validator.AwsStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.common.mappable.StorageType;
 
 @Service
 public class AwsConnector implements CloudConnector {
@@ -94,6 +97,9 @@ public class AwsConnector implements CloudConnector {
 
     @Inject
     private AwsStorageValidator awsStorageValidator;
+
+    @Inject
+    private List<ConsumptionCalculator> consumptionCalculators;
 
     @Override
     public Platform platform() {
@@ -181,6 +187,13 @@ public class AwsConnector implements CloudConnector {
     @Override
     public PublicKeyConnector publicKey() {
         return awsPublicKeyConnector;
+    }
+
+    @Override
+    public Optional<ConsumptionCalculator> consumptionCalculator(StorageType storageType) {
+        return consumptionCalculators.stream()
+                .filter(c -> c.storageType().equals(storageType))
+                .findFirst();
     }
 
     @Override

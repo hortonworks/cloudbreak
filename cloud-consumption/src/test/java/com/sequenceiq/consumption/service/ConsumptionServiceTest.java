@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -23,14 +24,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.common.consumption.AwsS3ConsumptionCalculator;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudConsumption;
+import com.sequenceiq.cloudbreak.common.mappable.StorageType;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ResourceType;
 import com.sequenceiq.consumption.configuration.repository.ConsumptionRepository;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.dto.ConsumptionCreationDto;
 import com.sequenceiq.consumption.dto.converter.ConsumptionDtoConverter;
-import com.sequenceiq.consumption.util.CloudStorageLocationUtil;
 
 @ExtendWith(MockitoExtension.class)
 public class ConsumptionServiceTest {
@@ -66,7 +70,10 @@ public class ConsumptionServiceTest {
     private ConsumptionDtoConverter consumptionDtoConverter;
 
     @Mock
-    private CloudStorageLocationUtil cloudStorageLocationUtil;
+    private AwsS3ConsumptionCalculator awsS3ConsumptionCalculator;
+
+    @Mock
+    private CloudPlatformConnectors cloudPlatformConnectors;
 
     @InjectMocks
     private ConsumptionService underTest;
@@ -180,8 +187,11 @@ public class ConsumptionServiceTest {
     @Test
     public void testNoAggregationRequiredIfLocationValidationFails() {
         Consumption consumption = consumption("not_s3_location");
-        doThrow(new ValidationException("error")).when(cloudStorageLocationUtil)
-                .validateCloudStorageType(FileSystemType.S3, "not_s3_location");
+        doThrow(new ValidationException("error")).when(awsS3ConsumptionCalculator)
+                .validate(any(CloudConsumption.class));
+        CloudConnector connector = mock(CloudConnector.class);
+        when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
+        when(connector.consumptionCalculator(any())).thenReturn(Optional.of(awsS3ConsumptionCalculator));
 
         boolean result = underTest.isAggregationRequired(consumption);
 
@@ -191,6 +201,9 @@ public class ConsumptionServiceTest {
     @Test
     public void testAggregationRequired() {
         Consumption consumption = consumption("s3_location");
+        CloudConnector connector = mock(CloudConnector.class);
+        when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
+        when(connector.consumptionCalculator(any())).thenReturn(Optional.of(awsS3ConsumptionCalculator));
 
         boolean result = underTest.isAggregationRequired(consumption);
 
@@ -200,9 +213,15 @@ public class ConsumptionServiceTest {
     @Test
     public void testFindAllStorageConsumptionForEnvCrnAndBucketNameNoResult() {
         when(consumptionRepository.findAllStorageConsumptionByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(List.of());
-        when(cloudStorageLocationUtil.getS3BucketName(STORAGE_LOCATION)).thenAnswer(invocation -> BUCKET);
+        when(awsS3ConsumptionCalculator.getObjectId(STORAGE_LOCATION)).thenAnswer(invocation -> BUCKET);
+        CloudConnector connector = mock(CloudConnector.class);
+        when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
+        when(connector.consumptionCalculator(any())).thenReturn(Optional.of(awsS3ConsumptionCalculator));
 
-        List<Consumption> result = underTest.findAllStorageConsumptionForEnvCrnAndBucketName(ENVIRONMENT_CRN, STORAGE_LOCATION);
+        List<Consumption> result = underTest.findAllStorageConsumptionForEnvCrnAndBucketName(
+                ENVIRONMENT_CRN,
+                STORAGE_LOCATION,
+                StorageType.S3);
 
         assertTrue(result.isEmpty());
     }
@@ -211,9 +230,15 @@ public class ConsumptionServiceTest {
     public void testFindAllStorageConsumptionForEnvCrnAndBucketNameValidationError() {
         when(consumptionRepository.findAllStorageConsumptionByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(
                 List.of(consumption(ENVIRONMENT_CRN, STORAGE_LOCATION)));
-        when(cloudStorageLocationUtil.getS3BucketName(STORAGE_LOCATION)).thenThrow(new ValidationException("error"));
+        when(awsS3ConsumptionCalculator.getObjectId(STORAGE_LOCATION)).thenThrow(new ValidationException("error"));
+        CloudConnector connector = mock(CloudConnector.class);
+        when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
+        when(connector.consumptionCalculator(any())).thenReturn(Optional.of(awsS3ConsumptionCalculator));
 
-        List<Consumption> result = underTest.findAllStorageConsumptionForEnvCrnAndBucketName(ENVIRONMENT_CRN, STORAGE_LOCATION);
+        List<Consumption> result = underTest.findAllStorageConsumptionForEnvCrnAndBucketName(
+                ENVIRONMENT_CRN,
+                STORAGE_LOCATION,
+                StorageType.S3);
 
         assertTrue(result.isEmpty());
     }
@@ -223,12 +248,19 @@ public class ConsumptionServiceTest {
         Consumption consumption1 = consumption(ENVIRONMENT_CRN, STORAGE_LOCATION);
         Consumption consumption2 = consumption(ENVIRONMENT_CRN, STORAGE_LOCATION);
         Consumption consumption3 = consumption(ENVIRONMENT_CRN, STORAGE_LOCATION_OTHER);
+
         when(consumptionRepository.findAllStorageConsumptionByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(
                 List.of(consumption1, consumption2, consumption3));
-        when(cloudStorageLocationUtil.getS3BucketName(STORAGE_LOCATION)).thenAnswer(invocation -> BUCKET);
-        when(cloudStorageLocationUtil.getS3BucketName(STORAGE_LOCATION_OTHER)).thenAnswer(invocation -> BUCKET_OTHER);
+        when(awsS3ConsumptionCalculator.getObjectId(STORAGE_LOCATION)).thenAnswer(invocation -> BUCKET);
+        when(awsS3ConsumptionCalculator.getObjectId(STORAGE_LOCATION_OTHER)).thenAnswer(invocation -> BUCKET_OTHER);
+        CloudConnector connector = mock(CloudConnector.class);
+        when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
+        when(connector.consumptionCalculator(any())).thenReturn(Optional.of(awsS3ConsumptionCalculator));
 
-        List<Consumption> result = underTest.findAllStorageConsumptionForEnvCrnAndBucketName(ENVIRONMENT_CRN, STORAGE_LOCATION);
+        List<Consumption> result = underTest.findAllStorageConsumptionForEnvCrnAndBucketName(
+                ENVIRONMENT_CRN,
+                STORAGE_LOCATION,
+                StorageType.S3);
 
         assertEquals(List.of(consumption1, consumption2), result);
     }
@@ -249,8 +281,11 @@ public class ConsumptionServiceTest {
         Consumption consumption41 = consumption(ENVIRONMENT_CRN_OTHER, STORAGE_LOCATION_OTHER);
         Consumption consumption42 = consumption(ENVIRONMENT_CRN_OTHER, STORAGE_LOCATION_OTHER);
 
-        when(cloudStorageLocationUtil.getS3BucketName(STORAGE_LOCATION)).thenAnswer(invocation -> BUCKET);
-        when(cloudStorageLocationUtil.getS3BucketName(STORAGE_LOCATION_OTHER)).thenAnswer(invocation -> BUCKET_OTHER);
+        when(awsS3ConsumptionCalculator.getObjectId(STORAGE_LOCATION)).thenAnswer(invocation -> BUCKET);
+        when(awsS3ConsumptionCalculator.getObjectId(STORAGE_LOCATION_OTHER)).thenAnswer(invocation -> BUCKET_OTHER);
+        CloudConnector connector = mock(CloudConnector.class);
+        when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
+        when(connector.consumptionCalculator(any())).thenReturn(Optional.of(awsS3ConsumptionCalculator));
 
         List<List<Consumption>> result = underTest.groupConsumptionsByEnvCrnAndBucketName(
                 List.of(consumption11, consumption12, consumption21, consumption31, consumption41, consumption42));
@@ -274,11 +309,14 @@ public class ConsumptionServiceTest {
         Consumption consumption42 = consumption(ENVIRONMENT_CRN_OTHER, STORAGE_LOCATION_OTHER);
         Consumption consumptionInvalid2 = consumption(ENVIRONMENT_CRN_OTHER, "invalid");
 
-        when(cloudStorageLocationUtil.getS3BucketName(STORAGE_LOCATION)).thenAnswer(invocation -> BUCKET);
-        when(cloudStorageLocationUtil.getS3BucketName(STORAGE_LOCATION_OTHER)).thenAnswer(invocation -> BUCKET_OTHER);
-        when(cloudStorageLocationUtil.getS3BucketName("invalid")).thenAnswer(invocation -> {
+        when(awsS3ConsumptionCalculator.getObjectId(STORAGE_LOCATION)).thenAnswer(invocation -> BUCKET);
+        when(awsS3ConsumptionCalculator.getObjectId(STORAGE_LOCATION_OTHER)).thenAnswer(invocation -> BUCKET_OTHER);
+        when(awsS3ConsumptionCalculator.getObjectId("invalid")).thenAnswer(invocation -> {
             throw new ValidationException("error");
         });
+        CloudConnector connector = mock(CloudConnector.class);
+        when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
+        when(connector.consumptionCalculator(any())).thenReturn(Optional.of(awsS3ConsumptionCalculator));
 
         List<List<Consumption>> result = underTest.groupConsumptionsByEnvCrnAndBucketName(
                 List.of(consumption11, consumption12, consumption21, consumptionInvalid1, consumption31, consumption41, consumption42, consumptionInvalid2));

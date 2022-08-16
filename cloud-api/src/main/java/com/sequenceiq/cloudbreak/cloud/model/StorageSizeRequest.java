@@ -1,13 +1,10 @@
-package com.sequenceiq.cloudbreak.cloud.model.objectstorage;
+package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Date;
 
 import javax.validation.constraints.NotNull;
 
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.Region;
-
-public class ObjectStorageSizeRequest {
+public class StorageSizeRequest {
 
     private @NotNull CloudCredential credential;
 
@@ -19,10 +16,10 @@ public class ObjectStorageSizeRequest {
 
     private Date endTime;
 
-    public ObjectStorageSizeRequest() {
+    public StorageSizeRequest() {
     }
 
-    public ObjectStorageSizeRequest(Builder builder) {
+    public StorageSizeRequest(Builder builder) {
         this.credential = builder.credential;
         this.objectStoragePath = builder.objectStoragePath;
         this.region = builder.region;
@@ -122,8 +119,8 @@ public class ObjectStorageSizeRequest {
             return this;
         }
 
-        public ObjectStorageSizeRequest build() {
-            return new ObjectStorageSizeRequest(this);
+        public StorageSizeRequest build() {
+            return new StorageSizeRequest(this);
         }
     }
 }
