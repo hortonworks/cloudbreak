@@ -21,15 +21,17 @@ import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
@@ -59,7 +61,7 @@ public class DistroXUpgradeService {
     private ReactorFlowManager reactorFlowManager;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private ClouderaManagerLicenseProvider clouderaManagerLicenseProvider;
@@ -67,31 +69,37 @@ public class DistroXUpgradeService {
     @Inject
     private LockedComponentService lockedComponentService;
 
+    @Inject
+    private StackUpgradeService stackUpgradeService;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
     public UpgradeV4Response triggerUpgrade(NameOrCrn cluster, Long workspaceId, String userCrn, UpgradeV4Request request, boolean upgradePreparation) {
         UpgradeV4Response upgradeV4Response = upgradeAvailabilityService.checkForUpgrade(cluster, workspaceId, request, userCrn);
         validateUpgradeCandidates(cluster, upgradeV4Response);
         verifyPaywallAccess(userCrn, request);
         ImageInfoV4Response targetImage = imageSelector.determineImageId(request, upgradeV4Response.getUpgradeCandidates());
-        Stack stack = stackService.getByNameOrCrnInWorkspace(cluster, workspaceId);
+        StackDto stack = stackDtoService.getByNameOrCrn(cluster, restRequestThreadLocalService.getAccountId());
         MDCBuilder.buildMdcContext(stack);
         boolean lockComponents = determineLockComponentsParam(request, targetImage, stack);
         return upgradePreparation ?
-                initUpgradePreparation(cluster, workspaceId, targetImage, upgradeV4Response.getUpgradeCandidates(), lockComponents, stack) :
-                initUpgrade(upgradeV4Response, cluster, workspaceId, userCrn, targetImage, lockComponents, stack);
+                initUpgradePreparation(cluster, workspaceId, targetImage, upgradeV4Response.getUpgradeCandidates(), lockComponents, stack.getStack()) :
+                initUpgrade(upgradeV4Response, cluster, workspaceId, userCrn, targetImage, lockComponents, stack.getStack());
     }
 
     private UpgradeV4Response initUpgrade(UpgradeV4Response upgradeV4Response, NameOrCrn cluster, Long workspaceId, String userCrn,
-            ImageInfoV4Response targetImage, boolean lockComponents, Stack stack) {
+            ImageInfoV4Response targetImage, boolean lockComponents, StackView stack) {
         LOGGER.debug("Initializing cluster upgrade. Target image: {}, lockComponents: {}", targetImage.getImageId(), lockComponents);
         boolean replaceVms = determineReplaceVmsParam(upgradeV4Response, lockComponents, stack);
-        String upgradeVariant = calculateUpgradeVariant(stack, userCrn);
+        String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(stack, userCrn);
         FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(stack.getId(), createImageChangeDto(cluster, workspaceId, targetImage),
                 replaceVms, lockComponents, upgradeVariant);
         return new UpgradeV4Response("Upgrade started with Image: " + targetImage.getImageId(), flowIdentifier, replaceVms);
     }
 
     private UpgradeV4Response initUpgradePreparation(NameOrCrn cluster, Long workspaceId, ImageInfoV4Response targetImage,
-            List<ImageInfoV4Response> upgradeCandidates, boolean lockComponents, Stack stack) {
+            List<ImageInfoV4Response> upgradeCandidates, boolean lockComponents, StackView stack) {
         LOGGER.debug("Initializing cluster upgrade preparation. Target image: {}, lockComponents: {}", targetImage.getImageId(), lockComponents);
         if (lockComponents) {
             return new UpgradeV4Response(targetImage, upgradeCandidates, "Upgrade preparation is not necessary in case of OS upgrade.");
@@ -102,22 +110,10 @@ public class DistroXUpgradeService {
         }
     }
 
-    private boolean determineLockComponentsParam(UpgradeV4Request request, ImageInfoV4Response targetImage, Stack stack) {
+    private boolean determineLockComponentsParam(UpgradeV4Request request, ImageInfoV4Response targetImage, StackDto stack) {
         boolean lockComponents = request.getLockComponents() != null ? request.getLockComponents() : isComponentsLocked(stack, targetImage);
         validateOsUpgradeEntitled(lockComponents, request);
         return lockComponents;
-    }
-
-    String calculateUpgradeVariant(Stack stack, String userCrn) {
-        String variant = stack.getPlatformVariant();
-        String accountId = Crn.safeFromString(userCrn).getAccountId();
-        boolean migrationEnable = entitlementService.awsVariantMigrationEnable(accountId);
-        if (migrationEnable) {
-            if (AwsConstants.AwsVariant.AWS_VARIANT.variant().value().equals(variant)) {
-                variant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value();
-            }
-        }
-        return variant;
     }
 
     private ImageChangeDto createImageChangeDto(NameOrCrn cluster, Long workspaceId, ImageInfoV4Response image) {
@@ -163,11 +159,11 @@ public class DistroXUpgradeService {
         paywallAccessChecker.checkPaywallAccess(license, paywallUrl);
     }
 
-    private boolean isComponentsLocked(Stack stack, ImageInfoV4Response targetImage) {
+    private boolean isComponentsLocked(StackDto stack, ImageInfoV4Response targetImage) {
         return lockedComponentService.isComponentsLocked(stack, targetImage.getImageId());
     }
 
-    private boolean determineReplaceVmsParam(UpgradeV4Response upgradeV4Response, boolean lockComponents, Stack stack) {
+    private boolean determineReplaceVmsParam(UpgradeV4Response upgradeV4Response, boolean lockComponents, StackView stack) {
         boolean originalReplaceVms = upgradeV4Response.isReplaceVms();
         if (originalReplaceVms) {
             try {

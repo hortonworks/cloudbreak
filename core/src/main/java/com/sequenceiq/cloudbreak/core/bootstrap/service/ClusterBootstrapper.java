@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -157,12 +158,12 @@ public class ClusterBootstrapper {
         bootstrapOnHostInternal(stack, this::saveSaltComponent);
     }
 
-    private void bootstrapOnHostInternal(StackDto stack, Consumer<StackDtoDelegate> saveOrUpdateSaltComponent) throws CloudbreakException {
+    private void bootstrapOnHostInternal(StackDto stack, Consumer<StackView> saveOrUpdateSaltComponent) throws CloudbreakException {
         try {
             Set<Node> nodes = transactionService.required(() -> collectNodesForBootstrap(stack));
             List<GatewayConfig> allGatewayConfig = collectAndCheckGateways(stack);
 
-            saveOrUpdateSaltComponent.accept(stack);
+            saveOrUpdateSaltComponent.accept(stack.getStack());
 
             BootstrapParams params = createBootstrapParams(stack);
             hostOrchestrator.bootstrap(allGatewayConfig, nodes, params, clusterDeletionBasedModel(stack.getId(), null));
@@ -212,9 +213,9 @@ public class ClusterBootstrapper {
         }
     }
 
-    private void saveSaltComponent(StackDtoDelegate stack) {
+    private void saveSaltComponent(StackView stack) {
         LOGGER.info("Save salt component for stack: {}", stack.getName());
-        ClusterComponent saltComponent = clusterComponentProvider.getComponent(stack.getCluster().getId(), ComponentType.SALT_STATE);
+        ClusterComponent saltComponent = clusterComponentProvider.getComponent(stack.getClusterId(), ComponentType.SALT_STATE);
         if (saltComponent == null) {
             try {
                 byte[] stateConfigZip = hostOrchestrator.getStateConfigZip();
@@ -226,24 +227,24 @@ public class ClusterBootstrapper {
         }
     }
 
-    private ClusterComponent createSaltComponent(StackDtoDelegate stack, byte[] stateConfigZip) {
-        Cluster clusterReference = clusterService.getClusterReference(stack.getCluster().getId());
+    private ClusterComponent createSaltComponent(StackView stack, byte[] stateConfigZip) {
+        Cluster clusterReference = clusterService.getClusterReference(stack.getClusterId());
         return new ClusterComponent(ComponentType.SALT_STATE,
                 new Json(Map.of(ComponentType.SALT_STATE.name(), Base64.encodeBase64String(stateConfigZip),
                         ClusterComponent.CB_VERSION_KEY, cbVersion)), clusterReference);
     }
 
-    public ClusterComponent updateSaltComponent(StackDtoDelegate stackDto) {
+    public ClusterComponent updateSaltComponent(StackView stackView) {
         try {
             byte[] stateConfigZip = hostOrchestrator.getStateConfigZip();
-            return updateSaltComponent(stackDto, stateConfigZip);
+            return updateSaltComponent(stackView, stateConfigZip);
         } catch (IOException e) {
             throw new CloudbreakServiceException(e);
         }
     }
 
-    public ClusterComponent updateSaltComponent(StackDtoDelegate stack, byte[] stateConfigZip) {
-        ClusterComponent saltComponent = clusterComponentProvider.getComponent(stack.getCluster().getId(), ComponentType.SALT_STATE);
+    public ClusterComponent updateSaltComponent(StackView stack, byte[] stateConfigZip) {
+        ClusterComponent saltComponent = clusterComponentProvider.getComponent(stack.getClusterId(), ComponentType.SALT_STATE);
         if (saltComponent == null) {
             LOGGER.debug("Create new salt component");
             saltComponent = createSaltComponent(stack, stateConfigZip);

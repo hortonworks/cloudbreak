@@ -242,20 +242,20 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier upgradeOs(Long workspaceId, String name, @AccountId String accountId) {
-        return stackUpgradeOperations.upgradeOs(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
+        return stackUpgradeOperations.upgradeOs(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId());
     }
 
     @Override
     @InternalOnly
     public FlowIdentifier upgradeOsInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
-        return stackUpgradeOperations.upgradeOs(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
+        return stackUpgradeOperations.upgradeOs(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId());
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public UpgradeOptionV4Response checkForOsUpgrade(Long workspaceId, String name, @AccountId String accountId) {
         return stackUpgradeOperations.checkForOsUpgrade(NameOrCrn.ofName(name), restRequestThreadLocalService.getCloudbreakUser(),
-                restRequestThreadLocalService.getRequestedWorkspaceId());
+                restRequestThreadLocalService.getAccountId());
     }
 
     @Override
@@ -348,19 +348,19 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier upgradeClusterByName(Long workspaceId, String name, String imageId, @AccountId String accountId) {
-        return stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), imageId);
+        return stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), imageId);
     }
 
     @Override
     @InternalOnly
     public FlowIdentifier upgradeClusterByNameInternal(Long workspaceId, String name, String imageId, @InitiatorUserCrn String initiatorUserCrn) {
-        return stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), imageId);
+        return stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), imageId);
     }
 
     @Override
     @InternalOnly
     public FlowIdentifier prepareClusterUpgradeByCrnInternal(Long workspaceId, String crn, String imageId, @InitiatorUserCrn String initiatorUserCrn) {
-        return stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId(), imageId);
+        return stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), imageId);
     }
 
     @Override

@@ -540,7 +540,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return EnumSet.of(Crn.ResourceType.CLUSTER_TEMPLATE);
     }
 
-    public Optional<Blueprint> getByClusterId(Long stackId) {
-        return blueprintRepository.findByClusterId(stackId);
+    public Optional<Blueprint> getByClusterId(Long clusterId) {
+        return blueprintRepository.findByClusterId(clusterId);
     }
 }

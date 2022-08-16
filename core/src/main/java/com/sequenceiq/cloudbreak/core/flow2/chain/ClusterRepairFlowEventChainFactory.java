@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.HashMultimap;
@@ -44,8 +43,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.migration.AwsVariantMigrationE
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
@@ -53,9 +50,10 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RescheduleStatu
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -73,8 +71,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     private StackService stackService;
 
     @Inject
-    @Qualifier("stackViewServiceDeprecated")
-    private StackViewService stackViewService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private InstanceGroupService instanceGroupService;
@@ -99,7 +96,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(ClusterRepairTriggerEvent event) {
         LOGGER.debug("Creating repair flow chain with stack id: '{}'", event.getStackId());
-        StackView stack = stackViewService.getById(event.getStackId());
+        StackView stack = stackDtoService.getStackViewById(event.getStackId());
         RepairConfig repairConfig = createRepairConfig(event, stack);
         Queue<Selectable> flowTriggers = createFlowTriggers(event, repairConfig, stack);
         return new FlowTriggerEventQueue(getName(), event, flowTriggers);
@@ -110,7 +107,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         for (Entry<String, List<String>> failedNodes : event.getFailedNodesMap().entrySet()) {
             String hostGroupName = failedNodes.getKey();
             List<String> hostNames = failedNodes.getValue();
-            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getClusterView().getId(), hostGroupName)
+            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getClusterId(), hostGroupName)
                     .orElseThrow(notFound("hostgroup", hostGroupName));
             InstanceGroup instanceGroup = hostGroup.getInstanceGroup();
             if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
@@ -284,7 +281,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     private StackAndClusterUpscaleTriggerEvent fullUpscaleEvent(ClusterRepairTriggerEvent event, Map<String, Set<String>> groupsWithHostNames,
             boolean singlePrimaryGateway, boolean restartServices, boolean kerberosSecured) {
-        Set<InstanceGroupView> instanceGroupViews = instanceGroupService.findViewByStackId(event.getStackId());
+        Set<com.sequenceiq.cloudbreak.domain.view.InstanceGroupView> instanceGroupViews = instanceGroupService.findViewByStackId(event.getStackId());
         boolean singleNodeCluster = isSingleNode(instanceGroupViews);
         Integer adjustmentSize = groupsWithHostNames.values().stream().map(Set::size).reduce(0, Integer::sum);
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) adjustmentSize);
@@ -297,16 +294,16 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                 event.getTriggeredStackVariant()).setRepair();
     }
 
-    public boolean isSingleNode(Set<InstanceGroupView> instanceGroupViews) {
+    public boolean isSingleNode(Set<com.sequenceiq.cloudbreak.domain.view.InstanceGroupView> instanceGroupViews) {
         int nodeCount = 0;
-        for (InstanceGroupView ig : instanceGroupViews) {
+        for (com.sequenceiq.cloudbreak.domain.view.InstanceGroupView ig : instanceGroupViews) {
             nodeCount += ig.getNodeCount();
         }
         return nodeCount == 1;
     }
 
     private boolean isKerberosSecured(Long stackId) {
-        StackView stack = stackViewService.getById(stackId);
+        StackView stack = stackDtoService.getStackViewById(stackId);
         return kerberosConfigService.isKerberosConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName());
     }
 

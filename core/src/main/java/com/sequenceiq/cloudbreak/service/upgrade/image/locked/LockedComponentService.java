@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -30,9 +30,9 @@ public class LockedComponentService {
     @Inject
     private ImageFilterParamsFactory imageFilterParamsFactory;
 
-    public boolean isComponentsLocked(Stack stack, String targetImageId) {
+    public boolean isComponentsLocked(StackDto stack, String targetImageId) {
         try {
-            Long workspaceId = stack.getWorkspace().getId();
+            Long workspaceId = stack.getWorkspaceId();
             Image currentImage = componentConfigProviderService.getImage(stack.getId());
             com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentCatalogImage = imageCatalogService
                     .getImage(workspaceId, currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), currentImage.getImageId())
