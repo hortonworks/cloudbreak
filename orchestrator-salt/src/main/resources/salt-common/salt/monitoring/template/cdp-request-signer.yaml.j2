@@ -11,10 +11,10 @@
 port: {{ monitoring.requestSignerPort }}
 endpoint: "{{ monitoring.remoteWriteUrl }}"
 credential:
-  file: "/opt/cdp-request-signer/conf/databus_credential"
+  file: "/opt/cdp-request-signer/conf/monitoring_credential"
   profile: dbus
-  access_key_name: dbus_access_key_id
-  secret_key_name: dbus_access_secret_key
+  access_key_name: monitoring_access_key_id
+  secret_key_name: monitoring_access_secret_key
 sign:
   auth_header_name: "x-altus-auth"
   date_header_name: "x-altus-date"

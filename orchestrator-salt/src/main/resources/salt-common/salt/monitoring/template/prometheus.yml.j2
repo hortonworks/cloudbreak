@@ -14,7 +14,7 @@ global:
   scrape_interval: {{ monitoring.scrapeIntervalSeconds }}s
 {%- if cdp_prometheus_installed %}
 remote_write:
-  {%- if monitoring.requestSignerEnabled and monitoring.databusEnabled %}
+  {%- if monitoring.requestSignerEnabled %}
   - url: https://localhost:{{ monitoring.requestSignerPort }}
     basic_auth:
       username: {{ monitoring.requestSignerUser }}

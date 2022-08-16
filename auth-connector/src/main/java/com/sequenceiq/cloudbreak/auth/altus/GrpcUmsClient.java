@@ -47,7 +47,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UnauthorizedException;
@@ -503,21 +502,6 @@ public class GrpcUmsClient {
         return makeCheckRightCall(userCrn, right, resource, regionAwareInternalCrnGeneratorFactory);
     }
 
-    @Cacheable(cacheNames = "umsUserHasRightsForResourceCache", key = "{ #userCrn, #right, #resource }")
-    public boolean checkResourceRightLegacy(String userCrn, String right, String resource,
-        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-        if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrn)) {
-            LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
-            return true;
-        }
-        if (isReadRight(right)) {
-            LOGGER.info("In account {} authorization related entitlement disabled, thus skipping permission check!!",
-                    ThreadBasedUserCrnProvider.getAccountId());
-            return true;
-        }
-        return makeCheckRightCall(userCrn, right, resource, regionAwareInternalCrnGeneratorFactory);
-    }
-
     @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #userCrn, #right }")
     public boolean checkAccountRight(String userCrn, String right,
         RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
@@ -705,19 +689,6 @@ public class GrpcUmsClient {
     }
 
     /**
-     * Remove machine user role
-     *
-     * @param machineUserCrn machine user
-     * @param roleCrn        role that will be removed
-     */
-    public void unassignMachineUserRole(String machineUserCrn,
-            String roleCrn, String accountId,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
-        client.unassignMachineUserRole(machineUserCrn, roleCrn, accountId);
-    }
-
-    /**
      * Generate access / private keypair
      *
      * @param actorCrn       actor that executes the key generation
@@ -789,39 +760,6 @@ public class GrpcUmsClient {
         }
         return generateAccessSecretKeyPair(userCrn, accountId, machineUserCrn.orElse(null),
                 accessKeyType, regionAwareInternalCrnGeneratorFactory);
-    }
-
-    /**
-     * Cleanup machine user related resources (access keys, role, user)
-     *
-     * @param machineUserName machine user name
-     * @param userCrn         crn of the actor
-     * @param roleCrn         crn of the role
-     */
-    public void clearMachineUserWithAccessKeysAndRole(String machineUserName, String userCrn, String accountId, String roleCrn,
-        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-        if (StringUtils.isNotEmpty(roleCrn)) {
-            unassignMachineUserRole(machineUserName, roleCrn,
-                    accountId, regionAwareInternalCrnGeneratorFactory);
-        }
-        deleteMachineUserAccessKeys(userCrn, accountId, machineUserName, regionAwareInternalCrnGeneratorFactory);
-        deleteMachineUser(machineUserName, userCrn, accountId,
-                regionAwareInternalCrnGeneratorFactory);
-    }
-
-    /**
-     * Delete all access key for machine user
-     *
-     * @param actorCrn       actor that executes the deletions
-     * @param machineUserCrn machine user
-     */
-    public void deleteMachineUserAccessKeys(String actorCrn, String accountId, String machineUserCrn,
-        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
-        LOGGER.info("Getting access keys for {}", machineUserCrn);
-        List<String> accessKeys = client.listMachineUserAccessKeys(actorCrn, accountId, machineUserCrn);
-        LOGGER.info("Deleting access keys for {}", machineUserCrn);
-        client.deleteAccessKeys(accessKeys, accountId);
     }
 
     /**
@@ -986,17 +924,6 @@ public class GrpcUmsClient {
     public Set<String> getRoles(String accountId) {
         UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         return client.listRoles(accountId);
-    }
-
-    protected boolean isReadRight(String action) {
-        if (action == null) {
-            return false;
-        }
-        String[] parts = action.split("/");
-        if (parts.length == 2 && parts[1] != null && parts[1].equals("read")) {
-            return true;
-        }
-        return false;
     }
 
     public void setTracer(Tracer tracer) {

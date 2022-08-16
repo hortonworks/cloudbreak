@@ -1242,6 +1242,9 @@ public class MockUserManagementService extends UserManagementImplBase {
                 .addRole(Role.newBuilder()
                         .setCrn("crn:altus:iam:us-west-1:altus:role:DbusUploader")
                         .build())
+                .addRole(Role.newBuilder()
+                        .setCrn("crn:altus:iam:us-west-1:altus:role:ComputeMetricsPublisher")
+                        .build())
                 .build());
         responseObserver.onCompleted();
     }

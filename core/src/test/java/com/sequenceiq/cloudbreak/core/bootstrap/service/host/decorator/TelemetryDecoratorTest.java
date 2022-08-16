@@ -126,7 +126,7 @@ public class TelemetryDecoratorTest {
         mockConfigServiceResults(dataConfigView, fluentConfigView, new MeteringConfigView.Builder().build());
         // WHEN
         StackDto stack = createStack();
-        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), new Telemetry());
+        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), new Telemetry(), null, null);
         // THEN
         Map<String, Object> results = createMapFromFluentPillars(result, "fluent");
         assertEquals(results.get("providerPrefix"), "s3");
@@ -161,7 +161,7 @@ public class TelemetryDecoratorTest {
         mockConfigServiceResults(dataConfigView, fluentConfigView, new MeteringConfigView.Builder().build());
         // WHEN
         StackDto stack = createStack();
-        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), new Telemetry());
+        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), new Telemetry(), null, null);
         // THEN
         Map<String, Object> results = createMapFromFluentPillars(result, "fluent");
         assertEquals(results.get("providerPrefix"), "s3a");
@@ -192,7 +192,7 @@ public class TelemetryDecoratorTest {
         mockConfigServiceResults(dataConfigView, new FluentConfigView.Builder().build(), meteringConfigView);
         // WHEN
         StackDto stack = createStack();
-        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), telemetry);
+        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), telemetry, null, null);
         // THEN
         Map<String, Object> results = createMapFromFluentPillars(result, "metering");
         assertEquals(results.get("serviceType"), "DATAHUB");
@@ -231,7 +231,7 @@ public class TelemetryDecoratorTest {
         telemetry.setMonitoring(new Monitoring());
         // WHEN
         StackDto stack = createStack();
-        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), telemetry);
+        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), telemetry, null, null);
         // THEN
         Map<String, Object> results = createMapFromFluentPillars(result, "monitoring");
         assertEquals(results.get("clusterType"), "datahub");
@@ -251,7 +251,7 @@ public class TelemetryDecoratorTest {
         mockConfigServiceResults(dataConfigView, fluentConfigView, new MeteringConfigView.Builder().build());
         // WHEN
         StackDto stack = createStack();
-        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), new Telemetry());
+        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), new Telemetry(), null, null);
         // THEN
         assertNotNull(result.get("telemetry"));
         assertNull(result.get("fleunt"));
@@ -272,7 +272,7 @@ public class TelemetryDecoratorTest {
         mockConfigServiceResults(dataConfigView, fluentConfigView, new MeteringConfigView.Builder().build());
         // WHEN
         StackDto stack = createStack();
-        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), new Telemetry());
+        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), new Telemetry(), null, null);
         // THEN
         Map<String, Object> results = createMapFromFluentPillars(result, "databus");
         assertEquals(results.get("accessKeyId"), "myAccessKeyId");
@@ -321,7 +321,7 @@ public class TelemetryDecoratorTest {
                 .willReturn(fluentConfigView);
         given(meteringConfigService.createMeteringConfigs(anyBoolean(), anyString(), anyString(), anyString(),
                 anyString(), anyString())).willReturn(meteringConfigView);
-        given(monitoringConfigService.createMonitoringConfig(any(), any(), any(), isNull(), anyBoolean(), anyBoolean()))
+        given(monitoringConfigService.createMonitoringConfig(any(), any(), any(), isNull(), anyBoolean(), anyBoolean(), isNull(), any(), isNull()))
                 .willReturn(monitoringConfigView);
         given(nodeStatusConfigService.createNodeStatusConfig(isNull(), isNull(), anyBoolean())).willReturn(nodeStatusConfigView);
         given(telemetryCommonConfigService.createTelemetryCommonConfigs(any(), anyList(), any())).willReturn(telemetryCommonConfigView);

@@ -53,9 +53,26 @@ public class AltusIAMService {
     }
 
     /**
-     * Generate machine user with access keys
+     * Generate databus machine user with access keys
      */
-    public Optional<AltusCredential> generateMachineUserWithAccessKey(String machineUserName, String actorCrn, String accountId, boolean useSharedCredential) {
+    public Optional<AltusCredential> generateDatabusMachineUserWithAccessKey(String machineUserName, String actorCrn, String accountId,
+            boolean useSharedCredential) {
+        return Optional.ofNullable(sharedAltusCredentialProvider.getSharedCredentialIfConfigured(useSharedCredential)
+                .orElse(umsClient.createMachineUserAndGenerateKeys(
+                        machineUserName,
+                        actorCrn,
+                        accountId,
+                        roleCrnGenerator.getBuiltInDatabusRoleCrn(accountId),
+                        Collections.emptyMap(),
+                        UserManagementProto.AccessKeyType.Value.ED25519,
+                        regionAwareInternalCrnGeneratorFactory)));
+    }
+
+    /**
+     * Generate monitoring machine user with access keys
+     */
+    public Optional<AltusCredential> generateMonitoringMachineUserWithAccessKey(String machineUserName, String actorCrn, String accountId,
+            boolean useSharedCredential) {
         return Optional.ofNullable(sharedAltusCredentialProvider.getSharedCredentialIfConfigured(useSharedCredential)
                 .orElse(umsClient.createMachineUserAndGenerateKeys(
                         machineUserName,
@@ -91,19 +108,18 @@ public class AltusIAMService {
     }
 
     /**
-     * Delete machine user with its access keys (and unassign databus role if required)
+     * Delete machine user.
      */
     public void clearMachineUser(String machineUserName, String actorCrn, String accountId, boolean useSharedCredential) {
         try {
             if (sharedAltusCredentialProvider.isSharedAltusCredentialInUse(useSharedCredential)) {
-                LOGGER.debug("Access and secret keys are set manually application wide for Databus, skip machine user cleanup.");
+                LOGGER.debug("Access and secret keys are set manually application wide, skip machine user cleanup.");
             } else {
-                umsClient.clearMachineUserWithAccessKeysAndRole(machineUserName, actorCrn, accountId,
-                        roleCrnGenerator.getBuiltInDatabusRoleCrn(accountId), regionAwareInternalCrnGeneratorFactory);
+                umsClient.deleteMachineUser(machineUserName, actorCrn, accountId, regionAwareInternalCrnGeneratorFactory);
             }
         } catch (Exception e) {
-            LOGGER.warn("Cluster Databus resource cleanup failed (fluent - databus user). It is not a fatal issue, "
-                    + "but note that you could have remaining UMS resources for your account", e);
+            LOGGER.warn("Failed to delete {} machine user. It is not a fatal issue, but note that you could have remaining UMS resources for your account",
+                    machineUserName, e);
         }
     }
 

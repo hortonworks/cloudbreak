@@ -71,6 +71,8 @@ public interface ClusterView extends MdcContextInfoProvider {
 
     Secret getDatabusCredentialSecret();
 
+    Secret getMonitoringCredentialSecret();
+
     Secret getKeyStorePwdSecret();
 
     Secret getTrustStorePwdSecret();
@@ -141,6 +143,10 @@ public interface ClusterView extends MdcContextInfoProvider {
 
     default String getDatabusCredential() {
         return getIfNotNull(getDatabusCredentialSecret(), Secret::getRaw);
+    }
+
+    default String getMonitoringCredential() {
+        return getIfNotNull(getMonitoringCredentialSecret(), Secret::getRaw);
     }
 
     default String getUserName() {

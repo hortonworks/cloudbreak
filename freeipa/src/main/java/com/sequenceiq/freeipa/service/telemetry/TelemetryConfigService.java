@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigView;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryConfigProvider;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
+import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
@@ -129,13 +130,28 @@ public class TelemetryConfigService implements TelemetryConfigProvider {
     }
 
     private Map<String, SaltPillarProperties> getMonitoringPillarConfig(Stack stack, Telemetry telemetry, char[] passwordInput, boolean cdpSaasEnabled,
-            boolean computeMonitoring) {
+            boolean computeMonitoring) throws CloudbreakOrchestratorFailedException {
         Map<String, Object> config = new HashMap<>();
         Monitoring monitoring = telemetry.getMonitoring();
         if (monitoring != null && telemetry.isMonitoringFeatureEnabled()) {
             LOGGER.debug("Monitoring is enabled, filling configs ...");
+            String accessKey = null;
+            char[] privateKey = null;
+            if (monitoringConfigService.isMonitoringEnabled(cdpSaasEnabled, computeMonitoring)) {
+                try {
+                    Optional<MonitoringCredential> monitoringCredential = altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(
+                            stackService.getStackById(stack.getId()));
+                    if (monitoringCredential.isPresent()) {
+                        accessKey = monitoringCredential.get().getAccessKey();
+                        privateKey = Optional.of(monitoringCredential.get().getPrivateKey()).map(String::toCharArray).orElse(null);
+                    }
+                } catch (IOException e) {
+                    throw new CloudbreakOrchestratorFailedException(e);
+                }
+            }
             MonitoringConfigView configView = monitoringConfigService.createMonitoringConfig(monitoring,
-                    MonitoringClusterType.FREEIPA, null, passwordInput, cdpSaasEnabled, computeMonitoring);
+                    MonitoringClusterType.FREEIPA, null, passwordInput, cdpSaasEnabled, computeMonitoring,
+                    accessKey, privateKey, null);
             config = configView.toMap();
         }
         return Map.of("monitoring",
