@@ -14,15 +14,10 @@ public class DatabaseRequestConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseRequestConverter.class);
 
     public DatabaseRequest createExternalDbRequest(SdxCluster sdxCluster) {
-        if (sdxCluster.hasExternalDatabase()) {
-            LOGGER.debug("SDX has external database, no DB request is necessary");
-            return null;
-        } else {
-            DatabaseRequest request = new DatabaseRequest();
-            request.setAvailabilityType(DatabaseAvailabilityType.NONE);
-            request.setDatabaseEngineVersion(sdxCluster.getDatabaseEngineVersion());
-            LOGGER.debug("Created DB request: {}", request);
-            return request;
-        }
+        DatabaseRequest request = new DatabaseRequest();
+        request.setAvailabilityType(DatabaseAvailabilityType.NONE);
+        request.setDatabaseEngineVersion(sdxCluster.getDatabaseEngineVersion());
+        LOGGER.debug("Created DB request: {}", request);
+        return request;
     }
 }

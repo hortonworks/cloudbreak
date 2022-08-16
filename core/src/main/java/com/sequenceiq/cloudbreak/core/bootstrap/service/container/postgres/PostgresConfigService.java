@@ -11,6 +11,9 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,13 +27,18 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class PostgresConfigService {
 
-    public static final String POSTGRES_COMMON = "postgres-common";
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedDatabaseConfigProvider.class);
 
-    public static final String POSTGRESQL_SERVER = "postgresql-server";
+    private static final String POSTGRES_COMMON = "postgres-common";
+
+    private static final String POSTGRESQL_SERVER = "postgresql-server";
+
+    private static final String POSTGRES_VERSION = "postgres_version";
 
     @Value("${cb.recovery.database.reuse}")
     private List<String> databasesReusedDuringRecovery;
@@ -81,6 +89,11 @@ public class PostgresConfigService {
             postgresConfig.put("configure_remote_db", "true");
         } else {
             postgresConfig.putAll(embeddedDatabaseConfigProvider.collectEmbeddedDatabaseConfigs(stackDto));
+        }
+        StackView stack = stackDto.getStack();
+        if (StringUtils.isNotBlank(stack.getExternalDatabaseEngineVersion())) {
+            LOGGER.debug("Configuring embedded DB version to [{}]", stack.getExternalDatabaseEngineVersion());
+            postgresConfig.put(POSTGRES_VERSION, stack.getExternalDatabaseEngineVersion());
         }
         if (CollectionUtils.isNotEmpty(databasesReusedDuringRecovery)) {
             postgresConfig.put("recovery_reused_databases", databasesReusedDuringRecovery);
