@@ -25,7 +25,7 @@ public class DatabaseDefaultVersionProvider {
         if (StringUtils.isNotBlank(requestedDbEngineVersion)) {
             LOGGER.debug("DB engine version already requested to be [{}]", requestedDbEngineVersion);
             return requestedDbEngineVersion;
-        } else {
+        } else if (StringUtils.isNotBlank(runtime)) {
             if (0 <= versionComparator.compare(() -> runtime, () -> minRuntimeVersion)) {
                 LOGGER.debug("Setting DB engine version to [{}] for runtime [{}]", dbEngineVersion, runtime);
                 return dbEngineVersion;
@@ -33,6 +33,9 @@ public class DatabaseDefaultVersionProvider {
                 LOGGER.debug("Setting DB engine version to 'null' for runtime [{}]", runtime);
                 return null;
             }
+        } else {
+            LOGGER.warn("Runtime is null, cannot provide default db engine version. Setting it to 'null'");
+            return null;
         }
     }
 }
