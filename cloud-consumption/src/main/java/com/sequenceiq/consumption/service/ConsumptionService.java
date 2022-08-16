@@ -1,5 +1,6 @@
 package com.sequenceiq.consumption.service;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.util.List;
@@ -16,17 +17,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.cloud.ConsumptionCalculator;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudConsumption;
 import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.mappable.StorageType;
 import com.sequenceiq.cloudbreak.common.service.account.AbstractAccountAwareResourceService;
-import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
 import com.sequenceiq.consumption.configuration.repository.ConsumptionRepository;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.dto.ConsumptionCreationDto;
 import com.sequenceiq.consumption.dto.converter.ConsumptionDtoConverter;
-import com.sequenceiq.consumption.util.CloudStorageLocationUtil;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
@@ -43,7 +46,7 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
     private ConsumptionDtoConverter consumptionDtoConverter;
 
     @Inject
-    private CloudStorageLocationUtil cloudStorageLocationUtil;
+    private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Override
     public Long getResourceIdByResourceCrn(String resourceCrn) {
@@ -118,16 +121,28 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
         return consumptionRepository.findAllConsumption();
     }
 
-    public List<Consumption> findAllStorageConsumptionForEnvCrnAndBucketName(String environmentCrn, String storageLocation) {
+    public List<Consumption> findAllStorageConsumptionForEnvCrnAndBucketName(String environmentCrn,
+        String storageLocation, StorageType storageType) {
         List<Consumption> consumptionsForEnv = consumptionRepository.findAllStorageConsumptionByEnvironmentCrn(environmentCrn);
         try {
-            String bucketName = cloudStorageLocationUtil.getS3BucketName(storageLocation);
-            List<Consumption> consumptionsForEnvAndBucket = consumptionsForEnv.stream()
-                    .filter(consumption -> bucketName.equals(cloudStorageLocationUtil.getS3BucketName(consumption.getStorageLocation())))
-                    .collect(Collectors.toList());
-            LOGGER.info("Number of storage consumptions found for environment CRN '{}' and bucket name '{}': {}.",
-                    environmentCrn, bucketName, consumptionsForEnvAndBucket.size());
-            return consumptionsForEnvAndBucket;
+            Optional<ConsumptionCalculator> consumptionCalculatorOptional = cloudPlatformConnectors
+                    .getDefault(platform(storageType.cloudPlatformName()))
+                    .consumptionCalculator(storageType);
+            if (consumptionCalculatorOptional.isPresent()) {
+                ConsumptionCalculator consumptionCalculator = consumptionCalculatorOptional.get();
+                String bucketName = consumptionCalculator.getObjectId(storageLocation);
+                List<Consumption> consumptionsForEnvAndBucket = consumptionsForEnv
+                        .stream()
+                        .filter(consumption -> bucketName.equals(consumptionCalculator.getObjectId(consumption.getStorageLocation())))
+                        .collect(Collectors.toList());
+                LOGGER.info("Number of storage consumptions found for environment CRN '{}' and bucket name '{}': {}.",
+                        environmentCrn, bucketName, consumptionsForEnvAndBucket.size());
+                return consumptionsForEnvAndBucket;
+            } else {
+                LOGGER.error("Cannot make consumption calculation on environment {} storageLocation {} storageType {}." +
+                        " There is no implementation for this kind of storageCalculation", environmentCrn, storageLocation, storageType);
+                return List.of();
+            }
         } catch (ValidationException e) {
             LOGGER.error("Cannot extract bucket name from storage location '{}' as it's not a valid S3 location. Reason: {}",
                     storageLocation, e.getMessage(), e);
@@ -147,7 +162,12 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
 
     private List<List<Consumption>> groupConsumptionsByBucketName(List<Consumption> consumptions) {
         Map<String, List<Consumption>> consumptionsGroupedByBucketName = consumptions.stream()
-                .collect(Collectors.groupingBy(consumption -> getBucketNameOrEmpty(consumption.getStorageLocation())));
+                .collect(Collectors
+                        .groupingBy(consumption -> getBucketNameOrEmpty(
+                                consumption.getStorageLocation(),
+                                consumption.getConsumptionType().getStorageService()
+                        ))
+                );
 
         return consumptionsGroupedByBucketName.entrySet().stream()
                 .filter(bucketNameGroup -> !bucketNameGroup.getKey().isEmpty())
@@ -155,9 +175,13 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
                 .collect(Collectors.toList());
     }
 
-    private String getBucketNameOrEmpty(String storageLocation) {
+    private String getBucketNameOrEmpty(String storageLocation, StorageType storageType) {
         try {
-            return cloudStorageLocationUtil.getS3BucketName(storageLocation);
+            Optional<ConsumptionCalculator> consumptionCalculatorOptional = cloudPlatformConnectors
+                    .getDefault(platform(storageType.cloudPlatformName()))
+                    .consumptionCalculator(storageType);
+            ConsumptionCalculator consumptionCalculator = consumptionCalculatorOptional.get();
+            return consumptionCalculator.getObjectId(storageLocation);
         } catch (ValidationException e) {
             LOGGER.info("Cannot extract bucket name from storage location '{}' as it's not a valid S3 location. Reason: {}.",
                     storageLocation, e.getMessage());
@@ -166,9 +190,14 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
     }
 
     public boolean isAggregationRequired(Consumption consumption) {
+        CloudConsumption cloudConsumption = CloudConsumption.builder().withStorageLocation(consumption.getStorageLocation()).build();
         if (ConsumptionType.STORAGE.equals(consumption.getConsumptionType())) {
             try {
-                cloudStorageLocationUtil.validateCloudStorageType(FileSystemType.S3, consumption.getStorageLocation());
+                Optional<ConsumptionCalculator> consumptionCalculatorOptional = cloudPlatformConnectors
+                        .getDefault(platform(consumption.getConsumptionType().getStorageService().cloudPlatformName()))
+                        .consumptionCalculator(consumption.getConsumptionType().getStorageService());
+                ConsumptionCalculator consumptionCalculator = consumptionCalculatorOptional.get();
+                consumptionCalculator.validate(cloudConsumption);
                 return true;
             } catch (ValidationException e) {
                 return false;

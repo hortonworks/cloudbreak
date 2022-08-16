@@ -1,23 +1,17 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
-import java.util.Comparator;
-import java.util.Optional;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.cloudwatch.model.Datapoint;
-import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsResult;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonS3Client;
-import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsCloudWatchCommonService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.validator.AwsIDBrokerObjectStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -27,8 +21,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
-import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageSizeRequest;
-import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageSizeResponse;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -51,9 +43,6 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
 
     @Inject
     private EntitlementService entitlementService;
-
-    @Inject
-    private AwsCloudWatchCommonService cloudWatchCommonService;
 
     @Override
     public ObjectStorageMetadataResponse getObjectStorageMetadata(ObjectStorageMetadataRequest request) {
@@ -114,23 +103,6 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
                     .build();
         }
         return response;
-    }
-
-    @Override
-    public ObjectStorageSizeResponse getObjectStorageSize(ObjectStorageSizeRequest request) {
-        GetMetricStatisticsResult result = cloudWatchCommonService.getBucketSize(request.getCredential(), request.getRegion().value(),
-                request.getStartTime(), request.getEndTime(), request.getObjectStoragePath());
-        Optional<Datapoint> latestDatapoint = result.getDatapoints().stream().max(Comparator.comparing(Datapoint::getTimestamp));
-        if (latestDatapoint.isPresent()) {
-            Datapoint datapoint = latestDatapoint.get();
-            LOGGER.debug("Gathered datapoint from CloudWatch: {}", datapoint);
-            return ObjectStorageSizeResponse.builder().withStorageInBytes(datapoint.getMaximum()).build();
-        } else {
-            String message = String.format("No datapoints were returned by CloudWatch for bucket %s and timeframe from %s to %s",
-                    request.getObjectStoragePath(), request.getStartTime().toString(), request.getEndTime().toString());
-            LOGGER.error(message);
-            throw new CloudConnectorException(message);
-        }
     }
 
     /**

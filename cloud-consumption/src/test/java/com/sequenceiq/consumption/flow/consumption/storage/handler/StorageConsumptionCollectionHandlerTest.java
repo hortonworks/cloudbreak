@@ -4,11 +4,12 @@ import static com.sequenceiq.consumption.flow.consumption.storage.event.StorageC
 import static com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionStateSelectors.SEND_CONSUMPTION_EVENT_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import javax.validation.ValidationException;
+import java.util.Optional;
+
 import javax.ws.rs.InternalServerErrorException;
 
 import org.junit.jupiter.api.Test;
@@ -18,19 +19,19 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.common.consumption.AwsS3ConsumptionCalculator;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
-import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageSizeRequest;
-import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageSizeResponse;
+import com.sequenceiq.cloudbreak.cloud.model.StorageSizeRequest;
+import com.sequenceiq.cloudbreak.cloud.model.StorageSizeResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
 import com.sequenceiq.consumption.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.dto.Credential;
@@ -40,7 +41,6 @@ import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumpt
 import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionHandlerEvent;
 import com.sequenceiq.consumption.service.CredentialService;
 import com.sequenceiq.consumption.service.EnvironmentService;
-import com.sequenceiq.consumption.util.CloudStorageLocationUtil;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse.LocationResponseBuilder;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -75,9 +75,6 @@ public class StorageConsumptionCollectionHandlerTest {
     private CredentialToCloudCredentialConverter credentialConverter;
 
     @Mock
-    private CloudPlatformConnectors cloudPlatformConnectors;
-
-    @Mock
     private EnvironmentService environmentService;
 
     @Mock
@@ -90,10 +87,7 @@ public class StorageConsumptionCollectionHandlerTest {
     private CloudConnector cloudConnector;
 
     @Mock
-    private ObjectStorageConnector objectStorageConnector;
-
-    @Mock
-    private CloudStorageLocationUtil cloudStorageLocationUtil;
+    private AwsS3ConsumptionCalculator awsS3ConsumptionCalculator;
 
     @InjectMocks
     private StorageConsumptionCollectionHandler underTest;
@@ -102,7 +96,7 @@ public class StorageConsumptionCollectionHandlerTest {
     private ArgumentCaptor<CloudPlatformVariant> variantCaptor;
 
     @Captor
-    private ArgumentCaptor<ObjectStorageSizeRequest> requestCaptor;
+    private ArgumentCaptor<StorageSizeRequest> requestCaptor;
 
     @Test
     public void testSelector() {
@@ -116,15 +110,13 @@ public class StorageConsumptionCollectionHandlerTest {
 
     @Test
     public void testExecuteOperationWorksCorrectly() {
-        mockEnvironmentService(CloudPlatform.AWS.name());
-        mockCloudStorageLocationUtil();
+        mockEnvironmentService(CloudPlatform.AWS);
         mockCredentialServices();
-        mockCloudConnector();
 
-        ObjectStorageSizeResponse objectStorageSizeResponse = ObjectStorageSizeResponse.builder().withStorageInBytes(STORAGE_SIZE).build();
-        when(objectStorageConnector.getObjectStorageSize(any(ObjectStorageSizeRequest.class))).thenReturn(objectStorageSizeResponse);
-
-        StorageConsumptionCollectionHandlerEvent event = createInputEvent();
+        StorageSizeResponse objectStorageSizeResponse = StorageSizeResponse.builder().withStorageInBytes(STORAGE_SIZE).build();
+        when(awsS3ConsumptionCalculator.calculate(any(StorageSizeRequest.class))).thenReturn(objectStorageSizeResponse);
+        when(awsS3ConsumptionCalculator.getObjectId(VALID_STORAGE_LOCATION)).thenReturn(VALID_BUCKET_NAME);
+        StorageConsumptionCollectionHandlerEvent event = createInputEvent(ConsumptionType.STORAGE);
         SendStorageConsumptionEvent result = (SendStorageConsumptionEvent) underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
         assertEquals(CRN, result.getResourceCrn());
@@ -133,20 +125,9 @@ public class StorageConsumptionCollectionHandlerTest {
         assertEquals(SEND_CONSUMPTION_EVENT_EVENT.selector(), result.selector());
 
         verify(environmentService).getByCrn(ENV_CRN);
-
-        verify(cloudStorageLocationUtil).validateCloudStorageType(FileSystemType.S3, VALID_STORAGE_LOCATION);
-        verify(cloudStorageLocationUtil).getS3BucketName(VALID_STORAGE_LOCATION);
-
         verify(credentialService).getCredentialByEnvCrn(ENV_CRN);
         verify(credentialConverter).convert(credential);
-
-        verify(cloudPlatformConnectors).get(variantCaptor.capture());
-        assertEquals(CloudPlatform.AWS.name(), variantCaptor.getValue().getVariant().value());
-        assertEquals(CloudPlatform.AWS.name(), variantCaptor.getValue().getPlatform().value());
-
-        verify(cloudConnector).objectStorage();
-
-        verify(objectStorageConnector).getObjectStorageSize(requestCaptor.capture());
+        verify(awsS3ConsumptionCalculator).calculate(requestCaptor.capture());
         assertEquals(VALID_BUCKET_NAME, requestCaptor.getValue().getObjectStoragePath());
         assertEquals(cloudCredential, requestCaptor.getValue().getCredential());
         assertEquals(REGION, requestCaptor.getValue().getRegion().getRegionName());
@@ -154,15 +135,15 @@ public class StorageConsumptionCollectionHandlerTest {
 
     @Test
     public void testExecuteOperationCloudPlatformNotAws() {
-        mockEnvironmentService(CloudPlatform.AZURE.name());
+        mockEnvironmentService(CloudPlatform.MOCK);
 
-        StorageConsumptionCollectionHandlerEvent event = createInputEvent();
+        StorageConsumptionCollectionHandlerEvent event = createInputEvent(ConsumptionType.UNKNOWN);
         StorageConsumptionCollectionFailureEvent result = (StorageConsumptionCollectionFailureEvent) underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
         assertEquals(CRN, result.getResourceCrn());
         assertEquals(ID, result.getResourceId());
         assertEquals(UnsupportedOperationException.class, result.getException().getClass());
-        assertEquals(String.format("Storage consumption collection is not supported on cloud platform %s", CloudPlatform.AZURE.name()),
+        assertEquals(String.format("Storage consumption collection is not supported on cloud platform %s", CloudPlatform.MOCK.name()),
                 result.getException().getMessage());
 
         verify(environmentService).getByCrn(ENV_CRN);
@@ -170,15 +151,13 @@ public class StorageConsumptionCollectionHandlerTest {
 
     @Test
     public void testExecuteOperationObjectStorageConnectorThrowsException() {
-        mockEnvironmentService(CloudPlatform.AWS.name());
-        mockCloudStorageLocationUtil();
+        mockEnvironmentService(CloudPlatform.AWS);
         mockCredentialServices();
-        mockCloudConnector();
 
         CloudConnectorException ex = new CloudConnectorException("error");
-        when(objectStorageConnector.getObjectStorageSize(any(ObjectStorageSizeRequest.class))).thenThrow(ex);
-
-        StorageConsumptionCollectionHandlerEvent event = createInputEvent();
+        when(awsS3ConsumptionCalculator.calculate(any(StorageSizeRequest.class))).thenThrow(ex);
+        when(awsS3ConsumptionCalculator.getObjectId(VALID_STORAGE_LOCATION)).thenReturn(VALID_BUCKET_NAME);
+        StorageConsumptionCollectionHandlerEvent event = createInputEvent(ConsumptionType.STORAGE);
         StorageConsumptionCollectionFailureEvent result = (StorageConsumptionCollectionFailureEvent) underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
         assertEquals(CRN, result.getResourceCrn());
@@ -186,73 +165,31 @@ public class StorageConsumptionCollectionHandlerTest {
         assertEquals(ex, result.getException());
 
         verify(environmentService).getByCrn(ENV_CRN);
-
-        verify(cloudStorageLocationUtil).validateCloudStorageType(FileSystemType.S3, VALID_STORAGE_LOCATION);
-        verify(cloudStorageLocationUtil).getS3BucketName(VALID_STORAGE_LOCATION);
-
         verify(credentialService).getCredentialByEnvCrn(ENV_CRN);
         verify(credentialConverter).convert(credential);
 
-        verify(cloudPlatformConnectors).get(variantCaptor.capture());
-        assertEquals(CloudPlatform.AWS.name(), variantCaptor.getValue().getVariant().value());
-        assertEquals(CloudPlatform.AWS.name(), variantCaptor.getValue().getPlatform().value());
-
-        verify(cloudConnector).objectStorage();
-
-        verify(objectStorageConnector).getObjectStorageSize(requestCaptor.capture());
+        verify(awsS3ConsumptionCalculator).calculate(requestCaptor.capture());
         assertEquals(VALID_BUCKET_NAME, requestCaptor.getValue().getObjectStoragePath());
         assertEquals(cloudCredential, requestCaptor.getValue().getCredential());
         assertEquals(REGION, requestCaptor.getValue().getRegion().getRegionName());
     }
 
     @Test
-    public void testExecuteOperationObjectStorageConnectorNotFound() {
-        mockEnvironmentService(CloudPlatform.AWS.name());
-        mockCloudStorageLocationUtil();
-        mockCredentialServices();
-
-        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(null);
-
-        StorageConsumptionCollectionHandlerEvent event = createInputEvent();
-        StorageConsumptionCollectionFailureEvent result = (StorageConsumptionCollectionFailureEvent) underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
-
-        assertEquals(CRN, result.getResourceCrn());
-        assertEquals(ID, result.getResourceId());
-        assertEquals(NotFoundException.class, result.getException().getClass());
-        assertEquals(String.format("No object storage connector for cloud platform: %s", CloudPlatform.AWS.name()), result.getException().getMessage());
-
-        verify(environmentService).getByCrn(ENV_CRN);
-
-        verify(cloudStorageLocationUtil).validateCloudStorageType(FileSystemType.S3, VALID_STORAGE_LOCATION);
-        verify(cloudStorageLocationUtil).getS3BucketName(VALID_STORAGE_LOCATION);
-
-        verify(credentialService).getCredentialByEnvCrn(ENV_CRN);
-        verify(credentialConverter).convert(credential);
-
-        verify(cloudPlatformConnectors).get(variantCaptor.capture());
-        assertEquals(CloudPlatform.AWS.name(), variantCaptor.getValue().getVariant().value());
-        assertEquals(CloudPlatform.AWS.name(), variantCaptor.getValue().getPlatform().value());
-    }
-
-    @Test
     public void testExecuteOperationCredentialServiceThrowsException() {
-        mockEnvironmentService(CloudPlatform.AWS.name());
-        mockCloudStorageLocationUtil();
-
+        Consumption consumption = new Consumption();
+        consumption.setEnvironmentCrn(ENV_CRN);
+        ConsumptionContext context = new ConsumptionContext(null, consumption);
         CloudbreakServiceException ex = new CloudbreakServiceException("error");
         when(credentialService.getCredentialByEnvCrn(ENV_CRN)).thenThrow(ex);
 
-        StorageConsumptionCollectionHandlerEvent event = createInputEvent();
-        StorageConsumptionCollectionFailureEvent result = (StorageConsumptionCollectionFailureEvent) underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
+        StorageConsumptionCollectionFailureEvent result = (StorageConsumptionCollectionFailureEvent)
+                underTest.doAccept(new HandlerEvent<>(new Event<>(new StorageConsumptionCollectionHandlerEvent(
+                STORAGE_CONSUMPTION_COLLECTION_HANDLER.selector(),
+                ID, CRN, context, null))));
 
         assertEquals(CRN, result.getResourceCrn());
         assertEquals(ID, result.getResourceId());
         assertEquals(ex, result.getException());
-
-        verify(environmentService).getByCrn(ENV_CRN);
-
-        verify(cloudStorageLocationUtil).validateCloudStorageType(FileSystemType.S3, VALID_STORAGE_LOCATION);
-        verify(cloudStorageLocationUtil).getS3BucketName(VALID_STORAGE_LOCATION);
 
         verify(credentialService).getCredentialByEnvCrn(ENV_CRN);
     }
@@ -262,7 +199,7 @@ public class StorageConsumptionCollectionHandlerTest {
         InternalServerErrorException ex = new InternalServerErrorException("error");
         when(environmentService.getByCrn(ENV_CRN)).thenThrow(ex);
 
-        StorageConsumptionCollectionHandlerEvent event = createInputEvent();
+        StorageConsumptionCollectionHandlerEvent event = createInputEvent(ConsumptionType.STORAGE);
         StorageConsumptionCollectionFailureEvent result = (StorageConsumptionCollectionFailureEvent) underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
         assertEquals(CRN, result.getResourceCrn());
@@ -272,34 +209,27 @@ public class StorageConsumptionCollectionHandlerTest {
         verify(environmentService).getByCrn(ENV_CRN);
     }
 
-    @Test
-    public void testExecuteOperationAwsStorageLocationValidationFails() {
-        mockEnvironmentService(CloudPlatform.AWS.name());
-
-        doThrow(new ValidationException()).when(cloudStorageLocationUtil).validateCloudStorageType(FileSystemType.S3, INVALID_STORAGE_LOCATION);
-
-        StorageConsumptionCollectionHandlerEvent event = createInputEvent(INVALID_STORAGE_LOCATION);
-        StorageConsumptionCollectionFailureEvent result = (StorageConsumptionCollectionFailureEvent) underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
-
-        assertEquals(CRN, result.getResourceCrn());
-        assertEquals(ID, result.getResourceId());
-        assertEquals(ValidationException.class, result.getException().getClass());
-
-        verify(environmentService).getByCrn(ENV_CRN);
-
-        verify(cloudStorageLocationUtil).validateCloudStorageType(FileSystemType.S3, INVALID_STORAGE_LOCATION);
-    }
-
-    private void mockEnvironmentService(String platform) {
+    private void mockEnvironmentService(CloudPlatform cloudPlatform) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = DetailedEnvironmentResponse.builder()
-                .withCloudPlatform(platform)
+                .withCloudPlatform(cloudPlatform.name())
                 .withLocation(LocationResponseBuilder.aLocationResponse().withName(REGION).build())
                 .build();
         when(environmentService.getByCrn(ENV_CRN)).thenReturn(detailedEnvironmentResponse);
-    }
 
-    private void mockCloudStorageLocationUtil() {
-        when(cloudStorageLocationUtil.getS3BucketName(VALID_STORAGE_LOCATION)).thenReturn(VALID_BUCKET_NAME);
+        if (cloudPlatform.equals(CloudPlatform.AWS)) {
+            when(awsS3ConsumptionCalculator.calculate(any())).thenReturn(StorageSizeResponse.builder().withStorageInBytes(250).build());
+            CloudPlatformConnectors cloudPlatformConnectors = mock(CloudPlatformConnectors.class);
+            CloudConnector connector = mock(CloudConnector.class);
+            when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
+            when(connector.consumptionCalculator(any())).thenReturn(Optional.of(awsS3ConsumptionCalculator));
+            ReflectionTestUtils.setField(underTest, "cloudPlatformConnectors", cloudPlatformConnectors);
+        } else {
+            CloudPlatformConnectors cloudPlatformConnectors = mock(CloudPlatformConnectors.class);
+            CloudConnector connector = mock(CloudConnector.class);
+            when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
+            when(connector.consumptionCalculator(any())).thenReturn(Optional.empty());
+            ReflectionTestUtils.setField(underTest, "cloudPlatformConnectors", cloudPlatformConnectors);
+        }
     }
 
     private void mockCredentialServices() {
@@ -307,20 +237,13 @@ public class StorageConsumptionCollectionHandlerTest {
         when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
     }
 
-    private void mockCloudConnector() {
-        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
-        when(cloudConnector.objectStorage()).thenReturn(objectStorageConnector);
-    }
-
-    private StorageConsumptionCollectionHandlerEvent createInputEvent() {
-        return createInputEvent(VALID_STORAGE_LOCATION);
-    }
-
-    private StorageConsumptionCollectionHandlerEvent createInputEvent(String storageLocation) {
+    private StorageConsumptionCollectionHandlerEvent createInputEvent(ConsumptionType consumptionType) {
         Consumption consumption = new Consumption();
         consumption.setEnvironmentCrn(ENV_CRN);
-        consumption.setStorageLocation(storageLocation);
+        consumption.setStorageLocation(VALID_STORAGE_LOCATION);
+        consumption.setConsumptionType(consumptionType);
         ConsumptionContext context = new ConsumptionContext(null, consumption);
+
         return new StorageConsumptionCollectionHandlerEvent(
                 STORAGE_CONSUMPTION_COLLECTION_HANDLER.selector(),
                 ID, CRN, context, null);

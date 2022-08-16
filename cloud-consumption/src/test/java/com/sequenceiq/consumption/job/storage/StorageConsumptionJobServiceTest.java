@@ -30,6 +30,7 @@ import org.quartz.SchedulerException;
 import org.springframework.context.ApplicationContext;
 
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
+import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
 import com.sequenceiq.consumption.configuration.repository.ConsumptionRepository;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.service.ConsumptionService;
@@ -105,7 +106,9 @@ public class StorageConsumptionJobServiceTest {
         Consumption consumptionToSchedule = consumption(1L);
         when(consumptionService.isAggregationRequired(consumptionToSchedule)).thenReturn(true);
         when(consumptionService.findAllStorageConsumptionForEnvCrnAndBucketName(
-                consumptionToSchedule.getEnvironmentCrn(), consumptionToSchedule.getStorageLocation()))
+                consumptionToSchedule.getEnvironmentCrn(),
+                consumptionToSchedule.getStorageLocation(),
+                consumptionToSchedule.getConsumptionType().getStorageService()))
                 .thenReturn(List.of(consumptionToSchedule));
         mockSchedulingById(1L);
 
@@ -121,7 +124,9 @@ public class StorageConsumptionJobServiceTest {
         Consumption consumptionOther = consumption(2L);
         when(consumptionService.isAggregationRequired(consumptionToSchedule)).thenReturn(true);
         when(consumptionService.findAllStorageConsumptionForEnvCrnAndBucketName(
-                consumptionToSchedule.getEnvironmentCrn(), consumptionToSchedule.getStorageLocation()))
+                consumptionToSchedule.getEnvironmentCrn(),
+                consumptionToSchedule.getStorageLocation(),
+                consumptionToSchedule.getConsumptionType().getStorageService()))
                 .thenReturn(List.of(consumptionToSchedule, consumptionOther));
         doReturn(null).when(scheduler).getJobDetail(argThat((JobKey jobkey) -> "1".equals(jobkey.getName())));
         doReturn(mock(JobDetail.class)).when(scheduler).getJobDetail(argThat((JobKey jobkey) -> "2".equals(jobkey.getName())));
@@ -148,7 +153,9 @@ public class StorageConsumptionJobServiceTest {
         when(consumptionService.isAggregationRequired(consumptionToUnSchedule)).thenReturn(true);
         doReturn(mock(JobDetail.class)).when(scheduler).getJobDetail(argThat((JobKey jobkey) -> "1".equals(jobkey.getName())));
         when(consumptionService.findAllStorageConsumptionForEnvCrnAndBucketName(
-                consumptionToUnSchedule.getEnvironmentCrn(), consumptionToUnSchedule.getStorageLocation()))
+                consumptionToUnSchedule.getEnvironmentCrn(),
+                consumptionToUnSchedule.getStorageLocation(),
+                consumptionToUnSchedule.getConsumptionType().getStorageService()))
                 .thenReturn(List.of(consumptionToUnSchedule));
 
         underTest.unschedule(consumptionToUnSchedule);
@@ -165,7 +172,9 @@ public class StorageConsumptionJobServiceTest {
         when(consumptionService.isAggregationRequired(consumptionToUnSchedule)).thenReturn(true);
         doReturn(mock(JobDetail.class)).when(scheduler).getJobDetail(argThat((JobKey jobkey) -> "1".equals(jobkey.getName())));
         when(consumptionService.findAllStorageConsumptionForEnvCrnAndBucketName(
-                consumptionToUnSchedule.getEnvironmentCrn(), consumptionToUnSchedule.getStorageLocation()))
+                consumptionToUnSchedule.getEnvironmentCrn(),
+                consumptionToUnSchedule.getStorageLocation(),
+                consumptionToUnSchedule.getConsumptionType().getStorageService()))
                 .thenReturn(List.of(consumptionToUnSchedule, consumptionOther));
         mockSchedulingById(2L);
 
@@ -194,6 +203,7 @@ public class StorageConsumptionJobServiceTest {
         consumption.setResourceCrn("crn");
         consumption.setEnvironmentCrn("env-crn");
         consumption.setStorageLocation("location");
+        consumption.setConsumptionType(ConsumptionType.STORAGE);
         consumption.setId(id);
         return consumption;
     }

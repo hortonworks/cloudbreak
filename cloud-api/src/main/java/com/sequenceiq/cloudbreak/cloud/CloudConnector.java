@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud;
 
 import java.util.List;
+import java.util.Optional;
+
+import com.sequenceiq.cloudbreak.common.mappable.StorageType;
 
 /**
  * In order to integrate a Cloud provider into the Cloudbreak this interface needs to be implemented.  Loading of the Cloud provider specific code
@@ -131,10 +134,20 @@ public interface CloudConnector extends CloudPlatformAware {
     }
 
     /**
+     * Access to the {@link ConsumptionCalculator} object.
+     *
+     * @return the {@link ConsumptionCalculator} object
+     */
+    default Optional<ConsumptionCalculator> consumptionCalculator(StorageType storageType) {
+        return Optional.empty();
+    }
+
+    /**
      * Access to the {@link NoSqlConnector} object.
      *
      * @return the {@link NoSqlConnector} object
      */
+
     default NoSqlConnector noSql() {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
