@@ -5,7 +5,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
-import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class EmbeddedDatabaseConfigProvider {
@@ -26,8 +24,6 @@ public class EmbeddedDatabaseConfigProvider {
     private static final String POSTGRES_DATA_ON_ATTACHED_DISK_KEY = "postgres_data_on_attached_disk";
 
     private static final String POSTGRES_SUBDIRECTORY_ON_ATTACHED_DISK = "pgsql";
-
-    private static final String POSTGRES_VERSION = "postgres_version";
 
     private static final String POSTGRES_LOG_SUBDIRECTORY_ON_ATTACHED_DISK = "pgsql/log";
 
@@ -46,11 +42,6 @@ public class EmbeddedDatabaseConfigProvider {
 
     public Map<String, Object> collectEmbeddedDatabaseConfigs(StackDto stackDto) {
         Map<String, Object> result = new HashMap<>();
-        StackView stack = stackDto.getStack();
-        if (StringUtils.isNotBlank(stack.getExternalDatabaseEngineVersion())) {
-            LOGGER.debug("Configuring embedded DB version to [{}]", stack.getExternalDatabaseEngineVersion());
-            result.put(POSTGRES_VERSION, stack.getExternalDatabaseEngineVersion());
-        }
         if (embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto)) {
             LOGGER.info("Attached disk will be used to store data for postgres sql server");
             result.putAll(createEmbeddedDbOnAttachedDiskConfig());

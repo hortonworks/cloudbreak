@@ -12,6 +12,9 @@
 {% if 'None' != configure_remote_db %}
 
 include:
+{%- if salt[ 'pillar.get' ]('postgres:postgres_version', '10') | int == 11 %}
+  - postgresql.pg11-alternatives
+{%- endif %}
   - postgresql.disaster_recovery.recover
 
 /opt/salt/scripts/init_db_remote.sh:
