@@ -19,6 +19,8 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -140,7 +142,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testAddRoleConfigsWithNoMatchinRefName() {
+    public void testAddRoleConfigsWithNoMatchingRefName() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         Map<String, List<ApiClusterTemplateConfig>> configs = new HashMap<>();
         configs.put("hdfs-NAMENODE-nomatch", List.of(new ApiClusterTemplateConfig().name("dfs_name_dir_list").variable("master_NAMENODE")));
@@ -472,7 +474,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void recommendGateway() {
+    public void recommendGatewayTestWhenNameAndCardinality() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-multi-gateway.bp"));
         assertEquals(new GatewayRecommendation(Set.of("master")), underTest.recommendGateway());
 
@@ -484,6 +486,64 @@ public class CmTemplateProcessorTest {
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha-no-gateway.bp"));
         assertEquals(new GatewayRecommendation(Set.of()), underTest.recommendGateway());
+    }
+
+    @Test
+    public void recommendGatewayTestWhenExplicitAndSingleEntryAndNoMatch() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha-single-worker-with-knox-of-0.bp"));
+
+        GatewayRecommendation result = underTest.recommendGateway();
+        assertThat(result).isEqualTo(new GatewayRecommendation(Set.of("worker")));
+    }
+
+    @ParameterizedTest(name = "path={0}")
+    @ValueSource(strings = {"input/namenode-ha-with-knox.bp", "input/namenode-ha-single-worker-with-knox-of-2.bp"})
+    public void recommendGatewayTestWhenExplicitAndSingleEntryAndMatch(String path) {
+        underTest = new CmTemplateProcessor(getBlueprintText(path));
+
+        GatewayRecommendation result = underTest.recommendGateway();
+        assertThat(result).isEqualTo(new GatewayRecommendation(Set.of("yolo")));
+    }
+
+    @Test
+    public void recommendGatewayTestWhenExplicitAndMultipleEntriesButNoMatch() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha-single-worker-with-knoxes-of-0-0.bp"));
+
+        GatewayRecommendation result = underTest.recommendGateway();
+        assertThat(result).isEqualTo(new GatewayRecommendation(Set.of("worker")));
+    }
+
+    @Test
+    public void recommendGatewayTestWhenExplicitAndMultipleEntriesAndOneMatch() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha-single-worker-with-knoxes-of-0-2.bp"));
+
+        GatewayRecommendation result = underTest.recommendGateway();
+        assertThat(result).isEqualTo(new GatewayRecommendation(Set.of("entrance")));
+    }
+
+    @Test
+    public void recommendGatewayTestWhenExplicitAndMultipleEntriesAndTwoMatchesAndSameCounts() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha-single-worker-with-knoxes-of-2-2.bp"));
+
+        GatewayRecommendation result = underTest.recommendGateway();
+        assertThat(result).isEqualTo(new GatewayRecommendation(Set.of("door")));
+    }
+
+    @Test
+    public void recommendGatewayTestWhenExplicitAndMultipleEntriesAndTwoMatchesAndDifferentCounts() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha-single-worker-with-knoxes-of-1-2.bp"));
+
+        GatewayRecommendation result = underTest.recommendGateway();
+        assertThat(result).isEqualTo(new GatewayRecommendation(Set.of("window")));
+    }
+
+    @ParameterizedTest(name = "path={0}")
+    @ValueSource(strings = {"input/namenode-ha-single-worker-with-knoxes-of-1-1-2.bp", "input/namenode-ha-single-worker-with-knoxes-of-1-2-3.bp"})
+    public void recommendGatewayTestWhenExplicitAndMultipleEntriesAndThreeMatches(String path) {
+        underTest = new CmTemplateProcessor(getBlueprintText(path));
+
+        GatewayRecommendation result = underTest.recommendGateway();
+        assertThat(result).isEqualTo(new GatewayRecommendation(Set.of("entrance")));
     }
 
     @Test
@@ -731,4 +791,5 @@ public class CmTemplateProcessorTest {
     private String templateToString(ApiClusterTemplate template) {
         return JsonUtil.writeValueAsStringSilent(template);
     }
+
 }
