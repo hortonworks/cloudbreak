@@ -4,14 +4,21 @@ import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFo
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.NOTIFICATION;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measureAndWarnIfLong;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -29,14 +36,10 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEve
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.converter.StructuredEventEntityToStructuredEventConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.converter.StructuredEventToStructuredEventEntityConverter;
+import com.sequenceiq.cloudbreak.util.DatabaseCommandFormatter;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Component;
 
 @Component
 public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResourceService<StructuredEventEntity> implements LegacyStructuredEventService {
@@ -48,6 +51,9 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     private static final long THREE_MONTHS = Duration.ofDays(NINETY_DAYS).toMillis();
 
     private static final int MILLISEC_MULTIPLIER = 1000;
+
+    @Inject
+    private DatabaseCommandFormatter databaseCommandFormatter;
 
     @Inject
     private LegacyStructuredEventRepository repository;
@@ -173,7 +179,8 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     }
 
     public void deleteEntriesForAccountThatIsOlderThanThreeMonths(String accountId) {
-        measureAndWarnIfLong(() -> repository.deleteByResourceCrnLikeAndTimestampIsLessThan(decorateAccountIdForLikelinessSearch(accountId),
+        measureAndWarnIfLong(() -> repository.deleteByResourceCrnLikeAndTimestampIsLessThan(
+                databaseCommandFormatter.encapsulateContentForLikelinessQuery(accountId),
                 getTimestampThatThreeMonthsBeforeNow()), LOGGER, "Cleaning up StructuredEvent(s) (for account: "
                 + accountId + ") that are older than 3 months and belongs to deleted Stack(s)");
     }
@@ -207,10 +214,6 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
 
     private Long getTimestampThatThreeMonthsBeforeNow() {
         return Instant.now().getEpochSecond() * MILLISEC_MULTIPLIER - THREE_MONTHS;
-    }
-
-    private String decorateAccountIdForLikelinessSearch(String content) {
-        return "%:" + content + ":%";
     }
 
 }

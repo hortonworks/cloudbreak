@@ -17,15 +17,15 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
+import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.service.account.AbstractAccountAwareResourceService;
 import com.sequenceiq.cloudbreak.structuredevent.domain.CDPStructuredEventEntity;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
-import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.structuredevent.repository.CDPPagingStructuredEventRepository;
 import com.sequenceiq.cloudbreak.structuredevent.repository.CDPStructuredEventRepository;
-import com.sequenceiq.cloudbreak.common.service.account.AbstractAccountAwareResourceService;
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPStructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.service.converter.CDPStructuredEventEntityToCDPStructuredEventConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.converter.CDPStructuredEventToCDPStructuredEventEntityConverter;
@@ -165,4 +165,5 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
         }
         return types;
     }
+
 }

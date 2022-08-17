@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.repository;
 
+import static javax.transaction.Transactional.TxType.REQUIRED;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +27,7 @@ import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 
-@Transactional(Transactional.TxType.REQUIRED)
+@Transactional(REQUIRED)
 @EntityType(entityClass = Stack.class)
 public interface StackRepository extends AccountAwareResourceRepository<Stack, Long>, JobResourceRepository<Stack, Long> {
 
@@ -183,5 +185,8 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Modifying
     @Query("UPDATE Stack s SET s.tunnel = :tunnel WHERE s.id = :id")
     int setTunnelByStackId(@Param("id") Long id, @Param("tunnel") Tunnel tunnel);
+
+    @Query("SELECT s.accountId FROM Stack s WHERE s.id = :id")
+    Optional<String> findAccountIdByStackId(@Param("id") Long id);
 
 }

@@ -22,6 +22,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.termination.TerminationFailedException;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCleanupService;
+import com.sequenceiq.freeipa.service.freeipa.cleanup.StructuredEventCleanupService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -55,12 +56,16 @@ public class TerminationService {
     @Inject
     private FreeIpaRecipeService freeIpaRecipeService;
 
+    @Inject
+    private StructuredEventCleanupService structuredEventCleanupService;
+
     public void finalizeTermination(Long stackId) {
         try {
             transactionService.required(() -> {
                 finalizeTerminationTransaction(stackId);
                 return null;
             });
+            structuredEventCleanupService.cleanUpStructuredEvents(stackId);
         } catch (TransactionExecutionException ex) {
             LOGGER.info("Failed to terminate cluster infrastructure.");
             throw new TerminationFailedException(ex);

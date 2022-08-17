@@ -23,6 +23,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCleanupService;
+import com.sequenceiq.freeipa.service.freeipa.cleanup.StructuredEventCleanupService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -32,6 +33,8 @@ import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 class TerminationServiceTest {
 
     private static final String STACK_NAME = "freeipa-cluster";
+
+    private static final long STACK_ID = 1L;
 
     @Mock
     private StackService stackService;
@@ -54,6 +57,9 @@ class TerminationServiceTest {
     @Mock
     private FreeIpaRecipeService freeIpaRecipeService;
 
+    @Mock
+    private StructuredEventCleanupService mockStructuredEventCleanupService;
+
     @InjectMocks
     private TerminationService underTest;
 
@@ -65,7 +71,7 @@ class TerminationServiceTest {
         InstanceMetaData im3 = mock(InstanceMetaData.class);
         InstanceMetaData im4 = mock(InstanceMetaData.class);
 
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(stack.getAllInstanceMetaDataList()).thenReturn(List.of(im1, im2, im3, im4));
         when(im1.isTerminated()).thenReturn(true);
         when(im2.isTerminated()).thenReturn(false);
@@ -76,7 +82,7 @@ class TerminationServiceTest {
         when(im4.getInstanceId()).thenReturn(null);
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
 
-        underTest.finalizeTerminationForInstancesWithoutInstanceIds(1L);
+        underTest.finalizeTerminationForInstancesWithoutInstanceIds(STACK_ID);
 
         verify(im2).setTerminationDate(any());
         verify(im2).setInstanceStatus(eq(InstanceStatus.TERMINATED));
@@ -112,14 +118,14 @@ class TerminationServiceTest {
     }
 
     @Test
-    void testfinalizeTerminationTransaction() throws Exception {
+    void testfinalizeTerminationTransaction() {
         Stack stack = mock(Stack.class);
 
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(stack.getName()).thenReturn(STACK_NAME);
-        when(stack.getId()).thenReturn(1L);
+        when(stack.getId()).thenReturn(STACK_ID);
 
-        underTest.finalizeTerminationTransaction(1L);
+        underTest.finalizeTerminationTransaction(STACK_ID);
 
         verify(stack).setName(anyString());
         verify(stack).setTerminated(any());
@@ -129,6 +135,7 @@ class TerminationServiceTest {
                 eq("Stack was terminated successfully."));
         verify(stackService).save(eq(stack));
         verify(instanceMetaDataService, never()).save(any());
-        verify(freeIpaRecipeService).deleteRecipes(1L);
+        verify(freeIpaRecipeService).deleteRecipes(STACK_ID);
     }
+
 }
