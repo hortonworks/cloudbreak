@@ -15,7 +15,7 @@
         "attachedVolumes": [
           {
             "count": 1,
-            "size": 250,
+            "size": 128,
             "type": "StandardSSD_LRS"
           }
         ]
@@ -32,7 +32,7 @@
         "attachedVolumes": [
           {
             "count": 1,
-            "size": 250,
+            "size": 128,
             "type": "StandardSSD_LRS"
           }
         ]
@@ -49,7 +49,7 @@
         "attachedVolumes": [
           {
             "count": 1,
-            "size": 250,
+            "size": 512,
             "type": "StandardSSD_LRS"
           }
         ]
@@ -66,7 +66,7 @@
         "attachedVolumes": [
           {
             "count": 1,
-            "size": 250,
+            "size": 128,
             "type": "StandardSSD_LRS"
           }
         ]
