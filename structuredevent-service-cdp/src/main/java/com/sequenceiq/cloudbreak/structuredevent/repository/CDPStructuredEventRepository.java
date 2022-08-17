@@ -8,6 +8,9 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
@@ -67,5 +70,9 @@ public interface CDPStructuredEventRepository extends AccountAwareResourceReposi
     default List<ResourceBasicView> findAllResourceBasicViewByNamesAndAccountId(Collection<String> names, String accountId) {
         throw new UnsupportedOperationException();
     }
+
+    @Modifying
+    @Query("DELETE FROM CDPStructuredEventEntity cdse WHERE cdse.resourceCrn = :accountId AND cdse.timestamp <= :timestamp")
+    void deleteByAccountIdOlderThan(@Param("accountId") String accountId, @Param("timestamp") Long timestamp);
 
 }

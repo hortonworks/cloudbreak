@@ -97,6 +97,14 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
         return stack;
     }
 
+    public Optional<String> findAccountById(Long id) {
+        LOGGER.debug("Trying to fetch account ID based on the following id: {}", id);
+        Optional<String> crn = stackRepository.findAccountIdByStackId(id);
+        crn.ifPresentOrElse(s -> LOGGER.debug("Account ID has found [for stack id: {}]: {}", id, s),
+                () -> LOGGER.debug("No account ID has been found for stack id: {}", id));
+        return crn;
+    }
+
     public Stack save(Stack stack) {
         return stackRepository.save(stack);
     }
