@@ -92,7 +92,7 @@ public class BlueprintUtilV4Controller extends NotificationController implements
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL)
     public RecommendationV4Response createRecommendationByCredCrn(Long workspaceId, String blueprintName,
             @TenantAwareParam @ResourceCrn String credentialCrn, String region, String platformVariant,
-            String availabilityZone, CdpResourceType cdpResourceType) {
+            String availabilityZone, CdpResourceType resourceType) {
         PlatformRecommendation recommendation = blueprintService.getRecommendationByCredentialCrn(
                 threadLocalService.getRequestedWorkspaceId(),
                 blueprintName,
@@ -100,7 +100,7 @@ public class BlueprintUtilV4Controller extends NotificationController implements
                 region,
                 platformVariant,
                 availabilityZone,
-                cdpResourceType);
+                resourceType);
         return platformRecommendationToPlatformRecommendationV4ResponseConverter.convert(recommendation);
     }
 
