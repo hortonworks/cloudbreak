@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.common.model.UpgradeShowAvailableImages.LATEST_ONLY;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
@@ -60,6 +62,9 @@ public class DistroXUpgradeAvailabilityService {
 
     @Inject
     private RuntimeVersionService runtimeVersionService;
+
+    @Inject
+    private CurrentImageUsageCondition currentImageUsageCondition;
 
     public boolean isRuntimeUpgradeEnabledByUserCrn(String userCrn) {
         return entitlementService.datahubRuntimeUpgradeEnabled(getAccountId(userCrn));
@@ -91,9 +96,20 @@ public class DistroXUpgradeAvailabilityService {
         String accountId = Crn.safeFromString(userCrn).getAccountId();
         UpgradeV4Response response = stackUpgradeOperations.checkForClusterUpgrade(accountId, stack, request);
         List<ImageInfoV4Response> filteredCandidates = filterCandidates(accountId, stack, request, response);
+        filteredCandidates = addOsUpgradeOptionIfAvailable(stack, response, filteredCandidates);
         List<ImageInfoV4Response> razValidatedCandidates = validateRangerRazCandidates(accountId, stack, filteredCandidates);
         response.setUpgradeCandidates(razValidatedCandidates);
         return response;
+    }
+
+    private List<ImageInfoV4Response> addOsUpgradeOptionIfAvailable(Stack stack, UpgradeV4Response response, List<ImageInfoV4Response> filteredCandidates) {
+        ImageInfoV4Response currentImage = response.getCurrent();
+        if (!filteredCandidates.contains(currentImage) && currentImageUsageCondition.currentImageUsedOnInstances(stack.getId(), currentImage.getImageId())) {
+            LOGGER.debug("Adding the current image for image candidates to offer OS upgrade. Current image id: {}", currentImage.getImageId());
+            filteredCandidates = new ArrayList<>(filteredCandidates);
+            filteredCandidates.add(currentImage);
+        }
+        return filteredCandidates;
     }
 
     private List<ImageInfoV4Response> validateRangerRazCandidates(String accountId, Stack stack, List<ImageInfoV4Response> filteredCandidates) {

@@ -81,11 +81,9 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 imageChangeDto, true, true, "variant", true);
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(6, flowChainQueue.getQueue().size());
+        assertEquals(4, flowChainQueue.getQueue().size());
         assertUpdateValidationEvent(flowChainQueue);
-        assertUpdatePreparationEvent(flowChainQueue);
         assertSaltUpdateEvent(flowChainQueue);
-        assertUpgradeEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
         assertRepairEvent(flowChainQueue);
     }
