@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -505,5 +506,15 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Override
     public String getSearchId() {
         return getName();
+    }
+
+    @Override
+    public void deleteForCleanup() {
+        try {
+            setFlow("SDX Internal deletion", getClientForCleanup().getDefaultClient().sdxEndpoint().deleteByCrn(getCrn(), true));
+            awaitForFlow();
+        } catch (NotFoundException nfe) {
+            LOGGER.info("SDX Internal resource not found, thus cleanup not needed.");
+        }
     }
 }

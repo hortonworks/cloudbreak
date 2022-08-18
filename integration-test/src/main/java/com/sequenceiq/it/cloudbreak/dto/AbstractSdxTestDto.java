@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -114,15 +113,5 @@ public abstract class AbstractSdxTestDto<R, S, T extends CloudbreakTestDto> exte
         }
         return getTestContext().then((T) this, SdxClient.class, assertions.get(assertions.size() - 1),
                 runningParameters.get(runningParameters.size() - 1));
-    }
-
-    @Override
-    public void deleteForCleanup() {
-        try {
-            setFlow("SDX deletion", getClientForCleanup().getDefaultClient().sdxEndpoint().deleteByCrn(getCrn(), true));
-            awaitForFlow();
-        } catch (NotFoundException nfe) {
-            LOGGER.info("resource not found, thus cleanup not needed.");
-        }
     }
 }
