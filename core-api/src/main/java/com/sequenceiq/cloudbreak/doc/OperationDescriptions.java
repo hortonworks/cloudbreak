@@ -190,6 +190,9 @@ public class OperationDescriptions {
                 " based on the given datahub crn.";
         public static final String GET_RECOMMENDATION_BY_CRED_CRN = "creates a recommendation that advises cloud resources for the given" +
                 " blueprint based on the given credential crn.";
+
+        public static final String GET_RECOMMENDATION_BY_ENV_CRN = "creates a recommendation that advises cloud resources for the given" +
+                " blueprint based on the given environment crn.";
     }
 
     public static class ImageCatalogOpDescription {

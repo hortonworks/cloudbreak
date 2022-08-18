@@ -35,6 +35,7 @@ import org.springframework.validation.MapBindingResult;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.CompositeAuthResourcePropertyProvider;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.RecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -53,18 +54,21 @@ import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.PlatformRecommendationToPlatformRecommendationV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.projection.BlueprintStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.CloudResourceAdvisor;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
@@ -128,6 +132,12 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Inject
     private ClusterTemplateViewService clusterTemplateViewService;
+
+    @Inject
+    private PlatformRecommendationToPlatformRecommendationV4ResponseConverter platformRecommendationToPlatformRecommendationV4ResponseConverter;
+
+    @Inject
+    private CredentialClientService credentialClientService;
 
     public Blueprint get(Long id) {
         return blueprintRepository.findById(id).orElseThrow(notFound("Cluster definition", id));
@@ -201,21 +211,29 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 .getHostGroupsWithComponent(HueRoles.HUE_SERVER);
     }
 
-    public PlatformRecommendation getRecommendation(Long workspaceId, String blueprintName, String credentialName,
+    public RecommendationV4Response getRecommendation(Long workspaceId, String blueprintName, String credentialName,
             String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
         if (!ObjectUtils.allNotNull(region)) {
             throw new BadRequestException("region cannot be null");
         }
-        return cloudResourceAdvisor.createForBlueprint(workspaceId, blueprintName, credentialName, region, platformVariant, availabilityZone, cdpResourceType);
+        PlatformRecommendation recommendation = cloudResourceAdvisor.createForBlueprint(workspaceId, blueprintName,
+                credentialName, region, platformVariant, availabilityZone, cdpResourceType);
+        return platformRecommendationToPlatformRecommendationV4ResponseConverter.convert(recommendation);
     }
 
-    public PlatformRecommendation getRecommendationByCredentialCrn(Long workspaceId, String blueprintName, String credentialCrn,
+    public RecommendationV4Response getRecommendationByCredentialCrn(Long workspaceId, String blueprintName, String credentialCrn,
             String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
-        if (!ObjectUtils.allNotNull(region)) {
-            throw new BadRequestException("region cannot be null");
-        }
-        return cloudResourceAdvisor
-                .createForBlueprintByCredCrn(workspaceId, blueprintName, credentialCrn, region, platformVariant, availabilityZone, cdpResourceType);
+        PlatformRecommendation recommendation = cloudResourceAdvisor.createForBlueprintByCredCrn(workspaceId, blueprintName, credentialCrn, region,
+                platformVariant, availabilityZone, cdpResourceType);
+        return platformRecommendationToPlatformRecommendationV4ResponseConverter.convert(recommendation);
+    }
+
+    public RecommendationV4Response getRecommendationByEnvironmentCrn(Long workspaceId, String blueprintName, String environmentCrn,
+            String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
+        Credential credential = credentialClientService.getByEnvironmentCrn(environmentCrn);
+        PlatformRecommendation recommendation = cloudResourceAdvisor.createForBlueprintByCred(workspaceId, blueprintName, credential, region,
+                platformVariant, availabilityZone, cdpResourceType);
+        return platformRecommendationToPlatformRecommendationV4ResponseConverter.convert(recommendation);
     }
 
     public AutoscaleRecommendation getAutoscaleRecommendation(Long workspaceId, String blueprintName) {
