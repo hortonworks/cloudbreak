@@ -2,8 +2,9 @@ package com.sequenceiq.freeipa.service.recipe;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceType.RECIPE;
 
-import java.util.Collections;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,14 +22,17 @@ import com.sequenceiq.authorization.service.AuthorizationResourceCrnListProvider
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.recipe.RecipeCrnListProviderService;
+import com.sequenceiq.freeipa.api.v1.recipe.model.RecipeAttachDetachRequest;
 import com.sequenceiq.freeipa.entity.FreeIpaStackRecipe;
 import com.sequenceiq.freeipa.repository.FreeIpaStackRecipeRepository;
 import com.sequenceiq.freeipa.repository.StackRepository;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
 public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvider {
@@ -46,6 +50,9 @@ public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvide
 
     @Inject
     private StackRepository stackRepository;
+
+    @Inject
+    private StackService stackService;
 
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
@@ -95,7 +102,7 @@ public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvide
         }
     }
 
-    public void saveRecipes(Set<String> recipes, Long stackId) {
+    public void saveRecipes(Collection<String> recipes, Long stackId) {
         if (recipes != null) {
             freeIpaStackRecipeRepository.saveAll(recipes.stream().map(recipe -> new FreeIpaStackRecipe(stackId, recipe)).collect(Collectors.toSet()));
         }
@@ -103,6 +110,31 @@ public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvide
 
     public void deleteRecipes(Long stackId) {
         freeIpaStackRecipeRepository.deleteFreeIpaStackRecipesByStackId(stackId);
+    }
+
+    public void attachRecipes(String accountId, RecipeAttachDetachRequest recipeAttach) {
+        String environmentCrn = recipeAttach.getEnvironmentCrn();
+        Long stackId = stackService.getIdByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        List<String> newRecipes = recipeAttach.getRecipes();
+        LOGGER.info("Attach {} recipes, env crn: {}", newRecipes, environmentCrn);
+        recipeCrnListProviderService.validateRequestedRecipesExistsByName(newRecipes);
+        Set<String> existingRecipes = getRecipeNamesForStack(stackId);
+        List<String> recipesToSave = newRecipes.stream().filter(newRecipe -> !existingRecipes.contains(newRecipe)).collect(Collectors.toList());
+        saveRecipes(recipesToSave, stackId);
+    }
+
+    public void detachRecipes(String accountId, RecipeAttachDetachRequest recipeDetach) {
+        String environmentCrn = recipeDetach.getEnvironmentCrn();
+        Long stackId = stackService.getIdByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        Collection<String> existingRecipes = getRecipeNamesForStack(stackId);
+        List<String> recipesToRemove = recipeDetach.getRecipes();
+        LOGGER.info("Detach {} recipes, env crn: {}", recipesToRemove, environmentCrn);
+        List<String> notAttachedRecipes = recipesToRemove.stream().filter(recipe -> !existingRecipes.contains(recipe)).collect(Collectors.toList());
+        if (!notAttachedRecipes.isEmpty()) {
+            LOGGER.info("{} recipes are not attached to freeipa, env crn: {}", notAttachedRecipes, environmentCrn);
+            throw new BadRequestException(String.join(", ", notAttachedRecipes) + " recipe(s) are not attached to freeipa stack!");
+        }
+        freeIpaStackRecipeRepository.deleteFreeIpaStackRecipeByStackIdAndRecipeIn(stackId, recipesToRemove);
     }
 
     @Override
