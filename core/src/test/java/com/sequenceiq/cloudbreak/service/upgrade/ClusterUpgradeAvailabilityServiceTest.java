@@ -356,6 +356,9 @@ public class ClusterUpgradeAvailabilityServiceTest {
         lastImageInfo.setCreated(2);
         lastImageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
+        ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
+        currentImageInfo.setImageId(CURRENT_IMAGE_ID);
+        response.setCurrent(currentImageInfo);
 
         underTest.filterUpgradeOptions(ACCOUNT_ID, response, request, true);
 
@@ -377,10 +380,40 @@ public class ClusterUpgradeAvailabilityServiceTest {
         lastImageInfo.setCreated(2);
         lastImageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
+        ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
+        currentImageInfo.setImageId(CURRENT_IMAGE_ID);
+        response.setCurrent(currentImageInfo);
 
         Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.filterUpgradeOptions(ACCOUNT_ID, response, request, true));
         Assert.assertEquals("The given image (another-image-id) is not eligible for the cluster upgrade. "
                 + "Please choose an id from the following image(s): image-id-first,image-id-last", e.getMessage());
+    }
+
+    @Test
+    public void testFilterUpgradeOptionsImageIdIsValidWhenTheCurrentImageIsSentInTheRequest() {
+        UpgradeV4Request request = new UpgradeV4Request();
+        request.setImageId(CURRENT_IMAGE_ID);
+        UpgradeV4Response response = new UpgradeV4Response();
+        ImageInfoV4Response imageInfo = new ImageInfoV4Response();
+        imageInfo.setImageId(IMAGE_ID);
+        imageInfo.setCreated(1);
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
+        ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
+        lastImageInfo.setImageId(IMAGE_ID_LAST);
+        lastImageInfo.setCreated(2);
+        lastImageInfo.setComponentVersions(createExpectedPackageVersions());
+        ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
+        currentImageInfo.setImageId(CURRENT_IMAGE_ID);
+        currentImageInfo.setCreated(1);
+        currentImageInfo.setComponentVersions(createExpectedPackageVersions());
+        response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo, currentImageInfo));
+        response.setCurrent(currentImageInfo);
+
+        underTest.filterUpgradeOptions(ACCOUNT_ID, response, request, true);
+
+        assertEquals(1, response.getUpgradeCandidates().size());
+        assertEquals(1, response.getUpgradeCandidates().stream().map(ImageInfoV4Response::getImageId).collect(Collectors.toSet()).size());
+        assertTrue(response.getUpgradeCandidates().contains(currentImageInfo));
     }
 
     @Test

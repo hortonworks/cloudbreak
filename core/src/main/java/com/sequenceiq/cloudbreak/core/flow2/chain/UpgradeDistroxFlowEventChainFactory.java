@@ -57,10 +57,9 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         LOGGER.debug("Creating flow trigger event queue for distrox upgrade with event {}", event);
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         createUpgradeValidationEvent(event).ifPresent(flowEventChain::add);
-        flowEventChain.add(createClusterUpgradePreparationTriggerEvent(event));
+        createClusterUpgradePreparationTriggerEvent(event).ifPresent(flowEventChain::add);
         flowEventChain.add(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
-        flowEventChain.add(new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
-                event.getImageChangeDto().getImageId(), event.isRollingUpgradeEnabled()));
+        createClusterUpgradeTriggerEvent(event).ifPresent(flowEventChain::add);
         flowEventChain.add(new StackImageUpdateTriggerEvent(FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT, event.getImageChangeDto()));
         if (event.isReplaceVms()) {
             Map<String, List<String>> nodeMap = getReplaceableInstancesByHostgroup(event);
@@ -68,6 +67,16 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
                     event.isRollingUpgradeEnabled(), nodeMap, true, event.getTriggeredStackVariant()));
         }
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
+    }
+
+    private static Optional<ClusterUpgradeTriggerEvent> createClusterUpgradeTriggerEvent(DistroXUpgradeTriggerEvent event) {
+        if (event.isLockComponents()) {
+            LOGGER.debug("Skip runtime upgrade because the component versions are not changing.");
+            return Optional.empty();
+        } else {
+            return Optional.of(new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
+                    event.getImageChangeDto().getImageId(), event.isRollingUpgradeEnabled()));
+        }
     }
 
     private Optional<ClusterUpgradeValidationTriggerEvent> createUpgradeValidationEvent(DistroXUpgradeTriggerEvent event) {
@@ -81,8 +90,13 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         }
     }
 
-    private ClusterUpgradePreparationTriggerEvent createClusterUpgradePreparationTriggerEvent(DistroXUpgradeTriggerEvent event) {
-        return new ClusterUpgradePreparationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto());
+    private Optional<ClusterUpgradePreparationTriggerEvent> createClusterUpgradePreparationTriggerEvent(DistroXUpgradeTriggerEvent event) {
+        if (event.isLockComponents()) {
+            LOGGER.debug("Skip upgrade preparation because the component versions are not changing.");
+            return Optional.empty();
+        } else {
+            return Optional.of(new ClusterUpgradePreparationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto()));
+        }
     }
 
     private Map<String, List<String>> getReplaceableInstancesByHostgroup(DistroXUpgradeTriggerEvent event) {

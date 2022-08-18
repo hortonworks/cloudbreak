@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -34,14 +33,12 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 public class ClusterUpgradeAvailabilityService {
@@ -50,9 +47,6 @@ public class ClusterUpgradeAvailabilityService {
 
     @Inject
     private ImageCatalogService imageCatalogService;
-
-    @Inject
-    private ImageCatalogProvider imageCatalogProvider;
 
     @Inject
     private ImageService imageService;
@@ -114,7 +108,7 @@ public class ClusterUpgradeAvailabilityService {
 
             // Image id param exists
             if (StringUtils.isNotEmpty(requestImageId)) {
-                filteredUpgradeCandidates = validateImageId(upgradeCandidates, requestImageId);
+                filteredUpgradeCandidates = validateImageId(upgradeOptions.getCurrent(), upgradeCandidates, requestImageId);
                 LOGGER.info("Image successfully validated by imageId {}", requestImageId);
                 // We would like to upgrade to the latest available image with given runtime
             } else if (StringUtils.isNotEmpty(runtime)) {
@@ -166,18 +160,6 @@ public class ClusterUpgradeAvailabilityService {
         return imageService.getImage(stack.getId());
     }
 
-    private CloudbreakImageCatalogV3 getImagesFromCatalog(Workspace workspace,
-            String imageCatalogName, String imageCatalogUrl) throws CloudbreakImageCatalogException {
-        try {
-            imageCatalogUrl = imageCatalogService.getImageCatalogByName(workspace.getId(), imageCatalogName).getImageCatalogUrl();
-            LOGGER.info("Image catalog with name {} and url {} is used for image filtering.", imageCatalogName, imageCatalogUrl);
-        } catch (NotFoundException ex) {
-            LOGGER.info("Image catalog with name {} not found. The following image catalog url will be used for image filtering: {}.",
-                    imageCatalogName, imageCatalogUrl);
-        }
-        return imageCatalogProvider.getImageCatalogV3(imageCatalogUrl);
-    }
-
     private ImageFilterResult filterImages(String accountId, Long workspaceId, String imageCatalogName,
             ImageFilterParams imageFilterParams) {
         return clusterUpgradeImageFilter.filter(accountId, workspaceId, imageCatalogName, imageFilterParams);
@@ -206,9 +188,9 @@ public class ClusterUpgradeAvailabilityService {
         }
     }
 
-    private List<ImageInfoV4Response> validateImageId(List<ImageInfoV4Response> upgradeCandidates, String requestImageId) {
-        if (upgradeCandidates.stream()
-                .noneMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equalsIgnoreCase(requestImageId))) {
+    private List<ImageInfoV4Response> validateImageId(ImageInfoV4Response currentImage, List<ImageInfoV4Response> upgradeCandidates, String requestImageId) {
+        if (!currentImage.getImageId().equalsIgnoreCase(requestImageId)
+                && upgradeCandidates.stream().noneMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equalsIgnoreCase(requestImageId))) {
             String candidates = upgradeCandidates.stream()
                     .map(ImageInfoV4Response::getImageId)
                     .collect(Collectors.joining(","));
