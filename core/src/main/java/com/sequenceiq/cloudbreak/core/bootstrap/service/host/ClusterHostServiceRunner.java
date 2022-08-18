@@ -106,7 +106,6 @@ import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
-import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaConfigProvider;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
@@ -237,9 +236,6 @@ public class ClusterHostServiceRunner {
     private DatalakeService datalakeService;
 
     @Inject
-    private FreeIpaConfigProvider freeIpaConfigProvider;
-
-    @Inject
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
     @Inject
@@ -247,6 +243,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private GatewayService gatewayService;
+
+    @Inject
+    private SssdConfigProvider sssdConfigProvider;
 
     public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto, Map<String, String> candidateAddresses) {
         try {
@@ -451,8 +450,8 @@ public class ClusterHostServiceRunner {
         addClouderaManagerConfig(stackDto, servicePillar, clouderaManagerRepo, primaryGatewayConfig);
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
 
-        saveSssdAdPillar(servicePillar, kerberosConfig);
-        servicePillar.putAll(saveSssdIpaPillar(kerberosConfig, serviceLocations, stack.getEnvironmentCrn()));
+        servicePillar.putAll(sssdConfigProvider.createSssdAdPillar(kerberosConfig));
+        servicePillar.putAll(sssdConfigProvider.createSssdIpaPillar(kerberosConfig, serviceLocations, stack.getEnvironmentCrn()));
 
         Map<String, Map<String, String>> mountPathMap = new HashMap<>();
         stackDto.getInstanceGroupDtos().forEach(group -> {
@@ -558,44 +557,9 @@ public class ClusterHostServiceRunner {
         servicePillar.putAll(createPillarWithClouderaManagerSettings(clouderaManagerRepo, stackDto, primaryGatewayConfig));
     }
 
-    private void saveSssdAdPillar(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) {
-        if (kerberosDetailService.isAdJoinable(kerberosConfig)) {
-            Map<String, Object> sssdConnfig = new HashMap<>();
-            sssdConnfig.put("username", kerberosConfig.getPrincipal());
-            sssdConnfig.put("domainuppercase", kerberosConfig.getRealm().toUpperCase());
-            sssdConnfig.put("domain", kerberosConfig.getRealm().toLowerCase());
-            sssdConnfig.put("password", kerberosConfig.getPassword());
-            servicePillar.put("sssd-ad", new SaltPillarProperties("/sssd/ad.sls", singletonMap("sssd-ad", sssdConnfig)));
-        }
-    }
-
     private VirtualGroupRequest getVirtualGroupRequest(String virtualGroupsEnvironmentCrn, Optional<LdapView> ldapView) {
         String adminGroup = ldapView.isPresent() ? ldapView.get().getAdminGroup() : "";
         return new VirtualGroupRequest(virtualGroupsEnvironmentCrn, adminGroup);
-    }
-
-    private Map<String, SaltPillarProperties> saveSssdIpaPillar(KerberosConfig kerberosConfig, Map<String, List<String>> serviceLocations,
-            String environmentCrn) {
-        if (kerberosDetailService.isIpaJoinable(kerberosConfig)) {
-            Map<String, Object> sssdConfig = new HashMap<>();
-            sssdConfig.put("principal", kerberosConfig.getPrincipal());
-            sssdConfig.put("realm", kerberosConfig.getRealm().toUpperCase());
-            sssdConfig.put("domain", kerberosConfig.getDomain());
-            sssdConfig.put("password", kerberosConfig.getPassword());
-            sssdConfig.put("server", kerberosConfig.getUrl());
-            sssdConfig.put("dns_ttl", kerberosDetailService.getDnsTtl());
-            // enumeration has performance impacts so it's only enabled if Ranger is installed on the cluster
-            // otherwise the usersync does not work with nss
-            boolean enumerate = !CollectionUtils.isEmpty(serviceLocations.get("RANGER_ADMIN"))
-                    || !CollectionUtils.isEmpty(serviceLocations.get("NIFI_REGISTRY_SERVER"))
-                    || !CollectionUtils.isEmpty(serviceLocations.get("NIFI_NODE"));
-            sssdConfig.put("enumerate", enumerate);
-            Map<String, Object> freeIpaConfig = freeIpaConfigProvider.createFreeIpaConfig(environmentCrn);
-            return Map.of("sssd-ipa", new SaltPillarProperties("/sssd/ipa.sls",
-                    Map.of("sssd-ipa", sssdConfig, "freeipa", freeIpaConfig)));
-        } else {
-            return Map.of();
-        }
     }
 
     // Right now we are assuming that CM enterprise is enabled if workload analytics is used

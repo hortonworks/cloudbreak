@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -68,6 +69,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
@@ -107,6 +109,10 @@ class ClusterHostServiceRunnerTest {
 
     private static final String TEST_CLUSTER_CRN = "crn:cdp:datahub:us-west-1:datahub:cluster:f7563fc1-e8ff-486a-9260-4e54ccabbaa0";
 
+    private static final String ENV_CRN = "envCrn";
+
+    private static final String STACK_NAME = "stackName";
+
     @Mock
     private GatewayConfigService gatewayConfigService;
 
@@ -118,9 +124,6 @@ class ClusterHostServiceRunnerTest {
 
     @Mock
     private ComponentLocatorService componentLocator;
-
-    @Mock
-    private KerberosDetailService kerberosDetailService;
 
     @Mock
     private PostgresConfigService postgresConfigService;
@@ -224,12 +227,19 @@ class ClusterHostServiceRunnerTest {
     @Mock
     private GatewayService gatewayService;
 
+    @Mock
+    private SssdConfigProvider sssdConfigProvider;
+
+    @Mock
+    private KerberosDetailService kerberosDetailService;
+
     @BeforeEach
     void setUp() {
         lenient().when(stack.getCluster()).thenReturn(cluster);
         lenient().when(stack.getStack()).thenReturn(stackView);
-        lenient().when(stack.getEnvironmentCrn()).thenReturn("envCrn");
-        lenient().when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn("envCrn");
+        lenient().when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        lenient().when(stack.getName()).thenReturn(STACK_NAME);
+        lenient().when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn(ENV_CRN);
     }
 
     @Test
@@ -322,6 +332,12 @@ class ClusterHostServiceRunnerTest {
                 createInstanceMetadata("1.1.3.1"), createInstanceMetadata("1.1.3.2"));
         when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(gwNodes);
         when(stackUtil.collectReachableAndUnreachableCandidateNodes(any(), any())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
+        KerberosConfig kerberosConfig = new KerberosConfig();
+        when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
+        when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
+        when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN)))
+                .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
+
         underTest.runTargetedClusterServices(stack, Map.of("fqdn3", "1.1.1.1"));
 
         ArgumentCaptor<Set<Node>> reachableCandidates = ArgumentCaptor.forClass(Set.class);
@@ -343,6 +359,12 @@ class ClusterHostServiceRunnerTest {
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
         when(stackUtil.collectAndCheckReachableNodes(any(), any())).thenReturn(nodes);
+        KerberosConfig kerberosConfig = new KerberosConfig();
+        when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
+        when(sssdConfigProvider.createSssdAdPillar(kerberosConfig)).thenReturn(Map.of("ad", new SaltPillarProperties("adpath", Map.of())));
+        when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN)))
+                .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
+
         underTest.runClusterServices(stack, Map.of());
 
         ArgumentCaptor<Set<Node>> reachableCandidates = ArgumentCaptor.forClass(Set.class);
