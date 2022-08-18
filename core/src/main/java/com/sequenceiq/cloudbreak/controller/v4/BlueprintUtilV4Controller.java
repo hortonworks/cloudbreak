@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import javax.validation.constraints.NotEmpty;
 
 import org.springframework.stereotype.Controller;
 
@@ -22,11 +23,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.ServiceDepe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.SupportedVersionsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.ScaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.ScaleRecommendation;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.GeneratedCmTemplateToGeneratedCmTemplateV4Response;
-import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.PlatformRecommendationToPlatformRecommendationV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.ScaleRecommendationToScaleRecommendationV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.ServiceDependencyMatrixToServiceDependencyMatrixV4Response;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.SupportedServicesToBlueprintServicesV4ResponseConverter;
@@ -55,9 +54,6 @@ public class BlueprintUtilV4Controller extends NotificationController implements
     private ScaleRecommendationToScaleRecommendationV4ResponseConverter scaleRecommendationToScaleRecommendationV4ResponseConverter;
 
     @Inject
-    private PlatformRecommendationToPlatformRecommendationV4ResponseConverter platformRecommendationToPlatformRecommendationV4ResponseConverter;
-
-    @Inject
     private ServiceDependencyMatrixToServiceDependencyMatrixV4Response serviceDependencyMatrixToServiceDependencyMatrixV4Response;
 
     @Inject
@@ -77,7 +73,7 @@ public class BlueprintUtilV4Controller extends NotificationController implements
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL)
     public RecommendationV4Response createRecommendation(Long workspaceId, String blueprintName, @ResourceName String credentialName,
             String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
-        PlatformRecommendation recommendation = blueprintService.getRecommendation(
+        return blueprintService.getRecommendation(
                 threadLocalService.getRequestedWorkspaceId(),
                 blueprintName,
                 credentialName,
@@ -85,15 +81,14 @@ public class BlueprintUtilV4Controller extends NotificationController implements
                 platformVariant,
                 availabilityZone,
                 cdpResourceType);
-        return platformRecommendationToPlatformRecommendationV4ResponseConverter.convert(recommendation);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL)
     public RecommendationV4Response createRecommendationByCredCrn(Long workspaceId, String blueprintName,
-            @TenantAwareParam @ResourceCrn String credentialCrn, String region, String platformVariant,
+            @TenantAwareParam @ResourceCrn String credentialCrn, @NotEmpty String region, String platformVariant,
             String availabilityZone, CdpResourceType resourceType) {
-        PlatformRecommendation recommendation = blueprintService.getRecommendationByCredentialCrn(
+        return blueprintService.getRecommendationByCredentialCrn(
                 threadLocalService.getRequestedWorkspaceId(),
                 blueprintName,
                 credentialCrn,
@@ -101,7 +96,21 @@ public class BlueprintUtilV4Controller extends NotificationController implements
                 platformVariant,
                 availabilityZone,
                 resourceType);
-        return platformRecommendationToPlatformRecommendationV4ResponseConverter.convert(recommendation);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public RecommendationV4Response createRecommendationByEnvCrn(Long workspaceId, String blueprintName,
+            @TenantAwareParam @ResourceCrn String environmentCrn, @NotEmpty String region, String platformVariant,
+            String availabilityZone, CdpResourceType resourceType) {
+        return blueprintService.getRecommendationByEnvironmentCrn(
+                threadLocalService.getRequestedWorkspaceId(),
+                blueprintName,
+                environmentCrn,
+                region,
+                platformVariant,
+                availabilityZone,
+                resourceType);
     }
 
     @Override

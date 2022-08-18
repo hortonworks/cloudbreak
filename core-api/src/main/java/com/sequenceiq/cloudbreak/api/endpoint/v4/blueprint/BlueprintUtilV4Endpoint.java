@@ -84,6 +84,19 @@ public interface BlueprintUtilV4Endpoint {
             @QueryParam("resourceType") CdpResourceType resourceType);
 
     @GET
+    @Path("recommendation_by_env_crn")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION_BY_ENV_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "createRecommendationForWorkspaceByEnvCrn")
+    RecommendationV4Response createRecommendationByEnvCrn(@PathParam("workspaceId") Long workspaceId,
+            @QueryParam("blueprintName") String blueprintName,
+            @QueryParam("environmentCrn") String environmentCrn,
+            @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone,
+            @QueryParam("resourceType") CdpResourceType resourceType);
+
+    @GET
     @Path("scalerecommendation")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
