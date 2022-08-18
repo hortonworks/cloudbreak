@@ -143,6 +143,14 @@ public class FreeIpaUpscaleActions {
     @Bean(name = "UPSCALE_STARTING_STATE")
     public Action<?, ?> startingAction() {
         return new AbstractUpscaleAction<>(UpscaleEvent.class) {
+
+            @Override
+            protected void prepareExecution(UpscaleEvent payload, Map<Object, Object> variables) {
+                if (payload.getTriggeredVariant() != null) {
+                    variables.put(TRIGGERED_VARIANT, payload.getTriggeredVariant());
+                }
+            }
+
             @Override
             protected void doExecute(StackContext context, UpscaleEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();

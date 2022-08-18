@@ -38,6 +38,7 @@ import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
+import com.sequenceiq.freeipa.flow.stack.migration.handler.AwsMigrationUtil;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -49,6 +50,8 @@ class UpgradeServiceTest {
     public static final String ACCOUNT_ID = "accId";
 
     public static final String ENVIRONMENT_CRN = "ENV_CRN";
+
+    private static final String RESOURCE_CRN = "crn:cdp:freeipa:us-west-1:accId:freeipa:969db858-ea8f-46ed-9e0d-216dd7ea8bf1";
 
     @Mock
     private OperationService operationService;
@@ -68,6 +71,9 @@ class UpgradeServiceTest {
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
 
+    @Mock
+    private AwsMigrationUtil awsMigrationUtil;
+
     @InjectMocks
     private UpgradeService underTest;
 
@@ -76,6 +82,7 @@ class UpgradeServiceTest {
         FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
         request.setImage(new ImageSettingsRequest());
         request.setEnvironmentCrn(ENVIRONMENT_CRN);
+        String triggeredVariant = "triggeredVariant";
 
         Stack stack = mock(Stack.class);
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
@@ -89,6 +96,8 @@ class UpgradeServiceTest {
         when(flowManager.notify(eq(FlowChainTriggers.UPGRADE_TRIGGER_EVENT), eventCaptor.capture())).thenReturn(flowIdentifier);
         when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
         when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
+        when(awsMigrationUtil.calculateUpgradeVariant(stack, ACCOUNT_ID)).thenReturn(triggeredVariant);
+        when(awsMigrationUtil.isAwsVariantMigrationIsFeasible(stack, triggeredVariant)).thenReturn(true);
 
         FreeIpaUpgradeResponse response = underTest.upgradeFreeIpa(ACCOUNT_ID, request);
 
@@ -104,6 +113,8 @@ class UpgradeServiceTest {
         assertEquals(2, upgradeEvent.getInstanceIds().size());
         assertTrue(Set.of("im2", "im3").containsAll(upgradeEvent.getInstanceIds()));
         assertFalse(upgradeEvent.isBackupSet());
+        assertTrue(upgradeEvent.isNeedMigration());
+        assertEquals(triggeredVariant, upgradeEvent.getTriggeredVariant());
 
         verify(validationService).validateEntitlement(ACCOUNT_ID);
         verify(validationService).validateStackForUpgrade(allInstances, stack);
@@ -218,6 +229,8 @@ class UpgradeServiceTest {
 
         Stack stack = mock(Stack.class);
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        ImageInfoResponse selectedImage = new ImageInfoResponse();
+        when(imageService.fetchCurrentImage(stack)).thenReturn(selectedImage);
         Set<InstanceMetaData> allInstances = Set.of();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
         when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenThrow(new BadRequestException("No primary Gateway found"));

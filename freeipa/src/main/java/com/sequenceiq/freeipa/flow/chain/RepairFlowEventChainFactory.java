@@ -39,7 +39,7 @@ public class RepairFlowEventChainFactory implements FlowEventChainFactory<Repair
         flowEventChain.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(),
                 event.getResourceId(), terminatedOrRemovedInstanceIds, event.getInstanceCountByGroup(), true, true, false, event.getOperationId()));
         flowEventChain.add(new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(),
-                event.getResourceId(), event.getInstanceCountByGroup(), true, true, false, event.getOperationId()));
+                event.getResourceId(), event.getInstanceCountByGroup(), true, true, false, event.getOperationId(), null));
         flowEventChain.add(new ChangePrimaryGatewayEvent(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), event.getResourceId(),
                 terminatedOrRemovedInstanceIds, true, event.getOperationId()));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);

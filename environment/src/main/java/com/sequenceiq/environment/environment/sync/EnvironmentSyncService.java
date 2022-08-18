@@ -47,6 +47,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UP
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UPGRADE_CCM_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UPGRADE_CCM_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UPGRADE_CCM_REQUESTED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UPGRADE_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UPSCALE_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.VERTICAL_SCALE_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.WAIT_FOR_SYNC;
@@ -101,7 +102,8 @@ public class EnvironmentSyncService {
             Map.entry(UPGRADE_CCM_FAILED, EnvironmentStatus.AVAILABLE),
             Map.entry(UNREACHABLE, FREEIPA_UNREACHABLE),
             Map.entry(UNHEALTHY, FREEIPA_UNHEALTHY),
-            Map.entry(UNKNOWN, FREEIPA_UNHEALTHY)
+            Map.entry(UNKNOWN, FREEIPA_UNHEALTHY),
+            Map.entry(UPGRADE_FAILED, EnvironmentStatus.AVAILABLE)
     );
 
     private final FreeIpaService freeIpaService;

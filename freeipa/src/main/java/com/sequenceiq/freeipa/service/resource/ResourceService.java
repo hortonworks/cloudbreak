@@ -86,4 +86,7 @@ public class ResourceService {
         repository.deleteByStackIdAndNameAndType(stackId, name, type);
     }
 
+    public Optional<Resource> findFirstByStatusAndTypeAndStack(CommonStatus status, ResourceType resourceType, Long stackId) {
+        return repository.findFirstByResourceStatusAndResourceTypeAndStackId(status, resourceType, stackId);
+    }
 }

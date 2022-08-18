@@ -17,4 +17,11 @@ public class CreateResourcesRequest extends CloudStackRequest<CreateResourcesRes
     public String getHostGroupName() {
         return hostGroupName;
     }
+
+    @Override
+    public String toString() {
+        return "CreateResourcesRequest{" +
+                "hostGroupName='" + hostGroupName + '\'' +
+                "} " + super.toString();
+    }
 }

@@ -20,6 +20,10 @@ public class InstanceGroupService {
         return repository.findByStackId(stackId);
     }
 
+    public Set<String> findGroupNamesByStackId(Long stackId) {
+        return repository.findAllNameByStackId(stackId);
+    }
+
     public Optional<InstanceGroup> findOneByGroupNameInStack(Long stackId, String groupName) {
         return repository.findOneByGroupNameInStack(stackId, groupName);
     }

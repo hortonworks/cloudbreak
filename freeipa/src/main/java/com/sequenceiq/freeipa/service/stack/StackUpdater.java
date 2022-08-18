@@ -111,4 +111,16 @@ public class StackUpdater {
                 || !detailedStatus.equals(stack.getStackStatus().getDetailedStackStatus())
                 || !Objects.equals(statusReason, stack.getStackStatus().getStatusReason());
     }
+
+    public void updateVariant(Long resourceId, String variant) {
+        LOGGER.debug("Update variant for stack to variant of {}", variant);
+        Stack stack = stackService.getStackById(resourceId);
+        if (!variant.equals(stack.getPlatformvariant())) {
+            LOGGER.debug("The new stack variant and old stack variant are different, update it");
+            stack.setPlatformvariant(variant);
+            stackService.save(stack);
+        } else {
+            LOGGER.info("The variant was already set to {}", variant);
+        }
+    }
 }

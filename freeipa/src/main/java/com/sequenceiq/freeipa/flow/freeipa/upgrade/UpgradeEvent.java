@@ -22,6 +22,10 @@ public class UpgradeEvent extends StackEvent {
 
     private final boolean backupSet;
 
+    private final boolean needMigration;
+
+    private final String triggeredVariant;
+
     @JsonCreator
     public UpgradeEvent(
             @JsonProperty("selector") String selector,
@@ -30,13 +34,17 @@ public class UpgradeEvent extends StackEvent {
             @JsonProperty("primareGwInstanceId") String primareGwInstanceId,
             @JsonProperty("operationId") String operationId,
             @JsonProperty("imageSettingsRequest") ImageSettingsRequest imageSettingsRequest,
-            @JsonProperty("backupSet") boolean backupSet) {
+            @JsonProperty("backupSet") boolean backupSet,
+            @JsonProperty("needMigration") boolean needMigration,
+            @JsonProperty("triggeredVariant") String triggeredVariant) {
         super(selector, stackId);
         this.instanceIds = instanceIds;
         this.primareGwInstanceId = primareGwInstanceId;
         this.operationId = operationId;
         this.imageSettingsRequest = imageSettingsRequest;
         this.backupSet = backupSet;
+        this.needMigration = needMigration;
+        this.triggeredVariant = triggeredVariant;
     }
 
     public Set<String> getInstanceIds() {
@@ -59,6 +67,14 @@ public class UpgradeEvent extends StackEvent {
         return backupSet;
     }
 
+    public boolean isNeedMigration() {
+        return needMigration;
+    }
+
+    public String getTriggeredVariant() {
+        return triggeredVariant;
+    }
+
     @Override
     public boolean equalsEvent(StackEvent other) {
         return isClassAndEqualsEvent(UpgradeEvent.class, other,
@@ -66,6 +82,7 @@ public class UpgradeEvent extends StackEvent {
                         && Objects.equals(instanceIds, event.instanceIds)
                         && Objects.equals(primareGwInstanceId, event.primareGwInstanceId)
                         && Objects.equals(imageSettingsRequest, event.imageSettingsRequest)
+                        && Objects.equals(triggeredVariant, event.triggeredVariant)
                         && backupSet == event.backupSet);
     }
 
