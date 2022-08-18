@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.repository;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -16,5 +17,7 @@ public interface FreeIpaStackRecipeRepository extends CrudRepository<FreeIpaStac
     List<FreeIpaStackRecipe> findByStackId(Long stackId);
 
     void deleteFreeIpaStackRecipesByStackId(Long stackId);
+
+    void deleteFreeIpaStackRecipeByStackIdAndRecipeIn(Long stackId, Collection<String> names);
 
 }

@@ -17,6 +17,7 @@ import com.sequenceiq.freeipa.api.v1.kerberosmgmt.KerberosMgmtV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.progress.ProgressV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.recipe.RecipeV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 
 public class FreeIpaApiUserCrnEndpoint extends AbstractUserCrnServiceEndpoint implements FreeIpaClient {
@@ -98,4 +99,10 @@ public class FreeIpaApiUserCrnEndpoint extends AbstractUserCrnServiceEndpoint im
     public FreeIpaUpgradeV1Endpoint getFreeIpaUpgradeV1Endpoint() {
         return getEndpoint(FreeIpaUpgradeV1Endpoint.class);
     }
+
+    @Override
+    public RecipeV1Endpoint getRecipeV1Endpoint() {
+        return getEndpoint(RecipeV1Endpoint.class);
+    }
+
 }

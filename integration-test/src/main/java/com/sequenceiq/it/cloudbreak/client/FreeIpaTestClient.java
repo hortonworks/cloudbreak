@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.client;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
@@ -8,12 +9,14 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaAttachChildEnvironmentAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaAttachRecipeAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaChangeImageCatalogAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaCollectDiagnosticsAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaCreateAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDescribeAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDetachChildEnvironmentAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDetachRecipeAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDownscaleAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindGroupsAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindUsersAction;
@@ -93,6 +96,14 @@ public class FreeIpaTestClient {
 
     public Action<FreeIpaTestDto, FreeIpaClient> repair(InstanceMetadataType instanceMetadataType) {
         return new FreeIpaRepairAction(instanceMetadataType);
+    }
+
+    public Action<FreeIpaTestDto, FreeIpaClient> attachRecipes(List<String> recipes) {
+        return new FreeIpaAttachRecipeAction(recipes);
+    }
+
+    public Action<FreeIpaTestDto, FreeIpaClient> detachRecipes(List<String> recipes) {
+        return new FreeIpaDetachRecipeAction(recipes);
     }
 
     public Action<FreeIpaTestDto, FreeIpaClient> rebuild() {
