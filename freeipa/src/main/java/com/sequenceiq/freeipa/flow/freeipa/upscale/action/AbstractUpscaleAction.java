@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateContext;
@@ -35,6 +36,8 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 
 public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractCommonChainAction<UpscaleState, UpscaleFlowEvent, StackContext, P> {
 
+    static final String TRIGGERED_VARIANT = "TRIGGERED_VARIANT";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractUpscaleAction.class);
 
     @Inject
@@ -56,6 +59,7 @@ public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractC
     @Override
     protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<UpscaleState, UpscaleFlowEvent> stateContext,
             P payload) {
+        Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         addMdcOperationIdIfPresent(stateContext.getExtendedState().getVariables());
@@ -66,7 +70,7 @@ public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractC
                 .withName(stack.getName())
                 .withCrn(stack.getResourceCrn())
                 .withPlatform(stack.getCloudPlatform())
-                .withVariant(stack.getPlatformvariant())
+                .withVariant(getTriggeredVariantOrStackVariant(variables, stack))
                 .withLocation(location)
                 .withUserName(stack.getOwner())
                 .withAccountId(stack.getAccountId())
@@ -109,5 +113,13 @@ public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractC
             stackStatus = DetailedStackStatus.UPSCALE_FAILED;
         }
         return stackStatus;
+    }
+
+    private String getTriggeredVariantOrStackVariant(Map<Object, Object> variables, Stack stack) {
+        String variant = (String) variables.get(TRIGGERED_VARIANT);
+        if (StringUtils.isEmpty(variant)) {
+            variant = stack.getPlatformvariant();
+        }
+        return variant;
     }
 }

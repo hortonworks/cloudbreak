@@ -87,7 +87,8 @@ public enum DetailedStackStatus {
     // Modify proxy config statuses
     MODIFY_PROXY_CONFIG_REQUESTED(Status.MODIFY_PROXY_CONFIG_REQUESTED, AvailabilityStatus.AVAILABLE),
     MODIFY_PROXY_CONFIG_IN_PROGRESS(Status.MODIFY_PROXY_CONFIG_IN_PROGRESS, AvailabilityStatus.AVAILABLE),
-    MODIFY_PROXY_CONFIG_FAILED(Status.MODIFY_PROXY_CONFIG_FAILED, AvailabilityStatus.AVAILABLE);
+    MODIFY_PROXY_CONFIG_FAILED(Status.MODIFY_PROXY_CONFIG_FAILED, AvailabilityStatus.AVAILABLE),
+    UPGRADE_FAILED(Status.UPGRADE_FAILED, AvailabilityStatus.AVAILABLE);
 
     public static final Collection<DetailedStackStatus> AVAILABLE_STATUSES;
 

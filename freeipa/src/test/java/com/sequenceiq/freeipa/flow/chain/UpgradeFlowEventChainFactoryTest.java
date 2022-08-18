@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.Queue;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -25,19 +29,26 @@ import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvent;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 
+@ExtendWith(MockitoExtension.class)
 class UpgradeFlowEventChainFactoryTest {
 
     public static final String OPERATION_ID = "opId";
 
     public static final long STACK_ID = 1L;
 
-    private UpgradeFlowEventChainFactory underTest = new UpgradeFlowEventChainFactory();
+    @Mock
+    private InstanceGroupService instanceGroupService;
+
+    @InjectMocks
+    private UpgradeFlowEventChainFactory underTest;
 
     @Test
     public void testFlowChainCreation() {
         ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
-        UpgradeEvent event = new UpgradeEvent("selector", STACK_ID, Sets.newHashSet("repl1", "repl2"), "pgw", OPERATION_ID, imageSettingsRequest, false);
+        UpgradeEvent event = new UpgradeEvent("selector", STACK_ID, Sets.newHashSet("repl1", "repl2"), "pgw", OPERATION_ID,
+                imageSettingsRequest, false, false, null);
 
         FlowTriggerEventQueue eventQueue = underTest.createFlowTriggerEventQueue(event);
 

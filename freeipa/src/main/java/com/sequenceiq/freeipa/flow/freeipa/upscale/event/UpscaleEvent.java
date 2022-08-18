@@ -18,6 +18,8 @@ public class UpscaleEvent extends StackEvent {
 
     private final boolean finalChain;
 
+    private final String triggeredVariant;
+
     @JsonCreator
     public UpscaleEvent(
             @JsonProperty("selector") String selector,
@@ -26,13 +28,15 @@ public class UpscaleEvent extends StackEvent {
             @JsonProperty("repair") Boolean repair,
             @JsonProperty("chained") boolean chained,
             @JsonProperty("finalChain") boolean finalChain,
-            @JsonProperty("operationId") String operationId) {
+            @JsonProperty("operationId") String operationId,
+            @JsonProperty("triggeredVariant") String triggeredVariant) {
         super(selector, stackId);
         this.instanceCountByGroup = instanceCountByGroup;
         this.repair = repair;
         this.chained = chained;
         this.finalChain = finalChain;
         this.operationId = operationId;
+        this.triggeredVariant = triggeredVariant;
     }
 
     public Integer getInstanceCountByGroup() {
@@ -53,6 +57,10 @@ public class UpscaleEvent extends StackEvent {
 
     public boolean isFinalChain() {
         return finalChain;
+    }
+
+    public String getTriggeredVariant() {
+        return triggeredVariant;
     }
 
     @Override

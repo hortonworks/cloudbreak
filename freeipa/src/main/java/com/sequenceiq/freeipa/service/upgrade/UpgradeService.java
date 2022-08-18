@@ -29,6 +29,7 @@ import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
+import com.sequenceiq.freeipa.flow.stack.migration.handler.AwsMigrationUtil;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -57,19 +58,20 @@ public class UpgradeService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
+    @Inject
+    private AwsMigrationUtil awsMigrationUtil;
+
     @SuppressWarnings("IllegalType")
     public FreeIpaUpgradeResponse upgradeFreeIpa(String accountId, FreeIpaUpgradeRequest request) {
         validationService.validateEntitlement(accountId);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(request.getEnvironmentCrn(), accountId);
         Set<InstanceMetaData> allInstances = stack.getNotDeletedInstanceMetaDataSet();
         validationService.validateStackForUpgrade(allInstances, stack);
-        String pgwInstanceId = instanceMetaDataService.getPrimaryGwInstance(allInstances).getInstanceId();
-        HashSet<String> nonPgwInstanceIds = selectNonPgwInstanceIds(allInstances);
         ImageInfoResponse currentImage = imageService.fetchCurrentImage(stack);
         ImageSettingsRequest imageSettingsRequest = assembleImageSettingsRequest(request, currentImage);
         ImageInfoResponse selectedImage = imageService.selectImage(stack, imageSettingsRequest);
         validationService.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
-        return triggerUpgrade(request, stack, pgwInstanceId, nonPgwInstanceIds, imageSettingsRequest, selectedImage, currentImage);
+        return triggerUpgrade(request, stack, allInstances, imageSettingsRequest, selectedImage, currentImage, accountId);
     }
 
     @SuppressWarnings("IllegalType")
@@ -88,11 +90,15 @@ public class UpgradeService {
     }
 
     @SuppressWarnings("IllegalType")
-    private FreeIpaUpgradeResponse triggerUpgrade(FreeIpaUpgradeRequest request, Stack stack, String pgwInstanceId,
-            HashSet<String> nonPgwInstanceIds, ImageSettingsRequest imageSettingsRequest, ImageInfoResponse selectedImage, ImageInfoResponse currentImage) {
+    private FreeIpaUpgradeResponse triggerUpgrade(FreeIpaUpgradeRequest request, Stack stack, Set<InstanceMetaData> allInstances,
+            ImageSettingsRequest imageSettingsRequest, ImageInfoResponse selectedImage, ImageInfoResponse currentImage, String accountId) {
+        String pgwInstanceId = instanceMetaDataService.getPrimaryGwInstance(allInstances).getInstanceId();
+        HashSet<String> nonPgwInstanceIds = selectNonPgwInstanceIds(allInstances);
         Operation operation = startUpgradeOperation(stack.getAccountId(), request);
+        String triggeredVariant = awsMigrationUtil.calculateUpgradeVariant(stack, accountId);
+        boolean needMigration = awsMigrationUtil.isAwsVariantMigrationIsFeasible(stack, triggeredVariant);
         UpgradeEvent upgradeEvent = new UpgradeEvent(FlowChainTriggers.UPGRADE_TRIGGER_EVENT, stack.getId(), nonPgwInstanceIds, pgwInstanceId,
-                operation.getOperationId(), imageSettingsRequest, Objects.nonNull(stack.getBackup()));
+                operation.getOperationId(), imageSettingsRequest, Objects.nonNull(stack.getBackup()), needMigration, triggeredVariant);
         LOGGER.info("Trigger upgrade flow with event: {}", upgradeEvent);
         FlowIdentifier flowIdentifier = flowManager.notify(FlowChainTriggers.UPGRADE_TRIGGER_EVENT, upgradeEvent);
         return new FreeIpaUpgradeResponse(flowIdentifier, selectedImage, currentImage, operation.getOperationId());
