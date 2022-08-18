@@ -37,6 +37,7 @@ public class DatabaseServerConverter {
         }
         stackDatabaseServerResponse.setStatusReason(databaseServerV4Response.getStatusReason());
         stackDatabaseServerResponse.setClusterCrn(databaseServerV4Response.getClusterCrn());
+        stackDatabaseServerResponse.setMajorVersion(databaseServerV4Response.getMajorVersion());
         if (databaseServerV4Response.getSslConfig() != null) {
             SslConfigV4Response sslConfig = databaseServerV4Response.getSslConfig();
             DatabaseServerSslConfig databaseServerSslConfig = new DatabaseServerSslConfig();
@@ -48,7 +49,6 @@ public class DatabaseServerConverter {
                 databaseServerSslConfig.setSslCertificateType(sslCertificateTypeToDatabaseServerSslCertificateType(sslConfig.getSslCertificateType()));
             }
             stackDatabaseServerResponse.setSslConfig(databaseServerSslConfig);
-            stackDatabaseServerResponse.setMajorVersion(databaseServerV4Response.getMajorVersion());
         }
         return stackDatabaseServerResponse;
     }

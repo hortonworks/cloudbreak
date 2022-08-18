@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RDS_UPGRADE_
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RDS_UPGRADE_NOT_AVAILABLE;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.RdsUpgradeResponseType;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -62,7 +64,10 @@ public class RdsUpgradeService {
 
     private String getCurrentRdsVersion(NameOrCrn nameOrCrn) {
         StackDatabaseServerResponse databaseServer = databaseService.getDatabaseServer(nameOrCrn);
-        return databaseServer.getMajorVersion().getVersion();
+        return Optional.ofNullable(databaseServer)
+                .map(StackDatabaseServerResponse::getMajorVersion)
+                .map(MajorVersion::getVersion)
+                .orElse(MajorVersion.VERSION_10.getVersion());
     }
 
     private RdsUpgradeV4Response alreadyOnLatestAnswer(TargetMajorVersion targetMajorVersion) {

@@ -97,6 +97,22 @@ class RdsUpgradeServiceTest {
     }
 
     @Test
+    void testUpgradeRdsWithValidSetupAndMissingDatabaseVersionThenSuccess() {
+        Stack stack = createStack(Status.AVAILABLE);
+        when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(null));
+        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
+        FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
+        when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION))).thenReturn(flowId);
+
+        RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
+
+        verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION));
+        assertThat(response.getResponseType()).isEqualTo(RdsUpgradeResponseType.TRIGGERED);
+        assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
+        assertThat(response.getFlowIdentifier().getPollableId()).isEqualTo(FLOW_ID);
+    }
+
+    @Test
     void testWhenRdsAlreadyUpgradedThenError() {
         Stack stack = createStack(Status.AVAILABLE);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_11));
