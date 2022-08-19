@@ -1,0 +1,106 @@
+{
+  "cdhVersion": "6.1.0",
+  "displayName": "simple_template",
+  "cmVersion": "6.1.0",
+  "repositories": [
+    "https://archive.cloudera.com/cdh6/{latest_supported}/parcels/"
+  ],
+  "products": [
+    {
+      "version": "6.1.0-1.cdh6.1.0.p0.770702",
+      "product": "CDH"
+    }
+  ],
+  "services": [
+    {
+      "refName": "zookeeper",
+      "serviceType": "ZOOKEEPER",
+      "roleConfigGroups": [
+        {
+          "refName": "zookeeper-SERVER-BASE",
+          "roleType": "SERVER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "hdfs",
+      "serviceType": "HDFS",
+      "roleConfigGroups": [
+        {
+          "refName": "hdfs-NAMENODE-BASE",
+          "roleType": "NAMENODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-DATANODE-BASE",
+          "roleType": "DATANODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-JOURNALNODE-BASE",
+          "roleType": "JOURNALNODE",
+          "base": true
+        },
+        {
+          "refName": "hdfs-FAILOVERCONTROLLER-BASE",
+          "roleType": "FAILOVERCONTROLLER",
+          "base": true
+        },
+        {
+          "refName": "hdfs-BALANCER-BASE",
+          "roleType": "BALANCER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "knox",
+      "roleConfigGroups": [
+        {
+          "base": true,
+          "refName": "knox-KNOX_GATEWAY-BASE",
+          "roleType": "KNOX_GATEWAY"
+        }
+      ],
+      "serviceType": "KNOX"
+    }
+  ],
+  "hostTemplates": [
+    {
+      "refName": "master",
+      "cardinality": 2,
+      "roleConfigGroupsRefNames": [
+        "hdfs-NAMENODE-BASE"
+      ]
+    },
+    {
+      "refName": "quorum",
+      "cardinality": 3,
+      "roleConfigGroupsRefNames": [
+        "zookeeper-SERVER-BASE"
+      ]
+    },
+    {
+      "refName": "worker",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "hdfs-DATANODE-BASE"
+      ]
+    },
+    {
+      "refName": "zero",
+      "cardinality": 0,
+      "roleConfigGroupsRefNames": [
+        "knox-KNOX_GATEWAY-BASE"
+      ]
+    },
+    {
+      "refName": "entrance",
+      "cardinality": 2,
+      "roleConfigGroupsRefNames": [
+        "knox-KNOX_GATEWAY-BASE"
+      ]
+    }
+  ]
+}

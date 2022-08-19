@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
@@ -60,6 +61,7 @@ import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
 import com.sequenceiq.cloudbreak.cluster.model.ClusterHostAttributes;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -257,11 +259,17 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     @Override
     public GatewayRecommendation recommendGateway() {
+        GatewayRecommendation explicitGatewayRecommendation = getExplicitGatewayRecommendation();
+        if (explicitGatewayRecommendation != null) {
+            return explicitGatewayRecommendation;
+        }
+
         Map<String, InstanceCount> instanceCounts = getCardinalityByHostGroup();
 
         for (String group : List.of("gateway", "master")) {
             InstanceCount count = instanceCounts.get(group);
             if (InstanceCount.EXACTLY_ONE.equals(count)) {
+                LOGGER.debug("Returning host group '{}' as the Knox Gateway recommendation based on name & cardinality.", group);
                 return new GatewayRecommendation(Set.of(group));
             }
         }
@@ -271,8 +279,85 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 .map(Map.Entry::getKey)
                 .sorted()
                 .findFirst()
-                .map(hostGroup -> new GatewayRecommendation(Set.of(hostGroup)))
-                .orElseGet(() -> new GatewayRecommendation(Set.of()));
+                .map(hostGroup -> {
+                    LOGGER.debug("Returning host group '{}' as the Knox Gateway recommendation based on lexicographic order & minimum count.", hostGroup);
+                    return new GatewayRecommendation(Set.of(hostGroup));
+                })
+                .orElseGet(() -> {
+                    LOGGER.warn("Cannot determine Knox Gateway recommendation, returning an empty set.");
+                    return new GatewayRecommendation(Set.of());
+                });
+    }
+
+    private GatewayRecommendation getExplicitGatewayRecommendation() {
+        LOGGER.debug("Checking if Knox Gateway is explicitly defined in any host groups");
+        Set<String> knoxGatewayGroupNames = getHostGroupsWithComponent(KnoxRoles.KNOX_GATEWAY);
+        if (knoxGatewayGroupNames.isEmpty()) {
+            LOGGER.warn("Knox Gateway is not explicitly defined, continuing with recommendation calculation.");
+            return null;
+        }
+
+        LOGGER.debug(knoxGatewayGroupNames.size() > 1 ? ("Found Knox Gateway explicitly defined in multiple host groups '{}' that is an ambiguous setup, " +
+                "trying to choose among them based on their cardinalities.") :
+                "Found Knox Gateway explicitly defined in exactly 1 host group '{}', verifying its cardinality.", knoxGatewayGroupNames);
+
+        // Perform cardinality check even for a single matching host group.
+        // In case of multiple matches, this is only a best-effort heuristics; there is no proper unambiguous choice by just looking at blueprint contents.
+        String knoxGatewayGroupName = getKnoxGatewayGroupNameWithMinPositiveCardinality(knoxGatewayGroupNames);
+        if (knoxGatewayGroupName == null) {
+            LOGGER.warn("Cannot find a proper match among the host groups where Knox Gateway is explicitly defined, " +
+                    "continuing with recommendation calculation.");
+            return null;
+        }
+
+        LOGGER.debug(knoxGatewayGroupNames.size() > 1 ? ("Found Knox Gateway explicitly defined in host group '{}' that has " +
+                "the smallest positive cardinality, returning it as the recommendation.") :
+                "Found Knox Gateway explicitly defined in exactly 1 host group '{}' with a positive cardinality, returning it as the recommendation.",
+                knoxGatewayGroupName);
+        return new GatewayRecommendation(Set.of(knoxGatewayGroupName));
+    }
+
+    private String getKnoxGatewayGroupNameWithMinPositiveCardinality(Set<String> knoxGatewayGroupNames) {
+        List<ApiClusterTemplateHostTemplate> knoxGatewayGroups = Optional.ofNullable(cmTemplate.getHostTemplates()).orElse(List.of()).stream()
+                .filter(group -> group.getRefName() != null && knoxGatewayGroupNames.contains(group.getRefName()))
+                .collect(Collectors.toList());
+        ensureAllKnoxGatewayGroupsFound(knoxGatewayGroupNames, knoxGatewayGroups);
+
+        OptionalInt minPositiveCardinalityOpt = knoxGatewayGroups.stream()
+                .mapToInt(this::getHostGroupCardinality)
+                .filter(cardinality -> cardinality > 0)
+                .min();
+        if (minPositiveCardinalityOpt.isEmpty()) {
+            LOGGER.warn("None of the host groups '{}' where Knox Gateway is explicitly defined has a positive cardinality.", knoxGatewayGroupNames);
+            return null;
+        }
+
+        int minPositiveCardinality = minPositiveCardinalityOpt.getAsInt();
+        LOGGER.debug("Filtering host groups '{}' where Knox Gateway is explicitly defined by the smallest positive cardinality {}.", knoxGatewayGroupNames,
+                minPositiveCardinality);
+        return knoxGatewayGroups.stream()
+                .filter(group -> getHostGroupCardinality(group) == minPositiveCardinality)
+                .map(ApiClusterTemplateHostTemplate::getRefName)
+                .sorted()
+                .findFirst()
+                .orElse(null);
+    }
+
+    private void ensureAllKnoxGatewayGroupsFound(Set<String> knoxGatewayGroupNamesExpected, List<ApiClusterTemplateHostTemplate> knoxGatewayGroups) {
+        if (knoxGatewayGroupNamesExpected.size() != knoxGatewayGroups.size()) {
+            Set<String> knoxGatewayGroupNamesFound = knoxGatewayGroups.stream()
+                    .map(ApiClusterTemplateHostTemplate::getRefName)
+                    .collect(toSet());
+            Set<String> knoxGatewayGroupNamesMissing = new HashSet<>(knoxGatewayGroupNamesExpected);
+            knoxGatewayGroupNamesMissing.removeAll(knoxGatewayGroupNamesFound);
+            LOGGER.warn("Cannot find host groups '{}' where Knox Gateway is explicitly defined.", knoxGatewayGroupNamesMissing);
+        }
+    }
+
+    private int getHostGroupCardinality(ApiClusterTemplateHostTemplate group) {
+        return Optional.ofNullable(group.getCardinality())
+                .map(BigDecimal::intValue)
+                .orElse(Integer.MIN_VALUE);
     }
 
     @Override
@@ -365,9 +450,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     public Set<String> getComputeHostGroups(Versioned version) {
         Map<String, Set<String>> componentsByHostGroup = collectComponentsByHostGroupWithYarnNMs();
         // Re-using the current LoadBasedAutoScaling recommendation to determine hostGroups which can be autoscaled
-        Set<String> computeHostGroups = getRecommendationByBlacklist(BlackListedLoadBasedAutoscaleRole.class,
+        return getRecommendationByBlacklist(BlackListedLoadBasedAutoscaleRole.class,
                 true, componentsByHostGroup, version, List.of());
-        return computeHostGroups;
     }
 
     private Map<String, Set<String>> collectComponentsByHostGroupWithYarnNMs() {
@@ -831,8 +915,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     public boolean isCMComponentExistsInBlueprint(String component) {
         for (Entry<String, Set<String>> entry : getComponentsByHostGroup().entrySet()) {
-            for (String entryCompoenent : entry.getValue()) {
-                if (component.equalsIgnoreCase(entryCompoenent)) {
+            for (String entryComponent : entry.getValue()) {
+                if (component.equalsIgnoreCase(entryComponent)) {
                     return true;
                 }
             }
