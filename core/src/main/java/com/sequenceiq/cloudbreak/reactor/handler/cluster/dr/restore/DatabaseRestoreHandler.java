@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltCon
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.RangerVirtualGroupService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -49,9 +48,6 @@ public class DatabaseRestoreHandler extends ExceptionCatcherEventHandler<Databas
 
     @Inject
     private StackDtoService stackDtoService;
-
-    @Inject
-    private StackUtil stackUtil;
 
     @Inject
     private RangerVirtualGroupService rangerVirtualGroupService;
@@ -82,7 +78,7 @@ public class DatabaseRestoreHandler extends ExceptionCatcherEventHandler<Databas
             ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, cluster.getId());
             String rangerAdminGroup = rangerVirtualGroupService.getRangerVirtualGroup(stack);
             SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), rangerAdminGroup, true, stack);
-            hostOrchestrator.restoreDatabase(gatewayConfig, gatewayFQDN, stackUtil.collectReachableNodes(stackDto), saltConfig, exitModel);
+            hostOrchestrator.restoreDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel);
 
             result = new DatabaseRestoreSuccess(stackId);
         } catch (Exception e) {
