@@ -86,7 +86,7 @@ class ClusterUpscaleServiceTest {
         Cluster cluster = new Cluster();
         cluster.setId(2L);
         when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
-        inOrder = Mockito.inOrder(parcelService, recipeEngine, clusterStatusService, clusterCommissionService, clusterApi);
+        inOrder = Mockito.inOrder(parcelService, recipeEngine, clusterStatusService, clusterCommissionService, clusterApi, clusterHostServiceRunner);
         lenient().when(stackDto.getCluster()).thenReturn(cluster);
         lenient().when(stackDto.getId()).thenReturn(1L);
     }
@@ -105,16 +105,18 @@ class ClusterUpscaleServiceTest {
         when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(clusterStatusService.getDecommissionedHostsFromCM()).thenReturn(List.of());
-        when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(Map.of());
+        Map<String, String> candidates = Map.of("master-1", "privateIp");
+        when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
 
         underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null);
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stackDto);
-        inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), Map.of());
+        inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), candidates);
         inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
         inOrder.verify(clusterStatusService, times(1)).getDecommissionedHostsFromCM();
         inOrder.verify(clusterCommissionService, times(0)).recommissionHosts(any());
         inOrder.verify(clusterApi, times(1)).restartAll(false);
+        inOrder.verify(clusterHostServiceRunner, times(1)).createCronForUserHomeCreation(eq(stackDto), eq(candidates.keySet()));
     }
 
     @Test
@@ -132,16 +134,18 @@ class ClusterUpscaleServiceTest {
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(clusterApi.clusterCommissionService()).thenReturn(clusterCommissionService);
         when(clusterStatusService.getDecommissionedHostsFromCM()).thenReturn(List.of("master-2"));
-        when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(Map.of());
+        Map<String, String> candidates = Map.of("master-1", "privateIp");
+        when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
 
         underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null);
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stackDto);
-        inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), Map.of());
+        inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), candidates);
         inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
         inOrder.verify(clusterStatusService, times(1)).getDecommissionedHostsFromCM();
         inOrder.verify(clusterCommissionService, times(1)).recommissionHosts(List.of("master-2"));
         inOrder.verify(clusterApi, times(1)).restartAll(false);
+        inOrder.verify(clusterHostServiceRunner, times(1)).createCronForUserHomeCreation(eq(stackDto), eq(candidates.keySet()));
     }
 
     @Test
@@ -159,15 +163,17 @@ class ClusterUpscaleServiceTest {
         when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(clusterStatusService.getDecommissionedHostsFromCM()).thenReturn(List.of());
-        when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(Map.of());
+        Map<String, String> candidates = Map.of("master-1", "privateIp");
+        when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
 
         underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null);
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stackDto);
-        inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), Map.of());
+        inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), candidates);
         inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
         inOrder.verify(clusterApi, times(0)).restartAll(false);
         inOrder.verify(clusterCommissionService, times(0)).recommissionHosts(any());
+        inOrder.verify(clusterHostServiceRunner, times(1)).createCronForUserHomeCreation(eq(stackDto), eq(candidates.keySet()));
     }
 
     @Test
@@ -180,18 +186,20 @@ class ClusterUpscaleServiceTest {
         when(hostGroupService.getByClusterWithRecipes(any())).thenReturn(Set.of(hostGroup));
         when(hostGroupService.getByCluster(any())).thenReturn(Set.of(hostGroup));
         when(parcelService.removeUnusedParcelComponents(stackDto)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of()));
-        when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(Map.of());
+        Map<String, String> candidates = Map.of("master-1", "privateIp");
+        when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
 
         when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
 
         underTest.installServicesOnNewHosts(1L, Set.of("master"), false, false, Map.of("master", Set.of("master-1", "master-2", "master-3")), null);
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stackDto);
-        inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), Map.of());
+        inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), candidates);
         inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
         inOrder.verify(clusterApi, times(0)).restartAll(false);
         inOrder.verify(clusterStatusService, times(0)).getDecommissionedHostsFromCM();
         inOrder.verify(clusterCommissionService, times(0)).recommissionHosts(any());
+        inOrder.verify(clusterHostServiceRunner, times(1)).createCronForUserHomeCreation(eq(stackDto), eq(candidates.keySet()));
     }
 
     @Test

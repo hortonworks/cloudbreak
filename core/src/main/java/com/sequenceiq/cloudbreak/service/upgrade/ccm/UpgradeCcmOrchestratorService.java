@@ -68,7 +68,6 @@ public class UpgradeCcmOrchestratorService {
         stateParams.setState(saltState);
         stateParams.setPrimaryGatewayConfig(gatewayConfigService.getPrimaryGatewayConfig(stack));
         stateParams.setTargetHostNames(gatewayNodes.stream().map(Node::getHostname).collect(Collectors.toSet()));
-        stateParams.setAllNodes(gatewayNodes);
         stateParams.setExitCriteriaModel(new ClusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
         return stateParams;
     }

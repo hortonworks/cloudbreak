@@ -61,7 +61,7 @@ public class CreateFullBackupHandler extends ExceptionCatcherEventHandler<Create
         Stack stack = stackService.getByIdWithListsInTransaction(event.getData().getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Set<Node> nodes = nodeService.mapInstancesToNodes(stack.getNotDeletedInstanceMetaDataSet());
-        OrchestratorStateParams stateParameters = createOrchestratorStateParams(stack, nodes);
+        OrchestratorStateParams stateParameters = createOrchestratorStateParams(stack);
         try {
             runBackupForNodesSequentially(nodes, stateParameters);
             return new StackEvent(FullBackupEvent.FULL_BACKUP_SUCCESSFUL_EVENT.event(), event.getData().getResourceId());
@@ -81,12 +81,11 @@ public class CreateFullBackupHandler extends ExceptionCatcherEventHandler<Create
         }
     }
 
-    private OrchestratorStateParams createOrchestratorStateParams(Stack stack, Set<Node> nodes) {
+    private OrchestratorStateParams createOrchestratorStateParams(Stack stack) {
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         OrchestratorStateParams stateParameters = new OrchestratorStateParams();
         stateParameters.setPrimaryGatewayConfig(primaryGatewayConfig);
         stateParameters.setState("freeipa.backup-full");
-        stateParameters.setAllNodes(nodes);
         LOGGER.debug("Created OrchestratorStateParams for running full backup: {}", stateParameters);
         return stateParameters;
     }
