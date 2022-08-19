@@ -1690,4 +1690,17 @@ class SdxServiceTest {
         verify(distroxService, times(1)).restartDistroxByCrns(any());
     }
 
+    @Test
+    public void testUpdateDbEngineVersionUpdatesField() {
+        when(sdxClusterRepository.updateDatabaseEngineVersion(SDX_CRN, "10")).thenReturn(1);
+
+        underTest.updateDatabaseEngineVersion(SDX_CRN, "10");
+    }
+
+    @Test
+    public void testUpdateDbEngineVersionFieldNotUpdated() {
+        when(sdxClusterRepository.updateDatabaseEngineVersion(SDX_CRN, "10")).thenReturn(0);
+
+        assertThrows(NotFoundException.class, () -> underTest.updateDatabaseEngineVersion(SDX_CRN, "10"));
+    }
 }

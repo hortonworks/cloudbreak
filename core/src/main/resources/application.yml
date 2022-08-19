@@ -931,6 +931,8 @@ existing-stack-patcher:
     cluster-public-endpoint:
       enabled: false
       related-stacks:
+    collect-db-engine-version:
+      enabled: true
 
 clusterdns:
   host: localhost

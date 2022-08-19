@@ -130,4 +130,8 @@ public interface SdxClusterRepository extends AccountAwareResourceRepository<Sdx
             "WHERE s.name in (:names) " +
             "AND s.accountId = :accountId")
     List<ResourceBasicView> findAllResourceBasicViewByNamesAndAccountId(@Param("names") Collection<String> names, @Param("accountId") String accountId);
+
+    @Modifying
+    @Query("UPDATE SdxCluster s SET s.databaseEngineVersion = :databaseEngineVersion WHERE s.crn = :crn")
+    int updateDatabaseEngineVersion(@Param("crn") String crn, @Param("databaseEngineVersion") String externalDatabaseEngineVersion);
 }

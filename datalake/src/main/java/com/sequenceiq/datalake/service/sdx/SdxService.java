@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFoundException;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
@@ -81,7 +82,6 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -161,9 +161,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private RecipeV4Endpoint recipeV4Endpoint;
-
-    @Inject
-    private CloudbreakInternalCrnClient cloudbreakInternalCrnClient;
 
     @Inject
     private DistroxService distroxService;
@@ -1358,5 +1355,14 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         );
         cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         return sdxReactorFlowManager.triggerSaltPasswordRotationTracker(sdxCluster);
+    }
+
+    public void updateDatabaseEngineVersion(String crn, String databaseEngineVersion) {
+        int updatedCount = sdxClusterRepository.updateDatabaseEngineVersion(crn, databaseEngineVersion);
+        if (updatedCount < 1) {
+            throw notFoundException("SdxCluster with", crn + " crn");
+        } else {
+            LOGGER.info("Updated database engine version for [{}] with [{}]", crn, databaseEngineVersion);
+        }
     }
 }

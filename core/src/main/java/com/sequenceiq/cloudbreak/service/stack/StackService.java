@@ -1022,6 +1022,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     }
 
     public void updateExternalDatabaseEngineVersion(Long stackId, String databaseVersion) {
+        LOGGER.info("Updating DB engine version for [{}] to [{}]", stackId, databaseVersion);
         stackRepository.updateExternalDatabaseEngineVersion(stackId, databaseVersion);
     }
 
