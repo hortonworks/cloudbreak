@@ -80,6 +80,9 @@ public class RotateSaltPasswordService {
     private ReactorFlowManager flowManager;
 
     public void validateRotateSaltPassword(StackDto stack) {
+        if (stack.getStatus().isStopped()) {
+            throw new BadRequestException("Rotating SaltStack user password is not supported for stopped clusters");
+        }
         if (!entitlementService.isSaltUserPasswordRotationEnabled(stack.getAccountId())) {
             throw new BadRequestException("Rotating SaltStack user password is not supported in your account");
         }

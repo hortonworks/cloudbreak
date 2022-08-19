@@ -29,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
@@ -91,6 +92,9 @@ class RotateSaltPasswordServiceTest {
     @Mock
     private ReactorFlowManager flowManager;
 
+    @Mock
+    private InstanceMetadataView instanceMetadataView;
+
     @Captor
     private ArgumentCaptor<String> stringArgumentCaptor;
 
@@ -108,6 +112,8 @@ class RotateSaltPasswordServiceTest {
     void setUp() {
         lenient().when(stack.isAvailable()).thenReturn(true);
         lenient().when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
+        lenient().when(stack.getStatus()).thenReturn(Status.AVAILABLE);
+        lenient().when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(List.of(instanceMetadataView));
         lenient().when(entitlementService.isSaltUserPasswordRotationEnabled(ACCOUNT_ID)).thenReturn(true);
 
         GatewayConfig gw1 = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
@@ -133,6 +139,15 @@ class RotateSaltPasswordServiceTest {
                 eq(securityConfig.getSaltSecurityConfig().getSaltPassword()));
         String newPassword = stringArgumentCaptor.getValue();
         verify(securityConfigService).changeSaltPassword(securityConfig, newPassword);
+    }
+
+    @Test
+    public void testRotateSaltPasswordOnStoppedStack() {
+        when(stack.getStatus()).thenReturn(Status.STOPPED);
+
+        assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Rotating SaltStack user password is not supported for stopped clusters");
     }
 
     @Test

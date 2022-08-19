@@ -69,9 +69,19 @@ public class RotateSaltPasswordActions {
             @Override
             protected void doExecute(RotateSaltPasswordContext context, RotateSaltPasswordSuccessResponse payload, Map<Object, Object> variables)
                     throws Exception {
-                LOGGER.info("Rotating salt password for stack {} finished", context.getStack().getResourceCrn());
-                stackUpdaterService.updateStatus(payload.getResourceId(), DetailedStackStatus.AVAILABLE,
-                        CLUSTER_SALT_PASSWORD_ROTATE_FINISHED, "SaltStack user password rotated");
+                LOGGER.info("Rotating salt password for stack {} finished, restoring previous status: {}",
+                        context.getStack().getResourceCrn(), context.getPreviousStackStatus());
+                String statusReason = "SaltStack user password rotated, restored previous status";
+                String previousStatusReason = context.getPreviousStackStatus().getStatusReason();
+                if (!previousStatusReason.isBlank()) {
+                    if (previousStatusReason.startsWith(statusReason)) {
+                        statusReason = previousStatusReason;
+                    } else {
+                        statusReason += ": " + previousStatusReason;
+                    }
+                }
+                stackUpdaterService.updateStatus(payload.getResourceId(), context.getPreviousStackStatus().getDetailedStackStatus(),
+                        CLUSTER_SALT_PASSWORD_ROTATE_FINISHED, statusReason);
                 rotateSaltPasswordService.sendSuccessUsageReport(context.getStack().getResourceCrn(), context.getReason());
                 sendEvent(context);
             }

@@ -14,11 +14,12 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.salt.rotatepassword.event.RotateSaltPasswordFailureResponse;
-import com.sequenceiq.datalake.flow.salt.rotatepassword.event.RotateSaltPasswordWaitRequest;
 import com.sequenceiq.datalake.flow.salt.rotatepassword.event.RotateSaltPasswordSuccessResponse;
+import com.sequenceiq.datalake.flow.salt.rotatepassword.event.RotateSaltPasswordWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 
@@ -26,6 +27,8 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 public class RotateSaltPasswordTrackerActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RotateSaltPasswordTrackerActions.class);
+
+    private static final String PREVIOUS_STACK_STATUS = "previousStackStatus";
 
     @Inject
     private SdxStatusService sdxStatusService;
@@ -36,6 +39,7 @@ public class RotateSaltPasswordTrackerActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
+                variables.put(PREVIOUS_STACK_STATUS, sdxStatusService.getActualStatusForSdx(context.getSdxId()));
                 LOGGER.info("Waiting for rotate salt password for SDX stack {}", context.getSdxId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.SALT_PASSWORD_ROTATION_IN_PROGRESS,
                         "Rotating SaltStack user password", context.getSdxId());
@@ -61,8 +65,18 @@ public class RotateSaltPasswordTrackerActions {
             @Override
             protected void doExecute(SdxContext context, RotateSaltPasswordSuccessResponse payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Rotating salt password for SDX stack {} finished", context.getSdxId());
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.SALT_PASSWORD_ROTATION_FINISHED,
-                        "Rotated SaltStack user password successfully", context.getSdxId());
+                String statusReason = "Rotated SaltStack user password successfully";
+                if (variables.get(PREVIOUS_STACK_STATUS) != null) {
+                    String previousStatusReason = ((SdxStatusEntity) variables.get(PREVIOUS_STACK_STATUS)).getStatusReason();
+                    if (!previousStatusReason.isBlank()) {
+                        if (previousStatusReason.startsWith(statusReason)) {
+                            statusReason = previousStatusReason;
+                        } else {
+                            statusReason += ": " + previousStatusReason;
+                        }
+                    }
+                }
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.SALT_PASSWORD_ROTATION_FINISHED, statusReason, context.getSdxId());
                 sendEvent(context);
             }
 

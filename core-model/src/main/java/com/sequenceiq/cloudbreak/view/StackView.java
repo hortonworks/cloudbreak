@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -59,6 +60,10 @@ public interface StackView extends MdcContextInfoProvider {
     DetailedStackStatus getDetailedStatus();
 
     String getStatusReason();
+
+    default StackStatus getStackStatus() {
+        return new StackStatus(null, getStatus(), getStatusReason(), getDetailedStatus());
+    }
 
     String getCloudPlatform();
 
