@@ -98,6 +98,9 @@ public class RotateSaltPasswordService {
 
     public void validateRotateSaltPassword(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
+        if (stack.isStopped()) {
+            throw new BadRequestException("Rotating SaltStack user password is not supported for stopped clusters");
+        }
         if (!entitlementService.isSaltUserPasswordRotationEnabled(stack.getAccountId())) {
             throw new BadRequestException("Rotating SaltStack user password is not supported in your account");
         }

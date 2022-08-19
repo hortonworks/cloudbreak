@@ -117,12 +117,22 @@ class RotateSaltPasswordServiceTest {
 
         lenient().when(stack.getId()).thenReturn(STACK_ID);
         lenient().when(stack.getAccountId()).thenReturn(ACCOUNT_ID);
+        lenient().when(stack.isStopped()).thenReturn(false);
 
         SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
         saltSecurityConfig.setSaltPassword(OLD_PASSWORD);
         SecurityConfig securityConfig = new SecurityConfig();
         securityConfig.setSaltSecurityConfig(saltSecurityConfig);
         lenient().when(stack.getSecurityConfig()).thenReturn(securityConfig);
+    }
+
+    @Test
+    void  rotateSaltPasswordForStoppedStack() {
+        lenient().when(stack.isStopped()).thenReturn(true);
+
+        Assertions.assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Rotating SaltStack user password is not supported for stopped clusters");
     }
 
     @Test
