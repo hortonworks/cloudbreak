@@ -3,11 +3,11 @@ package com.sequenceiq.cloudbreak.service.stackpatch.config;
 import java.lang.module.ModuleDescriptor;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.job.stackpatcher.config.StackPatchTypeConfig;
 
-@Configuration
+@Component
 @ConfigurationProperties("existing-stack-patcher.patch-configs.disable-region-for-fluentd")
 public class DisableRegionForFluentdPatchConfig extends StackPatchTypeConfig {
 

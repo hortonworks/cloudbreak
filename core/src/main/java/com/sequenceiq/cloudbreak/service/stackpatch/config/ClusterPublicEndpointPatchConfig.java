@@ -4,11 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.job.stackpatcher.config.StackPatchTypeConfig;
 
-@Configuration
+@Component
 @ConfigurationProperties("existing-stack-patcher.patch-configs.cluster-public-endpoint")
 public class ClusterPublicEndpointPatchConfig extends StackPatchTypeConfig {
 

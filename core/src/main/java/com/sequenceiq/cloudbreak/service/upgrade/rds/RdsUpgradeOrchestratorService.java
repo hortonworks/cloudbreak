@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.rds;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -88,19 +89,13 @@ public class RdsUpgradeOrchestratorService {
                 stateParams.getTargetHostNames(), "df -k /dbfs | tail -1 | awk '{print $4}'");
         Map<String, String> dataDirSizeMap = hostOrchestrator.runCommandOnHosts(List.of(stateParams.getPrimaryGatewayConfig()),
                 stateParams.getTargetHostNames(), "du -sk /dbfs/pgsql | awk '{print $1}'");
-        Integer dataDirSize = dataDirSizeMap.entrySet().stream()
-                .filter(e -> e.getKey().equals(stateParams.getPrimaryGatewayConfig().getHostname()))
-                .map(e -> Integer.valueOf(e.getValue()))
-                .findFirst().orElse(null);
-        Integer dbVolumeSize = dbVolumeSizeMap.entrySet().stream()
-                .filter(e -> e.getKey().equals(stateParams.getPrimaryGatewayConfig().getHostname()))
-                .map(e -> Integer.valueOf(e.getValue()))
-                .findFirst().orElse(null);
-        if (dataDirSize != null && dbVolumeSize != null) {
-            if (dataDirSize * DB_SPACE_MULTIPLIER > dbVolumeSize) {
+        Optional<Integer> dataDirSize = Optional.ofNullable(dataDirSizeMap.get(stateParams.getPrimaryGatewayConfig().getHostname())).map(Integer::valueOf);
+        Optional<Integer> dbVolumeSize = Optional.ofNullable(dbVolumeSizeMap.get(stateParams.getPrimaryGatewayConfig().getHostname())).map(Integer::valueOf);
+        if (dataDirSize.isPresent() && dbVolumeSize.isPresent()) {
+            if (dataDirSize.get() * DB_SPACE_MULTIPLIER > dbVolumeSize.get()) {
                 String msg = "Not enough space on attached db volume for postgres upgrade. Needed "
-                        + (dataDirSize * DB_SPACE_MULTIPLIER / KB_TO_MB) + "MB, available: "
-                        + (dbVolumeSize / KB_TO_MB) + "MB";
+                        + (dataDirSize.get() * DB_SPACE_MULTIPLIER / KB_TO_MB) + "MB, available: "
+                        + (dbVolumeSize.get() / KB_TO_MB) + "MB";
                 LOGGER.warn(msg);
                 throw new CloudbreakOrchestratorFailedException(msg);
             }

@@ -11,6 +11,7 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
@@ -54,5 +55,12 @@ public class SdxInternalController implements SdxInternalEndpoint {
     public FlowIdentifier renewCertificate(@TenantAwareParam String crn) {
         SdxCluster sdxCluster = sdxService.getByCrn(crn);
         return certRenewalService.triggerInternalRenewCertificate(sdxCluster);
+    }
+
+    @Override
+    @InternalOnly
+    public void updateDbEngineVersion(@TenantAwareParam String crn, String dbEngineVersion) {
+        MDCBuilder.addResourceCrn(crn);
+        sdxService.updateDatabaseEngineVersion(crn, dbEngineVersion);
     }
 }
