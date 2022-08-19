@@ -40,23 +40,31 @@ public class ParcelFilterService {
             LOGGER.debug("We can not identify one of the service from the blueprint so to stay on the safe side we will add every parcel");
             return parcels;
         }
-        Set<ClouderaManagerProduct> requiredParcels = filterParcels(workspaceId, stackId, parcels, serviceNamesInBlueprint);
+        Set<String> availableParcelNamesFromImage = imageReaderService.getParcelNames(workspaceId, stackId);
+        if (availableParcelNamesFromImage.isEmpty()) {
+            LOGGER.debug("There is no pre warmed parcel on the image therefore we assume that every parcel is required. Parcels: {}", parcels);
+            return parcels;
+        } else {
+            LOGGER.debug("The following parcels are available on the pre-warm image: {}", availableParcelNamesFromImage);
+        }
+        Set<ClouderaManagerProduct> requiredParcels = filterParcels(parcels, serviceNamesInBlueprint, availableParcelNamesFromImage);
         LOGGER.debug("The following parcels are used in CM based on blueprint: {}", requiredParcels);
         return requiredParcels;
     }
 
-    private Set<ClouderaManagerProduct> filterParcels(Long workspaceId, Long stackId, Set<ClouderaManagerProduct> parcels,
-            Set<String> requiredServicesInBlueprint) {
+    private Set<ClouderaManagerProduct> filterParcels(Set<ClouderaManagerProduct> parcels, Set<String> requiredServicesInBlueprint,
+            Set<String> availableParcelNamesFromImage) {
         Set<ClouderaManagerProduct> requiredParcels = new HashSet<>();
         Set<ClouderaManagerProduct> notAccessibleParcels = new HashSet<>();
         Iterator<ClouderaManagerProduct> parcelIterator = parcels.iterator();
+        requiredParcels.addAll(collectCustomParcelsIfPresent(availableParcelNamesFromImage, parcels));
         while (!requiredServicesInBlueprint.isEmpty() && parcelIterator.hasNext()) {
             ClouderaManagerProduct parcel = parcelIterator.next();
             ImmutablePair<ManifestStatus, Manifest> manifest = manifestRetrieverService.readRepoManifest(parcel.getParcel());
             if (manifestAvailable(manifest)) {
                 Set<String> servicesInParcel = getAllServiceNameInParcel(manifest.right);
                 LOGGER.debug("The {} parcel contains the following services: {}", parcel.getName(), servicesInParcel);
-                if (servicesArePresentInTheBlueprint(requiredServicesInBlueprint, servicesInParcel, parcel) || isCustomParcel(workspaceId, stackId, parcel)) {
+                if (servicesArePresentInTheBlueprint(requiredServicesInBlueprint, servicesInParcel, parcel)) {
                     requiredParcels.add(parcel);
                     LOGGER.debug("Removing {} from the remaining required services because these services are found in {} parcel.", servicesInParcel, parcel);
                     requiredServicesInBlueprint.removeAll(servicesInParcel);
@@ -90,15 +98,16 @@ public class ParcelFilterService {
         }
     }
 
-    private boolean isCustomParcel(Long workspaceId, Long stackId, ClouderaManagerProduct parcel) {
-        Set<String> parcelNamesFromImage = imageReaderService.getParcelNames(workspaceId, stackId);
-        if (parcelNamesFromImage.stream().noneMatch(preWarmParcel -> preWarmParcel.equals(parcel.getName()))) {
-            LOGGER.debug("Add custom parcel {}", parcel);
-            return true;
+    private Set<ClouderaManagerProduct> collectCustomParcelsIfPresent(Set<String> availableParcelNamesFromImage, Set<ClouderaManagerProduct> parcels) {
+        Set<ClouderaManagerProduct> customParcels = parcels.stream()
+                .filter(parcel -> !availableParcelNamesFromImage.contains(parcel.getName()))
+                .collect(Collectors.toSet());
+        if (customParcels.isEmpty()) {
+            LOGGER.debug("There is no custom parcel found in the provided parcel list");
         } else {
-            LOGGER.debug("The parcel {} is present on the image. It's not a custom parcel", parcel);
-            return false;
+            LOGGER.debug("The following custom parcels are required: {}", customParcels);
         }
+        return customParcels;
     }
 
     private Set<String> getServiceNamesInBlueprint(Blueprint blueprint) {
