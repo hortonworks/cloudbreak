@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
@@ -106,9 +105,9 @@ public class SdxCmSyncActions {
             }
 
             private void setStatusForDatalakeAndNotify(Long resourceId, String exceptionMessage) {
-                Optional<SdxStatusEntity> actualStatus = sdxStatusService.getActualStatusForSdx(resourceId);
+                SdxStatusEntity actualStatus = sdxStatusService.getActualStatusForSdx(resourceId);
                 sdxStatusService.setStatusForDatalakeAndNotify(
-                        actualStatus.map(SdxStatusEntity::getStatus).orElse(DatalakeStatusEnum.RUNNING),
+                        actualStatus.getStatus(),
                         exceptionMessage,
                         resourceId);
             }
