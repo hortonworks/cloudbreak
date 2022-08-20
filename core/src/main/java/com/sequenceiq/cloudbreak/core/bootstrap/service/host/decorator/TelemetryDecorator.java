@@ -193,7 +193,7 @@ public class TelemetryDecorator {
     }
 
     private AltusCredential getAltusCredentialForMonitoring(StackView stack, String accountId, Telemetry telemetry, MonitoringCredential credential) {
-        if (altusMachineUserService.isAnyDataBusBasedFeatureSupported(telemetry)) {
+        if (altusMachineUserService.isAnyMonitoringFeatureSupported(telemetry)) {
             if (needToGenerateCredential(accountId, telemetry, credential)) {
                 Optional<AltusCredential> altusCredential = altusMachineUserService.generateMonitoringMachineUser(stack, telemetry);
                 credential = altusMachineUserService.storeMonitoringCredential(altusCredential, stack);
