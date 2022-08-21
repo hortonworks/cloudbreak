@@ -13,6 +13,10 @@
       "displayName": "Asia Pacific (Tokyo)"
     },
     {
+      "name": "ap-east-1",
+      "displayName": "Asia Pacific (Hong Kong)"
+    },
+    {
       "name": "eu-west-1",
       "displayName": "EU (Ireland)"
     },
