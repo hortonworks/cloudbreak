@@ -15,6 +15,10 @@
     "zoneid": "ap-northeast-2",
     "defaultvm": "i2.4xlarge"
   },
+  "Asia Pacific (Hong Kong)": {
+    "zoneid": "ap-east-1",
+    "defaultvm": "i2.4xlarge"
+  },
   "Asia Pacific (Singapore)": {
     "zoneid": "ap-southeast-1",
     "defaultvm": "i2.4xlarge"
