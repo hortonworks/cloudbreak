@@ -4,12 +4,15 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.model.CloudIdentityType;
 
 public class CloudEfsView extends CloudFileSystemView {
     private String instanceProfile;
 
-    public CloudEfsView(CloudIdentityType cloudIdentityType) {
+    @JsonCreator
+    public CloudEfsView(@JsonProperty("cloudIdentityType") CloudIdentityType cloudIdentityType) {
         super(cloudIdentityType);
     }
 

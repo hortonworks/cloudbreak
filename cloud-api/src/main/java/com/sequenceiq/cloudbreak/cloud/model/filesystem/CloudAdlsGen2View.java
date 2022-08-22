@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.model.filesystem;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.model.CloudIdentityType;
 
 public class CloudAdlsGen2View extends CloudFileSystemView {
@@ -16,7 +18,8 @@ public class CloudAdlsGen2View extends CloudFileSystemView {
 
     private String managedIdentity;
 
-    public CloudAdlsGen2View(CloudIdentityType cloudIdentityType) {
+    @JsonCreator
+    public CloudAdlsGen2View(@JsonProperty("cloudIdentityType") CloudIdentityType cloudIdentityType) {
         super(cloudIdentityType);
     }
 

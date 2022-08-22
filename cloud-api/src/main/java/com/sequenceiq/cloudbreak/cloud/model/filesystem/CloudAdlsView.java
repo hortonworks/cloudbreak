@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model.filesystem;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.model.CloudIdentityType;
 
 public class CloudAdlsView extends CloudFileSystemView {
@@ -26,7 +28,8 @@ public class CloudAdlsView extends CloudFileSystemView {
 
     private String adlsTrackingClusterTypeKey;
 
-    public CloudAdlsView(CloudIdentityType cloudIdentityType) {
+    @JsonCreator
+    public CloudAdlsView(@JsonProperty("cloudIdentityType") CloudIdentityType cloudIdentityType) {
         super(cloudIdentityType);
     }
 
