@@ -133,7 +133,7 @@ public class SdxReactorFlowManager {
         LOGGER.info("Triggering recovery for failed SDX resize with original cluster: {} and resized cluster: {}",
                 oldSdxCluster, newSdxCluster);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        eventSenderService.sendEventAndNotification(newSdxCluster, ResourceEvent.DATALAKE_RECOVERY_STARTED);
+        eventSenderService.sendEventAndNotification(oldSdxCluster, ResourceEvent.DATALAKE_RECOVERY_STARTED);
         return notify(
                 SDX_RESIZE_RECOVERY_FLOW_CHAIN_START_EVENT,
                 new DatalakeResizeRecoveryFlowChainStartEvent(oldSdxCluster, newSdxCluster, userId),
