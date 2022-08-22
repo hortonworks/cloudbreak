@@ -28,9 +28,9 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxStatusRepository;
-import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
 
 @ExtendWith(MockitoExtension.class)
 class SdxStatusServiceTest {
@@ -41,7 +41,7 @@ class SdxStatusServiceTest {
     private TransactionService transactionService;
 
     @Mock
-    private SdxNotificationService sdxNotificationService;
+    private EventSenderService eventSenderService;
 
     @Mock
     private SdxStatusRepository sdxStatusRepository;
@@ -102,7 +102,7 @@ class SdxStatusServiceTest {
         assertEquals(status, statusEntityCaptor.getValue().getStatus());
         assertEquals(TIMESTAMP, sdxClusterCaptor.getValue().getDeleted());
         verify(transactionService).required(any(Runnable.class));
-        verify(sdxNotificationService).send(resourceEvent, sdxCluster);
+        verify(eventSenderService).sendEventAndNotification(sdxCluster, resourceEvent);
     }
 
     @Test
@@ -116,6 +116,6 @@ class SdxStatusServiceTest {
         verify(sdxStatusRepository).save(any(SdxStatusEntity.class));
         assertEquals(status, statusEntityCaptor.getValue().getStatus());
         verify(transactionService).required(any(Runnable.class));
-        verify(sdxNotificationService).send(status.getDefaultResourceEvent(), messageArgs, sdxCluster);
+        verify(eventSenderService).sendEventAndNotification(sdxCluster, status.getDefaultResourceEvent(), messageArgs);
     }
 }
