@@ -104,8 +104,8 @@ public class RecipeEngine {
         if (shouldExecuteRecipeOnStack(recipes, POST_CLUSTER_INSTALL, POST_SERVICE_DEPLOYMENT)) {
             uploadRecipesIfNeeded(stack, hostGroups);
         }
-        // Post service deployment recipes should be executed even if we don't have post service
-        // deployment recipe because we have the internal createuserhome.sh recipe
+        // Post service deployment recipes should be executed for old clusters even if we don't have post service
+        // deployment recipe because we may have the internal createuserhome.sh recipe
         orchestratorRecipeExecutor.postServiceDeploymentRecipes(stack);
     }
 
@@ -115,8 +115,8 @@ public class RecipeEngine {
         if (shouldExecuteRecipeOnStack(recipes, POST_CLUSTER_INSTALL, POST_SERVICE_DEPLOYMENT)) {
             uploadRecipesIfNeeded(stack, hostGroups);
         }
-        // Post service deployment recipes should be executed even if we don't have post service
-        // deployment recipe because we have the internal createuserhome.sh recipe
+        // Post service deployment recipes should be executed for old clusters even if we don't have post service
+        // deployment recipe because we may have the internal createuserhome.sh recipe
         orchestratorRecipeExecutor.postServiceDeploymentRecipesOnTargets(stack, candidateAddresses);
     }
 

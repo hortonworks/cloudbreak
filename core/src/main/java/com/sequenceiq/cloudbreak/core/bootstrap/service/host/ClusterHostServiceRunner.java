@@ -965,4 +965,17 @@ public class ClusterHostServiceRunner {
         grainRunnerParams.setGrainOperation(grainOperation);
         return grainRunnerParams;
     }
+
+    public void createCronForUserHomeCreation(StackDto stackDto, Set<String> candidateHostNames) throws CloudbreakException {
+        Set<String> reachableTargets = stackUtil.collectReachableAndUnreachableCandidateNodes(stackDto, candidateHostNames).getReachableHosts();
+        ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackDto.getId(), stackDto.getCluster().getId());
+        List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stackDto);
+        try {
+            hostOrchestrator.createCronForUserHomeCreation(allGatewayConfigs, reachableTargets, exitModel);
+        } catch (CloudbreakOrchestratorFailedException e) {
+            String message = "Creating cron for user home creation failed";
+            LOGGER.warn(message, e);
+            throw new CloudbreakException(message, e);
+        }
+    }
 }

@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -81,11 +82,13 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrapFactory;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUpload;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainRemoveRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ModifyGrainBase;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltCommandRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
@@ -792,5 +795,33 @@ class SaltOrchestratorTest {
         assertEquals(2022, result.getYear());
         assertEquals(Month.JANUARY, result.getMonth());
         assertEquals(1, result.getDayOfMonth());
+    }
+
+    @Test
+    void testCreateCronForUserHomeCreationWhenStateExists() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
+        when(saltStateService.stateSlsExists(any(), any(), eq("cloudera.createuserhome"))).thenReturn(Boolean.TRUE);
+        saltOrchestrator.createCronForUserHomeCreation(allGatewayConfigs, Set.of("fqdn"), exitCriteriaModel);
+
+        verify(callable).call();
+        ArgumentCaptor<OrchestratorBootstrap> saltJobIdTrackerCaptor = ArgumentCaptor.forClass(OrchestratorBootstrap.class);
+        verify(saltRunner, times(1)).runner(saltJobIdTrackerCaptor.capture(), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        Assertions.assertThat(saltJobIdTrackerCaptor.getValue()).isInstanceOf(SaltJobIdTracker.class);
+        SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) saltJobIdTrackerCaptor.getValue();
+        SaltJobRunner saltJobRunner = saltJobIdTracker.getSaltJobRunner();
+        assertEquals(Set.of("fqdn"), saltJobRunner.getTargetHostnames());
+        Assertions.assertThat(saltJobRunner).isInstanceOf(StateRunner.class);
+        StateRunner stateRunner = (StateRunner) saltJobRunner;
+        assertEquals("cloudera.createuserhome", stateRunner.getState());
+    }
+
+    @Test
+    void testCreateCronForUserHomeCreationWhenStateNotExists() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
+        when(saltStateService.stateSlsExists(any(), any(), eq("cloudera.createuserhome"))).thenReturn(Boolean.FALSE);
+        saltOrchestrator.createCronForUserHomeCreation(allGatewayConfigs, Set.of("fqdn"), exitCriteriaModel);
+
+        verify(callable, never()).call();
+        verify(saltRunner, never()).runner(any(), any(ExitCriteria.class), any(ExitCriteriaModel.class));
     }
 }
