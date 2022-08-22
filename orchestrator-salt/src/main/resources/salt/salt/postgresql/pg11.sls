@@ -4,29 +4,12 @@
 {% set postgres_data_on_attached_disk = salt['pillar.get']('postgres:postgres_data_on_attached_disk', 'False') %}
 
 
+include:
 {% if not salt['file.file_exists']('/usr/pgsql-11/bin/psql') %}
-include:
-  - postgresql.repo.pg11
-
-install-centos-scl-rh:
-  pkg.installed:
-    - failhard: True
-    - name: centos-release-scl-rh
-
-install-postgres11:
-  pkg.installed:
-    - failhard: True
-    - pkgs:
-        - postgresql11-server
-        - postgresql-jdbc
-        - postgresql11
-        - postgresql11-contrib
-        - postgresql11-docs
-        - postgresql11-devel
+  - postgresql.pg11-install
 {% endif %}
-
-include:
   - postgresql.pg11-alternatives
+
 
 {% if salt['file.file_exists']('/usr/lib/systemd/system/postgresql-10.service') %}
 remove-pg10-alias:
