@@ -113,8 +113,8 @@ class RdsUpgradeOrchestratorServiceTest {
         when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("du -sk /dbfs/pgsql | awk '{print $1}'"))).thenReturn(Map.of("fqdn1", "10000"));
         when(gatewayConfig.getHostname()).thenReturn("fqdn1");
         underTest.validateDbDirectorySpace(STACK_ID);
-        verify(hostOrchestrator).runCommandOnHosts(anyList(), eq(Set.of(node1)), eq("df -k /dbfs | tail -1 | awk '{print $4}'"));
-        verify(hostOrchestrator).runCommandOnHosts(anyList(), eq(Set.of(node1)), eq("du -sk /dbfs/pgsql | awk '{print $1}'"));
+        verify(hostOrchestrator).runCommandOnHosts(anyList(), eq(Set.of("fqdn1")), eq("df -k /dbfs | tail -1 | awk '{print $4}'"));
+        verify(hostOrchestrator).runCommandOnHosts(anyList(), eq(Set.of("fqdn1")), eq("du -sk /dbfs/pgsql | awk '{print $1}'"));
     }
 
     @Test

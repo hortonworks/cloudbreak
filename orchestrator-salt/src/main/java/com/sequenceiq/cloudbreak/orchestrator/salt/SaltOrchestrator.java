@@ -901,10 +901,10 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public Map<String, String> runCommandOnHosts(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, String command)
+    public Map<String, String> runCommandOnHosts(List<GatewayConfig> allGatewayConfigs, Set<String> targetFqdns, String command)
             throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
-        Target<String> hosts = new HostList(nodes.stream().map(Node::getHostname).collect(Collectors.toSet()));
+        Target<String> hosts = new HostList(targetFqdns);
         LOGGER.debug("Execute command: {}, on hosts: {}", command, hosts);
         try (SaltConnector saltConnector = saltService.createSaltConnector(primaryGateway)) {
             return saltStateService.runCommandOnHosts(retry, saltConnector, hosts, command);

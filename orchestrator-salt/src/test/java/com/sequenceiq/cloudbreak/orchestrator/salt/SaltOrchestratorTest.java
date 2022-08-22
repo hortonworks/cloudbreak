@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -766,7 +767,8 @@ class SaltOrchestratorTest {
         response.put("host1", "sample");
         String command = "echo sample";
         when(saltStateService.runCommandOnHosts(eq(retry), eq(saltConnector), any(), eq(command))).thenReturn(response);
-        Map<String, String> result = saltOrchestrator.runCommandOnHosts(allGatewayConfigs, targets, command);
+        Map<String, String> result = saltOrchestrator.runCommandOnHosts(allGatewayConfigs,
+                targets.stream().map(Node::getHostname).collect(Collectors.toSet()), command);
         assertEquals("sample", result.get("host1"));
         verify(saltStateService).runCommandOnHosts(eq(retry), eq(saltConnector), targetCaptor.capture(), eq(command));
         Target<String> target = targetCaptor.getValue();

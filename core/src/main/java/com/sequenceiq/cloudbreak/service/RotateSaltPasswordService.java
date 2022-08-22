@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.SaltBootstrapVersionChecker;
@@ -140,8 +141,8 @@ public class RotateSaltPasswordService {
 
     private void tryRemoveSaltuserFromGateways(StackDto stack, List<GatewayConfig> allGatewayConfig) {
         try {
-            Map<String, String> response = hostOrchestrator.runCommandOnHosts(allGatewayConfig, stack.getAllPrimaryGatewayInstanceNodes(),
-                    SALTUSER_DELETE_COMMAND);
+            Set<String> targetFqdns = stack.getAllPrimaryGatewayInstanceNodes().stream().map(Node::getHostname).collect(Collectors.toSet());
+            Map<String, String> response = hostOrchestrator.runCommandOnHosts(allGatewayConfig, targetFqdns, SALTUSER_DELETE_COMMAND);
             LOGGER.debug("Saltuser delete command response: {}", response);
         } catch (CloudbreakOrchestratorFailedException e) {
             LOGGER.warn("Failed to run saltuser delete command, assuming it is already deleted", e);

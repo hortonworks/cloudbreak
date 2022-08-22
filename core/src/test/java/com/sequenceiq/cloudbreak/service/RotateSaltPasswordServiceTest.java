@@ -168,36 +168,42 @@ class RotateSaltPasswordServiceTest {
 
     @Test
     void rotateSaltPasswordFallbackSuccess() throws Exception {
-        Set<Node> nodes = Set.of(mock(Node.class));
+        Node node = mock(Node.class);
+        when(node.getHostname()).thenReturn("fqdn");
+        Set<Node> nodes = Set.of(node);
         when(stack.getAllPrimaryGatewayInstanceNodes()).thenReturn(nodes);
 
         underTest.rotateSaltPasswordFallback(stack);
 
         String newPassword = stack.getSecurityConfig().getSaltSecurityConfig().getSaltPassword();
         assertThat(newPassword).isNotEqualTo(OLD_PASSWORD);
-        verify(hostOrchestrator).runCommandOnHosts(gatewayConfigs, nodes, "userdel saltuser");
+        verify(hostOrchestrator).runCommandOnHosts(gatewayConfigs, Set.of("fqdn"), "userdel saltuser");
         verify(clusterBootstrapper).reBootstrapOnHost(stack);
         verify(securityConfigService).changeSaltPassword(securityConfig, newPassword);
     }
 
     @Test
     void rotateSaltPasswordFallbackUserDeleteFails() throws Exception {
-        Set<Node> nodes = Set.of(mock(Node.class));
+        Node node = mock(Node.class);
+        when(node.getHostname()).thenReturn("fqdn");
+        Set<Node> nodes = Set.of(node);
         when(stack.getAllPrimaryGatewayInstanceNodes()).thenReturn(nodes);
-        when(hostOrchestrator.runCommandOnHosts(gatewayConfigs, nodes, "userdel saltuser")).thenThrow(CloudbreakOrchestratorFailedException.class);
+        when(hostOrchestrator.runCommandOnHosts(gatewayConfigs, Set.of("fqdn"), "userdel saltuser")).thenThrow(CloudbreakOrchestratorFailedException.class);
 
         underTest.rotateSaltPasswordFallback(stack);
 
         String newPassword = stack.getSecurityConfig().getSaltSecurityConfig().getSaltPassword();
         assertThat(newPassword).isNotEqualTo(OLD_PASSWORD);
-        verify(hostOrchestrator).runCommandOnHosts(gatewayConfigs, nodes, "userdel saltuser");
+        verify(hostOrchestrator).runCommandOnHosts(gatewayConfigs, Set.of("fqdn"), "userdel saltuser");
         verify(clusterBootstrapper).reBootstrapOnHost(stack);
         verify(securityConfigService).changeSaltPassword(securityConfig, newPassword);
     }
 
     @Test
     void rotateSaltPasswordFallbackFailure() throws Exception {
-        Set<Node> nodes = Set.of(mock(Node.class));
+        Node node = mock(Node.class);
+        when(node.getHostname()).thenReturn("fqdn");
+        Set<Node> nodes = Set.of(node);
         when(stack.getAllPrimaryGatewayInstanceNodes()).thenReturn(nodes);
         doThrow(CloudbreakException.class).when(clusterBootstrapper).reBootstrapOnHost(stack);
 
