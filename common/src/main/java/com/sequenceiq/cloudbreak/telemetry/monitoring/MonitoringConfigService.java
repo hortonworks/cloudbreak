@@ -5,12 +5,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.common.api.telemetry.model.Monitoring;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryPillarConfigGenerator;
+import com.sequenceiq.cloudbreak.telemetry.context.MonitoringContext;
+import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
+import com.sequenceiq.common.api.telemetry.model.CdpAccessKeyType;
 
 @Service
-public class MonitoringConfigService {
+public class MonitoringConfigService implements TelemetryPillarConfigGenerator<MonitoringConfigView> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MonitoringConfigService.class);
+
+    private static final String SALT_STATE = "monitoring";
 
     private final MonitoringConfiguration monitoringConfiguration;
 
@@ -21,35 +26,34 @@ public class MonitoringConfigService {
         this.monitoringGlobalAuthConfig = monitoringGlobalAuthConfig;
     }
 
-    // CHECKSTYLE:OFF
-    public MonitoringConfigView createMonitoringConfig(Monitoring monitoring, MonitoringClusterType clusterType,
-            MonitoringAuthConfig cmAuthConfig, char[] localPassword, boolean cdpSaasEnabled, boolean computeMonitoringEnabled,
-            String accessKeyId, char[] privateKey, String accessKeyType) {
+    @Override
+    public MonitoringConfigView createConfigs(TelemetryContext context) {
+        final MonitoringContext monitoringContext = context.getMonitoringContext();
         final MonitoringConfigView.Builder builder = new MonitoringConfigView.Builder();
-        boolean enabled = isMonitoringEnabled(cdpSaasEnabled, computeMonitoringEnabled);
         LOGGER.debug("Tyring to set monitoring configurations.");
-        if (clusterType != null) {
-            builder.withType(clusterType.value());
+        if (monitoringContext.getClusterType() != null) {
+            builder.withType(monitoringContext.getClusterType().value());
         }
-        fillCMAuthConfigs(clusterType, cmAuthConfig, builder);
-        if (enabled) {
-            builder.withUseDevStack(monitoringConfiguration.isDevStack());
-            if (!monitoringConfiguration.isDevStack()) {
-                builder.withRemoteWriteUrl(monitoring.getRemoteWriteUrl());
-            }
-            builder.withScrapeIntervalSeconds(monitoringConfiguration.getScrapeIntervalSeconds());
-            builder.withAgentPort(monitoringConfiguration.getAgent().getPort());
-            builder.withAgentUser(monitoringConfiguration.getAgent().getUser());
-            builder.withAgentMaxDiskUsage(monitoringConfiguration.getAgent().getMaxDiskUsage());
-            builder.withRetentionMinTime(monitoringConfiguration.getAgent().getRetentionMinTime());
-            builder.withRetentionMaxTime(monitoringConfiguration.getAgent().getRetentionMaxTime());
-            builder.withWalTruncateFrequency(monitoringConfiguration.getAgent().getWalTruncateFrequency());
-            builder.withAccessKeyId(accessKeyId);
-            builder.withPrivateKey(privateKey);
-            builder.withAccessKeyType(accessKeyType);
-            fillExporterConfigs(builder, localPassword);
-            fillRequestSignerConfigs(monitoringConfiguration.getRequestSigner(), builder);
+        fillCMAuthConfigs(monitoringContext.getClusterType(), monitoringContext.getCmAuth(), builder);
+        builder.withCmAutoTls(monitoringContext.isCmAutoTls());
+        builder.withUseDevStack(monitoringConfiguration.isDevStack());
+        if (!monitoringConfiguration.isDevStack()) {
+            builder.withRemoteWriteUrl(monitoringContext.getRemoteWriteUrl());
         }
+        builder.withScrapeIntervalSeconds(monitoringConfiguration.getScrapeIntervalSeconds());
+        builder.withAgentPort(monitoringConfiguration.getAgent().getPort());
+        builder.withAgentUser(monitoringConfiguration.getAgent().getUser());
+        builder.withAgentMaxDiskUsage(monitoringConfiguration.getAgent().getMaxDiskUsage());
+        builder.withRetentionMinTime(monitoringConfiguration.getAgent().getRetentionMinTime());
+        builder.withRetentionMaxTime(monitoringConfiguration.getAgent().getRetentionMaxTime());
+        builder.withWalTruncateFrequency(monitoringConfiguration.getAgent().getWalTruncateFrequency());
+        if (monitoringContext.getCredential() != null) {
+            builder.withAccessKeyId(monitoringContext.getCredential().getAccessKey())
+                    .withPrivateKey(monitoringContext.getCredential().getPrivateKey().toCharArray())
+                    .withAccessKeyType(StringUtils.defaultIfBlank(monitoringContext.getCredential().getAccessKeyType(), CdpAccessKeyType.ED25519.getValue()));
+        }
+        fillExporterConfigs(builder, monitoringContext.getSharedPassword());
+        fillRequestSignerConfigs(monitoringConfiguration.getRequestSigner(), builder);
         if (monitoringGlobalAuthConfig.isEnabled()) {
             builder.withUsername(monitoringGlobalAuthConfig.getUsername());
             if (StringUtils.isNotBlank(monitoringGlobalAuthConfig.getPassword())) {
@@ -60,10 +64,19 @@ public class MonitoringConfigService {
             }
         }
         return builder
-                .withEnabled(enabled)
+                .withEnabled(monitoringContext.isEnabled())
                 .build();
     }
-    // CHECKSTYLE:ON
+
+    @Override
+    public boolean isEnabled(TelemetryContext context) {
+        return context != null && context.getMonitoringContext() != null && context.getMonitoringContext().isEnabled();
+    }
+
+    @Override
+    public String saltStateName() {
+        return SALT_STATE;
+    }
 
     private void fillExporterConfigs(MonitoringConfigView.Builder builder, char[] localPassword) {
         builder.withLocalPassword(localPassword);
@@ -118,5 +131,4 @@ public class MonitoringConfigService {
         return authConfig != null && authConfig.getPassword() != null
                 && StringUtils.isNoneBlank(authConfig.getUsername(), new String(authConfig.getPassword()));
     }
-
 }

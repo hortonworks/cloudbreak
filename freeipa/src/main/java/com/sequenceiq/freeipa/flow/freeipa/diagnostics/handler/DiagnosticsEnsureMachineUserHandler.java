@@ -44,6 +44,7 @@ public class DiagnosticsEnsureMachineUserHandler extends AbstractDiagnosticsOper
                 DataBusCredential credential = altusMachineUserService.getOrCreateDataBusCredentialIfNeeded(resourceId);
                 parameters.setSupportBundleDbusAccessKey(credential.getAccessKey());
                 parameters.setSupportBundleDbusPrivateKey(credential.getPrivateKey());
+                parameters.setSupportBundleDbusAccessKeyType(credential.getAccessKeyType());
             }
             return DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)

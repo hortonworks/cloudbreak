@@ -10,13 +10,18 @@ import org.springframework.util.PropertyPlaceholderHelper;
 
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConnectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryConfigView;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryPillarConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryRepoConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryUpgradeConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.context.LogShipperContext;
+import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
+import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
 
 @Service
-public class TelemetryCommonConfigService {
+public class TelemetryCommonConfigService implements TelemetryPillarConfigGenerator<TelemetryCommonConfigView> {
 
     static final String SERVICE_LOG_FOLDER_PREFIX = "serviceLogFolderPrefix";
 
@@ -25,6 +30,8 @@ public class TelemetryCommonConfigService {
     static final String SERVER_LOG_FOLDER_PREFIX = "serverLogFolderPrefix";
 
     private static final String LOG_FOLDER_DEFAULT = "/var/log";
+
+    private static final String SALT_STATE = "telemetry";
 
     private final AnonymizationRuleResolver anonymizationRuleResolver;
 
@@ -42,9 +49,13 @@ public class TelemetryCommonConfigService {
         this.telemetryRepoConfiguration = telemetryRepoConfiguration;
     }
 
-    public TelemetryCommonConfigView createTelemetryCommonConfigs(Telemetry telemetry, List<VmLog> logs,
-            TelemetryClusterDetails clusterDetails) {
-        resolveLogPathReferences(telemetry, logs);
+    @Override
+    public TelemetryCommonConfigView createConfigs(TelemetryContext context) {
+        Telemetry telemetry = context.getTelemetry();
+        TelemetryClusterDetails clusterDetails = context.getClusterDetails();
+        LogShipperContext logShipperContext = context.getLogShipperContext();
+        List<VmLog> vmLogs = logShipperContext.getVmLogs();
+        resolveLogPathReferences(telemetry, vmLogs);
         TelemetryCommonConfigView.Builder builder = new TelemetryCommonConfigView.Builder();
         if (telemetryUpgradeConfiguration.isEnabled()) {
             if (telemetryUpgradeConfiguration.getCdpTelemetry() != null) {
@@ -60,7 +71,7 @@ public class TelemetryCommonConfigService {
         return builder
                 .withClusterDetails(clusterDetails)
                 .withRules(anonymizationRuleResolver.decodeRules(telemetry.getRules()))
-                .withVmLogs(logs)
+                .withVmLogs(vmLogs)
                 .withDatabusConnectMaxTimeSeconds(altusDatabusConnectionConfiguration.getMaxTimeSeconds())
                 .withDatabusConnectRetryTimes(altusDatabusConnectionConfiguration.getRetryTimes())
                 .withDatabusConnectRetryDelay(altusDatabusConnectionConfiguration.getRetryDelaySeconds())
@@ -70,6 +81,27 @@ public class TelemetryCommonConfigService {
                 .withRepoGpgKey(telemetryRepoConfiguration.getGpgKey())
                 .withRepoGpgCheck(telemetryRepoConfiguration.getGpgCheck())
                 .build();
+    }
+
+    @Override
+    public boolean isEnabled(TelemetryContext context) {
+        return context != null && context.getTelemetry() != null && context.getLogShipperContext() != null && context.getClusterDetails() != null;
+    }
+
+    @Override
+    public String saltStateName() {
+        return SALT_STATE;
+    }
+
+    @Override
+    public Map<String, Map<String, Map<String, Object>>> getSaltPillars(TelemetryConfigView configView, TelemetryContext context) {
+        Map<String, Object> configMap;
+        if (FluentClusterType.FREEIPA.equals(context.getClusterType())) {
+            configMap = Map.of(saltStateName(), configView.toMap(), "cloudera-manager", context.getPaywallConfigs());
+        } else {
+            configMap = Map.of(saltStateName(), configView.toMap());
+        }
+        return Map.of(saltStateName(), Map.of(String.format("/%s/init.sls", saltStateName()), configMap));
     }
 
     private void resolveLogPathReferences(Telemetry telemetry, List<VmLog> logs) {

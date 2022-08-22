@@ -5,28 +5,54 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.telemetry.TelemetryPillarConfigGenerator;
+import com.sequenceiq.cloudbreak.telemetry.context.DatabusContext;
+import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
+import com.sequenceiq.common.api.telemetry.model.CdpAccessKeyType;
+import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
+
 @Service
-public class DatabusConfigService {
+public class DatabusConfigService implements TelemetryPillarConfigGenerator<DatabusConfigView> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabusConfigService.class);
 
-    public DatabusConfigView createDatabusConfigs(String accessKeyId,
-            char[] accessKeySecret, String secretAlgorithm, String endpoint) {
-        final DatabusConfigView.Builder builder = new DatabusConfigView.Builder();
-        boolean validAccessKeySecret = accessKeySecret != null && StringUtils.isNotEmpty(new String(accessKeySecret));
-        boolean enableDbus = validAccessKeySecret && StringUtils.isNoneEmpty(endpoint, new String(accessKeySecret));
-        if (enableDbus) {
-            builder.withEndpoint(endpoint)
-                    .withAccessKeyId(accessKeyId)
-                    .withAccessKeySecret(accessKeySecret)
-                    .withAccessKeySecretAlgorithm(secretAlgorithm);
-        } else {
-            LOGGER.debug("Although metering or cluster deployment log reporting is enabled, databus "
-                            + "credentials/endpoint is not provided properly. endpoint: {}, accessKey: {}, privateKey: {}",
-                    endpoint, accessKeyId, validAccessKeySecret ? "*****" : "<empty>");
-        }
-        return builder
-                .withEnabled(enableDbus)
+    private static final String SALT_STATE = "datatabus";
+
+    @Override
+    public DatabusConfigView createConfigs(TelemetryContext context) {
+        final DatabusContext databusContext = context.getDatabusContext();
+        final DataBusCredential dataBusCredential = databusContext.getCredential();
+        return new DatabusConfigView.Builder()
+                .withEnabled(databusContext.isEnabled())
+                .withEndpoint(databusContext.getEndpoint())
+                .withAccessKeyId(dataBusCredential.getAccessKey())
+                .withAccessKeySecret(dataBusCredential.getPrivateKey().toCharArray())
+                .withAccessKeySecretAlgorithm(StringUtils.defaultIfBlank(dataBusCredential.getAccessKeyType(), CdpAccessKeyType.ED25519.getValue()))
                 .build();
+    }
+
+    @Override
+    public boolean isEnabled(TelemetryContext context) {
+        final DatabusContext databusContext = context.getDatabusContext();
+        boolean databusIsSet = databusContext.isEnabled() && databusContext.getCredential() != null;
+        boolean validDbusSettings = false;
+        if (databusIsSet) {
+            final DataBusCredential credential = databusContext.getCredential();
+            boolean validKeyPair = credential.isValid();
+            validDbusSettings = validKeyPair && StringUtils.isNotBlank(databusContext.getEndpoint());
+            if (!validDbusSettings) {
+                LOGGER.debug("Although metering or cluster deployment log reporting is enabled, databus "
+                                + "credentials/endpoint is not provided properly. endpoint: {}, accessKey: {}, privateKey: {}",
+                        databusContext.getEndpoint(), credential.getAccessKey(), validKeyPair ? "*****" : "<empty>");
+            }
+        } else {
+            LOGGER.debug("Databus related settings are not filled. Skip databus usage.");
+        }
+        return databusIsSet && validDbusSettings;
+    }
+
+    @Override
+    public String saltStateName() {
+        return SALT_STATE;
     }
 }

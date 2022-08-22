@@ -30,6 +30,15 @@ public class MetricsProcessorConfiguration extends AbstractStreamingConfiguratio
                 : monitoringConfiguration.getRemoteWriteUrl();
     }
 
+    public String getRemotePaasWriteUrl() {
+        if (StringUtils.isNotBlank(monitoringConfiguration.getPaasRemoteWriteInternalUrl())) {
+            return monitoringConfiguration.getPaasRemoteWriteUrl();
+        } else if (StringUtils.isNotBlank(monitoringConfiguration.getPaasRemoteWriteInternalUrl())) {
+            return monitoringConfiguration.getPaasRemoteWriteInternalUrl();
+        }
+        return getRemoteWriteUrl();
+    }
+
     public boolean isComputeMonitoringSupported() {
         return monitoringConfiguration.isEnabled() && StringUtils.isNotBlank(monitoringConfiguration.getRemoteWriteUrl());
     }

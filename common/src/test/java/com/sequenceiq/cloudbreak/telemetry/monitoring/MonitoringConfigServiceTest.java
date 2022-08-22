@@ -2,9 +2,10 @@ package com.sequenceiq.cloudbreak.telemetry.monitoring;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
+
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +15,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.common.api.telemetry.model.Monitoring;
+import com.sequenceiq.cloudbreak.telemetry.context.MonitoringContext;
+import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
+import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 
 @ExtendWith(MockitoExtension.class)
 public class MonitoringConfigServiceTest {
@@ -25,7 +28,7 @@ public class MonitoringConfigServiceTest {
 
     private static final char[] PRIVATE_KEY = "PRIVATE_KEY".toCharArray();
 
-    private static final String ACCESS_KEY_TYPE = "RSA";
+    private static final String ACCESS_KEY_TYPE = "ECDSA";
 
     @InjectMocks
     private MonitoringConfigService underTest;
@@ -46,9 +49,6 @@ public class MonitoringConfigServiceTest {
     private MonitoringAgentConfiguration monitoringAgentConfiguration;
 
     @Mock
-    private Monitoring monitoring;
-
-    @Mock
     private RequestSignerConfiguration requestSignerConfiguration;
 
     @Before
@@ -58,116 +58,76 @@ public class MonitoringConfigServiceTest {
     }
 
     @Test
-    public void testCreateMonitoringConfigs() {
+    public void testIsEnabled() {
         // GIVEN
-        MonitoringClusterType clusterType = MonitoringClusterType.CLOUDERA_MANAGER;
-        MonitoringAuthConfig authConfig = new MonitoringAuthConfig("user", "pass".toCharArray());
+        // WHEN
+        boolean result = underTest.isEnabled(telemetryContext());
+        // THEN
+        assertTrue(result);
+    }
+
+    @Test
+    public void testIsEnabledWithoutMonitoringContext() {
+        // GIVEN
+        TelemetryContext context = telemetryContext();
+        context.setMonitoringContext(null);
+        // WHEN
+        boolean result = underTest.isEnabled(context);
+        // THEN
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsEnabledWithoutContext() {
+        // GIVEN
+        TelemetryContext context = telemetryContext();
+        context.setMonitoringContext(null);
+        // WHEN
+        boolean result = underTest.isEnabled(null);
+        // THEN
+        assertFalse(result);
+    }
+
+    @Test
+    public void testCreateConfigs() {
+        // GIVEN
         given(monitoringConfiguration.isEnabled()).willReturn(true);
         given(monitoringConfiguration.isDevStack()).willReturn(false);
+        given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
+        given(requestSignerConfiguration.isEnabled()).willReturn(true);
         given(monitoringConfiguration.getClouderaManagerExporter()).willReturn(cmMonitoringConfiguration);
         given(monitoringConfiguration.getAgent()).willReturn(monitoringAgentConfiguration);
         given(cmMonitoringConfiguration.getPort()).willReturn(DEFAULT_CM_SMON_PORT);
-        given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
-
         given(monitoringConfiguration.getBlackboxExporter()).willReturn(blackboxExporterConfiguration);
         given(blackboxExporterConfiguration.getClouderaIntervalSeconds()).willReturn(1000);
-
-        given(monitoring.getRemoteWriteUrl()).willReturn("https://myendpoint/api/v1/receive");
         // WHEN
-        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, true, false,
-                ACCESS_KEY_ID, PRIVATE_KEY, ACCESS_KEY_TYPE);
+        Map<String, Object> result = underTest.createConfigs(telemetryContext()).toMap();
         // THEN
-        assertTrue(result.isEnabled());
-        assertEquals("https://myendpoint/api/v1/receive", result.getRemoteWriteUrl());
-        assertEquals("false", result.toMap().get("useDevStack").toString());
-        assertEquals(1000, result.toMap().get("blackboxExporterClouderaIntervalSeconds"));
-        assertEquals(DEFAULT_CM_SMON_PORT, result.getCmMetricsExporterPort());
+        assertEquals("myendpoint", result.get("remoteWriteUrl"));
+        assertEquals(true, result.get("cmAutoTls"));
+        assertEquals(ACCESS_KEY_TYPE, result.get("accessKeyType"));
+        assertEquals(true, result.get("enabled"));
+        assertEquals("user", result.get("cmUsername"));
+        assertEquals(1000, result.get("blackboxExporterClouderaIntervalSeconds"));
     }
 
-    @Test
-    public void testCreateMonitoringConfigsWithGlobalAuthConfig() {
-        // GIVEN
-        MonitoringClusterType clusterType = MonitoringClusterType.CLOUDERA_MANAGER;
-        MonitoringAuthConfig authConfig = new MonitoringAuthConfig("user", "pass".toCharArray());
-        given(monitoringConfiguration.isEnabled()).willReturn(true);
-        given(monitoringConfiguration.isDevStack()).willReturn(false);
-        given(monitoringConfiguration.getClouderaManagerExporter()).willReturn(cmMonitoringConfiguration);
-        given(monitoringConfiguration.getAgent()).willReturn(monitoringAgentConfiguration);
-        given(monitoring.getRemoteWriteUrl()).willReturn("https://myendpoint/api/v1/receive");
-        given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
-        given(monitoringGlobalAuthConfig.isEnabled()).willReturn(true);
-        given(monitoringGlobalAuthConfig.getToken()).willReturn("my-token");
-        // WHEN
-        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, true, false,
-                ACCESS_KEY_ID, PRIVATE_KEY, ACCESS_KEY_TYPE);
-        // THEN
-        assertTrue(result.isEnabled());
-        assertEquals("my-token", result.toMap().get("token").toString());
-
-    }
-
-    @Test
-    public void testCreateMonitoringConfigsWithDevStack() {
-        // GIVEN
-        MonitoringClusterType clusterType = MonitoringClusterType.CLOUDERA_MANAGER;
-        MonitoringAuthConfig authConfig = new MonitoringAuthConfig("user", "pass".toCharArray());
-        given(monitoringConfiguration.isEnabled()).willReturn(true);
-        given(monitoringConfiguration.isDevStack()).willReturn(true);
-        given(monitoringConfiguration.getClouderaManagerExporter()).willReturn(cmMonitoringConfiguration);
-        given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
-        given(monitoringConfiguration.getAgent()).willReturn(monitoringAgentConfiguration);
-        given(monitoringConfiguration.getRemoteWriteUrl()).willReturn("https://myendpoint/$accountid");
-        // WHEN
-        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, true, false,
-                ACCESS_KEY_ID, PRIVATE_KEY, ACCESS_KEY_TYPE);
-        // THEN
-        assertTrue(result.isEnabled());
-        assertNull(result.getRemoteWriteUrl());
-        assertEquals(result.toMap().get("useDevStack").toString(), "true");
-    }
-
-    @Test
-    public void testCreateMonitoringConfigsWithSaasDisabled() {
-        // GIVEN
-        MonitoringClusterType clusterType = MonitoringClusterType.CLOUDERA_MANAGER;
-        MonitoringAuthConfig authConfig = new MonitoringAuthConfig("user", "pass".toCharArray());
-        given(monitoringConfiguration.isEnabled()).willReturn(true);
-        given(monitoringConfiguration.getClouderaManagerExporter()).willReturn(cmMonitoringConfiguration);
-        given(monitoringConfiguration.getAgent()).willReturn(monitoringAgentConfiguration);
-        given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
-        given(monitoringConfiguration.getRemoteWriteUrl()).willReturn("https://myendpoint/$accountid");
-        // WHEN
-        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, false, false,
-                ACCESS_KEY_ID, PRIVATE_KEY, ACCESS_KEY_TYPE);
-        // THEN
-        assertFalse(result.isEnabled());
-    }
-
-    @Test
-    public void testCreateMonitoringConfigsWithSaasDisabledAndPaasEnabled() {
-        // GIVEN
-        MonitoringClusterType clusterType = MonitoringClusterType.CLOUDERA_MANAGER;
-        MonitoringAuthConfig authConfig = new MonitoringAuthConfig("user", "pass".toCharArray());
-        given(monitoringConfiguration.isEnabled()).willReturn(true);
-        given(monitoringConfiguration.isPaasSupport()).willReturn(true);
-        given(monitoringConfiguration.getClouderaManagerExporter()).willReturn(cmMonitoringConfiguration);
-        given(monitoringConfiguration.getAgent()).willReturn(monitoringAgentConfiguration);
-        given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
-        given(monitoringConfiguration.getRemoteWriteUrl()).willReturn("https://myendpoint/$accountid");
-        // WHEN
-        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, false, false,
-                ACCESS_KEY_ID, PRIVATE_KEY, ACCESS_KEY_TYPE);
-        // THEN
-        assertTrue(result.isEnabled());
-    }
-
-    @Test
-    public void testCreateMonitoringConfigsWithNulls() {
-        // GIVEN
-        // WHEN
-        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, null, null, null, true, false,
-                ACCESS_KEY_ID, PRIVATE_KEY, ACCESS_KEY_TYPE);
-        // THEN
-        assertFalse(result.isEnabled());
+    private TelemetryContext telemetryContext() {
+        TelemetryContext telemetryContext = new TelemetryContext();
+        MonitoringCredential cred = new MonitoringCredential();
+        cred.setAccessKey(ACCESS_KEY_ID);
+        cred.setPrivateKey(new String(PRIVATE_KEY));
+        cred.setAccessKeyType(ACCESS_KEY_TYPE);
+        MonitoringContext monitoringContext = MonitoringContext
+                .builder()
+                .enabled()
+                .withCmAuth(new MonitoringAuthConfig("user", "pass".toCharArray()))
+                .withCmAutoTls(true)
+                .withClusterType(MonitoringClusterType.CLOUDERA_MANAGER)
+                .withRemoteWriteUrl("myendpoint")
+                .withSharedPassword("mypass".toCharArray())
+                .withCredential(cred)
+                .build();
+        telemetryContext.setMonitoringContext(monitoringContext);
+        return telemetryContext;
     }
 }

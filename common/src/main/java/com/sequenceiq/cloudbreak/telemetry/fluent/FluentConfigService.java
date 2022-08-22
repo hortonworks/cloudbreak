@@ -11,7 +11,11 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryPillarConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.common.AnonymizationRuleResolver;
+import com.sequenceiq.cloudbreak.telemetry.context.LogShipperContext;
+import com.sequenceiq.cloudbreak.telemetry.context.MeteringContext;
+import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfig;
@@ -28,9 +32,11 @@ import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Service
-public class FluentConfigService {
+public class FluentConfigService implements TelemetryPillarConfigGenerator<FluentConfigView> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FluentConfigService.class);
+
+    private static final String SALT_STATE = "fluent";
 
     private static final String S3_PROVIDER_PREFIX = "s3";
 
@@ -39,8 +45,6 @@ public class FluentConfigService {
     private static final String GCS_PROVIDER_PREFIX = "gcs";
 
     private static final String CLOUDWATCH_PROVIDER_PREFIX = "cloudwatch";
-
-    private static final String DEFAULT_PROVIDER_PREFIX = "stdout";
 
     private final S3ConfigGenerator s3ConfigGenerator;
 
@@ -67,87 +71,81 @@ public class FluentConfigService {
         this.clusterLogsCollectionConfiguration = telemetryConfiguration.getClusterLogsCollectionConfiguration();
     }
 
-    public FluentConfigView createFluentConfigs(TelemetryClusterDetails clusterDetails,
-            boolean databusEnabled, boolean meteringEnabled, String region, Telemetry telemetry) {
+    @Override
+    public FluentConfigView createConfigs(TelemetryContext context) {
+        final LogShipperContext logShipperContext = context.getLogShipperContext();
+        final MeteringContext meteringContext = context.getMeteringContext();
+        final Telemetry telemetry = context.getTelemetry();
         final FluentConfigView.Builder builder = new FluentConfigView.Builder();
-        boolean enabled = false;
-        if (telemetry != null) {
-            if (telemetry.getFluentAttributes() != null) {
-                builder.withOverrideAttributes(
-                        telemetry.getFluentAttributes() != null ? new HashMap<>(telemetry.getFluentAttributes()) : new HashMap<>()
-                );
-            }
-            enabled = determineAndSetLogging(builder, telemetry, databusEnabled, meteringEnabled);
-            if (telemetry.isClusterLogsCollectionEnabled()) {
-                LOGGER.debug("Set anonymization rules (only for cluster log collection)");
-                builder.withAnonymizationRules(anonymizationRuleResolver.decodeRules(telemetry.getRules()));
-            }
-            if (enabled && meteringEnabled) {
-                builder.withMeteringConfiguration(meteringConfiguration);
-            }
+        if (telemetry.getFluentAttributes() != null) {
+            builder.withOverrideAttributes(
+                    telemetry.getFluentAttributes() != null ? new HashMap<>(telemetry.getFluentAttributes()) : new HashMap<>()
+            );
         }
-        if (!enabled) {
-            LOGGER.debug("Fluent based logging is disabled");
+        if (meteringContext != null && meteringContext.isEnabled()) {
+            builder.withEnabled(true)
+                    .withMeteringEnabled(true)
+                    .withMeteringConfiguration(meteringConfiguration);
+        }
+        if (logShipperContext.isCollectDeploymentLogs()) {
+            LOGGER.debug("Set anonymization rules (only for cluster log collection)");
+            builder.withEnabled(true)
+                    .withClusterLogsCollection(true)
+                    .withClusterLogsCollectionConfiguration(clusterLogsCollectionConfiguration)
+                    .withAnonymizationRules(anonymizationRuleResolver.decodeRules(telemetry.getRules()));
+        }
+        if (logShipperContext.isCloudStorageLogging()) {
+            builder.withEnabled(true);
+            Logging logging = telemetry.getLogging();
+            setupCloudStorageLogging(builder, logging);
         }
         return builder
-                .withEnabled(enabled)
-                .withRegion(region)
-                .withClusterDetails(clusterDetails)
-                .withEnvironmentRegion(getEnvironmentRegion(clusterDetails))
+                .withRegion(logShipperContext.getCloudRegion())
+                .withClusterDetails(context.getClusterDetails())
+                .withEnvironmentRegion(getEnvironmentRegion(context.getClusterDetails()))
                 .build();
     }
 
-    private boolean determineAndSetLogging(FluentConfigView.Builder builder, Telemetry telemetry, boolean databusEnabled,
-            boolean meteringEnabled) {
-        boolean cloudStorageLoggingEnabled = false;
-        boolean cloudLogServiceLoggingEnabled = false;
-        if (telemetry.getLogging() != null) {
-            Logging logging = telemetry.getLogging();
-            if (logging.getS3() != null) {
-                fillS3Configs(builder, logging.getStorageLocation());
-                LOGGER.debug("Fluent will be configured to use S3 output.");
-                cloudStorageLoggingEnabled = true;
-            } else if (logging.getAdlsGen2() != null) {
-                fillAdlsGen2Configs(builder, logging.getStorageLocation(), logging.getAdlsGen2());
-                LOGGER.debug("Fluent will be configured to use ADLS Gen2 output.");
-                cloudStorageLoggingEnabled = true;
-            } else if (logging.getGcs() != null) {
-                fillGcsConfigs(builder, logging.getStorageLocation(), logging.getGcs());
-                LOGGER.debug("Fluent will be configured to use GCS output");
-                cloudStorageLoggingEnabled = true;
-            } else if (logging.getCloudwatch() != null) {
-                fillCloudwatchConfigs(builder, logging.getStorageLocation(), logging.getCloudwatch());
-                LOGGER.debug("Fluent will be configured to use Cloudwatch output.");
-                cloudLogServiceLoggingEnabled = true;
-            }
-        }
-        if (!telemetry.isCloudStorageLoggingEnabled()) {
-            LOGGER.debug("Disable (override) cloud storage logging as feature setting is disabled.");
-            cloudStorageLoggingEnabled = false;
-        }
-        builder.withCloudStorageLoggingEnabled(cloudStorageLoggingEnabled)
-                .withCloudLoggingServiceEnabled(cloudLogServiceLoggingEnabled);
-        boolean databusLogEnabled = fillDiagnosticsConfigs(telemetry, databusEnabled, meteringEnabled, builder);
-        return cloudStorageLoggingEnabled || databusLogEnabled || cloudLogServiceLoggingEnabled;
+    @Override
+    public boolean isEnabled(TelemetryContext context) {
+        return context != null && isLoggingOrMeteringEnabled(context);
     }
 
-    private boolean fillDiagnosticsConfigs(Telemetry telemetry, boolean databusEnabled,
-            boolean meteringEnabled, FluentConfigView.Builder builder) {
-        boolean validDatabusLogging = false;
-        if (meteringEnabled || telemetry.isClusterLogsCollectionEnabled()) {
-            if (databusEnabled && meteringEnabled) {
-                builder.withMeteringEnabled(true);
-                LOGGER.debug("Fluent will be configured to send metering events.");
-                validDatabusLogging = true;
-            }
-            if (databusEnabled && telemetry.isClusterLogsCollectionEnabled()) {
-                builder.withClusterLogsCollection(true);
-                LOGGER.debug("Fluent based cluster log collection is enabled.");
-                builder.withClusterLogsCollectionConfiguration(clusterLogsCollectionConfiguration);
-                validDatabusLogging = true;
-            }
+    @Override
+    public String saltStateName() {
+        return SALT_STATE;
+    }
+
+    private void setupCloudStorageLogging(FluentConfigView.Builder builder, Logging logging) {
+        if (logging.getS3() != null) {
+            fillS3Configs(builder, logging.getStorageLocation());
+            builder.withCloudStorageLoggingEnabled(true);
+            LOGGER.debug("Fluent will be configured to use S3 output.");
+        } else if (logging.getAdlsGen2() != null) {
+            fillAdlsGen2Configs(builder, logging.getStorageLocation(), logging.getAdlsGen2());
+            builder.withCloudStorageLoggingEnabled(true);
+            LOGGER.debug("Fluent will be configured to use ADLS Gen2 output.");
+        } else if (logging.getGcs() != null) {
+            fillGcsConfigs(builder, logging.getStorageLocation(), logging.getGcs());
+            builder.withCloudStorageLoggingEnabled(true);
+            LOGGER.debug("Fluent will be configured to use GCS output");
+        } else if (logging.getCloudwatch() != null) {
+            fillCloudwatchConfigs(builder, logging.getStorageLocation(), logging.getCloudwatch());
+            builder.withCloudLoggingServiceEnabled(true);
+            LOGGER.debug("Fluent will be configured to use Cloudwatch output.");
         }
-        return validDatabusLogging;
+    }
+
+    private boolean isLoggingOrMeteringEnabled(TelemetryContext context) {
+        return  isLoggingEnabled(context.getLogShipperContext()) || isMeteringEnabled(context.getMeteringContext());
+    }
+
+    private boolean isLoggingEnabled(LogShipperContext logShipperContext) {
+        return logShipperContext != null && logShipperContext.isEnabled();
+    }
+
+    private boolean isMeteringEnabled(MeteringContext meteringContext) {
+        return meteringContext != null && meteringContext.isEnabled();
     }
 
     private void fillS3Configs(FluentConfigView.Builder builder, String storageLocation) {

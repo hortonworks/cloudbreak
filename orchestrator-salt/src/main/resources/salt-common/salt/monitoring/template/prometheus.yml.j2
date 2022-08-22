@@ -167,7 +167,7 @@ scrape_configs:
 {%- endif %}
 {%- if monitoring.type == "cloudera_manager" and "manager_server" in grains.get('roles', []) %}
   - job_name: 'smon_health'
-    scheme: 'https'
+    scheme: {% if monitoring.cmAutoTls %}'https'{% else %}'http'{% endif %}
     static_configs:
       - targets: ['localhost:{{ monitoring.cmMetricsExporterPort }}']
         labels:
