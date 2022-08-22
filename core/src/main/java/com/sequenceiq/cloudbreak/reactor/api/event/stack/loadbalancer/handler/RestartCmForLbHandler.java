@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.RestartCmF
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -45,6 +46,9 @@ public class RestartCmForLbHandler extends ExceptionCatcherEventHandler<RestartC
 
     @Inject
     private HostOrchestrator hostOrchestrator;
+
+    @Inject
+    private StackUtil stackUtil;
 
     @Inject
     private StackDtoService stackDtoService;
@@ -84,6 +88,6 @@ public class RestartCmForLbHandler extends ExceptionCatcherEventHandler<RestartC
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, stackDto.getSecurityConfig(), gatewayInstance, stackDto.hasGateway());
         Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
         ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), cluster.getId());
-        hostOrchestrator.restartClusterManagerOnMaster(gatewayConfig, gatewayFQDN, exitModel);
+        hostOrchestrator.restartClusterManagerOnMaster(gatewayConfig, gatewayFQDN, stackUtil.collectReachableNodes(stackDto), exitModel);
     }
 }

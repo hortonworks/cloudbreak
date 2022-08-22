@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
@@ -39,12 +40,18 @@ class StateRunnerTest {
 
     private Set<String> targets;
 
+    private Set<Node> allNode;
+
     @Test
     void submit() throws Exception {
         targets = new HashSet<>();
         targets.add("10-0-0-1.example.com");
+        allNode = new HashSet<>();
+        allNode.add(new Node("10.0.0.1", "5.5.5.1", "10-0-0-1.example.com", "hg"));
+        allNode.add(new Node("10.0.0.2", "5.5.5.2", "10-0-0-2.example.com", "hg"));
+        allNode.add(new Node("10.0.0.3", "5.5.5.3", "10-0-0-3.example.com", "hg"));
 
-        StateRunner stateRunner = new StateRunner(saltStateService, targets, "example_state");
+        StateRunner stateRunner = new StateRunner(saltStateService, targets, allNode, "example_state");
 
         String jobId = "1";
 

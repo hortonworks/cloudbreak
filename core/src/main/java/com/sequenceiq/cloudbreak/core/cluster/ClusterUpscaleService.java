@@ -83,8 +83,8 @@ public class ClusterUpscaleService {
         Map<HostGroup, Set<InstanceMetaData>> instanceMetaDatasByHostGroup = hostGroupSetWithInstanceMetadas.stream()
                 .filter(hostGroup -> hostGroupNames.contains(hostGroup.getName()))
                 .collect(Collectors.toMap(Function.identity(), hostGroup -> hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet()));
-        Map<String, String> candidateAddresses = clusterHostServiceRunner.collectUpscaleCandidates(stackDto, hostGroupWithAdjustment, false);
-        recipeEngine.executePostClouderaManagerStartRecipesOnTargets(stackDto, hostGroupSetWithRecipes, candidateAddresses);
+        recipeEngine.executePostClouderaManagerStartRecipesOnTargets(stackDto, hostGroupSetWithRecipes,
+                clusterHostServiceRunner.collectUpscaleCandidates(stackDto, hostGroupWithAdjustment, false));
         Set<InstanceMetaData> runningInstanceMetaDataSet =
                 hostGroupSetWithInstanceMetadas.stream()
                         .flatMap(hostGroup -> hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet().stream())
@@ -96,7 +96,6 @@ public class ClusterUpscaleService {
                 recommissionHostsIfNeeded(connector, hostGroupsWithHostNames);
                 restartServicesIfNecessary(restartServices, stackDto, connector);
             }
-            clusterHostServiceRunner.createCronForUserHomeCreation(stackDto, candidateAddresses.keySet());
             setInstanceStatus(runningInstanceMetaDataSet, upscaledHosts);
         } catch (ScalingException se) {
             if (Boolean.FALSE.equals(repair)) {

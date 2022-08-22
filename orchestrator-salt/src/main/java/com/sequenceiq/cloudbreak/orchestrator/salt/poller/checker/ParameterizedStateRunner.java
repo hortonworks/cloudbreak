@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
@@ -14,10 +15,10 @@ public class ParameterizedStateRunner extends StateRunner {
     protected final Map<String, Object> parameters;
     // CHECKSTYLE:ON
 
-    public ParameterizedStateRunner(SaltStateService saltStateService, Set<String> targetHostnames, String state,
+    public ParameterizedStateRunner(SaltStateService saltStateService, Set<String> targetHostnames, Set<Node> allNode, String state,
             Map<String, Object> parameters) {
 
-        super(saltStateService, targetHostnames, state);
+        super(saltStateService, targetHostnames, allNode, state);
         this.parameters = parameters;
     }
 

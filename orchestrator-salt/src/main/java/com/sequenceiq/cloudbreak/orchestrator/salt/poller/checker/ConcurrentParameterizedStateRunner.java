@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
@@ -16,9 +17,9 @@ public class ConcurrentParameterizedStateRunner extends ParameterizedStateRunner
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConcurrentParameterizedStateRunner.class);
 
-    public ConcurrentParameterizedStateRunner(SaltStateService saltStateService, Set<String> targetHostnames, String state,
+    public ConcurrentParameterizedStateRunner(SaltStateService saltStateService, Set<String> targetHostnames, Set<Node> allNode, String state,
             Map<String, Object> parameters) {
-        super(saltStateService, targetHostnames, state, parameters);
+        super(saltStateService, targetHostnames, allNode, state, parameters);
     }
 
     @Override

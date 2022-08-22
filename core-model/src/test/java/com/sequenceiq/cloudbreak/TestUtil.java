@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
-import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -905,7 +904,4 @@ public class TestUtil {
         return new RdsDetails();
     }
 
-    public static Node node() {
-        return new Node("privateIp", "publicIp", "instanceId", "instanceType", "fqdn", "hostgroup");
-    }
 }

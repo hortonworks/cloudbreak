@@ -1,10 +1,8 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -25,6 +23,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -117,8 +117,7 @@ class SaltTelemetryOrchestratorTest {
         SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) orchestratorBootstrapArgumentCaptor.getValue();
         ConcurrentParameterizedStateRunner saltJobRunner = (ConcurrentParameterizedStateRunner) saltJobIdTracker.getSaltJobRunner();
 
-        assertThat(saltJobRunner.getAllNode()).isEmpty();
-        assertThat(targets.stream().map(Node::getHostname).collect(Collectors.toSet())).containsExactlyElementsOf(saltJobRunner.getTargetHostnames());
+        Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
         assertEquals(SaltTelemetryOrchestrator.FILECOLLECTOR_INIT, saltJobRunner.getState());
         verify(callable, times(1)).call();
     }
@@ -132,8 +131,7 @@ class SaltTelemetryOrchestratorTest {
         SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) orchestratorBootstrapArgumentCaptor.getValue();
         ConcurrentParameterizedStateRunner saltJobRunner = (ConcurrentParameterizedStateRunner) saltJobIdTracker.getSaltJobRunner();
 
-        assertThat(saltJobRunner.getAllNode()).isEmpty();
-        assertThat(targets.stream().map(Node::getHostname).collect(Collectors.toSet())).containsExactlyElementsOf(saltJobRunner.getTargetHostnames());
+        Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
         assertEquals(SaltTelemetryOrchestrator.FILECOLLECTOR_COLLECT, saltJobRunner.getState());
         verify(callable, times(1)).call();
         verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
@@ -150,8 +148,7 @@ class SaltTelemetryOrchestratorTest {
         SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) orchestratorBootstrapArgumentCaptor.getValue();
         ConcurrentParameterizedStateRunner saltJobRunner = (ConcurrentParameterizedStateRunner) saltJobIdTracker.getSaltJobRunner();
 
-        assertThat(saltJobRunner.getAllNode()).isEmpty();
-        assertThat(targets.stream().map(Node::getHostname).collect(Collectors.toSet())).containsExactlyElementsOf(saltJobRunner.getTargetHostnames());
+        Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
         assertEquals(SaltTelemetryOrchestrator.FILECOLLECTOR_UPLOAD, saltJobRunner.getState());
         verify(callable, times(1)).call();
     }
@@ -165,8 +162,7 @@ class SaltTelemetryOrchestratorTest {
         SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) orchestratorBootstrapArgumentCaptor.getValue();
         ConcurrentParameterizedStateRunner saltJobRunner = (ConcurrentParameterizedStateRunner) saltJobIdTracker.getSaltJobRunner();
 
-        assertThat(saltJobRunner.getAllNode()).isEmpty();
-        assertThat(targets.stream().map(Node::getHostname).collect(Collectors.toSet())).containsExactlyElementsOf(saltJobRunner.getTargetHostnames());
+        Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
         assertEquals(SaltTelemetryOrchestrator.FILECOLLECTOR_CLEANUP, saltJobRunner.getState());
         verify(callable, times(1)).call();
     }
@@ -195,8 +191,7 @@ class SaltTelemetryOrchestratorTest {
         SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) orchestratorBootstrapArgumentCaptor.getValue();
         ConcurrentParameterizedStateRunner saltJobRunner = (ConcurrentParameterizedStateRunner) saltJobIdTracker.getSaltJobRunner();
 
-        assertThat(saltJobRunner.getAllNode()).isEmpty();
-        assertThat(targets.stream().map(Node::getHostname).collect(Collectors.toSet())).containsExactlyElementsOf(saltJobRunner.getTargetHostnames());
+        Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
         assertEquals("fluent.agent-stop", saltJobRunner.getState());
         verify(telemetrySaltRetryConfig, times(1)).getLoggingAgentStop();
         verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
@@ -213,9 +208,7 @@ class SaltTelemetryOrchestratorTest {
         SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) orchestratorBootstrapArgumentCaptor.getValue();
         ConcurrentParameterizedStateRunner saltJobRunner = (ConcurrentParameterizedStateRunner) saltJobIdTracker.getSaltJobRunner();
 
-        assertThat(saltJobRunner.getAllNode()).isEmpty();
-        assertThat(targets.stream().map(Node::getHostname).collect(Collectors.toSet())).containsExactlyElementsOf(saltJobRunner.getTargetHostnames());
-
+        Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
         assertEquals("telemetry.upgrade", saltJobRunner.getState());
         verify(telemetrySaltRetryConfig, times(1)).getTelemetryUpgrade();
         verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
@@ -230,9 +223,7 @@ class SaltTelemetryOrchestratorTest {
         SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) orchestratorBootstrapArgumentCaptor.getValue();
         StateRunner saltJobRunner = (StateRunner) saltJobIdTracker.getSaltJobRunner();
 
-        assertThat(saltJobRunner.getAllNode()).isEmpty();
-        assertThat(targets.stream().map(Node::getHostname).collect(Collectors.toSet()))
-                .containsExactlyElementsOf(saltJobRunner.getTargetHostnames());
+        Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
         assertEquals(SaltTelemetryOrchestrator.NODESTATUS_COLLECT, saltJobRunner.getState());
         verify(telemetrySaltRetryConfig, times(1)).getNodeStatusCollect();
         verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
@@ -272,9 +263,8 @@ class SaltTelemetryOrchestratorTest {
         for (OrchestratorBootstrap ob : orchestratorBootstraps) {
             if (ob instanceof SaltJobIdTracker) {
                 StateRunner saltJobRunner = (StateRunner) ((SaltJobIdTracker) ob).getSaltJobRunner();
-                assertThat(saltJobRunner.getAllNode()).isEmpty();
-                assertThat(targets.stream().map(Node::getHostname).collect(Collectors.toSet())).containsExactlyElementsOf(saltJobRunner.getTargetHostnames());
-                assertTrue(saltJobRunnerStates.contains(saltJobRunner.getState()));
+                Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
+                Assertions.assertTrue(saltJobRunnerStates.contains(saltJobRunner.getState()));
             } else if (ob instanceof SaltUploadWithPermission) {
                 String saltUploadTarget = ((SaltFileUpload) ob).getTargets().stream().findFirst().orElse(null);
                 assertEquals(saltUploadTarget, gatewayConfig.getPrivateAddress());
@@ -305,8 +295,7 @@ class SaltTelemetryOrchestratorTest {
         SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) orchestratorBootstrapArgumentCaptor.getValue();
         StateRunner saltJobRunner = (StateRunner) saltJobIdTracker.getSaltJobRunner();
 
-        assertThat(saltJobRunner.getAllNode()).isEmpty();
-        assertThat(targets.stream().map(Node::getHostname).collect(Collectors.toSet())).containsExactlyElementsOf(saltJobRunner.getTargetHostnames());
+        Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
         assertEquals(SaltTelemetryOrchestrator.METERING_UPGRADE, saltJobRunner.getState());
         verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
         verify(saltService, times(1)).createSaltConnector(gatewayConfig);
