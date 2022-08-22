@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.apache.commons.collections4.MapUtils;
 
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
@@ -16,6 +17,8 @@ public class OrchestratorStateParams implements Cloneable {
     private GatewayConfig primaryGatewayConfig;
 
     private Set<String> targetHostNames;
+
+    private Set<Node> allNodes;
 
     private ExitCriteriaModel exitCriteriaModel;
 
@@ -49,6 +52,14 @@ public class OrchestratorStateParams implements Cloneable {
 
     public void setTargetHostNames(Set<String> targetHostNames) {
         this.targetHostNames = targetHostNames;
+    }
+
+    public Set<Node> getAllNodes() {
+        return allNodes;
+    }
+
+    public void setAllNodes(Set<Node> allNodes) {
+        this.allNodes = allNodes;
     }
 
     public ExitCriteriaModel getExitCriteriaModel() {
@@ -106,6 +117,7 @@ public class OrchestratorStateParams implements Cloneable {
                 "state='" + state + '\'' +
                 ", primaryGatewayConfig=" + primaryGatewayConfig +
                 ", targetHostNames=" + targetHostNames +
+                ", allNodes=" + allNodes +
                 ", exitCriteriaModel=" + exitCriteriaModel +
                 ", stateRetryParams=" + stateRetryParams +
                 ", stateParams=" + stateParams +

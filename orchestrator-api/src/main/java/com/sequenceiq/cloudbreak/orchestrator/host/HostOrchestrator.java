@@ -52,10 +52,10 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void startClusterManagerOnMaster(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
-    void restartClusterManagerOnMaster(GatewayConfig gatewayConfig, Set<String> target, ExitCriteriaModel exitCriteriaModel)
+    void restartClusterManagerOnMaster(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
-    void updateAgentCertDirectoryPermission(GatewayConfig gatewayConfig, Set<String> target, ExitCriteriaModel exitCriteriaModel)
+    void updateAgentCertDirectoryPermission(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
     void upgradeClusterManager(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, SaltConfig pillarConfig, ExitCriteriaModel exitCriteriaModel)
@@ -115,11 +115,11 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     Map<String, Map<String, String>> formatAndMountDisksOnNodesLegacy(List<GatewayConfig> gatewayConfigs, Set<Node> targets, Set<Node> allNodes,
             ExitCriteriaModel exitCriteriaModel, String platformVariant) throws CloudbreakOrchestratorFailedException;
 
-    void backupDatabase(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel)
-            throws CloudbreakOrchestratorFailedException;
+    void backupDatabase(GatewayConfig primaryGateway, Set<String> target, Set<Node> allNodes, SaltConfig saltConfig,
+            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
 
-    void restoreDatabase(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel)
-            throws CloudbreakOrchestratorFailedException;
+    void restoreDatabase(GatewayConfig primaryGateway, Set<String> target, Set<Node> allNodes, SaltConfig saltConfig,
+            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
 
     void applyDiagnosticsState(List<GatewayConfig> gatewayConfigs, String state, Map<String, Object> parameters,
             ExitCriteriaModel stackBasedExitCriteriaModel) throws CloudbreakOrchestratorFailedException;
@@ -140,7 +140,4 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void uploadStates(List<GatewayConfig> allGatewayConfigs, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException;
 
     LocalDate getPasswordExpiryDate(List<GatewayConfig> allGatewayConfigs, String user) throws CloudbreakOrchestratorException;
-
-    void createCronForUserHomeCreation(List<GatewayConfig> gatewayConfigs, Set<String> targets, ExitCriteriaModel exitModel)
-            throws CloudbreakOrchestratorFailedException;
 }

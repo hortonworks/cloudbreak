@@ -89,7 +89,7 @@ public class RestartClusterManagerServerHandler  extends ExceptionCatcherEventHa
         ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), cluster.getId());
         Set<Node> nodes = stackUtil.collectReachableNodes(stackDto);
         Set<String> agentTargets = nodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-        hostOrchestrator.updateAgentCertDirectoryPermission(gatewayConfig, agentTargets, exitModel);
-        hostOrchestrator.restartClusterManagerOnMaster(gatewayConfig, gatewayFQDN, exitModel);
+        hostOrchestrator.updateAgentCertDirectoryPermission(gatewayConfig, agentTargets, nodes, exitModel);
+        hostOrchestrator.restartClusterManagerOnMaster(gatewayConfig, gatewayFQDN, nodes, exitModel);
     }
 }

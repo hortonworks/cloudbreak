@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker;
 
-import java.util.HashSet;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
@@ -13,8 +13,8 @@ public class StateRunner extends BaseSaltJobRunner {
     protected final String state;
     //CHECKSTYLE:ON
 
-    public StateRunner(SaltStateService saltStateService, Set<String> targetHostnames, String state) {
-        super(saltStateService, targetHostnames, new HashSet<>());
+    public StateRunner(SaltStateService saltStateService, Set<String> targetHostnames, Set<Node> allNode, String state) {
+        super(saltStateService, targetHostnames, allNode);
         this.state = state;
     }
 

@@ -64,6 +64,7 @@ public class SshKeyService {
         stateParams.setPrimaryGatewayConfig(gatewayConfigService.getGatewayConfig(stack, stackDto.getSecurityConfig(), stackDto.getPrimaryGatewayInstance(),
                 stackDto.hasGateway()));
         stateParams.setTargetHostNames(nodes.stream().map(Node::getHostname).collect(Collectors.toSet()));
+        stateParams.setAllNodes(nodes);
         stateParams.setExitCriteriaModel(ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), cluster.getId()));
         stateParams.setStateParams(createSshParams(user, keyPair, authKeysComment));
         OrchestratorStateRetryParams retryParams = new OrchestratorStateRetryParams();

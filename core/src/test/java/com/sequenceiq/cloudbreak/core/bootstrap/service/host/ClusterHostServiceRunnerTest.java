@@ -42,7 +42,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
@@ -82,7 +81,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.san.LoadBalancerSANProvider;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -407,16 +405,6 @@ class ClusterHostServiceRunnerTest {
         verify(hostOrchestrator).uploadStates(gatewayConfigsCaptor.capture(), any());
         List<GatewayConfig> gatewayConfigs = gatewayConfigsCaptor.getValue();
         assertEquals(gwConfigs, gatewayConfigs);
-    }
-
-    @Test
-    void testCreateCronForUserHomeCreation() throws CloudbreakException, CloudbreakOrchestratorFailedException {
-        List<GatewayConfig> gatewayConfigs = List.of(new GatewayConfig("addr", "endpoint", "privateAddr", 123, "instance", false));
-        when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
-        when(stackUtil.collectReachableAndUnreachableCandidateNodes(eq(stack), any()))
-                .thenReturn(new NodeReachabilityResult(Set.of(TestUtil.node()), new HashSet<>()));
-        underTest.createCronForUserHomeCreation(stack, Set.of("fqdn"));
-        verify(hostOrchestrator).createCronForUserHomeCreation(eq(gatewayConfigs), eq(Set.of("fqdn")), any());
     }
 
     private void setupMocksForRunClusterServices() {

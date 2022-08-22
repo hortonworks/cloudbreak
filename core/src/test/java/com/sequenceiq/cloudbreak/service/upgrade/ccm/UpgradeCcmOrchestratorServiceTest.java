@@ -105,6 +105,7 @@ class UpgradeCcmOrchestratorServiceTest {
     private void assertOtherStateParams(OrchestratorStateParams params) {
         assertThat(params.getPrimaryGatewayConfig()).isEqualTo(gatewayConfig);
         assertThat(params.getTargetHostNames()).hasSameElementsAs(Set.of("fqdn1", "fqdn2"));
+        assertThat(params.getAllNodes()).hasSameElementsAs(Set.of(node1, node2));
         assertThat(params.getExitCriteriaModel()).isInstanceOf(ClusterDeletionBasedExitCriteriaModel.class);
         assertThat(((ClusterDeletionBasedExitCriteriaModel) params.getExitCriteriaModel()).getStackId().get()).isEqualTo(STACK_ID);
     }

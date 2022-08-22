@@ -28,3 +28,20 @@ run_post_cluster_install_script_{{ script_name }}:
 
 {% endif %}
 {% endfor %}
+
+{% if "ipa_member" in grains.get('roles', []) and "namenode" in grains.get('roles', []) %}
+/opt/scripts/post-cluster-install/createuserhome.sh:
+  file.managed:
+    - source:
+        - salt://post-recipes/scripts/createuserhome.sh
+    - makedirs: True
+    - mode: 755
+
+createusername-cron:
+  cron.present:
+    - name: /opt/scripts/post-cluster-install/createuserhome.sh >> /var/log/createusername.log 2>&1
+    - user: root
+    - minute: '*/5'
+    - require:
+        - file: /opt/scripts/post-cluster-install/createuserhome.sh
+{% endif %}

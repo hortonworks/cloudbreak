@@ -7,14 +7,10 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.NotNull;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -23,23 +19,18 @@ import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
-import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class SdxRepairTests extends PreconditionSdxE2ETest {
-
-    private static final String CRONTAB_LIST = "sudo crontab -l";
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -55,9 +46,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
     @Inject
     private SdxUtil sdxUtil;
-
-    @Inject
-    private SshJClientActions sshJClientActions;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -86,7 +74,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> assertCronCreatedOnMasterNodesForUserHomeCreation(testDto))
                 .then((tc, testDto, client) -> {
                     List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
@@ -110,21 +97,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
                 .validate();
-    }
-
-    @NotNull
-    private SdxTestDto assertCronCreatedOnMasterNodesForUserHomeCreation(SdxTestDto testDto) {
-        Map<String, Pair<Integer, String>> crontabListResultByIpsMap =
-                sshJClientActions.executeSshCommandOnHost(testDto.getResponse().getStackV4Response().getInstanceGroups(),
-                        List.of(HostGroupType.MASTER.getName()), CRONTAB_LIST, false);
-        Set<String> nodesWithoutCrontabForUserHomeCreation = crontabListResultByIpsMap.entrySet().stream()
-                .filter(entry -> !entry.getValue().getValue().contains("createuserhome.sh"))
-                .map(entry -> entry.getKey())
-                .collect(Collectors.toSet());
-        if (!nodesWithoutCrontabForUserHomeCreation.isEmpty()) {
-            throw new TestFailException("Missing crontab for user home creation for nodes: " + nodesWithoutCrontabForUserHomeCreation);
-        }
-        return testDto;
     }
 
     @Test(dataProvider = TEST_CONTEXT)
