@@ -97,8 +97,7 @@ class CreateFullBackupHandlerTest {
         List<OrchestratorStateParams> stateParams = captor.getAllValues();
         assertThat(stateParams, everyItem(allOf(
                 hasProperty("primaryGatewayConfig", is(gatewayConfig)),
-                hasProperty("state", is("freeipa.backup-full")),
-                hasProperty("allNodes", is(nodes))
+                hasProperty("state", is("freeipa.backup-full"))
                 )));
         assertThat(stateParams, hasItem(hasProperty("targetHostNames", allOf(
                 hasItem("node1"),
