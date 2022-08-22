@@ -84,10 +84,10 @@ public class RdsUpgradeOrchestratorService {
 
     public void validateDbDirectorySpace(Long stackId) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = createStateParams(stackId, PREPARE_UPGRADE_EMBEDDED_DATABASE, true);
-        Map<String, String> dbVolumeSizeMap = hostOrchestrator.runCommandOnHosts(List.of(stateParams.getPrimaryGatewayConfig()), stateParams.getAllNodes(),
-                "df -k /dbfs | tail -1 | awk '{print $4}'");
-        Map<String, String> dataDirSizeMap = hostOrchestrator.runCommandOnHosts(List.of(stateParams.getPrimaryGatewayConfig()), stateParams.getAllNodes(),
-                "du -sk /dbfs/pgsql | awk '{print $1}'");
+        Map<String, String> dbVolumeSizeMap = hostOrchestrator.runCommandOnHosts(List.of(stateParams.getPrimaryGatewayConfig()),
+                stateParams.getTargetHostNames(), "df -k /dbfs | tail -1 | awk '{print $4}'");
+        Map<String, String> dataDirSizeMap = hostOrchestrator.runCommandOnHosts(List.of(stateParams.getPrimaryGatewayConfig()),
+                stateParams.getTargetHostNames(), "du -sk /dbfs/pgsql | awk '{print $1}'");
         Integer dataDirSize = dataDirSizeMap.entrySet().stream()
                 .filter(e -> e.getKey().equals(stateParams.getPrimaryGatewayConfig().getHostname()))
                 .map(e -> Integer.valueOf(e.getValue()))
