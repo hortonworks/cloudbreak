@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.model.filesystem;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.model.CloudIdentityType;
 
 public class CloudS3View extends CloudFileSystemView {
@@ -10,7 +12,8 @@ public class CloudS3View extends CloudFileSystemView {
 
     private String s3GuardDynamoTableName;
 
-    public CloudS3View(CloudIdentityType cloudIdentityType) {
+    @JsonCreator
+    public CloudS3View(@JsonProperty("cloudIdentityType") CloudIdentityType cloudIdentityType) {
         super(cloudIdentityType);
     }
 
