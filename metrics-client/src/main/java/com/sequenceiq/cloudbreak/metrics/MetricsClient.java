@@ -60,8 +60,9 @@ public class MetricsClient {
             return;
         }
         Crn crn = Crn.safeFromString(resourceCrn);
-        if (configuration.isPaasSupported() || entitlementService.isCdpSaasEnabled(crn.getAccountId())) {
-            processRequest(resourceCrn, platform, status, statusOrdinal, crn, computeMonitoringEnabled);
+        boolean saas = entitlementService.isCdpSaasEnabled(crn.getAccountId());
+        if (configuration.isPaasSupported() || saas) {
+            processRequest(resourceCrn, platform, status, statusOrdinal, crn, computeMonitoringEnabled, saas);
         } else {
             LOGGER.debug("Compute metrics processing is skipped (no paas or entitlement support )");
         }
@@ -69,7 +70,7 @@ public class MetricsClient {
 
     @VisibleForTesting
     MetricsRecordRequest processRequest(String resourceCrn, String platform, String status, Integer statusOrdinal, Crn crn,
-            Optional<Boolean> computeMonitoringEnabled) {
+            Optional<Boolean> computeMonitoringEnabled, boolean saas) {
         Map<String, String> sortedLabelsMap = new TreeMap<>();
         sortedLabelsMap.put(METRIC_LABEL_NAME, METRIC_NAME_VALUE);
         sortedLabelsMap.put(RESOURCE_CRN_LABEL_NAME, resourceCrn);
@@ -96,7 +97,7 @@ public class MetricsClient {
                         .build())
                 .addTimeseries(timeSeriesBuilder)
                 .build();
-        MetricsRecordRequest request = new MetricsRecordRequest(writeRequest, Crn.safeFromString(resourceCrn).getAccountId());
+        MetricsRecordRequest request = new MetricsRecordRequest(writeRequest, Crn.safeFromString(resourceCrn).getAccountId(), saas);
         metricsRecordProcessor.processRecord(request);
         return request;
     }

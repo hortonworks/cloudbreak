@@ -4,11 +4,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentUpgradeConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryUpgradeConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.context.MeteringContext;
+import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
+import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
+import com.sequenceiq.common.api.telemetry.model.Features;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public class MeteringConfigServiceTest {
 
@@ -26,35 +34,64 @@ public class MeteringConfigServiceTest {
     }
 
     @Test
+    public void testIsEnabled() {
+        // GIVEN
+        // WHEN
+        boolean result = underTest.isEnabled(telemetryContext());
+        // THEN
+        assertTrue(result);
+    }
+
+    @Test
+    public void testIsEnabledWithoutTelemetry() {
+        // GIVEN
+        TelemetryContext context = telemetryContext();
+        context.setTelemetry(null);
+        // WHEN
+        boolean result = underTest.isEnabled(context);
+        // THEN
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsEnabledWithoutContext() {
+        // GIVEN
+        // WHEN
+        boolean result = underTest.isEnabled(null);
+        // THEN
+        assertFalse(result);
+    }
+
+    @Test
     public void testCreateMeteringConfigs() {
         // GIVEN
         // WHEN
-        MeteringConfigView result = underTest.createMeteringConfigs(true, "AWS", "myName", "myCrn",
-                "DATAHUB", "1.0.0");
+        Map<String, Object> result = underTest.createConfigs(telemetryContext()).toMap();
         // THEN
-        assertTrue(result.isEnabled());
-        assertEquals("DATAHUB", result.getServiceType());
-        assertEquals("stream", result.getStreamName());
+        assertEquals(true, result.get("enabled"));
+        assertEquals("DATAHUB", result.get("serviceType"));
+        assertEquals("stream", result.get("streamName"));
     }
 
-    @Test
-    public void testCreateMeteringConfigsWithLowercaseServiceType() {
-        // GIVEN
-        // WHEN
-        MeteringConfigView result = underTest.createMeteringConfigs(true, "AWS", "myName", "myCrn",
-                "datahub", "1.0.0");
-        // THEN
-        assertTrue(result.isEnabled());
-        assertEquals("DATAHUB", result.getServiceType());
-    }
-
-    @Test
-    public void testCreateMeteringConfigsIfDisabled() {
-        // GIVEN
-        // WHEN
-        MeteringConfigView result = underTest.createMeteringConfigs(false, "AWS", "myName", "myCrn",
-                "DATAHUB", "1.0.0");
-        // THEN
-        assertFalse(result.isEnabled());
+    private TelemetryContext telemetryContext() {
+        TelemetryContext context = new TelemetryContext();
+        context.setClusterType(FluentClusterType.DATAHUB);
+        MeteringContext meteringContext = MeteringContext.builder()
+                .enabled()
+                .withVersion("7.2.16")
+                .withServiceType(FluentClusterType.DATAHUB.value())
+                .build();
+        context.setMeteringContext(meteringContext);
+        TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder()
+                .withPlatform("AWS")
+                .withCrn("crn")
+                .build();
+        context.setClusterDetails(clusterDetails);
+        Telemetry telemetry = new Telemetry();
+        Features features = new Features();
+        features.addMetering(true);
+        telemetry.setFeatures(features);
+        context.setTelemetry(telemetry);
+        return context;
     }
 }

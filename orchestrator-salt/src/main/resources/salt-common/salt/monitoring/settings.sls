@@ -38,6 +38,7 @@
 {% set local_password = salt['pillar.get']('monitoring:localPassword') %}
 {% set scrape_interval_seconds = salt['pillar.get']('monitoring:scrapeIntervalSeconds') %}
 {% set cm_metrics_exporter_port = salt['pillar.get']('monitoring:cmMetricsExporterPort', 61010) %}
+{% set cm_auto_tls = salt['pillar.get']('monitoring:cmAutoTls', True) %}
 
 {% set request_signer_enabled = salt['pillar.get']('monitoring:requestSignerEnabled', False) %}
 {% set request_signer_port = salt['pillar.get']('monitoring:requestSignerPort', 61095) %}
@@ -51,7 +52,7 @@
 
 {% set monitoring_access_key_id = salt['pillar.get']('monitoring:monitoringAccessKeyId') %}
 {% set monitoring_access_key_secret = salt['pillar.get']('monitoring:monitoringPrivateKey') %}
-
+{% set monitoring_access_key_type = salt['pillar.get']('monitoring:monitoringAccessKeyType', 'Ed25519') %}
 {%- if use_dev_stack %}
   {%- if salt['pillar.get']('cloudera-manager:address') %}
     {% set remote_write_url = "http://" + salt['pillar.get']('cloudera-manager:address') + ":9090/api/v1/write" %}
@@ -81,6 +82,7 @@
     "cmPassword": cm_password,
     "cmClusterType": cm_cluster_type,
     "cmMetricsExporterPort": cm_metrics_exporter_port,
+    "cmAutoTls": cm_auto_tls,
     "agentUser": agent_user,
     "agentPort": agent_port,
     "agentMaxDiskUsage": agent_max_disk_usage,
@@ -105,5 +107,6 @@
     "requestSignerTokenValidityMin" : request_signer_token_validity_min,
     "requestSignerUser" : request_signer_user,
     "monitoringAccessKeyId": monitoring_access_key_id,
-    "monitoringPrivateKey": monitoring_access_key_secret
+    "monitoringPrivateKey": monitoring_access_key_secret,
+    "monitoringAccessKeyType": monitoring_access_key_type
 }) %}

@@ -24,11 +24,14 @@ public class MetricsRecordWorker extends RecordWorker<MetricsRecordProcessor, Me
 
     private final String remoteWriteUrlUnformatted;
 
+    private final String remoteWritePaasUrlUnformatted;
+
     public MetricsRecordWorker(String name, String serviceName, MetricsRecordProcessor recordProcessor, BlockingDeque<MetricsRecordRequest> processingQueue,
             MetricsProcessorConfiguration configuration) {
         super(name, serviceName, recordProcessor, processingQueue, configuration);
         client = createClient();
         remoteWriteUrlUnformatted = configuration.getRemoteWriteUrl().replace("$accountid", "%s");
+        remoteWritePaasUrlUnformatted = configuration.getRemotePaasWriteUrl().replace("$accountid", "%s");
     }
 
     @Override
@@ -37,8 +40,9 @@ public class MetricsRecordWorker extends RecordWorker<MetricsRecordProcessor, Me
             byte[] compressed = Snappy.compress(input.getWriteRequest().toByteArray());
             MediaType mediaType = MediaType.parse("application/x-protobuf");
             RequestBody body = RequestBody.create(mediaType, compressed);
+            String unformattedEndpoint = input.isSaas() ? remoteWriteUrlUnformatted : remoteWritePaasUrlUnformatted;
             Request request = new Request.Builder()
-                    .url(String.format(remoteWriteUrlUnformatted, input.getAccountId()))
+                    .url(String.format(unformattedEndpoint, input.getAccountId()))
                     .addHeader("Content-Encoding", "snappy")
                     .addHeader("User-Agent", "cb-prometheus-java-client")
                     .addHeader("X-Prometheus-Remote-Write-Version", "0.1.0")

@@ -13,6 +13,10 @@ public class MonitoringConfiguration {
 
     private String remoteWriteInternalUrl;
 
+    private String paasRemoteWriteUrl;
+
+    private String paasRemoteWriteInternalUrl;
+
     private Integer scrapeIntervalSeconds;
 
     private boolean devStack;
@@ -51,6 +55,22 @@ public class MonitoringConfiguration {
 
     public void setRemoteWriteInternalUrl(String remoteWriteInternalUrl) {
         this.remoteWriteInternalUrl = remoteWriteInternalUrl;
+    }
+
+    public String getPaasRemoteWriteUrl() {
+        return paasRemoteWriteUrl;
+    }
+
+    public void setPaasRemoteWriteUrl(String paasRemoteWriteUrl) {
+        this.paasRemoteWriteUrl = paasRemoteWriteUrl;
+    }
+
+    public String getPaasRemoteWriteInternalUrl() {
+        return paasRemoteWriteInternalUrl;
+    }
+
+    public void setPaasRemoteWriteInternalUrl(String paasRemoteWriteInternalUrl) {
+        this.paasRemoteWriteInternalUrl = paasRemoteWriteInternalUrl;
     }
 
     public boolean isDevStack() {

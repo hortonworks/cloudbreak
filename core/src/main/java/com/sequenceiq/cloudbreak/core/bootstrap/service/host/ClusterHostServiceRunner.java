@@ -72,7 +72,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExit
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttributeDecorator;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
@@ -114,6 +113,7 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterServic
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
+import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
@@ -124,8 +124,6 @@ import com.sequenceiq.cloudbreak.view.GatewayView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
-import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Component
@@ -198,7 +196,7 @@ public class ClusterHostServiceRunner {
     private KerberosConfigService kerberosConfigService;
 
     @Inject
-    private TelemetryDecorator telemetryDecorator;
+    private TelemetrySaltPillarDecorator telemetrySaltPillarDecorator;
 
     @Inject
     private MountDisks mountDisks;
@@ -538,9 +536,7 @@ public class ClusterHostServiceRunner {
         StackView stack = stackDto.getStack();
         ClusterView cluster = stackDto.getCluster();
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
-        DataBusCredential dataBusCredential = convertOrReturnNull(cluster.getDatabusCredential(), DataBusCredential.class);
-        MonitoringCredential monitoringCredential = convertOrReturnNull(cluster.getMonitoringCredential(), MonitoringCredential.class);
-        telemetryDecorator.decoratePillar(servicePillar, stack, cluster, telemetry, dataBusCredential, monitoringCredential);
+        servicePillar.putAll(telemetrySaltPillarDecorator.generatePillarConfigMap(stackDto));
         decoratePillarWithTags(stack, servicePillar);
         decorateWithClouderaManagerEntrerpriseDetails(telemetry, servicePillar);
         Optional<String> licenseOpt = decoratePillarWithClouderaManagerLicense(stack, servicePillar);

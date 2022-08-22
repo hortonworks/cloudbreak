@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigSe
 import static com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigService.SERVER_LOG_FOLDER_PREFIX;
 import static com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigService.SERVICE_LOG_FOLDER_PREFIX;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 import java.util.ArrayList;
@@ -23,6 +25,8 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentUpgradeConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryRepoConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryUpgradeConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.context.LogShipperContext;
+import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
 
@@ -51,6 +55,64 @@ public class TelemetryCommonConfigServiceTest {
     }
 
     @Test
+    public void testIsEnabled() {
+        // GIVEN
+        TelemetryContext context = new TelemetryContext();
+        context.setLogShipperContext(LogShipperContext.builder().build());
+        context.setClusterDetails(TelemetryClusterDetails.Builder.builder().build());
+        context.setTelemetry(new Telemetry());
+        // WHEN
+        boolean result = underTest.isEnabled(context);
+        // THEN
+        assertTrue(result);
+    }
+
+    @Test
+    public void testIsEnabledWithoutTelemetry() {
+        // GIVEN
+        TelemetryContext context = new TelemetryContext();
+        context.setLogShipperContext(LogShipperContext.builder().build());
+        context.setClusterDetails(TelemetryClusterDetails.Builder.builder().build());
+        // WHEN
+        boolean result = underTest.isEnabled(context);
+        // THEN
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsEnabledWithoutLoggingContext() {
+        // GIVEN
+        TelemetryContext context = new TelemetryContext();
+        context.setTelemetry(new Telemetry());
+        context.setClusterDetails(TelemetryClusterDetails.Builder.builder().build());
+        // WHEN
+        boolean result = underTest.isEnabled(context);
+        // THEN
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsEnabledWithoutClusterDetails() {
+        // GIVEN
+        TelemetryContext context = new TelemetryContext();
+        context.setLogShipperContext(LogShipperContext.builder().build());
+        context.setTelemetry(new Telemetry());
+        // WHEN
+        boolean result = underTest.isEnabled(context);
+        // THEN
+        assertFalse(result);
+    }
+
+    @Test
+    public void testIsEnabledWithoutContext() {
+        // GIVEN
+        // WHEN
+        boolean result = underTest.isEnabled(null);
+        // THEN
+        assertFalse(result);
+    }
+
+    @Test
     public void testCreateTelemetryCommonConfigs() {
         // GIVEN
         given(telemetryUpgradeConfiguration.isEnabled()).willReturn(true);
@@ -76,13 +138,20 @@ public class TelemetryCommonConfigServiceTest {
         vmLogs.add(log3);
         TelemetryClusterDetails telemetryClusterDetails = TelemetryClusterDetails.Builder.builder()
                 .build();
+        LogShipperContext logShipperContext = LogShipperContext.builder()
+                .withVmLogs(vmLogs)
+                .build();
+        TelemetryContext context = new TelemetryContext();
+        context.setTelemetry(telemetry);
+        context.setClusterDetails(telemetryClusterDetails);
+        context.setLogShipperContext(logShipperContext);
         // WHEN
-        TelemetryCommonConfigView result = underTest.createTelemetryCommonConfigs(telemetry, vmLogs, telemetryClusterDetails);
+        Map<String, Object> result = underTest.createConfigs(context).toMap();
         // THEN
         assertEquals("/var/log/mylog.log", vmLogs.get(0).getPath());
         assertEquals("/grid/0/log/*", vmLogs.get(1).getPath());
         assertEquals("/my/path/custom/log/*", vmLogs.get(2).getPath());
-        assertEquals("0.0.1", result.toMap().get("desiredCdpTelemetryVersion").toString());
-        assertEquals(1, result.toMap().get("databusConnectMaxTime"));
+        assertEquals("0.0.1", result.get("desiredCdpTelemetryVersion").toString());
+        assertEquals(1, result.get("databusConnectMaxTime"));
     }
 }

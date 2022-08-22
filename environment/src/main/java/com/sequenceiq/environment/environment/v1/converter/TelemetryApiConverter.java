@@ -3,6 +3,8 @@ package com.sequenceiq.environment.environment.v1.converter;
 import java.util.HashMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -33,6 +35,8 @@ import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParame
 @Component
 public class TelemetryApiConverter {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TelemetryApiConverter.class);
+
     private static final String ACCOUNT_ID_TEMPLATE = "$accountid";
 
     private final boolean clusterLogsCollection;
@@ -45,6 +49,8 @@ public class TelemetryApiConverter {
 
     private final String monitoringEndpointConfig;
 
+    private final String monitoringPaasEndpointConfig;
+
     private final EntitlementService entitlementService;
 
     public TelemetryApiConverter(TelemetryConfiguration configuration, EntitlementService entitlementService) {
@@ -53,6 +59,7 @@ public class TelemetryApiConverter {
         this.monitoringEnabled = configuration.getMonitoringConfiguration().isEnabled();
         this.paasMonitoringEnabled = configuration.getMonitoringConfiguration().isPaasSupport();
         this.monitoringEndpointConfig = configuration.getMonitoringConfiguration().getRemoteWriteUrl();
+        this.monitoringPaasEndpointConfig = configuration.getMonitoringConfiguration().getPaasRemoteWriteUrl();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
     }
 
@@ -157,13 +164,15 @@ public class TelemetryApiConverter {
 
     private EnvironmentMonitoring createMonitoringFromRequest(MonitoringRequest monitoringRequest, String accountId) {
         EnvironmentMonitoring monitoring = new EnvironmentMonitoring();
-        if (isMonitoringEnabled(accountId)) {
+        boolean saas = isSaas(accountId);
+        if (isMonitoringEnabled(accountId, saas)) {
+            String unformattedMonitoringEndpoint = getUnformattedMonitoringEndpoint(saas);
             if (monitoringRequest != null) {
                 String preEndpoint = StringUtils.isNotBlank(monitoringRequest.getRemoteWriteUrl())
-                        ? monitoringRequest.getRemoteWriteUrl() : monitoringEndpointConfig;
+                        ? monitoringRequest.getRemoteWriteUrl() : unformattedMonitoringEndpoint;
                 monitoring.setRemoteWriteUrl(replaceAccountId(preEndpoint, accountId));
             } else {
-                monitoring.setRemoteWriteUrl(replaceAccountId(monitoringEndpointConfig, accountId));
+                monitoring.setRemoteWriteUrl(replaceAccountId(unformattedMonitoringEndpoint, accountId));
             }
         }
         return monitoring;
@@ -333,7 +342,18 @@ public class TelemetryApiConverter {
         return endpoint;
     }
 
-    private boolean isMonitoringEnabled(String accountId) {
-        return monitoringEnabled && (entitlementService.isCdpSaasEnabled(accountId) || paasMonitoringEnabled);
+    private boolean isMonitoringEnabled(String accountId, boolean saas) {
+        boolean computeMonitoring = entitlementService.isComputeMonitoringEnabled(accountId);
+        LOGGER.debug("Checking monitoring is set with the following inputs: computeMonitoringFromEntitlement (overrides global setting): {}, "
+                + "globalMonitoringEnabled: {}, saas: {}, paas: {}", computeMonitoring, monitoringEnabled, saas, paasMonitoringEnabled);
+        return computeMonitoring || (monitoringEnabled && (saas || paasMonitoringEnabled));
+    }
+
+    private boolean isSaas(String accountId) {
+        return entitlementService.isCdpSaasEnabled(accountId);
+    }
+
+    private String getUnformattedMonitoringEndpoint(boolean saas) {
+        return saas || StringUtils.isBlank(monitoringPaasEndpointConfig) ? monitoringEndpointConfig : monitoringPaasEndpointConfig;
     }
 }

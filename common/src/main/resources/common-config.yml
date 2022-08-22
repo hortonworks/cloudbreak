@@ -26,9 +26,11 @@ telemetry:
     gpg-check: 1
   monitoring:
     enabled: false
-    paas-support: false
     remote-write-url: ""
     remote-write-internal-url: ""
+    paas-support: false
+    paas-remote-write-url: ""
+    paas-remote-write-internal-url: ""
     scrape-interval-seconds: 60
     dev-stack: false
     status-processor:

@@ -41,6 +41,7 @@
 {% set support_bundle_dbus_stream_name = salt['pillar.get']('filecollector:supportBundleDbusStreamName') %}
 {% set support_bundle_dbus_access_key = salt['pillar.get']('filecollector:supportBundleDbusAccessKey') %}
 {% set support_bundle_dbus_private_key = salt['pillar.get']('filecollector:supportBundleDbusPrivateKey') %}
+{% set support_bundle_dbus_access_key_type = salt['pillar.get']('filecollector:supportBundleDbusAccessKeyType', 'Ed25519') %}
 
 {% if s3_location and not s3_region %}
   {%- set instanceDetails = salt.cmd.run('curl -s http://169.254.169.254/latest/dynamic/instance-identity/document') | load_json %}
@@ -159,6 +160,7 @@
     "supportBundleDbusHeaders": support_bundle_dbus_headers,
     "supportBundleDbusAccessKey": support_bundle_dbus_access_key,
     "supportBundleDbusPrivateKey": support_bundle_dbus_private_key,
+    "supportBundleAccessKeyType": support_bundle_dbus_access_key_type,
     "compressedFilePattern": compressed_file_pattern,
     "dbusUrl": dbus_url,
     "dbusS3Url": dbus_s3_url

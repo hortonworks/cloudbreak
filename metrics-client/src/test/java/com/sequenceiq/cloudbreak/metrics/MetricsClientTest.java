@@ -118,7 +118,8 @@ public class MetricsClientTest {
     public void testProcessRequestInOrder() {
         // GIVEN
         // WHEN
-        MetricsRecordRequest request = underTest.processRequest(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL, Crn.safeFromString(CRN), Optional.of(true));
+        MetricsRecordRequest request = underTest.processRequest(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL,
+                Crn.safeFromString(CRN), Optional.of(true), true);
         Types.TimeSeries timeSeries = request.getWriteRequest().getTimeseries(0);
         // THEN
         List<String> labels = List.of("__name__", "cluster_status", "cluster_type",

@@ -11,9 +11,12 @@ public class MetricsRecordRequest extends RecordRequest {
 
     private final String accountId;
 
-    public MetricsRecordRequest(GeneratedMessageV3 messageBody, String accountId) {
+    private final boolean saas;
+
+    public MetricsRecordRequest(GeneratedMessageV3 messageBody, String accountId, boolean saas) {
         super(null, messageBody, 0L, false);
         this.accountId = accountId;
+        this.saas = saas;
     }
 
     public Remote.WriteRequest getWriteRequest() {
@@ -23,5 +26,9 @@ public class MetricsRecordRequest extends RecordRequest {
 
     public String getAccountId() {
         return accountId;
+    }
+
+    public boolean isSaas() {
+        return saas;
     }
 }

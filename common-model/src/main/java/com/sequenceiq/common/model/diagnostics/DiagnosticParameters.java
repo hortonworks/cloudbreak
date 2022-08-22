@@ -77,6 +77,8 @@ public class DiagnosticParameters {
 
     private String supportBundleDbusPrivateKey;
 
+    private String supportBundleDbusAccessKeyType;
+
     private String supportBundleDbusAppName;
 
     private String supportBundleDbusStreamName;
@@ -115,6 +117,7 @@ public class DiagnosticParameters {
         parameters.put("dbusUrl", dbusUrl);
         parameters.put("dbusS3Url", dbusS3Url);
         parameters.put("supportBundleDbusAccessKey", supportBundleDbusAccessKey);
+        parameters.put("supportBundleDbusAccessKeyType", supportBundleDbusAccessKeyType);
         parameters.put("supportBundleDbusPrivateKey", supportBundleDbusPrivateKey);
         parameters.put("supportBundleDbusStreamName", supportBundleDbusStreamName);
         parameters.put("supportBundleDbusAppName", supportBundleDbusAppName);
@@ -233,6 +236,10 @@ public class DiagnosticParameters {
         this.supportBundleDbusPrivateKey = supportBundleDbusPrivateKey;
     }
 
+    public void setSupportBundleDbusAccessKeyType(String supportBundleDbusAccessKeyType) {
+        this.supportBundleDbusAccessKeyType = supportBundleDbusAccessKeyType;
+    }
+
     public void setSupportBundleDbusAppName(String supportBundleDbusAppName) {
         this.supportBundleDbusAppName = supportBundleDbusAppName;
     }
@@ -343,6 +350,10 @@ public class DiagnosticParameters {
 
     public String getSupportBundleDbusPrivateKey() {
         return supportBundleDbusPrivateKey;
+    }
+
+    public String getSupportBundleDbusAccessKeyType() {
+        return supportBundleDbusAccessKeyType;
     }
 
     public String getSupportBundleDbusAppName() {

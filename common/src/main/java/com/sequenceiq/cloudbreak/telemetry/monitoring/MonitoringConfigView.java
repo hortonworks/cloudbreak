@@ -36,6 +36,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private final Integer cmMetricsExporterPort;
 
+    private final boolean cmAutoTls;
+
     private final String nodeExporterUser;
 
     private final Integer nodeExporterPort;
@@ -118,6 +120,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         this.accessKeyId = builder.accessKeyId;
         this.privateKey = builder.privateKey;
         this.accessKeyType = builder.accessKeyType;
+        this.cmAutoTls = builder.cmAutoTls;
     }
 
     public boolean isEnabled() {
@@ -204,6 +207,34 @@ public class MonitoringConfigView implements TelemetryConfigView {
         return token;
     }
 
+    public boolean isCmAutoTls() {
+        return cmAutoTls;
+    }
+
+    public String getRetentionMinTime() {
+        return retentionMinTime;
+    }
+
+    public String getRetentionMaxTime() {
+        return retentionMaxTime;
+    }
+
+    public String getWalTruncateFrequency() {
+        return walTruncateFrequency;
+    }
+
+    public String getAccessKeyId() {
+        return accessKeyId;
+    }
+
+    public char[] getPrivateKey() {
+        return privateKey;
+    }
+
+    public String getAccessKeyType() {
+        return accessKeyType;
+    }
+
     public RequestSignerConfigView getRequestSigner() {
         return requestSigner;
     }
@@ -219,6 +250,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("cmUsername", defaultIfNull(this.cmUsername, EMPTY_CONFIG_DEFAULT));
         map.put("cmPassword", defaultIfNull(this.cmPassword, EMPTY_CONFIG_DEFAULT));
         map.put("cmMetricsExporterPort", defaultIfNull(this.cmMetricsExporterPort, DEFAULT_CM_SMON_PORT));
+        map.put("cmAutoTls", defaultIfNull(this.cmAutoTls, true));
         map.put("localPassword", this.localPassword != null ? new String(this.localPassword) : EMPTY_CONFIG_DEFAULT);
         map.put("nodeExporterUser", defaultIfNull(this.nodeExporterUser, EMPTY_CONFIG_DEFAULT));
         map.put("nodeExporterPort", this.nodeExporterPort);
@@ -274,6 +306,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
         private char[] localPassword;
 
         private Integer cmMetricsExporterPort;
+
+        private boolean cmAutoTls;
 
         private String nodeExporterUser;
 
@@ -469,6 +503,11 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         public Builder withAccessKeyType(String accessKeyType) {
             this.accessKeyType = accessKeyType;
+            return this;
+        }
+
+        public Builder withCmAutoTls(boolean cmAutoTls) {
+            this.cmAutoTls = cmAutoTls;
             return this;
         }
     }
