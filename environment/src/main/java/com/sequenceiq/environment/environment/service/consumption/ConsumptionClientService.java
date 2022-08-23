@@ -45,7 +45,7 @@ public class ConsumptionClientService {
     public void unscheduleStorageConsumptionCollection(String accountId, String monitoredResourceCrn, String storageLocation) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         try {
-            LOGGER.info("Executing storage consumption collection unscheduling: account '{}', user '{} , resource '{}' and storage location '{}'",
+            LOGGER.info("Executing storage consumption collection unscheduling: account '{}', user '{}', resource '{}' and storage location '{}'",
                     accountId, userCrn, monitoredResourceCrn, storageLocation);
             consumptionInternalCrnClient.withInternalCrn()
                     .consumptionEndpoint()

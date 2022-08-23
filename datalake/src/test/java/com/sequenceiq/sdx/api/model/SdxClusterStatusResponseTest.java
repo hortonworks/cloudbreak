@@ -18,4 +18,5 @@ public class SdxClusterStatusResponseTest {
     public void testFromApiToEntity(SdxClusterStatusResponse sdxClusterStatusResponse) {
         DatalakeStatusEnum.valueOf(sdxClusterStatusResponse.name());
     }
+
 }

@@ -5,12 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
-public class RdsDeletionWaitRequest extends SdxEvent {
+public class StorageConsumptionCollectionUnschedulingRequest extends SdxEvent {
 
     private final boolean forced;
 
     @JsonCreator
-    public RdsDeletionWaitRequest(
+    public StorageConsumptionCollectionUnschedulingRequest(
             @JsonProperty("resourceId") Long sdxId,
             @JsonProperty("userId") String userId,
             @JsonProperty("forced") boolean forced) {
@@ -18,13 +18,8 @@ public class RdsDeletionWaitRequest extends SdxEvent {
         this.forced = forced;
     }
 
-    public static RdsDeletionWaitRequest from(SdxContext context, StorageConsumptionCollectionUnschedulingSuccessEvent payload) {
-        return new RdsDeletionWaitRequest(context.getSdxId(), context.getUserId(), payload.isForced());
-    }
-
-    @Override
-    public String selector() {
-        return "RdsDeletionWaitRequest";
+    public static StorageConsumptionCollectionUnschedulingRequest from(SdxContext context, StackDeletionSuccessEvent payload) {
+        return new StorageConsumptionCollectionUnschedulingRequest(context.getSdxId(), context.getUserId(), payload.isForced());
     }
 
     public boolean isForced() {

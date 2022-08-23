@@ -6,11 +6,13 @@ import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_FAIL
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_STACK_DELETION_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_STACK_DELETION_SUCCESS_EVENT;
+import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_SUCCESS_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteState.INIT_STATE;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteState.SDX_DELETION_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteState.SDX_DELETION_FINISHED_STATE;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteState.SDX_DELETION_START_STATE;
+import static com.sequenceiq.datalake.flow.delete.SdxDeleteState.SDX_DELETION_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STATE;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteState.SDX_DELETION_WAIT_RDS_STATE;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteState.SDX_STACK_DELETION_IN_PROGRESS_STATE;
 
@@ -39,8 +41,13 @@ public class SdxDeleteFlowConfig extends AbstractFlowConfiguration<SdxDeleteStat
                 .defaultFailureEvent()
 
                 .from(SDX_STACK_DELETION_IN_PROGRESS_STATE)
-                .to(SDX_DELETION_WAIT_RDS_STATE)
+                .to(SDX_DELETION_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STATE)
                 .event(SDX_STACK_DELETION_SUCCESS_EVENT)
+                .defaultFailureEvent()
+
+                .from(SDX_DELETION_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STATE)
+                .to(SDX_DELETION_WAIT_RDS_STATE)
+                .event(STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_SUCCESS_EVENT)
                 .defaultFailureEvent()
 
                 .from(SDX_DELETION_WAIT_RDS_STATE)

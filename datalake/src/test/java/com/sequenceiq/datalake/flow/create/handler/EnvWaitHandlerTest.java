@@ -1,33 +1,26 @@
 package com.sequenceiq.datalake.flow.create.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
-import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitRequest;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
-import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.datalake.service.consumption.ConsumptionService;
 import com.sequenceiq.datalake.service.sdx.EnvironmentService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -44,24 +37,13 @@ class EnvWaitHandlerTest {
 
     private static final String USER_ID = "userId";
 
-    private static final String ACCOUNT_ID = "accountId";
-
-    private static final String ENVIRONMENT_CRN = "environmentCrn";
-
-    private static final String DATALAKE_CRN = "datalakeCrn";
-
     @Mock
     private EnvironmentService environmentService;
 
     @Mock
     private SdxStatusService sdxStatusService;
 
-    @Mock
-    private SdxClusterRepository sdxClusterRepository;
-
-    @Mock
-    private ConsumptionService consumptionService;
-
+    @InjectMocks
     private EnvWaitHandler underTest;
 
     @Mock
@@ -74,7 +56,7 @@ class EnvWaitHandlerTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new EnvWaitHandler(DURATION_IN_MINUTES, environmentService, sdxStatusService, sdxClusterRepository, consumptionService);
+        ReflectionTestUtils.setField(underTest, "durationInMinutes", DURATION_IN_MINUTES);
 
         lenient().when(handlerEvent.getData()).thenReturn(new EnvWaitRequest(DATALAKE_ID, USER_ID));
 
@@ -128,8 +110,6 @@ class EnvWaitHandlerTest {
         Selectable result = underTest.doAccept(handlerEvent);
 
         verifyFailedEvent(result, USER_ID, userBreakException);
-        verify(sdxClusterRepository, never()).findById(anyLong());
-        verify(consumptionService, never()).scheduleStorageConsumptionCollectionIfNeeded(any(SdxCluster.class));
     }
 
     @Test
@@ -140,8 +120,6 @@ class EnvWaitHandlerTest {
         Selectable result = underTest.doAccept(handlerEvent);
 
         verifyFailedEvent(result, USER_ID, PollerStoppedException.class, "Env wait timed out after 15 minutes");
-        verify(sdxClusterRepository, never()).findById(anyLong());
-        verify(consumptionService, never()).scheduleStorageConsumptionCollectionIfNeeded(any(SdxCluster.class));
     }
 
     @Test
@@ -152,8 +130,6 @@ class EnvWaitHandlerTest {
         Selectable result = underTest.doAccept(handlerEvent);
 
         verifyFailedEvent(result, USER_ID, pollerException);
-        verify(sdxClusterRepository, never()).findById(anyLong());
-        verify(consumptionService, never()).scheduleStorageConsumptionCollectionIfNeeded(any(SdxCluster.class));
     }
 
     @Test
@@ -164,41 +140,16 @@ class EnvWaitHandlerTest {
         Selectable result = underTest.doAccept(handlerEvent);
 
         verifyFailedEvent(result, USER_ID, exception);
-        verify(sdxClusterRepository, never()).findById(anyLong());
-        verify(consumptionService, never()).scheduleStorageConsumptionCollectionIfNeeded(any(SdxCluster.class));
     }
 
     @Test
-    void doAcceptTestErrorWhenSdxClusterAbsent() {
+    void doAcceptTestSuccess() {
         when(environmentService.waitAndGetEnvironment(DATALAKE_ID)).thenReturn(detailedEnvironmentResponse);
-        when(sdxClusterRepository.findById(DATALAKE_ID)).thenReturn(Optional.empty());
-
-        Selectable result = underTest.doAccept(handlerEvent);
-
-        verifyFailedEvent(result, USER_ID, NotFoundException.class, "SDX cluster '12' not found.");
-        verify(environmentService).waitAndGetEnvironment(DATALAKE_ID);
-        verify(consumptionService, never()).scheduleStorageConsumptionCollectionIfNeeded(any(SdxCluster.class));
-    }
-
-    @Test
-    void doAcceptTestExecuteConsumption() {
-        when(environmentService.waitAndGetEnvironment(DATALAKE_ID)).thenReturn(detailedEnvironmentResponse);
-        SdxCluster sdxCluster = sdxCluster();
-        when(sdxClusterRepository.findById(DATALAKE_ID)).thenReturn(Optional.of(sdxCluster));
 
         Selectable result = underTest.doAccept(handlerEvent);
 
         verifySuccessEvent(result);
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.ENVIRONMENT_CREATED, "Environment created", DATALAKE_ID);
-        verify(consumptionService).scheduleStorageConsumptionCollectionIfNeeded(sdxCluster);
-    }
-
-    private SdxCluster sdxCluster() {
-        SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setAccountId(ACCOUNT_ID);
-        sdxCluster.setEnvCrn(ENVIRONMENT_CRN);
-        sdxCluster.setCrn(DATALAKE_CRN);
-        return sdxCluster;
     }
 
     private void verifySuccessEvent(Selectable result) {

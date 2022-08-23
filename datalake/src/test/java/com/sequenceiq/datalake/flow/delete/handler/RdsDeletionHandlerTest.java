@@ -17,8 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
@@ -33,7 +35,6 @@ import com.sequenceiq.datalake.flow.delete.event.RdsDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionWaitRequest;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.datalake.service.consumption.ConsumptionService;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -70,9 +71,7 @@ class RdsDeletionHandlerTest {
     @Mock
     private OwnerAssignmentService ownerAssignmentService;
 
-    @Mock
-    private ConsumptionService consumptionService;
-
+    @InjectMocks
     private RdsDeletionHandler underTest;
 
     @Mock
@@ -83,8 +82,7 @@ class RdsDeletionHandlerTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new RdsDeletionHandler(DURATION_IN_MINUTES, sdxClusterRepository, databaseService, sdxStatusService, ownerAssignmentService,
-                consumptionService);
+        ReflectionTestUtils.setField(underTest, "durationInMinutes", DURATION_IN_MINUTES);
 
         MDCBuilder.addRequestId(REQUEST_ID);
     }
@@ -98,8 +96,7 @@ class RdsDeletionHandlerTest {
     @ValueSource(booleans = {false, true})
     void defaultFailureEventTest(boolean forceDelete) {
         UnsupportedOperationException exception = new UnsupportedOperationException("Bang!");
-        RdsDeletionWaitRequest rdsDeletionWaitRequest = new RdsDeletionWaitRequest(DATALAKE_ID, USER_ID, forceDelete);
-        when(event.getData()).thenReturn(rdsDeletionWaitRequest);
+        when(event.getData()).thenReturn(new RdsDeletionWaitRequest(DATALAKE_ID, USER_ID, forceDelete));
 
         Selectable result = underTest.defaultFailureEvent(DATALAKE_ID, exception, event);
 
@@ -142,7 +139,6 @@ class RdsDeletionHandlerTest {
         Selectable result = underTest.doAccept(handlerEvent);
 
         verifyFailedEvent(result, USER_ID, userBreakException, forceDelete);
-        verify(consumptionService, never()).unscheduleStorageConsumptionCollectionIfNeeded(any(SdxCluster.class));
         verify(databaseService, never()).terminate(any(SdxCluster.class), anyBoolean());
         verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(any(DatalakeStatusEnum.class), anyString(), any(SdxCluster.class));
         verify(ownerAssignmentService, never()).notifyResourceDeleted(anyString());
@@ -162,7 +158,6 @@ class RdsDeletionHandlerTest {
         Selectable result = underTest.doAccept(handlerEvent);
 
         verifyFailedEvent(result, USER_ID, PollerStoppedException.class, "Database deletion timed out after 15 minutes", forceDelete);
-        verify(consumptionService, never()).unscheduleStorageConsumptionCollectionIfNeeded(any(SdxCluster.class));
         verify(databaseService, never()).terminate(any(SdxCluster.class), anyBoolean());
         verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(any(DatalakeStatusEnum.class), anyString(), any(SdxCluster.class));
         verify(ownerAssignmentService, never()).notifyResourceDeleted(anyString());
@@ -178,7 +173,6 @@ class RdsDeletionHandlerTest {
         Selectable result = underTest.doAccept(handlerEvent);
 
         verifyFailedEvent(result, USER_ID, pollerException, forceDelete);
-        verify(consumptionService, never()).unscheduleStorageConsumptionCollectionIfNeeded(any(SdxCluster.class));
         verify(databaseService, never()).terminate(any(SdxCluster.class), anyBoolean());
         verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(any(DatalakeStatusEnum.class), anyString(), any(SdxCluster.class));
         verify(ownerAssignmentService, never()).notifyResourceDeleted(anyString());
@@ -194,7 +188,6 @@ class RdsDeletionHandlerTest {
         Selectable result = underTest.doAccept(handlerEvent);
 
         verifyFailedEvent(result, USER_ID, exception, forceDelete);
-        verify(consumptionService, never()).unscheduleStorageConsumptionCollectionIfNeeded(any(SdxCluster.class));
         verify(databaseService, never()).terminate(any(SdxCluster.class), anyBoolean());
         verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(any(DatalakeStatusEnum.class), anyString(), any(SdxCluster.class));
         verify(ownerAssignmentService, never()).notifyResourceDeleted(anyString());
@@ -202,14 +195,13 @@ class RdsDeletionHandlerTest {
 
     @ParameterizedTest(name = "forceDelete={0}")
     @ValueSource(booleans = {false, true})
-    void doAcceptTestSkipTerminateAndConsumptionWhenEnvironmentAbsent(boolean forceDelete) {
+    void doAcceptTestSkipTerminateWhenSdxClusterAbsent(boolean forceDelete) {
         initHandlerEvent(forceDelete);
         when(sdxClusterRepository.findById(DATALAKE_ID)).thenReturn(Optional.empty());
 
         Selectable result = underTest.doAccept(handlerEvent);
 
         verifySuccessEvent(result);
-        verify(consumptionService, never()).unscheduleStorageConsumptionCollectionIfNeeded(any(SdxCluster.class));
         verify(databaseService, never()).terminate(any(SdxCluster.class), anyBoolean());
         verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(any(DatalakeStatusEnum.class), anyString(), any(SdxCluster.class));
         verify(ownerAssignmentService, never()).notifyResourceDeleted(anyString());
@@ -278,7 +270,6 @@ class RdsDeletionHandlerTest {
         Selectable result = underTest.doAccept(handlerEvent);
 
         verifySuccessEvent(result);
-        verify(consumptionService).unscheduleStorageConsumptionCollectionIfNeeded(sdxCluster);
         verify(databaseService, never()).terminate(any(SdxCluster.class), anyBoolean());
         verifyDeletedStatus(sdxCluster);
     }
@@ -323,7 +314,6 @@ class RdsDeletionHandlerTest {
         Selectable result = underTest.doAccept(handlerEvent);
 
         verifySuccessEvent(result);
-        verify(consumptionService).unscheduleStorageConsumptionCollectionIfNeeded(sdxCluster);
         verifyTerminateExecutedAndDeletedStatus(forceDelete, sdxCluster);
     }
 
@@ -349,7 +339,6 @@ class RdsDeletionHandlerTest {
         Selectable result = underTest.doAccept(handlerEvent);
 
         verifySuccessEvent(result);
-        verify(consumptionService).unscheduleStorageConsumptionCollectionIfNeeded(sdxCluster);
         verifyTerminateExecutedAndDeletedStatus(forceDelete, sdxCluster);
     }
 

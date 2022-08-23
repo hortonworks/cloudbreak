@@ -36,6 +36,8 @@ import com.sequenceiq.datalake.flow.create.event.RdsWaitSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
+import com.sequenceiq.datalake.flow.create.event.StorageConsumptionCollectionSchedulingRequest;
+import com.sequenceiq.datalake.flow.create.event.StorageConsumptionCollectionSchedulingSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.StorageValidationRequest;
 import com.sequenceiq.datalake.flow.create.event.StorageValidationSuccessEvent;
 import com.sequenceiq.datalake.job.SdxClusterJobAdapter;
@@ -172,24 +174,46 @@ public class SdxCreateActions {
         };
     }
 
-    @Bean(name = "SDX_CREATION_START_STATE")
-    public Action<?, ?> sdxCreation() {
+    @Bean(name = "SDX_CREATION_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STATE")
+    public Action<?, ?> storageConsumptionCollectionSchedulingInProgress() {
         return new AbstractSdxAction<>(EnvWaitSuccessEvent.class) {
-
             @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    EnvWaitSuccessEvent payload) {
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, EnvWaitSuccessEvent payload) {
                 return SdxContext.from(flowParameters, payload);
             }
 
             @Override
-            protected void doExecute(SdxContext context, EnvWaitSuccessEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, EnvWaitSuccessEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Datalake storage consumption collection scheduling of SDX cluster: {}", payload.getResourceId());
+                eventSenderService.notifyEvent(context, ResourceEvent.SDX_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STARTED);
+                sendEvent(context, StorageConsumptionCollectionSchedulingRequest.from(context, payload.getDetailedEnvironmentResponse()));
+            }
+
+            @Override
+            protected Object getFailurePayload(EnvWaitSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return SdxCreateFailedEvent.from(payload, ex);
+            }
+        };
+    }
+
+    @Bean(name = "SDX_CREATION_START_STATE")
+    public Action<?, ?> sdxCreation() {
+        return new AbstractSdxAction<>(StorageConsumptionCollectionSchedulingSuccessEvent.class) {
+
+            @Override
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    StorageConsumptionCollectionSchedulingSuccessEvent payload) {
+                return SdxContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(SdxContext context, StorageConsumptionCollectionSchedulingSuccessEvent payload, Map<Object, Object> variables) {
                 provisionerService.startStackProvisioning(payload.getResourceId(), payload.getDetailedEnvironmentResponse());
                 sendEvent(context, SDX_STACK_CREATION_IN_PROGRESS_EVENT.event(), payload);
             }
 
             @Override
-            protected Object getFailurePayload(EnvWaitSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(StorageConsumptionCollectionSchedulingSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return SdxCreateFailedEvent.from(payload, ex);
             }
         };
