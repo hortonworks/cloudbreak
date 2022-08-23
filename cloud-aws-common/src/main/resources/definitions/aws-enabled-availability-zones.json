@@ -179,6 +179,14 @@
         "us-gov-east-1b",
         "us-gov-east-1c"
       ]
+    },
+    {
+      "name": "ap-east-1",
+      "zones": [
+        "ap-east-1a",
+        "ap-east-1b",
+        "ap-east-1c"
+      ]
     }
   ]
 }
