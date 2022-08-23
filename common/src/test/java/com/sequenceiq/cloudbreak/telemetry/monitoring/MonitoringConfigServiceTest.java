@@ -37,6 +37,9 @@ public class MonitoringConfigServiceTest {
     private ExporterConfiguration cmMonitoringConfiguration;
 
     @Mock
+    private BlackboxExporterConfiguration blackboxExporterConfiguration;
+
+    @Mock
     private MonitoringGlobalAuthConfig monitoringGlobalAuthConfig;
 
     @Mock
@@ -65,6 +68,10 @@ public class MonitoringConfigServiceTest {
         given(monitoringConfiguration.getAgent()).willReturn(monitoringAgentConfiguration);
         given(cmMonitoringConfiguration.getPort()).willReturn(DEFAULT_CM_SMON_PORT);
         given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
+
+        given(monitoringConfiguration.getBlackboxExporter()).willReturn(blackboxExporterConfiguration);
+        given(blackboxExporterConfiguration.getClouderaIntervalSeconds()).willReturn(1000);
+
         given(monitoring.getRemoteWriteUrl()).willReturn("https://myendpoint/api/v1/receive");
         // WHEN
         MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, true, false,
@@ -73,6 +80,7 @@ public class MonitoringConfigServiceTest {
         assertTrue(result.isEnabled());
         assertEquals("https://myendpoint/api/v1/receive", result.getRemoteWriteUrl());
         assertEquals("false", result.toMap().get("useDevStack").toString());
+        assertEquals(1000, result.toMap().get("blackboxExporterClouderaIntervalSeconds"));
         assertEquals(DEFAULT_CM_SMON_PORT, result.getCmMetricsExporterPort());
     }
 

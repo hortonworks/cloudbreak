@@ -74,7 +74,10 @@ public class MonitoringConfigService {
         }
         if (monitoringConfiguration.getBlackboxExporter() != null) {
             builder.withBlackboxExporterUser(monitoringConfiguration.getBlackboxExporter().getUser())
-                    .withBlackboxExporterPort(monitoringConfiguration.getBlackboxExporter().getPort());
+                    .withBlackboxExporterPort(monitoringConfiguration.getBlackboxExporter().getPort())
+                    .withBlackboxExporterCheckOnAllNodes(monitoringConfiguration.getBlackboxExporter().isCheckOnAllNodes())
+                    .withBlackboxExporterClouderaIntervalSeconds(monitoringConfiguration.getBlackboxExporter().getClouderaIntervalSeconds())
+                    .withBlackboxExporterCloudIntervalSeconds(monitoringConfiguration.getBlackboxExporter().getCloudIntervalSeconds());
         }
     }
 
