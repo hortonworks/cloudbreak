@@ -33,6 +33,8 @@ import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
 import com.sequenceiq.datalake.flow.delete.event.StackDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.StackDeletionWaitRequest;
+import com.sequenceiq.datalake.flow.delete.event.StorageConsumptionCollectionUnschedulingRequest;
+import com.sequenceiq.datalake.flow.delete.event.StorageConsumptionCollectionUnschedulingSuccessEvent;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
@@ -124,8 +126,8 @@ public class SdxDeleteActions {
         };
     }
 
-    @Bean(name = "SDX_DELETION_WAIT_RDS_STATE")
-    public Action<?, ?> sdxDeleteRdsAction() {
+    @Bean(name = "SDX_DELETION_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STATE")
+    public Action<?, ?> storageConsumptionCollectionUnschedulingInProgress() {
         return new AbstractSdxAction<>(StackDeletionSuccessEvent.class) {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
@@ -134,13 +136,36 @@ public class SdxDeleteActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, StackDeletionSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Datalake delete remote database of sdx cluster: {}", payload.getResourceId());
-                sendEvent(context, RdsDeletionWaitRequest.from(context, payload));
+            protected void doExecute(SdxContext context, StackDeletionSuccessEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Datalake storage consumption collection unscheduling of SDX cluster: {}", payload.getResourceId());
+                eventSenderService.notifyEvent(context, ResourceEvent.SDX_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED);
+                sendEvent(context, StorageConsumptionCollectionUnschedulingRequest.from(context, payload));
             }
 
             @Override
             protected Object getFailurePayload(StackDeletionSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return SdxDeletionFailedEvent.from(payload, ex, payload.isForced());
+            }
+        };
+    }
+
+    @Bean(name = "SDX_DELETION_WAIT_RDS_STATE")
+    public Action<?, ?> sdxDeleteRdsAction() {
+        return new AbstractSdxAction<>(StorageConsumptionCollectionUnschedulingSuccessEvent.class) {
+            @Override
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    StorageConsumptionCollectionUnschedulingSuccessEvent payload) {
+                return SdxContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(SdxContext context, StorageConsumptionCollectionUnschedulingSuccessEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Datalake delete remote database of SDX cluster: {}", payload.getResourceId());
+                sendEvent(context, RdsDeletionWaitRequest.from(context, payload));
+            }
+
+            @Override
+            protected Object getFailurePayload(StorageConsumptionCollectionUnschedulingSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return SdxDeletionFailedEvent.from(payload, ex, payload.isForced());
             }
         };

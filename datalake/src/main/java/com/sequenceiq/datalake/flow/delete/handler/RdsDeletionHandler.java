@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow.delete.handler;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +20,6 @@ import com.sequenceiq.datalake.flow.delete.event.RdsDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionWaitRequest;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.datalake.service.consumption.ConsumptionService;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -30,28 +31,20 @@ import reactor.bus.Event;
 public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletionWaitRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsDeletionHandler.class);
 
-    private final int durationInMinutes;
+    @Value("${sdx.db.operation.duration_min:60}")
+    private int durationInMinutes;
 
-    private final SdxClusterRepository sdxClusterRepository;
+    @Inject
+    private SdxClusterRepository sdxClusterRepository;
 
-    private final DatabaseService databaseService;
+    @Inject
+    private DatabaseService databaseService;
 
-    private final SdxStatusService sdxStatusService;
+    @Inject
+    private SdxStatusService sdxStatusService;
 
-    private final OwnerAssignmentService ownerAssignmentService;
-
-    private final ConsumptionService consumptionService;
-
-    public RdsDeletionHandler(@Value("${sdx.db.operation.duration_min:60}") int durationInMinutes, SdxClusterRepository sdxClusterRepository,
-            DatabaseService databaseService, SdxStatusService sdxStatusService, OwnerAssignmentService ownerAssignmentService,
-            ConsumptionService consumptionService) {
-        this.durationInMinutes = durationInMinutes;
-        this.sdxClusterRepository = sdxClusterRepository;
-        this.databaseService = databaseService;
-        this.sdxStatusService = sdxStatusService;
-        this.ownerAssignmentService = ownerAssignmentService;
-        this.consumptionService = consumptionService;
-    }
+    @Inject
+    private OwnerAssignmentService ownerAssignmentService;
 
     @Override
     public String selector() {
@@ -71,8 +64,6 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
         Selectable response;
         try {
             sdxClusterRepository.findById(sdxId).ifPresent(sdxCluster -> {
-                consumptionService.unscheduleStorageConsumptionCollectionIfNeeded(sdxCluster);
-
                 if (sdxCluster.hasExternalDatabase() && StringUtils.isNotEmpty(sdxCluster.getDatabaseCrn())) {
                     LOGGER.debug("start polling database termination for SDX: {}", sdxId);
                     databaseService.terminate(sdxCluster, rdsWaitRequest.isForced());

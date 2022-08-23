@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.consumption;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,18 +19,14 @@ public class ConsumptionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsumptionService.class);
 
-    private final EntitlementService entitlementService;
+    @Inject
+    private EntitlementService entitlementService;
 
-    private final ConsumptionClientService consumptionClientService;
+    @Inject
+    private ConsumptionClientService consumptionClientService;
 
-    private final boolean consumptionEnabled;
-
-    public ConsumptionService(EntitlementService entitlementService, ConsumptionClientService consumptionClientService,
-            @Value("${datalake.consumption.enabled:false}") boolean consumptionEnabled) {
-        this.entitlementService = entitlementService;
-        this.consumptionClientService = consumptionClientService;
-        this.consumptionEnabled = consumptionEnabled;
-    }
+    @Value("${datalake.consumption.enabled:false}")
+    private boolean consumptionEnabled;
 
     public void scheduleStorageConsumptionCollectionIfNeeded(SdxCluster sdxCluster) {
         String accountId = sdxCluster.getAccountId();
@@ -59,7 +57,7 @@ public class ConsumptionService {
         request.setMonitoredResourceType(ResourceType.DATALAKE);
         request.setStorageLocation(storageLocation);
         String accountId = sdxCluster.getAccountId();
-        LOGGER.info("Executing storage consumption collection scheduling for storage base location: account '{}', user '{} and request '{}'",
+        LOGGER.info("Executing storage consumption collection scheduling for storage base location: account '{}', user '{}' and request '{}'",
                 accountId, userCrn, request);
         consumptionClientService.scheduleStorageConsumptionCollection(accountId, request, userCrn);
     }
@@ -88,7 +86,7 @@ public class ConsumptionService {
     private void unscheduleStorageConsumptionCollectionForStorageLocation(String accountId, String monitoredResourceCrn,
             String storageLocation, String initiatorUserCrn) {
         LOGGER.info("Executing storage consumption collection unscheduling for storage base location: " +
-                        "account '{}', user '{} resource '{}' and storage location '{}'",
+                        "account '{}', user '{}', resource '{}' and storage location '{}'",
                 accountId, initiatorUserCrn, monitoredResourceCrn, storageLocation);
         consumptionClientService.unscheduleStorageConsumptionCollection(accountId, monitoredResourceCrn, storageLocation, initiatorUserCrn);
     }

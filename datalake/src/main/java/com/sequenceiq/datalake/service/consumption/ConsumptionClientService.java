@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.consumption;
 
+import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
@@ -15,15 +16,11 @@ public class ConsumptionClientService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsumptionClientService.class);
 
-    private final ConsumptionInternalCrnClient consumptionInternalCrnClient;
+    @Inject
+    private ConsumptionInternalCrnClient consumptionInternalCrnClient;
 
-    private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
-
-    public ConsumptionClientService(ConsumptionInternalCrnClient consumptionInternalCrnClient,
-            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
-        this.consumptionInternalCrnClient = consumptionInternalCrnClient;
-        this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
-    }
+    @Inject
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     public void scheduleStorageConsumptionCollection(String accountId, StorageConsumptionRequest request, String userCrn) {
         try {
@@ -41,7 +38,7 @@ public class ConsumptionClientService {
 
     public void unscheduleStorageConsumptionCollection(String accountId, String monitoredResourceCrn, String storageLocation, String initiatorUserCrn) {
         try {
-            LOGGER.info("Executing storage consumption collection unscheduling: account '{}', user '{} , resource '{}' and storage location '{}'",
+            LOGGER.info("Executing storage consumption collection unscheduling: account '{}', user '{}', resource '{}' and storage location '{}'",
                     accountId, initiatorUserCrn, monitoredResourceCrn, storageLocation);
             consumptionInternalCrnClient.withInternalCrn()
                     .consumptionEndpoint()
