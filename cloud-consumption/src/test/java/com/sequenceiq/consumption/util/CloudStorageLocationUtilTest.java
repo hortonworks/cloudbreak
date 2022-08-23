@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import javax.validation.ValidationException;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -18,23 +19,30 @@ public class CloudStorageLocationUtilTest {
 
     private static final String ABFS_OBJECT_PATH = "abfs://FILESYSTEM@STORAGEACCOUNT.dfs.core.windows.net/PATH";
 
+    private CloudStorageLocationUtil underTest;
+
+    @BeforeEach
+    void setUp() {
+        underTest = new CloudStorageLocationUtil();
+    }
+
     @Test
     public void testGetBucketName() {
-        assertEquals("bucket-name", CloudStorageLocationUtil.getS3BucketName(S3_OBJECT_PATH));
+        assertEquals("bucket-name", underTest.getS3BucketName(S3_OBJECT_PATH));
     }
 
     @Test
     public void testGetBucketNameWithInvalidStorageType() {
-        assertThrows(ValidationException.class, () -> CloudStorageLocationUtil.getS3BucketName(ABFS_OBJECT_PATH));
+        assertThrows(ValidationException.class, () -> underTest.getS3BucketName(ABFS_OBJECT_PATH));
     }
 
     @ParameterizedTest(name = "With requiredType={0} and storageLocation={1}, validation should succeed: {2}")
     @MethodSource("scenarios")
     public void testValidateCloudStorageType(FileSystemType requiredType, String storageLocation, boolean valid) {
         if (valid) {
-            assertDoesNotThrow(() -> CloudStorageLocationUtil.validateCloudStorageType(requiredType, storageLocation));
+            assertDoesNotThrow(() -> underTest.validateCloudStorageType(requiredType, storageLocation));
         } else {
-            assertThrows(ValidationException.class, () -> CloudStorageLocationUtil.validateCloudStorageType(requiredType, storageLocation));
+            assertThrows(ValidationException.class, () -> underTest.validateCloudStorageType(requiredType, storageLocation));
         }
     }
 

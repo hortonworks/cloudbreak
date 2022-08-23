@@ -2,16 +2,22 @@ package com.sequenceiq.consumption.converter.metering;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 import javax.validation.ValidationException;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.metering.events.MeteringEventsProto;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.dto.StorageConsumptionResult;
+import com.sequenceiq.consumption.util.CloudStorageLocationUtil;
 
+@ExtendWith(MockitoExtension.class)
 public class ConsumptionToStorageHeartbeatConverterTest {
 
     private static final String ENV_CRN = "env-crn";
@@ -20,12 +26,11 @@ public class ConsumptionToStorageHeartbeatConverterTest {
 
     private static final String INVALID_LOCATION = "invalid_location";
 
-    private ConsumptionToStorageHeartbeatConverter underTest;
+    @Mock
+    private CloudStorageLocationUtil cloudStorageLocationUtil;
 
-    @BeforeEach
-    public void setUp() {
-        underTest = new ConsumptionToStorageHeartbeatConverter();
-    }
+    @InjectMocks
+    private ConsumptionToStorageHeartbeatConverter underTest;
 
     @Test
     public void testNull() {
@@ -38,25 +43,31 @@ public class ConsumptionToStorageHeartbeatConverterTest {
     public void testNullStorageLocation() {
         Consumption consumption = createConsumption(null);
 
+        when(cloudStorageLocationUtil.getS3BucketName(consumption.getStorageLocation())).thenThrow(new ValidationException("error"));
+
         StorageConsumptionResult storage = new StorageConsumptionResult(0);
 
         ValidationException ex = assertThrows(ValidationException.class, () -> underTest.convertToS3StorageHeartBeat(consumption, storage));
-        assertEquals("Storage location must start with 's3a' if required file system type is 'S3'!", ex.getMessage());
+        assertEquals("error", ex.getMessage());
     }
 
     @Test
     public void testInvalidStorageLocation() {
         Consumption consumption = createConsumption(INVALID_LOCATION);
 
+        when(cloudStorageLocationUtil.getS3BucketName(consumption.getStorageLocation())).thenThrow(new ValidationException("error"));
+
         StorageConsumptionResult storage = new StorageConsumptionResult(0);
 
         ValidationException ex = assertThrows(ValidationException.class, () -> underTest.convertToS3StorageHeartBeat(consumption, storage));
-        assertEquals("Storage location must start with 's3a' if required file system type is 'S3'!", ex.getMessage());
+        assertEquals("error", ex.getMessage());
     }
 
     @Test
     public void testHeartbeatConvertedCorrectly() {
         Consumption consumption = createConsumption(VALID_LOCATION);
+
+        when(cloudStorageLocationUtil.getS3BucketName(consumption.getStorageLocation())).thenReturn("bucket-name");
 
         StorageConsumptionResult storage = new StorageConsumptionResult(42000000);
 
