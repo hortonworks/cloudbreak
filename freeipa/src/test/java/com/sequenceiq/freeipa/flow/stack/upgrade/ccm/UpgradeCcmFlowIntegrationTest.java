@@ -1,10 +1,13 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm;
 
+import static com.sequenceiq.common.api.type.Tunnel.CCM;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_TRIGGER_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,6 +34,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -45,16 +49,18 @@ import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmTriggerEven
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmChangeTunnelHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmCheckPrerequisitesHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmDeregisterMinaHandler;
-import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmHealthCheckHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmObtainAgentDataHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmPushSaltStatesHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmReconfigureNginxHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmRegisterClusterProxyHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmRemoveMinaHandler;
+import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmRevertAllHandler;
+import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmRevertHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmUpgradeHandler;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.upgrade.ccm.CcmParametersConfigService;
 
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
@@ -64,7 +70,7 @@ class UpgradeCcmFlowIntegrationTest {
 
     private static final long STACK_ID = 1L;
 
-    private static final int ALL_CALLED_ONCE = 20;
+    private static final int ALL_CALLED_ONCE = 22;
 
     private static final int CALLED_ONCE_TILL_PREPARATION = 2;
 
@@ -80,9 +86,11 @@ class UpgradeCcmFlowIntegrationTest {
 
     private static final int CALLED_ONCE_TILL_REGISTER = 14;
 
-    private static final int CALLED_ONCE_TILL_REMOVE_MINA = 17;
+    private static final int CALLED_ONCE_TILL_REMOVE_MINA = 16;
 
-    private static final int CALLED_ONCE_TILL_DEREGISTER_MINA = 19;
+    private static final int CALLED_ONCE_TILL_DEREGISTER_MINA = 18;
+
+    private static final int CALLED_ONCE_TILL_FINALIZE = 20;
 
     @Inject
     private FlowRegister flowRegister;
@@ -106,7 +114,7 @@ class UpgradeCcmFlowIntegrationTest {
     public void setup() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
-        stack.setTunnel(Tunnel.CCM);
+        stack.setTunnel(CCM);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
     }
 
@@ -123,7 +131,7 @@ class UpgradeCcmFlowIntegrationTest {
 
     @Test
     public void testCcmUpgradeWhenChangeTunnelFails() throws CloudbreakOrchestratorException {
-        doThrow(new BadRequestException()).when(upgradeCcmService).changeTunnel(1L);
+        doThrow(new BadRequestException()).when(upgradeCcmService).changeTunnel(1L, Tunnel.latestUpgradeTarget());
         testFlow(CALLED_ONCE_TILL_CHANGE_TUNNEL, false);
     }
 
@@ -153,33 +161,55 @@ class UpgradeCcmFlowIntegrationTest {
 
     @Test
     public void testCcmUpgradeWhenRegisterCcmFails() throws CloudbreakOrchestratorException {
-        doThrow(new BadRequestException()).when(upgradeCcmService).registerClusterProxyAndCheckHealth(1L);
+        doThrow(new BadRequestException()).doNothing().when(upgradeCcmService).registerClusterProxyAndCheckHealth(1L);
         testFlow(CALLED_ONCE_TILL_REGISTER, false);
     }
 
     @Test
     public void testCcmUpgradeWhenRemoveMinaFails() throws CloudbreakOrchestratorException {
         doThrow(new BadRequestException()).when(upgradeCcmService).removeMina(1L);
-        testFlow(CALLED_ONCE_TILL_REMOVE_MINA, false);
+        testFlow(CALLED_ONCE_TILL_REMOVE_MINA, true, false);
     }
 
     @Test
     public void testCcmUpgradeWhenDeregisterMinaFails() throws CloudbreakOrchestratorException {
         doThrow(new BadRequestException()).when(upgradeCcmService).deregisterMina(1L);
-        testFlow(CALLED_ONCE_TILL_DEREGISTER_MINA, false);
+        testFlow(CALLED_ONCE_TILL_DEREGISTER_MINA, true, false);
+    }
+
+    @Test
+    public void testCcmUpgradeWhenFinalizeFails() throws CloudbreakOrchestratorException {
+        doThrow(new CloudbreakOrchestratorFailedException("")).when(upgradeCcmService).finishedState(1L, Boolean.TRUE);
+        FlowIdentifier flowIdentifier = triggerFlow();
+        letItFlow(flowIdentifier);
+        verifyServiceCalls(CALLED_ONCE_TILL_FINALIZE);
+        verify(upgradeCcmService, times(1)).finishedState(STACK_ID, Boolean.TRUE);
+        verify(operationService, never()).completeOperation(any(), any(), any(), any());
+        ArgumentCaptor<UpgradeCcmContext> contextCaptor = ArgumentCaptor.forClass(UpgradeCcmContext.class);
+        ArgumentCaptor<UpgradeCcmFailureEvent> payloadCaptor = ArgumentCaptor.forClass(UpgradeCcmFailureEvent.class);
+        verify(upgradeCcmService, times(1)).failedState(contextCaptor.capture(), payloadCaptor.capture());
+        UpgradeCcmContext context = contextCaptor.getValue();
+        UpgradeCcmFailureEvent payload = payloadCaptor.getValue();
+        assertEquals(STACK_ID, context.getStack().getId());
+        assertEquals(STACK_ID, payload.getResourceId());
+        verify(operationService, times(1)).failOperation(any(), any(), any());
     }
 
     private void testFlow(int calledOnceCount, boolean success) throws CloudbreakOrchestratorException {
+        testFlow(calledOnceCount, success, true);
+    }
+
+    private void testFlow(int calledOnceCount, boolean success, boolean minaRemoved) throws CloudbreakOrchestratorException {
         FlowIdentifier flowIdentifier = triggerFlow();
         letItFlow(flowIdentifier);
 
         flowFinishedSuccessfully();
         verifyServiceCalls(calledOnceCount);
-        verifyFinishingStatCalls(success);
+        verifyFinishingStatCalls(success, minaRemoved);
     }
 
-    private void verifyFinishingStatCalls(boolean success) {
-        verify(upgradeCcmService, times(success ? 1 : 0)).finishedState(STACK_ID);
+    private void verifyFinishingStatCalls(boolean success, boolean minaRemoved) throws CloudbreakOrchestratorException {
+        verify(upgradeCcmService, times(success ? 1 : 0)).finishedState(STACK_ID, minaRemoved);
         verify(operationService, times(success ? 1 : 0)).completeOperation(any(), any(), any(), any());
         ArgumentCaptor<UpgradeCcmContext> contextCaptor = ArgumentCaptor.forClass(UpgradeCcmContext.class);
         ArgumentCaptor<UpgradeCcmFailureEvent> payloadCaptor = ArgumentCaptor.forClass(UpgradeCcmFailureEvent.class);
@@ -192,7 +222,6 @@ class UpgradeCcmFlowIntegrationTest {
         }
 
         verify(operationService, times(success ? 0 : 1)).failOperation(any(), any(), any());
-
     }
 
     private void verifyServiceCalls(int calledOnceCount) throws CloudbreakOrchestratorException {
@@ -203,20 +232,39 @@ class UpgradeCcmFlowIntegrationTest {
         inOrder.verify(upgradeCcmService, times(expected[i++])).checkPrerequisitesState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).checkPrerequsities(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).changeTunnelState(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(expected[i++])).changeTunnel(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).changeTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
         inOrder.verify(upgradeCcmService, times(expected[i++])).obtainAgentDataState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).obtainAgentData(STACK_ID);
+        if (calledOnceCount == CALLED_ONCE_TILL_OBTAIN_AGENT_DATA) {
+            inOrder.verify(upgradeCcmService, times(1)).changeTunnel(eq(STACK_ID), eq(CCM));
+            inOrder.verify(upgradeCcmService, times(1)).failedState(any(), any());
+        }
         inOrder.verify(upgradeCcmService, times(expected[i++])).pushSaltStatesState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).pushSaltStates(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).upgradeState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).upgrade(STACK_ID);
+        if (calledOnceCount == CALLED_ONCE_TILL_UPGRADE) {
+            inOrder.verify(upgradeCcmService, times(1)).changeTunnel(eq(STACK_ID), eq(CCM));
+            inOrder.verify(upgradeCcmService, times(1)).pushSaltStates(eq(STACK_ID));
+        }
         inOrder.verify(upgradeCcmService, times(expected[i++])).reconfigureNginxState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).reconfigureNginx(STACK_ID);
+        if (calledOnceCount == CALLED_ONCE_TILL_RECONFIGURE) {
+            inOrder.verify(upgradeCcmService, times(1)).changeTunnel(eq(STACK_ID), eq(CCM));
+            inOrder.verify(upgradeCcmService, times(1)).pushSaltStates(eq(STACK_ID));
+        }
         inOrder.verify(upgradeCcmService, times(expected[i++])).registerClusterProxyState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).registerClusterProxyAndCheckHealth(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(expected[i++])).healthCheckState(STACK_ID);
+        if (calledOnceCount == CALLED_ONCE_TILL_REGISTER) {
+            inOrder.verify(upgradeCcmService, times(1)).changeTunnel(eq(STACK_ID), eq(CCM));
+            inOrder.verify(upgradeCcmService, times(1)).registerClusterProxyAndCheckHealth(eq(STACK_ID));
+            inOrder.verify(upgradeCcmService, times(1)).pushSaltStates(eq(STACK_ID));
+        }
         inOrder.verify(upgradeCcmService, times(expected[i++])).removeMinaState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).removeMina(STACK_ID);
+        if (i == calledOnceCount) {
+            return;
+        }
         inOrder.verify(upgradeCcmService, times(expected[i++])).deregisterMinaState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).deregisterMina(STACK_ID);
     }
@@ -232,7 +280,7 @@ class UpgradeCcmFlowIntegrationTest {
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
                 () -> freeIpaFlowManager.notify(selector,
-                        new UpgradeCcmTriggerEvent(selector, "opi", STACK_ID, Tunnel.CCM)));
+                        new UpgradeCcmTriggerEvent(selector, "opi", STACK_ID, CCM)));
     }
 
     private void letItFlow(FlowIdentifier flowIdentifier) {
@@ -259,12 +307,16 @@ class UpgradeCcmFlowIntegrationTest {
             UpgradeCcmUpgradeHandler.class,
             UpgradeCcmReconfigureNginxHandler.class,
             UpgradeCcmRegisterClusterProxyHandler.class,
-            UpgradeCcmHealthCheckHandler.class,
             UpgradeCcmRemoveMinaHandler.class,
             UpgradeCcmDeregisterMinaHandler.class,
+            UpgradeCcmRevertHandler.class,
+            UpgradeCcmRevertAllHandler.class,
             UpgradeCcmService.class,
             FlowIntegrationTestConfig.class
     })
     static class Config {
+
+        @MockBean
+        private CcmParametersConfigService ccmParametersConfigService;
     }
 }

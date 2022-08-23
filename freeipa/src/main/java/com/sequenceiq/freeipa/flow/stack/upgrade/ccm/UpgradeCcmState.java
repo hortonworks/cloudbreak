@@ -15,6 +15,12 @@ public class UpgradeCcmState implements FlowState {
 
     public static final String UPGRADE_CCM_FAILED_STATE_NAME = "UPGRADE_CCM_FAILED_STATE";
 
+    public static final String UPGRADE_CCM_FINALIZE_FAILED_STATE_NAME = "UPGRADE_CCM_FINALIZE_FAILED_STATE";
+
+    public static final String UPGRADE_CCM_REVERT_FAILURE_STATE_NAME = "UPGRADE_CCM_REVERT_FAILURE_STATE";
+
+    public static final String UPGRADE_CCM_REVERT_ALL_FAILURE_STATE_NAME = "UPGRADE_CCM_REVERT_ALL_FAILURE_STATE";
+
     public static final String UPGRADE_CCM_PUSH_SALT_STATES_STATE_NAME = "UPGRADE_CCM_PUSH_SALT_STATES_STATE";
 
     public static final String UPGRADE_CCM_UPGRADE_STATE_NAME = "UPGRADE_CCM_UPGRADE_STATE";
@@ -22,8 +28,6 @@ public class UpgradeCcmState implements FlowState {
     public static final String UPGRADE_CCM_RECONFIGURE_NGINX_STATE_NAME = "UPGRADE_CCM_RECONFIGURE_NGINX_STATE";
 
     public static final String UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE_NAME = "UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE";
-
-    public static final String UPGRADE_CCM_HEALTH_CHECK_STATE_NAME = "UPGRADE_CCM_HEALTH_CHECK_STATE";
 
     public static final String UPGRADE_CCM_REMOVE_MINA_STATE_NAME = "UPGRADE_CCM_REMOVE_MINA_STATE";
 
@@ -39,6 +43,12 @@ public class UpgradeCcmState implements FlowState {
 
     public static final UpgradeCcmState UPGRADE_CCM_FAILED_STATE = new UpgradeCcmState(UPGRADE_CCM_FAILED_STATE_NAME);
 
+    public static final UpgradeCcmState UPGRADE_CCM_FINALIZE_FAILED_STATE = new UpgradeCcmState(UPGRADE_CCM_FINALIZE_FAILED_STATE_NAME);
+
+    public static final UpgradeCcmState UPGRADE_CCM_REVERT_FAILURE_STATE = new UpgradeCcmState(UPGRADE_CCM_REVERT_FAILURE_STATE_NAME);
+
+    public static final UpgradeCcmState UPGRADE_CCM_REVERT_ALL_FAILURE_STATE = new UpgradeCcmState(UPGRADE_CCM_REVERT_ALL_FAILURE_STATE_NAME);
+
     public static final UpgradeCcmState UPGRADE_CCM_FINISHED_STATE = new UpgradeCcmState(UPGRADE_CCM_FINISHED_STATE_NAME);
 
     public static final UpgradeCcmState UPGRADE_CCM_PUSH_SALT_STATES_STATE = new UpgradeCcmState(UPGRADE_CCM_PUSH_SALT_STATES_STATE_NAME);
@@ -48,8 +58,6 @@ public class UpgradeCcmState implements FlowState {
     public static final UpgradeCcmState UPGRADE_CCM_RECONFIGURE_NGINX_STATE = new UpgradeCcmState(UPGRADE_CCM_RECONFIGURE_NGINX_STATE_NAME);
 
     public static final UpgradeCcmState UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE = new UpgradeCcmState(UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE_NAME);
-
-    public static final UpgradeCcmState UPGRADE_CCM_HEALTH_CHECK_STATE = new UpgradeCcmState(UPGRADE_CCM_HEALTH_CHECK_STATE_NAME);
 
     public static final UpgradeCcmState UPGRADE_CCM_REMOVE_MINA_STATE = new UpgradeCcmState(UPGRADE_CCM_REMOVE_MINA_STATE_NAME);
 

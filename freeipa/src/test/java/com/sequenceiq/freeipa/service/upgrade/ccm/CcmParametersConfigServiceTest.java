@@ -71,7 +71,8 @@ class CcmParametersConfigServiceTest {
                 Map.entry("agent_backend_id_prefix", params.getAgentBackendIdPrefix()),
                 Map.entry("environment_crn", ENV_CRN),
                 Map.entry("agent_access_key_id", MACHINE_USER_ACCESS_KEY),
-                Map.entry("agent_enciphered_access_key", MACHINE_USER_PRIVATE_KEY)
+                Map.entry("agent_enciphered_access_key", MACHINE_USER_PRIVATE_KEY),
+                Map.entry("activation_in_minutes", 0L)
         );
     }
 
@@ -94,7 +95,8 @@ class CcmParametersConfigServiceTest {
                 Map.entry("agent_backend_id_prefix", params.getAgentBackendIdPrefix()),
                 Map.entry("environment_crn", ENV_CRN),
                 Map.entry("agent_access_key_id", EMPTY),
-                Map.entry("agent_enciphered_access_key", EMPTY)
+                Map.entry("agent_enciphered_access_key", EMPTY),
+                Map.entry("activation_in_minutes", 0L)
         );
     }
 

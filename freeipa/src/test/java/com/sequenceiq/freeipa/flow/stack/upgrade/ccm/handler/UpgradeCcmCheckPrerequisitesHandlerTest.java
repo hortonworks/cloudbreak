@@ -42,7 +42,7 @@ class UpgradeCcmCheckPrerequisitesHandlerTest {
 
     @BeforeEach
     void setUp() {
-        UpgradeCcmEvent upgradeCcmEvent = new UpgradeCcmEvent("selector", STACK_ID, Tunnel.CCM);
+        UpgradeCcmEvent upgradeCcmEvent = new UpgradeCcmEvent("selector", STACK_ID, Tunnel.CCM, null);
             event = new Event<>(upgradeCcmEvent);
     }
 

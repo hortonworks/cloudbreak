@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -24,6 +25,9 @@ public class CcmParametersConfigService {
     private static final String UPGRADE_CCM_KEY = "ccm_jumpgate";
 
     private static final String UPGRADE_CCM_SLS_PATH = "/upgradeccm/init.sls";
+
+    @Value("${ccmRevertJob.activationInMinutes}")
+    private long activationInMinutes;
 
     @Inject
     private EntitlementService entitlementService;
@@ -42,11 +46,16 @@ public class CcmParametersConfigService {
             boolean useOneWayTls = entitlementService.ccmV2UseOneWayTls(accountId);
             ccmConfig.put("agent_access_key_id", useOneWayTls ? ccmParameters.getAgentMachineUserAccessKey() : EMPTY);
             ccmConfig.put("agent_enciphered_access_key", useOneWayTls ? ccmParameters.getAgentMachineUserEncipheredAccessKey() : EMPTY);
+            ccmConfig.put("activation_in_minutes", getActivationInMinutes());
             return Map.of(UPGRADE_CCM_KEY, new SaltPillarProperties(UPGRADE_CCM_SLS_PATH, singletonMap(UPGRADE_CCM_KEY, ccmConfig)));
         } else {
             LOGGER.debug("CCM properties are empty in the Salt Pillar");
             return Map.of();
         }
+    }
+
+    public long getActivationInMinutes() {
+        return activationInMinutes;
     }
 
 }

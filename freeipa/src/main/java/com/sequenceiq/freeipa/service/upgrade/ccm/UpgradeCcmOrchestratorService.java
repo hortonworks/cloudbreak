@@ -31,6 +31,8 @@ public class UpgradeCcmOrchestratorService {
 
     private static final String DISABLE_MINA_STATE = "upgradeccm/disable-ccmv1";
 
+    private static final String FINALIZE = "upgradeccm/finalize";
+
     @Inject
     private StackService stackService;
 
@@ -52,6 +54,12 @@ public class UpgradeCcmOrchestratorService {
     public void reconfigureNginx(Long stackId) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = createStateParams(stackId, NGINX_STATE);
         LOGGER.debug("Calling reconfigureNginx with state params '{}'", stateParams);
+        hostOrchestrator.runOrchestratorState(stateParams);
+    }
+
+    public void finalizeConfiguration(Long stackId) throws CloudbreakOrchestratorException {
+        OrchestratorStateParams stateParams = createStateParams(stackId, FINALIZE);
+        LOGGER.debug("Calling finalize with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 

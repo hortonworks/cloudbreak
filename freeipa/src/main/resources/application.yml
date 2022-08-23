@@ -334,3 +334,6 @@ crn:
 authdistributor:
   host: localhost
   port: 8982
+
+ccmRevertJob:
+  activationInMinutes: 5
