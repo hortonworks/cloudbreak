@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.nodestatus;
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -54,8 +55,8 @@ public class NodeStatusJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Object getMdcContextObject() {
-        return stackService.getStackById(getStackId());
+    protected Optional<Object> getMdcContextObject() {
+        return Optional.ofNullable(stackService.getStackById(getStackId()));
     }
 
     @Override

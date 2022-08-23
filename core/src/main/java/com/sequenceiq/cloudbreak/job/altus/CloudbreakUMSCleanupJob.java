@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.cleanup.UMSCleanupConfig;
 import com.sequenceiq.cloudbreak.quartz.cleanup.job.UMSCleanupJob;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
@@ -46,8 +48,8 @@ public class CloudbreakUMSCleanupJob extends UMSCleanupJob {
     }
 
     @Override
-    protected Object getMdcContextObject() {
-        return null;
+    protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
+        return Optional.empty();
     }
 
     @Override

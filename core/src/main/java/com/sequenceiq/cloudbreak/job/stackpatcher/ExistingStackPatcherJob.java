@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.job.stackpatcher;
 
 import static com.sequenceiq.cloudbreak.job.stackpatcher.ExistingStackPatcherJobAdapter.STACK_PATCH_TYPE_NAME;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
@@ -17,7 +19,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatch;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchStatus;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
@@ -54,8 +55,8 @@ public class ExistingStackPatcherJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Object getMdcContextObject() {
-        return stackViewService.findById(getStackId()).orElseGet(StackView::new);
+    protected Optional<Object> getMdcContextObject() {
+        return Optional.ofNullable(stackViewService.findById(getStackId()));
     }
 
     @Override

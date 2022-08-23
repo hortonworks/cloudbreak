@@ -57,8 +57,8 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Object getMdcContextObject() {
-        return stackService.getStackById(getStackId());
+    protected Optional<Object> getMdcContextObject() {
+        return Optional.ofNullable(stackService.getStackById(getStackId()));
     }
 
     private Long getStackId() {
