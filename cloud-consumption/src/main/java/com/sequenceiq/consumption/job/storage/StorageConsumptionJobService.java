@@ -4,6 +4,8 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -22,6 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.consumption.domain.Consumption;
+import com.sequenceiq.consumption.service.ConsumptionService;
 
 @Service
 public class StorageConsumptionJobService {
@@ -43,28 +48,125 @@ public class StorageConsumptionJobService {
     @Inject
     private StorageConsumptionConfig storageConsumptionConfig;
 
-    public void schedule(StorageConsumptionJobAdapter resource) {
+    @Inject
+    private ConsumptionService consumptionService;
+
+    public void schedule(Long id) {
+        StorageConsumptionJobAdapter resourceAdapter = new StorageConsumptionJobAdapter(id, applicationContext);
+        scheduleIfNotScheduled(resourceAdapter);
+    }
+
+    public void schedule(Consumption consumption) {
+        if (consumptionService.isAggregationRequired(consumption)) {
+            scheduleWithAggregation(consumption);
+        } else {
+            schedule(consumption.getId());
+        }
+    }
+
+    private void scheduleIfNotScheduled(StorageConsumptionJobAdapter resource) {
         if (storageConsumptionConfig.isStorageConsumptionEnabled()) {
             JobDetail jobDetail = buildJobDetail(resource);
             Trigger trigger = buildJobTrigger(jobDetail);
             try {
                 JobKey jobKey = JobKey.jobKey(resource.getJobResource().getLocalId(), JOB_GROUP);
                 if (scheduler.getJobDetail(jobKey) != null) {
-                    LOGGER.info("Unscheduling storage consumption job key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
-                    unschedule(jobKey.getName());
+                    LOGGER.info("Skipping scheduling, storage consumption job with key: '{}' and group: '{}' is already scheduled",
+                            jobKey.getName(), jobKey.getGroup());
+                } else {
+                    LOGGER.info("Scheduling storage consumption job for key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
+                    scheduler.scheduleJob(jobDetail, trigger);
                 }
-                LOGGER.info("Scheduling storage consumption job for key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
-                scheduler.scheduleJob(jobDetail, trigger);
             } catch (SchedulerException e) {
                 LOGGER.error(String.format("Error during scheduling quartz job: %s", jobDetail), e);
             }
         }
-
     }
 
-    public void schedule(Long id) {
-        StorageConsumptionJobAdapter resourceAdapter = new StorageConsumptionJobAdapter(id, applicationContext);
-        schedule(resourceAdapter);
+    private void scheduleWithAggregation(Consumption consumption) {
+        String storageLocation = consumption.getStorageLocation();
+        String environmentCrn = consumption.getEnvironmentCrn();
+        List<Consumption> consumptionsForSameEnvAndBucket = consumptionService.findAllStorageConsumptionForEnvCrnAndBucketName(environmentCrn, storageLocation);
+        try {
+            if (isJobRunningForConsumptions(consumptionsForSameEnvAndBucket)) {
+                LOGGER.info("Skipping scheduling as aggregated storage consumption job is already running for " +
+                                "environment CRN '{}' and bucket name of location '{}'.", environmentCrn, storageLocation);
+            } else {
+                LOGGER.info("Scheduling aggregated storage consumption job for environment CRN '{}' and bucket name of location '{}'. " +
+                                "Using consumption with CRN '{}' and ID '{}'.",
+                        environmentCrn, storageLocation, consumption.getResourceCrn(), consumption.getId());
+                schedule(consumption.getId());
+            }
+        } catch (SchedulerException e) {
+            LOGGER.error("Error during getting aggregated storage consumption job details " +
+                            "for environment CRN '{}' and bucket name of location '{}'. Reason: {}",
+                    environmentCrn, storageLocation, e.getMessage(), e);
+        }
+    }
+
+    public void unschedule(Consumption consumption) {
+        if (consumptionService.isAggregationRequired(consumption)) {
+            unscheduleWithAggregation(consumption);
+        } else {
+            unschedule(consumption.getId());
+        }
+    }
+
+    private void unschedule(Long id) {
+        JobKey jobKey = JobKey.jobKey(id.toString(), JOB_GROUP);
+        try {
+            LOGGER.info("Unscheduling storage consumption job key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
+            scheduler.deleteJob(jobKey);
+        } catch (SchedulerException e) {
+            LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
+        }
+    }
+
+    private void unscheduleWithAggregation(Consumption consumption) {
+        String storageLocation = consumption.getStorageLocation();
+        String environmentCrn = consumption.getEnvironmentCrn();
+        try {
+            if (isJobRunningForConsumption(consumption)) {
+                LOGGER.info("Unscheduling aggregated storage consumption job for environment CRN '{}' and bucket name of location '{}'. " +
+                                "Using consumption with CRN '{}' and ID '{}'.",
+                        environmentCrn, storageLocation, consumption.getResourceCrn(), consumption.getId());
+                unschedule(consumption.getId());
+
+                Optional<Consumption> nextConsumptionForGroupOptional = consumptionService
+                        .findAllStorageConsumptionForEnvCrnAndBucketName(environmentCrn, storageLocation)
+                        .stream()
+                        .filter(cons -> !cons.getId().equals(consumption.getId()))
+                        .findFirst();
+                if (nextConsumptionForGroupOptional.isPresent()) {
+                    Consumption nextConsumptionForGroup = nextConsumptionForGroupOptional.get();
+                    LOGGER.info("Consumptions are still present for environment CRN '{}' and bucket name of location '{}'." +
+                                    "Rescheduling aggregated storage consumption job. " +
+                                    "Using consumption with CRN '{}' and ID '{}'.",
+                            environmentCrn, storageLocation, nextConsumptionForGroup.getResourceCrn(), nextConsumptionForGroup.getId());
+                    schedule(nextConsumptionForGroup.getId());
+                }
+            } else {
+                LOGGER.info("Skipping unscheduling as no job is running for consumption with CRN '{}' and ID '{}'.",
+                        consumption.getResourceCrn(), consumption.getId());
+            }
+        } catch (SchedulerException e) {
+            LOGGER.error("Error during getting aggregated storage consumption job details " +
+                            "for environment CRN '{}' and bucket name of location '{}'. Reason: {}",
+                    environmentCrn, storageLocation, e.getMessage(), e);
+        }
+    }
+
+    private boolean isJobRunningForConsumption(Consumption consumption) throws SchedulerException {
+        return scheduler.getJobDetail(JobKey.jobKey(consumption.getId().toString(), JOB_GROUP)) != null;
+    }
+
+    private boolean isJobRunningForConsumptions(List<Consumption> consumptions) throws SchedulerException {
+        for (Consumption consumption : consumptions) {
+            if (isJobRunningForConsumption(consumption)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private JobDetail buildJobDetail(StorageConsumptionJobAdapter resource) {
@@ -89,17 +191,6 @@ public class StorageConsumptionJobService {
                         .repeatForever()
                         .withMisfireHandlingInstructionIgnoreMisfires())
                 .build();
-
-    }
-
-    public void unschedule(String id) {
-        JobKey jobKey = JobKey.jobKey(id, JOB_GROUP);
-        try {
-            LOGGER.info("Unscheduling storage consumption job key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
-            scheduler.deleteJob(jobKey);
-        } catch (SchedulerException e) {
-            LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
-        }
 
     }
 

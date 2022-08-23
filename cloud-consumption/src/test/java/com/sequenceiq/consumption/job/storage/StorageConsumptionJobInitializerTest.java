@@ -1,12 +1,12 @@
 package com.sequenceiq.consumption.job.storage;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,8 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.quartz.model.JobResource;
-import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
+import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.service.ConsumptionService;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,17 +32,11 @@ public class StorageConsumptionJobInitializerTest {
     @Mock
     private StorageConsumptionConfig storageConsumptionConfig;
 
-    @Mock
-    private JobResource consumption1;
-
-    @Mock
-    private JobResource consumption2;
-
     @InjectMocks
     private StorageConsumptionJobInitializer underTest;
 
     @Captor
-    private ArgumentCaptor<StorageConsumptionJobAdapter> jobAdapterCaptor;
+    private ArgumentCaptor<Long> jobIdCaptor;
 
     @Test
     public void testJobDisabled() {
@@ -56,27 +49,105 @@ public class StorageConsumptionJobInitializerTest {
     }
 
     @Test
-    public void testNoJobsPresent() {
+    public void testNoConsumptionToSchedule() {
         when(storageConsumptionConfig.isStorageConsumptionEnabled()).thenReturn(true);
-        when(consumptionService.findAllStorageConsumptionJobResource()).thenReturn(List.of());
+
+        when(consumptionService.findAllConsumption()).thenReturn(List.of());
+        when(consumptionService.groupConsumptionsByEnvCrnAndBucketName(any())).thenReturn(List.of());
 
         underTest.initJobs();
 
-        verify(consumptionService, times(1)).findAllStorageConsumptionJobResource();
         verifyNoInteractions(jobService);
     }
 
     @Test
-    public void testJobsScheduled() {
+    public void testNonAggregatedScheduling() {
         when(storageConsumptionConfig.isStorageConsumptionEnabled()).thenReturn(true);
-        when(consumptionService.findAllStorageConsumptionJobResource()).thenReturn(List.of(consumption1, consumption2));
+
+        Consumption consumption1 = consumption(1L);
+        Consumption consumption2 = consumption(2L);
+
+        when(consumptionService.findAllConsumption()).thenReturn(List.of(consumption1, consumption2));
+        when(consumptionService.isAggregationRequired(consumption1)).thenReturn(false);
+        when(consumptionService.isAggregationRequired(consumption2)).thenReturn(false);
+        when(consumptionService.groupConsumptionsByEnvCrnAndBucketName(any())).thenReturn(List.of());
 
         underTest.initJobs();
 
-        verify(consumptionService, times(1)).findAllStorageConsumptionJobResource();
-        verify(jobService, times(2)).schedule(jobAdapterCaptor.capture());
-        Assertions.assertEquals(List.of(consumption1, consumption2),
-                jobAdapterCaptor.getAllValues().stream().map(JobResourceAdapter::getJobResource).collect(Collectors.toList()));
+        verify(jobService, times(2)).schedule(jobIdCaptor.capture());
+        Assertions.assertEquals(List.of(consumption1.getId(), consumption2.getId()), jobIdCaptor.getAllValues());
+    }
+
+    @Test
+    public void testAggregatedSchedulingWithMultiElementGroups() {
+        when(storageConsumptionConfig.isStorageConsumptionEnabled()).thenReturn(true);
+
+        Consumption consumption11 = consumption(11L);
+        Consumption consumption12 = consumption(12L);
+        Consumption consumption21 = consumption(21L);
+        Consumption consumption22 = consumption(22L);
+        List<Consumption> consumptions = List.of(consumption11, consumption12, consumption21, consumption22);
+
+        when(consumptionService.findAllConsumption()).thenReturn(consumptions);
+        consumptions.forEach(consumption -> when(consumptionService.isAggregationRequired(consumption)).thenReturn(true));
+        List<List<Consumption>> grouppedConsumptions = List.of(
+                List.of(consumption11, consumption12),
+                List.of(consumption21, consumption22));
+        when(consumptionService.groupConsumptionsByEnvCrnAndBucketName(any())).thenReturn(grouppedConsumptions);
+
+        underTest.initJobs();
+
+        verify(jobService, times(2)).schedule(jobIdCaptor.capture());
+        Assertions.assertEquals(List.of(consumption11.getId(), consumption21.getId()), jobIdCaptor.getAllValues());
+    }
+
+    @Test
+    public void testAggregatedSchedulingWithSingleElementGroups() {
+        when(storageConsumptionConfig.isStorageConsumptionEnabled()).thenReturn(true);
+
+        Consumption consumption11 = consumption(11L);
+        Consumption consumption21 = consumption(21L);
+        List<Consumption> consumptions = List.of(consumption11, consumption21);
+
+        when(consumptionService.findAllConsumption()).thenReturn(consumptions);
+        consumptions.forEach(consumption -> when(consumptionService.isAggregationRequired(consumption)).thenReturn(true));
+        List<List<Consumption>> grouppedConsumptions = List.of(
+                List.of(consumption11),
+                List.of(consumption21));
+        when(consumptionService.groupConsumptionsByEnvCrnAndBucketName(any())).thenReturn(grouppedConsumptions);
+
+        underTest.initJobs();
+
+        verify(jobService, times(2)).schedule(jobIdCaptor.capture());
+        Assertions.assertEquals(List.of(consumption11.getId(), consumption21.getId()), jobIdCaptor.getAllValues());
+    }
+
+    @Test
+    public void testAggregatedSchedulingWithSingleAndMultiElementGroups() {
+        when(storageConsumptionConfig.isStorageConsumptionEnabled()).thenReturn(true);
+
+        Consumption consumption11 = consumption(11L);
+        Consumption consumption12 = consumption(12L);
+        Consumption consumption21 = consumption(21L);
+        List<Consumption> consumptions = List.of(consumption11, consumption12, consumption21);
+
+        when(consumptionService.findAllConsumption()).thenReturn(consumptions);
+        consumptions.forEach(consumption -> when(consumptionService.isAggregationRequired(consumption)).thenReturn(true));
+        List<List<Consumption>> grouppedConsumptions = List.of(
+                List.of(consumption11, consumption12),
+                List.of(consumption21));
+        when(consumptionService.groupConsumptionsByEnvCrnAndBucketName(any())).thenReturn(grouppedConsumptions);
+
+        underTest.initJobs();
+
+        verify(jobService, times(2)).schedule(jobIdCaptor.capture());
+        Assertions.assertEquals(List.of(consumption11.getId(), consumption21.getId()), jobIdCaptor.getAllValues());
+    }
+
+    private Consumption consumption(Long id) {
+        Consumption consumption = new Consumption();
+        consumption.setId(id);
+        return consumption;
     }
 
 }
