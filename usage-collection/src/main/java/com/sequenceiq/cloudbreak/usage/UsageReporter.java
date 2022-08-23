@@ -163,4 +163,18 @@ public interface UsageReporter {
      */
     void cdpSaltPasswordRotationEvent(
             UsageProto.CDPSaltPasswordRotationEvent details);
+
+    /**
+     * Reports a recipe lifecycle event (creation/attachment/detachment/deletion)
+     * @param details the event details
+     */
+    void cdpRecipeEvent(
+            UsageProto.CDPRecipeEvent details);
+
+    /**
+     * Reports a cluster creation event from recipe point of view
+     * @param details the event details
+     */
+    void cdpClusterCreationRecipeEvent(
+            UsageProto.CDPClusterCreationRecipeEvent details);
 }

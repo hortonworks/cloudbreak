@@ -6,10 +6,12 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atMostOnce;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -18,6 +20,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -26,11 +29,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -38,12 +43,17 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.CreationType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeViewRepository;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
@@ -51,6 +61,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.usage.service.RecipeUsageService;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -94,6 +105,9 @@ public class RecipeServiceTest {
     @Mock
     private FreeipaClientService freeipaClientService;
 
+    @Mock
+    private RecipeUsageService recipeUsageService;
+
     @Spy
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
@@ -106,6 +120,45 @@ public class RecipeServiceTest {
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
         regionAwareInternalCrnGeneratorFactory.setPartition("cdp");
         regionAwareInternalCrnGeneratorFactory.setRegion("us-west-1");
+        lenient().doNothing().when(recipeUsageService).sendDeletedUsageReport(anyString(), anyString(), anyString());
+        lenient().doNothing().when(recipeUsageService).sendCreatedUsageReport(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public void testClusterCreationUsageSending() {
+        Stack stack = stack(Set.of(
+                hostGroup("hostGroup1", Set.of(
+                        recipeWithType("rp1", RecipeType.PRE_SERVICE_DEPLOYMENT),
+                        recipeWithType("rp2", RecipeType.POST_SERVICE_DEPLOYMENT),
+                        recipeWithType("rp3", RecipeType.PRE_TERMINATION)
+                )),
+                hostGroup("hostGroup2", Set.of(
+                        recipeWithType("rp4", RecipeType.POST_CLOUDERA_MANAGER_START),
+                        recipeWithType("rp2", RecipeType.POST_SERVICE_DEPLOYMENT),
+                        recipeWithType("rp5", RecipeType.POST_CLOUDERA_MANAGER_START),
+                        recipeWithType("rp6", RecipeType.POST_CLUSTER_INSTALL)
+                ))
+        ));
+        doNothing().when(recipeUsageService).sendClusterCreationRecipeUsageReport(anyString(), anyInt(), any(), any());
+        underTest.sendClusterCreationUsageReport(stack);
+        ArgumentCaptor<Optional<String>> typeDetailsCaptor = ArgumentCaptor.forClass(Optional.class);
+        ArgumentCaptor<Optional<String>> hostGroupDetailsCaptor = ArgumentCaptor.forClass(Optional.class);
+        verify(recipeUsageService).sendClusterCreationRecipeUsageReport(eq("crn"), eq(7),
+                typeDetailsCaptor.capture(), hostGroupDetailsCaptor.capture());
+        assertTrue(typeDetailsCaptor.getValue().isPresent());
+        assertTrue(hostGroupDetailsCaptor.getValue().isPresent());
+        String typeDetailsCaptorValue = typeDetailsCaptor.getValue().get();
+        String hostGroupDetailsCaptorValue = hostGroupDetailsCaptor.getValue().get();
+        assertTrue(JsonUtil.isValid(typeDetailsCaptorValue));
+        assertTrue(JsonUtil.isValid(hostGroupDetailsCaptorValue));
+        Map<RecipeType, Integer> typeDetails = JsonUtil.jsonToType(typeDetailsCaptorValue, new TypeReference<>() {
+        });
+        Map<String, Integer> hostGroupDetails = JsonUtil.jsonToType(hostGroupDetailsCaptorValue, new TypeReference<>() {
+        });
+        assertEquals(RecipeType.values().length, typeDetails.entrySet().size());
+        assertEquals(2, typeDetails.get(RecipeType.POST_CLOUDERA_MANAGER_START));
+        assertEquals(3, hostGroupDetails.get("hostGroup1"));
+        assertEquals(4, hostGroupDetails.get("hostGroup2"));
     }
 
     @Test
@@ -275,6 +328,29 @@ public class RecipeServiceTest {
         Workspace ws = new Workspace();
         ws.setId(6L);
         return ws;
+    }
+
+    private Recipe recipeWithType(String name, RecipeType type) {
+        Recipe recipe = new Recipe();
+        recipe.setRecipeType(type);
+        recipe.setName(name);
+        return recipe;
+    }
+
+    private HostGroup hostGroup(String name, Set<Recipe> recipes) {
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setRecipes(recipes);
+        hostGroup.setName(name);
+        return hostGroup;
+    }
+
+    private Stack stack(Set<HostGroup> hostGroups) {
+        Stack stack = new Stack();
+        stack.setResourceCrn("crn");
+        Cluster cluster = new Cluster();
+        stack.setCluster(cluster);
+        cluster.setHostGroups(hostGroups);
+        return stack;
     }
 
 }

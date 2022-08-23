@@ -23,6 +23,7 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.service.EnvironmentPropertyProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -161,6 +162,17 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
             throw new BadRequestException(String.format("Multiple FreeIPA stack by environment [%s] found", environmentCrn));
         } else {
             return ids.get(0);
+        }
+    }
+
+    public ResourceBasicView getResourceBasicViewByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
+        List<ResourceBasicView> views = stackRepository.findAllResourceBasicViewByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        if (views.isEmpty()) {
+            throw new NotFoundException(String.format("FreeIPA stack by environment [%s] not found", environmentCrn));
+        } else if (views.size() > 1) {
+            throw new BadRequestException(String.format("Multiple FreeIPA stack by environment [%s] found", environmentCrn));
+        } else {
+            return views.get(0);
         }
     }
 

@@ -286,6 +286,8 @@ public class StackCreatorService {
                 "Stack triggerProvisioning took {} ms with name {}", stackName);
         response.setFlowIdentifier(flowIdentifier);
 
+        recipeService.sendClusterCreationUsageReport(savedStack);
+
         metricService.submit(STACK_PREPARATION, System.currentTimeMillis() - start);
 
         return response;

@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -72,7 +71,7 @@ public class StackToStackDetailsConverterTest {
     public void testConversionExternalDB() {
         // GIVEN
         Stack stack = createStack();
-        Mockito.when(dbServerConfigurer.isRemoteDatabaseNeeded(stack.getCluster().getDatabaseServerCrn())).thenReturn(true);
+        when(dbServerConfigurer.isRemoteDatabaseNeeded(stack.getCluster().getDatabaseServerCrn())).thenReturn(true);
         // WHEN
         StackDetails actual = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
         // THEN
@@ -83,7 +82,7 @@ public class StackToStackDetailsConverterTest {
     public void testConversionWhenDBOnAttachedDisk() {
         // GIVEN
         Stack stack = createStack();
-        Mockito.when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stack.getCluster(), Optional.empty())).thenReturn(true);
+        when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stack.getCluster(), Optional.empty())).thenReturn(true);
         // WHEN
         StackDetails actual = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
         // THEN
@@ -94,7 +93,7 @@ public class StackToStackDetailsConverterTest {
     public void testConversionWhenDBTypeThrowsException() {
         // GIVEN
         Stack stack = createStack();
-        Mockito.when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stack.getCluster(), Optional.empty())).thenThrow(new RuntimeException());
+        when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stack.getCluster(), Optional.empty())).thenThrow(new RuntimeException());
         // WHEN
         StackDetails actual = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
         // THEN

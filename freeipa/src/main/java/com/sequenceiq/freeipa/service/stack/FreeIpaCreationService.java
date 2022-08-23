@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -173,6 +174,7 @@ public class FreeIpaCreationService {
                 stack.setSecurityConfig(savedSecurityConfig);
                 Stack savedStack = stackService.save(stack);
                 freeIpaRecipeService.saveRecipes(request.getRecipes(), savedStack.getId());
+                freeIpaRecipeService.sendCreationUsageReport(stack.getResourceCrn(), CollectionUtils.emptyIfNull(request.getRecipes()).size());
                 ImageSettingsRequest imageSettingsRequest = request.getImage();
                 ImageEntity image = imageService.create(savedStack, Objects.nonNull(imageSettingsRequest) ? imageSettingsRequest : new ImageSettingsRequest());
                 FreeIpa freeIpa = freeIpaService.create(savedStack, request.getFreeIpa());

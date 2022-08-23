@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.GeneratedRecipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.usage.service.RecipeUsageService;
 
 @Service
 public class UpdateRecipeService {
@@ -35,10 +36,14 @@ public class UpdateRecipeService {
 
     private final GeneratedRecipeService generatedRecipeService;
 
-    public UpdateRecipeService(RecipeService recipeService, HostGroupService hostGroupService, GeneratedRecipeService generatedRecipeService) {
+    private final RecipeUsageService recipeUsageService;
+
+    public UpdateRecipeService(RecipeService recipeService, HostGroupService hostGroupService,
+            GeneratedRecipeService generatedRecipeService, RecipeUsageService recipeUsageService) {
         this.recipeService = recipeService;
         this.hostGroupService = hostGroupService;
         this.generatedRecipeService = generatedRecipeService;
+        this.recipeUsageService = recipeUsageService;
     }
 
     /**
@@ -167,8 +172,14 @@ public class UpdateRecipeService {
                 .collect(Collectors.toSet());
         if (detach) {
             detachRecipeFromHostGroup(recipe, hostGroup, existingRecipeNames);
+            recipeUsageService.sendDetachedUsageReport(recipe.getName(),
+                    Optional.ofNullable(recipe.getResourceCrn()), Optional.ofNullable(recipe.getRecipeTypeString()),
+                    stack.getResourceCrn(), Optional.of(hostGroupName));
         } else {
             attachRecipeToHostGroup(recipe, hostGroup, existingRecipeNames);
+            recipeUsageService.sendAttachedUsageReport(recipe.getName(),
+                    Optional.ofNullable(recipe.getResourceCrn()), Optional.ofNullable(recipe.getRecipeTypeString()),
+                    stack.getResourceCrn(), Optional.of(hostGroupName));
         }
     }
 

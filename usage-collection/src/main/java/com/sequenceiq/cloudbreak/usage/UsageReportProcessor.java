@@ -281,6 +281,22 @@ public class UsageReportProcessor implements UsageReporter {
                 .build(), null);
     }
 
+    @Override
+    public void cdpRecipeEvent(UsageProto.CDPRecipeEvent details) {
+        checkNotNull(details);
+        usageProcessingStrategy.processUsage(eventBuilder()
+                .setCdpRecipeEvent(details)
+                .build(), null);
+    }
+
+    @Override
+    public void cdpClusterCreationRecipeEvent(UsageProto.CDPClusterCreationRecipeEvent details) {
+        checkNotNull(details);
+        usageProcessingStrategy.processUsage(eventBuilder()
+                .setCdpClusterCreationRecipeEvent(details)
+                .build(), null);
+    }
+
     private UsageProto.Event.Builder eventBuilder() {
         return UsageProto.Event.newBuilder()
                 .setId(UUID.randomUUID().toString())

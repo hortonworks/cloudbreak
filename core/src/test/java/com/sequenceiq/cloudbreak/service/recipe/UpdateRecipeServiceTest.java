@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.GeneratedRecipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.usage.service.RecipeUsageService;
 
 @ExtendWith(MockitoExtension.class)
 public class UpdateRecipeServiceTest {
@@ -62,9 +63,12 @@ public class UpdateRecipeServiceTest {
     @Mock
     private GeneratedRecipeService generatedRecipeService;
 
+    @Mock
+    private RecipeUsageService recipeUsageService;
+
     @BeforeEach
     public void setUp() {
-        underTest = new UpdateRecipeService(recipeService, hostGroupService, generatedRecipeService);
+        underTest = new UpdateRecipeService(recipeService, hostGroupService, generatedRecipeService, recipeUsageService);
     }
 
     @Test
