@@ -31,6 +31,10 @@ public class AzureCredentialRequestParameters implements Serializable {
 
     @Valid
     @ApiModelProperty
+    private AppBasedWithCertificateAuthenticationRequest appBasedWithCertAuth;
+
+    @Valid
+    @ApiModelProperty
     private RoleBasedRequest roleBased;
 
     public RoleBasedRequest getRoleBased() {
@@ -47,6 +51,14 @@ public class AzureCredentialRequestParameters implements Serializable {
 
     public void setAppBased(AppBasedRequest appBased) {
         this.appBased = appBased;
+    }
+
+    public AppBasedWithCertificateAuthenticationRequest getAppBasedWithCertAuth() {
+        return appBasedWithCertAuth;
+    }
+
+    public void setAppBasedWithCertAuth(AppBasedWithCertificateAuthenticationRequest appBasedWithCertAuth) {
+        this.appBasedWithCertAuth = appBasedWithCertAuth;
     }
 
     public String getSubscriptionId() {
@@ -71,6 +83,7 @@ public class AzureCredentialRequestParameters implements Serializable {
                 "subscriptionId='" + subscriptionId + '\'' +
                 ", tenantId='" + tenantId + '\'' +
                 ", appBased=" + appBased +
+                ", appBasedWithCertAuth=" + appBasedWithCertAuth +
                 ", roleBased=" + roleBased +
                 '}';
     }

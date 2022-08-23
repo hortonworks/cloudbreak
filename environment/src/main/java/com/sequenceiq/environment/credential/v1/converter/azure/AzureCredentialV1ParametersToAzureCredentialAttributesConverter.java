@@ -30,6 +30,9 @@ public class AzureCredentialV1ParametersToAzureCredentialAttributesConverter {
         doIfNotNull(source.getCodeGrantFlowBased(), param -> response.setRoleBased(getRoleBased(param)));
 
         doIfNotNull(source.getAppBased(), param -> response.setAccessKey(param.getAccessKey()));
+        if (source.getAppBased() != null) {
+            response.setAuthenticationType("SECRET");
+        }
         doIfNotNull(source.getCodeGrantFlowBased(), param -> response.setAccessKey(param.getAccessKey()));
 
         response.setSubscriptionId(source.getSubscriptionId());
