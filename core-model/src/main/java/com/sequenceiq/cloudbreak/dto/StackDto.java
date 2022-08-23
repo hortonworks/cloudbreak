@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.domain.IdAware;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
@@ -193,6 +194,10 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
         return securityConfig;
     }
 
+    public String getAccountId() {
+        return Crn.safeFromString(getResourceCrn()).getAccountId();
+    }
+
     @Override
     public InstanceGroupDto getInstanceGroupByInstanceGroupName(String instanceGroup) {
         return instanceGroups.get(instanceGroup);
@@ -234,6 +239,14 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
     public List<InstanceMetadataView> getNotTerminatedAndNotZombieGatewayInstanceMetadata() {
         return getAllAvailableInstances().stream()
                 .filter(im -> im.getInstanceGroupType() == InstanceGroupType.GATEWAY)
+                .collect(Collectors.toList());
+    }
+
+    public List<InstanceMetadataView> getNotTerminatedGatewayInstanceMetadata() {
+        return instanceGroups.values().stream()
+                .flatMap(ig -> ig.getInstanceMetadataViews().stream())
+                .filter(im -> im.getInstanceGroupType() == InstanceGroupType.GATEWAY)
+                .filter(im -> !im.isTerminated())
                 .collect(Collectors.toList());
     }
 

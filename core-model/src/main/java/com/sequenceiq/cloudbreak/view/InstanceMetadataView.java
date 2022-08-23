@@ -102,6 +102,11 @@ public interface InstanceMetadataView {
         return InstanceStatus.ZOMBIE.equals(getInstanceStatus());
     }
 
+    default boolean isHealthy() {
+        InstanceStatus instanceStatus = getInstanceStatus();
+        return InstanceStatus.SERVICES_HEALTHY.equals(instanceStatus) || InstanceStatus.SERVICES_RUNNING.equals(instanceStatus);
+    }
+
     default String getShortHostname() {
         String discoveryFQDN = getDiscoveryFQDN();
         if (discoveryFQDN == null || discoveryFQDN.isEmpty()) {

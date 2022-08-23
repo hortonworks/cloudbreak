@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -51,9 +50,9 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
@@ -383,22 +382,9 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testRotateSaltPasswordWithoutEntitlement() {
-        when(entitlementService.isSaltUserPasswordRotationEnabled(any())).thenReturn(false);
-
-        assertThatThrownBy(() ->
-                ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.rotateSaltPassword(STACK_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL)))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Rotating SaltStack user password is not supported in your account");
-    }
-
-    @Test
     public void testRotateSaltPassword() throws CloudbreakOrchestratorException {
-        when(entitlementService.isSaltUserPasswordRotationEnabled(any())).thenReturn(true);
-
         ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.rotateSaltPassword(STACK_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL));
 
-        verify(entitlementService).isSaltUserPasswordRotationEnabled(any());
         verify(stackOperationService).rotateSaltPassword(STACK_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
     }
 

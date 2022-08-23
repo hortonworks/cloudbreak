@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails.CLUSTE
 import static java.util.Collections.singletonMap;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -43,6 +42,7 @@ import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigView;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
+import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 /**
@@ -130,18 +130,10 @@ public class TelemetryDecorator {
     }
 
     public Map<String, SaltPillarProperties> decoratePillar(Map<String, SaltPillarProperties> servicePillar,
-            StackView stack, ClusterView cluster, Telemetry telemetry) {
-        return decoratePillar(servicePillar, stack, cluster, telemetry, null);
-    }
-
-    public Map<String, SaltPillarProperties> decoratePillar(Map<String, SaltPillarProperties> servicePillar,
-            StackView stack, ClusterView cluster, Telemetry telemetry, DataBusCredential dataBusCredential) {
-        AltusCredential dbusCredential = getAltusCredentialForDataBus(stack, telemetry, dataBusCredential);
-        String clusterType = StackType.DATALAKE.equals(stack.getType())
-                ? FluentClusterType.DATALAKE.value() : FluentClusterType.DATAHUB.value();
-        String serviceType = StackType.WORKLOAD.equals(stack.getType()) ? FluentClusterType.DATAHUB.value() : "";
-
+            StackView stack, ClusterView cluster, Telemetry telemetry, DataBusCredential dataBusCredential, MonitoringCredential monitoringCredential) {
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+        AltusCredential dbusCredential = getAltusCredentialForDataBus(stack, accountId, telemetry, dataBusCredential);
+        AltusCredential altusMonitoringCredential = getAltusCredentialForMonitoring(stack, accountId, telemetry, monitoringCredential);
         boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(accountId);
         String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(telemetry.getDatabusEndpoint(), useDbusCnameEndpoint);
         String databusS3Endpoint = dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint);
@@ -149,9 +141,7 @@ public class TelemetryDecorator {
         DatabusConfigView databusConfigView = databusConfigService.createDatabusConfigs(
                 dbusCredential.getAccessKey(), dbusCredential.getPrivateKey(), null, databusEndpoint);
         if (databusConfigView.isEnabled()) {
-            Map<String, Object> databusConfig = databusConfigView.toMap();
-            servicePillar.put("databus",
-                    new SaltPillarProperties("/databus/init.sls", singletonMap("databus", databusConfig)));
+            addPillar(servicePillar, "databus", "/databus/init.sls", databusConfigView.toMap());
         }
 
         boolean datalakeCluster = StackType.DATALAKE.equals(stack.getType());
@@ -163,7 +153,7 @@ public class TelemetryDecorator {
         final TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder()
                 .withOwner(stack.getCreator().getUserCrn())
                 .withName(stack.getName())
-                .withType(clusterType)
+                .withType(mapToFluentClusterType(stack.getType()))
                 .withCrn(clusterCrn)
                 .withPlatform(stack.getCloudPlatform())
                 .withVersion(version)
@@ -173,64 +163,92 @@ public class TelemetryDecorator {
                 .build();
         final TelemetryCommonConfigView telemetryCommonConfigs = telemetryCommonConfigService.createTelemetryCommonConfigs(
                 telemetry, vmLogsService.getVmLogs(), clusterDetails);
-        servicePillar.put("telemetry",
-                new SaltPillarProperties("/telemetry/init.sls", Collections.singletonMap("telemetry", telemetryCommonConfigs.toMap())));
+        addPillar(servicePillar, "telemetry", "/telemetry/init.sls", telemetryCommonConfigs.toMap());
 
         FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterDetails,
                 databusConfigView.isEnabled(), meteringEnabled, stack.getRegion(), telemetry);
         if (fluentConfigView.isEnabled()) {
-
-            Map<String, Object> fluentConfig = fluentConfigView.toMap();
-            servicePillar.put("fluent",
-                    new SaltPillarProperties("/fluent/init.sls", singletonMap("fluent", fluentConfig)));
+            addPillar(servicePillar, "fluent", "/fluent/init.sls", fluentConfigView.toMap());
         }
-        boolean cdpSaasEnabled = entitlementService.isCdpSaasEnabled(accountId);
-        setupMetering(servicePillar, stack, serviceType, meteringEnabled);
-        char[] nodePasswordInput = null;
-        if (StringUtils.isNotBlank(cluster.getCdpNodeStatusMonitorPassword())) {
-            nodePasswordInput = cluster.getCdpNodeStatusMonitorPassword().toCharArray();
-        }
-        boolean computeMonitoringEnabled = entitlementService.isComputeMonitoringEnabled(accountId);
-        setupMonitoring(servicePillar, cdpSaasEnabled, computeMonitoringEnabled, cluster, telemetry, nodePasswordInput);
-        setupNodeStatusMonitor(servicePillar, stack, cluster, nodePasswordInput);
+        setupMetering(servicePillar, stack, meteringEnabled);
+        char[] nodePassword = getNodePassword(cluster);
+        setupMonitoring(servicePillar, accountId, cluster, telemetry, nodePassword, Optional.of(altusMonitoringCredential));
+        setupNodeStatusMonitor(servicePillar, stack, cluster, nodePassword);
         return servicePillar;
     }
 
-    private AltusCredential getAltusCredentialForDataBus(StackView stack, Telemetry telemetry, DataBusCredential dataBusCredential) {
+    private AltusCredential getAltusCredentialForDataBus(StackView stack, String accountId, Telemetry telemetry, DataBusCredential dataBusCredential) {
         if (altusMachineUserService.isAnyDataBusBasedFeatureSupported(telemetry)) {
-            if (dataBusCredential == null || dataBusCredential.getAccessKey() == null || dataBusCredential.getPrivateKey() == null) {
-                LOGGER.debug("No databus access/secret key is attached to the stack, generate new api key for machine user.");
+            if (needToGenerateCredential(accountId, telemetry, dataBusCredential)) {
                 Optional<AltusCredential> altusCredential = altusMachineUserService.generateDatabusMachineUserForFluent(stack, telemetry);
                 dataBusCredential = altusMachineUserService.storeDataBusCredential(altusCredential, stack);
-            } else {
-                if (altusMachineUserService.isDataBusCredentialStillExist(telemetry, dataBusCredential, stack)) {
-                    LOGGER.debug("Databus credential data (machine user: {}; access key: {}) " +
-                            "still exists on UMS side, won't generaete new ones",
-                            dataBusCredential.getMachineUserName(),
-                            dataBusCredential.getAccessKey());
-                } else {
-                    LOGGER.debug("Databus credential data (machine user: {}; access key: {}) " +
-                            "does not exist on UMS side, generate new ones.",
-                            dataBusCredential.getMachineUserName(),
-                            dataBusCredential.getAccessKey());
-                    Optional<AltusCredential> altusCredential = altusMachineUserService.generateDatabusMachineUserForFluent(stack, telemetry);
-                    dataBusCredential = altusMachineUserService.storeDataBusCredential(altusCredential, stack);
-                }
             }
-            LOGGER.debug("Fill databus altus credential from DataBusCredential object...");
-            String accessKey = Optional.ofNullable(dataBusCredential)
-                    .map(DataBusCredential::getAccessKey).orElse(null);
-            char[] privateKey = Optional.ofNullable(dataBusCredential)
-                    .map(DataBusCredential::getPrivateKey)
-                    .map(String::toCharArray).orElse(null);
-            return new AltusCredential(accessKey, privateKey);
-
         }
-        return new AltusCredential(null, null);
+        if (dataBusCredential == null || dataBusCredential.getAccessKey() == null || dataBusCredential.getPrivateKey() == null) {
+            return new AltusCredential(null, null);
+        } else {
+            LOGGER.debug("Fill databus altus credential from DataBusCredential object...");
+            return new AltusCredential(dataBusCredential.getAccessKey(), dataBusCredential.getPrivateKey().toCharArray());
+        }
     }
 
-    private void setupMonitoring(Map<String, SaltPillarProperties> servicePillar, boolean cdpSaasEnabled, boolean computeMonitoringEnabled, ClusterView cluster,
-            Telemetry telemetry, char[] passwordInput) {
+    private AltusCredential getAltusCredentialForMonitoring(StackView stack, String accountId, Telemetry telemetry, MonitoringCredential credential) {
+        if (altusMachineUserService.isAnyMonitoringFeatureSupported(telemetry)) {
+            if (needToGenerateCredential(accountId, telemetry, credential)) {
+                Optional<AltusCredential> altusCredential = altusMachineUserService.generateMonitoringMachineUser(stack, telemetry);
+                credential = altusMachineUserService.storeMonitoringCredential(altusCredential, stack);
+            }
+        }
+        if (credential == null || credential.getAccessKey() == null || credential.getPrivateKey() == null) {
+            return new AltusCredential(null, null);
+        } else {
+            LOGGER.debug("Fill monitoring altus credential from MonitoringCredential object...");
+            return new AltusCredential(credential.getAccessKey(), credential.getPrivateKey().toCharArray());
+        }
+    }
+
+    private boolean needToGenerateCredential(String accountId, Telemetry telemetry, DataBusCredential credential) {
+        if (credential == null || credential.getAccessKey() == null || credential.getPrivateKey() == null) {
+            LOGGER.debug("No databus access/secret key is attached to the stack, generate new api key for machine user.");
+            return true;
+        } else if (altusMachineUserService.isCredentialExist(telemetry, accountId, credential.getMachineUserName(), credential.getAccessKey())) {
+            LOGGER.debug("Databus credential data (machine user: {}; access key: {}) " +
+                            "still exists on UMS side, won't generaete new ones",
+                    credential.getMachineUserName(),
+                    credential.getAccessKey());
+            return false;
+        } else {
+            LOGGER.debug("Databus credential data (machine user: {}; access key: {}) " +
+                            "does not exist on UMS side, generate new ones.",
+                    credential.getMachineUserName(),
+                    credential.getAccessKey());
+            return true;
+        }
+    }
+
+    private boolean needToGenerateCredential(String accountId, Telemetry telemetry, MonitoringCredential credential) {
+        if (credential == null || credential.getAccessKey() == null || credential.getPrivateKey() == null) {
+            LOGGER.debug("No monitoring access/secret key is attached to the stack, generate new api key for machine user.");
+            return true;
+        } else if (altusMachineUserService.isCredentialExist(telemetry, accountId, credential.getMachineUserName(), credential.getAccessKey())) {
+            LOGGER.debug("Monitoring credential data (machine user: {}; access key: {}) " +
+                            "still exists on UMS side, won't generate new ones",
+                    credential.getMachineUserName(),
+                    credential.getAccessKey());
+            return false;
+        } else {
+            LOGGER.debug("Monitoring credential data (machine user: {}; access key: {}) " +
+                            "does not exist on UMS side, generate new ones.",
+                    credential.getMachineUserName(),
+                    credential.getAccessKey());
+            return true;
+        }
+    }
+
+    private void setupMonitoring(Map<String, SaltPillarProperties> servicePillar, String accountId, ClusterView cluster,
+            Telemetry telemetry, char[] nodePassword, Optional<AltusCredential> monitoringAccessKey) {
+        boolean cdpSaasEnabled = entitlementService.isCdpSaasEnabled(accountId);
+        boolean computeMonitoringEnabled = entitlementService.isComputeMonitoringEnabled(accountId);
         if (telemetry.getMonitoring() != null && telemetry.isMonitoringFeatureEnabled()) {
             LOGGER.debug("Filling monitoring configs.");
             MonitoringAuthConfig cmAuthConfig = null;
@@ -241,26 +259,25 @@ public class TelemetryDecorator {
                 cmAuthConfig = new MonitoringAuthConfig(cmMonitoringUser, cmMonitoringPassword);
             }
             MonitoringConfigView monitoringConfigView = monitoringConfigService.createMonitoringConfig(telemetry.getMonitoring(),
-                    MonitoringClusterType.CLOUDERA_MANAGER, cmAuthConfig, passwordInput, cdpSaasEnabled, computeMonitoringEnabled);
+                    MonitoringClusterType.CLOUDERA_MANAGER, cmAuthConfig, nodePassword, cdpSaasEnabled, computeMonitoringEnabled,
+                    monitoringAccessKey.map(AltusCredential::getAccessKey).orElse(null),
+                    monitoringAccessKey.map(AltusCredential::getPrivateKey).orElse(null),
+                    null);
             if (monitoringConfigView.isEnabled()) {
-                Map<String, Object> monitoringConfig = monitoringConfigView.toMap();
-                servicePillar.put("monitoring",
-                        new SaltPillarProperties("/monitoring/init.sls", singletonMap("monitoring", monitoringConfig)));
+                addPillar(servicePillar, "monitoring", "/monitoring/init.sls", monitoringConfigView.toMap());
             }
         } else {
             LOGGER.debug("CDP Saas is not enabled, do not use monitoring features");
         }
     }
 
-    private void setupMetering(Map<String, SaltPillarProperties> servicePillar, StackView stack, String serviceType, boolean meteringEnabled) {
+    private void setupMetering(Map<String, SaltPillarProperties> servicePillar, StackView stack, boolean meteringEnabled) {
         if (meteringEnabled) {
+            String defaultServiceType = StackType.WORKLOAD.equals(stack.getType()) ? FluentClusterType.DATAHUB.value() : "";
             MeteringConfigView meteringConfigView = meteringConfigService.createMeteringConfigs(meteringEnabled,
-                    stack.getCloudPlatform(), stack.getResourceCrn(), stack.getName(),
-                    getServiceTypeForMetering(stack, serviceType),
+                    stack.getCloudPlatform(), stack.getResourceCrn(), stack.getName(), getServiceTypeForMetering(stack, defaultServiceType),
                     getVersionForMetering(stack, version));
-            Map<String, Object> meteringConfig = meteringConfigView.toMap();
-            servicePillar.put("metering",
-                    new SaltPillarProperties("/metering/init.sls", singletonMap("metering", meteringConfig)));
+            addPillar(servicePillar, "metering", "/metering/init.sls", meteringConfigView.toMap());
         }
     }
 
@@ -269,9 +286,7 @@ public class TelemetryDecorator {
         boolean saltPingEnabled = entitlementService.nodestatusSaltPingEnabled(accountId);
         NodeStatusConfigView nodeStatusConfigView = nodeStatusConfigService
                 .createNodeStatusConfig(cluster.getCdpNodeStatusMonitorUser(), passwordInput, saltPingEnabled);
-        Map<String, Object> nodeStatusConfig = nodeStatusConfigView.toMap();
-        servicePillar.put("nodestatus",
-                new SaltPillarProperties("/nodestatus/init.sls", singletonMap("nodestatus", nodeStatusConfig)));
+        addPillar(servicePillar, "nodestatus", "/nodestatus/init.sls", nodeStatusConfigView.toMap());
     }
 
     private String getDatalakeCrn(Telemetry telemetry, String defaultClusterCrn) {
@@ -305,5 +320,21 @@ public class TelemetryDecorator {
             LOGGER.warn("No stack version for the cluster, use CB application version.");
             return defaultVersion;
         }
+    }
+
+    private void addPillar(Map<String, SaltPillarProperties> pillars, String name, String path, Map<String, Object> properties) {
+        pillars.put(name, new SaltPillarProperties(path, singletonMap(name, properties)));
+    }
+
+    private char[] getNodePassword(ClusterView cluster) {
+        if (StringUtils.isNotBlank(cluster.getCdpNodeStatusMonitorPassword())) {
+            return cluster.getCdpNodeStatusMonitorPassword().toCharArray();
+        } else {
+            return null;
+        }
+    }
+
+    private String mapToFluentClusterType(StackType stackType) {
+        return StackType.DATALAKE.equals(stackType) ? FluentClusterType.DATALAKE.value() : FluentClusterType.DATAHUB.value();
     }
 }

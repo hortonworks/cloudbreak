@@ -31,6 +31,14 @@ public class GcpDatabaseServerBaseServiceTest {
     }
 
     @Test
+    public void testGetDatabaseCloudResource() {
+        CloudResource gcpDatabase = underTest.getDatabaseCloudResource("test", "az1");
+
+        Assert.assertEquals(ResourceType.GCP_DATABASE, gcpDatabase.getType());
+        Assert.assertEquals("test", gcpDatabase.getName());
+    }
+
+    @Test
     public void testCheckException() {
         GoogleJsonResponseException googleJsonResponseException = mock(GoogleJsonResponseException.class);
         GoogleJsonError googleJsonError = mock(GoogleJsonError.class);

@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.util;
+package com.sequenceiq.it.cloudbreak.util.resize;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -16,11 +16,14 @@ public class SdxResizeTestValidator {
 
     private final AtomicReference<String> expectedRuntime;
 
+    private final AtomicReference<Long> expectedCreationTimestamp;
+
     public SdxResizeTestValidator(SdxClusterShape expectedShape) {
         this.expectedShape = expectedShape;
         expectedCrn = new AtomicReference<>();
         expectedName = new AtomicReference<>();
         expectedRuntime = new AtomicReference<>();
+        expectedCreationTimestamp = new AtomicReference<>();
     }
 
     public void setExpectedCrn(String expectedCrn) {
@@ -35,6 +38,10 @@ public class SdxResizeTestValidator {
         this.expectedRuntime.set(expectedRuntime);
     }
 
+    public void setExpectedCreationTimestamp(Long expectedCreationTimestamp) {
+        this.expectedCreationTimestamp.set(expectedCreationTimestamp);
+    }
+
     public SdxInternalTestDto validateResizedCluster(SdxInternalTestDto dto) {
         SdxClusterResponse response = dto.getResponse();
         validateClusterShape(response.getClusterShape());
@@ -42,6 +49,14 @@ public class SdxResizeTestValidator {
         validateStackCrn(response.getStackCrn());
         validateName(response.getName());
         validateRuntime(response.getRuntime());
+        return dto;
+    }
+
+    public SdxInternalTestDto validateRecoveredCluster(SdxInternalTestDto dto) {
+        validateResizedCluster(dto);
+        SdxClusterResponse response = dto.getResponse();
+        validateNotDetached(response.isDetached());
+        validateCreationTimestamp(response.getCreated());
         return dto;
     }
 
@@ -75,9 +90,21 @@ public class SdxResizeTestValidator {
         }
     }
 
+    private void validateNotDetached(boolean detached) {
+        if (detached) {
+            fail("detached", "false", "true");
+        }
+    }
+
+    private void validateCreationTimestamp(Long creationTimestamp) {
+        if (!expectedCreationTimestamp.get().equals(creationTimestamp)) {
+            fail("creation timestamp", expectedCreationTimestamp.get().toString(), creationTimestamp.toString());
+        }
+    }
+
     private void fail(String testField, String expected, String actual) {
         throw new TestFailException(
-                " The DL " + testField + " is '" + actual + "' instead of '" + expected + '\''
+                " The DL's field '" + testField + "' is '" + actual + "' instead of '" + expected + '\''
         );
     }
 }

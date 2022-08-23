@@ -113,14 +113,14 @@ class StackUpgradeOperationsTest {
 
     @Test
     void testUpgradeOsShouldCallUpgradeService() {
-        underTest.upgradeOs(nameOrCrn, WORKSPACE_ID);
-        verify(upgradeService).upgradeOs(WORKSPACE_ID, nameOrCrn);
+        underTest.upgradeOs(nameOrCrn, ACCOUNT_ID);
+        verify(upgradeService).upgradeOs(ACCOUNT_ID, nameOrCrn);
     }
 
     @Test
     void testUpgradeClusterShouldCallUpgradeService() {
-        underTest.upgradeCluster(nameOrCrn, WORKSPACE_ID, IMAGE_ID);
-        verify(upgradeService).upgradeCluster(WORKSPACE_ID, nameOrCrn, IMAGE_ID);
+        underTest.upgradeCluster(nameOrCrn, ACCOUNT_ID, IMAGE_ID);
+        verify(upgradeService).upgradeCluster(ACCOUNT_ID, nameOrCrn, IMAGE_ID);
     }
 
     @Test
@@ -128,17 +128,17 @@ class StackUpgradeOperationsTest {
         User user = new User();
         when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
 
-        underTest.checkForOsUpgrade(nameOrCrn, cloudbreakUser, WORKSPACE_ID);
+        underTest.checkForOsUpgrade(nameOrCrn, cloudbreakUser, ACCOUNT_ID);
 
         verify(userService).getOrCreate(cloudbreakUser);
-        verify(upgradeService).getOsUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, nameOrCrn, user);
+        verify(upgradeService).getOsUpgradeOptionByStackNameOrCrn(ACCOUNT_ID, nameOrCrn, user);
     }
 
     @Test
     void testCheckForOsUpgradeShouldThrowExceptionWhenTheClusterNameIsNotAvailable() {
         when(userService.getOrCreate(cloudbreakUser)).thenReturn(new User());
 
-        assertThrows(BadRequestException.class, () -> underTest.checkForOsUpgrade(NameOrCrn.ofCrn("crn"), cloudbreakUser, WORKSPACE_ID));
+        assertThrows(BadRequestException.class, () -> underTest.checkForOsUpgrade(NameOrCrn.ofCrn("crn"), cloudbreakUser, ACCOUNT_ID));
 
         verify(userService).getOrCreate(cloudbreakUser);
         verifyNoInteractions(upgradeService);
@@ -353,9 +353,9 @@ class StackUpgradeOperationsTest {
     @Test
     public void testPrepareUpgrade() {
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollId");
-        when(upgradeService.prepareClusterUpgrade(WORKSPACE_ID, nameOrCrn, IMAGE_ID)).thenReturn(flowIdentifier);
+        when(upgradeService.prepareClusterUpgrade(ACCOUNT_ID, nameOrCrn, IMAGE_ID)).thenReturn(flowIdentifier);
 
-        FlowIdentifier result = underTest.prepareClusterUpgrade(nameOrCrn, WORKSPACE_ID, IMAGE_ID);
+        FlowIdentifier result = underTest.prepareClusterUpgrade(nameOrCrn, ACCOUNT_ID, IMAGE_ID);
 
         assertEquals(flowIdentifier, result);
     }

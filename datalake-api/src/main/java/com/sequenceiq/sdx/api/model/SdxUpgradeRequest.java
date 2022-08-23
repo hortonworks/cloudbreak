@@ -30,6 +30,15 @@ public class SdxUpgradeRequest {
     @ApiModelProperty(ModelDescriptions.SKIP_BACKUP)
     private Boolean skipBackup;
 
+    @ApiModelProperty(ModelDescriptions.SKIP_ATLAS)
+    private boolean skipAtlasMetadata;
+
+    @ApiModelProperty(ModelDescriptions.SKIP_RANGER_AUDIT)
+    private boolean skipRangerAudits;
+
+    @ApiModelProperty(ModelDescriptions.SKIP_RANGER_METADATA)
+    private boolean skipRangerMetadata;
+
     @ApiModelProperty(ModelDescriptions.SHOW_AVAILABLE_IMAGES)
     private SdxUpgradeShowAvailableImages showAvailableImages;
 
@@ -124,6 +133,30 @@ public class SdxUpgradeRequest {
         return Objects.isNull(imageId) &&
                 Objects.isNull(runtime) &&
                 !Boolean.TRUE.equals(lockComponents);
+    }
+
+    public boolean isSkipAtlasMetadata() {
+        return skipAtlasMetadata;
+    }
+
+    public void setSkipAtlasMetadata(boolean skipAtlasMetadata) {
+        this.skipAtlasMetadata = skipAtlasMetadata;
+    }
+
+    public boolean isSkipRangerAudits() {
+        return skipRangerAudits;
+    }
+
+    public void setSkipRangerAudits(boolean skipRangerAudits) {
+        this.skipRangerAudits = skipRangerAudits;
+    }
+
+    public boolean isSkipRangerMetadata() {
+        return skipRangerMetadata;
+    }
+
+    public void setSkipRangerMetadata(boolean skipRangerMetadata) {
+        this.skipRangerMetadata = skipRangerMetadata;
     }
 
     @Override

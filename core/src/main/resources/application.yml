@@ -172,6 +172,9 @@ cb:
         AZURE: StandardSSD_LRS
         GCP: pd-ssd
         MOCK: magnetic
+    upgrade:
+      embedded.targetversion: VERSION_11
+      rds.targetversion: VERSION_11
 
   externaldatabase.ssl.rootcerts.path: /hadoopfs/fs1/database-cacerts/certs.pem
 

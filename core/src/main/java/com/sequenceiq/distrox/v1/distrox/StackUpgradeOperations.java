@@ -74,25 +74,25 @@ public class StackUpgradeOperations {
     @Inject
     private StackOperations stackOperations;
 
-    public FlowIdentifier upgradeOs(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+    public FlowIdentifier upgradeOs(@NotNull NameOrCrn nameOrCrn, String accountId) {
         LOGGER.debug("Starting to upgrade OS: " + nameOrCrn);
-        return upgradeService.upgradeOs(workspaceId, nameOrCrn);
+        return upgradeService.upgradeOs(accountId, nameOrCrn);
     }
 
-    public FlowIdentifier upgradeCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String imageId) {
+    public FlowIdentifier upgradeCluster(@NotNull NameOrCrn nameOrCrn, String accountId, String imageId) {
         LOGGER.debug("Starting to upgrade cluster: " + nameOrCrn);
-        return upgradeService.upgradeCluster(workspaceId, nameOrCrn, imageId);
+        return upgradeService.upgradeCluster(accountId, nameOrCrn, imageId);
     }
 
-    public FlowIdentifier prepareClusterUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String imageId) {
+    public FlowIdentifier prepareClusterUpgrade(@NotNull NameOrCrn nameOrCrn, String accountId, String imageId) {
         LOGGER.debug("Starting to prepare upgrade for cluster: " + nameOrCrn);
-        return upgradeService.prepareClusterUpgrade(workspaceId, nameOrCrn, imageId);
+        return upgradeService.prepareClusterUpgrade(accountId, nameOrCrn, imageId);
     }
 
-    public UpgradeOptionV4Response checkForOsUpgrade(@NotNull NameOrCrn nameOrCrn, CloudbreakUser cloudbreakUser, Long workspaceId) {
+    public UpgradeOptionV4Response checkForOsUpgrade(@NotNull NameOrCrn nameOrCrn, CloudbreakUser cloudbreakUser, String accountId) {
         User user = userService.getOrCreate(cloudbreakUser);
         if (nameOrCrn.hasName()) {
-            return upgradeService.getOsUpgradeOptionByStackNameOrCrn(workspaceId, nameOrCrn, user);
+            return upgradeService.getOsUpgradeOptionByStackNameOrCrn(accountId, nameOrCrn, user);
         } else {
             LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
             throw new BadRequestException("Please provide a stack name for upgrade");

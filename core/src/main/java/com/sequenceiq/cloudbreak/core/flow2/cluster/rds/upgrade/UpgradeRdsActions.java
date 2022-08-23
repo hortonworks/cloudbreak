@@ -55,13 +55,17 @@ public class UpgradeRdsActions {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsStopServicesResult.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsStopServicesResult payload, Map<Object, Object> variables) {
-                upgradeRdsService.backupRdsState(payload.getResourceId());
+                if (!context.getCluster().getEmbeddedDatabaseOnAttachedDisk()) {
+                    upgradeRdsService.backupRdsState(payload.getResourceId());
+                }
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(UpgradeRdsContext context) {
-                return new UpgradeRdsDataBackupRequest(context.getStackId(), context.getVersion());
+                return context.getCluster().getEmbeddedDatabaseOnAttachedDisk() ?
+                    new UpgradeRdsDataBackupResult(context.getStackId(), context.getVersion()) :
+                    new UpgradeRdsDataBackupRequest(context.getStackId(), context.getVersion());
             }
         };
     }
@@ -87,13 +91,17 @@ public class UpgradeRdsActions {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsUpgradeDatabaseServerResult.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsUpgradeDatabaseServerResult payload, Map<Object, Object> variables) {
-                upgradeRdsService.restoreRdsState(payload.getResourceId());
+                if (!context.getCluster().getEmbeddedDatabaseOnAttachedDisk()) {
+                    upgradeRdsService.restoreRdsState(payload.getResourceId());
+                }
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(UpgradeRdsContext context) {
-                return new UpgradeRdsDataRestoreRequest(context.getStackId(), context.getVersion());
+                return context.getCluster().getEmbeddedDatabaseOnAttachedDisk() ?
+                        new UpgradeRdsDataRestoreResult(context.getStackId(), context.getVersion()) :
+                        new UpgradeRdsDataRestoreRequest(context.getStackId(), context.getVersion());
             }
         };
     }
@@ -119,7 +127,7 @@ public class UpgradeRdsActions {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsStartServicesResult.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsStartServicesResult payload, Map<Object, Object> variables) {
-                upgradeRdsService.rdsUpgradeFinished(payload.getResourceId(), context.getClusterId());
+                upgradeRdsService.rdsUpgradeFinished(payload.getResourceId(), context.getClusterId(), payload.getVersion());
                 sendEvent(context);
             }
 

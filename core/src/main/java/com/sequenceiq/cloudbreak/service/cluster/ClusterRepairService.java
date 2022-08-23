@@ -43,10 +43,10 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
@@ -58,9 +58,14 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
+import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.AwsDiskType;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -79,7 +84,7 @@ public class ClusterRepairService {
     private static final String RECOVERY_FAILED = "RECOVERY_FAILED";
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private StackUpdater stackUpdater;
@@ -123,9 +128,15 @@ public class ClusterRepairService {
     @Inject
     private StackStopRestrictionService stackStopRestrictionService;
 
-    public FlowIdentifier repairAll(Long stackId) {
+    @Inject
+    private StackUpgradeService stackUpgradeService;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    public FlowIdentifier repairAll(StackView stackView, boolean upgrade) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
-                validateRepair(ManualClusterRepairMode.ALL, stackId, Set.of(), false);
+                validateRepair(ManualClusterRepairMode.ALL, stackView.getId(), Set.of(), false);
         Set<String> repairableHostGroups;
         if (repairStart.isSuccess()) {
             repairableHostGroups = repairStart.getSuccess()
@@ -136,19 +147,21 @@ public class ClusterRepairService {
         } else {
             repairableHostGroups = Set.of();
         }
-        return triggerRepairOrThrowBadRequest(stackId, repairStart, true, false, repairableHostGroups);
+        String userCrn = restRequestThreadLocalService.getUserCrn();
+        String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(stackView, userCrn);
+        return triggerRepairOrThrowBadRequest(stackView.getId(), repairStart, true, false, repairableHostGroups, upgradeVariant, upgrade);
     }
 
     public FlowIdentifier repairHostGroups(Long stackId, Set<String> hostGroups, boolean restartServices) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
                 validateRepair(ManualClusterRepairMode.HOST_GROUP, stackId, hostGroups, false);
-        return triggerRepairOrThrowBadRequest(stackId, repairStart, false, restartServices, hostGroups);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, false, restartServices, hostGroups, null, false);
     }
 
     public FlowIdentifier repairNodes(Long stackId, Set<String> nodeIds, boolean deleteVolumes, boolean restartServices) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
                 validateRepair(ManualClusterRepairMode.NODE_ID, stackId, nodeIds, deleteVolumes);
-        return triggerRepairOrThrowBadRequest(stackId, repairStart, false, restartServices, nodeIds);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, false, restartServices, nodeIds, null, false);
     }
 
     public Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairWithDryRun(Long stackId) {
@@ -162,14 +175,19 @@ public class ClusterRepairService {
 
     public Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validateRepair(ManualClusterRepairMode repairMode, Long stackId,
             Set<String> selectedParts, boolean deleteVolumes) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        StackDto stack = stackDtoService.getById(stackId);
+        return validateRepair(repairMode, stack, selectedParts, deleteVolumes);
+    }
+
+    public Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validateRepair(ManualClusterRepairMode repairMode, StackDto stack,
+            Set<String> selectedParts, boolean deleteVolumes) {
         boolean reattach = !deleteVolumes;
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult;
         List<String> stoppedInstanceIds = getStoppedNotSelectedInstanceIds(stack, repairMode, selectedParts);
         if (!freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())) {
             repairStartResult = Result.error(RepairValidation
                     .of("Action cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state."));
-        } else if (!environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))) {
+        } else if (!environmentService.environmentStatusInDesiredState(stack.getStack(), Set.of(EnvironmentStatus.AVAILABLE))) {
             repairStartResult = Result.error(RepairValidation
                     .of("Action cannot be performed because the Environment isn't available. Please check the Environment state."));
         } else if (!stoppedInstanceIds.isEmpty()) {
@@ -177,7 +195,7 @@ public class ClusterRepairService {
                     .of("Action cannot be performed because there are stopped nodes in the cluster. " +
                             "Stopped nodes: [" + String.join(", ", stoppedInstanceIds) + "]. " +
                             "Please select them for repair or start the stopped nodes."));
-        } else if (!isReattachSupportedOnProvider(stack, reattach)) {
+        } else if (!isReattachSupportedOnProvider(stack.getStack(), reattach)) {
             repairStartResult = Result.error(RepairValidation
                     .of(String.format("Volume reattach currently not supported on %s platform!", stack.getPlatformVariant())));
         } else if (hasNotAvailableDatabase(stack)) {
@@ -189,7 +207,8 @@ public class ClusterRepairService {
         } else if (isAnyGWUnhealthyAndItIsNotSelected(repairMode, selectedParts, stack)) {
             repairStartResult = Result.error(RepairValidation.of("Gateway node is unhealthy, it must be repaired first."));
         } else {
-            Map<HostGroupName, Set<InstanceMetaData>> repairableNodes = selectRepairableNodes(getInstanceSelectors(repairMode, selectedParts), stack);
+            Pair<Predicate<HostGroup>, Predicate<InstanceMetaData>> instanceSelectors = getInstanceSelectors(repairMode, selectedParts);
+            Map<HostGroupName, Set<InstanceMetaData>> repairableNodes = selectRepairableNodes(instanceSelectors, stack.getStack());
             if (repairableNodes.isEmpty()) {
                 repairStartResult = Result.error(RepairValidation.of("Repairable node list is empty. Please check node statuses and try again."));
             } else {
@@ -197,7 +216,7 @@ public class ClusterRepairService {
                 if (!validationBySelectedNodes.getValidationErrors().isEmpty()) {
                     repairStartResult = Result.error(validationBySelectedNodes);
                 } else {
-                    setStackStatusAndMarkDeletableVolumes(repairMode, deleteVolumes, stack, repairableNodes);
+                    setStackStatusAndMarkDeletableVolumes(repairMode, deleteVolumes, stack.getStack(), repairableNodes);
                     repairStartResult = Result.success(repairableNodes);
                 }
             }
@@ -205,13 +224,13 @@ public class ClusterRepairService {
         return repairStartResult;
     }
 
-    private boolean isAnyGWUnhealthyAndItIsNotSelected(ManualClusterRepairMode repairMode, Set<String> selectedParts, Stack stack) {
-        List<InstanceMetaData> gatewayInstances = stack.getNotTerminatedGatewayInstanceMetadata();
+    private boolean isAnyGWUnhealthyAndItIsNotSelected(ManualClusterRepairMode repairMode, Set<String> selectedParts, StackDto stack) {
+        List<InstanceMetadataView> gatewayInstances = stack.getNotTerminatedGatewayInstanceMetadata();
         if (gatewayInstances.size() < 1) {
             LOGGER.info("Stack has no GW");
             return false;
         }
-        List<InstanceMetaData> unhealthyGWs = gatewayInstances.stream().filter(gatewayInstance -> !gatewayInstance.isHealthy()).collect(toList());
+        List<InstanceMetadataView> unhealthyGWs = gatewayInstances.stream().filter(gatewayInstance -> !gatewayInstance.isHealthy()).collect(toList());
         if (ManualClusterRepairMode.HOST_GROUP.equals(repairMode)) {
             LOGGER.info("Host group based repair mode, so GW hostgroup should be selected if any GW is not healthy. Unhealthy GWs: {}. Selected instances: {}",
                     unhealthyGWs, selectedParts);
@@ -226,7 +245,7 @@ public class ClusterRepairService {
         }
     }
 
-    private boolean isHAClusterAndRepairNotAllowed(Stack stack) {
+    private boolean isHAClusterAndRepairNotAllowed(StackDto stack) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return !entitlementService.haRepairEnabled(accountId)
                 && !entitlementService.haUpgradeEnabled(accountId)
@@ -234,17 +253,17 @@ public class ClusterRepairService {
                 && hasMultipleGatewayInstances(stack);
     }
 
-    private boolean hasMultipleGatewayInstances(Stack stack) {
+    private boolean hasMultipleGatewayInstances(StackDto stack) {
         int gatewayInstanceCount = 0;
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            if (InstanceGroupType.isGateway(instanceGroup.getInstanceGroupType())) {
+        for (InstanceGroupDto instanceGroup : stack.getInstanceGroupDtos()) {
+            if (InstanceGroupType.isGateway(instanceGroup.getInstanceGroup().getInstanceGroupType())) {
                 gatewayInstanceCount += instanceGroup.getNodeCount();
             }
         }
         return gatewayInstanceCount > 1;
     }
 
-    private boolean hasNotAvailableDatabase(Stack stack) {
+    private boolean hasNotAvailableDatabase(StackDto stack) {
         String databaseServerCrn = stack.getCluster().getDatabaseServerCrn();
         if (StringUtils.isNotBlank(databaseServerCrn)) {
             DatabaseServerV4Response databaseServerResponse = redbeamsClientService.getByCrn(databaseServerCrn);
@@ -255,26 +274,26 @@ public class ClusterRepairService {
         return false;
     }
 
-    private List<String> getStoppedNotSelectedInstanceIds(Stack stack, ManualClusterRepairMode repairMode, Set<String> selectedParts) {
+    private List<String> getStoppedNotSelectedInstanceIds(StackDto stack, ManualClusterRepairMode repairMode, Set<String> selectedParts) {
         if (ManualClusterRepairMode.HOST_GROUP.equals(repairMode)) {
-            return stack.getInstanceMetaDataAsList()
+            return stack.getNotTerminatedInstanceMetaData()
                     .stream()
-                    .filter(im -> !selectedParts.contains(im.getInstanceGroup().getGroupName()) &&
+                    .filter(im -> !selectedParts.contains(im.getInstanceGroupName()) &&
                             InstanceStatus.STOPPED.equals(im.getInstanceStatus()))
-                    .map(InstanceMetaData::getInstanceId)
+                    .map(InstanceMetadataView::getInstanceId)
                     .collect(Collectors.toList());
         } else if (ManualClusterRepairMode.NODE_ID.equals(repairMode)) {
-            return stack.getInstanceMetaDataAsList()
+            return stack.getNotTerminatedInstanceMetaData()
                     .stream()
                     .filter(im -> !selectedParts.contains(im.getInstanceId()) &&
                             InstanceStatus.STOPPED.equals(im.getInstanceStatus()))
-                    .map(InstanceMetaData::getInstanceId)
+                    .map(InstanceMetadataView::getInstanceId)
                     .collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
 
-    private boolean isReattachSupportedOnProvider(Stack stack, boolean repairWithReattach) {
+    private boolean isReattachSupportedOnProvider(StackView stack, boolean repairWithReattach) {
         return !repairWithReattach || StackService.REATTACH_COMPATIBLE_PLATFORMS.contains(stack.getPlatformVariant());
     }
 
@@ -314,8 +333,8 @@ public class ClusterRepairService {
 
     private Map<HostGroupName, Set<InstanceMetaData>> selectRepairableNodes(
             Pair<Predicate<HostGroup>, Predicate<InstanceMetaData>> instanceSelectors,
-            Stack stack) {
-        return hostGroupService.getByCluster(stack.getCluster().getId())
+            StackView stack) {
+        return hostGroupService.getByCluster(stack.getClusterId())
                 .stream()
                 .filter(hostGroup -> RecoveryMode.MANUAL.equals(hostGroup.getRecoveryMode()))
                 .filter(instanceSelectors.getLeft())
@@ -330,7 +349,7 @@ public class ClusterRepairService {
                 .collect(toMap(Entry::getKey, Entry::getValue));
     }
 
-    private RepairValidation validateSelectedNodes(Stack stack, Map<HostGroupName, Set<InstanceMetaData>> nodesToRepair, boolean reattach) {
+    private RepairValidation validateSelectedNodes(StackDto stack, Map<HostGroupName, Set<InstanceMetaData>> nodesToRepair, boolean reattach) {
         return new RepairValidation(nodesToRepair
                 .entrySet()
                 .stream()
@@ -340,7 +359,7 @@ public class ClusterRepairService {
         );
     }
 
-    private List<String> validateRepairableNodes(Stack stack, HostGroupName hostGroupName, Set<InstanceMetaData> instances, boolean reattach) {
+    private List<String> validateRepairableNodes(StackDto stack, HostGroupName hostGroupName, Set<InstanceMetaData> instances, boolean reattach) {
         List<String> validationResult = new ArrayList<>();
         if (reattach) {
             for (InstanceMetaData instanceMetaData : instances) {
@@ -353,10 +372,10 @@ public class ClusterRepairService {
         return validationResult;
     }
 
-    private List<String> validateOnGateway(Stack stack, InstanceMetaData instanceMetaData) {
+    private List<String> validateOnGateway(StackDto stack, InstanceMetadataView instanceMetaData) {
         List<String> validationResult = new ArrayList<>();
-        if (instanceMetaData.isGateway()) {
-            if (isCreatedFromBaseImage(stack)) {
+        if (instanceMetaData.isGatewayOrPrimaryGateway()) {
+            if (isCreatedFromBaseImage(stack.getStack())) {
                 validationResult.add("Action is only supported if the image already contains Cloudera Manager and Cloudera Data Platform artifacts.");
             }
             if (!clusterDBValidationService.isGatewayRepairEnabled(stack.getCluster())) {
@@ -367,17 +386,17 @@ public class ClusterRepairService {
         return validationResult;
     }
 
-    private boolean isCreatedFromBaseImage(Stack stack) {
+    private boolean isCreatedFromBaseImage(StackView stack) {
         try {
             Image image = componentConfigProviderService.getImage(stack.getId());
-            return !imageCatalogService.getImage(stack.getWorkspace().getId(), image.getImageCatalogUrl(), image.getImageCatalogName(),
+            return !imageCatalogService.getImage(stack.getWorkspaceId(), image.getImageCatalogUrl(), image.getImageCatalogName(),
                     image.getImageId()).getImage().isPrewarmed();
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
             throw new BadRequestException(e.getMessage(), e);
         }
     }
 
-    private void updateVolumesDeleteFlag(Stack stack, Predicate<Resource> resourceFilter, boolean deleteVolumes) {
+    private void updateVolumesDeleteFlag(StackView stack, Predicate<Resource> resourceFilter, boolean deleteVolumes) {
         List<Resource> volumes = resourceService.findByStackIdAndType(stack.getId(), stack.getDiskResourceType());
         volumes = volumes.stream()
                 .filter(resourceFilter)
@@ -407,7 +426,7 @@ public class ClusterRepairService {
         return volumeSet;
     }
 
-    private void setStackStatusAndMarkDeletableVolumes(ManualClusterRepairMode repairMode, boolean deleteVolumes, Stack stack,
+    private void setStackStatusAndMarkDeletableVolumes(ManualClusterRepairMode repairMode, boolean deleteVolumes, StackView stack,
             Map<HostGroupName, Set<InstanceMetaData>> nodesToRepair) {
         if (!ManualClusterRepairMode.DRY_RUN.equals(repairMode) && !nodesToRepair.isEmpty()) {
             LOGGER.info("Repair mode is not a dry run, {}", repairMode);
@@ -424,7 +443,8 @@ public class ClusterRepairService {
     }
 
     private FlowIdentifier triggerRepairOrThrowBadRequest(Long stackId, Result<Map<HostGroupName, Set<InstanceMetaData>>,
-            RepairValidation> repairValidationResult, boolean oneNodeFromEachHostGroupAtOnce, boolean restartServices, Set<String> recoveryMessageArgument) {
+            RepairValidation> repairValidationResult, boolean oneNodeFromEachHostGroupAtOnce, boolean restartServices, Set<String> recoveryMessageArgument,
+            String upgradeVariant, boolean upgrade) {
         if (repairValidationResult.isError()) {
             eventService.fireCloudbreakEvent(stackId, RECOVERY_FAILED, CLUSTER_MANUALRECOVERY_COULD_NOT_START,
                     repairValidationResult.getError().getValidationErrors());
@@ -432,7 +452,7 @@ public class ClusterRepairService {
         } else {
             if (!repairValidationResult.getSuccess().isEmpty()) {
                 FlowIdentifier flowIdentifier = flowManager.triggerClusterRepairFlow(stackId, toStringMap(repairValidationResult.getSuccess()),
-                        oneNodeFromEachHostGroupAtOnce, restartServices);
+                        oneNodeFromEachHostGroupAtOnce, restartServices, upgradeVariant, upgrade);
                 eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_REQUESTED,
                         List.of(String.join(",", recoveryMessageArgument)));
                 return flowIdentifier;

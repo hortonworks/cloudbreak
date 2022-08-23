@@ -102,7 +102,8 @@ public class DatalakeBackupActions {
 
                 DatalakeBackupStatusResponse backupStatusResponse =
                         sdxBackupRestoreService.triggerDatalakeBackup(payload.getResourceId(), payload.getBackupLocation(),
-                                payload.getBackupName(), payload.getUserId());
+                                payload.getBackupName(), payload.getUserId(),
+                                payload.getSkipOptions());
                 variables.put(BACKUP_ID, backupStatusResponse.getBackupId());
                 variables.put(OPERATION_ID, backupStatusResponse.getBackupId());
                 payload.getDrStatus().setOperationId(backupStatusResponse.getBackupId());

@@ -128,6 +128,10 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
 
     @Convert(converter = SecretToString.class)
     @SecretValue
+    private Secret monitoringCredential = Secret.EMPTY;
+
+    @Convert(converter = SecretToString.class)
+    @SecretValue
     private Secret cdpNodeStatusMonitorUser = Secret.EMPTY;
 
     @Convert(converter = SecretToString.class)
@@ -343,6 +347,14 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
 
     public void setDatabusCredential(String databusCredential) {
         this.databusCredential = new Secret(databusCredential);
+    }
+
+    public String getMonitoringCredential() {
+        return monitoringCredential.getRaw();
+    }
+
+    public void setMonitoringCredential(String monitoringCredential) {
+        this.monitoringCredential = new Secret(monitoringCredential);
     }
 
     public String getCdpNodeStatusMonitorUser() {

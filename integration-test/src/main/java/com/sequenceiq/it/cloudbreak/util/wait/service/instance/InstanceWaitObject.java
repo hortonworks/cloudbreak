@@ -9,5 +9,7 @@ public interface InstanceWaitObject extends WaitObject {
 
     List<String> getInstanceIds();
 
+    List<String> getFetchedInstanceIds();
+
     Map<String, String> getFetchedInstanceStatuses();
 }

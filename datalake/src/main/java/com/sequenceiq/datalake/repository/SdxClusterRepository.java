@@ -43,9 +43,9 @@ public interface SdxClusterRepository extends AccountAwareResourceRepository<Sdx
 
     Optional<SdxCluster> findByAccountIdAndCrnAndDeletedIsNull(String accountId, String crn);
 
-    Optional<SdxCluster> findByAccountIdAndOriginalCrnAndDeletedIsNull(String accountId, String crn);
+    List<SdxCluster> findByAccountIdAndOriginalCrnAndDeletedIsNull(String accountId, String crn);
 
-    Optional<SdxCluster> findByAccountIdAndOriginalCrn(String accountId, String crn);
+    List<SdxCluster> findByAccountIdAndOriginalCrn(String accountId, String crn);
 
     Optional<SdxCluster> findByCrnAndDeletedIsNull(String crn);
 

@@ -40,8 +40,6 @@ import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.flow.domain.FlowChainLog;
-import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
 @Configuration
@@ -217,12 +215,10 @@ public class SdxStopActions {
                 flow.setFlowFailed(payload.getException());
 
                 // If this is part of DL resize, mark failure as such in order to enable proper recovery.
-                Optional<FlowLogWithoutPayload> lastFlowLog = flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId());
-                if (lastFlowLog.isPresent()) {
-                    Optional<FlowChainLog> flowChainLog = flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(lastFlowLog.get().getFlowChainId());
-                    if (flowChainLog.isPresent() && flowChainLog.get().getFlowChainType().equals(DatalakeResizeFlowEventChainFactory.class.getSimpleName())) {
-                        statusReason = "Datalake resize failure: " + statusReason;
-                    }
+                if (flowChainLogService.isFlowTriggeredByFlowChain(
+                        DatalakeResizeFlowEventChainFactory.class.getSimpleName(),
+                        flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId()))) {
+                    statusReason = "Datalake resize failure: " + statusReason;
                 }
 
                 eventSenderService.notifyEvent(context, ResourceEvent.SDX_STOP_FAILED);

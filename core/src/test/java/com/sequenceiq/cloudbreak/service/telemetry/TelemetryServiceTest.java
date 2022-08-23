@@ -50,11 +50,11 @@ public class TelemetryServiceTest {
         given(stackDtoService.getStackViewById(STACK_ID)).willReturn(stack());
         given(stackDtoService.getClusterViewByStackId(STACK_ID)).willReturn(cluster("{}"));
         given(componentConfigProviderService.getTelemetry(STACK_ID)).willReturn(new Telemetry());
-        given(telemetryDecorator.decoratePillar(anyMap(), any(), any(), any(), any())).willReturn(new HashMap<>());
+        given(telemetryDecorator.decoratePillar(anyMap(), any(), any(), any(), any(), any())).willReturn(new HashMap<>());
         // WHEN
         underTest.createTelemetryConfigs(STACK_ID, Set.of(TelemetryComponentType.CDP_TELEMETRY));
         // THEN
-        verify(telemetryDecorator, times(1)).decoratePillar(anyMap(), any(), any(), any(), isNotNull());
+        verify(telemetryDecorator, times(1)).decoratePillar(anyMap(), any(), any(), any(), isNotNull(), any());
     }
 
     @Test
@@ -63,11 +63,11 @@ public class TelemetryServiceTest {
         given(stackDtoService.getStackViewById(STACK_ID)).willReturn(stack());
         given(stackDtoService.getClusterViewByStackId(STACK_ID)).willReturn(cluster("wrongJson"));
         given(componentConfigProviderService.getTelemetry(STACK_ID)).willReturn(new Telemetry());
-        given(telemetryDecorator.decoratePillar(anyMap(), any(), any(), any(), any())).willReturn(new HashMap<>());
+        given(telemetryDecorator.decoratePillar(anyMap(), any(), any(), any(), any(), any())).willReturn(new HashMap<>());
         // WHEN
         underTest.createTelemetryConfigs(STACK_ID, Set.of(TelemetryComponentType.CDP_TELEMETRY));
         // THEN
-        verify(telemetryDecorator, times(1)).decoratePillar(anyMap(), any(), any(), any(), isNull());
+        verify(telemetryDecorator, times(1)).decoratePillar(anyMap(), any(), any(), any(), isNull(), any());
     }
 
     @Test
@@ -76,11 +76,11 @@ public class TelemetryServiceTest {
         given(stackDtoService.getStackViewById(STACK_ID)).willReturn(stack());
         given(stackDtoService.getClusterViewByStackId(STACK_ID)).willReturn(cluster(null));
         given(componentConfigProviderService.getTelemetry(STACK_ID)).willReturn(new Telemetry());
-        given(telemetryDecorator.decoratePillar(anyMap(), any(), any(), any(), any())).willReturn(new HashMap<>());
+        given(telemetryDecorator.decoratePillar(anyMap(), any(), any(), any(), any(), any())).willReturn(new HashMap<>());
         // WHEN
         underTest.createTelemetryConfigs(STACK_ID, Set.of(TelemetryComponentType.CDP_TELEMETRY));
         // THEN
-        verify(telemetryDecorator, times(1)).decoratePillar(anyMap(), any(), any(), any(), isNull());
+        verify(telemetryDecorator, times(1)).decoratePillar(anyMap(), any(), any(), any(), isNull(), any());
     }
 
     private StackView stack() {

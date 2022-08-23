@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordFailureResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordSuccessResponse;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
 import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -46,7 +47,18 @@ public class RotateSaltPasswordHandler extends ExceptionCatcherEventHandler<Rota
         Long stackId = event.getData().getResourceId();
         try {
             StackDto stack = stackDtoService.getById(stackId);
-            rotateSaltPasswordService.rotateSaltPassword(stack);
+            RotateSaltPasswordType rotateSaltPasswordType = event.getData().getType();
+            LOGGER.info("Starting to rotate salt password for stack {} with type {}", stackId, rotateSaltPasswordType);
+            switch (rotateSaltPasswordType) {
+                case SALT_BOOTSTRAP_ENDPOINT:
+                    rotateSaltPasswordService.rotateSaltPassword(stack);
+                    break;
+                case FALLBACK:
+                    rotateSaltPasswordService.rotateSaltPasswordFallback(stack);
+                    break;
+                default:
+                    throw new IllegalStateException(String.format("RotateSaltPasswordType %s is not handled", rotateSaltPasswordType));
+            }
             return new RotateSaltPasswordSuccessResponse(stackId);
         } catch (Exception e) {
             LOGGER.warn("Failed to rotate salt password", e);

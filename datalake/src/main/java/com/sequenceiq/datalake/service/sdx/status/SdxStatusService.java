@@ -170,8 +170,8 @@ public class SdxStatusService {
         return sdxStatusRepository.findFirstByDatalakeIsOrderByIdDesc(sdxCluster);
     }
 
-    public Optional<SdxStatusEntity> getActualStatusForSdx(Long id) {
-        return sdxStatusRepository.findById(id);
+    public SdxStatusEntity getActualStatusForSdx(Long id) {
+        return sdxStatusRepository.findFirstByDatalakeIdIsOrderByIdDesc(id);
     }
 
     public void updateInMemoryStateStore(SdxCluster sdxCluster) {

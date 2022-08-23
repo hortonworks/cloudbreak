@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @Component
 public class ClusterDBValidationService {
@@ -18,11 +18,11 @@ public class ClusterDBValidationService {
     @Inject
     private RdsConfigWithoutClusterService rdsConfigWithoutClusterService;
 
-    public boolean isGatewayRepairEnabled(Cluster cluster) {
-        return cluster.isEmbeddedDatabaseOnAttachedDisk() || isGatewayDatabaseAvailable(cluster);
+    public boolean isGatewayRepairEnabled(ClusterView cluster) {
+        return cluster.getEmbeddedDatabaseOnAttachedDisk() || isGatewayDatabaseAvailable(cluster);
     }
 
-    private Boolean isGatewayDatabaseAvailable(Cluster cluster) {
+    private Boolean isGatewayDatabaseAvailable(ClusterView cluster) {
         if (cluster.getDatabaseServerCrn() != null) {
             return true;
         }

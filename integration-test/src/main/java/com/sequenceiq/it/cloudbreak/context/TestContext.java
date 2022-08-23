@@ -1053,9 +1053,24 @@ public abstract class TestContext implements ApplicationContextAware {
             return entity;
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        CloudbreakTestDto awaitEntity = entity == null ? get(key) : entity;
+        CloudbreakTestDto awaitEntity = get(key);
         instanceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter,
                 flowUtilSingleStatus.getPollingDurationOrTheDefault(runningParameter), maxRetry);
+        return entity;
+    }
+
+    public <T extends CloudbreakTestDto, E extends Enum<E>> T awaitForInstancesToExist(T entity, RunningParameter runningParameter) {
+        checkShutdown();
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
+            Log.await(LOGGER, "Cloudbreak await for instances to exist should be skipped because of previous error.");
+            return entity;
+        }
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
+        CloudbreakTestDto awaitEntity = get(key);
+        instanceAwait.awaitExistence(
+                awaitEntity, getTestContext(), runningParameter,
+                flowUtilSingleStatus.getPollingDurationOrTheDefault(runningParameter), maxRetry
+        );
         return entity;
     }
 

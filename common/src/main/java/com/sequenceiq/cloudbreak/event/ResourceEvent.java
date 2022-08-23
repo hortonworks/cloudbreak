@@ -388,6 +388,7 @@ public enum ResourceEvent {
     CLUSTER_PILLAR_CONFIG_UPDATE_FINISHED("cluster.pillar.config.update.finished"),
     CLUSTER_PILLAR_CONFIG_UPDATE_STARTED("cluster.pillar.config.update.started"),
     CLUSTER_SALT_PASSWORD_ROTATE_STARTED("cluster.salt.passwordrotate.started"),
+    CLUSTER_SALT_PASSWORD_ROTATE_STARTED_FALLBACK("cluster.salt.passwordrotate.started.fallback"),
     CLUSTER_SALT_PASSWORD_ROTATE_FINISHED("cluster.salt.passwordrotate.finished"),
     CLUSTER_SALT_PASSWORD_ROTATE_FAILED("cluster.salt.passwordrotate.failed"),
     CLUSTER_STOPPING("cluster.stopping"),
@@ -462,6 +463,10 @@ public enum ResourceEvent {
 
     CLUSTER_RDS_UPGRADE_NOT_AVAILABLE("cluster.externaldatabase.upgrade.not.available"),
     CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED("cluster.externaldatabase.upgrade.already.upgraded"),
+
+    CLUSTER_PREPARE_EMBEDDEDDB_UPGRADE_IN_PROGRESS("cluster.prepare.embeddeddatabase.upgrade.inprogress"),
+    CLUSTER_PREPARE_EMBEDDEDDB_UPGRADE_FINISHED("cluster.prepare.embeddeddatabase.upgrade.finished"),
+    CLUSTER_PREPARE_EMBEDDEDDB_UPGRADE_FAILED("cluster.prepare.embeddeddatabase.upgrade.failed"),
 
     CLUSTER_CCM_UPGRADE_TUNNEL_UPDATE("cluster.ccm.upgrade.tunnel.update"),
     CLUSTER_CCM_UPGRADE_PUSH_SALT_STATES("cluster.ccm.upgrade.push.salt.states"),

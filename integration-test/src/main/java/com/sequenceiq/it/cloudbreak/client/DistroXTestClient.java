@@ -15,11 +15,12 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCreateInternalActio
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXGetAction;
-import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRepairInstancesAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXInternalGetAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRemoveInstancesAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRepairAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRepairInstancesAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRotateSaltPasswordAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleStartInstancesAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleStopInstancesAction;
@@ -122,5 +123,9 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> checkVariant(String variant) {
         return new CheckVariant(variant);
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> rotateSaltPassword() {
+        return new DistroXRotateSaltPasswordAction();
     }
 }

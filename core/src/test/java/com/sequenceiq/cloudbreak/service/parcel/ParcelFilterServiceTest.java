@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,38 +53,53 @@ public class ParcelFilterServiceTest {
         return Arrays.asList(new Object[][] {
                 { "Trying to download the parcel manifest in case of BASE image, when we can reach the file which is a standard " +
                         "manifest file and it DOES contains the component then assign the parcel. (NIFI usecase)",
-                        "http://parcel1.com/", ManifestStatus.SUCCESS, "NIFI", "NIFI", 1 },
+                        "http://parcel1.com/", ManifestStatus.SUCCESS, "NIFI", "NIFI", 1, Collections.emptySet() },
 
                 { "Trying to download the parcel manifest in case of BASE image, when we can reach the file which is a standard " +
                         "manifest file then it should assign the parcel, because we dont know that it is required, or not. (PROFILER usecase)",
-                        "http://parcel1.com/", ManifestStatus.SUCCESS, "NIFI", "{..ewwer", 1 },
+                        "http://parcel1.com/", ManifestStatus.SUCCESS, "NIFI", "{..ewwer", 1, Collections.emptySet() },
 
                 { "Trying to download the parcel manifest in case of BASE image, when we can NOT reach the manifest file " +
                         "then it should assign the parcel, because we can't check that it is required, or not. (authentication required usecase)",
-                        "http://parcel1.com/", ManifestStatus.FAILED, "NIFI", null, 1 },
+                        "http://parcel1.com/", ManifestStatus.FAILED, "NIFI", null, 1, Collections.emptySet() },
 
                 { "Trying to download the parcel manifest in case of PREWARMED image when we can reach the file which is a standard " +
                         "manifest file and it DOES contains the component then assign the parcel. (NIFI usecase)",
-                        "http://parcel1.com/", ManifestStatus.SUCCESS, "NIFI", "NIFI", 1 },
-
-                { "Trying to download the parcel manifest in case of PREWARMED image, when we can reach the file which is a standard " +
-                        "manifest file then it should assign the parcel, because we dont know that it is required, or not. (PROFILER usecase)",
-                        "http://parcel1.com/", ManifestStatus.SUCCESS, "NIFI", "{..ewwer", 1 },
+                        "http://parcel1.com/", ManifestStatus.SUCCESS, "NIFI", "NIFI", 1, Set.of("NIFI") },
 
                 { "Trying to download the parcel manifest in case of PREWARMED image, when we can NOT reach the manifest file " +
                         "then it should assign the parcel because probably that is not available anymore but the PREWARMED image contains it. " +
                         "(RELENG deleted a released artifact usecase)",
-                        "http://parcel1.com/", ManifestStatus.FAILED, "NIFI", null, 1 },
+                        "http://parcel1.com/", ManifestStatus.FAILED, "NIFI", null, 1, Set.of("NIFI") },
         });
+    }
+
+    private static Manifest getManifest(String... componentNames) {
+        Manifest manifest = new Manifest();
+        manifest.setLastUpdated(System.currentTimeMillis());
+        Parcel parcel = new Parcel();
+        List<Component> components = Arrays.stream(componentNames).map(s -> {
+            Component component = new Component();
+            component.setName(s);
+            return component;
+        }).collect(Collectors.toList());
+        parcel.setComponents(components);
+        manifest.setParcels(List.of(parcel));
+        return manifest;
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    void test(String description, String parcelUrl, ManifestStatus status, String serviceNameInTheBlueprint, String manifest, int parcelCount) {
+    void test(String description, String parcelUrl, ManifestStatus status, String serviceNameInTheBlueprint, String manifest, int parcelCount,
+            Set<String> parcelNamesFromImage) {
         when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of(serviceNameInTheBlueprint)));
-        when(manifestRetrieverService.readRepoManifest(parcelUrl)).thenReturn(ImmutablePair.of(status, getManifest(manifest)));
+        when(imageReaderService.getParcelNames(WORKSPACE_ID, STACK_ID)).thenReturn(parcelNamesFromImage);
+        if (!parcelNamesFromImage.isEmpty()) {
+            when(manifestRetrieverService.readRepoManifest(parcelUrl)).thenReturn(ImmutablePair.of(status, getManifest(manifest)));
+        }
 
-        assertEquals(parcelCount, underTest.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, getParcels(parcelUrl), getBlueprint()).size());
+        assertEquals(parcelCount,
+                underTest.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, getParcels(parcelUrl, serviceNameInTheBlueprint), getBlueprint()).size());
     }
 
     @Test
@@ -126,11 +142,12 @@ public class ParcelFilterServiceTest {
 
     @Test
     void testShouldAddOnlyCdhParcelWhenTheRequiredServicesAreAvailableInTheCdhParcelAndOtherParcelsAreNotAccessible() {
-        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of("hdfs", "hive")));
+        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of("HDFS", "HIVE")));
+        when(imageReaderService.getParcelNames(WORKSPACE_ID, STACK_ID)).thenReturn(Set.of("HDFS", "HIVE", "SPARK", "CDH", "NIFI"));
         ClouderaManagerProduct cdhParcel = new ClouderaManagerProduct().withParcel("cdh-parcel-url").withName("CDH");
         ClouderaManagerProduct nifiParcel = new ClouderaManagerProduct().withParcel("nifi-parcel-url").withName("NIFI");
         when(manifestRetrieverService.readRepoManifest(cdhParcel.getParcel())).thenReturn(
-                ImmutablePair.of(ManifestStatus.SUCCESS, getManifest("hdfs", "hive")));
+                ImmutablePair.of(ManifestStatus.SUCCESS, getManifest("HDFS", "HIVE")));
 
         Set<ClouderaManagerProduct> actual = underTest.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, createParcelSet(cdhParcel, nifiParcel), getBlueprint());
         assertEquals(1, actual.size());
@@ -138,12 +155,26 @@ public class ParcelFilterServiceTest {
     }
 
     @Test
+    void testShouldAddAllParcelsInTheRequestWhenTheImageIsABaseImage() {
+        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of("HDFS", "HIVE")));
+        when(imageReaderService.getParcelNames(WORKSPACE_ID, STACK_ID)).thenReturn(Collections.emptySet());
+        ClouderaManagerProduct cdhParcel = new ClouderaManagerProduct().withParcel("cdh-parcel-url").withName("CDH");
+        ClouderaManagerProduct nifiParcel = new ClouderaManagerProduct().withParcel("nifi-parcel-url").withName("NIFI");
+
+        Set<ClouderaManagerProduct> actual = underTest.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, createParcelSet(cdhParcel, nifiParcel), getBlueprint());
+        assertEquals(2, actual.size());
+        assertTrue(actual.contains(cdhParcel));
+        assertTrue(actual.contains(nifiParcel));
+    }
+
+    @Test
     void testShouldAddCdhAndNifiParcelWhenTheRequiredServicesAreNotAvailableInTheCdhParcelAndOtherParcelsAreNotAccessible() {
-        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of("hdfs", "hive", "spark")));
+        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of("HDFS", "HIVE", "SPARK")));
+        when(imageReaderService.getParcelNames(WORKSPACE_ID, STACK_ID)).thenReturn(Set.of("HDFS", "HIVE", "SPARK", "CDH", "NIFI"));
         ClouderaManagerProduct cdhParcel = new ClouderaManagerProduct().withParcel("cdh-parcel-url").withName("CDH");
         ClouderaManagerProduct nifiParcel = new ClouderaManagerProduct().withParcel("nifi-parcel-url").withName("NIFI");
         when(manifestRetrieverService.readRepoManifest(cdhParcel.getParcel())).thenReturn(
-                ImmutablePair.of(ManifestStatus.SUCCESS, getManifest("hdfs", "hive")));
+                ImmutablePair.of(ManifestStatus.SUCCESS, getManifest("HDFS", "HIVE")));
         when(manifestRetrieverService.readRepoManifest(nifiParcel.getParcel())).thenReturn(ImmutablePair.of(ManifestStatus.FAILED, null));
 
         Set<ClouderaManagerProduct> actual = underTest.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, createParcelSet(cdhParcel, nifiParcel), getBlueprint());
@@ -152,18 +183,11 @@ public class ParcelFilterServiceTest {
         assertTrue(actual.contains(nifiParcel));
     }
 
-    private Blueprint getBlueprint() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText("bpText");
-        return blueprint;
-    }
-
-    private Set<ClouderaManagerProduct> getParcels(String... parcelUrls) {
-        return Arrays.stream(parcelUrls).map(s -> {
-            ClouderaManagerProduct product = new ClouderaManagerProduct();
-            product.setParcel(s);
-            return product;
-        }).collect(Collectors.toSet());
+    private Set<ClouderaManagerProduct> getParcels(String parcelUrl, String parcelName) {
+        ClouderaManagerProduct product = new ClouderaManagerProduct();
+        product.setParcel(parcelUrl);
+        product.setName(parcelName);
+        return Collections.singleton(product);
     }
 
     private Set<ClouderaManagerProduct> createParcelSet(ClouderaManagerProduct... parcels) {
@@ -181,18 +205,10 @@ public class ParcelFilterServiceTest {
         return supportedServices;
     }
 
-    private static Manifest getManifest(String... componentNames) {
-        Manifest manifest = new Manifest();
-        manifest.setLastUpdated(System.currentTimeMillis());
-        Parcel parcel = new Parcel();
-        List<Component> components = Arrays.stream(componentNames).map(s -> {
-            Component component = new Component();
-            component.setName(s);
-            return component;
-        }).collect(Collectors.toList());
-        parcel.setComponents(components);
-        manifest.setParcels(List.of(parcel));
-        return manifest;
+    private Blueprint getBlueprint() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText("bpText");
+        return blueprint;
     }
 
 }

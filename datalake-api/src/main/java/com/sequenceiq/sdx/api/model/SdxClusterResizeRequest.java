@@ -21,6 +21,15 @@ public class SdxClusterResizeRequest {
     @NotNull
     private SdxClusterShape clusterShape;
 
+    @ApiModelProperty(ModelDescriptions.SKIP_ATLAS)
+    private boolean skipAtlasMetadata;
+
+    @ApiModelProperty(ModelDescriptions.SKIP_RANGER_AUDIT)
+    private boolean skipRangerAudits;
+
+    @ApiModelProperty(ModelDescriptions.SKIP_RANGER_METADATA)
+    private boolean skipRangerMetadata;
+
     public String getEnvironment() {
         return environment;
     }
@@ -35,6 +44,30 @@ public class SdxClusterResizeRequest {
 
     public void setClusterShape(SdxClusterShape clusterShape) {
         this.clusterShape = clusterShape;
+    }
+
+    public boolean isSkipAtlasMetadata() {
+        return skipAtlasMetadata;
+    }
+
+    public void setSkipAtlasMetadata(boolean skipAtlas) {
+        this.skipAtlasMetadata = skipAtlas;
+    }
+
+    public boolean isSkipRangerAudits() {
+        return skipRangerAudits;
+    }
+
+    public void setSkipRangerAudits(boolean skipRangerAudits) {
+        this.skipRangerAudits = skipRangerAudits;
+    }
+
+    public boolean isSkipRangerMetadata() {
+        return skipRangerMetadata;
+    }
+
+    public void setSkipRangerMetadata(boolean skipRangerMetadata) {
+        this.skipRangerMetadata = skipRangerMetadata;
     }
 
     @Override

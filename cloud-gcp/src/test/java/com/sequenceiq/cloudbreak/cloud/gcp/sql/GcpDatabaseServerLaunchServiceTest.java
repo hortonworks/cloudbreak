@@ -84,14 +84,6 @@ public class GcpDatabaseServerLaunchServiceTest {
     private GcpDatabaseServerLaunchService underTest;
 
     @Test
-    public void testGetGcpDatabase() {
-        CloudResource gcpDatabase = underTest.getGcpDatabase("test", "az1");
-
-        Assert.assertEquals(ResourceType.GCP_DATABASE, gcpDatabase.getType());
-        Assert.assertEquals("test", gcpDatabase.getName());
-    }
-
-    @Test
     public void testGetRdsPort() {
         CloudResource rdsPort = underTest.getRdsPort("az1");
 

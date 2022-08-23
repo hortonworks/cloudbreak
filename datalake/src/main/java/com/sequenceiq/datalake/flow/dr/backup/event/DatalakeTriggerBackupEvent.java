@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.SdxEvent;
+import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupFailureReason;
 import com.sequenceiq.datalake.flow.dr.event.DatalakeDatabaseDrStartBaseEvent;
 
@@ -21,6 +22,8 @@ public class DatalakeTriggerBackupEvent extends DatalakeDatabaseDrStartBaseEvent
 
     private final DatalakeBackupFailureReason reason;
 
+    private final DatalakeDrSkipOptions skipOptions;
+
     @JsonCreator
     public DatalakeTriggerBackupEvent(
             @JsonProperty("selector") String selector,
@@ -28,20 +31,23 @@ public class DatalakeTriggerBackupEvent extends DatalakeDatabaseDrStartBaseEvent
             @JsonProperty("userId") String userId,
             @JsonProperty("backupLocation") String backupLocation,
             @JsonProperty("backupName") String backupName,
+            @JsonProperty("skipOptions") DatalakeDrSkipOptions skipOptions,
             @JsonProperty("reason") DatalakeBackupFailureReason reason,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, sdxId, userId, SdxOperationType.BACKUP, accepted);
         this.backupLocation = backupLocation;
         this.backupName = backupName;
+        this.skipOptions = skipOptions;
         this.reason = reason;
     }
 
     public DatalakeTriggerBackupEvent(String selector, Long sdxId, String userId, String backupLocation, String backupName,
-            DatalakeBackupFailureReason reason) {
+            DatalakeBackupFailureReason reason, DatalakeDrSkipOptions skipOptions) {
         super(selector, sdxId, userId, SdxOperationType.BACKUP);
         this.backupLocation = backupLocation;
         this.backupName = backupName;
         this.reason = reason;
+        this.skipOptions = skipOptions;
     }
 
     public String getBackupLocation() {
@@ -54,6 +60,10 @@ public class DatalakeTriggerBackupEvent extends DatalakeDatabaseDrStartBaseEvent
 
     public DatalakeBackupFailureReason getReason() {
         return reason;
+    }
+
+    public DatalakeDrSkipOptions getSkipOptions() {
+        return skipOptions;
     }
 
     @Override

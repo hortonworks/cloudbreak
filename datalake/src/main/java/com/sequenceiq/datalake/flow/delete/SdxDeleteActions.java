@@ -43,7 +43,6 @@ import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
 @Configuration
@@ -165,9 +164,9 @@ public class SdxDeleteActions {
                     metricService.incrementMetricCounter(MetricType.SDX_DELETION_FINISHED, sdxCluster);
                 }
                 eventSenderService.notifyEvent(context, ResourceEvent.SDX_CLUSTER_DELETION_FINISHED);
-                Optional<FlowLogWithoutPayload> lastFlowLog = flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId());
-                if (lastFlowLog.isPresent() && flowChainLogService.isFlowTriggeredByFlowChain(DatalakeResizeFlowEventChainFactory.class.getSimpleName(),
-                        lastFlowLog.get())) {
+                if (flowChainLogService.isFlowTriggeredByFlowChain(
+                        DatalakeResizeFlowEventChainFactory.class.getSimpleName(),
+                        flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId()))) {
                     eventSenderService.notifyEvent(context, ResourceEvent.DATALAKE_RESIZE_COMPLETE);
                 }
                 sendEvent(context, SDX_DELETE_FINALIZED_EVENT.event(), payload);

@@ -104,6 +104,7 @@ import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
@@ -1072,7 +1073,7 @@ class SdxServiceTest {
         withCustomInstanceGroups(sdxClusterRequest);
         RecipeViewV4Responses recipeViewV4Responses = new RecipeViewV4Responses();
         RecipeViewV4Response recipeViewV4Response = new RecipeViewV4Response();
-        recipeViewV4Response.setName("post-install");
+        recipeViewV4Response.setName("post-service-deployment");
         recipeViewV4Responses.setResponses(List.of(recipeViewV4Response));
         when(recipeV4Endpoint.listInternal(anyLong(), anyString())).thenReturn(recipeViewV4Responses);
         long id = 10L;
@@ -1196,7 +1197,7 @@ class SdxServiceTest {
     private void withRecipe(SdxClusterRequest sdxClusterRequest) {
         SdxRecipe recipe = new SdxRecipe();
         recipe.setHostGroup("master");
-        recipe.setName("post-install");
+        recipe.setName("post-service-deployment");
         sdxClusterRequest.setRecipes(Set.of(recipe));
     }
 
@@ -1475,7 +1476,8 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
 
         mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.AWS);
-        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class))).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class)))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
@@ -1564,7 +1566,7 @@ class SdxServiceTest {
         withRecipe(sdxClusterRequest);
         RecipeViewV4Responses recipeViewV4Responses = new RecipeViewV4Responses();
         RecipeViewV4Response recipeViewV4Response = new RecipeViewV4Response();
-        recipeViewV4Response.setName("post-install");
+        recipeViewV4Response.setName("post-service-deployment");
         recipeViewV4Responses.setResponses(List.of(recipeViewV4Response));
         when(recipeV4Endpoint.listInternal(anyLong(), anyString())).thenReturn(recipeViewV4Responses);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");

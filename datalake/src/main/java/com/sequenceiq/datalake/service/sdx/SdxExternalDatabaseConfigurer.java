@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -33,6 +34,9 @@ public class SdxExternalDatabaseConfigurer {
     @Inject
     private PlatformConfig platformConfig;
 
+    @Inject
+    private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
+
     private final Comparator<Versioned> versionComparator;
 
     public SdxExternalDatabaseConfigurer() {
@@ -42,7 +46,9 @@ public class SdxExternalDatabaseConfigurer {
     public void configure(CloudPlatform cloudPlatform, SdxDatabaseRequest databaseRequest, SdxCluster sdxCluster) {
         SdxDatabaseAvailabilityType databaseAvailabilityType = getDatabaseAvailabilityType(databaseRequest, cloudPlatform, sdxCluster);
         sdxCluster.setDatabaseAvailabilityType(databaseAvailabilityType);
-        Optional.ofNullable(databaseRequest).map(SdxDatabaseRequest::getDatabaseEngineVersion).ifPresent(sdxCluster::setDatabaseEngineVersion);
+        String requestedDbEngineVersion = Optional.ofNullable(databaseRequest).map(SdxDatabaseRequest::getDatabaseEngineVersion).orElse(null);
+        sdxCluster.setDatabaseEngineVersion(databaseDefaultVersionProvider
+                .calculateDbVersionBasedOnRuntimeIfMissing(sdxCluster.getRuntime(), requestedDbEngineVersion));
         validate(cloudPlatform, sdxCluster);
     }
 

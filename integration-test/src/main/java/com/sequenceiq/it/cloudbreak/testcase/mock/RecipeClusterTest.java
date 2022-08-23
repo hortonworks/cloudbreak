@@ -1,8 +1,9 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLOUDERA_MANAGER_START;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLUSTER_INSTALL;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_SERVICE_DEPLOYMENT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_SERVICE_DEPLOYMENT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.pollingInterval;
@@ -122,8 +123,8 @@ public class RecipeClusterTest extends AbstractMockTest {
         testContext
                 .given(recipeName, RecipeTestDto.class)
                     .withName(recipeName)
-                    .withContent(recipeUtil.generatePreCmStartRecipeContent(applicationContext))
-                    .withRecipeType(PRE_CLOUDERA_MANAGER_START)
+                    .withContent(recipeUtil.generatePreDeploymentRecipeContent(applicationContext))
+                    .withRecipeType(PRE_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4(), RunningParameter.key(recipeName))
                 .when(recipeTestClient.deleteV4(), RunningParameter.key(recipeName))
                 .given(instanceGroupName, InstanceGroupTestDto.class)
@@ -153,8 +154,8 @@ public class RecipeClusterTest extends AbstractMockTest {
                 .when(recipeTestClient.createV4())
                 .given(RecipeTestDto.class)
                     .withName(preCldrManagerStartRecipe)
-                    .withContent(recipeUtil.generatePreCmStartRecipeContent(applicationContext))
-                    .withRecipeType(PRE_CLOUDERA_MANAGER_START)
+                    .withContent(recipeUtil.generatePreDeploymentRecipeContent(applicationContext))
+                    .withRecipeType(PRE_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
                     .withHostGroup(HostGroupType.WORKER)
@@ -193,8 +194,8 @@ public class RecipeClusterTest extends AbstractMockTest {
         testContext
                 .given(RecipeTestDto.class)
                     .withName(recipeName)
-                    .withContent(recipeUtil.generatePostInstallRecipeContent(applicationContext))
-                    .withRecipeType(POST_CLUSTER_INSTALL)
+                    .withContent(recipeUtil.generatePostDeploymentRecipeContent(applicationContext))
+                    .withRecipeType(POST_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
                     .withHostGroup(HostGroupType.WORKER)
@@ -296,7 +297,7 @@ public class RecipeClusterTest extends AbstractMockTest {
         return new Object[][]{
                 {
                         getBean(MockedTestContext.class),
-                        PRE_CLOUDERA_MANAGER_START,
+                        PRE_SERVICE_DEPLOYMENT,
                         2,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("pre ambari start recipes")
@@ -314,7 +315,7 @@ public class RecipeClusterTest extends AbstractMockTest {
                 },
                 {
                         getBean(MockedTestContext.class),
-                        POST_CLUSTER_INSTALL,
+                        POST_SERVICE_DEPLOYMENT,
                         1,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("post cluster install recipes")

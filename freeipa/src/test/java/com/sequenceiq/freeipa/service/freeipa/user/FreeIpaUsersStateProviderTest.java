@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -53,6 +54,9 @@ class FreeIpaUsersStateProviderTest {
 
     private static final boolean USER_DISABLED = true;
 
+    private static final List<String> SPLIT_REQUEST_RESOURCE_PREFIXES = List.of(
+            "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f");
+
     @InjectMocks
     FreeIpaUsersStateProvider underTest;
 
@@ -90,7 +94,7 @@ class FreeIpaUsersStateProviderTest {
                 .map(this::createIpaGroup)
                 .collect(Collectors.toSet());
 
-        when(freeIpaClient.userFindAll()).thenReturn(usersFindAll);
+        when(freeIpaClient.userFindAll(Optional.empty(), Map.of("all", true))).thenReturn(usersFindAll);
         when(freeIpaClient.groupFindAll()).thenReturn(groupsFindAll);
 
         Set<String> expectedUsers = users.keySet().stream()
@@ -109,7 +113,7 @@ class FreeIpaUsersStateProviderTest {
             userMetadata.ifPresent(meta -> expectedUserMetadata.put(username, meta));
         });
 
-        UsersState ipaState = underTest.getUsersState(freeIpaClient);
+        UsersState ipaState = underTest.getUsersState(freeIpaClient, false);
 
         for (FmsUser fmsUser : ipaState.getUsers()) {
             assertTrue(expectedUsers.contains(fmsUser.getName()));
@@ -122,6 +126,50 @@ class FreeIpaUsersStateProviderTest {
             expectedGroups.remove(fmsGroup.getName());
         }
         assertTrue(expectedGroups.isEmpty());
+
+        assertEquals(expectedUserMetadata, ipaState.getUserMetadataMap());
+    }
+
+    @Test
+    void testGetUserStateSplitRequests() throws Exception {
+        List<String> userGroupNames = List.of("group1", "group2", "group3", IPA_UNMANAGED_GROUPS.get(0));
+
+        Set<com.sequenceiq.freeipa.client.model.User> allUsers = new HashSet<>();
+        Map<String, UserMetadata> expectedUserMetadata = Maps.newHashMap();
+
+        for (String prefix : SPLIT_REQUEST_RESOURCE_PREFIXES) {
+            UserMetadata userMetadata = new UserMetadata(createUserCrn(prefix), 1L);
+            String username = prefix + UUID.randomUUID().toString();
+            doReturn(Optional.of(userMetadata)).when(userMetadataConverter).toUserMetadata(argThat(arg -> username.equals(arg.getUid())));
+            expectedUserMetadata.put(username, userMetadata);
+            com.sequenceiq.freeipa.client.model.User user = createIpaUser(username, userGroupNames);
+            when(freeIpaClient.userFindAll(Optional.of(":user:" + prefix),
+                    Map.of("all", true))).thenReturn(Set.of(user));
+            allUsers.add(user);
+        }
+        UserMetadata userMetadata = new UserMetadata(createMachineUserCrn(), 1L);
+        String username = "macusername/" + UUID.randomUUID().toString();
+        doReturn(Optional.of(userMetadata)).when(userMetadataConverter).toUserMetadata(argThat(arg -> username.equals(arg.getUid())));
+        expectedUserMetadata.put(username, userMetadata);
+        com.sequenceiq.freeipa.client.model.User user = createIpaUser(username, userGroupNames);
+        when(freeIpaClient.userFindAll(Optional.of(":machineUser:"), Map.of("all", true))).thenReturn(Set.of(user));
+        allUsers.add(user);
+
+        Set<com.sequenceiq.freeipa.client.model.Group> groupsFindAll = userGroupNames.stream()
+                .map(this::createIpaGroup)
+                .collect(Collectors.toSet());
+        when(freeIpaClient.groupFindAll()).thenReturn(groupsFindAll);
+
+        UsersState ipaState = underTest.getUsersState(freeIpaClient, true);
+
+        List<String> allUserNames = allUsers.stream()
+                .map(com.sequenceiq.freeipa.client.model.User::getUid)
+                .sorted()
+                .collect(Collectors.toList());
+        assertEquals(allUserNames.size(), ipaState.getUsers().size());
+        for (FmsUser fmsUser : ipaState.getUsers()) {
+            assertTrue(allUserNames.contains(fmsUser.getName()));
+        }
 
         assertEquals(expectedUserMetadata, ipaState.getUserMetadataMap());
     }
@@ -188,10 +236,10 @@ class FreeIpaUsersStateProviderTest {
                 .map(this::createIpaGroup)
                 .collect(Collectors.toSet());
 
-        when(freeIpaClient.userFindAll()).thenReturn(usersFindAll);
+        when(freeIpaClient.userFindAll(Optional.empty(), Map.of("all", true))).thenReturn(usersFindAll);
         when(freeIpaClient.groupFindAll()).thenReturn(groupsFindAll);
 
-        UsersState ipaState = underTest.getUsersState(freeIpaClient);
+        UsersState ipaState = underTest.getUsersState(freeIpaClient, false);
 
         assertEquals(1, ipaState.getUsers().size());
         FmsUser ipaUser = ipaState.getUsers().asList().get(0);
@@ -248,6 +296,22 @@ class FreeIpaUsersStateProviderTest {
         FmsGroup fmsGroup = underTest.fromIpaGroup(ipaGroup);
 
         assertEquals(fmsGroup.getName(), ipaGroup.getCn());
+    }
+
+    private String createUserCrn(String resourcePrefix) {
+        return CrnTestUtil.getUserCrnBuilder()
+                .setAccountId(ACCOUNT_ID)
+                .setResource(resourcePrefix + UUID.randomUUID().toString())
+                .build()
+                .toString();
+    }
+
+    private String createMachineUserCrn() {
+        return CrnTestUtil.getMachineUserCrnBuilder()
+                .setAccountId(ACCOUNT_ID)
+                .setResource(UUID.randomUUID().toString())
+                .build()
+                .toString();
     }
 
     private com.sequenceiq.freeipa.client.model.User createIpaUser(String uid, List<String> memberOfGroup) {

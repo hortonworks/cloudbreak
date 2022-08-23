@@ -50,8 +50,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClus
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerSupportTagsSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostClusterManagerStartRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostClusterManagerStartRecipesSuccess;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostInstallRecipesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostInstallRecipesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostServiceDeploymentRecipesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostServiceDeploymentRecipesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.FinalizeClusterInstallRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.FinalizeClusterInstallSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.PrepareDatalakeResourceRequest;
@@ -601,7 +601,7 @@ public class ClusterCreationActions {
     }
 
     @Bean(name = "EXECUTE_POST_INSTALL_RECIPES_STATE")
-    public Action<?, ?> executePostInstallRecipesAction() {
+    public Action<?, ?> executePostServiceDeploymentRecipesAction() {
         return new AbstractClusterCreationAction<>(ClusterManagerConfigureKerberosSuccess.class) {
             @Override
             protected void doExecute(ClusterCreationViewContext context, ClusterManagerConfigureKerberosSuccess payload, Map<Object, Object> variables) {
@@ -610,16 +610,16 @@ public class ClusterCreationActions {
 
             @Override
             protected Selectable createRequest(ClusterCreationViewContext context) {
-                return new ExecutePostInstallRecipesRequest(context.getStackId());
+                return new ExecutePostServiceDeploymentRecipesRequest(context.getStackId());
             }
         };
     }
 
     @Bean(name = "PREPARE_DATALAKE_RESOURCE_STATE")
     public Action<?, ?> prepareDatalakeResourceAction() {
-        return new AbstractClusterCreationAction<>(ExecutePostInstallRecipesSuccess.class) {
+        return new AbstractClusterCreationAction<>(ExecutePostServiceDeploymentRecipesSuccess.class) {
             @Override
-            protected void doExecute(ClusterCreationViewContext context, ExecutePostInstallRecipesSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterCreationViewContext context, ExecutePostServiceDeploymentRecipesSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 

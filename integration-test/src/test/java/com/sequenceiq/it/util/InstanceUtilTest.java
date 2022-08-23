@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.api.client.util.Lists;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -20,12 +21,13 @@ public class InstanceUtilTest {
 
     @Test
     public void testGetInstanceStatusMap() {
-        assertEquals(0, InstanceUtil.getInstanceStatusMap(
-                getResponse()).entrySet().size());
-        assertEquals(0, InstanceUtil.getInstanceStatusMap(
-                getResponse(emptyInstanceGroup(), emptyInstanceGroup())).entrySet().size());
-        assertEquals(1, InstanceUtil.getInstanceStatusMap(
-                getResponse(emptyInstanceGroup(), emptyInstanceGroup(), instanceGroup())).entrySet().size());
+        assertEquals(0, getInstanceStatusMapSize(getResponse()));
+        assertEquals(0, getInstanceStatusMapSize(getResponse(emptyInstanceGroup(), emptyInstanceGroup())));
+        assertEquals(1, getInstanceStatusMapSize(getResponse(emptyInstanceGroup(), emptyInstanceGroup(), instanceGroup())));
+    }
+
+    private int getInstanceStatusMapSize(StackV4Response response) {
+        return InstanceUtil.getInstanceStatusMapForStatus(response, InstanceStatus.SERVICES_HEALTHY).entrySet().size();
     }
 
     private StackV4Response getResponse(InstanceGroupV4Response... groups) {

@@ -137,6 +137,15 @@ public class FreeIpaInstanceWaitObject implements InstanceWaitObject {
     }
 
     @Override
+    public List<String> getFetchedInstanceIds() {
+        return instanceGroups
+                .stream()
+                .flatMap(instanceGroup -> instanceGroup.getMetaData().stream())
+                .map(InstanceMetaDataResponse::getInstanceId)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Map<String, String> getFetchedInstanceStatuses() {
         return getInstanceMetaDatas().stream().collect(Collectors.toMap(InstanceMetaDataResponse::getInstanceId,
                 instanceMetaData -> instanceMetaData.getInstanceStatus().name()));

@@ -12,7 +12,7 @@ import "version.proto";
 service datalakeDR {
   // Get the service version.
   rpc GetVersion (version.VersionRequest)
-      returns (version.VersionResponse) {}
+    returns (version.VersionResponse) {}
 
   /**
    * Backup datalake
@@ -55,6 +55,16 @@ service datalakeDR {
    */
   rpc CancelDatalakeRestore (CancelDatalakeRestoreRequest) returns (CancelDatalakeRestoreResponse) {
   }
+}
+
+// A common enum used to describe whether terms have been accepted or not
+enum SkipFlag {
+  // Default value, indicates no skip flag was included and default behavior should be use
+  NOT_SET = 0;
+  // Set if the flag is set to skip an operation
+  SKIP = 1;
+  // Set if the flag is set to include an operation
+  INCLUDE = 2;
 }
 
 // BackupRestoreOperationStatus
@@ -108,6 +118,9 @@ message BackupDatalakeRequest {
   string backupName = 2; // The name of the backup being performed.
   string backupLocation = 3; // Location where the data has to be backed-up.
   bool closeDbConnections = 4; // Close the database connections while performing backup of the databases.
+  SkipFlag skipRangerHmsMetadata = 5; // Indicates whether or not to skip the Ranger and HMS database backup.
+  SkipFlag skipAtlasMetadata = 6; // Indicates whether or not to skip the Atlas metadata backup.
+  SkipFlag skipRangerAudits = 7; // Indicates whether or not to skip the Ranger audits backup.
 }
 
 /**
@@ -132,12 +145,27 @@ message BackupDatalakeResponse {
 * Request to restore datalake
 */
 message RestoreDatalakeRequest {
-  string datalakeName = 1; // The name of the datalake that has to be restored.
-  string backupName = 2; // The name of the backup from which restore has to performed.
-  string backupId = 3; // Unique identifier for the back-up.
-  bool includeDatabase = 4; // When set to true would trigger database restore.
-  bool force = 5; // When set to true will restore even if the backups is in a failed state.
-  string backupLocationOverride = 6; // Used this location to perform the restore.
+  // The name of the datalake that has to be restored.
+  string datalakeName = 1;
+  // The name of the backup from which restore has to performed.
+  string backupName = 2;
+  // Unique identifier for the back-up.
+  string backupId = 3;
+  // DEPRECATED - Maintained for backwards compatibilty, but has been replaced by the skipRangerHmsMetadata field.
+  bool includeDatabase = 4;
+  // When set to true will restore even if the backups is in a failed state.
+  bool force = 5;
+  // Used this location to perform the restore.
+  string backupLocationOverride = 6;
+  // Indicates whether or not to skip the Ranger and HMS database restore. If the backup used doesn't include the database
+  // information and this flag is set to INCLUDE, the request will fail.
+  SkipFlag skipRangerHmsMetadata = 7;
+  // Indicates whether or not to skip the Atlas metadata restore. If the backup used doesn't include the database information
+  // and this flag is set to INCLUDE, the request will fail.
+  SkipFlag skipAtlasMetadata = 8;
+  // Indicates whether or not to skip the Ranger audit restore. If the backup used doesn't include the database information
+  // and this flag is set to INCLUDE, the request will fail.
+  SkipFlag skipRangerAudits = 9;
 }
 
 /**
@@ -155,6 +183,7 @@ message RestoreDatalakeResponse {
   string backupLocation = 9; // Location where back-up is exported.
   string failureReason = 10; // DEPRECATED - maintained for backwards compatibility
   InternalBackupRestoreState operationStates = 11; // The status of each operation, including any failure reasons.
+  string runtimeVersion = 12; // The runtime version of the datalake when the restore was initiated.
 }
 
 /**
@@ -209,6 +238,7 @@ message RestoreDatalakeStatusResponse {
   string backupLocation = 9; // Location where back-up is exported.
   string failureReason = 10; // DEPRECATED - maintained for backwards compatibility
   InternalBackupRestoreState operationStates = 11; // The status of each operation, including any failure reasons.
+  string runtimeVersion = 12; // The runtime version of the datalake when the restore was initiated.
 }
 
 

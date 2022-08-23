@@ -153,6 +153,15 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
                 instanceMetaData -> instanceMetaData.getInstanceStatus().name()));
     }
 
+    @Override
+    public List<String> getFetchedInstanceIds() {
+        return instanceGroups
+                .stream()
+                .flatMap(instanceGroup -> instanceGroup.getMetadata().stream())
+                .map(InstanceMetaDataV4Response::getInstanceId)
+                .collect(Collectors.toList());
+    }
+
     public Map<String, InstanceStatus> getInstanceStatuses() {
         return getInstanceMetaDatas().stream()
                 .collect(Collectors.toMap(InstanceMetaDataV4Response::getInstanceId, InstanceMetaDataV4Response::getInstanceStatus));

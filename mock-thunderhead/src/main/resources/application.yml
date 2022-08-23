@@ -74,6 +74,7 @@ auth:
     user.sync:
       credentials.update.optimization.enable: true
       group-size.enforce-limit.enable: true
+      split-freeipa-user-retrieval.enable: true
     azure:
       disk:
         SSEWithCMK.enable: true
@@ -100,6 +101,7 @@ auth:
     workloadiam.sync.enable: false
     saas.sdx.integration.enable: true
     salt.rotatepassword.enable: true
+    postgres.upgrade.embedded.enable: true
 
 crn:
   partition: cdp

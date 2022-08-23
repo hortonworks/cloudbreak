@@ -15,6 +15,8 @@ public interface SdxStatusRepository extends CrudRepository<SdxStatusEntity, Lon
 
     SdxStatusEntity findFirstByDatalakeIsOrderByIdDesc(SdxCluster sdxCluster);
 
+    SdxStatusEntity findFirstByDatalakeIdIsOrderByIdDesc(Long id);
+
     List<SdxStatusEntity> findDistinctFirstByStatusInAndDatalakeIdInOrderByIdDesc(Collection<DatalakeStatusEnum> datalakeStatusEnums,
             Collection<Long> datalakeId);
 

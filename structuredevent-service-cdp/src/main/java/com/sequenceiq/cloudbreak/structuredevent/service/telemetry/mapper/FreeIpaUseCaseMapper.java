@@ -35,6 +35,8 @@ public class FreeIpaUseCaseMapper {
         firstStepUseCaseMap.put(Pair.of("", "UpscaleFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.UPSCALE_STARTED);
         firstStepUseCaseMap.put(Pair.of("", "DownscaleFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.DOWNSCALE_STARTED);
         firstStepUseCaseMap.put(Pair.of("UpgradeFlowEventChainFactory", "SaltUpdateFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.UPGRADE_STARTED);
+        firstStepUseCaseMap.put(Pair.of("UpgradeCcmFlowEventChainFactory", "UpgradeCcmFlowConfig"),
+                UsageProto.CDPFreeIPAStatus.Value.CCM_UPGRADE_STARTED);
     }
 
     public UsageProto.CDPFreeIPAStatus.Value useCase(FlowDetails flow) {
@@ -78,6 +80,11 @@ public class FreeIpaUseCaseMapper {
                     useCase = getFreeIpaStatus(nextFlowState, "FLOWCHAIN_FINALIZE_FINISHED_STATE",
                             UsageProto.CDPFreeIPAStatus.Value.UPGRADE_FINISHED,
                             UsageProto.CDPFreeIPAStatus.Value.UPGRADE_FAILED);
+                    break;
+                case "UpgradeCcmFlowEventChainFactory":
+                    useCase = getFreeIpaStatus(nextFlowState, "UPDATE_USERDATA_FINISHED_STATE",
+                            UsageProto.CDPFreeIPAStatus.Value.CCM_UPGRADE_FINISHED,
+                            UsageProto.CDPFreeIPAStatus.Value.CCM_UPGRADE_FAILED);
                     break;
                 default:
                     LOGGER.debug("Next flow state: {}", nextFlowState);

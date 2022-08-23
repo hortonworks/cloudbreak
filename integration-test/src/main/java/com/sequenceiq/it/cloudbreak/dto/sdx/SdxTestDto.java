@@ -17,6 +17,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -171,7 +172,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     public SdxTestDto awaitForHealthyInstances() {
         Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
-                InstanceUtil.getInstanceStatusMap(getResponse().getStackV4Response()));
+                InstanceUtil.getInstanceStatusMapForStatus(getResponse().getStackV4Response(), InstanceStatus.SERVICES_HEALTHY));
         return awaitForInstance(instanceStatusMap);
     }
 
@@ -380,5 +381,15 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
                 .flatMap(ig -> ig.getMetadata().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
         return new Clue("SDX", auditEvents, getResponse(), hasSpotTermination);
+    }
+
+    @Override
+    public void deleteForCleanup() {
+        try {
+            setFlow("SDX deletion", getClientForCleanup().getDefaultClient().sdxEndpoint().deleteByCrn(getCrn(), true));
+            awaitForFlow();
+        } catch (NotFoundException nfe) {
+            LOGGER.info("SDX resource not found, thus cleanup not needed.");
+        }
     }
 }

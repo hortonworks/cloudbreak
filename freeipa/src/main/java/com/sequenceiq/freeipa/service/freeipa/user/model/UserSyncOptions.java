@@ -18,10 +18,12 @@ public class UserSyncOptions {
 
     private final int largeGroupLimit;
 
+    private final boolean splitFreeIPAUserRetrievalEnabled;
+
     @SuppressWarnings("checkstyle:ExecutableStatementCount")
     private UserSyncOptions(boolean fullSync, boolean fmsToFreeIpaBatchCallEnabled,
             WorkloadCredentialsUpdateType workloadCredentialsUpdateType, boolean enforceGroupMembershipLimitEnabled,
-            int largeGroupThreshold, int largeGroupLimit) {
+            int largeGroupThreshold, int largeGroupLimit, boolean splitFreeIPAUserRetrievalEnabled) {
         checkArgument(workloadCredentialsUpdateType == WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED ||
                 workloadCredentialsUpdateType == WorkloadCredentialsUpdateType.FORCE_UPDATE);
         this.fullSync = fullSync;
@@ -30,6 +32,7 @@ public class UserSyncOptions {
         this.enforceGroupMembershipLimitEnabled = enforceGroupMembershipLimitEnabled;
         this.largeGroupThreshold = largeGroupThreshold;
         this.largeGroupLimit = largeGroupLimit;
+        this.splitFreeIPAUserRetrievalEnabled = splitFreeIPAUserRetrievalEnabled;
     }
 
     public boolean isFullSync() {
@@ -56,6 +59,10 @@ public class UserSyncOptions {
         return largeGroupLimit;
     }
 
+    public boolean isSplitFreeIPAUserRetrievalEnabled() {
+        return splitFreeIPAUserRetrievalEnabled;
+    }
+
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -72,6 +79,8 @@ public class UserSyncOptions {
         private int largeGroupThreshold;
 
         private int largeGroupLimit;
+
+        private boolean splitFreeIPAUserRetrievalEnabled;
 
         public Builder fullSync(boolean fullSync) {
             this.fullSync = fullSync;
@@ -103,9 +112,14 @@ public class UserSyncOptions {
             return this;
         }
 
+        public Builder splitFreeIPAUserRetrievalEnabled(boolean splitFreeIPAUserRetrievalEnabled) {
+            this.splitFreeIPAUserRetrievalEnabled = splitFreeIPAUserRetrievalEnabled;
+            return this;
+        }
+
         public UserSyncOptions build() {
             return new UserSyncOptions(fullSync, fmsToFreeIpaBatchCallEnabled, workloadCredentialsUpdateType,
-                    enforceGroupMembershipLimitEnabled, largeGroupThreshold, largeGroupLimit);
+                    enforceGroupMembershipLimitEnabled, largeGroupThreshold, largeGroupLimit, splitFreeIPAUserRetrievalEnabled);
         }
     }
 }

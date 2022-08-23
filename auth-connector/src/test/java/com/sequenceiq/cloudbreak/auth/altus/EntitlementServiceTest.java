@@ -229,7 +229,10 @@ class EntitlementServiceTest {
                 {"CDP_FMS_RECIPE", (EntitlementCheckFunction) EntitlementService::isFmsRecipesEnabled, true},
 
                 {"CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT", (EntitlementCheckFunction) EntitlementService::isUserSyncEnforceGroupMembershipLimitEnabled, false},
-                {"CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT", (EntitlementCheckFunction) EntitlementService::isUserSyncEnforceGroupMembershipLimitEnabled, true}
+                {"CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT", (EntitlementCheckFunction) EntitlementService::isUserSyncEnforceGroupMembershipLimitEnabled, true},
+
+                {"CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL", (EntitlementCheckFunction) EntitlementService::isUserSyncSplitFreeIPAUserRetrievalEnabled, false},
+                {"CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL", (EntitlementCheckFunction) EntitlementService::isUserSyncSplitFreeIPAUserRetrievalEnabled, true},
         };
     }
 

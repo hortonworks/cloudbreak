@@ -245,7 +245,7 @@ public class StackCreatorService {
                         "Select the correct image took {} ms");
                 stackRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
                 Stack newStack = measure(() -> stackService.create(
-                            stack, platformString, imgFromCatalog, user, workspace, Optional.ofNullable(stackRequest.getResourceCrn())),
+                            stack, imgFromCatalog, user, workspace, Optional.ofNullable(stackRequest.getResourceCrn())),
                             LOGGER,
                         "Save the remaining stack data took {} ms"
                         );

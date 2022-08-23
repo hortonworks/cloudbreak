@@ -17,7 +17,7 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.nimbusds.oauth2.sdk.util.MapUtils;
+import org.apache.commons.collections4.MapUtils;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;

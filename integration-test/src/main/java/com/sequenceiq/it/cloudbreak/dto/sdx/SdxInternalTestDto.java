@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,6 +62,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxInternalClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 
@@ -337,7 +339,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         if (checkResponseHasInstanceGroups()) {
             return instanceStatusMapSupplier.get();
         } else {
-            LOGGER.info("Response doesn't has instance groups");
+            LOGGER.info("Response doesn't have instance groups");
             return Collections.emptyMap();
         }
     }
@@ -358,16 +360,19 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     public SdxInternalTestDto awaitForHealthyInstances() {
         Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
-                InstanceUtil.getInstanceStatusMap(getResponse().getStackV4Response()));
+                InstanceUtil.getInstanceStatusMapForStatus(getResponse().getStackV4Response(), InstanceStatus.SERVICES_HEALTHY));
         return awaitForInstance(instanceStatusMap);
     }
 
     public SdxInternalTestDto awaitForStoppedInstances() {
         Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
-                getResponse().getStackV4Response().getInstanceGroups().stream().collect(Collectors.toMap(
-                        instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
-                                .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
-                        instanceMetaDataV4Response -> InstanceStatus.STOPPED)));
+                InstanceUtil.getInstanceStatusMapForStatus(getResponse().getStackV4Response(), InstanceStatus.STOPPED));
+        return awaitForInstance(instanceStatusMap);
+    }
+
+    public SdxInternalTestDto awaitForStartingInstances() {
+        Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
+                InstanceUtil.getInstanceStatusMapForStatus(getResponse().getStackV4Response(), InstanceStatus.SERVICES_RUNNING));
         return awaitForInstance(instanceStatusMap);
     }
 
@@ -377,6 +382,14 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     public SdxInternalTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter);
+    }
+
+    public SdxInternalTestDto awaitForInstancesToExist() {
+        return awaitForInstancesToExist(emptyRunningParameter());
+    }
+
+    public SdxInternalTestDto awaitForInstancesToExist(RunningParameter runningParameter) {
+        return getTestContext().awaitForInstancesToExist(this, runningParameter);
     }
 
     @Override
@@ -482,6 +495,14 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return resize.getRequest();
     }
 
+    public SdxRecoveryRequest getSdxRecoveryRequest() {
+        SdxRecoveryTestDto recovery = given(SdxRecoveryTestDto.class);
+        if (recovery == null) {
+            throw new IllegalArgumentException("SDX Recovery does not exist!");
+        }
+        return recovery.getRequest();
+    }
+
     @Override
     public Clue investigate() {
         if (getResponse() == null || getResponse().getCrn() == null) {
@@ -492,7 +513,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 CloudbreakEventService.DATALAKE_RESOURCE_TYPE,
                 null,
                 getResponse().getCrn());
-        boolean hasSpotTermination = (getResponse().getStackV4Response() == null) ? false : getResponse().getStackV4Response().getInstanceGroups().stream()
+        boolean hasSpotTermination = getResponse().getStackV4Response() != null && getResponse().getStackV4Response().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetadata().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
         return new Clue("SDX", auditEvents, getResponse(), hasSpotTermination);
@@ -505,5 +526,15 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Override
     public String getSearchId() {
         return getName();
+    }
+
+    @Override
+    public void deleteForCleanup() {
+        try {
+            setFlow("SDX Internal deletion", getClientForCleanup().getDefaultClient().sdxEndpoint().deleteByCrn(getCrn(), true));
+            awaitForFlow();
+        } catch (NotFoundException nfe) {
+            LOGGER.info("SDX Internal resource not found, thus cleanup not needed.");
+        }
     }
 }

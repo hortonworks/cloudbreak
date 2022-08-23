@@ -30,7 +30,7 @@ import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class SdxRecoveryTests extends PreconditionSdxE2ETest {
+public class SdxUpgradeRecoveryTests extends PreconditionSdxE2ETest {
 
     private static final String INJECT_UPGRADE_FAILURE_CMD =
             "sudo sh -c \"echo -e '"
@@ -42,7 +42,7 @@ public class SdxRecoveryTests extends PreconditionSdxE2ETest {
                     + "\\n127.0.0.1 cache-test1.vpc.cloudera.com'"
                     + " >> /etc/hosts\"";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SdxRecoveryTests.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeRecoveryTests.class);
 
     @Inject
     private SshJClientActions sshJClientActions;
@@ -80,7 +80,7 @@ public class SdxRecoveryTests extends PreconditionSdxE2ETest {
                 .then((tc, testDto, client) -> executeCommandToCauseUpgradeFailure(testDto, client))
                 .when(sdxTestClient.upgrade(), key(sdx))
                 .awaitForFlowFail()
-                .when(sdxTestClient.recover(), key(sdx))
+                .when(sdxTestClient.recoverFromUpgrade(), key(sdx))
                 .awaitForFlow(emptyRunningParameter().withWaitForFlowSuccess())
                 .then((tc, dto, client) -> validateStackCrn(originalCrn, dto))
                 .then((tc, dto, client) -> validateImageId(originalImageId, dto))

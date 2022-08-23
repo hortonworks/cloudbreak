@@ -60,9 +60,9 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
-import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -464,17 +464,16 @@ public class StackOperationServiceTest {
     public void testRotateSaltPassword() {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn("crn");
         StackDto stackDto = mock(StackDto.class);
-        when(stackDto.getId()).thenReturn(5L);
         when(stackDtoService.getByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stackDto);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollableId");
-        when(flowManager.triggerRotateSaltPassword(stackDto.getId(), REASON)).thenReturn(flowIdentifier);
+        when(rotateSaltPasswordService.triggerRotateSaltPassword(stackDto, REASON)).thenReturn(flowIdentifier);
 
         FlowIdentifier result = underTest.rotateSaltPassword(nameOrCrn, ACCOUNT_ID, REASON);
 
         assertEquals(flowIdentifier, result);
         verify(stackDtoService).getByNameOrCrn(nameOrCrn, ACCOUNT_ID);
         verify(rotateSaltPasswordService).validateRotateSaltPassword(stackDto);
-        verify(flowManager).triggerRotateSaltPassword(stackDto.getId(), REASON);
+        verify(rotateSaltPasswordService).triggerRotateSaltPassword(stackDto, REASON);
     }
 
     private InstanceMetaData createInstanceMetadataForTest(Long privateId, String instanceGroupName) {

@@ -53,7 +53,6 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
@@ -62,6 +61,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackLoadBalancerUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsTriggerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CmSyncTriggerEvent;
@@ -218,9 +219,9 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
-    public FlowIdentifier triggerRotateSaltPassword(Long stackId, RotateSaltPasswordReason reason) {
+    public FlowIdentifier triggerRotateSaltPassword(Long stackId, RotateSaltPasswordReason reason, RotateSaltPasswordType type) {
         String selector = RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.event();
-        return reactorNotifier.notify(stackId, selector, new RotateSaltPasswordRequest(stackId, reason));
+        return reactorNotifier.notify(stackId, selector, new RotateSaltPasswordRequest(stackId, reason, type));
     }
 
     public FlowIdentifier triggerClusterReInstall(Long stackId) {
@@ -332,15 +333,21 @@ public class ReactorFlowManager {
     }
 
     public FlowIdentifier triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap, boolean oneNodeFromEachHostGroupAtOnce,
-            boolean restartServices) {
+            boolean restartServices, String triggeredVariant) {
         return reactorNotifier.notify(stackId, FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT,
-                new ClusterRepairTriggerEvent(stackId, failedNodesMap, oneNodeFromEachHostGroupAtOnce, restartServices));
+                new ClusterRepairTriggerEvent(stackId, failedNodesMap, oneNodeFromEachHostGroupAtOnce, restartServices, triggeredVariant));
+    }
+
+    public FlowIdentifier triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap, boolean oneNodeFromEachHostGroupAtOnce,
+            boolean restartServices, String triggeredVariant, boolean upgrade) {
+        return reactorNotifier.notify(stackId, FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT,
+                new ClusterRepairTriggerEvent(stackId, failedNodesMap, oneNodeFromEachHostGroupAtOnce, restartServices, triggeredVariant, upgrade));
     }
 
     public FlowIdentifier triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap,
             boolean restartServices) {
         return reactorNotifier.notify(stackId, FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT,
-                new ClusterRepairTriggerEvent(stackId, failedNodesMap, restartServices));
+                new ClusterRepairTriggerEvent(stackId, failedNodesMap, false, restartServices, null));
     }
 
     public FlowIdentifier triggerStackImageUpdate(ImageChangeDto imageChangeDto) {

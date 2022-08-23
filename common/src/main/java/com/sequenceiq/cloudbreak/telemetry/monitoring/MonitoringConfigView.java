@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.telemetry.monitoring;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang3.ObjectUtils;
 
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfigView;
@@ -70,6 +70,12 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private final char[] token;
 
+    private final String accessKeyId;
+
+    private final char[] privateKey;
+
+    private final String accessKeyType;
+
     private final TelemetryClusterDetails clusterDetails;
 
     private final RequestSignerConfigView requestSigner;
@@ -100,6 +106,9 @@ public class MonitoringConfigView implements TelemetryConfigView {
         this.retentionMinTime = builder.retentionMinTime;
         this.retentionMaxTime = builder.retentionMaxTime;
         this.walTruncateFrequency = builder.walTruncateFrequency;
+        this.accessKeyId = builder.accessKeyId;
+        this.privateKey = builder.privateKey;
+        this.accessKeyType = builder.accessKeyType;
     }
 
     public boolean isEnabled() {
@@ -197,25 +206,28 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("remoteWriteUrl", this.remoteWriteUrl);
         map.put("scrapeIntervalSeconds", this.scrapeIntervalSeconds);
         map.put("useDevStack", this.useDevStack);
-        map.put("type", ObjectUtils.defaultIfNull(this.type, EMPTY_CONFIG_DEFAULT));
-        map.put("cmUsername", ObjectUtils.defaultIfNull(this.cmUsername, EMPTY_CONFIG_DEFAULT));
-        map.put("cmPassword", ObjectUtils.defaultIfNull(this.cmPassword, EMPTY_CONFIG_DEFAULT));
-        map.put("cmMetricsExporterPort", ObjectUtils.defaultIfNull(this.cmMetricsExporterPort, DEFAULT_CM_SMON_PORT));
+        map.put("type", defaultIfNull(this.type, EMPTY_CONFIG_DEFAULT));
+        map.put("cmUsername", defaultIfNull(this.cmUsername, EMPTY_CONFIG_DEFAULT));
+        map.put("cmPassword", defaultIfNull(this.cmPassword, EMPTY_CONFIG_DEFAULT));
+        map.put("cmMetricsExporterPort", defaultIfNull(this.cmMetricsExporterPort, DEFAULT_CM_SMON_PORT));
         map.put("localPassword", this.localPassword != null ? new String(this.localPassword) : EMPTY_CONFIG_DEFAULT);
-        map.put("nodeExporterUser", ObjectUtils.defaultIfNull(this.nodeExporterUser, EMPTY_CONFIG_DEFAULT));
+        map.put("nodeExporterUser", defaultIfNull(this.nodeExporterUser, EMPTY_CONFIG_DEFAULT));
         map.put("nodeExporterPort", this.nodeExporterPort);
-        map.put("nodeExporterCollectors", ObjectUtils.defaultIfNull(this.nodeExporterCollectors, new ArrayList<>()));
-        map.put("blackboxExporterUser", ObjectUtils.defaultIfNull(this.blackboxExporterUser, EMPTY_CONFIG_DEFAULT));
+        map.put("nodeExporterCollectors", defaultIfNull(this.nodeExporterCollectors, new ArrayList<>()));
+        map.put("blackboxExporterUser", defaultIfNull(this.blackboxExporterUser, EMPTY_CONFIG_DEFAULT));
         map.put("blackboxExporterPort", this.blackboxExporterPort);
-        map.put("agentUser", ObjectUtils.defaultIfNull(this.agentUser, EMPTY_CONFIG_DEFAULT));
+        map.put("agentUser", defaultIfNull(this.agentUser, EMPTY_CONFIG_DEFAULT));
         map.put("agentPort", this.agentPort);
-        map.put("agentMaxDiskUsage", ObjectUtils.defaultIfNull(this.agentMaxDiskUsage, AGENT_MAX_DISK_USAGE_DEFAULT));
-        map.put("retentionMinTime", ObjectUtils.defaultIfNull(this.retentionMinTime, RETENTION_MIN_TIME));
-        map.put("retentionMaxTime", ObjectUtils.defaultIfNull(this.retentionMaxTime, RETENTION_MAX_TIME));
-        map.put("walTruncateFrequency", ObjectUtils.defaultIfNull(this.walTruncateFrequency, WAL_TRUNCATE_FREQUENCY));
-        map.put("username", ObjectUtils.defaultIfNull(this.username, EMPTY_CONFIG_DEFAULT));
+        map.put("agentMaxDiskUsage", defaultIfNull(this.agentMaxDiskUsage, AGENT_MAX_DISK_USAGE_DEFAULT));
+        map.put("retentionMinTime", defaultIfNull(this.retentionMinTime, RETENTION_MIN_TIME));
+        map.put("retentionMaxTime", defaultIfNull(this.retentionMaxTime, RETENTION_MAX_TIME));
+        map.put("walTruncateFrequency", defaultIfNull(this.walTruncateFrequency, WAL_TRUNCATE_FREQUENCY));
+        map.put("username", defaultIfNull(this.username, EMPTY_CONFIG_DEFAULT));
         map.put("password", this.password != null ? new String(this.password) : EMPTY_CONFIG_DEFAULT);
         map.put("token", this.token != null ? new String(this.token) : EMPTY_CONFIG_DEFAULT);
+        map.put("monitoringAccessKeyId", defaultIfNull(this.accessKeyId, EMPTY_CONFIG_DEFAULT));
+        map.put("monitoringPrivateKey", this.privateKey != null ? new String(this.privateKey) : EMPTY_CONFIG_DEFAULT);
+        map.put("accessKeyType", defaultIfNull(this.accessKeyType, EMPTY_CONFIG_DEFAULT));
         if (this.clusterDetails != null) {
             map.putAll(clusterDetails.toMap());
         }
@@ -272,6 +284,12 @@ public class MonitoringConfigView implements TelemetryConfigView {
         private String retentionMaxTime;
 
         private String walTruncateFrequency;
+
+        private String accessKeyId;
+
+        private char[] privateKey;
+
+        private String accessKeyType;
 
         private TelemetryClusterDetails clusterDetails;
 
@@ -403,6 +421,21 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         public Builder withWalTruncateFrequency(String walTruncateFrequency) {
             this.walTruncateFrequency = walTruncateFrequency;
+            return this;
+        }
+
+        public Builder withAccessKeyId(String accessKeyId) {
+            this.accessKeyId = accessKeyId;
+            return this;
+        }
+
+        public Builder withPrivateKey(char[] privateKey) {
+            this.privateKey = privateKey;
+            return this;
+        }
+
+        public Builder withAccessKeyType(String accessKeyType) {
+            this.accessKeyType = accessKeyType;
             return this;
         }
     }

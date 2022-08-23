@@ -55,16 +55,16 @@ class FreeIpaPostInstallServiceTest {
     private FreeIpaPostInstallService freeIpaPostInstallService;
 
     @Test
-    public void postInstallFreeIpaExecutePostInstallRecipes() throws Exception {
+    public void postInstallFreeIpaExecutePostServiceDeploymentRecipes() throws Exception {
         Stack stack = mock(Stack.class);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         Set<Node> nodes = Set.of(mock(Node.class));
         when(freeIpaNodeUtilService.mapInstancesToNodes(anySet())).thenReturn(nodes);
-        when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.POST_CLUSTER_INSTALL)).thenReturn(true);
+        when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.POST_SERVICE_DEPLOYMENT, RecipeType.POST_CLUSTER_INSTALL)).thenReturn(true);
         freeIpaPostInstallService.postInstallFreeIpa(1L, false);
-        verify(hostOrchestrator).postInstallRecipes(eq(gatewayConfig), eq(nodes), any(StackBasedExitCriteriaModel.class));
+        verify(hostOrchestrator).postServiceDeploymentRecipes(eq(gatewayConfig), eq(nodes), any(StackBasedExitCriteriaModel.class));
     }
 
     @Test
@@ -73,9 +73,9 @@ class FreeIpaPostInstallServiceTest {
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         Set<Node> nodes = Set.of(mock(Node.class));
-        when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.POST_CLUSTER_INSTALL)).thenReturn(false);
+        when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.POST_SERVICE_DEPLOYMENT, RecipeType.POST_CLUSTER_INSTALL)).thenReturn(false);
         freeIpaPostInstallService.postInstallFreeIpa(1L, false);
-        verify(hostOrchestrator, times(0)).postInstallRecipes(eq(gatewayConfig), eq(nodes), any(StackBasedExitCriteriaModel.class));
+        verify(hostOrchestrator, times(0)).postServiceDeploymentRecipes(eq(gatewayConfig), eq(nodes), any(StackBasedExitCriteriaModel.class));
     }
 
 }

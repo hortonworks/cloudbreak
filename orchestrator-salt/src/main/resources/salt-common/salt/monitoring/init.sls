@@ -14,8 +14,6 @@ include:
   - monitoring.request-signer
   {%- if cdp_prometheus_installed %}
   - monitoring.cdp-prometheus
-  {%- else %}
-  - monitoring.vmagent
   {%- endif %}
 
 /etc/cron.d/monitoring_cert_check:

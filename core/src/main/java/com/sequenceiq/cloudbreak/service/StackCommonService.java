@@ -31,8 +31,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkS
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
@@ -144,9 +142,6 @@ public class StackCommonService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    @Inject
-    private EntitlementService entitlementService;
-
     public StackV4Response createInWorkspace(StackV4Request stackRequest, User user, Workspace workspace, boolean distroxRequest) {
         return stackCreatorService.createStack(user, workspace, stackRequest, distroxRequest);
     }
@@ -255,9 +250,6 @@ public class StackCommonService {
     }
 
     public FlowIdentifier rotateSaltPassword(NameOrCrn nameOrCrn, String accountId, RotateSaltPasswordReason reason) {
-        if (!entitlementService.isSaltUserPasswordRotationEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            throw new BadRequestException("Rotating SaltStack user password is not supported in your account");
-        }
         return stackOperationService.rotateSaltPassword(nameOrCrn, accountId, reason);
     }
 

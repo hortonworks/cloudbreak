@@ -61,6 +61,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EMBEDDED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
@@ -74,6 +75,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SHOW_CL
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_TARGETED_UPSCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_UNBOUND_ELIMINATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_VM_DIAGNOSTICS;
@@ -462,6 +464,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.workloadiam.sync.enable}")
     private boolean enableWorkloadIamSync;
 
+    @Value("${auth.mock.postgres.upgrade.embedded.enable}")
+    private boolean enablePostgresUpgradeEmbedded;
+
     private String cbLicense;
 
     private AltusCredential telemetyPublisherCredential;
@@ -540,6 +545,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.user.sync.group-size.enforce-limit.enable}")
     private boolean enableUsersyncEnforceGroupMemberLimit;
+
+    @Value("${auth.mock.user.sync.split-freeipa-user-retrieval.enable}")
+    private boolean enableUsersyncSplitFreeIPAUserRetrieval;
 
     @PostConstruct
     public void init() {
@@ -992,6 +1000,12 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (enableUsersyncEnforceGroupMemberLimit) {
             builder.addEntitlements(createEntitlement(CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT));
         }
+        if (enablePostgresUpgradeEmbedded) {
+            builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_EMBEDDED));
+        }
+        if (enableUsersyncSplitFreeIPAUserRetrieval) {
+            builder.addEntitlements(createEntitlement(CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL));
+        }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
                         .setAccount(builder
@@ -1241,6 +1255,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         responseObserver.onNext(ListRolesResponse.newBuilder()
                 .addRole(Role.newBuilder()
                         .setCrn("crn:altus:iam:us-west-1:altus:role:DbusUploader")
+                        .build())
+                .addRole(Role.newBuilder()
+                        .setCrn("crn:altus:iam:us-west-1:altus:role:ComputeMetricsPublisher")
                         .build())
                 .build());
         responseObserver.onCompleted();
