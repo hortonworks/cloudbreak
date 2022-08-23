@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.azure.client;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -97,7 +99,17 @@ public class AzureClientCredentials {
         String secretKey = credentialView.getSecretKey();
         String subscriptionId = credentialView.getSubscriptionId();
         AzureEnvironment azureEnvironment = getAzureEnvironment(region);
-        ApplicationTokenCredentials applicationTokenCredentials = new ApplicationTokenCredentials(clientId, tenantId, secretKey, azureEnvironment);
+        //ApplicationTokenCredentials applicationTokenCredentials = new ApplicationTokenCredentials(clientId, tenantId, secretKey, azureEnvironment);
+
+        byte[]  cert = null;
+        try {
+            cert = Files.readAllBytes(Paths.get("/Users/akanto/azure-full.pem"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        ApplicationTokenCredentials applicationTokenCredentials = new ApplicationTokenCredentials(clientId, tenantId, cert, null, azureEnvironment);
+
         Optional<Boolean> codeGrantFlow = Optional.ofNullable(credentialView.codeGrantFlow());
 
         AzureTokenCredentials result = applicationTokenCredentials;
