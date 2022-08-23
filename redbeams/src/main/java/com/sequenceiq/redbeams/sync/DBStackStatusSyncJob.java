@@ -2,6 +2,8 @@ package com.sequenceiq.redbeams.sync;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
@@ -41,9 +43,9 @@ public class DBStackStatusSyncJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Object getMdcContextObject() {
+    protected Optional<Object> getMdcContextObject() {
         Long dbStackId = Long.valueOf(getLocalId());
-        return dbStackService.getById(dbStackId);
+        return Optional.ofNullable(dbStackService.getById(dbStackId));
     }
 
     @Override

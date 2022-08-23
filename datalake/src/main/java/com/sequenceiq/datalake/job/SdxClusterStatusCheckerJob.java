@@ -53,8 +53,8 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected SdxCluster getMdcContextObject() {
-        return sdxClusterRepository.findById(Long.valueOf(getLocalId())).orElse(null);
+    protected Optional<Object> getMdcContextObject() {
+        return Optional.ofNullable(sdxClusterRepository.findById(Long.valueOf(getLocalId())).orElse(null));
     }
 
     @Override

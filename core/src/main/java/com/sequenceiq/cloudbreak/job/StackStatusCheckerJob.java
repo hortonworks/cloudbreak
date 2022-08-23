@@ -128,8 +128,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected MdcContextInfoProvider getMdcContextConfigProvider() {
-        return stackDtoService.getStackViewByIdOpt(getStackId()).orElse(null);
+    protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
+        return Optional.ofNullable(stackDtoService.getStackViewByIdOpt(getStackId()).orElse(null));
     }
 
     @Override

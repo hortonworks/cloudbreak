@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -77,8 +78,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Object getMdcContextObject() {
-        return stackService.getStackById(getStackId());
+    protected Optional<Object> getMdcContextObject() {
+        return Optional.ofNullable(stackService.getStackById(getStackId()));
     }
 
     @Override
