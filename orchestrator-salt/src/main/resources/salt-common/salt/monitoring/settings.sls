@@ -32,6 +32,9 @@
 {% set node_exporter_collectors = salt['pillar.get']('monitoring:nodeExporterCollectors', []) %}
 {% set blackbox_exporter_user = salt['pillar.get']('monitoring:blackboxExporterUser', 'blackboxuser') %}
 {% set blackbox_exporter_port = salt['pillar.get']('monitoring:blackboxExporterPort', 9115) %}
+{% set blackbox_exporter_cloud_interval_seconds = salt['pillar.get']('monitoring:blackboxExporterCloudIntervalSeconds', 600) %}
+{% set blackbox_exporter_cloudera_interval_seconds = salt['pillar.get']('monitoring:blackboxExporterClouderaIntervalSeconds', 1800) %}
+{% set blackbox_exporter_check_on_all_nodes = salt['pillar.get']('monitoring:blackboxExporterCheckOnAllNodes', false) %}
 {% set local_password = salt['pillar.get']('monitoring:localPassword') %}
 {% set scrape_interval_seconds = salt['pillar.get']('monitoring:scrapeIntervalSeconds') %}
 {% set cm_metrics_exporter_port = salt['pillar.get']('monitoring:cmMetricsExporterPort', 61010) %}
@@ -90,6 +93,9 @@
     "nodeExporterExists": node_exporter_exists,
     "blackboxExporterUser": blackbox_exporter_user,
     "blackboxExporterPort": blackbox_exporter_port,
+    "blackboxExporterCloudIntervalSeconds": blackbox_exporter_cloud_interval_seconds,
+    "blackboxExporterClouderaIntervalSeconds": blackbox_exporter_cloudera_interval_seconds,
+    "blackboxExporterCheckOnAllNodes": blackbox_exporter_check_on_all_nodes,
     "blackboxExporterExists" : blackbox_exporter_exists,
     "localPassword": local_password,
     "useDevStack": use_dev_stack,

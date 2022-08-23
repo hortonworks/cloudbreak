@@ -25,7 +25,7 @@ public class MonitoringConfiguration {
 
     private NodeExporterConfiguration nodeExporter;
 
-    private ExporterConfiguration blackboxExporter;
+    private BlackboxExporterConfiguration blackboxExporter;
 
     private RequestSignerConfiguration requestSigner;
 
@@ -93,11 +93,11 @@ public class MonitoringConfiguration {
         this.nodeExporter = nodeExporter;
     }
 
-    public ExporterConfiguration getBlackboxExporter() {
+    public BlackboxExporterConfiguration getBlackboxExporter() {
         return blackboxExporter;
     }
 
-    public void setBlackboxExporter(ExporterConfiguration blackboxExporter) {
+    public void setBlackboxExporter(BlackboxExporterConfiguration blackboxExporter) {
         this.blackboxExporter = blackboxExporter;
     }
 
