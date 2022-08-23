@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static java.util.Collections.emptySet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -12,11 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -34,9 +37,12 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.CreationType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.view.RecipeView;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
@@ -44,6 +50,7 @@ import com.sequenceiq.cloudbreak.repository.RecipeViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.usage.service.RecipeUsageService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
@@ -76,10 +83,39 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    @Inject
+    private RecipeUsageService recipeUsageService;
+
+    public void sendClusterCreationUsageReport(Stack stack) {
+        try {
+            String stackCrn = stack.getResourceCrn();
+            int recipeCount = (int) stack.getCluster().getHostGroups()
+                    .stream()
+                    .mapToLong(hg -> hg.getRecipes().size())
+                    .sum();
+            Map<String, Integer> hostGroupDetails = stack.getCluster().getHostGroups()
+                    .stream()
+                    .collect(Collectors.toMap(HostGroup::getName, hg -> CollectionUtils.emptyIfNull(hg.getRecipes()).size()));
+            Map<RecipeType, AtomicInteger> typeDetails = Arrays.stream(RecipeType.values())
+                    .collect(Collectors.toMap(rt -> rt, rt -> new AtomicInteger(0)));
+            stack.getCluster().getHostGroups()
+                    .stream()
+                    .flatMap(hg -> hg.getRecipes().stream())
+                    .forEach(recipe -> typeDetails.get(recipe.getRecipeType()).incrementAndGet());
+            recipeUsageService.sendClusterCreationRecipeUsageReport(stackCrn, recipeCount,
+                    Optional.ofNullable(JsonUtil.writeValueAsStringSilentSafe(typeDetails)),
+                    Optional.ofNullable(JsonUtil.writeValueAsStringSilentSafe(hostGroupDetails)));
+        } catch (Exception e) {
+            LOGGER.error(String.format("We could not send usage report regarding recipes during cluster creation for stack %s, because: ",
+                    stack.getResourceCrn()), e.getMessage());
+        }
+    }
+
     public Recipe delete(NameOrCrn recipeNameOrCrn, Long workspaceId) {
         Recipe toDelete = get(recipeNameOrCrn, workspaceId);
         Recipe deleted = super.delete(toDelete, this::prepareDeletion);
         ownerAssignmentService.notifyResourceDeleted(deleted.getResourceCrn());
+        recipeUsageService.sendDeletedUsageReport(deleted.getName(), deleted.getResourceCrn(), deleted.getRecipeTypeString());
         return deleted;
     }
 
@@ -96,6 +132,8 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
     public Set<Recipe> deleteMultipleByNameFromWorkspace(Set<String> names, Long workspaceId) {
         Set<Recipe> deletedRecipes = super.deleteMultipleByNameFromWorkspace(names, workspaceId);
         deletedRecipes.forEach(deleted -> ownerAssignmentService.notifyResourceDeleted(deleted.getResourceCrn()));
+        deletedRecipes.forEach(deleted ->
+                recipeUsageService.sendDeletedUsageReport(deleted.getName(), deleted.getResourceCrn(), deleted.getRecipeTypeString()));
         return deletedRecipes;
     }
 
@@ -133,6 +171,7 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
                 Recipe created = super.createForLoggedInUser(recipe, workspaceId);
                 ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(), created.getResourceCrn(),
                         ThreadBasedUserCrnProvider.getAccountId());
+                recipeUsageService.sendCreatedUsageReport(created.getName(), created.getResourceCrn(), created.getRecipeTypeString());
                 return created;
             });
         } catch (TransactionService.TransactionExecutionException e) {
@@ -151,7 +190,9 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
                 Workspace workspace = getWorkspaceService().getByIdWithoutAuth(workspaceId);
                 recipe.setWorkspace(workspace);
                 recipe.setCreationType(CreationType.SERVICE);
-                return super.pureSave(recipe);
+                Recipe created = super.pureSave(recipe);
+                recipeUsageService.sendCreatedUsageReport(created.getName(), created.getResourceCrn(), created.getRecipeTypeString());
+                return created;
             });
         } catch (TransactionService.TransactionExecutionException e) {
             throw new TransactionService.TransactionRuntimeExecutionException(e);

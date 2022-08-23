@@ -188,6 +188,13 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
         this.generatedRecipes = generatedRecipes;
     }
 
+    public String getRecipeTypeString() {
+        if (recipeType != null) {
+            return recipeType.name();
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return "Recipe{" +

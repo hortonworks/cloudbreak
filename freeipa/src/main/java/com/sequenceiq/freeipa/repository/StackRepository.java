@@ -87,6 +87,11 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Query("SELECT s.id FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn AND s.terminated = -1")
     List<Long> findAllIdByEnvironmentCrnAndAccountId(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
 
+    @Query("SELECT s.resourceCrn as resourceCrn, s.id as id, s.name as name, s.environmentCrn as environmentCrn " +
+            "FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn AND s.terminated = -1")
+    List<ResourceBasicView> findAllResourceBasicViewByEnvironmentCrnAndAccountId(@Param("environmentCrn") String environmentCrn,
+            @Param("accountId") String accountId);
+
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig "
             + "LEFT JOIN FETCH ig.instanceMetaData WHERE s.environmentCrn = :environmentCrn AND s.accountId = :accountId AND s.terminated = -1")
     Optional<Stack> findByEnvironmentCrnAndAccountIdWithList(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
