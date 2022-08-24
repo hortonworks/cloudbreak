@@ -5,6 +5,8 @@ import java.util.Objects;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @DiscriminatorValue("YARN")
 public class YarnNetwork extends BaseNetwork {
@@ -29,6 +31,7 @@ public class YarnNetwork extends BaseNetwork {
     }
 
     @Override
+    @JsonIgnore
     public String getNetworkId() {
         return null;
     }
