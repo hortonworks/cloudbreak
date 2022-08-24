@@ -28,13 +28,15 @@ public class ParametersValidator {
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
-    public ParametersValidationRequest validate(String platform, CloudCredential cloudCredential, Map<String, String> parameters, Long workspaceId) {
+    public ParametersValidationRequest validate(String platform, String variant, CloudCredential cloudCredential, Map<String, String> parameters,
+            Long workspaceId) {
         if (parameters == null || parameters.isEmpty()) {
             return null;
         }
         LOGGER.info("Validate the parameters: {}", parameters);
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withPlatform(platform)
+                .withVariant(variant)
                 .withWorkspaceId(workspaceId)
                 .build();
         ParametersValidationRequest request = new ParametersValidationRequest(cloudCredential, cloudContext, parameters);
