@@ -91,6 +91,10 @@
     {
       "name": "us-gov-west-1",
       "displayName": "AWS GovCloud (US-West)"
+    },
+    {
+      "name": "ap-east-1",
+      "displayName": "Asia Pacific (Hong Kong)"
     }
   ]
 }

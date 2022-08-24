@@ -94,8 +94,8 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Object getMdcContextObject() {
-        return stackDtoService.getStackViewById(getStackId());
+    protected Optional<Object> getMdcContextObject() {
+        return Optional.ofNullable(stackDtoService.getStackViewById(getStackId()));
     }
 
     @Override

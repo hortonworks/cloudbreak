@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.cleanup.UMSCleanupConfig;
 import com.sequenceiq.cloudbreak.quartz.cleanup.job.UMSCleanupJob;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -44,8 +46,8 @@ public class FreeIpaUMSCleanupJob extends UMSCleanupJob {
     }
 
     @Override
-    protected Object getMdcContextObject() {
-        return null;
+    protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
+        return Optional.empty();
     }
 
     @Override

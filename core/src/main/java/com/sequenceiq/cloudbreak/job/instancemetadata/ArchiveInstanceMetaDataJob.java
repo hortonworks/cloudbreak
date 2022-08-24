@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.job.instancemetadata;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
@@ -40,8 +42,8 @@ public class ArchiveInstanceMetaDataJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Object getMdcContextObject() {
-        return stackViewService.findById(getStackId()).orElseGet(StackView::new);
+    protected Optional<Object> getMdcContextObject() {
+        return Optional.ofNullable(stackViewService.findById(getStackId()));
     }
 
     @Override

@@ -78,5 +78,9 @@
   "Middle East (Bahrain)": {
     "zoneid": "me-south-1",
     "defaultvm": "i2.4xlarge"
+  },
+  "Asia Pacific (Hong Kong)": {
+    "zoneid": "ap-east-1",
+    "defaultvm": "i2.4xlarge"
   }
 }

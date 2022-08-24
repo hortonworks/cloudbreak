@@ -71,7 +71,7 @@ public class StorageConsumptionJobTest {
     public void testGetMdcContextObject() {
         when(consumptionService.findConsumptionById(LOCAL_ID)).thenReturn(consumption);
 
-        Assertions.assertEquals(consumption, underTest.getMdcContextObject());
+        Assertions.assertEquals(consumption, underTest.getMdcContextObject().orElse(null));
     }
 
     @Test

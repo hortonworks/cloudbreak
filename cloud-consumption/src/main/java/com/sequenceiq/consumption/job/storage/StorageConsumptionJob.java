@@ -1,5 +1,7 @@
 package com.sequenceiq.consumption.job.storage;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.flow.ConsumptionReactorFlowManager;
@@ -38,6 +41,11 @@ public class StorageConsumptionJob extends StatusCheckerJob {
     }
 
     @Override
+    protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
+        return Optional.empty();
+    }
+
+    @Override
     protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
         try {
             Consumption consumption = consumptionService.findConsumptionById(getLocalIdAsLong());
@@ -52,7 +60,7 @@ public class StorageConsumptionJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Object getMdcContextObject() {
-        return consumptionService.findConsumptionById(getLocalIdAsLong());
+    protected Optional<Object> getMdcContextObject() {
+        return Optional.ofNullable(consumptionService.findConsumptionById(getLocalIdAsLong()));
     }
 }
