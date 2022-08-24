@@ -148,7 +148,8 @@ public class SdxRuntimeUpgradeService {
         boolean skipBackup = request != null && Boolean.TRUE.equals(request.getSkipBackup());
         boolean skipAtlasMetadata = request != null && Boolean.TRUE.equals(request.isSkipAtlasMetadata());
         boolean skipRangerAudits = request != null && Boolean.TRUE.equals(request.isSkipRangerAudits());
-        boolean skipRangerMetadata = request != null && Boolean.TRUE.equals(request.isSkipRangerMetadata());
+        //CB-18319
+        boolean skipRangerMetadata = true;
         DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(skipAtlasMetadata, skipRangerAudits, skipRangerMetadata);
         FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(imageId, cluster, shouldReplaceVmsAfterUpgrade(request), skipBackup, skipOptions);
         String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE.getMessage(), Collections.singletonList(imageId));
