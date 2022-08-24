@@ -1,5 +1,7 @@
 package com.sequenceiq.flow.cleanup;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.quartz.JobExecutionContext;
@@ -9,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.TracedQuartzJob;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -42,8 +45,8 @@ public class FlowCleanupJob extends TracedQuartzJob {
     }
 
     @Override
-    protected Object getMdcContextObject() {
-        return null;
+    protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
+        return Optional.empty();
     }
 
     @Override

@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -70,8 +69,8 @@ public class NodeStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Object getMdcContextObject() {
-        return stackViewService.findById(getStackId()).orElseGet(StackView::new);
+    protected Optional<Object> getMdcContextObject() {
+        return Optional.ofNullable(stackViewService.findById(getStackId()));
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.sequenceiq.consumption.job.storage;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
@@ -52,7 +54,7 @@ public class StorageConsumptionJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Object getMdcContextObject() {
-        return consumptionService.findConsumptionById(getLocalIdAsLong());
+    protected Optional<Object> getMdcContextObject() {
+        return Optional.ofNullable(consumptionService.findConsumptionById(getLocalIdAsLong()));
     }
 }

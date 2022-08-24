@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.job;
 
 import java.util.EnumSet;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -46,8 +47,8 @@ public class StructuredSynchronizerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Object getMdcContextObject() {
-        return stackService.getById(getLocalIdAsLong());
+    protected Optional<Object> getMdcContextObject() {
+        return Optional.ofNullable(stackService.getById(getLocalIdAsLong()));
     }
 
     @Override

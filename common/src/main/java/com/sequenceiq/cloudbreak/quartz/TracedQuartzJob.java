@@ -1,7 +1,14 @@
 package com.sequenceiq.cloudbreak.quartz;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
+import java.util.Optional;
+
+import javax.annotation.Nullable;
+
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
@@ -14,6 +21,8 @@ import io.opentracing.Span;
 import io.opentracing.Tracer;
 
 public abstract class TracedQuartzJob extends QuartzJobBean {
+
+    private static final Logger LOGGER = getLogger(TracedQuartzJob.class);
 
     private final String jobName;
 
@@ -38,8 +47,9 @@ public abstract class TracedQuartzJob extends QuartzJobBean {
     }
 
     protected void fillMdcContext(JobExecutionContext context) {
-        MdcContextInfoProvider mdcContextConfigProvider = getMdcContextConfigProvider();
+        Optional<MdcContextInfoProvider> mdcContextConfigProvider = getMdcContextConfigProvider();
         if (mdcContextConfigProvider == null) {
+            LOGGER.debug("getMdcContextConfigProvider does not implemented, try the old one");
             Object mdcContextObject = getMdcContextObject();
             if (mdcContextObject == null) {
                 throw new IllegalArgumentException("Please implement one of them: getMdcContextObject() or getMdcContextConfigProvider()");
@@ -47,17 +57,19 @@ public abstract class TracedQuartzJob extends QuartzJobBean {
                 MDCBuilder.buildMdcContext(mdcContextObject);
             }
         } else {
-            MDCBuilder.buildMdcContextFromInfoProvider(mdcContextConfigProvider);
+            MDCBuilder.buildMdcContextFromInfoProvider(mdcContextConfigProvider.orElse(null));
         }
         String requestId = MDCBuilder.getOrGenerateRequestId();
         context.put(LoggerContextKey.REQUEST_ID.toString(), requestId);
     }
 
-    protected Object getMdcContextObject() {
+    @Nullable
+    protected Optional<Object> getMdcContextObject() {
         return null;
     }
 
-    protected MdcContextInfoProvider getMdcContextConfigProvider() {
+    @Nullable
+    protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
         return null;
     }
 

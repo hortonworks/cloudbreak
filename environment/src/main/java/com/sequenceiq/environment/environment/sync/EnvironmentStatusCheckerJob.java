@@ -57,8 +57,8 @@ public class EnvironmentStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Object getMdcContextObject() {
-        return environmentService.findEnvironmentById(getLocalIdAsLong()).orElse(null);
+    protected Optional<Object> getMdcContextObject() {
+        return Optional.ofNullable(environmentService.findEnvironmentById(getLocalIdAsLong()).orElse(null));
     }
 
     @Override

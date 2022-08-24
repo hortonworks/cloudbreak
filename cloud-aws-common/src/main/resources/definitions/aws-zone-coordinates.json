@@ -43,6 +43,13 @@
       "k8sSupported": true
     },
     {
+      "name": "ap-east-1",
+      "displayName": "Asia Pacific (Hong Kong)",
+      "latitude": "22.302711",
+      "longitude": "114.177216",
+      "k8sSupported": true
+    },
+    {
       "name": "ap-northeast-2",
       "displayName": "Asia Pacific (Seoul)",
       "latitude": "37.5663491",
