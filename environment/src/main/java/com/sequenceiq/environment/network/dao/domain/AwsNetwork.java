@@ -3,6 +3,8 @@ package com.sequenceiq.environment.network.dao.domain;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @DiscriminatorValue("AWS")
 public class AwsNetwork extends BaseNetwork {
@@ -17,6 +19,7 @@ public class AwsNetwork extends BaseNetwork {
     }
 
     @Override
+    @JsonIgnore
     public String getNetworkId() {
         return vpcId;
     }

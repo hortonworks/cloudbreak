@@ -7,6 +7,7 @@ import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
@@ -70,6 +71,7 @@ public class AzureParameters extends BaseParameters implements AccountIdAwareRes
         return getIfNotNull(encryptionKeyUrl, Secret::getRaw);
     }
 
+    @JsonIgnore
     public String getEncryptionKeyUrlSecret() {
         return getIfNotNull(encryptionKeyUrl, Secret::getSecret);
     }

@@ -706,7 +706,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         this.trustStorePwd = new Secret(trustStorePwd);
     }
 
-    public Boolean isTopologyValidation() {
+    public Boolean getTopologyValidation() {
         return topologyValidation;
     }
 

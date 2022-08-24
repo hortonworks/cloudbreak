@@ -22,6 +22,8 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -46,6 +48,12 @@ import com.sequenceiq.environment.parameters.dao.converter.RegistrationTypeConve
 @Table(name = "environment_network")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "network_platform")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "@type")
+@JsonSubTypes({ @JsonSubTypes.Type(value = AwsNetwork.class, name = "awsNetwork"),
+        @JsonSubTypes.Type(value = AzureNetwork.class, name = "azureNetwork"),
+        @JsonSubTypes.Type(value = GcpNetwork.class, name = "gcpNetwork"),
+        @JsonSubTypes.Type(value = MockNetwork.class, name = "mockNetwork"),
+        @JsonSubTypes.Type(value = YarnNetwork.class, name = "yarnNetwork") })
 public abstract class BaseNetwork implements EnvironmentAwareResource {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "environment_network_generator")

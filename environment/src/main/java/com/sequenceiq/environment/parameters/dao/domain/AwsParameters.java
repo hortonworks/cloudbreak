@@ -2,19 +2,20 @@ package com.sequenceiq.environment.parameters.dao.domain;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
-import com.sequenceiq.cloudbreak.service.secret.SecretValue;
-import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
-import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
-import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
-import com.sequenceiq.environment.parameters.dao.converter.S3GuardTableCreationConverter;
-
 import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
+import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
+import com.sequenceiq.environment.parameters.dao.converter.S3GuardTableCreationConverter;
 
 @Entity
 @DiscriminatorValue("AWS")
@@ -74,6 +75,7 @@ public class AwsParameters extends BaseParameters implements AccountIdAwareResou
         return getIfNotNull(encryptionKeyArn, Secret::getRaw);
     }
 
+    @JsonIgnore
     public String getEncryptionKeyArnSecret() {
         return getIfNotNull(encryptionKeyArn, Secret::getSecret);
     }
