@@ -66,7 +66,7 @@ public class StackUpdater {
     }
 
     public void updateExternalDatabaseEngineVersion(Long stackId, String databaseVersion) {
-        stackService.updateStackVersion(stackId, databaseVersion);
+        stackService.updateExternalDatabaseEngineVersion(stackId, databaseVersion);
     }
 
     private Stack doUpdateStackStatus(Long stackId, Status newStatus, DetailedStackStatus newDetailedStatus, String statusReason) {
