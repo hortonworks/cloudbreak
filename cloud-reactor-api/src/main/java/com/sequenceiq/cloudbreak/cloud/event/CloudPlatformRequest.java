@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.reactivestreams.Subscriber;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -17,6 +18,7 @@ public class CloudPlatformRequest<T> implements Selectable {
 
     private final CloudCredential cloudCredential;
 
+    @JsonIgnore
     private final Promise<T> result;
 
     public CloudPlatformRequest(CloudContext cloudContext, CloudCredential cloudCredential) {
