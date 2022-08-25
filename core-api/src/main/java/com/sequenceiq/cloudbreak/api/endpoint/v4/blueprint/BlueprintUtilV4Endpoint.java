@@ -78,7 +78,7 @@ public interface BlueprintUtilV4Endpoint {
     RecommendationV4Response createRecommendationByCredCrn(@PathParam("workspaceId") Long workspaceId,
             @QueryParam("blueprintName") String blueprintName,
             @QueryParam("credentialCrn") String credentialCrn,
-            @QueryParam("region") String region,
+            @NotEmpty @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
             @QueryParam("availabilityZone") String availabilityZone,
             @QueryParam("resourceType") CdpResourceType resourceType);
@@ -91,7 +91,7 @@ public interface BlueprintUtilV4Endpoint {
     RecommendationV4Response createRecommendationByEnvCrn(@PathParam("workspaceId") Long workspaceId,
             @QueryParam("blueprintName") String blueprintName,
             @QueryParam("environmentCrn") String environmentCrn,
-            @QueryParam("region") String region,
+            @NotEmpty @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
             @QueryParam("availabilityZone") String availabilityZone,
             @QueryParam("resourceType") CdpResourceType resourceType);
