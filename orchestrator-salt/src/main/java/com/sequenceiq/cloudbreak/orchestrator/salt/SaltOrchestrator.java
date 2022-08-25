@@ -1384,8 +1384,8 @@ public class SaltOrchestrator implements HostOrchestrator {
             try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
                 // remove 'recipe' grain from all nodes
                 Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-                saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(saltStateService, targetHostnames, allNodes, "recipes", executedPhase.value()),
-                        exitCriteriaModel, maxRetry, exitCriteria);
+                saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(saltStateService, targetHostnames, allNodes, "recipes",
+                        executedPhase.value()), exitCriteriaModel, exitCriteria);
             } catch (Exception e) {
                 LOGGER.info("Error occurred during removing recipe roles.", e);
                 throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
@@ -1395,8 +1395,8 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private void addRecipeGrainToNodes(Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, int maxRetry, RecipeExecutionPhase executedPhase,
             SaltConnector sc, Set<String> targetHostnames) throws Exception {
-        saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(saltStateService, targetHostnames, allNodes, "recipes", executedPhase.value()),
-                exitCriteriaModel, maxRetry, exitCriteria);
+        saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(saltStateService, targetHostnames, allNodes, "recipes", executedPhase.value()),
+                exitCriteriaModel, exitCriteria);
     }
 
     private RecipeExecutionPhase fallbackToOldRecipeExecutionPhaseIfNecessary(RecipeExecutionPhase phase, GatewayConfig gatewayConfig, SaltConnector sc) {
