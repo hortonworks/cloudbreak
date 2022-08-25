@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_REVERT_ALL_COMMENCE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_REVERT_SALTSTATE_COMMENCE_EVENT;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -17,8 +20,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmDeregisterAgentRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmDeregisterAgentResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFailedEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmHealthCheckRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmHealthCheckResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFinalizeRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFinalizeResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmPushSaltStatesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmPushSaltStatesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmReconfigureNginxRequest;
@@ -49,7 +52,7 @@ public class UpgradeCcmActions {
 
             @Override
             protected Selectable createRequest(UpgradeCcmContext context) {
-                return new UpgradeCcmTunnelUpdateRequest(context.getStackId(), context.getClusterId(), context.getOldTunnel());
+                return new UpgradeCcmTunnelUpdateRequest(context.getStackId(), context.getClusterId(), context.getOldTunnel(), context.getRevertTime());
             }
         };
     }
@@ -65,7 +68,55 @@ public class UpgradeCcmActions {
 
             @Override
             protected Selectable createRequest(UpgradeCcmContext context) {
-                return new UpgradeCcmPushSaltStatesRequest(context.getStackId(), context.getClusterId(), context.getOldTunnel());
+                return new UpgradeCcmPushSaltStatesRequest(context.getStackId(), context.getClusterId(), context.getOldTunnel(), context.getRevertTime());
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_CCM_REVERT_TUNNEL_STATE")
+    public Action<?, ?> revertTunnel() {
+        return new AbstractUpgradeCcmAction<>(UpgradeCcmFailedEvent.class) {
+            @Override
+            protected void doExecute(UpgradeCcmContext context, UpgradeCcmFailedEvent payload, Map<Object, Object> variables) {
+                upgradeCcmService.updateTunnel(payload.getResourceId(), payload.getOldTunnel());
+                sendEvent(context, new UpgradeCcmFailedEvent(payload.getResourceId(),
+                        payload.getClusterId(),
+                        payload.getOldTunnel(),
+                        payload.getFailureOrigin(),
+                        payload.getException(),
+                        payload.getRevertTime()));
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_CCM_REVERT_SALTSTATE_STATE")
+    public Action<?, ?> revertTunnelAndSaltState() {
+        return new AbstractUpgradeCcmAction<>(UpgradeCcmFailedEvent.class) {
+            @Override
+            protected void doExecute(UpgradeCcmContext context, UpgradeCcmFailedEvent payload, Map<Object, Object> variables) {
+                upgradeCcmService.updateTunnel(payload.getResourceId(), payload.getOldTunnel());
+                sendEvent(context, UPGRADE_CCM_REVERT_SALTSTATE_COMMENCE_EVENT.selector(), new UpgradeCcmFailedEvent(payload.getResourceId(),
+                        payload.getClusterId(),
+                        payload.getOldTunnel(),
+                        payload.getFailureOrigin(),
+                        payload.getException(),
+                        payload.getRevertTime()));
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_CCM_REVERT_ALL_STATE")
+    public Action<?, ?> revertAll() {
+        return new AbstractUpgradeCcmAction<>(UpgradeCcmFailedEvent.class) {
+            @Override
+            protected void doExecute(UpgradeCcmContext context, UpgradeCcmFailedEvent payload, Map<Object, Object> variables) {
+                upgradeCcmService.updateTunnel(payload.getResourceId(), payload.getOldTunnel());
+                sendEvent(context, UPGRADE_CCM_REVERT_ALL_COMMENCE_EVENT.selector(), new UpgradeCcmFailedEvent(payload.getResourceId(),
+                        payload.getClusterId(),
+                        payload.getOldTunnel(),
+                        payload.getFailureOrigin(),
+                        payload.getException(),
+                        payload.getRevertTime()));
             }
         };
     }
@@ -81,7 +132,7 @@ public class UpgradeCcmActions {
 
             @Override
             protected Selectable createRequest(UpgradeCcmContext context) {
-                return new UpgradeCcmReconfigureNginxRequest(context.getStackId(), context.getClusterId(), context.getOldTunnel());
+                return new UpgradeCcmReconfigureNginxRequest(context.getStackId(), context.getClusterId(), context.getOldTunnel(), context.getRevertTime());
             }
         };
     }
@@ -97,39 +148,23 @@ public class UpgradeCcmActions {
 
             @Override
             protected Selectable createRequest(UpgradeCcmContext context) {
-                return new UpgradeCcmRegisterClusterProxyRequest(context.getStackId(), context.getClusterId(), context.getOldTunnel());
-            }
-        };
-    }
-
-    @Bean(name = "UPGRADE_CCM_HEALTH_CHECK_STATE")
-    public Action<?, ?> healthCheck() {
-        return new AbstractUpgradeCcmAction<>(UpgradeCcmRegisterClusterProxyResult.class) {
-            @Override
-            protected void doExecute(UpgradeCcmContext context, UpgradeCcmRegisterClusterProxyResult payload, Map<Object, Object> variables) {
-                upgradeCcmService.healthCheckState(payload.getResourceId());
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(UpgradeCcmContext context) {
-                return new UpgradeCcmHealthCheckRequest(context.getStackId(), context.getClusterId(), context.getOldTunnel());
+                return new UpgradeCcmRegisterClusterProxyRequest(context.getStackId(), context.getClusterId(), context.getOldTunnel(), context.getRevertTime());
             }
         };
     }
 
     @Bean(name = "UPGRADE_CCM_REMOVE_AGENT_STATE")
     public Action<?, ?> removeAgent() {
-        return new AbstractUpgradeCcmAction<>(UpgradeCcmHealthCheckResult.class) {
+        return new AbstractUpgradeCcmAction<>(UpgradeCcmRegisterClusterProxyResult.class) {
             @Override
-            protected void doExecute(UpgradeCcmContext context, UpgradeCcmHealthCheckResult payload, Map<Object, Object> variables) {
+            protected void doExecute(UpgradeCcmContext context, UpgradeCcmRegisterClusterProxyResult payload, Map<Object, Object> variables) {
                 upgradeCcmService.removeAgentState(payload.getResourceId());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(UpgradeCcmContext context) {
-                return new UpgradeCcmRemoveAgentRequest(context.getStackId(), context.getClusterId(), context.getOldTunnel());
+                return new UpgradeCcmRemoveAgentRequest(context.getStackId(), context.getClusterId(), context.getOldTunnel(), context.getRevertTime());
             }
         };
     }
@@ -145,16 +180,31 @@ public class UpgradeCcmActions {
 
             @Override
             protected Selectable createRequest(UpgradeCcmContext context) {
-                return new UpgradeCcmDeregisterAgentRequest(context.getStackId(), context.getClusterId(), context.getOldTunnel());
+                return new UpgradeCcmDeregisterAgentRequest(context.getStackId(), context.getClusterId(), context.getOldTunnel(), context.getRevertTime());
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_CCM_FINALIZE_STATE")
+    public Action<?, ?> upgradeCcmFinalize() {
+        return new AbstractUpgradeCcmAction<>(UpgradeCcmDeregisterAgentResult.class) {
+            @Override
+            protected void doExecute(UpgradeCcmContext context, UpgradeCcmDeregisterAgentResult payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(UpgradeCcmContext context) {
+                return new UpgradeCcmFinalizeRequest(context.getStackId(), context.getClusterId(), context.getOldTunnel(), context.getRevertTime());
             }
         };
     }
 
     @Bean(name = "UPGRADE_CCM_FINISHED_STATE")
     public Action<?, ?> upgradeCcmFinished() {
-        return new AbstractUpgradeCcmAction<>(UpgradeCcmDeregisterAgentResult.class) {
+        return new AbstractUpgradeCcmAction<>(UpgradeCcmFinalizeResult.class) {
             @Override
-            protected void doExecute(UpgradeCcmContext context, UpgradeCcmDeregisterAgentResult payload, Map<Object, Object> variables) {
+            protected void doExecute(UpgradeCcmContext context, UpgradeCcmFinalizeResult payload, Map<Object, Object> variables) {
                 upgradeCcmService.ccmUpgradeFinished(payload.getResourceId(), context.getClusterId());
                 sendEvent(context);
             }

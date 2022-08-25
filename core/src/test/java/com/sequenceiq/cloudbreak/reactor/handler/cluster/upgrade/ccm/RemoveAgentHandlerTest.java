@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmRemoveAgentRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -51,31 +50,25 @@ class RemoveAgentHandlerTest {
 
     @Test
     void doAccept() throws CloudbreakOrchestratorException {
-        UpgradeCcmRemoveAgentRequest request = new UpgradeCcmRemoveAgentRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM);
+        UpgradeCcmRemoveAgentRequest request = new UpgradeCcmRemoveAgentRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM, null);
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
         InOrder inOrder = inOrder(upgradeCcmService);
-        inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID);
+        inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
         inOrder.verify(upgradeCcmService).removeAgent(STACK_ID, Tunnel.CCM);
         assertThat(result.selector()).isEqualTo("UPGRADECCMREMOVEAGENTRESULT");
     }
 
     @Test
     void orchestrationException() throws CloudbreakOrchestratorException {
-        UpgradeCcmRemoveAgentRequest request = new UpgradeCcmRemoveAgentRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM);
+        UpgradeCcmRemoveAgentRequest request = new UpgradeCcmRemoveAgentRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM, null);
         when(event.getData()).thenReturn(request);
         doThrow(new CloudbreakOrchestratorFailedException("salt error")).when(upgradeCcmService).removeAgent(any(), any());
 
         Selectable result = underTest.doAccept(event);
         verify(upgradeCcmService).removeAgent(STACK_ID, Tunnel.CCM);
-        assertThat(result.selector()).isEqualTo("UPGRADECCMFAILEDEVENT");
-        assertThat(result).isInstanceOf(UpgradeCcmFailedEvent.class);
-        UpgradeCcmFailedEvent failedEvent = (UpgradeCcmFailedEvent) result;
-        assertThat(failedEvent.getOldTunnel()).isEqualTo(Tunnel.CCM);
-        assertThat(failedEvent.getResourceId()).isEqualTo(STACK_ID);
-        assertThat(failedEvent.getFailureOrigin()).isEqualTo(RemoveAgentHandler.class);
-        assertThat(failedEvent.getException().getMessage()).isEqualTo("salt error");
+        assertThat(result.selector()).isEqualTo("UPGRADECCMREMOVEAGENTRESULT");
     }
 
 }

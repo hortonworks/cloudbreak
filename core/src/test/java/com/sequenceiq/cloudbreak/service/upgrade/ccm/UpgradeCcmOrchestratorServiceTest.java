@@ -80,7 +80,7 @@ class UpgradeCcmOrchestratorServiceTest {
         underTest.reconfigureNginx(STACK_ID);
         verify(hostOrchestrator).runOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
-        assertThat(params.getState()).isEqualTo("nginx");
+        assertThat(params.getState()).isEqualTo("nginx/upgradeccm");
         assertOtherStateParams(params);
     }
 

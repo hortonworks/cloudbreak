@@ -23,10 +23,7 @@ public enum UpgradeCcmStateSelector implements UpgradeCcmFlowEvent {
     UPGRADE_CCM_FAILED_REVERT_EVENT,
     UPGRADE_CCM_FAILED_REVERT_ALL_EVENT,
     UPGRADE_CCM_CLEANING_FAILED_EVENT,
-<<<<<<< HEAD
     UPGRADE_CCM_FINALIZE_FAILED_EVENT,
-=======
->>>>>>> CB-14585 ccm upgrade revert flow in case of error in freeipa
     UPGRADE_CCM_FAILURE_HANDLED_EVENT;
 
     private final String event;

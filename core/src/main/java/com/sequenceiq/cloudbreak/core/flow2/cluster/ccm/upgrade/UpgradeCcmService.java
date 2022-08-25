@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterPro
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.AbstractUpgradeCcmEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmBaseEvent;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.RegisterClusterProxyHandler;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -116,11 +116,25 @@ public class UpgradeCcmService {
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_REMOVE_AGENT);
     }
 
+    public void removeAgentFailed(Long stackId) {
+        String statusReason = "Remove previous version's agent from the cluster is failed";
+        LOGGER.debug(statusReason);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CCM_UPGRADE_IN_PROGRESS, statusReason);
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_REMOVE_AGENT_FAILED);
+    }
+
     void deregisterAgentState(Long stackId) {
         String statusReason = "Deregister previous version's agent";
         LOGGER.debug(statusReason);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CCM_UPGRADE_IN_PROGRESS, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_DEREGISTER_AGENT);
+    }
+
+    public void deregisterAgentFailed(Long stackId) {
+        String statusReason = "Deregister previous version's agent is failed";
+        LOGGER.debug(statusReason);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CCM_UPGRADE_IN_PROGRESS, statusReason);
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_DEREGISTER_AGENT_FAILED);
     }
 
     public void ccmUpgradeFinished(Long stackId, Long clusterId) {
@@ -133,7 +147,7 @@ public class UpgradeCcmService {
     }
 
     public void ccmUpgradeFailed(Long stackId, Long clusterId, Tunnel oldTunnel,
-            Class<? extends ExceptionCatcherEventHandler<? extends AbstractUpgradeCcmEvent>> failureOrigin) {
+            Class<? extends ExceptionCatcherEventHandler<? extends UpgradeCcmBaseEvent>> failureOrigin) {
 
         String statusReason = "CCM upgrade failed";
         LOGGER.debug(statusReason);
@@ -148,8 +162,8 @@ public class UpgradeCcmService {
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_FAILED);
     }
 
-    public void updateTunnel(Long stackId) {
-        stackService.setTunnelByStackId(stackId, Tunnel.latestUpgradeTarget());
+    public void updateTunnel(Long stackId, Tunnel tunnel) {
+        stackService.setTunnelByStackId(stackId, tunnel);
     }
 
     public void pushSaltState(Long stackId, Long clusterId) {
@@ -170,12 +184,16 @@ public class UpgradeCcmService {
         healthCheck(stackId);
     }
 
-    private void registerClusterProxy(Long stackId) {
+    public void finalize(Long stackId) throws CloudbreakOrchestratorException {
+        upgradeCcmOrchestratorService.finalize(stackId);
+    }
+
+    public void registerClusterProxy(Long stackId) {
         Optional<ConfigRegistrationResponse> configRegistrationResponse = clusterProxyService.reRegisterCluster(stackId);
         configRegistrationResponse.ifPresentOrElse(c -> LOGGER.debug(c.toString()), () -> LOGGER.debug("No clusterproxy register response for {}", stackId));
     }
 
-    private void healthCheck(Long stackId) {
+    public void healthCheck(Long stackId) {
         LOGGER.info("Health check for CCM upgrade...");
         Set<String> unhealthyHosts;
         try {

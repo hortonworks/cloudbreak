@@ -146,6 +146,9 @@ public class ClusterHostServiceRunner {
     @Value("${cb.cm.kerberos.encryption.type}")
     private String defaultKerberosEncryptionType;
 
+    @Value("${cb.ccmRevertJob.activationInMinutes}")
+    private Integer activationInMinutes;
+
     @Inject
     private HostOrchestrator hostOrchestrator;
 
@@ -725,6 +728,7 @@ public class ClusterHostServiceRunner {
         gateway.put("enable_knox_ranger_authorizer", isRangerAuthorizerEnabled(clouderaManagerRepo));
         gateway.put("enable_ccmv2", stackDto.getTunnel().useCcmV2OrJumpgate());
         gateway.put("enable_ccmv2_jumpgate", stackDto.getTunnel().useCcmV2Jumpgate());
+        gateway.put("activation_in_minutes", activationInMinutes);
 
         gateway.putAll(createKnoxRelatedGatewayCofniguration(stackDto, virtualGroupRequest, connector));
         gateway.putAll(createGatewayUserFacingCertAndFqdn(gatewayConfig, stackDto));

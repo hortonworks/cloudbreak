@@ -24,7 +24,9 @@ public class UpgradeCcmOrchestratorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeCcmOrchestratorService.class);
 
-    private static final String NGINX_STATE = "nginx";
+    private static final String UPGRADECCM_STATE = "nginx/upgradeccm";
+
+    private static final String FINALIZE = "nginx/finalize";
 
     private static final String DISABLE_MINA_STATE = "upgradeccm/disable-ccmv1";
 
@@ -43,8 +45,14 @@ public class UpgradeCcmOrchestratorService {
     private HostOrchestrator hostOrchestrator;
 
     public void reconfigureNginx(Long stackId) throws CloudbreakOrchestratorException {
-        OrchestratorStateParams stateParams = createStateParams(stackId, NGINX_STATE);
+        OrchestratorStateParams stateParams = createStateParams(stackId, UPGRADECCM_STATE);
         LOGGER.debug("Calling reconfigureNginx with state params '{}'", stateParams);
+        hostOrchestrator.runOrchestratorState(stateParams);
+    }
+
+    public void finalize(Long stackId) throws CloudbreakOrchestratorException {
+        OrchestratorStateParams stateParams = createStateParams(stackId, FINALIZE);
+        LOGGER.debug("Calling finalize with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 

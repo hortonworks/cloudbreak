@@ -45,12 +45,12 @@ class DeregisterAgentHandlerTest {
 
     @Test
     void doAccept() {
-        UpgradeCcmDeregisterAgentRequest request = new UpgradeCcmDeregisterAgentRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM);
+        UpgradeCcmDeregisterAgentRequest request = new UpgradeCcmDeregisterAgentRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM, null);
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
         InOrder inOrder = inOrder(upgradeCcmService);
-        inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID);
+        inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
         inOrder.verify(upgradeCcmService).deregisterAgent(STACK_ID, Tunnel.CCM);
         assertThat(result.selector()).isEqualTo("UPGRADECCMDEREGISTERAGENTRESULT");
     }

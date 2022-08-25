@@ -45,12 +45,12 @@ class RegisterClusterProxyHandlerTest {
 
     @Test
     void doAccept() {
-        UpgradeCcmRegisterClusterProxyRequest request = new UpgradeCcmRegisterClusterProxyRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM);
+        UpgradeCcmRegisterClusterProxyRequest request = new UpgradeCcmRegisterClusterProxyRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM, null);
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
         InOrder inOrder = inOrder(upgradeCcmService);
-        inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID);
+        inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
         inOrder.verify(upgradeCcmService).registerClusterProxyAndCheckHealth(STACK_ID);
         assertThat(result.selector()).isEqualTo("UPGRADECCMREGISTERCLUSTERPROXYRESULT");
     }

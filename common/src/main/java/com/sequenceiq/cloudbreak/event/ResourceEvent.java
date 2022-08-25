@@ -474,7 +474,11 @@ public enum ResourceEvent {
     CLUSTER_CCM_UPGRADE_REGISTER_CLUSTER_PROXY("cluster.ccm.upgrade.register.clusterproxy"),
     CLUSTER_CCM_UPGRADE_HEALTH_CHECK("cluster.ccm.upgrade.health.check"),
     CLUSTER_CCM_UPGRADE_REMOVE_AGENT("cluster.ccm.upgrade.remove.agent"),
+
+    CLUSTER_CCM_UPGRADE_REMOVE_AGENT_FAILED("cluster.ccm.upgrade.remove.agent.failed"),
     CLUSTER_CCM_UPGRADE_DEREGISTER_AGENT("cluster.ccm.upgrade.deregister.agent"),
+
+    CLUSTER_CCM_UPGRADE_DEREGISTER_AGENT_FAILED("cluster.ccm.upgrade.deregister.agent.failed"),
     CLUSTER_CCM_UPGRADE_FAILED("cluster.ccm.upgrade.failed"),
     CLUSTER_CCM_UPGRADE_FINISHED("cluster.ccm.upgrade.finished"),
 
