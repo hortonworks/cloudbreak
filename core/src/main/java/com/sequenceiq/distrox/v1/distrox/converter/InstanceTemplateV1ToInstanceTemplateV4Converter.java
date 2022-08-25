@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AzureInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.GcpInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
@@ -28,7 +29,9 @@ public class InstanceTemplateV1ToInstanceTemplateV4Converter {
         response.setRootVolume(getIfNotNull(source.getRootVolume(), volumeConverter::convert));
         response.setAttachedVolumes(getIfNotNull(source.getAttachedVolumes(), volumeConverter::convertTo));
         response.setEphemeralVolume(getIfNotNull(source.getEphemeralVolume(), volumeConverter::convert));
-        response.setAws(getIfNotNull(source.getAws(), environment, instanceTemplateParameterConverter::convert));
+        AwsInstanceTemplateV1Parameters awsParametersEffective = Objects.requireNonNullElse(source.getAws(),
+                new AwsInstanceTemplateV1Parameters());
+        response.setAws(instanceTemplateParameterConverter.convert(awsParametersEffective, environment));
         AzureInstanceTemplateV1Parameters azureParametersEffective = Objects.requireNonNullElse(source.getAzure(),
                 new AzureInstanceTemplateV1Parameters());
         response.setAzure(instanceTemplateParameterConverter.convert(azureParametersEffective, environment));
