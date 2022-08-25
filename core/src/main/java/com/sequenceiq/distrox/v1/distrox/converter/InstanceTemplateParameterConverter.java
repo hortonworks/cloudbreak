@@ -67,10 +67,12 @@ public class InstanceTemplateParameterConverter {
                     .map(AwsDiskEncryptionParameters::getEncryptionKeyArn)
                     .orElse(null);
             if (environmentEncryptionKeyArn != null && !environmentEncryptionKeyArn.isEmpty()) {
+                LOGGER.info("Applying AWS CMK for instance volume encryption as per environment configuration.");
                 response.setKey(environmentEncryptionKeyArn);
                 response.setType(EncryptionType.CUSTOM);
             } else {
                 response.setType(EncryptionType.DEFAULT);
+                LOGGER.info("Environment configuration does not contain AWS CMK for instance volume encryption. Using default encryption.");
             }
         }
         return response;
