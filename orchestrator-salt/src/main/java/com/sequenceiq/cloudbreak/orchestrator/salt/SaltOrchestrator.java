@@ -782,6 +782,35 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
+    public void startClusterManagerWithItsAgents(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException {
+        LOGGER.debug("Start Cluster manager and its agents: [{}]", allNodes);
+        runHighStateWithSpecificRole(gatewayConfig, allNodes, exitCriteriaModel, "cloudera_manager_full_start", "Error occurred during CM start");
+    }
+
+    @Override
+    public void stopClusterManagerWithItsAgents(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException {
+        LOGGER.debug("Stop Cluster manager and its agents: [{}]", allNodes);
+        runHighStateWithSpecificRole(gatewayConfig, allNodes, exitCriteriaModel, "cloudera_manager_full_stop", "Error occurred during CM stop");
+    }
+
+    private void runHighStateWithSpecificRole(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, String role,
+            String errorMsg) throws CloudbreakOrchestratorException {
+        Set<String> targets = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+        try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
+            saltCommandRunner.runModifyGrainCommand(sc,
+                    new GrainAddRunner(saltStateService, targets, allNodes, role), exitCriteriaModel, exitCriteria);
+            runNewService(sc, new HighStateRunner(saltStateService, targets, allNodes), exitCriteriaModel);
+            saltCommandRunner.runModifyGrainCommand(sc,
+                    new GrainRemoveRunner(saltStateService, targets, allNodes, role), exitCriteriaModel, exitCriteria);
+        } catch (Exception e) {
+            LOGGER.error(errorMsg, e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public void updateAgentCertDirectoryPermission(GatewayConfig gatewayConfig, Set<String> target, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
