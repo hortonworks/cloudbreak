@@ -122,3 +122,13 @@ base:
   'roles:cloudera_manager_agent_stop':
     - match: grain
     - cloudera.agent.agent-stop
+
+  'roles:cloudera_manager_full_stop':
+    - match: grain
+    - cloudera.agent.agent-stop
+    - cloudera.manager.server-stop
+
+  'roles:cloudera_manager_full_start':
+    - match: grain
+    - cloudera.agent.start
+    - cloudera.manager.server-start
