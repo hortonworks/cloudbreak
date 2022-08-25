@@ -103,6 +103,7 @@ auth:
     saas.sdx.integration.enable: true
     salt.rotatepassword.enable: true
     postgres.upgrade.embedded.enable: true
+    postgres.upgrade.exception.enable: false
 
 crn:
   partition: cdp

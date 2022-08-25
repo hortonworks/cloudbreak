@@ -54,6 +54,9 @@ public class RdsUpgradeService {
     @Value("${cb.db.env.upgrade.rds.targetversion}")
     private TargetMajorVersion defaultTargetMajorVersion;
 
+    @Inject
+    private DatabaseUpgradeRuntimeValidator databaseUpgradeRuntimeValidator;
+
     public RdsUpgradeV4Response upgradeRds(NameOrCrn nameOrCrn, TargetMajorVersion targetMajorVersion) {
         TargetMajorVersion calculatedVersion = ObjectUtils.defaultIfNull(targetMajorVersion, defaultTargetMajorVersion);
         String accountId = restRequestThreadLocalService.getAccountId();
@@ -65,7 +68,7 @@ public class RdsUpgradeService {
         if (getCurrentRdsVersion(nameOrCrn).equals(calculatedVersion.getMajorVersion())) {
             return alreadyOnLatestAnswer(calculatedVersion);
         } else {
-            return checkStackStatusAndTrigger(stack, calculatedVersion);
+            return validateAndTrigger(stack, calculatedVersion, accountId);
         }
     }
 
@@ -83,7 +86,11 @@ public class RdsUpgradeService {
                 getMessage(CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED, List.of(targetMajorVersion.getMajorVersion())), targetMajorVersion);
     }
 
-    private RdsUpgradeV4Response checkStackStatusAndTrigger(StackView stack, TargetMajorVersion targetMajorVersion) {
+    private RdsUpgradeV4Response validateAndTrigger(StackView stack, TargetMajorVersion targetMajorVersion, String accountId) {
+        Optional<String> runtimeValidationError = databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(stack.getStackVersion(), accountId);
+        if (runtimeValidationError.isPresent()) {
+            return new RdsUpgradeV4Response(RdsUpgradeResponseType.ERROR, FlowIdentifier.notTriggered(), runtimeValidationError.get(), targetMajorVersion);
+        }
         if (!stack.getStatus().isAvailable() && Status.EXTERNAL_DATABASE_UPGRADE_FAILED != stack.getStatus()) {
             LOGGER.info("Stack {} is not available for RDS upgrade", stack.getName());
             return new RdsUpgradeV4Response(RdsUpgradeResponseType.ERROR, FlowIdentifier.notTriggered(),

@@ -63,6 +63,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_D
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EMBEDDED;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
@@ -471,6 +472,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.postgres.upgrade.embedded.enable}")
     private boolean enablePostgresUpgradeEmbedded;
+
+    @Value("${auth.mock.postgres.upgrade.exception.enable}")
+    private boolean enablePostgresUpgradeException;
 
     private String cbLicense;
 
@@ -1013,6 +1017,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enablePostgresUpgradeEmbedded) {
             builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_EMBEDDED));
+        }
+        if (enablePostgresUpgradeException) {
+            builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_EXCEPTION));
         }
         if (enableUsersyncSplitFreeIPAUserRetrieval) {
             builder.addEntitlements(createEntitlement(CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL));
