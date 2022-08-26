@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -89,6 +91,27 @@ class RdsUpgradeServiceTest {
         when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION))).thenReturn(flowId);
 
         RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
+
+        verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION));
+        assertThat(response.getResponseType()).isEqualTo(RdsUpgradeResponseType.TRIGGERED);
+        assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
+        assertThat(response.getFlowIdentifier().getPollableId()).isEqualTo(FLOW_ID);
+    }
+
+    @Test
+    void testUpgradeRdsWithMissingTargetVersionThenSuccess() {
+
+        Field defaultTargetMajorVersion = ReflectionUtils.findField(RdsUpgradeService.class, "defaultTargetMajorVersion");
+        ReflectionUtils.makeAccessible(defaultTargetMajorVersion);
+        ReflectionUtils.setField(defaultTargetMajorVersion, underTest, TARGET_VERSION);
+
+        Stack stack = createStack(Status.AVAILABLE);
+        when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
+        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
+        FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
+        when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION))).thenReturn(flowId);
+
+        RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), null);
 
         verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION));
         assertThat(response.getResponseType()).isEqualTo(RdsUpgradeResponseType.TRIGGERED);
