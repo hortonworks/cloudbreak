@@ -18,6 +18,7 @@ import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_EVEN
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmStateSelectors.UPGRADE_CCM_UPGRADE_STACK_EVENT;
+import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -60,6 +62,7 @@ import com.sequenceiq.datalake.flow.salt.rotatepassword.RotateSaltPasswordTracke
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmStackEvent;
+import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
@@ -176,12 +179,20 @@ public class SdxReactorFlowManager {
         }
     }
 
+    public FlowIdentifier triggerDatabaseServerUpgradeFlow(SdxCluster cluster, TargetMajorVersion targetMajorVersion) {
+        LOGGER.info("Trigger Database Server Upgrade on Datalake for: {} with targetMajorVersion: {}", cluster, targetMajorVersion);
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxUpgradeDatabaseServerEvent event =
+                new SdxUpgradeDatabaseServerEvent(SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT.event(), cluster.getId(), initiatorUserCrn, targetMajorVersion);
+        return notify(SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT.event(), event, cluster.getClusterName());
+    }
+
     public FlowIdentifier triggerDatalakeRuntimeUpgradePreparationFlow(SdxCluster cluster, String imageId) {
         LOGGER.info("Trigger Datalake runtime upgrade preparation for: {} with imageId: {}", cluster, imageId);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT.event(),
                 new DatalakeUpgradePreparationStartEvent(DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT.event(), cluster.getId(),
-                userId, imageId), cluster.getClusterName());
+                        userId, imageId), cluster.getClusterName());
     }
 
     public FlowIdentifier triggerDatalakeSyncComponentVersionsFromCmFlow(SdxCluster cluster) {

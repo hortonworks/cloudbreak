@@ -4,10 +4,12 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.sequenceiq.cloudbreak.common.type.Versioned;
+
 /**
     Represents the major version of a postgreSql instance.
  */
-public enum MajorVersion implements Version {
+public enum MajorVersion implements Version, Versioned {
 
     // VERSIONS_9 is not a concrete PostgreSql version, but the collection of 9.0 to 9.6 versions.
     VERSION_FAMILY_9("9"),
@@ -27,7 +29,13 @@ public enum MajorVersion implements Version {
         this.majorVersionFamily = Integer.parseInt(version.split("\\.")[0]);
     }
 
+    @Override
     public String getMajorVersion() {
+        return version;
+    }
+
+    @Override
+    public String getVersion() {
         return version;
     }
 

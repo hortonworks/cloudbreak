@@ -24,14 +24,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.datalake.service.upgrade.SdxRuntimeUpgradeService;
 import com.sequenceiq.datalake.service.upgrade.ccm.SdxCcmUpgradeService;
+import com.sequenceiq.datalake.service.upgrade.database.SdxDatabaseServerUpgradeService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
+import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerRequest;
+import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages;
@@ -47,11 +52,16 @@ class SdxUpgradeControllerTest {
 
     private static final String CLUSTER_NAME = "clusterName";
 
+    private static final String CLUSTER_CRN = "clusterCrn";
+
     @Mock
     private SdxRuntimeUpgradeService sdxRuntimeUpgradeService;
 
     @Mock
     private SdxCcmUpgradeService sdxCcmUpgradeService;
+
+    @Mock
+    private SdxDatabaseServerUpgradeService sdxDatabaseServerUpgradeService;
 
     @InjectMocks
     private SdxUpgradeController underTest;
@@ -261,6 +271,34 @@ class SdxUpgradeControllerTest {
         when(sdxCcmUpgradeService.upgradeCcm(ENV_CRN)).thenReturn(response);
         SdxCcmUpgradeResponse sdxCcmUpgradeResponse = underTest.upgradeCcm(ENV_CRN, USER_CRN);
         assertThat(sdxCcmUpgradeResponse).isEqualTo(response);
+    }
+
+    @Test
+    void testUpgradeDatabaseServerByName() {
+        SdxUpgradeDatabaseServerRequest request = new SdxUpgradeDatabaseServerRequest();
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        request.setTargetMajorVersion(targetMajorVersion);
+        SdxUpgradeDatabaseServerResponse sdxUpgradeDatabaseServerResponse = new SdxUpgradeDatabaseServerResponse();
+        when(sdxDatabaseServerUpgradeService.upgrade(NameOrCrn.ofName(CLUSTER_NAME), targetMajorVersion)).thenReturn(sdxUpgradeDatabaseServerResponse);
+
+        SdxUpgradeDatabaseServerResponse response = underTest.upgradeDatabaseServerByName(CLUSTER_NAME, request);
+
+        assertEquals(response, sdxUpgradeDatabaseServerResponse);
+        verify(sdxDatabaseServerUpgradeService).upgrade(NameOrCrn.ofName(CLUSTER_NAME), targetMajorVersion);
+    }
+
+    @Test
+    void testUpgradeDatabaseServerByCrn() {
+        SdxUpgradeDatabaseServerRequest request = new SdxUpgradeDatabaseServerRequest();
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        request.setTargetMajorVersion(targetMajorVersion);
+        SdxUpgradeDatabaseServerResponse sdxUpgradeDatabaseServerResponse = new SdxUpgradeDatabaseServerResponse();
+        when(sdxDatabaseServerUpgradeService.upgrade(NameOrCrn.ofCrn(CLUSTER_CRN), targetMajorVersion)).thenReturn(sdxUpgradeDatabaseServerResponse);
+
+        SdxUpgradeDatabaseServerResponse response = underTest.upgradeDatabaseServerByCrn(CLUSTER_CRN, request);
+
+        verify(sdxDatabaseServerUpgradeService).upgrade(NameOrCrn.ofCrn(CLUSTER_CRN), targetMajorVersion);
+        assertEquals(response, sdxUpgradeDatabaseServerResponse);
     }
 
     @Test

@@ -18,4 +18,8 @@ public enum TargetMajorVersion implements Version {
         return version;
     }
 
+    public MajorVersion convertToMajorVersion() {
+        return MajorVersion.valueOf(name());
+    }
+
 }

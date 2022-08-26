@@ -40,6 +40,7 @@ class MajorVersionTest {
                 {"13.0", VERSION_13},
                 {"130", null},
                 {"asd", null},
+                {null, null}
         };
     }
 

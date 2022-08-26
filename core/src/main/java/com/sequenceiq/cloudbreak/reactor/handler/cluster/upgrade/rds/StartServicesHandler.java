@@ -28,7 +28,7 @@ public class StartServicesHandler extends ExceptionCatcherEventHandler<UpgradeRd
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeRdsStartServicesRequest> event) {
         LOGGER.error("Starting services for RDS upgrade has failed", e);
-        return new UpgradeRdsFailedEvent(resourceId, e, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_FAILED);
+        return new UpgradeRdsFailedEvent(resourceId, e, DetailedStackStatus.DATABASE_UPGRADE_FAILED);
     }
 
     @Override

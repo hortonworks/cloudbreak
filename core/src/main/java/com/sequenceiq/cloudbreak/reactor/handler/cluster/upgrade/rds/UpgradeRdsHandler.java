@@ -43,7 +43,7 @@ public class UpgradeRdsHandler extends ExceptionCatcherEventHandler<UpgradeRdsUp
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeRdsUpgradeDatabaseServerRequest> event) {
         LOGGER.error("RDS database server upgrade has failed", e);
-        return new UpgradeRdsFailedEvent(resourceId, e, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_FAILED);
+        return new UpgradeRdsFailedEvent(resourceId, e, DetailedStackStatus.DATABASE_UPGRADE_FAILED);
     }
 
     @Override

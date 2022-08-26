@@ -61,7 +61,7 @@ public class UpgradeRdsService {
 
     private void setStatusAndNotify(Long stackId, String statusReason, ResourceEvent resourceEvent) {
         LOGGER.debug(statusReason);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_IN_PROGRESS, statusReason);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), resourceEvent);
     }
 
@@ -90,7 +90,7 @@ public class UpgradeRdsService {
         if (Objects.nonNull(clusterId)) {
             InMemoryStateStore.deleteCluster(clusterId);
         }
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_FAILED, statusReason);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DATABASE_UPGRADE_FAILED, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_FAILED);
     }
 
