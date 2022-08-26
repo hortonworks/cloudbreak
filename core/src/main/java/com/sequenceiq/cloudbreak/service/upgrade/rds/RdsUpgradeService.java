@@ -8,8 +8,10 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -49,16 +51,21 @@ public class RdsUpgradeService {
     @Inject
     private CloudbreakMessagesService messagesService;
 
+    @Value("${cb.db.env.upgrade.rds.targetversion}")
+    private TargetMajorVersion defaultTargetMajorVersion;
+
     public RdsUpgradeV4Response upgradeRds(NameOrCrn nameOrCrn, TargetMajorVersion targetMajorVersion) {
+        TargetMajorVersion calculatedVersion = ObjectUtils.defaultIfNull(targetMajorVersion, defaultTargetMajorVersion);
         String accountId = restRequestThreadLocalService.getAccountId();
         StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("RDS upgrade has been initiated for stack {}", nameOrCrn.getNameOrCrn());
+        LOGGER.info("RDS upgrade has been initiated for stack {} to version {}, request version was {}",
+                nameOrCrn.getNameOrCrn(), calculatedVersion, targetMajorVersion);
 
-        if (getCurrentRdsVersion(nameOrCrn).equals(targetMajorVersion.getMajorVersion())) {
-            return alreadyOnLatestAnswer(targetMajorVersion);
+        if (getCurrentRdsVersion(nameOrCrn).equals(calculatedVersion.getMajorVersion())) {
+            return alreadyOnLatestAnswer(calculatedVersion);
         } else {
-            return checkStackStatusAndTrigger(stack, targetMajorVersion);
+            return checkStackStatusAndTrigger(stack, calculatedVersion);
         }
     }
 
