@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_H
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
@@ -578,6 +579,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.environment.edit.proxy.enable}")
     private boolean enableEditProxy;
 
+    @Value("${auth.mock.azure.certificate.auth.enable}")
+    private boolean azureCertificateAuth;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -1052,6 +1056,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (skipPostgresUpgradeServicesAndCmStop) {
             builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP));
+        }
+        if (azureCertificateAuth) {
+            builder.addEntitlements(createEntitlement(CDP_AZURE_CERTIFICATE_AUTH));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

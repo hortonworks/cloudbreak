@@ -55,12 +55,19 @@ import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.environment.authorization.EnvironmentCredentialFiltering;
 import com.sequenceiq.environment.credential.reactor.handler.CredentialExperiencePolicyHandler;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
+import com.sequenceiq.environment.credential.service.AzureCredentialCertificateService;
 import com.sequenceiq.environment.credential.service.CredentialDeleteService;
+import com.sequenceiq.environment.credential.service.CredentialEntitlementService;
 import com.sequenceiq.environment.credential.service.CredentialPrerequisiteService;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.service.ServiceProviderCredentialAdapter;
 import com.sequenceiq.environment.credential.v1.CredentialV1Controller;
+import com.sequenceiq.environment.credential.v1.converter.CreateCredentialRequestToCredentialConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
+import com.sequenceiq.environment.credential.v1.converter.EditCredentialRequestToCredentialConverter;
+import com.sequenceiq.environment.credential.v1.converter.aws.AwsCredentialV1ParametersToAwsCredentialAttributesConverter;
+import com.sequenceiq.environment.credential.v1.converter.azure.AzureCredentialRequestParametersToAzureCredentialAttributesConverter;
+import com.sequenceiq.environment.credential.v1.converter.gcp.GcpCredentialV1ParametersToGcpCredentialAttributesConverter;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.environment.flow.EnvEventParameterFactory;
 import com.sequenceiq.environment.environment.flow.EnvironmentFlowInformation;
@@ -240,6 +247,12 @@ public class CredentialExperienceTest {
     @Import({CredentialPrerequisiteService.class,
             CredentialService.class,
             CredentialV1Controller.class,
+            CreateCredentialRequestToCredentialConverter.class,
+            AwsCredentialV1ParametersToAwsCredentialAttributesConverter.class,
+            AzureCredentialRequestParametersToAzureCredentialAttributesConverter.class,
+            AzureCredentialCertificateService.class,
+            GcpCredentialV1ParametersToGcpCredentialAttributesConverter.class,
+            EditCredentialRequestToCredentialConverter.class,
             EnvironmentFlowInformation.class,
             EnvironmentMetricService.class,
             EnvEventParameterFactory.class,
@@ -247,7 +260,7 @@ public class CredentialExperienceTest {
             CredentialPrerequisitesHandler.class,
             CredentialExperiencePolicyHandler.class,
             CloudbreakMessagesService.class,
-
+            CredentialEntitlementService.class,
             CloudPlatformInitializer.class,
             ConversionConfig.class,
             TransactionService.class,
@@ -314,6 +327,24 @@ public class CredentialExperienceTest {
 
         @MockBean
         private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+        @MockBean
+        private CreateCredentialRequestToCredentialConverter createCredentialRequestToCredentialConverter;
+
+        @MockBean
+        private AwsCredentialV1ParametersToAwsCredentialAttributesConverter awsCredentialV1ParametersToAwsCredentialAttributesConverter;
+
+        @MockBean
+        private AzureCredentialRequestParametersToAzureCredentialAttributesConverter azureCredentialRequestParametersToAzureCredentialAttributesConverter;
+
+        @MockBean
+        private AzureCredentialCertificateService azureCredentialCertificateService;
+
+        @MockBean
+        private GcpCredentialV1ParametersToGcpCredentialAttributesConverter gcpCredentialV1ParametersToGcpCredentialAttributesConverter;
+
+        @MockBean
+        private EditCredentialRequestToCredentialConverter editCredentialRequestToCredentialConverter;
 
         @Bean
         @Primary

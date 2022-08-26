@@ -31,6 +31,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
 import com.sequenceiq.cloudbreak.cloud.response.AzureCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
+import com.sequenceiq.common.api.credential.AppAuthenticationType;
+import com.sequenceiq.common.api.credential.AppCertificateStatus;
 import com.sequenceiq.common.model.CredentialType;
 
 @Service
@@ -60,18 +62,28 @@ public class AzureCredentialConnector implements CredentialConnector {
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext, CredentialVerificationContext credentialVerificationContext) {
         CloudCredential cloudCredential = authenticatedContext.getCloudCredential();
         try {
-            AzureClient client = authenticatedContext.getParameter(AzureClient.class);
-            if (client.getCurrentSubscription() == null) {
-                return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.FAILED, null,
-                        "Your subscription ID is not valid");
+            AzureCredentialView azureCredentialView = new AzureCredentialView(cloudCredential);
+
+            if (!(AppAuthenticationType.CERTIFICATE.name().equals(azureCredentialView.getAuthenticationType())
+                    && AppCertificateStatus.KEY_GENERATED.name().equals(azureCredentialView.getStatus()))) {
+                AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+                if (client.getCurrentSubscription() == null) {
+                    return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.FAILED, null,
+                            "Your subscription ID is not valid");
+                } else {
+                    client.getRefreshToken()
+                            .ifPresent(refreshToken -> {
+                                Map<String, String> codeGrantFlowBased = (Map<String, String>) cloudCredential
+                                        .getParameter("azure", Map.class)
+                                        .get(AzureCredentialView.CODE_GRANT_FLOW_BASED);
+                                codeGrantFlowBased.put("refreshToken", refreshToken);
+                            });
+                }
             } else {
-                client.getRefreshToken()
-                        .ifPresent(refreshToken -> {
-                            Map<String, String> codeGrantFlowBased = (Map<String, String>) cloudCredential
-                                    .getParameter("azure", Map.class)
-                                    .get(AzureCredentialView.CODE_GRANT_FLOW_BASED);
-                            codeGrantFlowBased.put("refreshToken", refreshToken);
-                        });
+                LOGGER.info("Keys are generated for the Azure credential: {}, but they are not ACTIVE yet, therefore we just skip the validation",
+                        cloudCredential.getName());
+                return new CloudCredentialStatus(cloudCredential, CredentialStatus.CREATED, null,
+                        "Keys are generated for the Azure credential: {}, but they are not ACTIVE yet, therefore we just skip the validation");
             }
         } catch (RuntimeException e) {
             String exceptionMessage = e.getMessage();
@@ -101,7 +113,7 @@ public class AzureCredentialConnector implements CredentialConnector {
 
     @Override
     public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String auditExternalId,
-        String deploymentAddress, CredentialType type) {
+            String deploymentAddress, CredentialType type) {
         String credentialCreationCommand = appCreationCommand.generateEnvironmentCredentialCommand(deploymentAddress);
         String auditCredentialCreationCommand = appCreationCommand.generateAuditCredentialCommand(deploymentAddress);
         String encodedCommand;
