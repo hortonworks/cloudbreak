@@ -80,7 +80,7 @@ auth:
         SSEWithCMK.enable: true
       encryptionAtHost.enable: false
     aws:
-      native.variant.migration.enable: true
+      native.variant.migration.enable: false
       disk:
         EncryptionWithCMK.enable: true
     datahub.customconfigs.enable: true
