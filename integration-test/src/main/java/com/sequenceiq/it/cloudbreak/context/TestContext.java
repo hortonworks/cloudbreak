@@ -422,7 +422,7 @@ public abstract class TestContext implements ApplicationContextAware {
         LOGGER.info("then exception {} action on {} by {}, name: {}", key, entity, who, entity.getName());
         Log.thenException(LOGGER, assertion.getClass().getSimpleName() + " exception assertion on " + entity + " by " + who);
         try {
-            String message = String.format("Expected exception with message (%s) has not been thrown!", runningParameter.getExpectedMessage());
+            String message = format("Expected exception with message (%s) has not been thrown!", runningParameter.getExpectedMessage());
             CloudbreakTestDto cloudbreakTestDto = resourceNames.get(key);
             if (cloudbreakTestDto != null) {
                 assertion.doAssertion(this, (T) cloudbreakTestDto, getMicroserviceClient(entity.getClass(), who.getAccessKey()));
