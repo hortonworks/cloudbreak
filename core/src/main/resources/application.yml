@@ -923,7 +923,7 @@ existing-stack-patcher:
     logging-agent-auto-restart-v2:
       enabled: false
     disable-region-for-fluentd:
-      enabled: true
+      enabled: false
       affected-version-from: 0.2.16
     metering-azure-metadata:
       enabled: false
