@@ -296,10 +296,15 @@ public class DatabaseService {
         if (sdxCluster.getDatabaseCrn() == null) {
             throw com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound("Database for Data Lake with Data Lake crn:", clusterCrn).get();
         }
+        return getDatabaseServer(sdxCluster.getDatabaseCrn());
+    }
+
+    public StackDatabaseServerResponse getDatabaseServer(String databaseServerCrn) {
         DatabaseServerV4Response databaseServerV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> databaseServerV4Endpoint.getByCrn(sdxCluster.getDatabaseCrn()));
+                () -> databaseServerV4Endpoint.getByCrn(databaseServerCrn));
 
         return databaseServerConverter.convert(databaseServerV4Response);
     }
+
 }

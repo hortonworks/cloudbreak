@@ -77,7 +77,7 @@ class UpgradeRdsServiceTest {
 
         underTest.rdsUpgradeFailed(STACK_ID, CLUSTER_ID, exception);
 
-        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_FAILED),
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_FAILED),
                 eq("RDS upgrade failed with exception " + exception.getMessage()));
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_FAILED.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_FAILED));
 
@@ -102,7 +102,7 @@ class UpgradeRdsServiceTest {
         when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_BACKUP_DATA.getMessage())).thenReturn(BACKUP_STATE);
         underTest.backupRdsState(STACK_ID);
 
-        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_IN_PROGRESS), eq(BACKUP_STATE));
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS), eq(BACKUP_STATE));
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_BACKUP_DATA));
     }
 
@@ -111,7 +111,7 @@ class UpgradeRdsServiceTest {
         when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_RESTORE_DATA.getMessage())).thenReturn(RESTORE_STATE);
         underTest.restoreRdsState(STACK_ID);
 
-        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_IN_PROGRESS), eq(RESTORE_STATE));
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS), eq(RESTORE_STATE));
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_RESTORE_DATA));
     }
 
@@ -120,7 +120,7 @@ class UpgradeRdsServiceTest {
         when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_DBSERVER_UPGRADE.getMessage())).thenReturn(UPGRADE_STATE);
         underTest.upgradeRdsState(STACK_ID);
 
-        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_IN_PROGRESS), eq(UPGRADE_STATE));
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS), eq(UPGRADE_STATE));
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_DBSERVER_UPGRADE));
     }
 
@@ -129,7 +129,7 @@ class UpgradeRdsServiceTest {
         when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_STOP_SERVICES.getMessage())).thenReturn(STOP_STATE);
         underTest.stopServicesState(STACK_ID);
 
-        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_IN_PROGRESS), eq(STOP_STATE));
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS), eq(STOP_STATE));
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_STOP_SERVICES));
     }
 
@@ -138,7 +138,7 @@ class UpgradeRdsServiceTest {
         when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_START_SERVICES.getMessage())).thenReturn(START_STATE);
         underTest.startServicesState(STACK_ID);
 
-        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_IN_PROGRESS), eq(START_STATE));
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS), eq(START_STATE));
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_START_SERVICES));
     }
 

@@ -35,7 +35,7 @@ public class RestoreRdsDataHandler extends ExceptionCatcherEventHandler<UpgradeR
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeRdsDataRestoreRequest> event) {
         LOGGER.error("Restoring data for RDS upgrade has failed", e);
-        return new UpgradeRdsFailedEvent(resourceId, e, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_FAILED);
+        return new UpgradeRdsFailedEvent(resourceId, e, DetailedStackStatus.DATABASE_UPGRADE_FAILED);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class RestoreRdsDataHandler extends ExceptionCatcherEventHandler<UpgradeR
             upgradeRdsService.restoreRds(stackId);
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.warn("RDS restore failed due to {}", e.getMessage());
-            return new UpgradeRdsFailedEvent(stackId, e, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_FAILED);
+            return new UpgradeRdsFailedEvent(stackId, e, DetailedStackStatus.DATABASE_UPGRADE_FAILED);
         }
         return new UpgradeRdsDataRestoreResult(stackId, request.getVersion());
     }

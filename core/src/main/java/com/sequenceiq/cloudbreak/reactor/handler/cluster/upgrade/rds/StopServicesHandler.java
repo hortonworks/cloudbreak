@@ -28,7 +28,7 @@ public class StopServicesHandler extends ExceptionCatcherEventHandler<UpgradeRds
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeRdsStopServicesRequest> event) {
         LOGGER.error("Stopping services for RDS upgrade has failed", e);
-        return new UpgradeRdsFailedEvent(resourceId, e, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_FAILED);
+        return new UpgradeRdsFailedEvent(resourceId, e, DetailedStackStatus.DATABASE_UPGRADE_FAILED);
     }
 
     @Override

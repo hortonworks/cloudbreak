@@ -82,6 +82,11 @@ public class CloudbreakPoller {
                 Status.getAvailableStatuses(), Sets.immutableEnumSet(Status.UPGRADE_CCM_FAILED));
     }
 
+    public void pollDatabaseServerUpgradeUntilAvailable(SdxCluster sdxCluster, PollingConfig pollingConfig) {
+        waitForState("Database server upgrade", sdxCluster, pollingConfig,
+                Status.getAvailableStatuses(), Sets.immutableEnumSet(Status.EXTERNAL_DATABASE_UPGRADE_FAILED));
+    }
+
     public void pollFlowStateByFlowIdUntilComplete(String process, String flowId, Long sdxId, PollingConfig pollingConfig) {
         waitForFlowStateByFlowId(process, flowId, sdxId, pollingConfig, Sets.immutableEnumSet(FINISHED), Sets.immutableEnumSet(FAILED, UNKNOWN));
     }

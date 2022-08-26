@@ -17,6 +17,8 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
+import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
+import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 
@@ -62,4 +64,19 @@ public interface SdxUpgradeEndpoint {
     SdxCcmUpgradeResponse upgradeCcm(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
             @NotEmpty @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
+    @Path("{name}/upgrade_rds")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Upgrades the database server of the data lake", nickname = "upgradeDatalakeDatabaseByName")
+    SdxUpgradeDatabaseServerResponse upgradeDatabaseServerByName(@PathParam("name") String clusterName, @Valid SdxUpgradeDatabaseServerRequest
+            sdxUpgradeDatabaseServerRequest);
+
+    @PUT
+    @Path("/crn/{crn}/upgrade_rds")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Upgrades the database server of the data lake", nickname = "upgradeDatalakeDatabaseByCrn")
+    SdxUpgradeDatabaseServerResponse upgradeDatabaseServerByCrn(@PathParam("crn") String clusterCrn, @Valid SdxUpgradeDatabaseServerRequest
+            sdxUpgradeDatabaseServerRequest);
+
 }
