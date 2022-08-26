@@ -64,16 +64,8 @@ public class SdxResizeRecoveryTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .when(sdxTestClient.resize(), key(sdxKey))
-                .await(SdxClusterStatusResponse.DATALAKE_BACKUP_INPROGRESS, key(sdxKey).withoutWaitForFlow())
                 .await(SdxClusterStatusResponse.STOP_IN_PROGRESS, key(sdxKey).withoutWaitForFlow())
                 .await(SdxClusterStatusResponse.STACK_CREATION_IN_PROGRESS, key(sdxKey).withoutWaitForFlow());
-    }
-
-    private SdxInternalTestDto performResizeRecoveryAndValidate(SdxInternalTestDto testDto, String sdxKey, SdxResizeTestValidator validator) {
-        return testDto.when(sdxTestClient.recoverFromResizeInternal(), key(sdxKey))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdxKey))
-                .awaitForHealthyInstances()
-                .then((tc, dto, client) -> validator.validateRecoveredCluster(dto));
     }
 
     private SdxInternalTestDto causeProvisioningFailureAndAwait(SdxInternalTestDto testDto, String sdxKey) {
@@ -81,6 +73,13 @@ public class SdxResizeRecoveryTests extends PreconditionSdxE2ETest {
                 .awaitForStartingInstances()
                 .then((tc, dto, client) -> deleteMasterNode(dto, client, tc))
                 .await(SdxClusterStatusResponse.PROVISIONING_FAILED, key(sdxKey).withoutWaitForFlow());
+    }
+
+    private SdxInternalTestDto performResizeRecoveryAndValidate(SdxInternalTestDto testDto, String sdxKey, SdxResizeTestValidator validator) {
+        return testDto.when(sdxTestClient.recoverFromResizeInternal(), key(sdxKey))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxKey))
+                .awaitForHealthyInstances()
+                .then((tc, dto, client) -> validator.validateRecoveredCluster(dto));
     }
 
     private SdxInternalTestDto deleteMasterNode(SdxInternalTestDto testDto, SdxClient client, TestContext testContext) {
