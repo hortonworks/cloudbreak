@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -218,7 +219,7 @@ public class CredentialService extends AbstractCredentialService implements Comp
         credential.setResourceCrn(credentialCrn);
         credential.setCreator(creatorUserCrn);
         credential.setAccountId(accountId);
-        Credential verifiedCredential = credentialAdapter.verify(credential, accountId, Boolean.TRUE).getCredential();
+        Credential verifiedCredential = verifyCredentialDuringCreate(credential, accountId);
         if (verifiedCredential.getVerificationStatusText() != null) {
             throw new BadRequestException(verifiedCredential.getVerificationStatusText());
         }
@@ -236,8 +237,17 @@ public class CredentialService extends AbstractCredentialService implements Comp
         }
     }
 
+    private Credential verifyCredentialDuringCreate(Credential credential, String accountId) {
+        Credential verifiedCredential = credential;
+        if (!CloudPlatform.AZURE.equalsIgnoreCase(credential.getCloudPlatform())) {
+            //TODO if it is Azure, and not cert based the we should verify
+            verifiedCredential = credentialAdapter.verify(credential, accountId, Boolean.TRUE).getCredential();
+        }
+        return verifiedCredential;
+    }
+
     public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, boolean govCloud,
-        String deploymentAddress, String userCrn, CredentialType type) {
+            String deploymentAddress, String userCrn, CredentialType type) {
         String cloudPlatformInUpperCase = cloudPlatform.toUpperCase();
         credentialValidator.validateCredentialCloudPlatform(cloudPlatformInUpperCase, userCrn, type);
         return credentialPrerequisiteService.getPrerequisites(cloudPlatformInUpperCase, govCloud, deploymentAddress, type);
@@ -304,7 +314,7 @@ public class CredentialService extends AbstractCredentialService implements Comp
     }
 
     Optional<Credential> findByCrnAndAccountId(String crn, String accountId, Collection<String> cloudPlatforms,
-        CredentialType type) {
+            CredentialType type) {
         return repository.findByCrnAndAccountId(crn, accountId, cloudPlatforms, type, false);
     }
 

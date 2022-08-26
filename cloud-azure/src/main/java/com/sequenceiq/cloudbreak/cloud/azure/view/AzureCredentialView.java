@@ -12,6 +12,8 @@ public class AzureCredentialView {
 
     public static final String APP_BASED = "appBased";
 
+    public static final String CERTIFICATE = "certificate";
+
     public static final String CODE_GRANT_FLOW_BASED = "codeGrantFlowBased";
 
     public static final String CODE_GRANT_FLOW_STATE_KEY = "codeGrantFlowState";
@@ -20,7 +22,9 @@ public class AzureCredentialView {
 
     private final Map<String, Object> parameters;
 
-    private final Map<String, String> appBasedParameters;
+    private final Map<String, Object> appBasedParameters;
+
+    private final Map<String, String> appBasedParametersCertificate;
 
     private final Map<String, String> codeGrantFlowParameters;
 
@@ -31,7 +35,10 @@ public class AzureCredentialView {
                 ? (Map<String, Object>) cloudCredential.getParameter(PROVIDER_KEY, Map.class) : new HashMap<>();
 
         this.appBasedParameters = parameters.get(APP_BASED) != null
-                ? (Map<String, String>) parameters.get(APP_BASED) : new HashMap<>();
+                ? (Map<String, Object>) parameters.get(APP_BASED) : new HashMap<>();
+
+        this.appBasedParametersCertificate = appBasedParameters.get(CERTIFICATE) != null
+                ? (Map<String, String>) appBasedParameters.get(CERTIFICATE) : new HashMap<>();
 
         this.codeGrantFlowParameters = parameters.get(CODE_GRANT_FLOW_BASED) != null
                 ? (Map<String, String>) parameters.get(CODE_GRANT_FLOW_BASED) : new HashMap<>();
@@ -54,12 +61,25 @@ public class AzureCredentialView {
     }
 
     public String getAccessKey() {
-        return Optional.ofNullable(appBasedParameters.get("accessKey"))
+        return Optional.ofNullable((String) appBasedParameters.get("accessKey"))
                 .orElse(codeGrantFlowParameters.get("accessKey"));
     }
 
+    public String getAuthenticationType() {
+        return Optional.ofNullable((String) appBasedParameters.get("authenticationType"))
+                .orElse("SECRET");
+    }
+
+    public String getPrivateKeyForCertificate() {
+        return appBasedParametersCertificate.get("privateKey");
+    }
+
+    public String getCertificate() {
+        return appBasedParametersCertificate.get("certificate");
+    }
+
     public String getSecretKey() {
-        return Optional.ofNullable(appBasedParameters.get("secretKey"))
+        return Optional.ofNullable((String) appBasedParameters.get("secretKey"))
                 .orElse(codeGrantFlowParameters.get("secretKey"));
     }
 

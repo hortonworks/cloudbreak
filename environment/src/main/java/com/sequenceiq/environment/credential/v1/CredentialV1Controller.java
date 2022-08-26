@@ -12,6 +12,8 @@ import javax.validation.Valid;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
@@ -44,6 +46,8 @@ import com.sequenceiq.notification.NotificationController;
 
 @Controller
 public class CredentialV1Controller extends NotificationController implements CredentialEndpoint {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialV1Controller.class);
 
     private final CredentialService credentialService;
 
@@ -109,20 +113,25 @@ public class CredentialV1Controller extends NotificationController implements Cr
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CREDENTIAL)
     public CredentialResponse post(@Valid CredentialRequest request) {
+        LOGGER.debug("Create credential request has received: {}", request);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
         Credential credential = credentialConverter.convert(request);
         credential.setType(ENVIRONMENT);
+        Credential createdCredential = credentialService.create(credential, accountId, creator, ENVIRONMENT);
         notify(ResourceEvent.CREDENTIAL_CREATED);
-        return credentialConverter.convert(credentialService.create(credential, accountId, creator, ENVIRONMENT));
+        LOGGER.debug("Credential has been created: {}", createdCredential);
+        return credentialConverter.convert(createdCredential);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_CREDENTIAL)
     public CredentialResponse deleteByName(@ResourceName String name) {
+        LOGGER.debug("Delete credential request has received: {}", name);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential deleted = credentialDeleteService.deleteByName(name, accountId, ENVIRONMENT);
         notify(ResourceEvent.CREDENTIAL_DELETED);
+        LOGGER.debug("Credential has been deleted: {}", deleted);
         return credentialConverter.convert(deleted);
     }
 
