@@ -2,14 +2,19 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -31,8 +36,13 @@ import com.sequenceiq.cloudbreak.view.StackView;
 @Configuration
 public class UpgradeRdsActions {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeRdsActions.class);
+
     @Inject
     private UpgradeRdsService upgradeRdsService;
+
+    @Value("${cb.db.env.upgrade.rds.backuprestore.cloudplatforms}")
+    private Set<CloudPlatform> cloudPlatformsToRunBackupRestore;
 
     @Bean(name = "UPGRADE_RDS_STOP_SERVICES_STATE")
     public Action<?, ?> stopServicesAndCm() {
@@ -55,7 +65,7 @@ public class UpgradeRdsActions {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsStopServicesResult.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsStopServicesResult payload, Map<Object, Object> variables) {
-                if (!context.getCluster().getEmbeddedDatabaseOnAttachedDisk()) {
+                if (runDataBackupRestore(context)) {
                     upgradeRdsService.backupRdsState(payload.getResourceId());
                 }
                 sendEvent(context);
@@ -91,7 +101,7 @@ public class UpgradeRdsActions {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsUpgradeDatabaseServerResult.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsUpgradeDatabaseServerResult payload, Map<Object, Object> variables) {
-                if (!context.getCluster().getEmbeddedDatabaseOnAttachedDisk()) {
+                if (runDataBackupRestore(context)) {
                     upgradeRdsService.restoreRdsState(payload.getResourceId());
                 }
                 sendEvent(context);
@@ -155,5 +165,13 @@ public class UpgradeRdsActions {
                 return new StackEvent(UpgradeRdsEvent.FAIL_HANDLED_EVENT.event(), context.getStack().getId());
             }
         };
+    }
+
+    private boolean runDataBackupRestore(UpgradeRdsContext context) {
+        boolean platformSupported = cloudPlatformsToRunBackupRestore.contains(CloudPlatform.valueOf(context.getStack().getCloudPlatform()));
+        boolean embeddedDatabaseOnAttachedDisk = context.getCluster().getEmbeddedDatabaseOnAttachedDisk();
+        LOGGER.debug("Running backup and restore based on conditions: platformSupported: {}, embeddedDatabaseOnAttachedDisk: {}",
+                platformSupported, embeddedDatabaseOnAttachedDisk);
+        return platformSupported && !embeddedDatabaseOnAttachedDisk;
     }
 }
