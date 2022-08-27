@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.services.rds.model.AmazonRDSException;
 import com.amazonaws.services.rds.model.DescribeDBEngineVersionsRequest;
 import com.amazonaws.services.rds.model.DescribeDBEngineVersionsResult;
 import com.amazonaws.services.rds.model.UpgradeTarget;
@@ -96,11 +97,19 @@ public class AwsRdsVersionOperations {
                     .collect(Collectors.toSet());
             LOGGER.debug("The following valid AWS RDS upgrade targets were found: {}", validUpgradeTargets);
             return validUpgradeTargets;
+        } catch (AmazonRDSException e) {
+            String message = getErrorMessage(e.getErrorMessage());
+            throw new CloudConnectorException(message, e);
         } catch (Exception e) {
-            String message = String.format("Exception occurred when querying valid upgrade targets: %s", e);
-            LOGGER.warn(message);
+            String message = getErrorMessage(e.getMessage());
             throw new CloudConnectorException(message, e);
         }
+    }
+
+    private static String getErrorMessage(String exceptionMessage) {
+        String message = String.format("Exception occurred when querying valid upgrade targets: %s", exceptionMessage);
+        LOGGER.warn(message);
+        return message;
     }
 
     public Optional<RdsEngineVersion> getHighestUpgradeVersionForTargetMajorVersion(Set<String> validUpgradeTargetVersions, Version targetMajorVersion) {
