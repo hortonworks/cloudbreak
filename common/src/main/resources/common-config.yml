@@ -76,9 +76,9 @@ telemetry:
     blackbox-exporter:
       user: blackboxuser
       port: 9115
-      checkOnAllNodes: false
-      cloudIntervalSeconds: 600
-      clouderaIntervalSeconds: 1800
+      check-on-all-nodes: false
+      cloud-interval-seconds: 600
+      cloudera-interval-seconds: 1800
     cloudera-manager-exporter:
       user: cmmonitoring
       port: 61010
