@@ -12,15 +12,19 @@ public class StopStartDownscaleTriggerEvent extends StackEvent {
 
     private final Set<Long> hostIds;
 
+    private final boolean failureRecoveryEnabled;
+
     @JsonCreator
     public StopStartDownscaleTriggerEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("hostGroup") String hostGroup,
-            @JsonProperty("hostIds") Set<Long> hostIds) {
+            @JsonProperty("hostIds") Set<Long> hostIds,
+            @JsonProperty("failureRecoveryEnabled") boolean failureRecoveryEnabled) {
         super(selector, stackId);
         this.hostGroup = hostGroup;
         this.hostIds = hostIds;
+        this.failureRecoveryEnabled = failureRecoveryEnabled;
     }
 
     public String getHostGroup() {
@@ -31,11 +35,16 @@ public class StopStartDownscaleTriggerEvent extends StackEvent {
         return hostIds;
     }
 
+    public boolean isFailureRecoveryEnabled() {
+        return failureRecoveryEnabled;
+    }
+
     @Override
     public String toString() {
         return "StopStartDownscaleTriggerEvent{" +
                 "hostGroup='" + hostGroup + '\'' +
                 ", hostIds=" + hostIds +
+                ", failureRecoveryEnabled=" + failureRecoveryEnabled +
                 '}';
     }
 }

@@ -145,6 +145,11 @@ class EntitlementServiceTest {
                 {"DATAHUB_GCP_STOP_START_SCALING", (EntitlementCheckFunction) EntitlementService::gcpStopStartScalingEnabled, false},
                 {"DATAHUB_GCP_STOP_START_SCALING", (EntitlementCheckFunction) EntitlementService::gcpStopStartScalingEnabled, true},
 
+                {"DATAHUB_STOP_START_SCALING_FAILURE_RECOVERY",
+                        (EntitlementCheckFunction) EntitlementService::stopStartScalingFailureRecoveryEnabled, false},
+                {"DATAHUB_STOP_START_SCALING_FAILURE_RECOVERY",
+                        (EntitlementCheckFunction) EntitlementService::stopStartScalingFailureRecoveryEnabled, true},
+
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, false},
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, true},
 

@@ -12,6 +12,9 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOP
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_INIT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_NOT_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_IDENTIFIEDRECOVERYCANDIDATES;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_STARTED_WITH_RECOVERY_CANDIDATES;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_STARTING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_START_FAILED;
 
 import java.util.Collection;
@@ -47,19 +50,41 @@ class StopStartUpscaleFlowService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    void startingInstances(long stackId, String hostGroupName, int nodeCount) {
+    void initScaleUp(long stackId, String hostGroupName) {
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_BY_START_IN_PROGRESS,
                 String.format("Scaling up (stopstart) host  group: %s", hostGroupName));
-        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_INIT, hostGroupName, String.valueOf(nodeCount));
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_INIT, hostGroupName);
     }
 
-    void instancesStarted(long stackId, List<InstanceMetadataView> instancesStarted) {
+    void startingInstances(long stackId, String hostGroup, int instancesToStart, List<CloudInstance> recoveryCandidates) {
+        if (!recoveryCandidates.isEmpty()) {
+            flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_IDENTIFIEDRECOVERYCANDIDATES,
+                    String.valueOf(instancesToStart),
+                    hostGroup,
+                    String.valueOf(recoveryCandidates.size()),
+                    recoveryCandidates.stream().map(CloudInstance::getInstanceId).collect(Collectors.joining(", ")));
+        } else {
+            flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_STARTING,
+                    String.valueOf(instancesToStart),
+                    hostGroup);
+        }
+    }
+
+    void instancesStarted(long stackId, List<InstanceMetadataView> instancesStarted, List<InstanceMetadataView> recoveryCandidates) {
         instancesStarted.stream().forEach(x -> instanceMetaDataService.updateInstanceStatus(x, InstanceStatus.SERVICES_RUNNING));
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.STARTING_CLUSTER_MANAGER_SERVICES,
                 "Instances: " + instancesStarted.size() + " started successfully.");
-        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_STARTED,
-                String.valueOf(instancesStarted.size()), instancesStarted.stream().map(InstanceMetadataView::getInstanceId)
-                        .collect(Collectors.joining(", ")));
+        if (recoveryCandidates.isEmpty()) {
+            flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_STARTED,
+                    String.valueOf(instancesStarted.size()), instancesStarted.stream().map(InstanceMetadataView::getInstanceId)
+                            .collect(Collectors.joining(", ")));
+        } else {
+            flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_STARTED_WITH_RECOVERY_CANDIDATES,
+                    String.valueOf(instancesStarted.size()), instancesStarted.stream().map(InstanceMetadataView::getInstanceId)
+                            .collect(Collectors.joining(", ")),
+                    String.valueOf(recoveryCandidates.size()), recoveryCandidates.stream().map(InstanceMetadataView::getInstanceId)
+                            .collect(Collectors.joining(", ")));
+        }
     }
 
     void logInstancesFailedToStart(long stackId, List<CloudVmInstanceStatus> notStartedIntances) {

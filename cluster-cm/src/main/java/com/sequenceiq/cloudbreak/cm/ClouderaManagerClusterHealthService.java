@@ -25,6 +25,7 @@ import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiRoleRef;
+import com.cloudera.api.swagger.model.ApiRoleState;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
@@ -37,10 +38,11 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cluster.model.stopstart.DetailedCertHealthCheck;
 import com.sequenceiq.cloudbreak.cluster.model.stopstart.DetailedHostHealthCheck;
 import com.sequenceiq.cloudbreak.cluster.model.stopstart.DetailedServicesHealthCheck;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
 import com.sequenceiq.cloudbreak.cluster.model.stopstart.HostCommissionState;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @Service
 @Scope("prototype")
@@ -66,20 +68,20 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
-    private Stack stack;
+    private StackDtoDelegate stack;
 
     private ApiClient apiClient;
 
     private HttpClientConfig httpClientConfig;
 
-    public ClouderaManagerClusterHealthService(Stack stack, HttpClientConfig httpClientConfig) {
+    public ClouderaManagerClusterHealthService(StackDtoDelegate stack, HttpClientConfig httpClientConfig) {
         this.stack = stack;
         this.httpClientConfig = httpClientConfig;
     }
 
     @PostConstruct
     private void initApiClient() throws ClusterClientInitException {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {
@@ -90,7 +92,18 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
     }
 
     @Override
-    public DetailedHostStatuses getDetailedHostStatuses() {
+    public boolean isClusterManagerRunning() {
+        try {
+            clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient).getVersion();
+            return true;
+        } catch (ApiException e) {
+            LOGGER.info("Failed to get version info from CM");
+            return false;
+        }
+    }
+
+    @Override
+    public DetailedHostStatuses getDetailedHostStatuses(Optional<String> runtimeVersion) {
         List<ApiHost> apiHosts = getHostsFromCM();
         Map<HostName, Optional<DetailedHostHealthCheck>> hostsHealth = apiHosts.stream().collect(Collectors.toMap(
                 apiHost -> hostName(apiHost.getHostname()),
@@ -98,7 +111,7 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
 
         Map<HostName, Optional<DetailedServicesHealthCheck>> servicesHealth = apiHosts.stream().collect(Collectors.toMap(
                 apiHost -> hostName(apiHost.getHostname()),
-                ClouderaManagerClusterHealthService::getDetailedServicesHealthCheck));
+                apiHost -> getDetailedServicesHealthCheck(apiHost, runtimeVersion)));
 
         Map<HostName, Optional<DetailedCertHealthCheck>>  certHealth = apiHosts.stream().collect(Collectors.toMap(
                 apiHost -> hostName(apiHost.getHostname()),
@@ -133,14 +146,21 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
                         HostCommissionState.valueOf(apiHost.getCommissionState().getValue()), apiHost.getLastHeartbeat()));
     }
 
-    private static Optional<DetailedServicesHealthCheck> getDetailedServicesHealthCheck(ApiHost apiHost) {
-        Set<String> servicesWithBadHealth = emptyIfNull(apiHost.getRoleRefs()).stream()
-                .filter(roleRef -> Objects.nonNull(roleRef.getHealthSummary()))
-                .filter(roleRef -> HealthCheckResult.UNHEALTHY.equals(healthSummaryToHealthCheckResult(roleRef.getHealthSummary())))
-                .map(ApiRoleRef::getServiceName)
-                .collect(Collectors.toSet());
-        if (!servicesWithBadHealth.isEmpty()) {
-            return Optional.of(new DetailedServicesHealthCheck(HealthCheckResult.UNHEALTHY, servicesWithBadHealth));
+    private static Optional<DetailedServicesHealthCheck> getDetailedServicesHealthCheck(ApiHost apiHost, Optional<String> runtimeVersion) {
+        if (CMRepositoryVersionUtil.isCmServicesHealthCheckAllowed(runtimeVersion)) {
+            Set<String> servicesWithBadHealth = emptyIfNull(apiHost.getRoleRefs()).stream()
+                    .filter(roleRef -> Objects.nonNull(roleRef.getHealthSummary()))
+                    .filter(roleRef -> HealthCheckResult.UNHEALTHY.equals(healthSummaryToHealthCheckResult(roleRef.getHealthSummary())))
+                    .map(ApiRoleRef::getServiceName)
+                    .collect(Collectors.toSet());
+
+            Set<String> servicesNotRunning = emptyIfNull(apiHost.getRoleRefs()).stream()
+                    .filter(roleRef -> Objects.nonNull(roleRef.getRoleStatus()))
+                    .filter(roleRef -> isRoleStopped(roleRef.getRoleStatus()))
+                    .map(ApiRoleRef::getServiceName)
+                    .collect(Collectors.toSet());
+
+            return Optional.of(new DetailedServicesHealthCheck(servicesWithBadHealth, servicesNotRunning));
         }
         return Optional.empty();
     }
@@ -154,12 +174,19 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
     }
 
     private static HealthCheckResult healthSummaryToHealthCheckResult(ApiHealthSummary apiHealthSummary) {
-        switch (apiHealthSummary) {
-            case CONCERNING:
-            case BAD:
-                return HealthCheckResult.UNHEALTHY;
+        if (ApiHealthSummary.GOOD.equals(apiHealthSummary)) {
+            return HealthCheckResult.HEALTHY;
+        }
+        return HealthCheckResult.UNHEALTHY;
+    }
+
+    private static boolean isRoleStopped(ApiRoleState apiRoleState) {
+        switch (apiRoleState) {
+            case STOPPED:
+            case STOPPING:
+                return true;
             default:
-                return HealthCheckResult.HEALTHY;
+                return false;
         }
     }
 }

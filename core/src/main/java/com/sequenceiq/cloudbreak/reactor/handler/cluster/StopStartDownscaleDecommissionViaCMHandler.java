@@ -22,11 +22,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.converter.CloudInstanceIdToInstanceMetaDataConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartDownscaleDecommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartDownscaleDecommissionViaCMResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -53,6 +54,9 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
     private StackService stackService;
 
     @Inject
+    private CloudInstanceIdToInstanceMetaDataConverter instanceIdToInstanceMetaDataConverter;
+
+    @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
@@ -77,20 +81,37 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
 
         try {
             Stack stack = stackService.getByIdWithLists(request.getResourceId());
-            Cluster cluster = stack.getCluster();
             ClusterDecomissionService clusterDecomissionService = clusterApiConnectors.getConnector(stack).clusterDecomissionService();
 
             Set<String> hostNames = getHostNamesForPrivateIds(request.getInstanceIdsToDecommission(), stack);
-            LOGGER.debug("Attempting to decommission hosts. count={}, hostnames={}", hostNames.size(), hostNames);
+            List<InstanceMetadataView> instancesWithServicesNotRunning = instanceIdToInstanceMetaDataConverter
+                    .getNotDeletedAndNotZombieInstances(stack.getAllAvailableInstances(),
+                            request.getHostGroupName(),
+                            request.getRunningInstancesWithServicesNotRunning().stream().map(CloudInstance::getInstanceId).collect(Collectors.toSet()));
+            Set<String> additionalHostNamesToDecommission = instancesWithServicesNotRunning.stream()
+                            .map(InstanceMetadataView::getDiscoveryFQDN)
+                            .filter(discoveryFQDN -> !hostNames.contains(discoveryFQDN)).collect(Collectors.toSet());
+
+            LOGGER.debug("Attempting to decommission hosts. count={}, hostnames={}, additionalHostNamesToDecommission: {}",
+                    hostNames.size() + additionalHostNamesToDecommission.size(), hostNames, additionalHostNamesToDecommission);
+
+            hostNames.addAll(additionalHostNamesToDecommission);
+
+            if (!additionalHostNamesToDecommission.isEmpty()) {
+                LOGGER.info("Including instancesWithServicesNotRunning: count={}, hostnames={} as part of decommission node list",
+                        additionalHostNamesToDecommission.size(), additionalHostNamesToDecommission);
+            }
 
             Map<String, InstanceMetadataView> hostsToRemove = clusterDecomissionService.collectHostsToRemove(request.getHostGroupName(), hostNames);
             List<String> missingHostsInCm = Collections.emptyList();
-            if (hostNames.size() != hostsToRemove.size()) {
+            if (hostNames.size() > hostsToRemove.size()) {
                 missingHostsInCm = hostNames.stream()
                         .filter(h -> !hostsToRemove.containsKey(h))
                         .collect(Collectors.toList());
-                LOGGER.info("Found fewer instances in CM to decommission, as compared to initial ask. foundCount={}, initialCount={}, missingHostsInCm={}",
-                        hostsToRemove.size(), hostNames.size(), missingHostsInCm);
+                LOGGER.info("Found fewer instances in CM to decommission, as compared to initial ask. foundCount={}, initialCount={}, " +
+                                "recoveryCandidatesCount: {}, missingHostsInCm={}",
+                        hostsToRemove.size(), hostNames.size() - additionalHostNamesToDecommission.size(), additionalHostNamesToDecommission.size(),
+                        missingHostsInCm);
             }
 
             // TODO CB-14929: Potentially put the nodes into maintenance mode before decommissioning?

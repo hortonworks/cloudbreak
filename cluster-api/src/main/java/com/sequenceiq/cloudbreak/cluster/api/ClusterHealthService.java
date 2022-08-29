@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cluster.api;
 
+import java.util.Optional;
+
 import com.sequenceiq.cloudbreak.cluster.status.DetailedHostStatuses;
 
 /**
@@ -7,5 +9,7 @@ import com.sequenceiq.cloudbreak.cluster.status.DetailedHostStatuses;
  */
 public interface ClusterHealthService {
 
-    DetailedHostStatuses getDetailedHostStatuses();
+    boolean isClusterManagerRunning();
+
+    DetailedHostStatuses getDetailedHostStatuses(Optional<String> runtimeVersion);
 }

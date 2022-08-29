@@ -2,34 +2,33 @@ package com.sequenceiq.cloudbreak.cluster.model.stopstart;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
-
 /**
  * DetailedServicesHealthCheck maintains information about all the services with BAD or CONCERNING health on the cluster.
  */
 public class DetailedServicesHealthCheck {
 
-    private final HealthCheckResult healthCheckResult;
-
     private final Set<String> servicesWithBadHealth;
 
-    public DetailedServicesHealthCheck(HealthCheckResult healthCheckResult, Set<String> servicesWithBadHealth) {
-        this.healthCheckResult = healthCheckResult;
+    private final Set<String> servicesNotRunning;
+
+    public DetailedServicesHealthCheck(Set<String> servicesWithBadHealth, Set<String> servicesNotRunning) {
         this.servicesWithBadHealth = servicesWithBadHealth;
+        this.servicesNotRunning = servicesNotRunning;
     }
 
     public Set<String> getServicesWithBadHealth() {
         return servicesWithBadHealth;
     }
 
-    public HealthCheckResult getHealthCheckResult() {
-        return healthCheckResult;
+    public Set<String> getServicesNotRunning() {
+        return servicesNotRunning;
     }
 
     @Override
     public String toString() {
         return "DetailedServicesHealthCheck{" +
                 "servicesWithBadHealth=" + servicesWithBadHealth +
+                "servicesNotRunning=" + servicesNotRunning +
                 '}';
     }
 }

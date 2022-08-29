@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStart
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_GET_RECOVERY_CANDIDATES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_INSTANCES_STARTED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_INSTANCES_START_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_TRIGGER_EVENT;
@@ -12,6 +13,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStart
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleState.STOPSTART_UPSCALE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleState.STOPSTART_UPSCALE_FINALIZE_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleState.STOPSTART_UPSCALE_GET_RECOVERY_CANDIDATES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleState.STOPSTART_UPSCALE_HOSTS_COMMISSION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleState.STOPSTART_UPSCALE_HOSTS_COMMISSION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleState.STOPSTART_UPSCALE_START_INSTANCE_FAILED_STATE;
@@ -30,8 +32,12 @@ public class StopStartUpscaleFlowConfig extends StackStatusFinalizerAbstractFlow
             new Transition.Builder<StopStartUpscaleState, StopStartUpscaleEvent>()
             .defaultFailureEvent(STOPSTART_UPSCALE_FAILURE_EVENT)
             .from(INIT_STATE)
-                    .to(STOPSTART_UPSCALE_START_INSTANCE_STATE)
+                    .to(STOPSTART_UPSCALE_GET_RECOVERY_CANDIDATES_STATE)
                     .event(STOPSTART_UPSCALE_TRIGGER_EVENT)
+                    .defaultFailureEvent()
+            .from(STOPSTART_UPSCALE_GET_RECOVERY_CANDIDATES_STATE)
+                    .to(STOPSTART_UPSCALE_START_INSTANCE_STATE)
+                    .event(STOPSTART_UPSCALE_GET_RECOVERY_CANDIDATES_EVENT)
                     .defaultFailureEvent()
             .from(STOPSTART_UPSCALE_START_INSTANCE_STATE)
                     .to(STOPSTART_UPSCALE_HOSTS_COMMISSION_STATE)

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
@@ -34,6 +35,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartDownscaleGetRecoveryCandidatesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartDownscaleGetRecoveryCandidatesResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartDownscaleStopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartDownscaleStopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -136,24 +139,72 @@ public class StopStartDownscaleActionsTest {
     private CloudbreakMetricService metricService;
 
     @Test
-    void testDecommissionViaCmAction() throws Exception {
+    void testGetRecoveryCandidatesAction() throws Exception {
         AbstractStopStartDownscaleActions<StopStartDownscaleTriggerEvent> action =
-                (AbstractStopStartDownscaleActions<StopStartDownscaleTriggerEvent>) underTest.decommissionViaCmAction();
+                (AbstractStopStartDownscaleActions<StopStartDownscaleTriggerEvent>) underTest.getRecoveryCandidatesAction();
         initActionPrivateFields(action);
 
-        List<InstanceMetaData> instancesActionableStarted = generateInstances(10, 100, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_ACTIONABLE);
-        Set<Long> instanceIdsToRemove = instancesActionableStarted.stream().limit(5).map(InstanceMetaData::getId).collect(Collectors.toUnmodifiableSet());
+        List<InstanceMetadataView> instancesActionableStarted = generateInstances(10, 100, InstanceStatus.SERVICES_HEALTHY,
+                INSTANCE_GROUP_NAME_ACTIONABLE);
+        List<InstanceMetadataView> instancesActionableNotStarted = generateInstances(5, 200, InstanceStatus.STOPPED,
+                INSTANCE_GROUP_NAME_ACTIONABLE);
+        List<InstanceMetadataView> instancesRandomStarted = generateInstances(8, 300, InstanceStatus.SERVICES_HEALTHY,
+                INSTANCE_GROUP_NAME_RANDOM);
+        List<InstanceMetadataView> instancesRandomNotStarted = generateInstances(3, 400, InstanceStatus.STOPPED,
+                INSTANCE_GROUP_NAME_RANDOM);
+
+        List<InstanceMetadataView> actionable = Stream.of(instancesActionableStarted, instancesActionableNotStarted)
+                .flatMap(Collection::stream).collect(Collectors.toList());
+
+        List<InstanceMetadataView> expectedToBeStopped = instancesActionableStarted.stream().limit(5).collect(Collectors.toList());
+        Set<Long> instanceIdsToRemove = expectedToBeStopped.stream().map(InstanceMetadataView::getId).collect(Collectors.toUnmodifiableSet());
+        StopStartDownscaleContext stopStartDownscaleContext = createContext(instanceIdsToRemove);
+        StopStartDownscaleTriggerEvent payload = new StopStartDownscaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME_ACTIONABLE, instanceIdsToRemove,
+                Boolean.TRUE);
+
+        mockStackEtc(instancesActionableStarted, instancesActionableNotStarted, instancesRandomStarted, instancesRandomNotStarted);
+        mockInstanceMetadataToCloudInstanceConverter(actionable);
+        when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
+
+        new AbstractActionTestSupport<>(action).doExecute(stopStartDownscaleContext, payload, Collections.emptyMap());
+
+        verify(stopStartDownscaleFlowService).initScaleDown(eq(STACK_ID), eq(INSTANCE_GROUP_NAME_ACTIONABLE));
+        verify(instanceMetaDataToCloudInstanceConverter).convert(eq(actionable), any());
+        verifyNoMoreInteractions(stopStartDownscaleFlowService);
+
+        ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        verify(reactorEventFactory).createEvent(anyMap(), captor.capture());
+        verify(eventBus).notify("STOPSTARTDOWNSCALEGETRECOVERYCANDIDATESREQUEST", event);
+        assertThat(captor.getValue()).isInstanceOf(StopStartDownscaleGetRecoveryCandidatesRequest.class);
+
+        StopStartDownscaleGetRecoveryCandidatesRequest request = (StopStartDownscaleGetRecoveryCandidatesRequest) captor.getValue();
+        assertThat(request.getAllInstancesInHostGroup()).hasSameElementsAs(convertToCloudInstance(actionable));
+        assertThat(request.getHostGroupName()).isEqualTo(INSTANCE_GROUP_NAME_ACTIONABLE);
+        assertThat(request.getHostIds()).hasSameElementsAs(instanceIdsToRemove);
+        assertThat(request.isFailureRecoveryEnabled()).isTrue();
+    }
+
+    @Test
+    void testDecommissionViaCmAction() throws Exception {
+        AbstractStopStartDownscaleActions<StopStartDownscaleGetRecoveryCandidatesResult> action =
+                (AbstractStopStartDownscaleActions<StopStartDownscaleGetRecoveryCandidatesResult>) underTest.decommissionViaCmAction();
+        initActionPrivateFields(action);
+
+        List<InstanceMetadataView> instancesActionableStarted = generateInstances(10, 100, InstanceStatus.SERVICES_HEALTHY,
+                INSTANCE_GROUP_NAME_ACTIONABLE);
+        Set<Long> instanceIdsToRemove = instancesActionableStarted.stream().limit(5).map(InstanceMetadataView::getId).collect(Collectors.toUnmodifiableSet());
 
         StopStartDownscaleContext stopStartDownscaleContext = createContext(instanceIdsToRemove);
-        StopStartDownscaleTriggerEvent payload = new StopStartDownscaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME_ACTIONABLE,
-                instanceIdsToRemove);
+        StopStartDownscaleGetRecoveryCandidatesResult payload = new StopStartDownscaleGetRecoveryCandidatesResult(STACK_ID,
+                Collections.emptyList(), INSTANCE_GROUP_NAME_ACTIONABLE, instanceIdsToRemove);
 
         mockStackEtc();
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
 
         new AbstractActionTestSupport<>(action).doExecute(stopStartDownscaleContext, payload, Collections.emptyMap());
 
-        verify(stopStartDownscaleFlowService).clusterDownscaleStarted(eq(STACK_ID), eq(INSTANCE_GROUP_NAME_ACTIONABLE), eq(instanceIdsToRemove));
+        verify(stopStartDownscaleFlowService).clusterDownscaleStarted(eq(STACK_ID), eq(INSTANCE_GROUP_NAME_ACTIONABLE), eq(instanceIdsToRemove),
+                anySet());
         verifyNoMoreInteractions(stopStartDownscaleFlowService);
         ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
         verify(reactorEventFactory).createEvent(anyMap(), argumentCaptor.capture());
@@ -171,10 +222,10 @@ public class StopStartDownscaleActionsTest {
                 (AbstractStopStartDownscaleActions<StopStartDownscaleDecommissionViaCMResult>) underTest.stopInstancesAction();
         initActionPrivateFields(action);
 
-        List<InstanceMetaData> instancesActionableStarted = generateInstances(10, 100, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_ACTIONABLE);
-        List<InstanceMetaData> instancesActionableNotStarted = generateInstances(5, 200, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_ACTIONABLE);
-        List<InstanceMetaData> instancesRandomStarted = generateInstances(8, 300, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_RANDOM);
-        List<InstanceMetaData> instancesRandomNotStarted = generateInstances(3, 400, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_RANDOM);
+        List<InstanceMetadataView> instancesActionableStarted = generateInstances(10, 100, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_ACTIONABLE);
+        List<InstanceMetadataView> instancesActionableNotStarted = generateInstances(5, 200, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_ACTIONABLE);
+        List<InstanceMetadataView> instancesRandomStarted = generateInstances(8, 300, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_RANDOM);
+        List<InstanceMetadataView> instancesRandomNotStarted = generateInstances(3, 400, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_RANDOM);
 
         List<InstanceMetadataView> expectedToBeStopped = instancesActionableStarted.stream().limit(5).collect(Collectors.toList());
         Set<Long> instanceIdsToRemove = expectedToBeStopped.stream().map(InstanceMetadataView::getId).collect(Collectors.toUnmodifiableSet());
@@ -184,7 +235,7 @@ public class StopStartDownscaleActionsTest {
 
         StopStartDownscaleContext stopStartDownscaleContext = createContext(instanceIdsToRemove);
         StopStartDownscaleDecommissionViaCMRequest r =
-                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME_ACTIONABLE, instanceIdsToRemove);
+                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME_ACTIONABLE, instanceIdsToRemove, Collections.emptyList());
         StopStartDownscaleDecommissionViaCMResult payload = new StopStartDownscaleDecommissionViaCMResult(r, decommissionedHostsFqdns, Collections.emptyList());
 
         mockStackEtc(instancesActionableStarted, instancesActionableNotStarted, instancesRandomStarted, instancesRandomNotStarted);
@@ -213,22 +264,22 @@ public class StopStartDownscaleActionsTest {
                 (AbstractStopStartDownscaleActions<StopStartDownscaleDecommissionViaCMResult>) underTest.stopInstancesAction();
         initActionPrivateFields(action);
 
-        List<InstanceMetaData> instancesActionableStarted = generateInstances(10, 100, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_ACTIONABLE);
-        List<InstanceMetaData> instancesActionableNotStarted = generateInstances(5, 200, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_ACTIONABLE);
-        List<InstanceMetaData> instancesRandomStarted = generateInstances(8, 300, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_RANDOM);
-        List<InstanceMetaData> instancesRandomNotStarted = generateInstances(3, 400, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_RANDOM);
+        List<InstanceMetadataView> instancesActionableStarted = generateInstances(10, 100, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_ACTIONABLE);
+        List<InstanceMetadataView> instancesActionableNotStarted = generateInstances(5, 200, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_ACTIONABLE);
+        List<InstanceMetadataView> instancesRandomStarted = generateInstances(8, 300, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_RANDOM);
+        List<InstanceMetadataView> instancesRandomNotStarted = generateInstances(3, 400, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_RANDOM);
 
-        Set<Long> instanceIdsToRemove = instancesActionableStarted.stream().limit(6).map(InstanceMetaData::getId).collect(Collectors.toUnmodifiableSet());
+        Set<Long> instanceIdsToRemove = instancesActionableStarted.stream().limit(6).map(InstanceMetadataView::getId).collect(Collectors.toUnmodifiableSet());
         List<InstanceMetadataView> expectedToBeStopped = instancesActionableStarted.stream().limit(4).collect(Collectors.toList());
         Set<String> decommissionedHostsFqdns =
                 expectedToBeStopped.stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toUnmodifiableSet());
 
-        List<InstanceMetaData> notDecommissioned = instancesActionableStarted.subList(4, 6);
-        List<String> notDecommissionedFqdns = notDecommissioned.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toUnmodifiableList());
+        List<InstanceMetadataView> notDecommissioned = instancesActionableStarted.subList(4, 6);
+        List<String> notDecommissionedFqdns = notDecommissioned.stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toUnmodifiableList());
 
         StopStartDownscaleContext stopStartDownscaleContext = createContext(instanceIdsToRemove);
         StopStartDownscaleDecommissionViaCMRequest r =
-                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME_ACTIONABLE, instanceIdsToRemove);
+                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME_ACTIONABLE, instanceIdsToRemove, Collections.emptyList());
         StopStartDownscaleDecommissionViaCMResult payload = new StopStartDownscaleDecommissionViaCMResult(r, decommissionedHostsFqdns, notDecommissionedFqdns);
 
         mockStackEtc(instancesActionableStarted, instancesActionableNotStarted, instancesRandomStarted, instancesRandomNotStarted);
@@ -259,21 +310,21 @@ public class StopStartDownscaleActionsTest {
                 (AbstractStopStartDownscaleActions<StopStartDownscaleDecommissionViaCMResult>) underTest.stopInstancesAction();
         initActionPrivateFields(action);
 
-        List<InstanceMetaData> instancesActionableStarted = generateInstances(10, 100, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_ACTIONABLE);
-        List<InstanceMetaData> instancesActionableNotStarted = generateInstances(5, 200, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_ACTIONABLE);
-        List<InstanceMetaData> instancesRandomStarted = generateInstances(8, 300, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_RANDOM);
-        List<InstanceMetaData> instancesRandomNotStarted = generateInstances(3, 400, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_RANDOM);
+        List<InstanceMetadataView> instancesActionableStarted = generateInstances(10, 100, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_ACTIONABLE);
+        List<InstanceMetadataView> instancesActionableNotStarted = generateInstances(5, 200, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_ACTIONABLE);
+        List<InstanceMetadataView> instancesRandomStarted = generateInstances(8, 300, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_RANDOM);
+        List<InstanceMetadataView> instancesRandomNotStarted = generateInstances(3, 400, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_RANDOM);
 
-        Set<Long> instanceIdsToRemove = instancesActionableStarted.stream().limit(6).map(InstanceMetaData::getId).collect(Collectors.toUnmodifiableSet());
+        Set<Long> instanceIdsToRemove = instancesActionableStarted.stream().limit(6).map(InstanceMetadataView::getId).collect(Collectors.toUnmodifiableSet());
         List<InstanceMetadataView> expectedToBeStopped = Collections.emptyList();
         Set<String> decommissionedHostsFqdns = Collections.emptySet();
 
-        List<InstanceMetaData> notDecommissioned = instancesActionableStarted.subList(0, 6);
-        List<String> notDecommissionedFqdns = notDecommissioned.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toUnmodifiableList());
+        List<InstanceMetadataView> notDecommissioned = instancesActionableStarted.subList(0, 6);
+        List<String> notDecommissionedFqdns = notDecommissioned.stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toUnmodifiableList());
 
         StopStartDownscaleContext stopStartDownscaleContext = createContext(instanceIdsToRemove);
         StopStartDownscaleDecommissionViaCMRequest r =
-                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME_ACTIONABLE, instanceIdsToRemove);
+                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME_ACTIONABLE, instanceIdsToRemove, Collections.emptyList());
         StopStartDownscaleDecommissionViaCMResult payload = new StopStartDownscaleDecommissionViaCMResult(r, decommissionedHostsFqdns, notDecommissionedFqdns);
 
         mockStackEtc(instancesActionableStarted, instancesActionableNotStarted, instancesRandomStarted, instancesRandomNotStarted);
@@ -302,10 +353,10 @@ public class StopStartDownscaleActionsTest {
                 (AbstractStopStartDownscaleActions<StopStartDownscaleStopInstancesResult>) underTest.downscaleFinishedAction();
         initActionPrivateFields(action);
 
-        List<InstanceMetaData> instancesActionableStarted = generateInstances(10, 100, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_ACTIONABLE);
-        List<InstanceMetaData> instancesActionableNotStarted = generateInstances(5, 200, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_ACTIONABLE);
-        List<InstanceMetaData> instancesRandomStarted = generateInstances(8, 300, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_RANDOM);
-        List<InstanceMetaData> instancesRandomNotStarted = generateInstances(3, 400, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_RANDOM);
+        List<InstanceMetadataView> instancesActionableStarted = generateInstances(10, 100, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_ACTIONABLE);
+        List<InstanceMetadataView> instancesActionableNotStarted = generateInstances(5, 200, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_ACTIONABLE);
+        List<InstanceMetadataView> instancesRandomStarted = generateInstances(8, 300, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_RANDOM);
+        List<InstanceMetadataView> instancesRandomNotStarted = generateInstances(3, 400, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_RANDOM);
 
         List<InstanceMetadataView> expectedToBeStopped = instancesActionableStarted.stream().limit(5).collect(Collectors.toList());
         Set<Long> instanceIdsToRemove = expectedToBeStopped.stream().map(InstanceMetadataView::getId).collect(Collectors.toUnmodifiableSet());
@@ -341,10 +392,10 @@ public class StopStartDownscaleActionsTest {
                 (AbstractStopStartDownscaleActions<StopStartDownscaleStopInstancesResult>) underTest.downscaleFinishedAction();
         initActionPrivateFields(action);
 
-        List<InstanceMetaData> instancesActionableStarted = generateInstances(10, 100, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_ACTIONABLE);
-        List<InstanceMetaData> instancesActionableNotStarted = generateInstances(5, 200, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_ACTIONABLE);
-        List<InstanceMetaData> instancesRandomStarted = generateInstances(8, 300, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_RANDOM);
-        List<InstanceMetaData> instancesRandomNotStarted = generateInstances(3, 400, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_RANDOM);
+        List<InstanceMetadataView> instancesActionableStarted = generateInstances(10, 100, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_ACTIONABLE);
+        List<InstanceMetadataView> instancesActionableNotStarted = generateInstances(5, 200, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_ACTIONABLE);
+        List<InstanceMetadataView> instancesRandomStarted = generateInstances(8, 300, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_RANDOM);
+        List<InstanceMetadataView> instancesRandomNotStarted = generateInstances(3, 400, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_RANDOM);
 
         List<InstanceMetadataView> expectedToBeStopped = instancesActionableStarted.stream().limit(5).collect(Collectors.toList());
         Set<Long> instanceIdsToRemove = expectedToBeStopped.stream().map(InstanceMetadataView::getId).collect(Collectors.toUnmodifiableSet());
@@ -385,10 +436,10 @@ public class StopStartDownscaleActionsTest {
         Exception exception = new Exception("FailedStop");
         StackFailureEvent stackFailureEvent = new StackFailureEvent(STACK_ID, exception);
 
-        List<InstanceMetaData> instancesActionableStarted = generateInstances(10, 100, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_ACTIONABLE);
-        List<InstanceMetaData> instancesActionableNotStarted = generateInstances(5, 200, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_ACTIONABLE);
-        List<InstanceMetaData> instancesRandomStarted = generateInstances(8, 300, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_RANDOM);
-        List<InstanceMetaData> instancesRandomNotStarted = generateInstances(3, 400, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_RANDOM);
+        List<InstanceMetadataView> instancesActionableStarted = generateInstances(10, 100, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_ACTIONABLE);
+        List<InstanceMetadataView> instancesActionableNotStarted = generateInstances(5, 200, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_ACTIONABLE);
+        List<InstanceMetadataView> instancesRandomStarted = generateInstances(8, 300, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_RANDOM);
+        List<InstanceMetadataView> instancesRandomNotStarted = generateInstances(3, 400, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_RANDOM);
 
         mockStackEtc(instancesActionableStarted, instancesActionableNotStarted, instancesRandomStarted, instancesRandomNotStarted);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
@@ -413,15 +464,15 @@ public class StopStartDownscaleActionsTest {
         lenient().when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
     }
 
-    private void mockStackEtc(List<InstanceMetaData> instancesActionableStarted, List<InstanceMetaData> instancesActionableNotStarted,
-            List<InstanceMetaData> instancesRandomStarted, List<InstanceMetaData> instancesRandomNotStarted) {
+    private void mockStackEtc(List<InstanceMetadataView> instancesActionableStarted, List<InstanceMetadataView> instancesActionableNotStarted,
+            List<InstanceMetadataView> instancesRandomStarted, List<InstanceMetadataView> instancesRandomNotStarted) {
         mockStackEtc();
 
-        List<InstanceMetaData> combined =
+        List<InstanceMetadataView> combined =
                 Stream.of(instancesActionableStarted, instancesActionableNotStarted, instancesRandomStarted, instancesRandomNotStarted)
                         .flatMap(Collection::stream).collect(Collectors.toList());
 
-        lenient().when(stack.getNotDeletedAndNotZombieInstanceMetaDataList()).thenReturn(combined);
+        lenient().when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(eq(stack.getId()))).thenReturn(combined);
 
         lenient().when(stackService.getPrivateIdsForHostNames(any(), any())).thenCallRealMethod();
         lenient().when(cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(any(), anyString(), any())).thenCallRealMethod();
@@ -443,9 +494,9 @@ public class StopStartDownscaleActionsTest {
         return cloudInstances;
     }
 
-    private List<InstanceMetaData> generateInstances(int count, int startIndex,
+    private List<InstanceMetadataView> generateInstances(int count, int startIndex,
             com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus instanceStatus, String instanceGroupName) {
-        List<InstanceMetaData> instances = new ArrayList<>(count);
+        List<InstanceMetadataView> instances = new ArrayList<>(count);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(instanceGroupName);
         for (int i = 0; i < count; i++) {

@@ -17,8 +17,9 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownsca
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StopStartDownscaleTriggerEvent;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
@@ -26,7 +27,10 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 public class StopStartDownscaleFlowEventChainFactory implements FlowEventChainFactory<ClusterAndStackDownscaleTriggerEvent> {
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
+
+    @Inject
+    private StackUtil stackUtil;
 
     @Override
     public String initEvent() {
@@ -36,7 +40,7 @@ public class StopStartDownscaleFlowEventChainFactory implements FlowEventChainFa
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(ClusterAndStackDownscaleTriggerEvent event) {
 
-        StackView stackView = stackService.getViewByIdWithoutAuth(event.getResourceId());
+        StackView stackView = stackDtoService.getStackViewById(event.getResourceId());
         Map<String, Set<Long>> hostGroupsWithPrivateIds = event.getHostGroupsWithPrivateIds();
 
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
@@ -52,7 +56,8 @@ public class StopStartDownscaleFlowEventChainFactory implements FlowEventChainFa
                     StopStartDownscaleEvent.STOPSTART_DOWNSCALE_TRIGGER_EVENT.event(),
                     stackView.getId(),
                     hostGroupWithPrivateIds.getKey(),
-                    hostGroupWithPrivateIds.getValue()
+                    hostGroupWithPrivateIds.getValue(),
+                    stackUtil.stopStartScalingFailureRecoveryEnabled(stackView)
             );
             flowEventChain.add(te);
         }
