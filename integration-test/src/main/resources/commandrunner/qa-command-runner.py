@@ -9,7 +9,6 @@ import shutil
 
 SALT_CMD_PREFIX = '/opt/salt_*/bin/salt'
 
-
 def run_command(cmd):
     proc = subprocess.Popen(cmd,
                             stdout=subprocess.PIPE,
@@ -18,7 +17,6 @@ def run_command(cmd):
                             universal_newlines=True)
     std_out, std_err = proc.communicate()
     return proc.returncode, std_out, std_err
-
 
 def read_json_line_file(file):
     data = {}
@@ -30,7 +28,6 @@ def read_json_line_file(file):
             for key, json_dict_elem in json_data.items():
                 data[key] = json_dict_elem
     return data
-
 
 def execute_local_commands(config):
     results = list()
@@ -45,7 +42,7 @@ def execute_local_commands(config):
         result["out"] = out.rstrip() if out else out
         result["err"] = err.rstrip() if err else err
         results.append(result)
-    print(json.dumps(results))
+    return results
 
 
 def execute_salt_commands(command_file_location, config, hosts, host_groups):
@@ -90,31 +87,38 @@ def execute_salt_commands(command_file_location, config, hosts, host_groups):
     if final_json:
         for key in final_json:
             outputs[key] = json.loads(final_json[key])
-    print(json.dumps(outputs))
-
+    return outputs
 
 if __name__ == "__main__":
-    parser = optparse.OptionParser("usage: %prog [options]")
-    parser.add_option("-c", "--config", dest="config", default=None, type="string",
+    main_result={}
+    try:
+        parser = optparse.OptionParser("usage: %prog [options]")
+        parser.add_option("-c", "--config", dest="config", default=None, type="string",
                       help="Configuration file for executing salt commands.")
-    parser.add_option("--hosts", dest="hosts", default=None, type="string", help="Comma separated hosts filter,")
-    parser.add_option("--host-groups", dest="host_groups", default=None, type="string",
+        parser.add_option("--hosts", dest="hosts", default=None, type="string", help="Comma separated hosts filter,")
+        parser.add_option("--host-groups", dest="host_groups", default=None, type="string",
                       help="Comma separated host groups filter.")
-    parser.add_option("-l", "--local", action="store_true", dest="local", help="Run commands locally,")
-    (options, args) = parser.parse_args()
-    if not options.config:
-        print("Configuration option -c / --config is required!")
-        parser.print_help()
-        sys.exit(1)
-    hosts_arr = options.hosts.split(",") if options.hosts else list()
-    host_groups_arr = options.host_groups.split(",") if options.host_groups else list()
-    if not os.path.exists(options.config):
-        print("Configuration file %s does not exist!" % options.config)
-        sys.exit(1)
-    config = {}
-    with open(options.config) as f:
-        config = json.load(f)
-    if options.local:
-        execute_local_commands(config)
-    else:
-        execute_salt_commands(options.config, config, hosts_arr, host_groups_arr)
+        parser.add_option("-l", "--local", action="store_true", dest="local", help="Run commands locally,")
+        (options, args) = parser.parse_args()
+        if not options.config:
+            raise ValueError("Configuration option -c / --config is required!")
+        hosts_arr = options.hosts.split(",") if options.hosts else list()
+        host_groups_arr = options.host_groups.split(",") if options.host_groups else list()
+        if not os.path.exists(options.config):
+            raise ValueError("Configuration file %s does not exist!" % options.config)
+        config = {}
+        with open(options.config) as f:
+            config = json.load(f)
+        if options.local:
+            local_results=execute_local_commands(config)
+            print(json.dumps(local_results))
+            sys.exit(0)
+        else:
+            responses=execute_salt_commands(options.config, config, hosts_arr, host_groups_arr)
+            main_result['responses']=responses
+            main_result['code']=0
+    except Exception as e:
+        main_result['code']=1
+        main_result['err']=str(e)
+        main_result['responses']={}
+    print(json.dumps(main_result))
