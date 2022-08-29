@@ -19,16 +19,18 @@ one_week_next_update_grace_period:
     - failhard: True
     - unless: grep "^ca[.]crl[.]MasterCRL[.]nextUpdateGracePeriod=10080$" /var/lib/pki/pki-tomcat/ca/conf/CS.cfg
 
+{%- set ipaserverPath = salt.cmd.run('find /usr/lib -name ipaserver') %}
+
 add-httpd-x-cdp-trace-id:
    file.line:
-     - name: /usr/lib/python2.7/site-packages/ipaserver/rpcserver.py
+     - name: {{ ipaserverPath }}/rpcserver.py
      - mode: ensure
      - content: "        logger.info('X-cdp-request-ID : %s', environ.get('HTTP_X_CDP_REQUEST_ID'))"
      - after: "return self.marshal(result, RefererError(referer=environ['HTTP_REFERER']), _id)"
      - indent: False
      - backup: False
 
-/usr/lib/python2.7/site-packages/ipaserver/plugins/getkeytab.py:
+{{ ipaserverPath }}/plugins/getkeytab.py:
   file.managed:
     - makedirs: True
     - user: root
@@ -43,8 +45,8 @@ restart_freeipa_after_plugin_change:
     - onlyif: test -f /etc/ipa/default.conf
     - failhard: True
     - watch:
-      - file: /usr/lib/python2.7/site-packages/ipaserver/plugins/getkeytab.py
-      - file: /usr/lib/python2.7/site-packages/ipaserver/rpcserver.py
+      - file: {{ ipaserverPath }}/plugins/getkeytab.py
+      - file: {{ ipaserverPath }}/rpcserver.py
 
 set_number_of_krb5kdc_workers:
   file.replace:
