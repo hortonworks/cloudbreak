@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRd
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_DATA_RESTORE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_START_SERVICES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_STOP_SERVICES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_UPGRADE_DATABASE_SERVER_FINISHED_EVENT;
@@ -15,6 +16,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRd
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_DATA_RESTORE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_FINISHED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_START_SERVICES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_STOP_SERVICES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_UPGRADE_DATABASE_SERVER_STATE;
@@ -55,8 +57,12 @@ public class UpgradeRdsFlowConfig extends StackStatusFinalizerAbstractFlowConfig
                     .event(UPGRADE_RDS_DATA_RESTORE_FINISHED_EVENT)
                     .defaultFailureEvent()
 
-                    .from(UPGRADE_RDS_START_SERVICES_STATE).to(UPGRADE_RDS_FINISHED_STATE)
+                    .from(UPGRADE_RDS_START_SERVICES_STATE).to(UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_STATE)
                     .event(UPGRADE_RDS_START_SERVICES_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_STATE).to(UPGRADE_RDS_FINISHED_STATE)
+                    .event(UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_FINISHED_EVENT)
                     .defaultFailureEvent()
 
                     .from(UPGRADE_RDS_FINISHED_STATE).to(FINAL_STATE)

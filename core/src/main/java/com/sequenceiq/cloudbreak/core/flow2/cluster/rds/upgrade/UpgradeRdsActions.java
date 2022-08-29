@@ -24,6 +24,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataRestoreRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataRestoreResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsFailedEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesRequest;
@@ -132,11 +134,27 @@ public class UpgradeRdsActions {
         };
     }
 
-    @Bean(name = "UPGRADE_RDS_FINISHED_STATE")
-    public Action<?, ?> upgradeRdsFinished() {
+    @Bean(name = "UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_STATE")
+    public Action<?, ?> installPg11() {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsStartServicesResult.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsStartServicesResult payload, Map<Object, Object> variables) {
+                upgradeRdsService.installPostgresPackagesState(payload.getResourceId(), payload.getVersion().getMajorVersion());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(UpgradeRdsContext context) {
+                return new UpgradeRdsInstallPostgresPackagesRequest(context.getStackId(), context.getVersion());
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_RDS_FINISHED_STATE")
+    public Action<?, ?> upgradeRdsFinished() {
+        return new AbstractUpgradeRdsAction<>(UpgradeRdsInstallPostgresPackagesResult.class) {
+            @Override
+            protected void doExecute(UpgradeRdsContext context, UpgradeRdsInstallPostgresPackagesResult payload, Map<Object, Object> variables) {
                 upgradeRdsService.rdsUpgradeFinished(payload.getResourceId(), context.getClusterId(), payload.getVersion());
                 sendEvent(context);
             }

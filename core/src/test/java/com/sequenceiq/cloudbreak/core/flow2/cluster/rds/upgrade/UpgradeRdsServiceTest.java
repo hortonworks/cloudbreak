@@ -30,6 +30,8 @@ class UpgradeRdsServiceTest {
 
     private static final Long STACK_ID = 234L;
 
+    private static final String TARGET_VERSION = "11";
+
     private static final String BACKUP_STATE = "Creating data backup, it might take a while.";
 
     private static final String RESTORE_STATE = "Restoring data from the backup, it might take a while.";
@@ -39,6 +41,8 @@ class UpgradeRdsServiceTest {
     private static final String START_STATE = "Starting back Cloudera Manager and Runtime Services.";
 
     private static final String UPGRADE_STATE = "Upgrading database server.";
+
+    private static final String INSTALL_PG_STATE = "Installing Postgres packages if necessary.";
 
     @Mock
     private StackUpdater stackUpdater;
@@ -75,7 +79,10 @@ class UpgradeRdsServiceTest {
 
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_FAILED),
                 eq("RDS upgrade failed with exception: " + exception.getMessage()));
-        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_FAILED.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_FAILED),
+        verify(flowMessageService).fireEventAndLog(
+                eq(STACK_ID),
+                eq(UPDATE_FAILED.name()),
+                eq(ResourceEvent.CLUSTER_RDS_UPGRADE_FAILED),
                 eq("Backup for RDS upgrade has failed"));
     }
 
@@ -91,6 +98,13 @@ class UpgradeRdsServiceTest {
         underTest.restoreRds(STACK_ID);
 
         verify(rdsUpgradeOrchestratorService).restoreRdsData(eq(STACK_ID));
+    }
+
+    @Test
+    public void testInstallPostgresPackages() throws CloudbreakOrchestratorException {
+        underTest.installPostgresPackages(STACK_ID);
+
+        verify(rdsUpgradeOrchestratorService).installPostgresPackages(eq(STACK_ID));
     }
 
     @Test
@@ -136,6 +150,16 @@ class UpgradeRdsServiceTest {
 
         verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS), eq(START_STATE));
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_START_SERVICES));
+    }
+
+    @Test
+    public void testInstallPostgresPackagesState() {
+        when(messagesService.getMessageWithArgs(ResourceEvent.CLUSTER_RDS_UPGRADE_INSTALL_PG.getMessage(), TARGET_VERSION)).thenReturn(INSTALL_PG_STATE);
+        underTest.installPostgresPackagesState(STACK_ID, TARGET_VERSION);
+
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS), eq(INSTALL_PG_STATE));
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_INSTALL_PG),
+                eq(TARGET_VERSION));
     }
 
 }

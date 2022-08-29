@@ -19,8 +19,8 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -34,6 +34,8 @@ public class RdsUpgradeOrchestratorService {
 
     private static final String RESTORE_STATE = "postgresql/upgrade/restore";
 
+    private static final String PG11_INSTALL_STATE = "postgresql/pg11-install";
+
     private static final String UPGRADE_EMBEDDED_DATABASE = "postgresql/upgrade/embedded";
 
     private static final String PREPARE_UPGRADE_EMBEDDED_DATABASE = "postgresql/upgrade/prepare-embedded";
@@ -42,9 +44,9 @@ public class RdsUpgradeOrchestratorService {
 
     private static final int KB_TO_MB = 1024;
 
-    private static final int MAX_RETRY_ON_ERROR = 5;
+    private static final int MAX_RETRY_ON_ERROR = 3;
 
-    private static final int MAX_RETRY = 10;
+    private static final int MAX_RETRY = 20;
 
     @Inject
     private StackDtoService stackDtoService;
@@ -78,6 +80,12 @@ public class RdsUpgradeOrchestratorService {
         OrchestratorStateParams stateParams = createStateParams(stackId, RESTORE_STATE);
         stateParams.setStateParams(backupRestoreEmbeddedDBStateParamsProvider.createParamsForBackupRestore());
         LOGGER.debug("Calling restoreRdsData with state params '{}'", stateParams);
+        hostOrchestrator.runOrchestratorState(stateParams);
+    }
+
+    public void installPostgresPackages(Long stackId) throws CloudbreakOrchestratorException {
+        OrchestratorStateParams stateParams = createStateParams(stackId, PG11_INSTALL_STATE);
+        LOGGER.debug("Calling installPostgresPackages with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
