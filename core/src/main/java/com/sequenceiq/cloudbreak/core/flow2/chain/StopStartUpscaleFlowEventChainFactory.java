@@ -16,17 +16,19 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscale
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StopStartUpscaleTriggerEvent;
-import com.sequenceiq.cloudbreak.domain.view.ClusterView;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
 public class StopStartUpscaleFlowEventChainFactory implements FlowEventChainFactory<StackAndClusterUpscaleTriggerEvent> {
+    @Inject
+    private StackDtoService stackDtoService;
 
     @Inject
-    private StackService stackService;
+    private StackUtil stackUtil;
 
     @Override
     public String initEvent() {
@@ -35,11 +37,10 @@ public class StopStartUpscaleFlowEventChainFactory implements FlowEventChainFact
 
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(StackAndClusterUpscaleTriggerEvent event) {
-        StackView stackView = stackService.getViewByIdWithoutAuth(event.getResourceId());
-        ClusterView clusterView = stackView.getClusterView();
+        StackView stackView = stackDtoService.getStackViewById(event.getResourceId());
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         addStackSyncTriggerEvent(event, flowEventChain);
-        addClusterScaleTriggerEventIfNeeded(event, stackView, clusterView, flowEventChain);
+        addClusterScaleTriggerEventIfNeeded(event, stackView, flowEventChain);
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
@@ -53,9 +54,9 @@ public class StopStartUpscaleFlowEventChainFactory implements FlowEventChainFact
         );
     }
 
-    private void addClusterScaleTriggerEventIfNeeded(StackAndClusterUpscaleTriggerEvent event, StackView stackView, ClusterView clusterView,
-            Queue<Selectable> flowEventChain) {
+    private void addClusterScaleTriggerEventIfNeeded(StackAndClusterUpscaleTriggerEvent event, StackView stackView, Queue<Selectable> flowEventChain) {
         Map<String, Integer> hostGroupsWithAdjustment = event.getHostGroupsWithAdjustment();
+        boolean stopStartFailureRecoveryEnabled = stackUtil.stopStartScalingFailureRecoveryEnabled(stackView);
         if (hostGroupsWithAdjustment.keySet().size() > 1) {
             throw new BadRequestException("Start stop upscale flow was intended to handle only 1 hostgroup.");
         }
@@ -66,8 +67,8 @@ public class StopStartUpscaleFlowEventChainFactory implements FlowEventChainFact
                             stackView.getId(),
                             hostGroupWithAdjustment.getKey(),
                             hostGroupWithAdjustment.getValue(),
-                            event.getClusterManagerType())
-            );
+                            event.getClusterManagerType(),
+                            stopStartFailureRecoveryEnabled));
         }
     }
 }

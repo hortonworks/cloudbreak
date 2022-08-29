@@ -298,4 +298,9 @@ public class StackUtil {
         }
         return entitled;
     }
+
+    public boolean stopStartScalingFailureRecoveryEnabled(StackView stack) {
+        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+        return entitlementService.stopStartScalingFailureRecoveryEnabled(accountId);
+    }
 }

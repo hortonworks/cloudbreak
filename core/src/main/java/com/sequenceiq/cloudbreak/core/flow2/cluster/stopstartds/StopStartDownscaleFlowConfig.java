@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStart
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_GET_RECOVERY_CANDIDATES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_INSTANCES_STOPPED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_INSTANCES_STOP_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_TRIGGER_EVENT;
@@ -13,6 +14,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStart
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.STOPSTART_DOWNSCALE_DECOMMISSION_VIA_CM_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.STOPSTART_DOWNSCALE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.STOPSTART_DOWNSCALE_FINALIZE_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.STOPSTART_DOWNSCALE_GET_RECOVERY_CANDIDATES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.STOPSTART_DOWNSCALE_HOSTS_DECOMMISSION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.STOPSTART_DOWNSCALE_STOP_INSTANCES_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.STOPSTART_DOWNSCALE_STOP_INSTANCE_STATE;
@@ -30,8 +32,12 @@ public class StopStartDownscaleFlowConfig extends StackStatusFinalizerAbstractFl
             new Transition.Builder<StopStartDownscaleState, StopStartDownscaleEvent>()
             .defaultFailureEvent(STOPSTART_DOWNSCALE_FAILURE_EVENT)
             .from(StopStartDownscaleState.INIT_STATE)
-                .to(STOPSTART_DOWNSCALE_HOSTS_DECOMMISSION_STATE)
+                .to(STOPSTART_DOWNSCALE_GET_RECOVERY_CANDIDATES_STATE)
                 .event(STOPSTART_DOWNSCALE_TRIGGER_EVENT)
+                .defaultFailureEvent()
+            .from(STOPSTART_DOWNSCALE_GET_RECOVERY_CANDIDATES_STATE)
+                .to(STOPSTART_DOWNSCALE_HOSTS_DECOMMISSION_STATE)
+                .event(STOPSTART_DOWNSCALE_GET_RECOVERY_CANDIDATES_EVENT)
                 .defaultFailureEvent()
             .from(STOPSTART_DOWNSCALE_HOSTS_DECOMMISSION_STATE)
                 .to(STOPSTART_DOWNSCALE_STOP_INSTANCE_STATE)

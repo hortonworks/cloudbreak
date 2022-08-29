@@ -93,6 +93,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZU
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_STOP_START_SCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STOP_START_SCALING_FAILURE_RECOVERY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.EPHEMERAL_DISKS_FOR_TEMP_DATA;
@@ -315,6 +316,10 @@ public class EntitlementService {
 
     public boolean gcpAutoScalingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, DATAHUB_GCP_AUTOSCALING);
+    }
+
+    public boolean stopStartScalingFailureRecoveryEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, DATAHUB_STOP_START_SCALING_FAILURE_RECOVERY);
     }
 
     public boolean gcpStopStartScalingEnabled(String accountId) {

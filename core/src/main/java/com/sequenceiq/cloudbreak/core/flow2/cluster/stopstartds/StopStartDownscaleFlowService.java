@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOP
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_NODES_STOPPED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_NODE_STOPPING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING_IDENTIFIEDRECOVERYCANDIDATES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_STOP_FAILED;
 
 import java.util.List;
@@ -57,18 +58,34 @@ public class StopStartDownscaleFlowService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    public void clusterDownscaleStarted(long stackId, String hostGroupName, Set<Long> privateIds) {
+    public void initScaleDown(long stackId, String hostGroupName) {
         clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.DOWNSCALE_BY_STOP_IN_PROGRESS);
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_INIT, hostGroupName);
+    }
 
+    public void clusterDownscaleStarted(long stackId, String hostGroupName, Set<Long> privateIds, Set<String> recoveryCandidateHostIds) {
         // TODO CB-15153: Change the message once an adjustment based downscale is supported.
         LOGGER.debug("stopstart scaling Decommissioning from group: {}, privateIds: [{}]", hostGroupName, privateIds);
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         List<String> decomissionedHostNames = stackService.getHostNamesForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
-        LOGGER.debug("stopstart scaling Decommissioning from group: {}, hostnames: [{}]", hostGroupName, decomissionedHostNames);
-        flowMessageService.fireInstanceGroupEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), hostGroupName,
-                CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING,
-                String.valueOf(decomissionedHostNames.size()), hostGroupName, String.join(", ", decomissionedHostNames));
+        List<String> recoveryCandidateHostNames;
+        if (!recoveryCandidateHostIds.isEmpty()) {
+            recoveryCandidateHostNames = stack.getAllAvailableInstances().stream().filter(i -> recoveryCandidateHostIds.contains(i.getInstanceId()))
+                    .map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toList());
+            LOGGER.debug("stop start scaling Decommissioning from group: {}, hostnames: [{}], identified recovery candidates: [{}]",
+                    hostGroupName, decomissionedHostNames, recoveryCandidateHostNames);
+            flowMessageService.fireInstanceGroupEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), hostGroupName,
+                    CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING_IDENTIFIEDRECOVERYCANDIDATES,
+                    String.valueOf(decomissionedHostNames.size()), hostGroupName, String.join(", ", decomissionedHostNames),
+                    String.valueOf(recoveryCandidateHostIds.size()),
+                    String.join(", ", recoveryCandidateHostNames));
+        } else {
+            LOGGER.debug("stopstart scaling Decommissioning from group: {}, hostnames: [{}]", hostGroupName, decomissionedHostNames);
+            flowMessageService.fireInstanceGroupEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), hostGroupName,
+                    CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING,
+                    String.valueOf(decomissionedHostNames.size()), hostGroupName, String.join(", ", decomissionedHostNames));
+
+        }
     }
 
     public void logCouldNotDecommission(long stackId, List<String> notDecommissionedFqdns) {

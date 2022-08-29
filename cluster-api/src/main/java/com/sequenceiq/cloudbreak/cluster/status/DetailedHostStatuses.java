@@ -29,14 +29,19 @@ public class DetailedHostStatuses {
         this.certHealth = certHealth;
     }
 
-    private boolean isHostUnHealthy(HostName hostName) {
+    public boolean isHostUnHealthy(HostName hostName) {
         return hostsHealth.get(hostName).stream()
                 .anyMatch(dhc -> HealthCheckResult.UNHEALTHY.equals(dhc.getHealthCheckResult()));
     }
 
-    private boolean areServicesUnhealthy(HostName hostname) {
+    public boolean areServicesUnhealthy(HostName hostname) {
         return servicesHealth.get(hostname).stream()
-                .anyMatch(dhc -> HealthCheckResult.UNHEALTHY.equals(dhc.getHealthCheckResult()));
+                .anyMatch(dhc -> !dhc.getServicesWithBadHealth().isEmpty());
+    }
+
+    public boolean areServicesNotRunning(HostName hostname) {
+        return servicesHealth.get(hostname).stream()
+                .anyMatch(dhc -> !dhc.getServicesNotRunning().isEmpty());
     }
 
     public boolean isCertExpiring(HostName hostName) {
@@ -56,7 +61,7 @@ public class DetailedHostStatuses {
 
     public boolean isHostDecommissioned(HostName hostName) {
         return hostsHealth.get(hostName).stream()
-                .anyMatch(dhc -> !HostCommissionState.COMMISSIONED.equals(dhc.getHostCommissionState()));
+                .anyMatch(dhc -> HostCommissionState.DECOMMISSIONED.equals(dhc.getHostCommissionState()));
     }
 
     public Map<HostName, Optional<DetailedHostHealthCheck>> getHostsHealth() {

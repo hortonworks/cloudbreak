@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -296,6 +298,68 @@ public class StopStartUpscaleStartInstancesHandlerTest {
         assertEquals(0, result.getAffectedInstanceStatuses().size());
         assertEquals(EventStatus.FAILED, result.getStatus());
         assertEquals("STOPSTARTUPSCALESTARTINSTANCESRESULT_ERROR", result.selector());
+    }
+
+    @Test
+    void testNegativeInstancesToStartIncludingInstancesWithServicesNotRunning() {
+        List<CloudInstance> allInstancesInHg = generateCloudInstances(10);
+        List<CloudInstance> stoppedInstancesInHg = generateCloudInstances(3);
+        List<CloudInstance> startedInstancesWithServicesNotRunning = generateCloudInstances(5);
+        int numInstancesToStart = 2;
+
+        StopStartUpscaleStartInstancesRequest request = new StopStartUpscaleStartInstancesRequest(cloudContext, cloudCredential, cloudStack,
+                "compute", stoppedInstancesInHg, allInstancesInHg, startedInstancesWithServicesNotRunning, numInstancesToStart);
+
+        Event event = new Event(request);
+
+        underTest.accept(event);
+
+        ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(any(Object.class), captor.capture());
+        verifyNoMoreInteractions(instanceConnector);
+
+        assertEquals(1, captor.getAllValues().size());
+        Event resultEvent = captor.getValue();
+        assertEquals(StopStartUpscaleStartInstancesResult.class, resultEvent.getData().getClass());
+        StopStartUpscaleStartInstancesResult result = (StopStartUpscaleStartInstancesResult) resultEvent.getData();
+
+        assertThat(result.getAffectedInstanceStatuses()).isEmpty();
+    }
+
+    @Test
+    void testStartInstancesIncludingInstancesWithServicesNotRunning() {
+        List<CloudInstance> allInstancesInHg = generateCloudInstances(10);
+        List<CloudInstance> stoppedInstancesInHg = generateCloudInstances(6);
+        List<CloudInstance> startedInstancesWithServicesNotRunning = generateCloudInstances(3);
+        int numInstancesToStart = 5;
+
+        StopStartUpscaleStartInstancesRequest request = new StopStartUpscaleStartInstancesRequest(cloudContext, cloudCredential, cloudStack,
+                "compute", stoppedInstancesInHg, allInstancesInHg, startedInstancesWithServicesNotRunning, numInstancesToStart);
+
+        int expectedInstances = Math.min(stoppedInstancesInHg.size(), numInstancesToStart - startedInstancesWithServicesNotRunning.size());
+        List<CloudInstance> stoppedInstancesArg = stoppedInstancesInHg.subList(0, expectedInstances);
+        List<CloudVmInstanceStatus> startedInstanceStatusList = generateStartedCloudVmInstanceStatuses(stoppedInstancesArg);
+        List<CloudVmInstanceStatus> stoppedInstanceStatusList = generateStoppedCloudVmInstanceStatuses(stoppedInstancesArg);
+        when(instanceConnector.checkWithoutRetry(any(AuthenticatedContext.class), eq(stoppedInstancesArg))).thenReturn(stoppedInstanceStatusList);
+        when(instanceConnector.startWithLimitedRetry(any(AuthenticatedContext.class), eq(null), eq(stoppedInstancesArg), anyLong()))
+                .thenReturn(startedInstanceStatusList);
+
+        Event event = new Event(request);
+        underTest.accept(event);
+
+        ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+        verify(instanceConnector).checkWithoutRetry(any(AuthenticatedContext.class), eq(stoppedInstancesArg));
+        verify(instanceConnector).startWithLimitedRetry(
+                any(AuthenticatedContext.class), eq(null), eq(stoppedInstancesArg), anyLong());
+
+        assertEquals(1, resultCaptor.getAllValues().size());
+        Event resultEvent = resultCaptor.getValue();
+        assertEquals(StopStartUpscaleStartInstancesResult.class, resultEvent.getData().getClass());
+        StopStartUpscaleStartInstancesResult result = (StopStartUpscaleStartInstancesResult) resultEvent.getData();
+
+        verifyAffectedInstancesInResult(startedInstanceStatusList, result.getAffectedInstanceStatuses());
+        assertEquals(numInstancesToStart - startedInstancesWithServicesNotRunning.size(), result.getAffectedInstanceStatuses().size());
     }
 
     private void testNotEnoughInstancesAvailableToStartTestInternal(

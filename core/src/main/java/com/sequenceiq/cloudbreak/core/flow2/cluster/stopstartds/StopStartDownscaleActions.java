@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FINALIZED_EVENT;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,7 +52,9 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartDownscaleDecommissionViaCMRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartDownscaleGetRecoveryCandidatesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartDownscaleDecommissionViaCMResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartDownscaleGetRecoveryCandidatesResult;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -79,9 +82,8 @@ public class StopStartDownscaleActions {
     @Inject
     private CloudInstanceIdToInstanceMetaDataConverter cloudInstanceIdToInstanceMetaDataConverter;
 
-    // TODO CB-15132: Potential pre-flight checks. YARN / appropriate service masters available. CM master available.
-    @Bean(name = "STOPSTART_DOWNSCALE_HOSTS_DECOMMISSION_STATE")
-    public Action<?, ?> decommissionViaCmAction() {
+    @Bean(name = "STOPSTART_DOWNSCALE_GET_RECOVERY_CANDIDATES_STATE")
+    public Action<?, ?> getRecoveryCandidatesAction() {
         return new AbstractStopStartDownscaleActions<>(StopStartDownscaleTriggerEvent.class) {
 
             @Override
@@ -91,15 +93,40 @@ public class StopStartDownscaleActions {
             }
 
             @Override
-            protected void doExecute(
-                    StopStartDownscaleContext context, StopStartDownscaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
-                stopStartDownscaleFlowService.clusterDownscaleStarted(context.getStack().getId(), payload.getHostGroup(), payload.getHostIds());
-                sendEvent(context);
+            protected void doExecute(StopStartDownscaleContext context, StopStartDownscaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+                StackDtoDelegate stack = context.getStack();
+                stopStartDownscaleFlowService.initScaleDown(stack.getId(), payload.getHostGroup());
+
+                List<CloudInstance> allInstancesInHostGroup = Collections.emptyList();
+                if (payload.isFailureRecoveryEnabled()) {
+                    LOGGER.info("Identifying recovery candidates for downscale");
+                    List<InstanceMetadataView> allInstanceMetadataInHostGroup =
+                            instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stack.getId())
+                                    .stream().filter(imv -> payload.getHostGroup().equals(imv.getInstanceGroupName())).collect(Collectors.toList());
+                    allInstancesInHostGroup = instanceMetaDataToCloudInstanceConverter.convert(allInstanceMetadataInHostGroup,
+                            stack.getStack());
+                }
+                StopStartDownscaleGetRecoveryCandidatesRequest request = new StopStartDownscaleGetRecoveryCandidatesRequest(context.getCloudContext(),
+                        context.getCloudCredential(), context.getCloudStack(), context.getHostGroupName(), allInstancesInHostGroup, payload.getHostIds(),
+                        payload.isFailureRecoveryEnabled());
+                sendEvent(context, request);
             }
+        };
+    }
+
+    // TODO CB-15132: Potential pre-flight checks. YARN / appropriate service masters available. CM master available.
+    @Bean(name = "STOPSTART_DOWNSCALE_HOSTS_DECOMMISSION_STATE")
+    public Action<?, ?> decommissionViaCmAction() {
+        return new AbstractStopStartDownscaleActions<>(StopStartDownscaleGetRecoveryCandidatesResult.class) {
 
             @Override
-            protected Selectable createRequest(StopStartDownscaleContext context) {
-                return new StopStartDownscaleDecommissionViaCMRequest(context.getStack().getId(), context.getHostGroupName(), context.getHostIdsToRemove());
+            protected void doExecute(
+                    StopStartDownscaleContext context, StopStartDownscaleGetRecoveryCandidatesResult payload, Map<Object, Object> variables) throws Exception {
+                stopStartDownscaleFlowService.clusterDownscaleStarted(context.getStack().getId(), payload.getHostGroupName(), payload.getHostIds(),
+                        payload.getStartedInstancesWithServicesNotRunning().stream().map(CloudInstance::getInstanceId).collect(Collectors.toSet()));
+                StopStartDownscaleDecommissionViaCMRequest request = new StopStartDownscaleDecommissionViaCMRequest(context.getStack().getId(),
+                        context.getHostGroupName(), context.getHostIdsToRemove(), payload.getStartedInstancesWithServicesNotRunning());
+                sendEvent(context, request);
             }
         };
     }

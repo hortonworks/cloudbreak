@@ -364,9 +364,12 @@ public enum ResourceEvent {
     CLUSTER_UPGRADE_VALIDATION_SKIPPED("cluster.upgrade.validation.skipped"),
     CLUSTER_UPGRADE_VALIDATION_FAILED("cluster.upgrade.validation.failed"),
     CLUSTER_PROVISION_CLOUD_STORAGE_VALIDATION_ON_IDBROKER_FAILED("cluster.provision.idbrokerhost.cloudstorage.vmvalidation.failed"),
-
     CLUSTER_SCALING_STOPSTART_UPSCALE_INIT("cluster.scaling.stopstart.upscale.init"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_STARTING("cluster.scaling.stopstart.upscale.starting"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_IDENTIFYINGRECOVERYCANDIDATES("cluster.scaling.stopstart.upscale.identifyrecoverycandidates"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_IDENTIFIEDRECOVERYCANDIDATES("cluster.scaling.stopstart.upscale.starting.identifiedrecoverycandidates"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_STARTED("cluster.scaling.stopstart.upscale.nodes.started"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_STARTED_WITH_RECOVERY_CANDIDATES("cluster.scaling.stopstart.upscale.nodes.started.withrecoverycandidates"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_NOT_STARTED("cluster.scaling.stopstart.upscale.nodes.notstarted"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_INADEQUATE_NODES("cluster.scaling.stopstart.upscale.inadequate.nodes"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSIONING("cluster.scaling.stopstart.upscale.commissioning"),
@@ -380,7 +383,9 @@ public enum ResourceEvent {
     CLUSTER_SCALING_STOPSTART_UPSCALE_FAILED("cluster.scaling.stopstart.upscale.failed"),
 
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_INIT("cluster.scaling.stopstart.downscale.init"),
+    CLUSTER_SCALING_STOPSTART_DOWNSCALE_IDENTIFYRECOVERYCANDIDATES("cluster.scaling.stopstart.downscale.identifyrecoverycandidates"),
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING("cluster.scaling.stopstart.downscale.starting"),
+    CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING_IDENTIFIEDRECOVERYCANDIDATES("cluster.scaling.stopstart.downscale.starting.identifiedrecoverycandidates"),
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_COULDNOTDECOMMISSION("cluster.scaling.stopstart.downscale.couldnotdecommission"),
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTERINGCMMAINTMODE("cluster.scaling.stopstart.downscale.enteringcmmaintmode"),
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTEREDCMMAINTMODE("cluster.scaling.stopstart.downscale.enteredcmmaintmode"),

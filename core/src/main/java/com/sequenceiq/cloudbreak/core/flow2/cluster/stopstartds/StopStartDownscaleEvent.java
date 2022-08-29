@@ -2,12 +2,14 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds;
 
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartDownscaleDecommissionViaCMResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartDownscaleStopInstancesResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartDownscaleGetRecoveryCandidatesResult;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public enum StopStartDownscaleEvent implements FlowEvent {
 
     STOPSTART_DOWNSCALE_TRIGGER_EVENT("STOPSTART_DOWNSCALE_TRIGGER_EVENT"),
+    STOPSTART_DOWNSCALE_GET_RECOVERY_CANDIDATES_EVENT(EventSelectorUtil.selector(StopStartDownscaleGetRecoveryCandidatesResult.class)),
     STOPSTART_DOWNSCALE_CLUSTER_MANAGER_DECOMMISSIONED_EVENT(EventSelectorUtil.selector(StopStartDownscaleDecommissionViaCMResult.class)),
     STOPSTART_DOWNSCALE_CLUSTER_MANAGER_DECOIMMISSION_FAILED_EVENT(EventSelectorUtil.failureSelector(StopStartDownscaleDecommissionViaCMResult.class)),
     STOPSTART_DOWNSCALE_INSTANCES_STOPPED_EVENT(EventSelectorUtil.selector(StopStartDownscaleStopInstancesResult.class)),

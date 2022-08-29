@@ -51,14 +51,10 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
 
         int numInstancesToStart = request.getNumInstancesToStart() - request.getStartedInstancesWithServicesNotRunning().size();
         if (numInstancesToStart <= 0) {
-            // TODO CB-15132: This is currently not exercised, since the Flow itself does not send any good information about running instances.
             LOGGER.debug("No nodes to start. Start requested for numInstances={}, Running CM instances with services not running={}",
                     request.getNumInstancesToStart(), request.getStartedInstancesWithServicesNotRunning().size());
-            List<CloudInstance> startedInstancesWithServicesNotRunning = request.getStartedInstancesWithServicesNotRunning();
-            List<CloudVmInstanceStatus> vmInstanceStatuses = startedInstancesWithServicesNotRunning.stream()
-                    .map(i -> new CloudVmInstanceStatus(i, InstanceStatus.STARTED)).collect(Collectors.toUnmodifiableList());
             StopStartUpscaleStartInstancesResult result = new StopStartUpscaleStartInstancesResult(
-                    request.getResourceId(), request, vmInstanceStatuses);
+                    request.getResourceId(), request, Collections.emptyList());
             notify(result, event);
             return;
         }

@@ -28,6 +28,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleGetRecoveryCandidatesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleGetRecoveryCandidatesResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -77,10 +79,9 @@ public class StopStartUpscaleActions {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    @Bean(name = "STOPSTART_UPSCALE_START_INSTANCE_STATE")
-    public Action<?, ?> startInstancesAction() {
+    @Bean(name = "STOPSTART_UPSCALE_GET_RECOVERY_CANDIDATES_STATE")
+    public Action<?, ?> getRecoveryCandidatesAction() {
         return new AbstractStopStartUpscaleActions<>(StopStartUpscaleTriggerEvent.class) {
-
             @Override
             protected void prepareExecution(StopStartUpscaleTriggerEvent payload, Map<Object, Object> variables) {
                 variables.put(HOSTGROUPNAME, payload.getHostGroup());
@@ -89,12 +90,35 @@ public class StopStartUpscaleActions {
 
             @Override
             protected void doExecute(StopStartUpscaleContext context, StopStartUpscaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterUpscaleFlowService.startingInstances(context.getStack().getId(), payload.getHostGroup(), payload.getAdjustment());
-                sendEvent(context);
+                StackDtoDelegate stack = context.getStack();
+                clusterUpscaleFlowService.initScaleUp(context.getStack().getId(), context.getHostGroupName());
+                List<InstanceMetadataView> allInstanceMetadataInHg;
+                List<CloudInstance> allCloudInstancesInHg = Collections.emptyList();
+                if (payload.isFailureRecoveryEnabled()) {
+                    LOGGER.info("Identifying upscale recovery candidates");
+                    allInstanceMetadataInHg = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stack.getId())
+                            .stream().filter(imv -> context.getHostGroupName().equals(imv.getInstanceGroupName())).collect(Collectors.toList());
+                    allCloudInstancesInHg = instanceMetaDataToCloudInstanceConverter.convert(allInstanceMetadataInHg, stack.getStack());
+                }
+                StopStartUpscaleGetRecoveryCandidatesRequest request = new StopStartUpscaleGetRecoveryCandidatesRequest(context.getCloudContext(),
+                        context.getCloudCredential(), context.getCloudStack(), payload.getHostGroup(), payload.getAdjustment(), allCloudInstancesInHg,
+                        payload.isFailureRecoveryEnabled());
+                sendEvent(context, request);
             }
+        };
+    }
+
+    @Bean(name = "STOPSTART_UPSCALE_START_INSTANCE_STATE")
+    public Action<?, ?> startInstancesAction() {
+        return new AbstractStopStartUpscaleActions<>(StopStartUpscaleGetRecoveryCandidatesResult.class) {
 
             @Override
-            protected Selectable createRequest(StopStartUpscaleContext context) {
+            protected void doExecute(StopStartUpscaleContext context, StopStartUpscaleGetRecoveryCandidatesResult payload, Map<Object, Object> variables)
+                    throws Exception {
+                int instancesToStart = Math.max(payload.getAdjustment() - payload.getStartedInstancesWithServicesNotRunning().size(), 0);
+                clusterUpscaleFlowService.startingInstances(context.getStack().getId(), payload.getHostGroupName(),
+                        instancesToStart, payload.getStartedInstancesWithServicesNotRunning());
+
                 StackDtoDelegate stack = context.getStack();
 
                 List<InstanceMetadataView> instanceMetaDataList = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stack.getId());
@@ -111,10 +135,12 @@ public class StopStartUpscaleActions {
                         instanceMetaDataList.size(), context.getHostGroupName(), instanceMetaDataForHg.size(), stoppedInstancesInHg.size());
 
                 List<CloudInstance> stoppedCloudInstancesForHg = instanceMetaDataToCloudInstanceConverter.convert(stoppedInstancesInHg, stack.getStack());
-                List<CloudInstance> allCloudInstancesForHg = instanceMetaDataToCloudInstanceConverter.convert(instanceMetaDataList, stack.getStack());
+                List<CloudInstance> allCloudInstancesForHg = instanceMetaDataToCloudInstanceConverter.convert(instanceMetaDataForHg, stack.getStack());
 
-                return new StopStartUpscaleStartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
-                        context.getHostGroupName(), stoppedCloudInstancesForHg, allCloudInstancesForHg, Collections.emptyList(), context.getAdjustment());
+                StopStartUpscaleStartInstancesRequest request =  new StopStartUpscaleStartInstancesRequest(context.getCloudContext(),
+                        context.getCloudCredential(), context.getCloudStack(), context.getHostGroupName(), stoppedCloudInstancesForHg,
+                        allCloudInstancesForHg, payload.getStartedInstancesWithServicesNotRunning(), context.getAdjustment());
+                sendEvent(context, request);
             }
         };
     }
@@ -128,31 +154,33 @@ public class StopStartUpscaleActions {
                     Map<Object, Object> variables) throws Exception {
 
                 // Update instance metadata for successful nodes before handling / logging info about failures.
+                StackDtoDelegate stack = context.getStack();
                 List<CloudVmInstanceStatus> cloudVmInstanceStatusList = payload.getAffectedInstanceStatuses();
                 Set<String> cloudInstanceIdsStarted = cloudVmInstanceStatusList.stream()
                         .filter(x -> x.getStatus() == InstanceStatus.STARTED)
                         .map(x -> x.getCloudInstance().getInstanceId())
                         .collect(Collectors.toUnmodifiableSet());
-                StackDtoDelegate stack = context.getStack();
+
+                List<CloudInstance> instancesWithServicesNotRunning = payload.getStartInstanceRequest().getStartedInstancesWithServicesNotRunning();
+
+                LOGGER.info("StartedInstancesCount={}, InstancesWithServicesNotRunningCount={}", cloudInstanceIdsStarted.size(),
+                        instancesWithServicesNotRunning.size());
+
                 List<InstanceMetadataView> allInstanceMetadata = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stack.getId());
                 List<InstanceMetadataView> startedInstancesMetaData = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(
                         allInstanceMetadata, context.getHostGroupName(), cloudInstanceIdsStarted);
-                clusterUpscaleFlowService.instancesStarted(stack.getId(), startedInstancesMetaData);
 
-                handleInstanceUnsuccessfulStart(context, cloudVmInstanceStatusList);
-
-                // This list is currently empty. It could be populated later in another flow-step by querying CM to get service health.
-                // Meant to be a mechanism which detects cloud instances which are RUNNING, but not being utilized (likely due to previous failures)
-                List<CloudInstance> instancesWithServicesNotRunning = payload.getStartInstanceRequest().getStartedInstancesWithServicesNotRunning();
                 List<InstanceMetadataView> metaDataWithServicesNotRunning = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(
                         allInstanceMetadata,
                         context.getHostGroupName(),
-                        instancesWithServicesNotRunning.stream().map(i -> i.getInstanceId()).collect(Collectors.toUnmodifiableSet()));
+                        instancesWithServicesNotRunning.stream().map(CloudInstance::getInstanceId).collect(Collectors.toUnmodifiableSet()));
 
-                LOGGER.info("StartedInstancesCount={}, StartedInstancesMetadataCount={}," +
-                        " instancesWithServicesNotRunningCount={}, instancesWithServicesNotRunningMetadataCount={}",
-                        cloudInstanceIdsStarted.size(), startedInstancesMetaData.size(),
-                        instancesWithServicesNotRunning.size(), metaDataWithServicesNotRunning.size());
+                LOGGER.info(" StartedInstanceMetadataCount={}, InstancesWithServicesNotRunningMetadataCount={}",
+                        startedInstancesMetaData.size(), metaDataWithServicesNotRunning.size());
+
+                clusterUpscaleFlowService.instancesStarted(stack.getId(), startedInstancesMetaData, metaDataWithServicesNotRunning);
+
+                handleInstanceUnsuccessfulStart(context, cloudVmInstanceStatusList);
 
                 int toCommissionNodeCount = metaDataWithServicesNotRunning.size() + startedInstancesMetaData.size();
                 if (toCommissionNodeCount < context.getAdjustment()) {
