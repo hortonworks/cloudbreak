@@ -8,20 +8,31 @@ set -e
 : ${EXPOSE_JMX_METRICS_CONFIG:=config.yaml}
 : ${TRUSTED_CERT_DIR:=/certs/trusted}
 : ${EXPOSE_JMX_BIND_ADDRESS:=0.0.0.0}
+: ${SERVICE_SPECIFIC_CERT_DIR:=/consumption/certs}
 
 echo "Importing certificates to the default Java certificate  trust store."
 
-if [ -d "$TRUSTED_CERT_DIR" ]; then
-    for cert in $(ls -A "$TRUSTED_CERT_DIR"); do
-        if [ -f "$TRUSTED_CERT_DIR/$cert" ]; then
-            if keytool -import -alias "$cert" -noprompt -file "$TRUSTED_CERT_DIR/$cert" -keystore /etc/pki/java/cacerts -storepass changeit; then
-                echo -e "Certificate added to default Java trust store with alias $cert."
-            else
-                echo -e "WARNING: Failed to add $cert to trust store.\n"
-            fi
-        fi
-    done
-fi
+import_certs_from_dir_to_keystore() {
+  cert_dir_param=$1
+
+  if [ -d "$cert_dir_param" ]; then
+      echo -e "Starting to process certificates in $cert_dir_param directory."
+      for cert in $(ls -A "$cert_dir_param"); do
+          if [ -f "$cert_dir_param/$cert" ]; then
+              if keytool -import -alias "$cert" -noprompt -file "$cert_dir_param/$cert" -keystore /etc/pki/java/cacerts -storepass changeit; then
+                  echo -e "Certificate added to default Java trust store with alias $cert."
+              else
+                  echo -e "WARNING: Failed to add $cert to trust store.\n"
+              fi
+          fi
+      done
+  else
+      echo -e "NOT an existing directory $cert_dir_param"
+  fi
+}
+
+import_certs_from_dir_to_keystore $TRUSTED_CERT_DIR
+import_certs_from_dir_to_keystore $SERVICE_SPECIFIC_CERT_DIR
 
 echo "Starting the Consumption application..."
 
