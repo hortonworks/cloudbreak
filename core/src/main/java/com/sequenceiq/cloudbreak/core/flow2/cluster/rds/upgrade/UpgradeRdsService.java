@@ -59,10 +59,24 @@ public class UpgradeRdsService {
         setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_START_SERVICES), ResourceEvent.CLUSTER_RDS_UPGRADE_START_SERVICES);
     }
 
+    void installPostgresPackagesState(Long stackId, String majorVersion) {
+        setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_INSTALL_PG, majorVersion),
+                ResourceEvent.CLUSTER_RDS_UPGRADE_INSTALL_PG, majorVersion);
+    }
+
+    private void setStatusAndNotify(Long stackId, String statusReason, ResourceEvent resourceEvent, String... args) {
+        updateStatus(stackId, statusReason);
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), resourceEvent, args);
+    }
+
     private void setStatusAndNotify(Long stackId, String statusReason, ResourceEvent resourceEvent) {
+        updateStatus(stackId, statusReason);
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), resourceEvent);
+    }
+
+    private void updateStatus(Long stackId, String statusReason) {
         LOGGER.debug(statusReason);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS, statusReason);
-        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), resourceEvent);
     }
 
     public void backupRds(Long stackId) throws CloudbreakOrchestratorException {
@@ -71,6 +85,14 @@ public class UpgradeRdsService {
 
     public void restoreRds(Long stackId) throws CloudbreakOrchestratorException {
         rdsUpgradeOrchestratorService.restoreRdsData(stackId);
+    }
+
+    public void installPostgresPackages(Long stackId) throws CloudbreakOrchestratorException {
+        rdsUpgradeOrchestratorService.installPostgresPackages(stackId);
+    }
+
+    public void handleInstallPostgresPackagesError(Long stackId, String version, String exception) {
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_INSTALL_PG_FAILED, version, exception);
     }
 
     public void rdsUpgradeFinished(Long stackId, Long clusterId, TargetMajorVersion targetMajorVersion) {
@@ -96,5 +118,9 @@ public class UpgradeRdsService {
 
     private String getMessage(ResourceEvent resourceEvent) {
         return messagesService.getMessage(resourceEvent.getMessage());
+    }
+
+    private String getMessage(ResourceEvent resourceEvent, Object... args) {
+        return messagesService.getMessageWithArgs(resourceEvent.getMessage(), args);
     }
 }
