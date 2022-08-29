@@ -73,9 +73,9 @@ public class UpgradeRdsActions {
 
             @Override
             protected Selectable createRequest(UpgradeRdsContext context) {
-                return context.getCluster().getEmbeddedDatabaseOnAttachedDisk() ?
-                    new UpgradeRdsDataBackupResult(context.getStackId(), context.getVersion()) :
-                    new UpgradeRdsDataBackupRequest(context.getStackId(), context.getVersion());
+                return runDataBackupRestore(context) ?
+                        new UpgradeRdsDataBackupRequest(context.getStackId(), context.getVersion()) :
+                        new UpgradeRdsDataBackupResult(context.getStackId(), context.getVersion());
             }
         };
     }
@@ -109,9 +109,9 @@ public class UpgradeRdsActions {
 
             @Override
             protected Selectable createRequest(UpgradeRdsContext context) {
-                return context.getCluster().getEmbeddedDatabaseOnAttachedDisk() ?
-                        new UpgradeRdsDataRestoreResult(context.getStackId(), context.getVersion()) :
-                        new UpgradeRdsDataRestoreRequest(context.getStackId(), context.getVersion());
+                return runDataBackupRestore(context) ?
+                        new UpgradeRdsDataRestoreRequest(context.getStackId(), context.getVersion()) :
+                        new UpgradeRdsDataRestoreResult(context.getStackId(), context.getVersion());
             }
         };
     }

@@ -32,6 +32,10 @@ import org.springframework.util.ReflectionUtils;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.AbstractUpgradeRdsEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataBackupRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataBackupResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataRestoreRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataRestoreResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerResult;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -93,6 +97,11 @@ class UpgradeRdsActionsTest {
         ArgumentCaptor<AbstractUpgradeRdsEvent> captor = ArgumentCaptor.forClass(AbstractUpgradeRdsEvent.class);
         verify(reactorEventFactory, times(1)).createEvent(any(), captor.capture());
         AbstractUpgradeRdsEvent captorValue = captor.getValue();
+        if (runBackup) {
+            assertEquals(UpgradeRdsDataBackupRequest.class, captorValue.getClass());
+        } else {
+            assertEquals(UpgradeRdsDataBackupResult.class, captorValue.getClass());
+        }
         assertEquals(STACK_ID, captorValue.getResourceId());
         assertEquals(TargetMajorVersion.VERSION_11, captorValue.getVersion());
     }
@@ -124,6 +133,11 @@ class UpgradeRdsActionsTest {
         ArgumentCaptor<AbstractUpgradeRdsEvent> captor = ArgumentCaptor.forClass(AbstractUpgradeRdsEvent.class);
         verify(reactorEventFactory, times(1)).createEvent(any(), captor.capture());
         AbstractUpgradeRdsEvent captorValue = captor.getValue();
+        if (runRestore) {
+            assertEquals(UpgradeRdsDataRestoreRequest.class, captorValue.getClass());
+        } else {
+            assertEquals(UpgradeRdsDataRestoreResult.class, captorValue.getClass());
+        }
         assertEquals(STACK_ID, captorValue.getResourceId());
         assertEquals(TargetMajorVersion.VERSION_11, captorValue.getVersion());
     }
