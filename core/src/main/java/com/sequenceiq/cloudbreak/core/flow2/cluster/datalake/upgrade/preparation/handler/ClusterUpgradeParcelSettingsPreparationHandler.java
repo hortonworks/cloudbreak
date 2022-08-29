@@ -19,12 +19,12 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradeParcelSettingsPreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationFailureEvent;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -36,7 +36,7 @@ public class ClusterUpgradeParcelSettingsPreparationHandler extends ExceptionCat
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeParcelSettingsPreparationHandler.class);
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
@@ -53,10 +53,10 @@ public class ClusterUpgradeParcelSettingsPreparationHandler extends ExceptionCat
         ClusterUpgradeParcelSettingsPreparationEvent request = event.getData();
         Long stackId = request.getResourceId();
         try {
-            Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-            Set<ClouderaManagerProduct> clouderaManagerProducts = getRequiredProductsFromImage(stack, request.getImageChangeDto());
+            StackDto stackDto = stackDtoService.getById(stackId);
+            Set<ClouderaManagerProduct> clouderaManagerProducts = getRequiredProductsFromImage(stackDto, request.getImageChangeDto());
             LOGGER.debug("The following parcels will be prepared for upgrade: {}", clouderaManagerProducts);
-            clusterApiConnectors.getConnector(stack).updateParcelSettings(clouderaManagerProducts);
+            clusterApiConnectors.getConnector(stackDto).updateParcelSettings(clouderaManagerProducts);
             return new ClusterUpgradePreparationEvent(START_CLUSTER_UPGRADE_PARCEL_DOWNLOAD_EVENT.name(), stackId, clouderaManagerProducts);
         } catch (Exception e) {
             LOGGER.error("Cluster upgrade parcel settings preparation failed.", e);
@@ -75,13 +75,14 @@ public class ClusterUpgradeParcelSettingsPreparationHandler extends ExceptionCat
         return new ClusterUpgradePreparationFailureEvent(resourceId, e);
     }
 
-    private Set<ClouderaManagerProduct> getRequiredProductsFromImage(Stack stack, ImageChangeDto imageChangeDto)
+    private Set<ClouderaManagerProduct> getRequiredProductsFromImage(StackDto stackDto, ImageChangeDto imageChangeDto)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        return parcelService.getRequiredProductsFromImage(stack, getImageFromCatalog(stack, imageChangeDto));
+        return parcelService.getRequiredProductsFromImage(stackDto, getImageFromCatalog(stackDto, imageChangeDto));
     }
 
-    private Image getImageFromCatalog(Stack stack, ImageChangeDto imageChangeDto) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        return imageCatalogService.getImage(stack.getWorkspace().getId(), imageChangeDto.getImageCatalogUrl(), imageChangeDto.getImageCatalogName(),
+    private Image getImageFromCatalog(StackDto stackDto, ImageChangeDto imageChangeDto)
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        return imageCatalogService.getImage(stackDto.getWorkspace().getId(), imageChangeDto.getImageCatalogUrl(), imageChangeDto.getImageCatalogName(),
                 imageChangeDto.getImageId()).getImage();
     }
 }
