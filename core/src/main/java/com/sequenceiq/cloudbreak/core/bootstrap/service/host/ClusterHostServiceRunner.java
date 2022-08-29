@@ -838,7 +838,9 @@ public class ClusterHostServiceRunner {
                     List.copyOf(componentLocation.get(impalaService.getServiceName())));
             Map<String, List<String>> impalaLocations = componentLocator.getImpalaCoordinatorLocations(stackDto);
             List<String> locations = impalaLocations.values().stream().flatMap(List::stream).collect(Collectors.toList());
-            componentLocation.replace(impalaService.getServiceName(), locations);
+            if (!locations.isEmpty()) {
+                componentLocation.replace(impalaService.getServiceName(), locations);
+            }
         }
         return componentLocation;
     }
