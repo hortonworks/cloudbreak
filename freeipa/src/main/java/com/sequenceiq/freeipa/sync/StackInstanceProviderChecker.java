@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
-import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.CredentialService;
@@ -38,9 +37,6 @@ public class StackInstanceProviderChecker {
 
     @Inject
     private CredentialService credentialService;
-
-    @Inject
-    private StackToCloudStackConverter cloudStackConverter;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;

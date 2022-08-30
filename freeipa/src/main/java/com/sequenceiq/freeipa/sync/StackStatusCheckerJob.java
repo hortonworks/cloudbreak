@@ -30,7 +30,6 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
-import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 import io.opentracing.Tracer;
 
@@ -57,9 +56,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private AutoSyncConfig autoSyncConfig;
-
-    @Inject
-    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private FreeipaStatusInfoLogger freeipaStatusInfoLogger;

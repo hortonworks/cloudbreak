@@ -90,6 +90,7 @@ dependencies {
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test',       version: springBootVersion
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: springBootVersion
+  testImplementation group: 'org.testcontainers',       name: 'junit-jupiter',                  version: testContainersVersion
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

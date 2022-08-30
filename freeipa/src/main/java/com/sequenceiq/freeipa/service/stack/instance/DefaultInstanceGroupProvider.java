@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.cloud.model.instance.GcpInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.common.api.type.EncryptionType;
@@ -51,9 +50,6 @@ public class DefaultInstanceGroupProvider {
 
     @Inject
     private DefaultInstanceTypeProvider defaultInstanceTypeProvider;
-
-    @Inject
-    private ProviderParameterCalculator providerParameterCalculator;
 
     @Inject
     private EntitlementService entitlementService;

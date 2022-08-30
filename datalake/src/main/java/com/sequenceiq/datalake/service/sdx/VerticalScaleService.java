@@ -23,8 +23,6 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleEvent;
 import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleStateSelectors;
-import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
@@ -41,22 +39,13 @@ public class VerticalScaleService {
     private static final Logger LOGGER = LoggerFactory.getLogger(VerticalScaleService.class);
 
     @Inject
-    private SdxClusterRepository sdxClusterRepository;
-
-    @Inject
     private SdxService sdxService;
 
     @Inject
     private SdxStatusService sdxStatusService;
 
     @Inject
-    private StackRequestManifester stackRequestManifester;
-
-    @Inject
     private StackV4Endpoint stackV4Endpoint;
-
-    @Inject
-    private CloudbreakFlowService cloudbreakFlowService;
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;

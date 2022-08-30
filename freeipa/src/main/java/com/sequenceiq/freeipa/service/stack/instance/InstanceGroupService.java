@@ -16,9 +16,6 @@ public class InstanceGroupService {
     @Inject
     private InstanceGroupRepository repository;
 
-    @Inject
-    private InstanceMetaDataService instanceMetaDataService;
-
     public Set<InstanceGroup> findByStackId(Long stackId) {
         return repository.findByStackId(stackId);
     }

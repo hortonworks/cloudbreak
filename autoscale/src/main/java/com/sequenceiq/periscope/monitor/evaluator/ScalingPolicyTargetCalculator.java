@@ -2,24 +2,14 @@ package com.sequenceiq.periscope.monitor.evaluator;
 
 import static java.lang.Math.ceil;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
-import com.sequenceiq.periscope.monitor.handler.CloudbreakCommunicator;
 import com.sequenceiq.periscope.utils.ClusterUtils;
-import com.sequenceiq.periscope.utils.StackResponseUtils;
 
 @Component
 public class ScalingPolicyTargetCalculator {
-
-    @Inject
-    private StackResponseUtils stackResponseUtils;
-
-    @Inject
-    private CloudbreakCommunicator cloudbreakCommunicator;
 
     public Integer getDesiredAbsoluteNodeCount(ScalingEvent event, int hostGroupNodeCount) {
         ScalingPolicy policy = event.getAlert().getScalingPolicy();

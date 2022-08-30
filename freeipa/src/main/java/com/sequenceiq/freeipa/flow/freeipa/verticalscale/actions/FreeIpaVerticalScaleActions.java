@@ -31,7 +31,6 @@ import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
-import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.Resource;
@@ -44,7 +43,6 @@ import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalSc
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleResult;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScalingTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
-import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -55,12 +53,6 @@ public class FreeIpaVerticalScaleActions {
 
     @Inject
     private FreeIpaVerticalScaleService freeIPAVerticalScaleService;
-
-    @Inject
-    private CredentialService credentialService;
-
-    @Inject
-    private CredentialToCloudCredentialConverter credentialConverter;
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;

@@ -10,7 +10,6 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.freeipa.flow.stack.termination.event.telemetry.StopTelemetryAgentFinished;
 import com.sequenceiq.freeipa.flow.stack.termination.event.telemetry.StopTelemetryAgentRequest;
-import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.telemetry.TelemetryAgentService;
 
 import reactor.bus.Event;
@@ -23,9 +22,6 @@ public class StopTelemetryAgentHandler implements EventHandler<StopTelemetryAgen
 
     @Inject
     private EventBus eventBus;
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private TelemetryAgentService telemetryAgentService;

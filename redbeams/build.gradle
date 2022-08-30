@@ -131,6 +131,9 @@ dependencies {
   runtimeOnly project(':cloud-aws-cloudformation')
   runtimeOnly project(':cloud-mock')
   runtimeOnly project(':cloud-azure')
+
+  testRuntimeClasspath group: 'org.testcontainers',        name: 'postgresql',                     version: testContainersVersion
+  testRuntimeClasspath group: 'org.awaitility',            name: 'awaitility',                     version: awaitilityVersion
 }
 
 bootRun {

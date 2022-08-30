@@ -25,7 +25,6 @@ import com.sequenceiq.datalake.flow.upgrade.database.event.UpgradeDatabaseServer
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.datalake.service.upgrade.database.SdxDatabaseServerUpgradeService;
 
 @Configuration
 public class UpgradeDatabaseServerActions {
@@ -37,9 +36,6 @@ public class UpgradeDatabaseServerActions {
 
     @Inject
     private SdxMetricService metricService;
-
-    @Inject
-    private SdxDatabaseServerUpgradeService sdxDatabaseServerUpgradeService;
 
     @Bean(name = "SDX_UPGRADE_DATABASE_SERVER_UPGRADE_STATE")
     public Action<?, ?> upgradeDatabase() {

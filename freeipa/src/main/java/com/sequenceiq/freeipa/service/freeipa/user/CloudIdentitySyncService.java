@@ -18,7 +18,6 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Servi
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.freeipa.configuration.CloudIdSyncConfig;
@@ -36,9 +35,6 @@ public class CloudIdentitySyncService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudIdentitySyncService.class);
 
     private static final int ONE_MAX_CONSECUTIVE_FAILURE = 1;
-
-    @Inject
-    private Clock clock;
 
     @Inject
     private SdxEndpoint sdxEndpoint;

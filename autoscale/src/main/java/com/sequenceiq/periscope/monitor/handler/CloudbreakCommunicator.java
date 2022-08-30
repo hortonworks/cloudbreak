@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.SecurityConfig;
-import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 
 @Service
 public class CloudbreakCommunicator {
@@ -33,9 +32,6 @@ public class CloudbreakCommunicator {
 
     @Inject
     private CloudbreakInternalCrnClient cloudbreakInternalCrnClient;
-
-    @Inject
-    private AutoscaleRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
     private RequestLogging requestLogging;

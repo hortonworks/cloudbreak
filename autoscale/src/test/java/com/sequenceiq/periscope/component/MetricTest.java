@@ -45,7 +45,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
@@ -176,9 +175,6 @@ public class MetricTest {
 
     @LocalServerPort
     private int port;
-
-    @Inject
-    private ApplicationContext applicationContext;
 
     @Inject
     private TestRestTemplate restTemplate;

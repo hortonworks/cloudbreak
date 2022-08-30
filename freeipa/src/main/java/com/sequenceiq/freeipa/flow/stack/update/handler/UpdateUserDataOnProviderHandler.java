@@ -16,23 +16,15 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.flow.stack.update.event.UserDataUpdateFailed;
 import com.sequenceiq.freeipa.flow.stack.update.event.UserDataUpdateOnProviderRequest;
 import com.sequenceiq.freeipa.flow.stack.update.event.UserDataUpdateOnProviderResult;
-import com.sequenceiq.freeipa.service.resource.ResourceService;
 
 import reactor.bus.Event;
 
 @Component
 public class UpdateUserDataOnProviderHandler extends ExceptionCatcherEventHandler<UserDataUpdateOnProviderRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateUserDataOnProviderHandler.class);
-
-    @Inject
-    private ResourceService resourceService;
-
-    @Inject
-    private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;

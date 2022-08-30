@@ -32,7 +32,6 @@ import com.sequenceiq.datalake.job.SdxClusterJobAdapter;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
-import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -46,9 +45,6 @@ public class SdxRepairActions {
 
     @Inject
     private SdxStatusService sdxStatusService;
-
-    @Inject
-    private SdxRepairService repairService;
 
     @Inject
     private SdxMetricService metricService;

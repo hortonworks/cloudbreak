@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordFailureResponse;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordRequest;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordSuccessResponse;
@@ -32,9 +31,6 @@ public class RotateSaltPasswordActions {
 
     @Inject
     private RotateSaltPasswordService rotateSaltPasswordService;
-
-    @Inject
-    private UsageReporter usageReporter;
 
     @Bean(name = "ROTATE_SALT_PASSWORD_STATE")
     public Action<?, ?> rotateSaltPassword() {

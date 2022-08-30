@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterManager;
-import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.security.TlsHttpClientConfigurationService;
 
 @Service
@@ -36,9 +35,6 @@ public class ClouderaManagerCommunicator {
 
     @Inject
     private SecretService secretService;
-
-    @Inject
-    private ClusterService clusterService;
 
     @Inject
     private RequestLogging requestLogging;

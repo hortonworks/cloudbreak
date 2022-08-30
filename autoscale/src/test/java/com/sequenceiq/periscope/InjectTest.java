@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak;
+package com.sequenceiq.periscope;
 
 import org.junit.jupiter.api.Test;
 

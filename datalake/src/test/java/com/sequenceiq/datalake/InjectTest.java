@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak;
+package com.sequenceiq.datalake;
 
 import org.junit.jupiter.api.Test;
 

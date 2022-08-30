@@ -34,14 +34,11 @@ import com.sequenceiq.periscope.model.NameOrCrn;
 import com.sequenceiq.periscope.monitor.handler.CloudbreakCommunicator;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AlertService;
-import com.sequenceiq.periscope.service.AutoscaleRecommendationService;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.service.EntitlementValidationService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.NotFoundException;
 import com.sequenceiq.periscope.service.UsageReportingService;
-import com.sequenceiq.periscope.service.configuration.ClusterProxyConfigurationService;
 
 @Component
 public class AutoScaleClusterCommonService implements AuthorizationResourceCrnProvider, AuthorizationEnvironmentCrnProvider {
@@ -70,15 +67,6 @@ public class AutoScaleClusterCommonService implements AuthorizationResourceCrnPr
 
     @Inject
     private AlertService alertService;
-
-    @Inject
-    private ClusterProxyConfigurationService clusterProxyConfigurationService;
-
-    @Inject
-    private EntitlementValidationService entitlementValidationService;
-
-    @Inject
-    private AutoscaleRecommendationService recommendationService;
 
     public List<Cluster> getDistroXClusters() {
         return clusterService.findDistroXByTenant(restRequestThreadLocalService.getCloudbreakTenant());

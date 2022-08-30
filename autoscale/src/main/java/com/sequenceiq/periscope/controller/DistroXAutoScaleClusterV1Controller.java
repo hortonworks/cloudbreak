@@ -15,21 +15,16 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleClusterV1Endpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterResponse;
 import com.sequenceiq.periscope.controller.validation.AlertValidator;
 import com.sequenceiq.periscope.converter.DistroXAutoscaleClusterResponseConverter;
-import com.sequenceiq.periscope.converter.HistoryConverter;
 import com.sequenceiq.periscope.converter.LoadAlertRequestConverter;
 import com.sequenceiq.periscope.converter.TimeAlertRequestConverter;
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.service.EntitlementValidationService;
-import com.sequenceiq.periscope.service.HistoryService;
 
 @Controller
 public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClusterV1Endpoint {
@@ -43,9 +38,6 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
     private ClusterService clusterService;
 
     @Inject
-    private HistoryService historyService;
-
-    @Inject
     private AlertValidator alertValidator;
 
     @Inject
@@ -55,22 +47,10 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
     private DistroXAutoscaleClusterResponseConverter distroXAutoscaleClusterResponseConverter;
 
     @Inject
-    private HttpNotificationSender notificationSender;
-
-    @Inject
-    private CloudbreakMessagesService messagesService;
-
-    @Inject
     private TimeAlertRequestConverter timeAlertRequestConverter;
 
     @Inject
     private LoadAlertRequestConverter loadAlertRequestConverter;
-
-    @Inject
-    private EntitlementValidationService entitlementValidationService;
-
-    @Inject
-    private HistoryConverter historyConverter;
 
     @Override
     @DisableCheckPermissions

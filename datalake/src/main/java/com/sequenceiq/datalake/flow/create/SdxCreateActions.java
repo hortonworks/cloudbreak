@@ -28,12 +28,12 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
-import com.sequenceiq.datalake.flow.create.event.SdxValidationRequest;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitRequest;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.RdsWaitRequest;
 import com.sequenceiq.datalake.flow.create.event.RdsWaitSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
+import com.sequenceiq.datalake.flow.create.event.SdxValidationRequest;
 import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
 import com.sequenceiq.datalake.flow.create.event.StorageConsumptionCollectionSchedulingRequest;
@@ -50,7 +50,6 @@ import com.sequenceiq.datalake.service.sdx.status.DatalakeStatusUpdateException;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
-import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 
@@ -76,9 +75,6 @@ public class SdxCreateActions {
 
     @Inject
     private SdxService sdxService;
-
-    @Inject
-    private FlowLogService flowLogService;
 
     @Inject
     private EventSenderService eventSenderService;

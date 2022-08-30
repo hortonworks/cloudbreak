@@ -1,5 +1,13 @@
 package com.sequenceiq.redbeams.flow.redbeams.stop.handler;
 
+import static com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus.STOPPED;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -8,7 +16,6 @@ import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
-import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
@@ -16,16 +23,8 @@ import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerFailed
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerSuccess;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
-import static com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus.STOPPED;
 
 @Component
 public class StopDatabaseServerHandler implements EventHandler<StopDatabaseServerRequest> {
@@ -34,9 +33,6 @@ public class StopDatabaseServerHandler implements EventHandler<StopDatabaseServe
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
-
-    @Inject
-    private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
 
     @Inject
     private EventBus eventBus;

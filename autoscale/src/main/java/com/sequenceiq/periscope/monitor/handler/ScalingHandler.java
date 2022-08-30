@@ -19,7 +19,6 @@ import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlert;
-import com.sequenceiq.periscope.monitor.evaluator.ScalingPolicyTargetCalculator;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
@@ -46,9 +45,6 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
 
     @Inject
     private RejectedThreadService rejectedThreadService;
-
-    @Inject
-    private ScalingPolicyTargetCalculator scalingPolicyTargetCalculator;
 
     @Inject
     private CloudbreakMessagesService messagesService;
