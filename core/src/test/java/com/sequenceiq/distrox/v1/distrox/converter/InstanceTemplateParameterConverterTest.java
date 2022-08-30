@@ -232,6 +232,23 @@ class InstanceTemplateParameterConverterTest {
         assertThat(awsInstanceTemplateV4Parameters).isNotNull();
     }
 
+    @Test
+    void testConvertAwsInstanceTemplateV1ToAwsInstanceTemplateV4WhenV1IsNull() {
+        // GIVEN: Source for DH encryption does not have encryption params set, i.e, is null
+        AwsInstanceTemplateV1Parameters awsParametersEffective = new AwsInstanceTemplateV1Parameters();
+
+        DetailedEnvironmentResponse environment = createDetailedEnvironmentResponseForAwsEncryption(true, true,
+                ENVIRONMENT_ENCRYPTION_KEY);
+
+        // WHEN: Converting to V4
+        AwsInstanceTemplateV4Parameters result = underTest.convert(awsParametersEffective, environment);
+
+        // THEN: Encrpytion with ENVIRONMENT_ENCRYPTION_KEY should take place
+        assertThat(result).isNotNull();
+        assertThat(result.getEncryption().getType()).isEqualTo(EncryptionType.CUSTOM);
+        assertThat(result.getEncryption().getKey()).isEqualTo(ENVIRONMENT_ENCRYPTION_KEY);
+    }
+
     private DetailedEnvironmentResponse createDetailedEnvironmentResponseForAwsEncryption(boolean withAws, boolean withResourceEncryption,
             String environmentEncryptionKey) {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
