@@ -4,4 +4,5 @@ public enum SaltPasswordStatus {
     OK,
     INVALID,
     EXPIRES,
+    FAILED_TO_CHECK,
 }

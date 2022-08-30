@@ -58,7 +58,7 @@ public class SaltPasswordStatusService {
                 result = SaltPasswordStatus.INVALID;
             } else {
                 LOGGER.warn("Received error response from salt on stack {}", stack.getId(), e);
-                throw new CloudbreakRuntimeException(e);
+                result = SaltPasswordStatus.FAILED_TO_CHECK;
             }
         }
         return result;

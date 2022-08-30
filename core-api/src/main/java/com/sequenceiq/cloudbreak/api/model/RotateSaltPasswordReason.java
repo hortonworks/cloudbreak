@@ -13,6 +13,7 @@ public enum RotateSaltPasswordReason {
     public static Optional<RotateSaltPasswordReason> getForStatus(SaltPasswordStatus status) {
         switch (status) {
             case OK:
+            case FAILED_TO_CHECK:
                 return Optional.empty();
             case EXPIRES:
                 return Optional.of(RotateSaltPasswordReason.EXPIRED);

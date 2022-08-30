@@ -143,6 +143,8 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private static final DateTimeFormatter CHAGE_DATE_PATTERN = DateTimeFormatter.ofPattern("MMM dd, yyyy");
 
+    private static final String CHAGE_DATE_NEVER = "never";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltOrchestrator.class);
 
     @Value("${cb.max.salt.new.service.retry}")
@@ -1535,13 +1537,18 @@ public class SaltOrchestrator implements HostOrchestrator {
             String command = String.format("chage -l %s | grep \"Password expires\" | cut -d \":\" -f2", user);
             Map<String, String> passwordExpiryDatesOnHosts = saltStateService.runCommandOnHosts(retry, sc, new HostList(gatewayTargets), command);
             return passwordExpiryDatesOnHosts.values().stream()
-                    .map(dateString -> LocalDate.parse(dateString.trim(), CHAGE_DATE_PATTERN))
+                    .map(String::trim)
+                    .map(SaltOrchestrator::parseDateString)
                     .min(LocalDate::compareTo)
                     .orElseThrow(() -> new IllegalStateException("No password expiry date found for user " + user));
         } catch (Exception e) {
             LOGGER.info("Error occurred during the salt state upload", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
+    }
+
+    private static LocalDate parseDateString(String dateString) {
+        return CHAGE_DATE_NEVER.equals(dateString) ? LocalDate.MAX : LocalDate.parse(dateString, CHAGE_DATE_PATTERN);
     }
 
     @Override
