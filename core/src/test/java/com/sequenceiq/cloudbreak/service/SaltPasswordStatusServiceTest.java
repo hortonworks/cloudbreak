@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -103,9 +102,9 @@ class SaltPasswordStatusServiceTest {
         CloudbreakOrchestratorFailedException exception = new CloudbreakOrchestratorFailedException("Unexpected failure");
         when(hostOrchestrator.getPasswordExpiryDate(gatewayConfigs, SaltPasswordStatusService.SALTUSER)).thenThrow(exception);
 
-        assertThatThrownBy(() -> underTest.getSaltPasswordStatus(stack))
-                .isInstanceOf(CloudbreakRuntimeException.class)
-                .hasCause(exception);
+        SaltPasswordStatus result = underTest.getSaltPasswordStatus(stack);
+
+        assertThat(result).isEqualTo(SaltPasswordStatus.FAILED_TO_CHECK);
     }
 
 }

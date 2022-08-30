@@ -784,7 +784,8 @@ class SaltOrchestratorTest {
         String user = "saltuser";
         when(saltStateService.runCommandOnHosts(any(), any(), any(), anyString())).thenReturn(Map.of(
                 "host1", " Jan 01, 2022",
-                "host2", " Mar 10, 2022"
+                "host2", " Mar 10, 2022",
+                "host3", " never"
         ));
 
         LocalDate result = saltOrchestrator.getPasswordExpiryDate(allGatewayConfigs, user);
