@@ -24,14 +24,14 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradeParcelSettingsPreparationEvent;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -54,7 +54,7 @@ class ClusterUpgradeParcelSettingsPreparationHandlerTest {
     private ClusterUpgradeParcelSettingsPreparationHandler underTest;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private ClusterApiConnectors clusterApiConnectors;
@@ -71,25 +71,28 @@ class ClusterUpgradeParcelSettingsPreparationHandlerTest {
     @Mock
     private Image image;
 
+    @Mock
+    private StackDto stackDto;
+
     @Test
     void testDoAcceptShouldCallClusterApiToUpdateParcelSettings() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException,
             CloudbreakException {
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL);
-        Stack stack = createStack();
         Set<ClouderaManagerProduct> requiredProducts = Collections.singleton(new ClouderaManagerProduct());
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(stackDto.getWorkspace()).thenReturn(createWorkspace());
         when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID)).thenReturn(
                 StatedImage.statedImage(image, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME));
-        when(parcelService.getRequiredProductsFromImage(stack, image)).thenReturn(requiredProducts);
-        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+        when(parcelService.getRequiredProductsFromImage(stackDto, image)).thenReturn(requiredProducts);
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
 
         Selectable nextFlowStepSelector = underTest.doAccept(createEvent(imageChangeDto));
 
         assertEquals(START_CLUSTER_UPGRADE_PARCEL_DOWNLOAD_EVENT.name(), nextFlowStepSelector.selector());
-        verify(stackService).getByIdWithListsInTransaction(STACK_ID);
+        verify(stackDtoService).getById(STACK_ID);
         verify(imageCatalogService).getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID);
-        verify(parcelService).getRequiredProductsFromImage(stack, image);
-        verify(clusterApiConnectors).getConnector(stack);
+        verify(parcelService).getRequiredProductsFromImage(stackDto, image);
+        verify(clusterApiConnectors).getConnector(stackDto);
         verify(clusterApi).updateParcelSettings(requiredProducts);
     }
 
@@ -98,22 +101,22 @@ class ClusterUpgradeParcelSettingsPreparationHandlerTest {
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException,
             CloudbreakException {
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL);
-        Stack stack = createStack();
         Set<ClouderaManagerProduct> requiredProducts = Collections.singleton(new ClouderaManagerProduct());
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(stackDto.getWorkspace()).thenReturn(createWorkspace());
         when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID)).thenReturn(
                 StatedImage.statedImage(image, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME));
-        when(parcelService.getRequiredProductsFromImage(stack, image)).thenReturn(requiredProducts);
-        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+        when(parcelService.getRequiredProductsFromImage(stackDto, image)).thenReturn(requiredProducts);
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         doThrow(new CloudbreakException("Failed to update parcel settings")).when(clusterApi).updateParcelSettings(requiredProducts);
 
         Selectable nextFlowStepSelector = underTest.doAccept(createEvent(imageChangeDto));
 
         assertEquals(FAILED_CLUSTER_UPGRADE_PREPARATION_EVENT.name(), nextFlowStepSelector.selector());
-        verify(stackService).getByIdWithListsInTransaction(STACK_ID);
+        verify(stackDtoService).getById(STACK_ID);
         verify(imageCatalogService).getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID);
-        verify(parcelService).getRequiredProductsFromImage(stack, image);
-        verify(clusterApiConnectors).getConnector(stack);
+        verify(parcelService).getRequiredProductsFromImage(stackDto, image);
+        verify(clusterApiConnectors).getConnector(stackDto);
         verify(clusterApi).updateParcelSettings(requiredProducts);
     }
 
@@ -121,13 +124,9 @@ class ClusterUpgradeParcelSettingsPreparationHandlerTest {
         return new HandlerEvent<>(new Event<>(new ClusterUpgradeParcelSettingsPreparationEvent(STACK_ID, imageChangeDto)));
     }
 
-    private Stack createStack() {
-        Stack stack = new Stack();
-        stack.setId(STACK_ID);
+    private Workspace createWorkspace() {
         Workspace workspace = new Workspace();
         workspace.setId(WORKSPACE_ID);
-        stack.setWorkspace(workspace);
-        return stack;
+        return workspace;
     }
-
 }

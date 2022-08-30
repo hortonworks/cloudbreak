@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -60,10 +59,6 @@ public class ParcelService {
         return getParcelComponentsByBlueprint(stack.getStack(), stack.getCluster(), stack.getBlueprint());
     }
 
-    public Set<ClusterComponentView> getParcelComponentsByBlueprint(StackDto stackDto) {
-        return getParcelComponentsByBlueprint(stackDto.getStack(), stackDto.getCluster(), stackDto.getBlueprint());
-    }
-
     public Set<ClusterComponentView> getParcelComponentsByBlueprint(StackView stack, ClusterView cluster, Blueprint blueprint) {
         if (cluster == null) {
             return Collections.emptySet();
@@ -87,12 +82,13 @@ public class ParcelService {
         }
     }
 
-    public Set<String> getComponentNamesByImage(Stack stack, Image image) {
+    public Set<String> getComponentNamesByImage(StackDtoDelegate stack, Image image) {
         return getComponentsByImage(stack, image).stream().map(ClusterComponentView::getName).collect(Collectors.toSet());
     }
 
-    public Set<ClusterComponentView> getComponentsByImage(Stack stack, Image image) {
-        return getComponentsByImage(stack, stack.getCluster().getId(), stack.getCluster().getBlueprint(), image);
+    public Set<ClusterComponentView> getComponentsByImage(StackDtoDelegate stack, Image image) {
+        ClusterView cluster = stack.getCluster();
+        return getComponentsByImage(stack.getStack(), cluster.getId(), stack.getBlueprint(), image);
     }
 
     public Set<ClusterComponentView> getComponentsByImage(StackView stack, Long clusterId, Blueprint blueprint, Image image) {
@@ -108,7 +104,7 @@ public class ParcelService {
         }
     }
 
-    public ParcelOperationStatus removeUnusedParcelComponents(StackDtoDelegate stackDto) throws CloudbreakException {
+    public ParcelOperationStatus removeUnusedParcelComponents(StackDto stackDto) throws CloudbreakException {
         Set<ClusterComponentView> clusterComponentsByBlueprint = getParcelComponentsByBlueprint(stackDto);
         return removeUnusedParcelComponents(stackDto, clusterComponentsByBlueprint);
     }
@@ -122,9 +118,9 @@ public class ParcelService {
         return removalStatus;
     }
 
-    public Set<ClouderaManagerProduct> getRequiredProductsFromImage(Stack stack, Image image) {
-        Set<String> requiredParcelNames = getComponentNamesByImage(stack, image);
-        return clouderaManagerProductTransformer.transform(image, true, !stack.isDatalake())
+    public Set<ClouderaManagerProduct> getRequiredProductsFromImage(StackDtoDelegate stackDto, Image image) {
+        Set<String> requiredParcelNames = getComponentNamesByImage(stackDto, image);
+        return clouderaManagerProductTransformer.transform(image, true, !stackDto.getStack().isDatalake())
                 .stream()
                 .filter(products -> requiredParcelNames.contains(products.getName()))
                 .collect(Collectors.toSet());
