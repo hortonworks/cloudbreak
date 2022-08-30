@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -23,9 +22,6 @@ import com.sequenceiq.environment.parameter.dto.ParametersDto;
 public class GcpParameterValidator implements ParameterValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpParameterValidator.class);
-
-    @Inject
-    private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Inject
     private EntitlementService entitlementService;

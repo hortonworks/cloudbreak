@@ -15,14 +15,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordReason;
 import com.sequenceiq.freeipa.orchestrator.RotateSaltPasswordService;
-import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.sync.InterruptSyncingException;
 
@@ -42,12 +40,6 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private HostOrchestrator hostOrchestrator;
-
-    @Inject
-    private GatewayConfigService gatewayConfigService;
 
     @Inject
     private RotateSaltPasswordService rotateSaltPasswordService;

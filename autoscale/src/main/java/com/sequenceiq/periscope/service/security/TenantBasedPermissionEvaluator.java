@@ -14,7 +14,6 @@ import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.Clustered;
@@ -29,10 +28,6 @@ public class TenantBasedPermissionEvaluator implements PermissionEvaluator {
     @Inject
     @Lazy
     private AutoscaleRestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
-    @Lazy
-    private AuthenticatedUserService authenticatedUserService;
 
     @Inject
     @Lazy

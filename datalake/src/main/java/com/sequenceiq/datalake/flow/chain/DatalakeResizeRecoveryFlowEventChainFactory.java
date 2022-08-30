@@ -10,8 +10,6 @@ import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -24,16 +22,12 @@ import com.sequenceiq.datalake.flow.detach.event.SdxStartDetachEvent;
 import com.sequenceiq.datalake.flow.detach.event.SdxStartDetachRecoveryEvent;
 import com.sequenceiq.datalake.flow.loadbalancer.dns.event.StartUpdateLoadBalancerDNSEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
-import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
 public class DatalakeResizeRecoveryFlowEventChainFactory implements FlowEventChainFactory<DatalakeResizeRecoveryFlowChainStartEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeResizeRecoveryFlowEventChainFactory.class);
-
-    @Inject
-    private SdxStatusService sdxStatusService;
 
     @Override
     public String initEvent() {

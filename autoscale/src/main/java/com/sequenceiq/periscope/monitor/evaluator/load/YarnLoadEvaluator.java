@@ -28,7 +28,6 @@ import com.sequenceiq.periscope.monitor.evaluator.EventPublisher;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.monitor.handler.CloudbreakCommunicator;
-import com.sequenceiq.periscope.repository.LoadAlertRepository;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.utils.LoggingUtils;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
@@ -45,9 +44,6 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
 
     @Inject
     private ClusterService clusterService;
-
-    @Inject
-    private LoadAlertRepository alertRepository;
 
     @Inject
     private EventPublisher eventPublisher;

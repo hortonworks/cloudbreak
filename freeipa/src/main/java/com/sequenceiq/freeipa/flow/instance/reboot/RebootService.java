@@ -11,21 +11,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.stack.start.FreeIpaServiceStartService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
-import com.sequenceiq.freeipa.sync.StackStatusCheckerJob;
 
 @Component
 public class RebootService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RebootService.class);
-
-    @Inject
-    private StackStatusCheckerJob stackStatusCheckerJob;
-
-    @Inject
-    private FreeIpaServiceStartService freeIpaServiceStartService;
 
     @Inject
     private StackUpdater stackUpdater;

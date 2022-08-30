@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak;
+package com.sequenceiq.consumption;
 
 import org.junit.jupiter.api.Test;
 

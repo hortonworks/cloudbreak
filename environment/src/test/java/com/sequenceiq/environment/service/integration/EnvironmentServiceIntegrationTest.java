@@ -54,7 +54,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.quartz.configuration.QuartzJobInitializer;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBasedParameters;
@@ -141,9 +140,6 @@ public class EnvironmentServiceIntegrationTest {
 
     @Inject
     private CredentialRepository credentialRepository;
-
-    @Inject
-    private SecretService secretService;
 
     private CredentialRequest credentialRequest;
 

@@ -25,7 +25,6 @@ import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCleanupService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
-import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Service
@@ -37,9 +36,6 @@ public class TerminationService {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private InstanceGroupService instanceGroupService;
 
     @Inject
     private StackUpdater stackUpdater;

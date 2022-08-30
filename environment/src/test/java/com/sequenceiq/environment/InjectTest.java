@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak;
+package com.sequenceiq.environment;
 
 import org.junit.jupiter.api.Test;
 

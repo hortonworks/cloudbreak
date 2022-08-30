@@ -20,8 +20,6 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
-import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
-import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.AbstractCommonChainAction;
@@ -30,7 +28,6 @@ import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalSc
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.service.CredentialService;
-import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 public abstract class AbstractFreeIpaVerticalScaleAction<P extends Payload>
@@ -47,15 +44,6 @@ public abstract class AbstractFreeIpaVerticalScaleAction<P extends Payload>
 
     @Inject
     private CredentialService credentialService;
-
-    @Inject
-    private ResourceService resourceService;
-
-    @Inject
-    private ResourceToCloudResourceConverter resourceConverter;
-
-    @Inject
-    private InstanceMetaDataToCloudInstanceConverter instanceConverter;
 
     protected AbstractFreeIpaVerticalScaleAction(Class<P> payloadClass) {
         super(payloadClass);

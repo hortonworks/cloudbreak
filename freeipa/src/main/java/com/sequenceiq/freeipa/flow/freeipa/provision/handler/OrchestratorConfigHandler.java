@@ -16,14 +16,10 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.Orchestr
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaOrchestrationConfigService;
 
 import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class OrchestratorConfigHandler extends ExceptionCatcherEventHandler<OrchestratorConfigRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrchestratorConfigHandler.class);
-
-    @Inject
-    private EventBus eventBus;
 
     @Inject
     private FreeIpaOrchestrationConfigService freeIpaOrchestrationConfigService;

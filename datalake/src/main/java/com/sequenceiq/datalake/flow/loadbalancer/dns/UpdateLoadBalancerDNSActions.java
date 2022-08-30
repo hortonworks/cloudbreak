@@ -26,7 +26,6 @@ import com.sequenceiq.datalake.flow.loadbalancer.dns.event.UpdateLoadBalancerDNS
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.loadbalancer.dns.UpdateLoadBalancerDNSService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
-import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -42,9 +41,6 @@ public class UpdateLoadBalancerDNSActions {
 
     @Inject
     private UpdateLoadBalancerDNSService updateLoadBalancerDNSService;
-
-    @Inject
-    private SdxStatusService sdxStatusService;
 
     @Inject
     private EventSenderService eventSenderService;
