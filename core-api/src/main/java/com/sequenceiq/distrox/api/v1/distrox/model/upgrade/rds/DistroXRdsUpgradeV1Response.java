@@ -26,6 +26,14 @@ public class DistroXRdsUpgradeV1Response {
         this.targetVersion = targetVersion;
     }
 
+    public RdsUpgradeResponseType getResponseType() {
+        return responseType;
+    }
+
+    public void setResponseType(RdsUpgradeResponseType responseType) {
+        this.responseType = responseType;
+    }
+
     public TargetMajorVersion getTargetVersion() {
         return targetVersion;
     }
