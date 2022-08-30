@@ -47,7 +47,8 @@
       "Action": [
         "logs:CreateLogStream",
         "logs:DescribeLogStreams",
-        "logs:PutLogEvents"
+        "logs:PutLogEvents",
+        "logs:PutRetentionPolicy"
       ],
       "Effect": "Allow",
       "Resource": [
