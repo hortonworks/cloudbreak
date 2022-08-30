@@ -12,7 +12,6 @@ import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.DISTRIBUTED;
 import java.util.Collections;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,16 +45,15 @@ public class CmServerQueryServiceTest {
     @Mock
     private Stack stack;
 
-    @BeforeEach
-    void setup() {
-        when(stack.getName()).thenReturn(STACK_NAME);
-        when(apiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
-    }
+    @Mock
+    private StackDto stackDto;
 
     @Test
     void testGetActiveParcelsWhenParcelReturned() {
+        when(apiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
         ParcelInfo parcel = new ParcelInfo(CDH_PARCEL_NAME, CDH_PARCEL_VERSION, ACTIVATED);
         when(clusterApi.gatherInstalledParcels(STACK_NAME)).thenReturn(Collections.singleton(parcel));
+        when(stack.getName()).thenReturn(STACK_NAME);
 
         Set<ParcelInfo> foundParcels = underTest.queryActiveParcels(stack);
 
@@ -66,7 +65,9 @@ public class CmServerQueryServiceTest {
 
     @Test
     void testGetActiveParcelsWhenNoParcelReturnedThenEmptyList() {
+        when(apiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
         when(clusterApi.gatherInstalledParcels(STACK_NAME)).thenReturn(Collections.emptySet());
+        when(stack.getName()).thenReturn(STACK_NAME);
 
         Set<ParcelInfo> foundParcels = underTest.queryActiveParcels(stack);
 
@@ -75,19 +76,23 @@ public class CmServerQueryServiceTest {
 
     @Test
     void testQueryAllParcelsShouldReturnAllParcel() {
+        when(apiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
+        when(stackDto.getName()).thenReturn(STACK_NAME);
         Set<ParcelInfo> parcels = Set.of(new ParcelInfo(CDH_PARCEL_NAME, CDH_PARCEL_VERSION, ACTIVATED), new ParcelInfo("NIFI", "123", DISTRIBUTED));
         when(clusterApi.getAllParcels(STACK_NAME)).thenReturn(parcels);
 
-        Set<ParcelInfo> actual = underTest.queryAllParcels(stack);
+        Set<ParcelInfo> actual = underTest.queryAllParcels(stackDto);
 
         assertEquals(parcels, actual);
     }
 
     @Test
     void testQueryAllParcelsShouldReturnEmptySetWhenClusterApiDoesNotReturnAnyParcels() {
+        when(apiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
+        when(stackDto.getName()).thenReturn(STACK_NAME);
         when(clusterApi.getAllParcels(STACK_NAME)).thenReturn(Collections.emptySet());
 
-        Set<ParcelInfo> actual = underTest.queryAllParcels(stack);
+        Set<ParcelInfo> actual = underTest.queryAllParcels(stackDto);
 
         assertEquals(Collections.emptySet(), actual);
     }

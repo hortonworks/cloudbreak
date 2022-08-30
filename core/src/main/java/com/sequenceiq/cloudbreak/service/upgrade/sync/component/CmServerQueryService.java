@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.PackageInfo;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -29,8 +30,8 @@ public class CmServerQueryService {
     @Inject
     private CmVersionQueryService cmVersionQueryService;
 
-    public Set<ParcelInfo> queryAllParcels(Stack stack) {
-        Set<ParcelInfo> parcels = apiConnectors.getConnector(stack).getAllParcels(stack.getName());
+    public Set<ParcelInfo> queryAllParcels(StackDto stackDto) {
+        Set<ParcelInfo> parcels = apiConnectors.getConnector(stackDto).getAllParcels(stackDto.getName());
         LOGGER.debug("Reading parcel info from CM server, found parcels: " + parcels);
         return parcels;
     }

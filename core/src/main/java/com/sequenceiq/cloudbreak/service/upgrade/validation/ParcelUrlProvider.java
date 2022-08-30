@@ -1,11 +1,8 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -14,12 +11,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.component.CmServerQueryService;
 
 @Component
 public class ParcelUrlProvider {
@@ -29,80 +28,53 @@ public class ParcelUrlProvider {
     @Inject
     private ParcelService parcelService;
 
-    public Set<String> getRequiredParcelsFromImage(Image image, Stack stack) {
+    @Inject
+    private CmServerQueryService cmServerQueryService;
+
+    @Inject
+    private ClouderaManagerProductTransformer clouderaManagerProductTransformer;
+
+    public Set<String> getRequiredParcelsFromImage(Image image, StackDto stackDto) {
         LOGGER.debug("Retrieving parcel URLs from image {}", image.getUuid());
-        String cdhParcelUrl = getCdhParcelUrl(image);
-        return StackType.DATALAKE.equals(stack.getType()) ? Collections.singleton(cdhParcelUrl) : getAllParcels(cdhParcelUrl, image, stack);
+        Set<String> requiredParcelNamesFromImage = parcelService.getComponentNamesByImage(stackDto, image);
+        Set<String> requiredParcelUrls = getRequiredParcelUrls(image, stackDto, requiredParcelNamesFromImage);
+        LOGGER.debug("Required parcel URLs: {}", requiredParcelUrls);
+        return requiredParcelUrls;
     }
 
-    private String getCdhParcelUrl(Image image) {
-        Map<String, String> stack = image.getStackDetails().getRepo().getStack();
-        String imageId = image.getUuid();
-        return getCdhBaseUrl(stack, imageId).concat("CDH-").concat(getRepoVersion(stack, imageId)).concat("-el7.parcel");
-    }
-
-    private String getCdhBaseUrl(Map<String, String> stack, String imageId) {
-        return Optional.ofNullable(stack.get("redhat7"))
-                .orElseThrow(() -> new CloudbreakServiceException(String.format("Stack base URL is not found on image: %s", imageId)));
-    }
-
-    private String getRepoVersion(Map<String, String> stack, String imageId) {
-        return Optional.ofNullable(stack.get("repository-version"))
-                .orElseThrow(() -> new CloudbreakServiceException(String.format("Stack repository version is not found on image: %s", imageId)));
-    }
-
-    private Set<String> getAllParcels(String cdhRepoUrl, Image image, Stack stack) {
-        Set<String> requiredParcelNames = getRequiredParcelNames(stack, image);
-        Set<String> parcelUrls = getPreWarmParcelUrls(image, requiredParcelNames);
-        parcelUrls.addAll(getPreWarmCsdUrls(image, requiredParcelNames));
-        parcelUrls.add(cdhRepoUrl);
-        return parcelUrls;
-    }
-
-    private Set<String> getPreWarmParcelUrls(Image image, Set<String> requiredParcelNames) {
-        return image.getPreWarmParcels()
-                .stream()
-                .filter(filterRequiredParcels(requiredParcelNames))
-                .map(list -> removeUnnecessaryCharacters(getPreWarmParcelBaseUrl(list)).concat("/").concat(getPreWarmParcelName(list)))
+    private Set<String> getRequiredParcelUrls(Image image, StackDto stackDto, Set<String> requiredParcelNamesFromImage) {
+        Set<ParcelInfo> activeAndDistributedParcels = getActiveAndDistributedParcels(stackDto);
+        return transformProducts(image, !stackDto.getStack().isDatalake()).stream()
+                .filter(product -> isRequiredProduct(requiredParcelNamesFromImage, product) && isNotActiveProduct(activeAndDistributedParcels, product))
+                .map(this::getParcelAndCsdUrlsFromProduct)
+                .flatMap(Set::stream)
                 .collect(Collectors.toSet());
     }
 
-    private Set<String> getPreWarmCsdUrls(Image image, Set<String> requiredParcelNames) {
-        return image.getPreWarmCsd()
-                .stream()
-                .filter(csdUrl -> requiredParcelNames.stream().anyMatch(parcelName -> csdUrl.toLowerCase().contains(parcelName.toLowerCase())))
+    private Set<ParcelInfo> getActiveAndDistributedParcels(StackDto stackDto) {
+        return cmServerQueryService.queryAllParcels(stackDto).stream()
+                .filter(parcelInfo -> ParcelStatus.DISTRIBUTED.equals(parcelInfo.getStatus()) || ParcelStatus.ACTIVATED.equals(parcelInfo.getStatus()))
                 .collect(Collectors.toSet());
     }
 
-    private String getPreWarmParcelName(List<String> list) {
-        return list.stream()
-                .filter(parcelList -> !parcelList.startsWith("http"))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Parcel name not found in list: %s", list)));
+    private boolean isRequiredProduct(Set<String> requiredParcelNamesFromImage, ClouderaManagerProduct product) {
+        return requiredParcelNamesFromImage.contains(product.getName());
     }
 
-    private String getPreWarmParcelBaseUrl(List<String> list) {
-        return list.stream()
-                .filter(parcelList -> parcelList.startsWith("http"))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Parcel url not found in list: %s", list)));
+    private boolean isNotActiveProduct(Set<ParcelInfo> activeParcels, ClouderaManagerProduct product) {
+        return activeParcels.stream()
+                .noneMatch(activeParcel -> product.getName().equals(activeParcel.getName()) &&
+                        product.getVersion().equals(activeParcel.getVersion()));
     }
 
-    private Predicate<List<String>> filterRequiredParcels(Set<String> requiredParcelNames) {
-        return list -> list.stream().anyMatch(parcelName -> requiredParcelNames.stream().anyMatch(parcelName::startsWith));
+    private Set<String> getParcelAndCsdUrlsFromProduct(ClouderaManagerProduct product) {
+        Set<String> parcelAndCsdUrls = new HashSet<>();
+        Optional.of(product).map(ClouderaManagerProduct::getCsd).ifPresent(parcelAndCsdUrls::addAll);
+        parcelAndCsdUrls.add(product.getParcelFileUrl());
+        return parcelAndCsdUrls;
     }
 
-    private Set<String> getRequiredParcelNames(Stack stack, Image image) {
-        return parcelService.getComponentsByImage(stack, image)
-                .stream()
-                .map(ClusterComponentView::getName)
-                .collect(Collectors.toSet());
-    }
-
-    private String removeUnnecessaryCharacters(String baseUrl) {
-        while (baseUrl.endsWith(".") || baseUrl.endsWith("/")) {
-            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-        }
-        return baseUrl;
+    private Set<ClouderaManagerProduct> transformProducts(Image image, boolean getPreWarmParcels) {
+        return clouderaManagerProductTransformer.transform(image, true, getPreWarmParcels);
     }
 }
