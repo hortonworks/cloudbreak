@@ -40,6 +40,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_DATABUS_ENDPOINT_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_LONG_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_RESIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_RESIZE_RECOVERY;
@@ -541,6 +542,10 @@ public class EntitlementService {
 
     public boolean isUserSyncSplitFreeIPAUserRetrievalEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL);
+    }
+
+    public boolean isLongTimeBackupEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_DATALAKE_BACKUP_LONG_TIMEOUT);
     }
 
     public List<String> getEntitlements(String accountId) {

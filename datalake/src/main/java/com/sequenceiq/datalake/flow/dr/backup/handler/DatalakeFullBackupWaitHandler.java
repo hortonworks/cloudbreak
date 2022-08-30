@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupFailedEvent;
@@ -36,8 +38,14 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
     @Value("${sdx.stack.backup.status.duration_min:240}")
     private int durationInMinutes;
 
+    @Value("${sdx.stack.backup.status.long_duration_min:840}")
+    private int longDurationInMinutes;
+
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Override
     public String selector() {
@@ -55,12 +63,14 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
         Selectable response;
+        int duration = entitlementService.isLongTimeBackupEnabled(ThreadBasedUserCrnProvider.getAccountId())
+                ? longDurationInMinutes : durationInMinutes;
         try {
             LOGGER.info("Start polling datalake full backup status for id: {}", sdxId);
-            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes,
-                TimeUnit.MINUTES);
+            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, duration,
+                    TimeUnit.MINUTES);
             sdxBackupRestoreService.waitForDatalakeDrBackupToComplete(sdxId, request.getOperationId(), request.getUserId(),
-                pollingConfig, "Full backup");
+                    pollingConfig, "Full backup");
             response = new DatalakeBackupSuccessEvent(sdxId, userId, request.getOperationId());
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Full backup polling exited before timeout. Cause: ", userBreakException);
@@ -68,7 +78,7 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Full backup poller stopped for cluster: {}", sdxId);
             response = new DatalakeBackupFailedEvent(sdxId, userId,
-                new PollerStoppedException("Datalake backup timed out after " + durationInMinutes + " minutes"));
+                    new PollerStoppedException("Datalake backup timed out after " + duration + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Full backup polling failed for cluster: {}", sdxId);
             response = new DatalakeBackupFailedEvent(sdxId, userId, exception);
