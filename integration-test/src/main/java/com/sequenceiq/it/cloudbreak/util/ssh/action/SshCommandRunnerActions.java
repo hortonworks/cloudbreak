@@ -18,19 +18,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
@@ -165,23 +164,15 @@ public class SshCommandRunnerActions extends SshJClientActions {
                 commandRunnerFileName, sampleCommandFileName, commandRunnerFileName, sampleCommandFileName));
 
         try {
-            Map<String, List<Map<String, String>>> fetchedResult =
-                    JsonUtil.readValue(cmdOut.getValue(), new TypeReference<Map<String, List<Map<String, String>>>>() { });
-            fetchedResult.forEach((key, value) -> {
-                value.forEach(resultMaps -> {
-                    List<String> exitCodes = resultMaps.entrySet().stream()
-                            .filter(results -> "code".equalsIgnoreCase(results.getKey()))
-                            .map(Entry::getValue)
-                            .collect(Collectors.toList());
-                    if (exitCodes.stream().anyMatch(codes -> Integer.parseInt(codes) != 0)) {
-                        Log.error(LOGGER, "One or more command has been failed on nodes!");
-                        throw new TestFailException("One or more command has been failed on nodes!");
-                    }
-                });
-            });
-        } catch (IOException e) {
-            Log.error(LOGGER, "Cannot find command runner folder at classpath!");
-            throw new TestFailException("Cannot find command runner folder at classpath!");
+            JSONObject cmdOutJson = new JSONObject(cmdOut.getValue());
+            int code = cmdOutJson.getInt("code");
+            if (code != 0) {
+                Log.error(LOGGER, "One or more command has been failed on nodes!");
+                throw new TestFailException("One or more command has been failed on nodes!");
+            }
+        } catch (JSONException e) {
+            Log.error(LOGGER, "Cannot parse result to JSON!");
+            throw new TestFailException("Cannot parse result to JSON!");
         }
     }
 
