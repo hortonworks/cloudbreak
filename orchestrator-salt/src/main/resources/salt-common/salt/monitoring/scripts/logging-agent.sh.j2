@@ -17,21 +17,23 @@ if [[ -f "/var/run/cdp-logging-agent/cdp-logging-agent.pid" ]]; then
       # processes that contains under-supervisor in their command: fluentd workers/processes (cloud storage shipper, metering shipper, deployment log shipper)
       if [[ "$logging_agent_process" == *"under-supervisor"* ]]; then
          logging_type="${logging_types_arr[$i]}"
-         if [[ -d "/var/log/cdp-logging-agent/${logging_type}" ]]; then
-           buffer_size=$(du -b "/var/log/cdp-logging-agent/${logging_type}" | cut -f1)
-           if [[ -d "/var/log/cdp-logging-agent/${logging_type}_CM_COMMAND" ]]; then
-             buffer_size_cm=$(du -b "/var/log/cdp-logging-agent/${logging_type}_CM_COMMAND" | cut -f1)
-             echo "cb_fluentd_${logging_type}_cm_buffer_size_bytes $buffer_size_cm" >> /var/lib/node_exporter/files/logging_agent.prom.$$
+         if [[ "$logging_type" != "" ]]; then
+           if [[ -d "/var/log/cdp-logging-agent/${logging_type}" ]]; then
+             buffer_size=$(du -b "/var/log/cdp-logging-agent/${logging_type}" | cut -f1)
+             if [[ -d "/var/log/cdp-logging-agent/${logging_type}_CM_COMMAND" ]]; then
+               buffer_size_cm=$(du -b "/var/log/cdp-logging-agent/${logging_type}_CM_COMMAND" | cut -f1)
+               echo "cb_fluentd_${logging_type}_cm_buffer_size_bytes_total $buffer_size_cm" >> /var/lib/node_exporter/files/logging_agent.prom.$$
+             fi
+           else
+             buffer_size=0
            fi
-         else
-           buffer_size=0
+           echo "cb_fluentd_${logging_type}_buffer_size_bytes_total $buffer_size" >> /var/lib/node_exporter/files/logging_agent.prom.$$
+           echo "cb_fluentd_${logging_type}_memory_rss_bytes_total $rss_bytes" >> /var/lib/node_exporter/files/logging_agent.prom.$$
+           echo "cb_fluentd_${logging_type}_open_fd_total $fds_num" >> /var/lib/node_exporter/files/logging_agent.prom.$$
          fi
-         echo "cb_fluentd_${logging_type}_buffer_size_bytes $buffer_size" >> /var/lib/node_exporter/files/logging_agent.prom.$$
-         echo "cb_fluentd_${logging_type}_memory_rss_bytes $rss_bytes" >> /var/lib/node_exporter/files/logging_agent.prom.$$
-         echo "cb_fluentd_${logging_type}_open_fd $fds_num" >> /var/lib/node_exporter/files/logging_agent.prom.$$
          i=$((i+1))
       else
-        echo "cb_fluentd_supervisor_memory_rss_bytes $rss_bytes" >> /var/lib/node_exporter/files/logging_agent.prom.$$
+        echo "cb_fluentd_supervisor_memory_rss_bytes_total $rss_bytes" >> /var/lib/node_exporter/files/logging_agent.prom.$$
       fi
     done
   if [[ -f /var/lib/node_exporter/files/logging_agent.prom.$$ ]]; then
