@@ -75,6 +75,8 @@ public class EnvironmentResponseConverterTest {
 
     private static final String REGION = "us-west";
 
+    private static final int FREE_IPA_INSTANCE_COUNT_BY_GROUP = 2;
+
     @InjectMocks
     private EnvironmentResponseConverter underTest;
 
@@ -389,7 +391,7 @@ public class EnvironmentResponseConverterTest {
     }
 
     private FreeIpaCreationDto createFreeIpaCreationDto() {
-        return FreeIpaCreationDto.builder()
+        return FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP)
                 .withCreate(true)
                 .build();
     }

@@ -215,7 +215,7 @@ public class EnvironmentCreationDto {
 
         private EnvironmentBackup backup;
 
-        private FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder().build();
+        private FreeIpaCreationDto freeIpaCreation;
 
         private AuthenticationDto authentication;
 

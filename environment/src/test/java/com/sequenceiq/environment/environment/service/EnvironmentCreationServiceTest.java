@@ -69,6 +69,8 @@ import com.sequenceiq.environment.parameters.service.ParametersService;
 @TestPropertySource(properties = "environment.tunnel.ccm.validate.entitlement=true")
 class EnvironmentCreationServiceTest {
 
+    private static final int FREE_IPA_INSTANCE_COUNT_BY_GROUP = 2;
+
     @MockBean
     private EnvironmentService environmentService;
 
@@ -334,7 +336,7 @@ class EnvironmentCreationServiceTest {
                 .withCrn(environmentCrn)
                 .withAuthentication(AuthenticationDto.builder().build())
                 .withParameters(parametersDto)
-                .withFreeIpaCreation(FreeIpaCreationDto.builder().withRecipes(recipes).build())
+                .withFreeIpaCreation(FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP).withRecipes(recipes).build())
                 .withLocation(LocationDto.builder()
                         .withName("test")
                         .withDisplayName("test")

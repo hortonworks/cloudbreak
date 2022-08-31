@@ -31,6 +31,7 @@ public class EnvironmentViewConverter {
         environmentView.setResourceCrn(environment.getResourceCrn());
         environmentView.setStatus(environment.getStatus());
         environmentView.setTelemetry(environment.getTelemetry());
+        environmentView.setFreeIpaInstanceCountByGroup(environment.getFreeIpaInstanceCountByGroup());
         return environmentView;
     }
 }

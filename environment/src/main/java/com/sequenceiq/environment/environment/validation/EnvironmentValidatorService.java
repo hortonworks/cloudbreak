@@ -88,6 +88,8 @@ public class EnvironmentValidatorService {
 
     private final EnvironmentRecipeService recipeService;
 
+    private final Integer ipaMinimumInstanceCountByGroup;
+
     public EnvironmentValidatorService(NetworkCreationValidator networkCreationValidator,
             PlatformParameterService platformParameterService,
             EnvironmentResourceService environmentResourceService,
@@ -100,7 +102,8 @@ public class EnvironmentValidatorService {
             EncryptionKeyUrlValidator encryptionKeyUrlValidator,
             EntitlementService entitlementService,
             EncryptionKeyValidator encryptionKeyValidator,
-            EnvironmentRecipeService recipeService) {
+            EnvironmentRecipeService recipeService,
+            @Value("${environment.freeipa.groupInstanceCount.minimum}") Integer ipaMinimumInstanceCountByGroup) {
         this.networkCreationValidator = networkCreationValidator;
         this.platformParameterService = platformParameterService;
         this.environmentResourceService = environmentResourceService;
@@ -114,6 +117,7 @@ public class EnvironmentValidatorService {
         this.entitlementService = entitlementService;
         this.encryptionKeyValidator = encryptionKeyValidator;
         this.recipeService = recipeService;
+        this.ipaMinimumInstanceCountByGroup = ipaMinimumInstanceCountByGroup;
     }
 
     public void validateFMSRecipesEntitlement(EnvironmentCreationDto creationDto) {
@@ -263,7 +267,13 @@ public class EnvironmentValidatorService {
 
     public ValidationResult validateFreeIpaCreation(FreeIpaCreationDto freeIpaCreation) {
         ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
-        if (freeIpaCreation.getInstanceCountByGroup() == 1 && !singleInstanceIsOnDemandOrSpot(freeIpaCreation)) {
+        int ipaInstanceCountByGroup = freeIpaCreation.getInstanceCountByGroup();
+        if (ipaInstanceCountByGroup < ipaMinimumInstanceCountByGroup) {
+            validationResultBuilder.error(
+                    String.format("FreeIpa deployment requests are only allowed with at least '%d' instance(s) by group. The requested value was '%d'",
+                            ipaMinimumInstanceCountByGroup, ipaInstanceCountByGroup));
+        }
+        if (ipaInstanceCountByGroup == 1 && !singleInstanceIsOnDemandOrSpot(freeIpaCreation)) {
             validationResultBuilder.error(
                     String.format("Single instance FreeIpa spot percentage must be either %d or %d.", ALL_ON_DEMAND_PERCENTAGE, ALL_SPOT_PERCENTAGE));
         }

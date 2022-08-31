@@ -61,7 +61,7 @@ class EnvironmentValidatorServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:123:user:123";
 
-    private static final String ENCRYPTION_KEY = "dummy-encryption-key";
+    private static final int FREE_IPA_INSTANCE_COUNT_BY_GROUP = 2;
 
     @Mock
     private NetworkCreationValidator networkCreationValidator;
@@ -113,7 +113,8 @@ class EnvironmentValidatorServiceTest {
                 encryptionKeyUrlValidator,
                 entitlementService,
                 encryptionKeyValidator,
-                recipeService);
+                recipeService,
+                1);
     }
 
     @Test
@@ -121,7 +122,7 @@ class EnvironmentValidatorServiceTest {
         when(entitlementService.isFmsRecipesEnabled("accountId")).thenReturn(false);
         EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withAccountId("accountId")
-                .withFreeIpaCreation(FreeIpaCreationDto.builder().withRecipes(Set.of("recipe1", "recipe2")).build())
+                .withFreeIpaCreation(FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP).withRecipes(Set.of("recipe1", "recipe2")).build())
                 .build();
         BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.validateFMSRecipesEntitlement(environmentCreationDto));
@@ -133,7 +134,7 @@ class EnvironmentValidatorServiceTest {
         when(entitlementService.isFmsRecipesEnabled("accountId")).thenReturn(false);
         EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withAccountId("accountId")
-                .withFreeIpaCreation(FreeIpaCreationDto.builder().withRecipes(Set.of()).build())
+                .withFreeIpaCreation(FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP).withRecipes(Set.of()).build())
                 .build();
         underTest.validateFMSRecipesEntitlement(environmentCreationDto);
     }
@@ -143,7 +144,7 @@ class EnvironmentValidatorServiceTest {
         when(entitlementService.isFmsRecipesEnabled("accountId")).thenReturn(true);
         EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withAccountId("accountId")
-                .withFreeIpaCreation(FreeIpaCreationDto.builder().withRecipes(Set.of("recipe1", "recipe2")).build())
+                .withFreeIpaCreation(FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP).withRecipes(Set.of("recipe1", "recipe2")).build())
                 .build();
         underTest.validateFMSRecipesEntitlement(environmentCreationDto);
     }
@@ -500,6 +501,26 @@ class EnvironmentValidatorServiceTest {
         assertEquals("You don't add a(n) any storage location, please provide a valid storage location.", validationResult.getErrors().get(0));
     }
 
+    @Test
+    void testValidateWhenRequestedInstanceCountLessThanTheMinimumThreshold() {
+        FreeIpaCreationDto freeIpaCreationDto = FreeIpaCreationDto.builder(0)
+                .build();
+
+        ValidationResult validationResult = underTest.validateFreeIpaCreation(freeIpaCreationDto);
+        assertTrue(validationResult.hasError());
+        assertEquals("FreeIpa deployment requests are only allowed with at least '1' instance(s) by group. The requested value was '0'",
+                validationResult.getErrors().get(0));
+    }
+
+    @Test
+    void testValidateWhenRequestedInstanceCountEqualsOrMoreThanTheMinimumThreshold() {
+        FreeIpaCreationDto freeIpaCreationDto = FreeIpaCreationDto.builder(1)
+                .build();
+
+        ValidationResult validationResult = underTest.validateFreeIpaCreation(freeIpaCreationDto);
+        assertFalse(validationResult.hasError());
+    }
+
     private Environment aValidEnvirontmentWithParent() {
         Environment parentEnvironment = new Environment();
         parentEnvironment.setCloudPlatform(CloudPlatform.AWS.name());
@@ -516,8 +537,7 @@ class EnvironmentValidatorServiceTest {
     @ParameterizedTest
     @MethodSource("freeIpaCreationArguments")
     void shouldValidateFreeIpaCreation(int instanceCountByGroup, int spotPercentage, boolean valid) {
-        FreeIpaCreationDto freeIpaCreationDto = FreeIpaCreationDto.builder()
-                .withInstanceCountByGroup(instanceCountByGroup)
+        FreeIpaCreationDto freeIpaCreationDto = FreeIpaCreationDto.builder(instanceCountByGroup)
                 .withAws(FreeIpaCreationAwsParametersDto.builder()
                         .withSpot(FreeIpaCreationAwsSpotParametersDto.builder()
                                 .withPercentage(spotPercentage)

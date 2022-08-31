@@ -10,7 +10,7 @@ public class FreeIpaCreationDto {
 
     private boolean create = true;
 
-    private int instanceCountByGroup = 1;
+    private int instanceCountByGroup;
 
     private FreeIpaCreationAwsParametersDto aws;
 
@@ -113,8 +113,8 @@ public class FreeIpaCreationDto {
                 '}';
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static Builder builder(int instanceCountByGroup) {
+        return new Builder(instanceCountByGroup);
     }
 
     @JsonPOJOBuilder
@@ -122,7 +122,7 @@ public class FreeIpaCreationDto {
 
         private boolean create = true;
 
-        private int instanceCountByGroup = 1;
+        private Integer instanceCountByGroup;
 
         private FreeIpaCreationAwsParametersDto aws;
 
@@ -136,6 +136,10 @@ public class FreeIpaCreationDto {
 
         private Set<String> recipes;
 
+        private Builder(int instanceCountByGroup) {
+            this.instanceCountByGroup = instanceCountByGroup;
+        }
+
         private Builder() {
         }
 
@@ -144,7 +148,7 @@ public class FreeIpaCreationDto {
             return this;
         }
 
-        public Builder withInstanceCountByGroup(int instanceCountByGroup) {
+        private Builder withInstanceCountByGroup(int instanceCountByGroup) {
             this.instanceCountByGroup = instanceCountByGroup;
             return this;
         }

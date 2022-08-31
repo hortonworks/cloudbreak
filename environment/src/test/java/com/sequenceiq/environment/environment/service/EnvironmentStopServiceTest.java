@@ -44,6 +44,8 @@ class EnvironmentStopServiceTest {
 
     private static final String SDX_NAME = "sdx_name";
 
+    private static final int FREE_IPA_INSTANCE_COUNT_BY_GROUP = 2;
+
     @Mock
     private EnvironmentReactorFlowManager reactorFlowManager;
 
@@ -111,7 +113,7 @@ class EnvironmentStopServiceTest {
     @Test
     public void shouldThrowBadRequestExceptionGivenFreeIpaIsRunningOnSpotInstances() {
         EnvironmentDto environmentDto = getEnvironmentDto();
-        environmentDto.setFreeIpaCreation(FreeIpaCreationDto.builder()
+        environmentDto.setFreeIpaCreation(FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP)
                 .withAws(FreeIpaCreationAwsParametersDto.builder()
                         .withSpot(FreeIpaCreationAwsSpotParametersDto.builder()
                                 .withPercentage(100)
