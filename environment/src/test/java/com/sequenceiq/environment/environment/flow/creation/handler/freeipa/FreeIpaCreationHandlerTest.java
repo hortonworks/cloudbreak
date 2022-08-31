@@ -28,8 +28,6 @@ import org.junit.jupiter.params.provider.EnumSource.Mode;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
@@ -71,8 +69,6 @@ import reactor.bus.EventBus;
 @ExtendWith(MockitoExtension.class)
 public class FreeIpaCreationHandlerTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaCreationHandlerTest.class);
-
     private static final long ENVIRONMENT_ID = 1L;
 
     private static final String PARENT_ENVIRONMENT_CRN = "parentEnvCrn";
@@ -81,13 +77,13 @@ public class FreeIpaCreationHandlerTest {
 
     private static final String YARN_NETWORK_CIDR = "172.27.0.0/16";
 
-    private static final Set<PollingResult> UNSUCCESSFUL_POLLING_RESULTS = Set.of(PollingResult.FAILURE, PollingResult.EXIT, PollingResult.TIMEOUT);
-
     private static final String IMAGE_CATALOG = "image catalog";
 
     private static final String IMAGE_ID = "image id";
 
     private static final String INSTANCE_TYPE = "instance type";
+
+    private static final int FREE_IPA_INSTANCE_COUNT_BY_GROUP = 2;
 
     @Mock
     private EventSender eventSender;
@@ -478,7 +474,7 @@ public class FreeIpaCreationHandlerTest {
         dto.setTags(new EnvironmentTags(emptyMap(), emptyMap()));
         dto.setAuthentication(AuthenticationDto.builder().build());
         dto.setRegions(Set.of(createRegion("someWhereOverTheRainbow")));
-        dto.setFreeIpaCreation(FreeIpaCreationDto.builder().withCreate(true).build());
+        dto.setFreeIpaCreation(FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP).withCreate(true).build());
         dto.setNetwork(NetworkDto.builder().withNetworkCidr(YARN_NETWORK_CIDR).build());
 
         return dto;

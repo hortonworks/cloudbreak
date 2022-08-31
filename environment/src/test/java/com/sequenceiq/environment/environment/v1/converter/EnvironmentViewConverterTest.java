@@ -52,5 +52,6 @@ class EnvironmentViewConverterTest {
         assertEquals(REGIONS, result.getRegions());
         assertEquals(CRN, result.getResourceCrn());
         assertEquals(EnvironmentStatus.AVAILABLE, result.getStatus());
+        assertEquals(environment.getFreeIpaInstanceCountByGroup(), result.getFreeIpaInstanceCountByGroup());
     }
 }

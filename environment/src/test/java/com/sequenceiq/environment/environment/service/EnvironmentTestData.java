@@ -92,6 +92,7 @@ public class EnvironmentTestData {
         environment.setParameters(PARAMETERS);
         environment.setRegions(REGIONS);
         environment.setNetwork(NETWORK);
+        environment.setFreeIpaInstanceCountByGroup(2);
         return environment;
     }
 

@@ -20,12 +20,16 @@ import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaRespo
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaInstanceCountByGroupProvider;
 
 @Component
 public class FreeIpaConverter {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private FreeIpaInstanceCountByGroupProvider ipaInstanceCountByGroupProvider;
 
     public FreeIpaResponse convert(FreeIpaCreationDto freeIpaCreation) {
         if (freeIpaCreation == null) {
@@ -66,7 +70,7 @@ public class FreeIpaConverter {
     }
 
     public FreeIpaCreationDto convert(AttachedFreeIpaRequest request, String accountId, String cloudPlatform) {
-        FreeIpaCreationDto.Builder builder = FreeIpaCreationDto.builder();
+        FreeIpaCreationDto.Builder builder = FreeIpaCreationDto.builder(ipaInstanceCountByGroupProvider.getInstanceCount(request));
         if (request != null) {
             builder.withCreate(request.getCreate());
             builder.withEnableMultiAz(request.isEnableMultiAz());
@@ -78,8 +82,6 @@ public class FreeIpaConverter {
                     throw new BadRequestException("You need to be entitled for CDP_CB_AWS_NATIVE_FREEIPA to provision FreeIPA in Multi Availability Zone.");
                 }
             }
-            Optional.ofNullable(request.getInstanceCountByGroup())
-                    .ifPresent(builder::withInstanceCountByGroup);
             Optional.ofNullable(request.getInstanceType())
                     .ifPresent(builder::withInstanceType);
             Optional.ofNullable(request.getAws())
