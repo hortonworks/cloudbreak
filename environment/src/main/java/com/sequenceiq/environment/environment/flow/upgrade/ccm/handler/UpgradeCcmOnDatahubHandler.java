@@ -53,6 +53,7 @@ public class UpgradeCcmOnDatahubHandler extends EventSenderAwareHandler<Environm
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
             List<String> dataHubCrns = getDatahubCrns(environmentDto.getResourceCrn());
+            String errorReason = null;
             if (!dataHubCrns.isEmpty()) {
                 LOGGER.debug("The following datahub crns will be tried for upgrade CCM: {}", dataHubCrns);
                 List<DistroXCcmUpgradeV1Response> upgradeResponses = initUpgradeCcm(dataHubCrns);
@@ -63,6 +64,9 @@ public class UpgradeCcmOnDatahubHandler extends EventSenderAwareHandler<Environm
                     return;
                 }
                 logNotTriggered(upgradeResponses);
+                if (hasAnyErroredOut(upgradeResponses)) {
+                    errorReason = "Some Data Hubs could not be upgraded.";
+                }
                 upgradeCcmService.waitForUpgradeOnFlowIds(environmentDto.getId(), getTriggeredFlows(upgradeResponses));
             } else {
                 LOGGER.info("There were no Data Hubs created for environment {}", environmentDto.getResourceCrn());
@@ -72,6 +76,7 @@ public class UpgradeCcmOnDatahubHandler extends EventSenderAwareHandler<Environm
                     .withResourceCrn(environmentDto.getResourceCrn())
                     .withResourceId(environmentDto.getId())
                     .withResourceName(environmentDto.getName())
+                    .withErrorReason(errorReason)
                     .build();
 
             eventSender().sendEvent(upgradeCcmEvent, environmentDtoEvent.getHeaders());
@@ -91,6 +96,10 @@ public class UpgradeCcmOnDatahubHandler extends EventSenderAwareHandler<Environm
 
     private boolean hasAllErroredOut(List<DistroXCcmUpgradeV1Response> upgradeResponses) {
         return upgradeResponses.stream().allMatch(r -> r.getResponseType() == CcmUpgradeResponseType.ERROR);
+    }
+
+    private boolean hasAnyErroredOut(List<DistroXCcmUpgradeV1Response> upgradeResponses) {
+        return upgradeResponses.stream().anyMatch(r -> r.getResponseType() == CcmUpgradeResponseType.ERROR);
     }
 
     private String getReasons(List<DistroXCcmUpgradeV1Response> upgradeResponses) {

@@ -10,12 +10,20 @@ import reactor.rx.Promise;
 @JsonDeserialize(builder = UpgradeCcmEvent.Builder.class)
 public class UpgradeCcmEvent extends BaseNamedFlowEvent {
 
+    private final String errorReason;
+
     public UpgradeCcmEvent(String selector, Long resourceId, String resourceName, String resourceCrn) {
         super(selector, resourceId, resourceName, resourceCrn);
+        this.errorReason = null;
     }
 
-    public UpgradeCcmEvent(String selector, Long resourceId, Promise<AcceptResult> accepted, String resourceName, String resourceCrn) {
+    public UpgradeCcmEvent(String selector, Long resourceId, Promise<AcceptResult> accepted, String resourceName, String resourceCrn, String errorReason) {
         super(selector, resourceId, accepted, resourceName, resourceCrn);
+        this.errorReason = errorReason;
+    }
+
+    public String getErrorReason() {
+        return errorReason;
     }
 
     public static Builder builder() {
@@ -33,6 +41,8 @@ public class UpgradeCcmEvent extends BaseNamedFlowEvent {
         private Long resourceId;
 
         private Promise<AcceptResult> accepted;
+
+        private String errorReason;
 
         private Builder() {
         }
@@ -62,8 +72,13 @@ public class UpgradeCcmEvent extends BaseNamedFlowEvent {
             return this;
         }
 
+        public Builder withErrorReason(String errorReason) {
+            this.errorReason = errorReason;
+            return this;
+        }
+
         public UpgradeCcmEvent build() {
-            return new UpgradeCcmEvent(selector, resourceId, accepted, resourceName, resourceCrn);
+            return new UpgradeCcmEvent(selector, resourceId, accepted, resourceName, resourceCrn, errorReason);
         }
     }
 }

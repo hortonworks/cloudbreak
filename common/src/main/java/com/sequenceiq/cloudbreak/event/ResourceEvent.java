@@ -165,6 +165,7 @@ public enum ResourceEvent {
     ENVIRONMENT_UPGRADE_CCM_ON_DATAHUB_FAILED("environment.upgrade.ccm.datahub.failed"),
     ENVIRONMENT_UPGRADE_CCM_ROLLING_BACK("environment.upgrade.ccm.rollback"),
     ENVIRONMENT_UPGRADE_CCM_FINISHED("environment.upgrade.ccm.finished"),
+    ENVIRONMENT_UPGRADE_CCM_FINISHED_WITH_ERRORS("environment.upgrade.ccm.finished.witherrors"),
     ENVIRONMENT_UPGRADE_CCM_FAILED("environment.upgrade.ccm.failed"),
 
     ENVIRONMENT_VERTICAL_SCALE_VALIDATION_STARTED("environment.vertical.scale.validation.started"),
