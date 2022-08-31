@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -65,6 +67,9 @@ public class StackImageUpdateServiceTest {
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Mock
+    private PlatformStringTransformer platformStringTransformer;
+
     @InjectMocks
     private StackImageUpdateService underTest;
 
@@ -86,6 +91,7 @@ public class StackImageUpdateServiceTest {
         stack.setName("stackname");
         stack.setRegion("region");
         stack.setCloudPlatform("AWS");
+        stack.setPlatformVariant("AWS_NATIVE");
         stack.setWorkspace(workspace);
 
         image = new Image("asdf", System.currentTimeMillis(), System.currentTimeMillis(), "asdf", "centos7", "uuid", "2.8.0", Collections.emptyMap(),
@@ -115,6 +121,7 @@ public class StackImageUpdateServiceTest {
                         statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
         when(stackImageService.getCurrentImage(anyLong())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
 
         StatedImage newImageIfVersionsMatch = underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl");
         assertNotNull(newImageIfVersionsMatch);
@@ -128,6 +135,8 @@ public class StackImageUpdateServiceTest {
                         statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
         when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
+
         assertThrows(OperationException.class, () -> underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl"));
 
         verify(restRequestThreadLocalService).setWorkspaceId(stack.getWorkspaceId());
@@ -141,9 +150,32 @@ public class StackImageUpdateServiceTest {
                         statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
         when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("GCP"));
+
         assertThrows(OperationException.class, () -> underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl"));
 
         verify(restRequestThreadLocalService).setWorkspaceId(stack.getWorkspaceId());
+    }
+
+    @Test
+    public void testGetNewImageIfCloudPlatformAwsGov() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        stack.setPlatformVariant("AWS_GOV_NATIVE");
+        image = new Image("asdf", System.currentTimeMillis(), System.currentTimeMillis(), "asdf", "centos7", "uuid", "2.8.0", Collections.emptyMap(),
+                Collections.singletonMap("AWS_GOV", Collections.emptyMap()), null, "centos", packageVersions,
+                Collections.emptyList(), Collections.emptyList(), "1", true, null, null);
+        statedImage = StatedImage.statedImage(image, "url", "name");
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
+                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",
+                        statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
+        when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
+        when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("aws_gov"));
+
+        CloudbreakDetails cloudbreakDetails = new CloudbreakDetails();
+        cloudbreakDetails.setVersion(StackImageUpdateService.MIN_VERSION);
+        when(componentConfigProviderService.getCloudbreakDetails(stack.getId())).thenReturn(cloudbreakDetails);
+        boolean validImage = underTest.isValidImage(stack, "imageId", "imageCatalogName", "imageCatalogUrl");
+        assertTrue(validImage);
     }
 
     @Test
@@ -153,6 +185,7 @@ public class StackImageUpdateServiceTest {
                         statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
         when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
         CloudbreakDetails cloudbreakDetails = new CloudbreakDetails();
         cloudbreakDetails.setVersion(StackImageUpdateService.MIN_VERSION);
         when(componentConfigProviderService.getCloudbreakDetails(stack.getId())).thenReturn(cloudbreakDetails);
@@ -167,6 +200,7 @@ public class StackImageUpdateServiceTest {
                         statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
         when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
         CloudbreakDetails cloudbreakDetails = new CloudbreakDetails();
         cloudbreakDetails.setVersion("2.9.0");
         when(componentConfigProviderService.getCloudbreakDetails(stack.getId())).thenReturn(cloudbreakDetails);
@@ -188,6 +222,7 @@ public class StackImageUpdateServiceTest {
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
         when(packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(anyList())).thenReturn(CheckResult.failed(
                 "Instance ID: instance-id Packages without version: salt"));
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
 
         boolean validImage = underTest.isValidImage(stack, "imageId", "imageCatalogName", "imageCatalogUrl");
         assertTrue(validImage);
@@ -207,6 +242,7 @@ public class StackImageUpdateServiceTest {
         when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
         when(packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(anyList())).thenReturn(CheckResult.ok());
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
 
         boolean validImage = underTest.isValidImage(stack, "imageId", "imageCatalogName", "imageCatalogUrl");
         assertFalse(validImage);
