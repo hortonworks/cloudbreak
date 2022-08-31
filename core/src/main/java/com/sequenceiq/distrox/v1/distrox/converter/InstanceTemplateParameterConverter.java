@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
@@ -41,7 +42,7 @@ public class InstanceTemplateParameterConverter {
     public AwsInstanceTemplateV4Parameters convert(AwsInstanceTemplateV1Parameters source, DetailedEnvironmentResponse environment) {
         AwsInstanceTemplateV4Parameters response = new AwsInstanceTemplateV4Parameters();
         if (environment != null) {
-            response.setEncryption(getIfNotNull(source.getEncryption(), environment, this::convert));
+            response.setEncryption(convert(source.getEncryption(), environment));
         }
         response.setSpot(getIfNotNull(source.getSpot(), this::convert));
         response.setPlacementGroup(getIfNotNull(source.getPlacementGroup(), this::convert));
@@ -57,18 +58,16 @@ public class InstanceTemplateParameterConverter {
 
     private AwsEncryptionV4Parameters convert(AwsEncryptionV1Parameters source, DetailedEnvironmentResponse environment) {
         AwsEncryptionV4Parameters response = new AwsEncryptionV4Parameters();
-        String dataHubEncryptionKey = source.getKey();
-        EncryptionType dataHubEncryptionKeyType = source.getType();
-        if (EncryptionType.CUSTOM.equals(dataHubEncryptionKeyType)) {
-            response.setKey(dataHubEncryptionKey);
-            response.setType(dataHubEncryptionKeyType);
+        String environmentEncryptionKeyArn = Optional.ofNullable(environment)
+                .map(DetailedEnvironmentResponse::getAws)
+                .map(AwsEnvironmentParameters::getAwsDiskEncryptionParameters)
+                .map(AwsDiskEncryptionParameters::getEncryptionKeyArn)
+                .orElse(null);
+        if (source != null && EncryptionType.CUSTOM.equals(source.getType())) {
+            response.setKey(source.getKey());
+            response.setType(source.getType());
         } else {
-            String environmentEncryptionKeyArn = Optional.ofNullable(environment)
-                    .map(DetailedEnvironmentResponse::getAws)
-                    .map(AwsEnvironmentParameters::getAwsDiskEncryptionParameters)
-                    .map(AwsDiskEncryptionParameters::getEncryptionKeyArn)
-                    .orElse(null);
-            if (environmentEncryptionKeyArn != null && !environmentEncryptionKeyArn.isEmpty()) {
+            if (!Strings.isNullOrEmpty(environmentEncryptionKeyArn)) {
                 LOGGER.info("Applying AWS CMK for instance volume encryption as per environment configuration.");
                 response.setKey(environmentEncryptionKeyArn);
                 response.setType(EncryptionType.CUSTOM);
