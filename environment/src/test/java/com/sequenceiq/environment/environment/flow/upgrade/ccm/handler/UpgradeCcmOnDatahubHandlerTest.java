@@ -152,6 +152,35 @@ class UpgradeCcmOnDatahubHandlerTest {
     }
 
     @Test
+    void testAcceptWhenUpgradeErrorOnOneDatahubBecauseStopped() {
+        StackViewV4Response stackResponse1 = new StackViewV4Response();
+        stackResponse1.setCrn(TEST_STACK1_CRN);
+        StackViewV4Response stackResponse2 = new StackViewV4Response();
+        stackResponse2.setCrn(TEST_STACK2_CRN);
+        StackViewV4Responses stackResponses = new StackViewV4Responses(Set.of(stackResponse1, stackResponse2));
+        when(datahubService.list(TEST_ENV_CRN)).thenReturn(stackResponses);
+
+        FlowIdentifier flowId1 = new FlowIdentifier(FlowType.FLOW, "flowId1");
+        DistroXCcmUpgradeV1Response response1 =
+                new DistroXCcmUpgradeV1Response(CcmUpgradeResponseType.TRIGGERED, flowId1, "reason", TEST_STACK1_CRN);
+        when(datahubService.upgradeCcm(TEST_STACK1_CRN)).thenReturn(response1);
+        FlowIdentifier flowId2 = new FlowIdentifier(FlowType.FLOW, "flowId2");
+        DistroXCcmUpgradeV1Response response2 =
+                new DistroXCcmUpgradeV1Response(CcmUpgradeResponseType.ERROR, flowId2, "stopped", TEST_STACK2_CRN);
+        when(datahubService.upgradeCcm(TEST_STACK2_CRN)).thenReturn(response2);
+
+        underTest.accept(mockEnvironmentDtoEvent);
+        verify(upgradeCcmPollerService).waitForUpgradeOnFlowIds(TEST_ENV_ID, List.of(flowId1));
+        assertThat(baseNamedFlowEvent.getValue()).isInstanceOf(UpgradeCcmEvent.class);
+        UpgradeCcmEvent capturedUpgradeCcmEvent = (UpgradeCcmEvent) baseNamedFlowEvent.getValue();
+        assertThat(capturedUpgradeCcmEvent.getResourceName()).isEqualTo(TEST_ENV_NAME);
+        assertThat(capturedUpgradeCcmEvent.getResourceId()).isEqualTo(TEST_ENV_ID);
+        assertThat(capturedUpgradeCcmEvent.getResourceCrn()).isEqualTo(TEST_ENV_CRN);
+        assertThat(capturedUpgradeCcmEvent.selector()).isEqualTo("FINISH_UPGRADE_CCM_EVENT");
+        assertThat(capturedUpgradeCcmEvent.getErrorReason()).isEqualTo("Some Data Hubs could not be upgraded.");
+    }
+
+    @Test
     void testAcceptWhenUpgradeSkipped() {
         StackViewV4Response stackResponse1 = new StackViewV4Response();
         stackResponse1.setCrn(TEST_STACK1_CRN);
@@ -173,6 +202,7 @@ class UpgradeCcmOnDatahubHandlerTest {
         assertThat(capturedUpgradeCcmEvent.getResourceId()).isEqualTo(TEST_ENV_ID);
         assertThat(capturedUpgradeCcmEvent.getResourceCrn()).isEqualTo(TEST_ENV_CRN);
         assertThat(capturedUpgradeCcmEvent.selector()).isEqualTo("FINISH_UPGRADE_CCM_EVENT");
+        assertThat(capturedUpgradeCcmEvent.getErrorReason()).isNull();
     }
 
     @Test
@@ -202,6 +232,7 @@ class UpgradeCcmOnDatahubHandlerTest {
         assertThat(capturedUpgradeCcmEvent.getResourceId()).isEqualTo(TEST_ENV_ID);
         assertThat(capturedUpgradeCcmEvent.getResourceCrn()).isEqualTo(TEST_ENV_CRN);
         assertThat(capturedUpgradeCcmEvent.selector()).isEqualTo("FINISH_UPGRADE_CCM_EVENT");
+        assertThat(capturedUpgradeCcmEvent.getErrorReason()).isNull();
     }
 
     @Test
@@ -225,6 +256,7 @@ class UpgradeCcmOnDatahubHandlerTest {
         assertThat(capturedUpgradeCcmEvent.getResourceId()).isEqualTo(TEST_ENV_ID);
         assertThat(capturedUpgradeCcmEvent.getResourceCrn()).isEqualTo(TEST_ENV_CRN);
         assertThat(capturedUpgradeCcmEvent.selector()).isEqualTo("FINISH_UPGRADE_CCM_EVENT");
+        assertThat(capturedUpgradeCcmEvent.getErrorReason()).isNull();
     }
 
     @Test
@@ -241,6 +273,7 @@ class UpgradeCcmOnDatahubHandlerTest {
         assertThat(capturedUpgradeCcmEvent.getResourceId()).isEqualTo(TEST_ENV_ID);
         assertThat(capturedUpgradeCcmEvent.getResourceCrn()).isEqualTo(TEST_ENV_CRN);
         assertThat(capturedUpgradeCcmEvent.selector()).isEqualTo("FINISH_UPGRADE_CCM_EVENT");
+        assertThat(capturedUpgradeCcmEvent.getErrorReason()).isNull();
     }
 
     @Test

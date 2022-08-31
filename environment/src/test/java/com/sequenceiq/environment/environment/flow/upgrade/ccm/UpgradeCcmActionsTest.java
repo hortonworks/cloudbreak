@@ -20,6 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -60,6 +61,7 @@ import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
+import reactor.rx.Promise;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ExtendWith(MockitoExtension.class)
@@ -80,6 +82,8 @@ class UpgradeCcmActionsTest {
     private static final String MESSAGE = "Houston, we have a problem.";
 
     private static final String FAILURE_EVENT = "failureEvent";
+
+    private static final String ERROR_REASON = "error reason";
 
     @Mock
     private StateContext stateContext;
@@ -258,6 +262,20 @@ class UpgradeCcmActionsTest {
     }
 
     @Test
+    void finishedHappyPathWithErrorReason() {
+        actionPayload = new UpgradeCcmEvent(ACTION_PAYLOAD_SELECTOR, ENVIRONMENT_ID, new Promise<>(), ENVIRONMENT_NAME, ENVIRONMENT_CRN, ERROR_REASON);
+        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(actionPayload);
+        testUpgradeActionHappyPath(underTest::finishedAction, FINALIZE_UPGRADE_CCM_EVENT.selector());
+        verify(metricService).incrementMetricCounter(eq(MetricType.ENV_UPGRADE_CCM_FINISHED), any(EnvironmentDto.class));
+        verify(environmentStatusUpdateService)
+                .updateEnvironmentStatusAndNotify(any(), any(),
+                        eq(EnvironmentStatus.AVAILABLE),
+                        eq(ResourceEvent.ENVIRONMENT_UPGRADE_CCM_FINISHED_WITH_ERRORS),
+                        eq(List.of(ERROR_REASON)),
+                        any());
+    }
+
+    @Test
     void finishedNoEnvironment() {
         testNoEnvironment(underTest::finishedAction, FAILURE_EVENT);
     }
@@ -299,6 +317,7 @@ class UpgradeCcmActionsTest {
 
         EnvironmentDto environmentDto = mock(EnvironmentDto.class);
         lenient().when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(any(), any(), any(), any(), any())).thenReturn(environmentDto);
+        lenient().when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(any(), any(), any(), any(), any(), any())).thenReturn(environmentDto);
         lenient().when(environmentStatusUpdateService.updateFailedEnvironmentStatusAndNotify(any(), any(), any(), any(), any())).thenReturn(environmentDto);
 
         action.execute(stateContext);

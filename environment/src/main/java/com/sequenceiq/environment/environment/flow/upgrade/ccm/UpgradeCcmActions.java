@@ -8,6 +8,7 @@ import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.Upgr
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmStateSelectors.FINALIZE_UPGRADE_CCM_EVENT;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmStateSelectors.HANDLED_FAILED_UPGRADE_CCM_EVENT;
 
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -110,9 +111,17 @@ public class UpgradeCcmActions {
         return new AbstractUpgradeCcmAction<>(UpgradeCcmEvent.class) {
             @Override
             protected void doExecute(CommonContext context, UpgradeCcmEvent payload, Map<Object, Object> variables) {
-                EnvironmentDto environmentDto = environmentStatusUpdateService
-                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.AVAILABLE,
-                                ResourceEvent.ENVIRONMENT_UPGRADE_CCM_FINISHED, UpgradeCcmState.UPGRADE_CCM_FINISHED_STATE);
+                EnvironmentDto environmentDto;
+                if (payload.getErrorReason() == null) {
+                    environmentDto = environmentStatusUpdateService
+                            .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.AVAILABLE,
+                                    ResourceEvent.ENVIRONMENT_UPGRADE_CCM_FINISHED, UpgradeCcmState.UPGRADE_CCM_FINISHED_STATE);
+                } else {
+                    environmentDto = environmentStatusUpdateService
+                            .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.AVAILABLE,
+                                    ResourceEvent.ENVIRONMENT_UPGRADE_CCM_FINISHED_WITH_ERRORS, List.of(payload.getErrorReason()),
+                                    UpgradeCcmState.UPGRADE_CCM_FINISHED_STATE);
+                }
                 metricService.incrementMetricCounter(MetricType.ENV_UPGRADE_CCM_FINISHED, environmentDto);
                 sendEvent(context, FINALIZE_UPGRADE_CCM_EVENT.event(), payload);
             }
