@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.rotatepassword.RotateSaltPasswordEvent;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
@@ -60,6 +59,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.RdsUpgradeChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
@@ -73,7 +73,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsTriggerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CmSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
@@ -249,8 +248,8 @@ public class ReactorFlowManager {
     }
 
     public FlowIdentifier triggerRdsUpgrade(Long stackId, TargetMajorVersion targetVersion) {
-        String selector = UpgradeRdsEvent.UPGRADE_RDS_EVENT.event();
-        return reactorNotifier.notify(stackId, selector, new UpgradeRdsTriggerRequest(selector, stackId, targetVersion));
+        String selector = FlowChainTriggers.UPGRADE_RDS_CHAIN_TRIGGER_EVENT;
+        return reactorNotifier.notify(stackId, selector, new RdsUpgradeChainTriggerEvent(selector, stackId, targetVersion));
     }
 
     public FlowIdentifier triggerDatalakeClusterRecovery(Long stackId) {

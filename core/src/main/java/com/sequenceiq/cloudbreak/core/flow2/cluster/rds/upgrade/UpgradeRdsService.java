@@ -15,11 +15,13 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.upgrade.rds.DatabaseUpgradeBackupRestoreChecker;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeOrchestratorService;
 
 @Service
@@ -38,6 +40,9 @@ public class UpgradeRdsService {
 
     @Inject
     private CloudbreakMessagesService messagesService;
+
+    @Inject
+    private DatabaseUpgradeBackupRestoreChecker backupRestoreValidator;
 
     void stopServicesState(Long stackId) {
         setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_STOP_SERVICES), ResourceEvent.CLUSTER_RDS_UPGRADE_STOP_SERVICES);
@@ -114,6 +119,10 @@ public class UpgradeRdsService {
         }
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DATABASE_UPGRADE_FAILED, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_FAILED, exception.getMessage());
+    }
+
+    public boolean shouldRunDataBackupRestore(ClusterViewContext context) {
+        return backupRestoreValidator.shouldRunDataBackupRestore(context);
     }
 
     private String getMessage(ResourceEvent resourceEvent) {

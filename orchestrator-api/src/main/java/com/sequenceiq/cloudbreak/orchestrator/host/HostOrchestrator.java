@@ -150,4 +150,6 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     void createCronForUserHomeCreation(List<GatewayConfig> gatewayConfigs, Set<String> targets, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException;
+
+    List<Map<String, JsonNode>> applyOrchestratoState(OrchestratorStateParams stateParams) throws CloudbreakOrchestratorFailedException;
 }
