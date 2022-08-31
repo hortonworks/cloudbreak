@@ -222,7 +222,7 @@ public class UpgradeCcmService {
             LOGGER.info("Re-registering cluster proxy to previous tunnel {}", payload.getOldTunnel());
             registerClusterProxy(payload.getResourceId());
         }
-        String statusReason = "Upgrade CCM failed";
+        String statusReason = "Upgrade CCM failed: " + payload.getException().getMessage();
         stackUpdater.updateStackStatus(payload.getResourceId(), detailedStatus, statusReason);
     }
 

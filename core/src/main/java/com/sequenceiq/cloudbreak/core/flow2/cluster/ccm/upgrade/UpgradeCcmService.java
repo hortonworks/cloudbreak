@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterPro
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.AbstractUpgradeCcmEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.RegisterClusterProxyHandler;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.service.upgrade.ccm.HealthCheckService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.UpgradeCcmOrchestratorService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
 @Service
 public class UpgradeCcmService {
@@ -132,20 +131,19 @@ public class UpgradeCcmService {
         flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_FINISHED);
     }
 
-    public void ccmUpgradeFailed(Long stackId, Long clusterId, Tunnel oldTunnel,
-            Class<? extends ExceptionCatcherEventHandler<? extends AbstractUpgradeCcmEvent>> failureOrigin) {
+    public void ccmUpgradeFailed(UpgradeCcmFailedEvent failedEvent, Long clusterId) {
 
-        String statusReason = "CCM upgrade failed";
+        String statusReason = "CCM upgrade failed: " + failedEvent.getException().getMessage();
         LOGGER.debug(statusReason);
-        InMemoryStateStore.deleteStack(stackId);
+        InMemoryStateStore.deleteStack(failedEvent.getResourceId());
         InMemoryStateStore.deleteCluster(clusterId);
-        stackService.setTunnelByStackId(stackId, oldTunnel);
-        if (failureOrigin.equals(RegisterClusterProxyHandler.class)) {
-            LOGGER.info("Re-registering cluster proxy to previous tunnel {}", oldTunnel);
-            registerClusterProxy(stackId);
+        stackService.setTunnelByStackId(failedEvent.getResourceId(), failedEvent.getOldTunnel());
+        if (failedEvent.getFailureOrigin().equals(RegisterClusterProxyHandler.class)) {
+            LOGGER.info("Re-registering cluster proxy to previous tunnel {}", failedEvent.getOldTunnel());
+            registerClusterProxy(failedEvent.getResourceId());
         }
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CCM_UPGRADE_FAILED, statusReason);
-        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_FAILED);
+        stackUpdater.updateStackStatus(failedEvent.getResourceId(), DetailedStackStatus.CCM_UPGRADE_FAILED, statusReason);
+        flowMessageService.fireEventAndLog(failedEvent.getResourceId(), UPDATE_FAILED.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_FAILED);
     }
 
     public void updateTunnel(Long stackId) {

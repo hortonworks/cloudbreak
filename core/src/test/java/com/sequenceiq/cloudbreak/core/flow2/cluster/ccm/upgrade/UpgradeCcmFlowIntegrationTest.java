@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmTriggerRequest;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.DeregisterAgentHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.HealthCheckHandler;
@@ -149,7 +150,7 @@ class UpgradeCcmFlowIntegrationTest {
         inOrder.verify(upgradeCcmService, times(1)).registerClusterProxyAndCheckHealth(STACK_ID);
         inOrder.verify(upgradeCcmService, times(1)).removeAgent(STACK_ID, Tunnel.CCM);
         inOrder.verify(upgradeCcmService, times(1)).deregisterAgent(STACK_ID, Tunnel.CCM);
-        verify(upgradeCcmService, never()).ccmUpgradeFailed(eq(STACK_ID), eq(CLUSTER_ID), eq(Tunnel.CCM), any());
+        verify(upgradeCcmService, never()).ccmUpgradeFailed(any(UpgradeCcmFailedEvent.class), eq(CLUSTER_ID));
     }
 
     @Test
@@ -164,7 +165,12 @@ class UpgradeCcmFlowIntegrationTest {
         Assertions.assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
         InOrder inOrder = Mockito.inOrder(upgradeCcmService);
         inOrder.verify(upgradeCcmService, times(1)).updateTunnel(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(STACK_ID, CLUSTER_ID, Tunnel.CCM, TunnelUpdateHandler.class);
+        ArgumentCaptor<UpgradeCcmFailedEvent> failedEventCaptor = ArgumentCaptor.forClass(UpgradeCcmFailedEvent.class);
+        inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(failedEventCaptor.capture(), eq(CLUSTER_ID));
+        UpgradeCcmFailedEvent failedEvent = failedEventCaptor.getValue();
+        Assertions.assertEquals(STACK_ID, failedEvent.getResourceId());
+        Assertions.assertEquals(Tunnel.CCM, failedEvent.getOldTunnel());
+        Assertions.assertEquals(TunnelUpdateHandler.class, failedEvent.getFailureOrigin());
         verify(upgradeCcmService, never()).pushSaltState(STACK_ID, CLUSTER_ID);
         verify(upgradeCcmService, never()).reconfigureNginx(STACK_ID);
         verify(upgradeCcmService, never()).registerClusterProxyAndCheckHealth(STACK_ID);
@@ -187,7 +193,12 @@ class UpgradeCcmFlowIntegrationTest {
         inOrder.verify(upgradeCcmService, times(1)).pushSaltState(STACK_ID, CLUSTER_ID);
         inOrder.verify(upgradeCcmService, times(1)).reconfigureNginx(STACK_ID);
         inOrder.verify(upgradeCcmService, times(1)).registerClusterProxyAndCheckHealth(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(STACK_ID, CLUSTER_ID, Tunnel.CCM, RegisterClusterProxyHandler.class);
+        ArgumentCaptor<UpgradeCcmFailedEvent> failedEventCaptor = ArgumentCaptor.forClass(UpgradeCcmFailedEvent.class);
+        inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(failedEventCaptor.capture(), eq(CLUSTER_ID));
+        UpgradeCcmFailedEvent failedEvent = failedEventCaptor.getValue();
+        Assertions.assertEquals(STACK_ID, failedEvent.getResourceId());
+        Assertions.assertEquals(Tunnel.CCM, failedEvent.getOldTunnel());
+        Assertions.assertEquals(RegisterClusterProxyHandler.class, failedEvent.getFailureOrigin());
         verify(upgradeCcmService, never()).healthCheckState(STACK_ID);
         verify(upgradeCcmService, never()).deregisterAgent(STACK_ID, Tunnel.CCM);
         verify(upgradeCcmService, never()).removeAgent(STACK_ID, Tunnel.CCM);
