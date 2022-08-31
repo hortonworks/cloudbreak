@@ -1,8 +1,10 @@
 [
   {
+    "name": "log_size",
     "description":  "Check log size",
     "command":  "du -h /var/log"},
   {
+    "name": "hello_world",
     "description": "Hello world",
     "command":  "echo hello"
   }

@@ -27,6 +27,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -154,21 +155,27 @@ public class SshCommandRunnerActions extends SshJClientActions {
         return fileNames;
     }
 
-    private void executeCommandRunner(String gatewayPrivateIp) {
+    private void executeCommandRunner(String gatewayPrivateIp, List<String> commandNames) {
         Map<String, String> fileNames = uploadCommandRunner(gatewayPrivateIp);
+        Pair<Integer, String> cmdOut;
         String commandRunnerFileName = getFileName(fileNames, "runner");
         String sampleCommandFileName = getFileName(fileNames, "command");
 
-        Pair<Integer, String> cmdOut = executeSshCommand(gatewayPrivateIp, format("sudo mkdir -p /srv/salt/qa && sudo cp %s /srv/salt/qa" +
-                        " && sudo cp %s /srv/salt/qa && sudo python3 /srv/salt/qa/%s -c /srv/salt/qa/%s",
-                commandRunnerFileName, sampleCommandFileName, commandRunnerFileName, sampleCommandFileName));
+        if (CollectionUtils.isEmpty(commandNames)) {
+            cmdOut = executeSshCommand(gatewayPrivateIp, format("sudo python3 /srv/salt/qa/%s -c /srv/salt/qa/%s",
+                    commandRunnerFileName, sampleCommandFileName));
+        } else {
+            cmdOut = executeSshCommand(gatewayPrivateIp, format("sudo python3 /srv/salt/qa/%s -c /srv/salt/qa/%s -r %s",
+                    commandRunnerFileName, sampleCommandFileName, commandNames));
+        }
 
         try {
             JSONObject cmdOutJson = new JSONObject(cmdOut.getValue());
             int code = cmdOutJson.getInt("code");
             if (code != 0) {
-                Log.error(LOGGER, "One or more command has been failed on nodes!");
-                throw new TestFailException("One or more command has been failed on nodes!");
+                String error = cmdOutJson.getString("err");
+                Log.error(LOGGER, "One or more command has been failed with error: %s", error);
+                throw new TestFailException(format("One or more command has been failed with error: %s", error));
             }
         } catch (JSONException e) {
             Log.error(LOGGER, "Cannot parse result to JSON!");
@@ -176,15 +183,15 @@ public class SshCommandRunnerActions extends SshJClientActions {
         }
     }
 
-    public FreeIpaTestDto executeCommandRunner(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
+    public FreeIpaTestDto executeCommandRunner(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient, List<String> commandNames) {
         String gatewayPrivateIp = getGatewayPrivateIp(environmentCrn, freeipaClient);
-        executeCommandRunner(gatewayPrivateIp);
+        executeCommandRunner(gatewayPrivateIp, commandNames);
         return testDto;
     }
 
-    public <T extends CloudbreakTestDto> T executeCommandRunner(T testDto, List<InstanceGroupV4Response> instanceGroups) {
+    public <T extends CloudbreakTestDto> T executeCommandRunner(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> commandNames) {
         String gatewayPrivateIp = getGatewayPrivateIp(testDto.getCrn(), instanceGroups);
-        executeCommandRunner(gatewayPrivateIp);
+        executeCommandRunner(gatewayPrivateIp, commandNames);
         return testDto;
     }
 }
