@@ -29,20 +29,28 @@ def read_json_line_file(file):
                 data[key] = json_dict_elem
     return data
 
-def execute_local_commands(config):
+def execute_local_commands(config, command_names):
     results = list()
     for c in config:
-        result = {}
+        name = c["name"]
         description = c["description"]
         command = c["command"]
-        code, out, err = run_command(command)
-        result["command"] = c["command"]
-        result["description"] = c["description"]
-        result["code"] = code
-        result["out"] = out.rstrip() if out else out
-        result["err"] = err.rstrip() if err else err
-        results.append(result)
+        if command_names:
+            if name in command_names:
+                results.append(execute_command(command))
+        else:
+            results.append(execute_command(command))
     return results
+
+def execute_command(command):
+    result = {}
+    code, out, err = run_command(command)
+    result["command"] = c["command"]
+    result["description"] = c["description"]
+    result["code"] = code
+    result["out"] = out.rstrip() if out else out
+    result["err"] = err.rstrip() if err else err
+    return result
 
 def copy_file(source, dest):
     try:
@@ -62,7 +70,7 @@ def get_hg_grain_per_host(avilable_nodes, host_groups, nodes_str):
                 filtered_hostnames.append(key)
     return filtered_hostnames
 
-def execute_salt_commands(command_file_location, config, hosts, host_groups):
+def execute_salt_commands(command_file_location, config, hosts, host_groups, command_names):
     global SALT_CMD_PREFIX
     ping_out_file = "/tmp/qa_test_ping.json"
     test_cmd = "%s '*' test.ping --out=json --out-file=%s --out-indent=-1" % (SALT_CMD_PREFIX, ping_out_file)
@@ -105,9 +113,10 @@ def execute_salt_commands(command_file_location, config, hosts, host_groups):
     run_command(cmd_copy_script_file)
     run_command(cmd_copy_command_file)
     final_output = '/tmp/qa_test_results.json'
+    command_names_param = "-n %s " % command_names if command_names else ""
     run_all_commands_cmd = \
-        "%s -L %s cmd.run 'python3 /tmp/%s -c /tmp/%s -l' --out=json --out-file=%s --out-indent=-1" % (
-    SALT_CMD_PREFIX, nodes_str, script_file_basename, command_file_basename, final_output)
+            "%s -L %s cmd.run 'python3 /tmp/%s -c /tmp/%s %s -l' --out=json --out-file=%s --out-indent=-1" % (
+        SALT_CMD_PREFIX, nodes_str, script_file_basename, command_file_basename, command_names_param, final_output)
     run_command(run_all_commands_cmd)
     final_json = read_json_line_file(final_output)
     outputs = {}
@@ -125,12 +134,15 @@ if __name__ == "__main__":
         parser.add_option("--hosts", dest="hosts", default=None, type="string", help="Comma separated hosts filter,")
         parser.add_option("--host-groups", dest="host_groups", default=None, type="string",
                       help="Comma separated host groups filter.")
+        parser.add_option("-n", "--command-names", dest="command_names", default=None, type="string",
+                              help="Comma separated list of command names to be run.")
         parser.add_option("-l", "--local", action="store_true", dest="local", help="Run commands locally,")
         (options, args) = parser.parse_args()
         if not options.config:
             raise ValueError("Configuration option -c / --config is required!")
         hosts_arr = options.hosts.split(",") if options.hosts else list()
         host_groups_arr = options.host_groups.split(",") if options.host_groups else list()
+        command_names_arr = options.command_names.split(",") if options.command_names else list()
         main_result['hosts_filter']=hosts_arr
         main_result['host_groups_filter']=host_groups_arr
         if not os.path.exists(options.config):
@@ -139,11 +151,11 @@ if __name__ == "__main__":
         with open(options.config) as f:
             config = json.load(f)
         if options.local:
-            local_results=execute_local_commands(config)
+            local_results=execute_local_commands(config, command_names_arr)
             print(json.dumps(local_results))
             sys.exit(0)
         else:
-            responses, unreachable_nodes, skipped=execute_salt_commands(options.config, config, hosts_arr, host_groups_arr)
+            responses, unreachable_nodes, skipped=execute_salt_commands(options.config, config, hosts_arr, host_groups_arr, command_names_arr)
             main_result['responses']=responses
             main_result['unreachable_nodes']=unreachable_nodes
             main_result['skipped']=skipped
