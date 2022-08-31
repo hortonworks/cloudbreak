@@ -15,7 +15,7 @@
         "attachedVolumes": [
           {
             "count": 1,
-            "size": 250,
+            "size": 128,
             "type": "pd-standard"
           }
         ]
@@ -32,7 +32,7 @@
         "attachedVolumes": [
           {
             "count": 1,
-            "size": 250,
+            "size": 128,
             "type": "pd-standard"
           }
         ]
@@ -49,8 +49,8 @@
         "attachedVolumes": [
           {
             "count": 1,
-            "size": 250,
-            "type": "pd-standard"
+            "size": 512,
+            "type": "pd-ssd"
           }
         ]
       },
@@ -66,7 +66,7 @@
         "attachedVolumes": [
           {
             "count": 1,
-            "size": 250,
+            "size": 128,
             "type": "pd-standard"
           }
         ]
