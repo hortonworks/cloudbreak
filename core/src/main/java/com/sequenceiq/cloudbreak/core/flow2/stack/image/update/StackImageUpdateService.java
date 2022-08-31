@@ -26,7 +26,9 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
@@ -59,6 +61,9 @@ public class StackImageUpdateService {
 
     @Inject
     private StackImageService stackImageService;
+
+    @Inject
+    private PlatformStringTransformer platformStringTransformer;
 
     public StatedImage getNewImageIfVersionsMatch(StackDtoDelegate stack, String newImageId, String imageCatalogName, String imageCatalogUrl) {
         try {
@@ -100,7 +105,12 @@ public class StackImageUpdateService {
     }
 
     private boolean isCloudPlatformMatches(StackDtoDelegate stack, StatedImage newImage) {
-        return newImage.getImage().getImageSetsByProvider().keySet().stream().anyMatch(key -> key.equalsIgnoreCase(stack.getCloudPlatform()));
+        ImageCatalogPlatform platformString = platformStringTransformer
+                .getPlatformStringForImageCatalog(stack.getCloudPlatform(), stack.getPlatformVariant());
+        return newImage.getImage().getImageSetsByProvider()
+                .keySet()
+                .stream()
+                .anyMatch(key -> key.equalsIgnoreCase(platformString.nameToLowerCase()));
     }
 
     private boolean isOsVersionsMatch(Image currentImage, StatedImage newImage) {
