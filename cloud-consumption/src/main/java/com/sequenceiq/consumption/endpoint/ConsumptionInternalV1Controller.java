@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.consumption.api.v1.consumption.endpoint.ConsumptionInternalEndpoint;
+import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionRequest;
 import com.sequenceiq.consumption.api.v1.consumption.model.response.ConsumptionExistenceResponse;
 import com.sequenceiq.consumption.domain.Consumption;
@@ -50,36 +51,109 @@ public class ConsumptionInternalV1Controller implements ConsumptionInternalEndpo
     @InternalOnly
     public void scheduleStorageConsumptionCollection(@AccountId String accountId, @Valid @NotNull StorageConsumptionRequest request,
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER }) @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
-        ConsumptionCreationDto consumptionCreationDto = consumptionApiConverter.initCreationDtoForStorage(request);
         LOGGER.info("Registering storage consumption collection for resource with CRN [{}] and location [{}]",
-                consumptionCreationDto.getMonitoredResourceCrn(), consumptionCreationDto.getStorageLocation());
-        Optional<Consumption> consumptionOpt = consumptionService.create(consumptionCreationDto);
-        consumptionOpt.ifPresent(jobService::schedule);
+                request.getMonitoredResourceCrn(), request.getStorageLocation());
+        scheduleConsumptionCollection(request, ConsumptionType.STORAGE);
     }
 
     @Override
     @InternalOnly
     public void unscheduleStorageConsumptionCollection(@AccountId String accountId,
             @NotNull @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE}) String monitoredResourceCrn,
-            @NotEmpty String storageLocation, @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
-            @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
-        LOGGER.info("Unregistering storage consumption collection for resource with CRN [{}] and location [{}]", monitoredResourceCrn, storageLocation);
+            @NotEmpty String storageLocation,
+            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER }) @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
+        LOGGER.info("Unregistering storage consumption collection for resource with CRN [{}] and location [{}]",
+                monitoredResourceCrn, storageLocation);
+        unscheduleConsumptionCollection(monitoredResourceCrn, storageLocation);
+    }
+
+    @Override
+    @InternalOnly
+    public ConsumptionExistenceResponse doesStorageConsumptionCollectionExist(@AccountId String accountId,
+            @NotNull @ValidCrn(resource = {CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE}) String monitoredResourceCrn,
+            @NotEmpty String storageLocation,
+            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER }) @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
+        return getConsumptionExistenceResponse(monitoredResourceCrn, storageLocation);
+    }
+
+    @Override
+    @InternalOnly
+    public void scheduleElasticFilesystemConsumptionCollection(@AccountId String accountId,
+            @Valid @NotNull StorageConsumptionRequest request,
+            @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER}) @NotEmpty String initiatorUserCrn) {
+        LOGGER.info("Registering elastic filesystem consumption collection for resource with CRN [{}] and location [{}]",
+                request.getMonitoredResourceCrn(), request.getStorageLocation());
+        scheduleConsumptionCollection(request, ConsumptionType.ELASTIC_FILESYSTEM);
+    }
+
+    @Override
+    @InternalOnly
+    public void unscheduleElasticFilesystemConsumptionCollection(@AccountId String accountId,
+            @NotNull @ValidCrn(resource = {CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE}) String monitoredResourceCrn,
+            @NotEmpty String elasticFilesystemId,
+            @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER}) @NotEmpty String initiatorUserCrn) {
+        LOGGER.info("Unregistering elastic filesystem consumption collection for resource with CRN [{}] and location [{}]",
+                monitoredResourceCrn, elasticFilesystemId);
+        unscheduleConsumptionCollection(monitoredResourceCrn, elasticFilesystemId);
+    }
+
+    @Override
+    @InternalOnly
+    public ConsumptionExistenceResponse doesElasticFilesystemConsumptionCollectionExist(@AccountId String accountId,
+            @NotNull @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE}) String monitoredResourceCrn,
+            @NotEmpty String elasticFilesystemId,
+            @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER}) @NotEmpty String initiatorUserCrn) {
+        return getConsumptionExistenceResponse(monitoredResourceCrn, elasticFilesystemId);
+    }
+
+    @Override
+    @InternalOnly
+    public void scheduleEbsConsumptionCollection(@AccountId String accountId,
+            @Valid @NotNull StorageConsumptionRequest request,
+            @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER}) @NotEmpty String initiatorUserCrn) {
+        LOGGER.info("Registering elastic filesystem consumption collection for resource with CRN [{}] and location [{}]",
+                request.getMonitoredResourceCrn(), request.getStorageLocation());
+        scheduleConsumptionCollection(request, ConsumptionType.EBS);
+    }
+
+    @Override
+    @InternalOnly
+    public void unscheduleEbsConsumptionCollection(@AccountId String accountId,
+            @NotNull @ValidCrn(resource = {CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE}) String monitoredResourceCrn,
+            @NotEmpty String ebsId,
+            @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER}) @NotEmpty String initiatorUserCrn) {
+        LOGGER.info("Unregistering elastic filesystem consumption collection for resource with CRN [{}] and location [{}]",
+                monitoredResourceCrn, ebsId);
+        unscheduleConsumptionCollection(monitoredResourceCrn, ebsId);
+    }
+
+    @Override
+    @InternalOnly
+    public ConsumptionExistenceResponse doesEbsConsumptionCollectionExist(@AccountId String accountId,
+        @NotNull @ValidCrn(resource = {CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE}) String monitoredResourceCrn,
+        @NotEmpty String ebsId,
+        @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER}) @NotEmpty String initiatorUserCrn) {
+        return getConsumptionExistenceResponse(monitoredResourceCrn, ebsId);
+    }
+
+    private ConsumptionExistenceResponse getConsumptionExistenceResponse(String monitoredResourceCrn, String objectId) {
+        ConsumptionExistenceResponse response = new ConsumptionExistenceResponse();
+        response.setExists(consumptionService.isConsumptionPresentForLocationAndMonitoredCrn(monitoredResourceCrn, objectId));
+        return response;
+    }
+
+    private void unscheduleConsumptionCollection(String monitoredResourceCrn, String objectId) {
         Optional<Consumption> consumptionOpt =
-                consumptionService.findStorageConsumptionByMonitoredResourceCrnAndLocation(monitoredResourceCrn, storageLocation);
+                consumptionService.findStorageConsumptionByMonitoredResourceCrnAndLocation(monitoredResourceCrn, objectId);
         consumptionOpt.ifPresent(consumption -> {
             jobService.unschedule(consumption);
             consumptionService.delete(consumption);
         });
     }
 
-    @Override
-    @InternalOnly
-    public ConsumptionExistenceResponse doesStorageConsumptionCollectionExist(@AccountId String accountId,
-            @NotNull @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE}) String monitoredResourceCrn,
-            @NotEmpty String storageLocation, @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
-            @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
-        ConsumptionExistenceResponse response = new ConsumptionExistenceResponse();
-        response.setExists(consumptionService.isConsumptionPresentForLocationAndMonitoredCrn(monitoredResourceCrn, storageLocation));
-        return response;
+    private void scheduleConsumptionCollection(StorageConsumptionRequest request, ConsumptionType storage) {
+        ConsumptionCreationDto consumptionCreationDto = consumptionApiConverter.initCreationDtoForStorage(request, storage);
+        Optional<Consumption> consumptionOpt = consumptionService.create(consumptionCreationDto);
+        consumptionOpt.ifPresent(jobService::schedule);
     }
 }

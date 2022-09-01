@@ -44,7 +44,8 @@ public interface ConsumptionInternalEndpoint {
     @ApiOperation(value = ConsumptionOpDescription.UNSCHEDULE_STORAGE, produces = MediaType.APPLICATION_JSON, nickname = "unscheduleStorageCollection")
     void unscheduleStorageConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
             @NotNull @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE})
-            @QueryParam("monitoredResourceCrn") String monitoredResourceCrn, @NotEmpty @QueryParam("storageLocation") String storageLocation,
+            @QueryParam("monitoredResourceCrn") String monitoredResourceCrn,
+            @NotEmpty @QueryParam("storageLocation") String storageLocation,
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
             @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
@@ -54,7 +55,76 @@ public interface ConsumptionInternalEndpoint {
     @ApiOperation(value = ConsumptionOpDescription.STORAGE_EXISTS, produces = MediaType.APPLICATION_JSON, nickname = "storageCollectionExists")
     ConsumptionExistenceResponse doesStorageConsumptionCollectionExist(@AccountId @QueryParam("accountId") String accountId,
             @NotNull @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE})
-            @QueryParam("monitoredResourceCrn") String monitoredResourceCrn, @NotEmpty @QueryParam("storageLocation") String storageLocation,
+            @QueryParam("monitoredResourceCrn") String monitoredResourceCrn,
+            @NotEmpty @QueryParam("storageLocation") String storageLocation,
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
             @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+
+    @POST
+    @Path("schedule/efs")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConsumptionOpDescription.SCHEDULE_STORAGE, produces = MediaType.APPLICATION_JSON,
+            nickname = "scheduleElasticFilesystemCollection")
+    void scheduleElasticFilesystemConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
+        @Valid @NotNull StorageConsumptionRequest request,
+        @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+        @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+
+    @DELETE
+    @Path("unschedule/efs")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConsumptionOpDescription.UNSCHEDULE_STORAGE, produces = MediaType.APPLICATION_JSON,
+            nickname = "unscheduleElasticFilesystemCollection")
+    void unscheduleElasticFilesystemConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
+        @NotNull @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE})
+        @QueryParam("monitoredResourceCrn") String monitoredResourceCrn,
+        @NotEmpty @QueryParam("elasticFilesystemId") String elasticFilesystemId,
+        @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+        @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+
+    @GET
+    @Path("exists/efs")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConsumptionOpDescription.STORAGE_EXISTS, produces = MediaType.APPLICATION_JSON,
+            nickname = "elasticFilesystemCollectionExists")
+    ConsumptionExistenceResponse doesElasticFilesystemConsumptionCollectionExist(@AccountId @QueryParam("accountId") String accountId,
+        @NotNull @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE})
+        @QueryParam("monitoredResourceCrn") String monitoredResourceCrn,
+        @NotEmpty @QueryParam("elasticFilesystemId") String elasticFilesystemId,
+        @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+        @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+
+    @POST
+    @Path("schedule/ebs")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConsumptionOpDescription.SCHEDULE_STORAGE, produces = MediaType.APPLICATION_JSON,
+            nickname = "scheduleEbsCollection")
+    void scheduleEbsConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
+        @Valid @NotNull StorageConsumptionRequest request,
+        @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+        @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+
+    @DELETE
+    @Path("unschedule/ebs")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConsumptionOpDescription.UNSCHEDULE_STORAGE, produces = MediaType.APPLICATION_JSON,
+            nickname = "unscheduleEbsCollection")
+    void unscheduleEbsConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
+        @NotNull @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE})
+        @QueryParam("monitoredResourceCrn") String monitoredResourceCrn,
+        @NotEmpty @QueryParam("ebsId") String ebsId,
+        @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+        @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+
+    @GET
+    @Path("exists/ebs")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConsumptionOpDescription.STORAGE_EXISTS, produces = MediaType.APPLICATION_JSON,
+            nickname = "ebsCollectionExists")
+    ConsumptionExistenceResponse doesEbsConsumptionCollectionExist(@AccountId @QueryParam("accountId") String accountId,
+        @NotNull @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE})
+        @QueryParam("monitoredResourceCrn") String monitoredResourceCrn,
+        @NotEmpty @QueryParam("ebsId") String ebsId,
+        @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+        @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 }

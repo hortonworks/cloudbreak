@@ -19,8 +19,8 @@ public class ConsumptionApiConverter {
     @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
-    public ConsumptionCreationDto initCreationDtoForStorage(StorageConsumptionRequest request) {
-        Builder builder = initCreationDtoBuilder(request, ConsumptionType.STORAGE);
+    public ConsumptionCreationDto initCreationDtoForStorage(StorageConsumptionRequest request, ConsumptionType consumptionType) {
+        Builder builder = initCreationDtoBuilder(request, consumptionType);
         return builder
                 .withStorageLocation(request.getStorageLocation())
                 .build();

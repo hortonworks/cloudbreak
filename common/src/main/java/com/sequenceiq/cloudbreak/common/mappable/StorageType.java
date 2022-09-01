@@ -4,6 +4,7 @@ public enum StorageType {
 
     UNKNOWN(CloudPlatform.MOCK),
     S3(CloudPlatform.AWS),
+    EFS(CloudPlatform.AWS),
     EBS(CloudPlatform.AWS);
 
     private final CloudPlatform cloudPlatform;

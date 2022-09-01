@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionRequest;
 import com.sequenceiq.consumption.api.v1.consumption.model.response.ConsumptionExistenceResponse;
 import com.sequenceiq.consumption.domain.Consumption;
@@ -73,7 +74,7 @@ public class ConsumptionInternalV1ControllerTest {
         StorageConsumptionRequest request = new StorageConsumptionRequest();
         ConsumptionCreationDto consumptionCreationDto = consumptionCreationDto(LOCATION);
 
-        when(consumptionApiConverter.initCreationDtoForStorage(request)).thenReturn(consumptionCreationDto);
+        when(consumptionApiConverter.initCreationDtoForStorage(request, ConsumptionType.STORAGE)).thenReturn(consumptionCreationDto);
         when(consumptionService.create(consumptionCreationDto)).thenReturn(Optional.empty());
 
         underTest.scheduleStorageConsumptionCollection(ACCOUNT_ID, request, INITIATOR_USER_CRN);
@@ -86,7 +87,7 @@ public class ConsumptionInternalV1ControllerTest {
         StorageConsumptionRequest request = new StorageConsumptionRequest();
         ConsumptionCreationDto consumptionCreationDto = consumptionCreationDto(LOCATION);
 
-        when(consumptionApiConverter.initCreationDtoForStorage(request)).thenReturn(consumptionCreationDto);
+        when(consumptionApiConverter.initCreationDtoForStorage(request, ConsumptionType.STORAGE)).thenReturn(consumptionCreationDto);
         Consumption consumption = consumption();
         when(consumptionService.create(consumptionCreationDto)).thenReturn(Optional.of(consumption));
 

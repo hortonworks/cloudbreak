@@ -41,7 +41,8 @@ public class ConsumptionApiConverterTest {
         request.setMonitoredResourceCrn("dl-crn");
         request.setStorageLocation("location");
 
-        ConsumptionCreationDto result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.initCreationDtoForStorage(request));
+        ConsumptionCreationDto result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.initCreationDtoForStorage(request, ConsumptionType.STORAGE));
 
         Assertions.assertEquals("name_STORAGE", result.getName());
         Assertions.assertNull(result.getDescription());
