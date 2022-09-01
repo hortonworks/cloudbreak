@@ -16,12 +16,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.upgrade.rds.DatabaseUpgradeBackupRestoreChecker;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeOrchestratorService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @ExtendWith(MockitoExtension.class)
 class UpgradeRdsServiceTest {
@@ -57,7 +59,13 @@ class UpgradeRdsServiceTest {
     private CloudbreakMessagesService messagesService;
 
     @Mock
-    private Stack stack;
+    private DatabaseUpgradeBackupRestoreChecker backupRestoreChecker;
+
+    @Mock
+    private StackView stackView;
+
+    @Mock
+    private ClusterView clusterView;
 
     @InjectMocks
     private UpgradeRdsService underTest;
@@ -105,6 +113,13 @@ class UpgradeRdsServiceTest {
         underTest.installPostgresPackages(STACK_ID);
 
         verify(rdsUpgradeOrchestratorService).installPostgresPackages(eq(STACK_ID));
+    }
+
+    @Test
+    public void testShouldRunDataBackupRestore() {
+        underTest.shouldRunDataBackupRestore(stackView, clusterView);
+
+        verify(backupRestoreChecker).shouldRunDataBackupRestore(eq(stackView), eq(clusterView));
     }
 
     @Test

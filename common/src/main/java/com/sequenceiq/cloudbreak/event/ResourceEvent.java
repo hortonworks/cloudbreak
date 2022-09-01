@@ -479,6 +479,11 @@ public enum ResourceEvent {
     CLUSTER_RDS_UPGRADE_NOT_AVAILABLE("cluster.externaldatabase.upgrade.not.available"),
     CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED("cluster.externaldatabase.upgrade.already.upgraded"),
 
+    CLUSTER_RDS_UPGRADE_VALIDATION_PUSH_SALT_STATES("cluster.externaldatabase.upgrade.validation.push.salt.states"),
+    CLUSTER_RDS_UPGRADE_VALIDATION_BACKUP_VALIDATION("cluster.externaldatabase.upgrade.validation.backup.validation"),
+    CLUSTER_RDS_UPGRADE_VALIDATION_FINISHED("cluster.externaldatabase.upgrade.validation.finished"),
+    CLUSTER_RDS_UPGRADE_VALIDATION_FAILED("cluster.externaldatabase.upgrade.validation.failed"),
+
     CLUSTER_PREPARE_EMBEDDEDDB_UPGRADE_IN_PROGRESS("cluster.prepare.embeddeddatabase.upgrade.inprogress"),
     CLUSTER_PREPARE_EMBEDDEDDB_UPGRADE_FINISHED("cluster.prepare.embeddeddatabase.upgrade.finished"),
     CLUSTER_PREPARE_EMBEDDEDDB_UPGRADE_FAILED("cluster.prepare.embeddeddatabase.upgrade.failed"),

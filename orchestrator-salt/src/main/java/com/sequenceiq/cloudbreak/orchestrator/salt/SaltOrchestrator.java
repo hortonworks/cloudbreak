@@ -74,6 +74,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostAndRoleTarget;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.grain.GrainUploader;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
@@ -1601,4 +1602,16 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    @Override
+    public List<Map<String, JsonNode>> applyOrchestratorState(OrchestratorStateParams stateParams) throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = stateParams.getPrimaryGatewayConfig();
+        Target<String> gatewayHost = new HostList(stateParams.getTargetHostNames());
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            ApplyResponse response = saltStateService.applyStateSync(sc, stateParams.getState(), gatewayHost);
+            return (List<Map<String, JsonNode>>) response.getResult();
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during the salt bootstrap", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
 }
