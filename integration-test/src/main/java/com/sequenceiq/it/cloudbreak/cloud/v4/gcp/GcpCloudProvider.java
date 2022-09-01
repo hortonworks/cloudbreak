@@ -364,8 +364,9 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        String sshPublicKey = commonCloudProperties().getSshPublicKey();
-        return stackAuthenticationEntity.withPublicKey(sshPublicKey);
+        return stackAuthenticationEntity
+                .withLoginUserName("cloudbreak")
+                .withPublicKey(commonCloudProperties().getSshPublicKey());
     }
 
     @Override
