@@ -1,17 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.action;
 
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_CHANGE_TUNNEL_STATE_NAME;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_CHECK_PREREQUISITES_STATE_NAME;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_DEREGISTER_MINA_STATE_NAME;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_FAILED_STATE_NAME;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_FINISHED_STATE_NAME;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_HEALTH_CHECK_STATE_NAME;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_OBTAIN_AGENT_DATA_STATE_NAME;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_PUSH_SALT_STATES_STATE_NAME;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_RECONFIGURE_NGINX_STATE_NAME;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE_NAME;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_REMOVE_MINA_STATE_NAME;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_UPGRADE_STATE_NAME;
+import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_APPLY_UPGRADE_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_CHANGE_TUNNEL_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_CHECK_PREREQUISITES_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_DEREGISTER_MINA_EVENT;
@@ -21,7 +10,6 @@ import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmH
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_RECONFIGURE_NGINX_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_REGISTER_CLUSTER_PROXY_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_REMOVE_MINA_EVENT;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_APPLY_UPGRADE_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FINISHED_EVENT;
 
@@ -54,7 +42,7 @@ public class UpgradeCcmActions {
     @Inject
     private UpgradeCcmService upgradeCcmService;
 
-    @Bean(name = UPGRADE_CCM_CHECK_PREREQUISITES_STATE_NAME)
+    @Bean(name = "UPGRADE_CCM_CHECK_PREREQUISITES_STATE")
     public Action<?, ?> checkPrerequisites() {
         return new AbstractUpgradeCcmAction<>(UpgradeCcmTriggerEvent.class) {
             @Override
@@ -69,7 +57,7 @@ public class UpgradeCcmActions {
         };
     }
 
-    @Bean(name = UPGRADE_CCM_CHANGE_TUNNEL_STATE_NAME)
+    @Bean(name = "UPGRADE_CCM_CHANGE_TUNNEL_STATE")
     public Action<?, ?> changeTunnel() {
         return new AbstractUpgradeCcmEventAction() {
             @Override
@@ -81,7 +69,7 @@ public class UpgradeCcmActions {
         };
     }
 
-    @Bean(name = UPGRADE_CCM_OBTAIN_AGENT_DATA_STATE_NAME)
+    @Bean(name = "UPGRADE_CCM_OBTAIN_AGENT_DATA_STATE")
     public Action<?, ?> obtainAgentData() {
         return new AbstractUpgradeCcmEventAction() {
             @Override
@@ -93,7 +81,7 @@ public class UpgradeCcmActions {
         };
     }
 
-    @Bean(name = UPGRADE_CCM_PUSH_SALT_STATES_STATE_NAME)
+    @Bean(name = "UPGRADE_CCM_PUSH_SALT_STATES_STATE")
     public Action<?, ?> pushSaltStates() {
         return new AbstractUpgradeCcmEventAction() {
             @Override
@@ -105,7 +93,7 @@ public class UpgradeCcmActions {
         };
     }
 
-    @Bean(name = UPGRADE_CCM_UPGRADE_STATE_NAME)
+    @Bean(name = "UPGRADE_CCM_UPGRADE_STATE")
     public Action<?, ?> upgrade() {
         return new AbstractUpgradeCcmEventAction() {
             @Override
@@ -117,7 +105,7 @@ public class UpgradeCcmActions {
         };
     }
 
-    @Bean(name = UPGRADE_CCM_RECONFIGURE_NGINX_STATE_NAME)
+    @Bean(name = "UPGRADE_CCM_RECONFIGURE_NGINX_STATE")
     public Action<?, ?> reconfigure() {
         return new AbstractUpgradeCcmEventAction() {
             @Override
@@ -129,7 +117,7 @@ public class UpgradeCcmActions {
         };
     }
 
-    @Bean(name = UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE_NAME)
+    @Bean(name = "UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE")
     public Action<?, ?> registerCcm() {
         return new AbstractUpgradeCcmEventAction() {
             @Override
@@ -141,7 +129,7 @@ public class UpgradeCcmActions {
         };
     }
 
-    @Bean(name = UPGRADE_CCM_HEALTH_CHECK_STATE_NAME)
+    @Bean(name = "UPGRADE_CCM_HEALTH_CHECK_STATE")
     public Action<?, ?> healthCheck() {
         return new AbstractUpgradeCcmEventAction() {
             @Override
@@ -153,7 +141,7 @@ public class UpgradeCcmActions {
         };
     }
 
-    @Bean(name = UPGRADE_CCM_REMOVE_MINA_STATE_NAME)
+    @Bean(name = "UPGRADE_CCM_REMOVE_MINA_STATE")
     public Action<?, ?> removeMina() {
         return new AbstractUpgradeCcmEventAction() {
             @Override
@@ -165,7 +153,7 @@ public class UpgradeCcmActions {
         };
     }
 
-    @Bean(name = UPGRADE_CCM_DEREGISTER_MINA_STATE_NAME)
+    @Bean(name = "UPGRADE_CCM_DEREGISTER_MINA_STATE")
     public Action<?, ?> deregisterMina() {
         return new AbstractUpgradeCcmEventAction() {
             @Override
@@ -177,7 +165,7 @@ public class UpgradeCcmActions {
         };
     }
 
-    @Bean(name = UPGRADE_CCM_FINISHED_STATE_NAME)
+    @Bean(name = "UPGRADE_CCM_FINISHED_STATE")
     public Action<?, ?> finished() {
         return new AbstractUpgradeCcmEventAction() {
             @Override
@@ -190,7 +178,7 @@ public class UpgradeCcmActions {
         };
     }
 
-    @Bean(name = UPGRADE_CCM_FAILED_STATE_NAME)
+    @Bean(name = "UPGRADE_CCM_FAILED_STATE")
     public Action<?, ?> failed() {
         return new AbstractUpgradeCcmAction<>(UpgradeCcmFailureEvent.class) {
             @Override
