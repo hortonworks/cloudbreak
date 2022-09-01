@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.CmAgentStopFlags;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -70,6 +71,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostAndRoleTarget;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
@@ -866,5 +868,27 @@ class SaltOrchestratorTest {
         assertThatThrownBy(() -> saltOrchestrator.stopClusterManagerWithItsAgents(gatewayConfig, targets, exitCriteriaModel))
                 .isInstanceOf(CloudbreakOrchestratorFailedException.class)
                 .hasMessage("errorMsg");
+    }
+
+    @Test
+    void testApplyOrchestratorState() throws Exception {
+        GatewayConfig primaryGateway = mock(GatewayConfig.class);
+        Set<String> targetHostNames = Set.of("hostname");
+        String state = "state";
+        OrchestratorStateParams stateParams = new OrchestratorStateParams();
+        stateParams.setPrimaryGatewayConfig(primaryGateway);
+        stateParams.setTargetHostNames(targetHostNames);
+        stateParams.setState(state);
+
+        List<Map<String, JsonNode>> responseResult = List.of(Map.of("key", mock(JsonNode.class)));
+        ApplyResponse response = new ApplyResponse();
+        response.setResult(responseResult);
+        when(saltStateService.applyStateSync(eq(saltConnector), eq(state), any())).thenReturn(response);
+
+        List<Map<String, JsonNode>> result = saltOrchestrator.applyOrchestratorState(stateParams);
+
+        assertEquals(responseResult, result);
+        verify(saltStateService).applyStateSync(eq(saltConnector), eq(state), targetCaptor.capture());
+        assertEquals("hostname", targetCaptor.getValue().getTarget());
     }
 }

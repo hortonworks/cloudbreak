@@ -175,7 +175,9 @@ cb:
     upgrade:
       embedded.targetversion: VERSION_11
       rds.targetversion: VERSION_11
-      rds.backuprestore.cloudplatforms: AZURE
+      rds.backuprestore:
+        cloudplatforms: AZURE
+        validationratio: 0.1
 
   externaldatabase.ssl.rootcerts.path: /hadoopfs/fs1/database-cacerts/certs.pem
 
