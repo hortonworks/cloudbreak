@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.service.stack.instance;
 
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -9,8 +11,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-
-import javax.inject.Inject;
 
 @Component
 public class InstanceUpdater {

@@ -172,6 +172,10 @@ cb:
         AZURE: StandardSSD_LRS
         GCP: pd-ssd
         MOCK: magnetic
+    upgrade:
+      embedded.targetversion: VERSION_11
+      rds.targetversion: VERSION_11
+      rds.backuprestore.cloudplatforms: AZURE
 
   externaldatabase.ssl.rootcerts.path: /hadoopfs/fs1/database-cacerts/certs.pem
 
@@ -919,7 +923,7 @@ existing-stack-patcher:
     logging-agent-auto-restart-v2:
       enabled: false
     disable-region-for-fluentd:
-      enabled: true
+      enabled: false
       affected-version-from: 0.2.16
     metering-azure-metadata:
       enabled: false
@@ -928,6 +932,8 @@ existing-stack-patcher:
     cluster-public-endpoint:
       enabled: false
       related-stacks:
+    collect-db-engine-version:
+      enabled: true
 
 clusterdns:
   host: localhost

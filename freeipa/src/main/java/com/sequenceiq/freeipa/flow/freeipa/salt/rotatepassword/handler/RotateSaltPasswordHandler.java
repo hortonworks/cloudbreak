@@ -11,6 +11,7 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.RotateSaltPasswordType;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordFailureResponse;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordRequest;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordSuccessResponse;
@@ -44,12 +45,23 @@ public class RotateSaltPasswordHandler extends ExceptionCatcherEventHandler<Rota
     @Override
     protected Selectable doAccept(HandlerEvent<RotateSaltPasswordRequest> event) {
         Long stackId = event.getData().getResourceId();
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        RotateSaltPasswordType rotateSaltPasswordType = event.getData().getType();
+        LOGGER.info("Rotating salt password with type {}", rotateSaltPasswordType);
         try {
-            Stack stack = stackService.getStackById(stackId);
-            rotateSaltPasswordService.rotateSaltPassword(stack);
+            switch (rotateSaltPasswordType) {
+                case SALT_BOOTSTRAP_ENDPOINT:
+                    rotateSaltPasswordService.rotateSaltPassword(stack);
+                    break;
+                case FALLBACK:
+                    rotateSaltPasswordService.rotateSaltPasswordFallback(stack);
+                    break;
+                default:
+                    throw new IllegalStateException(String.format("RotateSaltPasswordType %s is not handled", rotateSaltPasswordType));
+            }
             return new RotateSaltPasswordSuccessResponse(stackId);
         } catch (Exception e) {
-            LOGGER.warn("Failed to rotate salt password", e);
+            LOGGER.warn("Failed to rotate salt password with type {}", rotateSaltPasswordType, e);
             return new RotateSaltPasswordFailureResponse(stackId, e);
         }
     }

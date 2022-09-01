@@ -37,6 +37,7 @@ public final class FreeIpaOperationDescriptions {
     public static final String INTERNAL_UPGRADE_CCM_BY_ENVID =
             "Initiates the CCM tunnel type upgrade to the latest available version for FreeIPA stack by environment CRN using the internal actor";
     public static final String GET_RECOMMENDATION = "Get recommendation that advises cloud resources for FreeIPA based on the given credential CRN.";
+    public static final String VERTICAL_SCALE_BY_CRN = "Vertical scale by environment CRN.";
 
     private FreeIpaOperationDescriptions() {
     }

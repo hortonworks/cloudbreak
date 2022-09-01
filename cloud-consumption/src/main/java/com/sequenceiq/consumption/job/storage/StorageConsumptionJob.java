@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.flow.ConsumptionReactorFlowManager;
@@ -37,6 +38,11 @@ public class StorageConsumptionJob extends StatusCheckerJob {
 
     public StorageConsumptionJob(Tracer tracer) {
         super(tracer, "Storage Consumption Job");
+    }
+
+    @Override
+    protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
+        return Optional.empty();
     }
 
     @Override

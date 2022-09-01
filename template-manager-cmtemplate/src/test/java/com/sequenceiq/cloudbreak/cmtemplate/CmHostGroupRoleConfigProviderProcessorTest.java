@@ -256,9 +256,9 @@ public class CmHostGroupRoleConfigProviderProcessorTest {
     @Test
     public void testGetRoleConfigsWithEphemeralVolumes() {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, Collections.<String>emptySet(),
-                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.EPHEMERAL_VOLUMES, 1);
+                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.EPHEMERAL_VOLUMES, 1, 100);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, Collections.<String>emptySet(),
-                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.EPHEMERAL_VOLUMES, 3);
+                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.EPHEMERAL_VOLUMES, 3, 300);
         setup("input/clouderamanager.bp", Builder.builder().withHostgroupViews(Set.of(master, worker)));
 
         underTest.process(templateProcessor, templatePreparator);
@@ -282,9 +282,9 @@ public class CmHostGroupRoleConfigProviderProcessorTest {
     @Test
     public void testGetRoleConfigsWithAttachedVolumes() {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, Collections.<String>emptySet(),
-                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.ATTACHED_VOLUMES, 0);
+                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.ATTACHED_VOLUMES, 0, 0);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, Collections.<String>emptySet(),
-                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.ATTACHED_VOLUMES, 0);
+                Sets.newHashSet(new VolumeTemplate()), TemporaryStorage.ATTACHED_VOLUMES, 0, 0);
         setup("input/clouderamanager.bp", Builder.builder().withHostgroupViews(Set.of(master, worker)));
 
         underTest.process(templateProcessor, templatePreparator);

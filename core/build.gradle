@@ -229,12 +229,6 @@ dependencies {
   implementation group: 'org.apache.commons',                 name: 'commons-lang3',                    version: '3.12.0'
   implementation group: 'com.google.guava',                   name: 'guava',                            version: guavaVersion
 
-  implementation(group: 'com.nimbusds', name: 'oauth2-oidc-sdk') {
-    version {
-      strictly oauth2OidcSdkVersion
-    }
-    because 'java.lang.NoClassDefFoundError: com/nimbusds/oauth2/sdk/http/CommonContentTypes caused by multiple oauth2-oidc-sdk versions on classpath.'
-  }
   implementation(group: 'net.minidev', name: 'json-smart') {
     version {
       strictly jsonSmartVersion

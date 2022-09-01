@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.sqladmin.SQLAdmin;
 import com.google.api.services.sqladmin.model.DatabaseInstance;
-import com.google.api.services.sqladmin.model.InstancesListResponse;
 import com.google.api.services.sqladmin.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
@@ -25,7 +24,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerTerminateService;
-import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
 public class GcpDatabaseServerTerminateService extends GcpDatabaseServerBaseService implements DatabaseServerTerminateService {
@@ -46,23 +44,10 @@ public class GcpDatabaseServerTerminateService extends GcpDatabaseServerBaseServ
         String deploymentName = databaseServerView.getDbServerName();
         SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
         String projectId = gcpStackUtil.getProjectId(ac.getCloudCredential());
-        List<CloudResource> buildableResource = List.of(
-                new CloudResource.Builder()
-                .withType(ResourceType.GCP_DATABASE)
-                .withName(deploymentName)
-                .withAvailabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
-                .build());
-
+        List<CloudResource> buildableResource = List.of(getDatabaseCloudResource(deploymentName, ac));
         try {
-            InstancesListResponse list = sqlAdmin.instances().list(projectId).execute();
-            Optional<DatabaseInstance> first = Optional.empty();
-            if (!list.isEmpty()) {
-                first = list.getItems()
-                        .stream()
-                        .filter(e -> e.getName().equals(deploymentName))
-                        .findFirst();
-            }
-            if (!first.isEmpty()) {
+            Optional<DatabaseInstance> databaseInstance = getDatabaseInstance(deploymentName, sqlAdmin, projectId);
+            if (!databaseInstance.isEmpty()) {
                 SQLAdmin.Instances.Delete delete = sqlAdmin.instances().delete(projectId, deploymentName);
                 delete.setPrettyPrint(true);
                 try {

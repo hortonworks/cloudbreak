@@ -46,7 +46,7 @@ public class MachineUserRemoveHandler implements EventHandler<RemoveMachineUserR
     @Override
     public void accept(Event<RemoveMachineUserRequest> event) {
         RemoveMachineUserRequest request = event.getData();
-        LOGGER.info("Cleanup machine user for logging from UMS (if it is needed)...");
+        LOGGER.info("Cleanup machine user for logging / monitoring from UMS (if it is needed)...");
         cleanupMachineUser(request.getResourceId());
         RemoveMachineUserFinished response = new RemoveMachineUserFinished(request.getResourceId(), request.getForced());
         eventBus.notify(EventSelectorUtil.selector(RemoveMachineUserFinished.class),
@@ -56,12 +56,19 @@ public class MachineUserRemoveHandler implements EventHandler<RemoveMachineUserR
     private void cleanupMachineUser(Long stackId) {
         Stack stack = stackService.getStackById(stackId);
         Telemetry telemetry = stack.getTelemetry();
-        if (telemetry != null && (telemetry.isClusterLogsCollectionEnabled() || StringUtils.isNotBlank(stack.getDatabusCredential()))) {
-            ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> altusMachineUserService.cleanupMachineUser(stack, telemetry));
-        } else {
-            LOGGER.info("Machine user cleanup is not needed.");
+        if (telemetry != null) {
+            if (telemetry.isClusterLogsCollectionEnabled() || StringUtils.isNotBlank(stack.getDatabusCredential())) {
+                LOGGER.info("Cleanup fluent machine user.");
+                ThreadBasedUserCrnProvider.doAsInternalActor(
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () -> altusMachineUserService.cleanupMachineUser(stack, telemetry));
+            }
+            if (StringUtils.isNotBlank(stack.getMonitoringCredential())) {
+                LOGGER.info("Cleanup monitoring machine user.");
+                ThreadBasedUserCrnProvider.doAsInternalActor(
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () -> altusMachineUserService.cleanupMonitoringMachineUser(stack));
+            }
         }
     }
 }

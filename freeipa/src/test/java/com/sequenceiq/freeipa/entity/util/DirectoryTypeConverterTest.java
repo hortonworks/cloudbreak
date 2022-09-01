@@ -1,9 +1,9 @@
 package com.sequenceiq.freeipa.entity.util;
 
+import javax.persistence.AttributeConverter;
+
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
-
-import javax.persistence.AttributeConverter;
 
 public class DirectoryTypeConverterTest extends DefaultEnumConverterBaseTest<DirectoryType> {
 

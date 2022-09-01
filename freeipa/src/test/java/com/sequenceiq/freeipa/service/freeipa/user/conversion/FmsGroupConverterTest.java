@@ -1,11 +1,12 @@
 package com.sequenceiq.freeipa.service.freeipa.user.conversion;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
+
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 
 class FmsGroupConverterTest {
     private FmsGroupConverter underTest = new FmsGroupConverter();

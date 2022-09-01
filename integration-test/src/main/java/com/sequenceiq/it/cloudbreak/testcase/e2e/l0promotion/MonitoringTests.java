@@ -21,7 +21,6 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
-import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
@@ -93,8 +92,6 @@ public class MonitoringTests extends AbstractE2ETest {
                     .withTelemetry("telemetry")
                     .withTunnel(testContext.getTunnel())
                     .withCreateFreeIpa(Boolean.TRUE)
-                    .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
-                        commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaUserSyncTestDto.class)
@@ -103,9 +100,12 @@ public class MonitoringTests extends AbstractE2ETest {
                 .given(FreeIpaTestDto.class)
                     .withEnvironment()
                 .when(freeIpaTestClient.describe())
-                .then((tc, testDto, client) ->
-                        sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getEnvironmentCrn(), client,
-                        List.of("node_filesystem_free_bytes"), List.of("cdp-request-signer")))
+                .then((tc, testDto, client) -> {
+                    sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getEnvironmentCrn(), client,
+                            List.of("node_filesystem_free_bytes"), List.of("cdp-request-signer"));
+                    sshJUtil.checkFilesystemFreeBytesGeneratedMetric(testDto, testDto.getEnvironmentCrn(), client);
+                    return testDto;
+                })
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe())
                 .validate();
@@ -141,8 +141,6 @@ public class MonitoringTests extends AbstractE2ETest {
                 .given(FreeIpaTestDto.class)
                     .withEnvironment()
                     .withTelemetry("telemetry")
-                    .withCatalog(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
-                        commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .awaitForHealthyInstances()
@@ -151,36 +149,42 @@ public class MonitoringTests extends AbstractE2ETest {
                 .await(OperationState.COMPLETED)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
-                .then((tc, testDto, client) -> sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getEnvironmentCrn(), client,
-                        List.of("node_filesystem_free_bytes"), List.of("cdp-request-signer")))
+                .then((tc, testDto, client) -> {
+                    sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getEnvironmentCrn(), client,
+                            List.of("node_filesystem_free_bytes"), List.of("cdp-request-signer"));
+                    sshJUtil.checkFilesystemFreeBytesGeneratedMetric(testDto, testDto.getEnvironmentCrn(), client);
+                    return testDto;
+                })
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe())
                 .given(SdxInternalTestDto.class)
                     .withEnvironment()
                     .withDatabase(sdxDatabaseRequest)
-                    .withImageCatalogNameAndImageId(commonCloudProperties().getImageValidation().getSourceCatalogName(),
-                        commonCloudProperties().getImageValidation().getImageUuid())
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .when(sdxTestClient.describeInternal())
-                .then((tc, testDto, client) -> sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
-                        List.of(MASTER.getName()), List.of("node_filesystem_free_bytes", "cm_health_check_info"), List.of("cdp-request-signer",
-                                "smon-exporter", "cm_health_check_info")))
-                .given(DistroXImageTestDto.class)
-                    .withImageId(commonCloudProperties().getImageValidation().getImageUuid())
-                    .withImageCatalog(commonCloudProperties().getImageValidation().getSourceCatalogName())
+                .then((tc, testDto, client) -> {
+                    sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
+                            List.of(MASTER.getName()), List.of("node_filesystem_free_bytes", "cm_health_check_info"), List.of("cdp-request-signer"));
+                    sshJUtil.checkFilesystemFreeBytesGeneratedMetric(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
+                            List.of(MASTER.getName()));
+                    return testDto;
+                })
                 .given(DistroXTestDto.class)
                     .withExternalDatabase(distroXDatabaseRequest)
                     .withEnvironment()
-                    .withImageSettings()
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
                 .when(distroXTestClient.get())
-                .then((tc, testDto, client) -> sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getResponse().getInstanceGroups(),
-                        List.of(MASTER.getName()), List.of("node_filesystem_free_bytes", "cm_health_check_info"), List.of("cdp-request-signer",
-                                "smon-exporter", "cm_health_check_info")))
+                .then((tc, testDto, client) -> {
+                    sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getResponse().getInstanceGroups(),
+                            List.of(MASTER.getName()), List.of("node_filesystem_free_bytes", "cm_health_check_info"), List.of("cdp-request-signer"));
+                    sshJUtil.checkFilesystemFreeBytesGeneratedMetric(testDto, testDto.getResponse().getInstanceGroups(),
+                            List.of(MASTER.getName()));
+                    return testDto;
+                })
                 .validate();
     }
 }

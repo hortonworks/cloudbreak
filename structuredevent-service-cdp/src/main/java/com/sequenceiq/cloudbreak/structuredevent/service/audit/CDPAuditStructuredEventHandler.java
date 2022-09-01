@@ -48,6 +48,7 @@ public class CDPAuditStructuredEventHandler<T extends CDPStructuredEvent> implem
                     .withEventSource(extractor.eventSource(data))
                     .withSourceIp(extractor.sourceIp(data))
                     .build();
+
             auditClient.createAuditEvent(event);
         } catch (UnsupportedOperationException e) {
             LOGGER.debug("Audit log is unnecessary: {}", e.getMessage());

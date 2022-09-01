@@ -18,7 +18,7 @@ public class RdsDeletionWaitRequest extends SdxEvent {
         this.forced = forced;
     }
 
-    public static RdsDeletionWaitRequest from(SdxContext context, StackDeletionSuccessEvent payload) {
+    public static RdsDeletionWaitRequest from(SdxContext context, StorageConsumptionCollectionUnschedulingSuccessEvent payload) {
         return new RdsDeletionWaitRequest(context.getSdxId(), context.getUserId(), payload.isForced());
     }
 
@@ -30,4 +30,5 @@ public class RdsDeletionWaitRequest extends SdxEvent {
     public boolean isForced() {
         return forced;
     }
+
 }

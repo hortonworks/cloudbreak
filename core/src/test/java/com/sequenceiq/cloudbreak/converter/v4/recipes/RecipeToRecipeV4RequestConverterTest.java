@@ -26,12 +26,12 @@ class RecipeToRecipeV4RequestConverterTest {
     public void testRecipeToRecipeV4RequestConverter() {
         Recipe source = new Recipe();
         source.setName("recipeName");
-        source.setRecipeType(RecipeType.POST_CLUSTER_INSTALL);
+        source.setRecipeType(RecipeType.POST_SERVICE_DEPLOYMENT);
         source.setContent("content");
         source.setDescription("description");
         RecipeV4Request converted = recipeToRecipeV4RequestConverter.convert(source);
         assertEquals(converted.getName(), source.getName());
-        assertEquals(converted.getType(), RecipeV4Type.POST_CLUSTER_INSTALL);
+        assertEquals(converted.getType(), RecipeV4Type.POST_SERVICE_DEPLOYMENT);
         assertEquals(converted.getDescription(), source.getDescription());
         assertEquals(converted.getContent(), source.getContent());
     }

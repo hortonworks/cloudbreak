@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRota
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
@@ -64,13 +65,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
 import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
 import com.sequenceiq.cloudbreak.service.operation.OperationService;
@@ -89,6 +90,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Reque
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXVerticalScaleV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.MultipleInstanceDeleteRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.CmDiagnosticsCollectionV1Request;
@@ -99,6 +101,7 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXMaintenanceModeV1ToMai
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXRepairV1RequestToClusterRepairV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXScaleV1RequestToStackScaleV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
+import com.sequenceiq.distrox.v1.distrox.converter.DistroXVerticalScaleV1RequestToStackVerticalScaleV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.service.DistroXService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
@@ -124,6 +127,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Inject
     private DistroXScaleV1RequestToStackScaleV4RequestConverter scaleRequestConverter;
+
+    @Inject
+    private DistroXVerticalScaleV1RequestToStackVerticalScaleV4RequestConverter verticalScaleV4RequestConverter;
 
     @Inject
     private DistroXRepairV1RequestToClusterRepairV4RequestConverter clusterRepairRequestConverter;
@@ -355,7 +361,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public FlowIdentifier putScalingByName(@ResourceName String name, @Valid DistroXScaleV1Request updateRequest) {
         StackScaleV4Request stackScaleV4Request = scaleRequestConverter.convert(updateRequest);
-        stackScaleV4Request.setStackId(stackOperations.getStackByName(name).getId());
+        stackScaleV4Request.setStackId(stackOperations.getResourceIdByResourceName(name));
         return stackOperations.putScaling(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), stackScaleV4Request);
     }
 
@@ -366,6 +372,23 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         StackScaleV4Request stackScaleV4Request = scaleRequestConverter.convert(updateRequest);
         stackScaleV4Request.setStackId(stackOperations.getStackByCrn(crn).getId());
         stackOperations.putScaling(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), stackScaleV4Request);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
+    public FlowIdentifier putVerticalScalingByName(@ResourceName String name, @Valid DistroXVerticalScaleV1Request updateRequest) {
+        StackVerticalScaleV4Request stackVerticalScaleV4Request = verticalScaleV4RequestConverter.convert(updateRequest);
+        stackVerticalScaleV4Request.setStackId(stackOperations.getResourceIdByResourceName(name));
+        return stackOperations.putVerticalScaling(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), stackVerticalScaleV4Request);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
+    public FlowIdentifier putVerticalScalingByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn,
+            @Valid DistroXVerticalScaleV1Request updateRequest) {
+        StackVerticalScaleV4Request stackVerticalScaleV4Request = verticalScaleV4RequestConverter.convert(updateRequest);
+        stackVerticalScaleV4Request.setStackId(stackOperations.getResourceIdByResourceCrn(crn));
+        return stackOperations.putVerticalScaling(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), stackVerticalScaleV4Request);
     }
 
     @Override

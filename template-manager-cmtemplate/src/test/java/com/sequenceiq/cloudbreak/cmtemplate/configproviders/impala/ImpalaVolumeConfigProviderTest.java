@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.impala;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.VolumeConfigProviderTestHelper.hostGroupWithVolumeTemplates;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.VolumeConfigProviderTestHelper.hostGroupWithVolumeTemplatesAndTemporaryStorage;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.VolumeConfigProviderTestHelper.preparatorWithHostGroups;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -36,6 +38,21 @@ class ImpalaVolumeConfigProviderTest {
     }
 
     @Test
+    void testRoleConfigsWithAttachedVolumes100GBAndTemporaryStoragePresent() {
+        HostgroupView worker = hostGroupWithVolumeTemplatesAndTemporaryStorage(2, getVolumeTemplates(100), TemporaryStorage.EPHEMERAL_VOLUMES, 3, 300);
+        List<ApiClusterTemplateConfig> roleConfigs = subject.getRoleConfigs(ImpalaRoles.ROLE_IMPALAD, worker, preparatorWithHostGroups(worker));
+
+        assertEquals(
+                List.of(
+                        config("scratch_dirs", "/hadoopfs/ephfs1/impala/scratch,/hadoopfs/ephfs2/impala/scratch,/hadoopfs/ephfs3/impala/scratch"),
+                        config("datacache_enabled", "true"),
+                        config("datacache_capacity", "46170898432"),
+                        config("datacache_dirs", "/hadoopfs/ephfs1/impala/datacache,/hadoopfs/ephfs2/impala/datacache,/hadoopfs/ephfs3/impala/datacache")),
+                roleConfigs
+        );
+    }
+
+    @Test
     void testRoleConfigsWithAttachedVolumes200GB() {
         HostgroupView worker = hostGroupWithVolumeTemplates(3, getVolumeTemplates(200));
         List<ApiClusterTemplateConfig> roleConfigs = subject.getRoleConfigs(ImpalaRoles.ROLE_IMPALAD, worker, preparatorWithHostGroups(worker));
@@ -51,6 +68,21 @@ class ImpalaVolumeConfigProviderTest {
     }
 
     @Test
+    void testRoleConfigsWithAttachedVolumes200GBAndTemporaryStoragePresent() {
+        HostgroupView worker = hostGroupWithVolumeTemplatesAndTemporaryStorage(3, getVolumeTemplates(200), TemporaryStorage.EPHEMERAL_VOLUMES, 1, 300);
+        List<ApiClusterTemplateConfig> roleConfigs = subject.getRoleConfigs(ImpalaRoles.ROLE_IMPALAD, worker, preparatorWithHostGroups(worker));
+
+        assertEquals(
+                List.of(
+                        config("scratch_dirs", "/hadoopfs/ephfs1/impala/scratch"),
+                        config("datacache_enabled", "true"),
+                        config("datacache_capacity", "139586437120"),
+                        config("datacache_dirs", "/hadoopfs/ephfs1/impala/datacache")),
+                roleConfigs
+        );
+    }
+
+    @Test
     void testRoleConfigsWithAttachedVolumesGreaterThanMaxImapalaCacheVolumeSize() {
         HostgroupView worker = hostGroupWithVolumeTemplates(3, getVolumeTemplates(1000));
         List<ApiClusterTemplateConfig> roleConfigs = subject.getRoleConfigs(ImpalaRoles.ROLE_IMPALAD, worker, preparatorWithHostGroups(worker));
@@ -61,6 +93,21 @@ class ImpalaVolumeConfigProviderTest {
                         config("datacache_enabled", "true"),
                         config("datacache_capacity", "46170898432"),
                         config("datacache_dirs", "/hadoopfs/fs1/impala/datacache,/hadoopfs/fs2/impala/datacache,/hadoopfs/fs3/impala/datacache")),
+                roleConfigs
+        );
+    }
+
+    @Test
+    void testRoleConfigsWithAttachedVolumesGreaterThanMaxImapalaCacheVolumeSizeAndTemporaryStoragePresent() {
+        HostgroupView worker = hostGroupWithVolumeTemplatesAndTemporaryStorage(3, getVolumeTemplates(1000), TemporaryStorage.EPHEMERAL_VOLUMES, 1, 300);
+        List<ApiClusterTemplateConfig> roleConfigs = subject.getRoleConfigs(ImpalaRoles.ROLE_IMPALAD, worker, preparatorWithHostGroups(worker));
+
+        assertEquals(
+                List.of(
+                        config("scratch_dirs", "/hadoopfs/ephfs1/impala/scratch"),
+                        config("datacache_enabled", "true"),
+                        config("datacache_capacity", "139586437120"),
+                        config("datacache_dirs", "/hadoopfs/ephfs1/impala/datacache")),
                 roleConfigs
         );
     }

@@ -1,16 +1,48 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.sql;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
+
+import org.jetbrains.annotations.NotNull;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.sqladmin.SQLAdmin;
+import com.google.api.services.sqladmin.model.DatabaseInstance;
+import com.google.api.services.sqladmin.model.InstancesListResponse;
 import com.google.api.services.sqladmin.model.Operation;
 import com.google.api.services.sqladmin.model.OperationError;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.checker.AbstractGcpDatabaseBaseResourceChecker;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.ResourceType;
 
 public abstract class GcpDatabaseServerBaseService extends AbstractGcpDatabaseBaseResourceChecker {
+    @NotNull
+    protected Optional<DatabaseInstance> getDatabaseInstance(String deploymentName, SQLAdmin sqlAdmin, String projectId) throws IOException {
+        InstancesListResponse list = sqlAdmin.instances().list(projectId).execute();
+        Optional<DatabaseInstance> databaseInstance = Optional.empty();
+        if (!list.isEmpty()) {
+            databaseInstance = list.getItems()
+                    .stream()
+                    .filter(e -> e.getName().equals(deploymentName))
+                    .findFirst();
+        }
+        return databaseInstance;
+    }
+
+    protected CloudResource getDatabaseCloudResource(String deploymentName, AuthenticatedContext ac) {
+        return getDatabaseCloudResource(deploymentName, ac.getCloudContext().getLocation().getAvailabilityZone().value());
+    }
+
+    protected CloudResource getDatabaseCloudResource(String deploymentName, String availabilityZone) {
+        return new CloudResource.Builder()
+                .withType(ResourceType.GCP_DATABASE)
+                .withName(deploymentName)
+                .withAvailabilityZone(availabilityZone)
+                .build();
+    }
 
     protected void verifyOperation(Operation operation, List<CloudResource> buildableResource) {
         if (operation.getError() != null

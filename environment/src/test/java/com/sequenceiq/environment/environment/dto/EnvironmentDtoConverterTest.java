@@ -50,6 +50,7 @@ import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.domain.ParentEnvironmentView;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaInstanceCountByGroupProvider;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -188,6 +189,9 @@ class EnvironmentDtoConverterTest {
 
     @Mock
     private EnvironmentNetworkConverter environmentNetworkConverter;
+
+    @Mock
+    private FreeIpaInstanceCountByGroupProvider ipaInstanceCountByGroupProvider;
 
     @Captor
     private ArgumentCaptor<CDPTagGenerationRequest> cdpTagGenerationRequestCaptor;
@@ -434,6 +438,21 @@ class EnvironmentDtoConverterTest {
     }
 
     @Test
+    void environmentViewToViewDtoTestWithoutFreeIpaInstanceCountByGroup() {
+        int expectedFreeIpaInstanceCountByGroup = 3;
+        when(ipaInstanceCountByGroupProvider.getDefaultInstanceCount()).thenReturn(expectedFreeIpaInstanceCountByGroup);
+        when(environmentView.getFreeIpaInstanceCountByGroup()).thenReturn(null);
+        when(environmentView.getFreeIpaInstanceType()).thenReturn(FREE_IPA_INSTANCE_TYPE);
+        when(environmentView.getCloudPlatform()).thenReturn(CLOUD_PLATFORM_AWS);
+
+        EnvironmentViewDto result = underTest.environmentViewToViewDto(environmentView);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getFreeIpaCreation().getInstanceCountByGroup()).isEqualTo(expectedFreeIpaInstanceCountByGroup);
+        assertThat(result.getFreeIpaCreation().getInstanceType()).isEqualTo(FREE_IPA_INSTANCE_TYPE);
+    }
+
+    @Test
     void environmentToDtoTestBasic() {
         Credential credential = new Credential();
         Region region = new Region();
@@ -670,9 +689,8 @@ class EnvironmentDtoConverterTest {
         environmentTelemetry.setFluentAttributes(fluentAttributes);
         EnvironmentBackup environmentBackup = new EnvironmentBackup();
         environmentBackup.setStorageLocation(STORAGE_LOCATION);
-        FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder()
+        FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP)
                 .withCreate(CREATE_FREE_IPA)
-                .withInstanceCountByGroup(FREE_IPA_INSTANCE_COUNT_BY_GROUP)
                 .withInstanceType(FREE_IPA_INSTANCE_TYPE)
                 .withImageCatalog(FREE_IPA_IMAGE_CATALOG)
                 .withEnableMultiAz(FREE_IPA_ENABLE_MULTI_AZ)
@@ -789,7 +807,7 @@ class EnvironmentDtoConverterTest {
                 .withName(LOCATION)
                 .withDisplayName(LOCATION_DISPLAY_NAME)
                 .build();
-        FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder()
+        FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP)
                 .build();
         Map<String, String> defaultTags = Map.ofEntries(entry("defaultKey1", "defaultValue1"), entry("defaultKey2", "defaultValue2"));
         EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
@@ -828,7 +846,7 @@ class EnvironmentDtoConverterTest {
                 .withName(LOCATION)
                 .withDisplayName(LOCATION_DISPLAY_NAME)
                 .build();
-        FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder()
+        FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP)
                 .build();
         EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
                 .withAccountId(ACCOUNT_ID)
@@ -857,7 +875,7 @@ class EnvironmentDtoConverterTest {
                 .withName(LOCATION)
                 .withDisplayName(LOCATION_DISPLAY_NAME)
                 .build();
-        FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder()
+        FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP)
                 .build();
         EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
                 .withAccountId(ACCOUNT_ID)

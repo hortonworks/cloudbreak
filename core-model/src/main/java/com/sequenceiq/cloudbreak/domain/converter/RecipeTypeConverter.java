@@ -7,6 +7,6 @@ public class RecipeTypeConverter extends DefaultEnumConverter<RecipeType> {
 
     @Override
     public RecipeType getDefault() {
-        return RecipeType.POST_CLUSTER_INSTALL;
+        return RecipeType.POST_SERVICE_DEPLOYMENT;
     }
 }

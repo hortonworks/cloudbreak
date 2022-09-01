@@ -27,6 +27,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaInstanceCountByGroupProvider;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
@@ -61,6 +62,8 @@ public class EnvironmentDtoConverter {
 
     private final EnvironmentRecipeService environmentRecipeService;
 
+    private final FreeIpaInstanceCountByGroupProvider ipaInstanceCountByGroupProvider;
+
     public EnvironmentDtoConverter(Map<CloudPlatform,
             EnvironmentNetworkConverter> environmentNetworkConverterMap,
             Map<CloudPlatform, EnvironmentParametersConverter> environmentParamsConverterMap,
@@ -71,7 +74,8 @@ public class EnvironmentDtoConverter {
             AccountTagToAccountTagResponsesConverter accountTagToAccountTagResponsesConverter,
             AccountTagService accountTagService,
             CrnUserDetailsService crnUserDetailsService,
-            EnvironmentRecipeService environmentRecipeService) {
+            EnvironmentRecipeService environmentRecipeService,
+            FreeIpaInstanceCountByGroupProvider ipaInstanceCountByGroupProvider) {
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
         this.environmentParamsConverterMap = environmentParamsConverterMap;
         this.authenticationDtoConverter = authenticationDtoConverter;
@@ -82,6 +86,7 @@ public class EnvironmentDtoConverter {
         this.accountTagToAccountTagResponsesConverter = accountTagToAccountTagResponsesConverter;
         this.crnUserDetailsService = crnUserDetailsService;
         this.environmentRecipeService = environmentRecipeService;
+        this.ipaInstanceCountByGroupProvider = ipaInstanceCountByGroupProvider;
     }
 
     public EnvironmentViewDto environmentViewToViewDto(EnvironmentView environmentView) {
@@ -319,9 +324,9 @@ public class EnvironmentDtoConverter {
 
     private FreeIpaCreationDto getFreeIpaCreationDto(boolean createFreeIpa, Integer freeIpaInstanceCountByGroup, String freeIpaInstanceType,
             String freeIpaImageCatalog, String freeIpaImageId, boolean freeIpaEnableMultiAz, Set<String> freeipaRecipes) {
-        FreeIpaCreationDto.Builder builder = FreeIpaCreationDto.builder()
+        Integer ipaInstanceCountByGroup = Optional.ofNullable(freeIpaInstanceCountByGroup).orElse(ipaInstanceCountByGroupProvider.getDefaultInstanceCount());
+        FreeIpaCreationDto.Builder builder = FreeIpaCreationDto.builder(ipaInstanceCountByGroup)
                 .withCreate(createFreeIpa);
-        Optional.ofNullable(freeIpaInstanceCountByGroup).ifPresent(builder::withInstanceCountByGroup);
         builder.withInstanceType(freeIpaInstanceType);
         builder.withImageCatalog(freeIpaImageCatalog);
         builder.withImageId(freeIpaImageId);

@@ -129,4 +129,8 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
     @Modifying
     @Query("UPDATE InstanceGroup ig SET ig.attributes = :attributes WHERE ig.id = :instanceGroupId")
     void updateAttributes(@Param("instanceGroupId") Long instanceGroupId, @Param("attributes") Json attributes);
+
+    @Query("SELECT i FROM InstanceGroup i JOIN FETCH i.template WHERE i.stack.id = :stackId AND i.groupName = :groupName")
+    Optional<InstanceGroup> getByStackIdAndInstanceGroupNameWithFetchTemplate(@Param("stackId") Long stackId, @Param("groupName") String groupName);
+
 }

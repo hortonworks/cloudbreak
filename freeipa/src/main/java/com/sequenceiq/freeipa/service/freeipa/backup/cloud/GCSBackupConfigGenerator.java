@@ -1,12 +1,13 @@
 package com.sequenceiq.freeipa.service.freeipa.backup.cloud;
 
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import java.nio.file.Paths;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Paths;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @Component
 public class GCSBackupConfigGenerator extends CloudBackupConfigGenerator<GCSBackupConfig> {

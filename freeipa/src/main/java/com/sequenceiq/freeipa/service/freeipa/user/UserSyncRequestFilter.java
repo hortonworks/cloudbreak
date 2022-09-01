@@ -1,10 +1,10 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
-import com.google.common.collect.ImmutableSet;
-
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
 
 public class UserSyncRequestFilter {
 

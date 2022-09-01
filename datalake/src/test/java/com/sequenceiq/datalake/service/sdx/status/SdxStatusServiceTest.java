@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxStatusRepository;
 import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
@@ -41,13 +43,16 @@ class SdxStatusServiceTest {
     private TransactionService transactionService;
 
     @Mock
-    private SdxNotificationService sdxNotificationService;
+    private EventSenderService eventSenderService;
 
     @Mock
     private SdxStatusRepository sdxStatusRepository;
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
+
+    @Mock
+    private SdxNotificationService sdxNotificationService;
 
     @Spy
     private Clock clock;
@@ -95,6 +100,8 @@ class SdxStatusServiceTest {
         oldStatus.setStatus(DatalakeStatusEnum.STACK_DELETED);
         DatalakeStatusEnum status = DatalakeStatusEnum.DELETED;
         ResourceEvent resourceEvent = ResourceEvent.SDX_RDS_DELETION_FINISHED;
+        doNothing().when(eventSenderService).sendEventAndNotification(any(), any());
+        doNothing().when(sdxNotificationService).send(any(), any(), any());
 
         sdxStatusService.setStatusForDatalakeAndNotify(status, resourceEvent, "deleted", sdxCluster);
 
@@ -102,7 +109,7 @@ class SdxStatusServiceTest {
         assertEquals(status, statusEntityCaptor.getValue().getStatus());
         assertEquals(TIMESTAMP, sdxClusterCaptor.getValue().getDeleted());
         verify(transactionService).required(any(Runnable.class));
-        verify(sdxNotificationService).send(resourceEvent, sdxCluster);
+        verify(eventSenderService).sendEventAndNotification(sdxCluster, resourceEvent);
     }
 
     @Test
@@ -110,12 +117,14 @@ class SdxStatusServiceTest {
         oldStatus.setStatus(DatalakeStatusEnum.RUNNING);
         DatalakeStatusEnum status = DatalakeStatusEnum.SALT_PASSWORD_ROTATION_FAILED;
         Set<String> messageArgs = Collections.singleton("exception-message");
+        doNothing().when(sdxNotificationService).send(any(), any(), any());
+        doNothing().when(eventSenderService).sendEventAndNotification(any(), any(), any());
 
         sdxStatusService.setStatusForDatalakeAndNotify(status, messageArgs, "Rotating SaltStack user password failed", sdxCluster.getId());
 
         verify(sdxStatusRepository).save(any(SdxStatusEntity.class));
         assertEquals(status, statusEntityCaptor.getValue().getStatus());
         verify(transactionService).required(any(Runnable.class));
-        verify(sdxNotificationService).send(status.getDefaultResourceEvent(), messageArgs, sdxCluster);
+        verify(eventSenderService).sendEventAndNotification(sdxCluster, status.getDefaultResourceEvent(), messageArgs);
     }
 }

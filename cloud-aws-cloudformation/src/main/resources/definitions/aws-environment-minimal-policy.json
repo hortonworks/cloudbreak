@@ -166,6 +166,7 @@
         "rds:CreateDBParameterGroup",
         "rds:DeleteDBParameterGroup",
         "rds:DescribeEngineDefaultParameters",
+        "rds:DescribeDBEngineVersions",
         "rds:ModifyDBParameterGroup",
         "rds:DescribeDBParameters",
         "rds:DescribeDBParameterGroups",

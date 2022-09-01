@@ -14,6 +14,7 @@ public class AzureNetwork extends BaseNetwork {
 
     private String databasePrivateDnsZoneId;
 
+    @Override
     public String getNetworkId() {
         return networkId;
     }

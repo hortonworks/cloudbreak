@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
@@ -21,9 +20,6 @@ import reactor.bus.EventBus;
 public class ClusterProxyDeregistrationHandler implements EventHandler<ClusterProxyDeregistrationRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyDeregistrationHandler.class);
-
-    @Inject
-    private ClusterProxyConfiguration clusterProxyConfiguration;
 
     @Inject
     private EventBus eventBus;

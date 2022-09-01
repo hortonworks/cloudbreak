@@ -5,11 +5,11 @@ import java.util.Map;
 import javax.validation.constraints.NotBlank;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 
-@Configuration
+@Component
 @ConfigurationProperties(prefix = "existing-stack-patcher")
 public class ExistingStackPatcherConfig {
 

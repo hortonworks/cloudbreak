@@ -141,7 +141,7 @@ public class ResizeRecoveryServiceTest {
     public void testTriggerRecoveryShouldStartFlow() {
         SdxRecoveryResponse sdxRecoveryResponse =
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerRecovery(cluster, request));
-        verify(sdxReactorFlowManager).triggerSdxResizeRecovery(otherCluster, cluster);
+        verify(sdxReactorFlowManager).triggerSdxResizeRecovery(otherCluster, Optional.ofNullable(cluster));
         assertEquals(flowId, sdxRecoveryResponse.getFlowIdentifier());
     }
 
@@ -190,7 +190,7 @@ public class ResizeRecoveryServiceTest {
                 .thenReturn(Optional.empty());
         SdxRecoveryResponse sdxRecoveryResponse =
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerRecovery(cluster, request));
-        verify(sdxReactorFlowManager).triggerSdxResizeRecovery(cluster, null);
+        verify(sdxReactorFlowManager).triggerSdxResizeRecovery(cluster, Optional.empty());
         assertEquals(flowId, sdxRecoveryResponse.getFlowIdentifier());
     }
 }

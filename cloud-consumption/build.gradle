@@ -67,6 +67,9 @@ dependencies {
     implementation     group: 'io.projectreactor',         name: 'reactor-bus',                          version: eventBusVersion
     implementation     group: 'io.projectreactor',         name: 'reactor-stream',                       version: eventBusVersion
 
+    testRuntimeClasspath group: 'org.testcontainers',      name: 'postgresql',                           version: testContainersVersion
+    testRuntimeClasspath group: 'org.awaitility',          name: 'awaitility',                           version: awaitilityVersion
+
     implementation(group: 'net.minidev', name: 'json-smart') {
         version {
             strictly jsonSmartVersion

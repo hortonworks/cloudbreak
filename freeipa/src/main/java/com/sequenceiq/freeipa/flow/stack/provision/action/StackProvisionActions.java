@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
-import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
@@ -71,9 +70,6 @@ public class StackProvisionActions {
 
     @Inject
     private StackProvisionService stackProvisionService;
-
-    @Inject
-    private InstanceMetaDataToCloudInstanceConverter metadataConverter;
 
     @Inject
     private StackService stackService;

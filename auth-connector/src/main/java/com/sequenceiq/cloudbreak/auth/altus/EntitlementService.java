@@ -40,6 +40,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_DATABUS_ENDPOINT_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_LONG_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_RESIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_RESIZE_RECOVERY;
@@ -67,6 +68,8 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EMBEDDED;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ROTATE_SALTUSER_PASSWORD;
@@ -78,6 +81,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_TARGETED_UPSCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_UNBOUND_ELIMINATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_DATABUS_CNAME_ENDPOINT;
@@ -98,6 +102,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH_ONE_HOUR_TOKEN;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PERSONAL_VIEW_CB_BY_RIGHT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
 
 import java.util.List;
@@ -324,6 +329,10 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, CDP_CCM_V2_JUMPGATE);
     }
 
+    public boolean awsVerticalScaleEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_AWS_VERTICAL_SCALE);
+    }
+
     public boolean ccmV1ToV2JumpgateUpgradeEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE);
     }
@@ -526,6 +535,22 @@ public class EntitlementService {
 
     public boolean isExperimentalNodeCountLimitsEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS);
+    }
+
+    public boolean isEmbeddedPostgresUpgradeEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_POSTGRES_UPGRADE_EMBEDDED);
+    }
+
+    public boolean isPostgresUpgradeExceptionEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_POSTGRES_UPGRADE_EXCEPTION);
+    }
+
+    public boolean isUserSyncSplitFreeIPAUserRetrievalEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL);
+    }
+
+    public boolean isLongTimeBackupEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_DATALAKE_BACKUP_LONG_TIMEOUT);
     }
 
     public List<String> getEntitlements(String accountId) {

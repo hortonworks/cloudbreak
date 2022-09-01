@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.model.filesystem;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.model.CloudIdentityType;
 
 public class CloudWasbView extends CloudFileSystemView {
@@ -14,7 +16,8 @@ public class CloudWasbView extends CloudFileSystemView {
 
     private String resourceGroupName;
 
-    public CloudWasbView(CloudIdentityType cloudIdentityType) {
+    @JsonCreator
+    public CloudWasbView(@JsonProperty("cloudIdentityType") CloudIdentityType cloudIdentityType) {
         super(cloudIdentityType);
     }
 

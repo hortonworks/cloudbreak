@@ -15,6 +15,7 @@ dependencies {
 
   implementation project(":common")
   implementation project(':common-model')
+  implementation project(':usage-collection')
 
   implementation            group: 'io.swagger',                 name: 'swagger-annotations',   version: swaggerVersion
 

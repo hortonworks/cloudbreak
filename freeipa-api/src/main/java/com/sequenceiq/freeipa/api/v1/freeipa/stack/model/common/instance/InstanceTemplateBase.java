@@ -1,10 +1,12 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance;
 
+import java.io.Serializable;
+
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.TemplateModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public abstract class InstanceTemplateBase {
+public abstract class InstanceTemplateBase implements Serializable {
     @ApiModelProperty(TemplateModelDescription.INSTANCE_TYPE)
     private String instanceType;
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.connector.resource;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView.DB_VERSION;
 import static com.sequenceiq.common.api.type.ResourceType.ARM_TEMPLATE;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_ENDPOINT;
@@ -38,7 +39,10 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceRetriever;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -69,6 +73,9 @@ public class AzureDatabaseResourceService {
     @Inject
     private AzureTransientDeploymentService azureTransientDeploymentService;
 
+    @Inject
+    private PersistenceRetriever persistenceRetriever;
+
     public List<CloudResourceStatus> buildDatabaseResourcesForLaunch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier persistenceNotifier) {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
@@ -92,8 +99,7 @@ public class AzureDatabaseResourceService {
         createTemplateResource(persistenceNotifier, cloudContext, stackName);
         Deployment deployment;
         try {
-            String parametersMapAsString = new Json(Map.of()).getValue();
-            client.createTemplateDeployment(resourceGroupName, stackName, template, parametersMapAsString);
+            deployDatabaseServer(stackName, resourceGroupName, template, client);
         } catch (CloudException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Database stack provisioning");
         } catch (Exception e) {
@@ -237,5 +243,72 @@ public class AzureDatabaseResourceService {
 
     public String getDBStackTemplate() {
         return azureDatabaseTemplateProvider.getDBTemplateString();
+    }
+
+    public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion) {
+
+        CloudContext cloudContext = authenticatedContext.getCloudContext();
+        Long stackId = cloudContext.getId();
+        Optional<CloudResource> databaseServer = persistenceRetriever.retrieveFirstByTypeAndStatusForStack(AZURE_DATABASE,
+                CommonStatus.CREATED, stackId);
+        Optional<CloudResource> privateEndpoint = persistenceRetriever.retrieveFirstByTypeAndStatusForStack(AZURE_PRIVATE_ENDPOINT,
+                CommonStatus.CREATED, stackId);
+
+        String stackName = azureUtils.getStackName(cloudContext);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
+        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+
+        try {
+            databaseServer.ifPresent(
+                    databaseServerResource -> deleteDatabaseServer(client, databaseServerResource, persistenceNotifier, cloudContext));
+
+            privateEndpoint.ifPresent(
+                    privateEndpointResource -> deletePrivateEndpoint(client, privateEndpointResource, persistenceNotifier, cloudContext));
+
+            stack.getDatabaseServer().putParameter(DB_VERSION, targetMajorVersion.getMajorVersion());
+            String template = azureDatabaseTemplateBuilder.build(cloudContext, stack);
+            deployDatabaseServer(stackName, resourceGroupName, template, client);
+        } catch (CloudException e) {
+            throw azureUtils.convertToCloudConnectorException(e, "Database stack upgrade");
+        } catch (Exception e) {
+            throw new CloudConnectorException(String.format("Error in upgrading database stack %s: %s", stackName, e.getMessage()), e);
+        } finally {
+            updateCloudResourcesInDeployment(persistenceNotifier, cloudContext, stackName, resourceGroupName, client);
+        }
+    }
+
+    private void updateCloudResourcesInDeployment(PersistenceNotifier persistenceNotifier, CloudContext cloudContext,
+            String deploymentName, String resourceGroupName, AzureClient client) {
+        Deployment deployment = client.getTemplateDeployment(resourceGroupName, deploymentName);
+        if (deployment != null) {
+            List<CloudResource> cloudResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
+            LOGGER.debug("Deployment {} has been found with the following cloud resources: {}", deploymentName, cloudResources);
+            cloudResources.forEach(resource -> persistenceNotifier.notifyUpdate(resource, cloudContext));
+        } else {
+            LOGGER.warn("Deployment {} is not found, it should not happen", deploymentName);
+        }
+    }
+
+    private void deployDatabaseServer(String stackName, String resourceGroupName, String template, AzureClient client) {
+        LOGGER.debug("Re-deploying database server {} in resource group {}", stackName, resourceGroupName);
+        String parametersMapAsString = new Json(Map.of()).getValue();
+        client.createTemplateDeployment(resourceGroupName, stackName, template, parametersMapAsString);
+    }
+
+    private void deleteDatabaseServer(AzureClient client, CloudResource resource, PersistenceNotifier persistenceNotifier, CloudContext cloudContext) {
+        String databaseReference = resource.getReference();
+        LOGGER.debug("Azure database server has been found with the reference '{}', deleting and marking it 'DETACHED' in our database: {}",
+                databaseReference, resource);
+        azureUtils.deleteDatabaseServer(client, databaseReference, false);
+        resource.setStatus(CommonStatus.DETACHED);
+        persistenceNotifier.notifyUpdate(resource, cloudContext);
+    }
+
+    private void deletePrivateEndpoint(AzureClient client, CloudResource resource, PersistenceNotifier persistenceNotifier, CloudContext cloudContext) {
+        LOGGER.debug("Deleting private endpoint and marking it 'DETACHED' in our database: {}", resource);
+        azureUtils.deletePrivateEndpoint(client, resource.getReference(), false);
+        resource.setStatus(CommonStatus.DETACHED);
+        persistenceNotifier.notifyUpdate(resource, cloudContext);
     }
 }

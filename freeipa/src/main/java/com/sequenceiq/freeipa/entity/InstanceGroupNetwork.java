@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.entity;
 
+import java.util.StringJoiner;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -11,8 +13,6 @@ import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
-
-import java.util.StringJoiner;
 
 @Entity
 @Table

@@ -4,10 +4,10 @@ import javax.ws.rs.client.WebTarget;
 
 import com.sequenceiq.cloudbreak.client.AbstractKeyBasedServiceEndpoint;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
-import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.freeipa.api.v1.diagnostics.DiagnosticsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.test.ClientTestV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.FreeIpaUpgradeV1Endpoint;
@@ -17,6 +17,7 @@ import com.sequenceiq.freeipa.api.v1.kerberosmgmt.KerberosMgmtV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.progress.ProgressV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.recipe.RecipeV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 
 public class FreeIpaApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint implements FreeIpaClient {
@@ -71,8 +72,8 @@ public class FreeIpaApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint impl
     }
 
     @Override
-    public FlowEndpoint getFlowEndpoint() {
-        return getEndpoint(FlowEndpoint.class);
+    public FreeIpaV1FlowEndpoint getFlowEndpoint() {
+        return getEndpoint(FreeIpaV1FlowEndpoint.class);
     }
 
     @Override
@@ -99,4 +100,10 @@ public class FreeIpaApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint impl
     public FreeIpaUpgradeV1Endpoint getFreeIpaUpgradeV1Endpoint() {
         return getEndpoint(FreeIpaUpgradeV1Endpoint.class);
     }
+
+    @Override
+    public RecipeV1Endpoint getRecipeV1Endpoint() {
+        return getEndpoint(RecipeV1Endpoint.class);
+    }
+
 }

@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLUSTER_INSTALL;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_SERVICE_DEPLOYMENT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_SERVICE_DEPLOYMENT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
 
 import java.util.Map;
@@ -47,22 +47,22 @@ public class FreeIpaCreationTest extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "environment is present",
-            when = "calling a freeipa creation",
-            then = "freeipa should be available with kerberos and ldap config")
-    public void testCreateFreeIpa(MockedTestContext testContext) {
+            when = "calling a freeipa creation with attached recipes",
+            then = "freeipa should be available with kerberos and ldap config, recipes should run")
+    public void testCreateFreeIpaWithRecipes(MockedTestContext testContext) {
         String preRecipeName = resourcePropertyProvider().getName();
         String postInstallRecipeName = resourcePropertyProvider().getName();
         String preTerminationRecipeName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
                     .withName(preRecipeName)
-                    .withContent(recipeUtil.generatePreCmStartRecipeContent(applicationContext))
-                    .withRecipeType(PRE_CLOUDERA_MANAGER_START)
+                    .withContent(recipeUtil.generatePreDeploymentRecipeContent(applicationContext))
+                    .withRecipeType(PRE_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4())
                 .given(RecipeTestDto.class)
                     .withName(postInstallRecipeName)
-                    .withContent(recipeUtil.generatePostInstallRecipeContent(applicationContext))
-                    .withRecipeType(POST_CLUSTER_INSTALL)
+                    .withContent(recipeUtil.generatePostDeploymentRecipeContent(applicationContext))
+                    .withRecipeType(POST_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4())
                 .given(RecipeTestDto.class)
                     .withName(preTerminationRecipeName)
@@ -76,20 +76,26 @@ public class FreeIpaCreationTest extends AbstractMockTest {
                 .await(Status.AVAILABLE)
                 .then(FreeIpaKerberosTestAssertion.validate())
                 .then(FreeIpaLdapTestAssertion.validate())
+                .when(freeIpaTestClient.delete())
+                .await(Status.DELETE_COMPLETED)
                 .mockSalt().saltFileDistribute().post()
                     .parameters(Map.of("file", preRecipeName, "path", "/srv/salt/pre-recipes/scripts", "permissions", "0600"),
                             DefaultResponseConfigure.ParameterCheck.HAS_THESE_PARAMETERS)
-                    .times(1).verify()
+                    .times(2).verify()
                 .mockSalt().saltFileDistribute().post()
                 .parameters(Map.of("file", postInstallRecipeName, "path", "/srv/salt/post-recipes/scripts", "permissions", "0600"),
                         DefaultResponseConfigure.ParameterCheck.HAS_THESE_PARAMETERS)
-                .times(1).verify()
+                .times(2).verify()
                 .mockSalt().saltFileDistribute().post()
                 .parameters(Map.of("file", preTerminationRecipeName, "path", "/srv/salt/pre-recipes/scripts", "permissions", "0600"),
                         DefaultResponseConfigure.ParameterCheck.HAS_THESE_PARAMETERS)
-                .times(1).verify()
-                .mockSalt().run().post().bodyContains("fun=grains.append", 1).times(2).verify()
+                .times(2).verify()
+                .mockSalt().run().post().bodyContains(Set.of("fun=grains.append", "arg=recipes&arg=pre-service-deployment"), 1).times(1).verify()
+                .mockSalt().run().post().bodyContains(Set.of("fun=grains.append", "arg=recipes&arg=post-service-deployment"), 1).times(1).verify()
+                .mockSalt().run().post().bodyContains(Set.of("fun=grains.append", "arg=recipes&arg=pre-termination"), 1).times(1).verify()
                 .mockSalt().run().post().bodyContains("state.highstate", 1).times(3).verify()
+                .mockSalt().run().post().bodyContains(Set.of("state.apply", "arg=recipes.post-service-deployment"), 1).times(1).verify()
+                .mockSalt().run().post().bodyContains(Set.of("state.apply", "arg=recipes.pre-termination"), 1).times(1).verify()
                 .validate();
     }
 

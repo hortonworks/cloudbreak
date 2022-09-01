@@ -28,6 +28,7 @@ public class DatalakeUpgradeFlowEventChainFactory implements FlowEventChainFacto
         Queue<Selectable> chain = new ConcurrentLinkedQueue<>();
         chain.add(new DatalakeTriggerBackupEvent(DATALAKE_TRIGGER_BACKUP_EVENT.event(),
                 event.getResourceId(), event.getUserId(), event.getBackupLocation(), "",
+                event.getSkipOptions(),
                 DatalakeBackupFailureReason.BACKUP_ON_UPGRADE, event.accepted()));
         chain.add(new DatalakeUpgradeStartEvent(DATALAKE_UPGRADE_EVENT.event(), event.getResourceId(), event.getUserId(),
                 event.getImageId(), event.isReplaceVms()));

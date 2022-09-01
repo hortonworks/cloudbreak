@@ -87,6 +87,9 @@ public interface ComputeResourceBuilder<C extends ResourceBuilderContext> extend
     List<CloudResource> build(C context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception;
 
+    List<CloudResource> update(C context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
+            CloudStack cloudStack) throws Exception;
+
     /**
      * This method will be called if an instance stop/start is requested to check the state of the instance.
      *

@@ -104,6 +104,7 @@ import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
@@ -245,6 +246,9 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     @Inject
     private StackDtoService stackDtoService;
+
+    @Inject
+    private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -543,7 +547,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     }
 
     @Measure(StackService.class)
-    public Stack create(Stack stack, String platformString, StatedImage imgFromCatalog, User user, Workspace workspace, Optional<String> externalCrn) {
+    public Stack create(Stack stack, StatedImage imgFromCatalog, User user, Workspace workspace, Optional<String> externalCrn) {
         if (stack.getGatewayPort() == null) {
             stack.setGatewayPort(nginxPort);
         }
@@ -602,7 +606,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
         try {
             Set<Component> components = imageService.create(stack, imgFromCatalog);
-            setRuntime(stack, components);
+            setRuntimeAndDbVersion(stack, components);
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Cloudbreak Image not found", e);
             throw new CloudbreakApiException(e.getMessage(), e);
@@ -617,12 +621,14 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return savedStack;
     }
 
-    private void setRuntime(Stack stack, Set<Component> components) {
+    private void setRuntimeAndDbVersion(Stack stack, Set<Component> components) {
         ClouderaManagerProduct runtime = ComponentConfigProviderService.getComponent(components, ClouderaManagerProduct.class, CDH_PRODUCT_DETAILS);
         if (Objects.nonNull(runtime)) {
             String stackVersion = substringBefore(runtime.getVersion(), "-");
             LOGGER.debug("Setting runtime version {} for stack", stackVersion);
             stack.setStackVersion(stackVersion);
+            stack.setExternalDatabaseEngineVersion(databaseDefaultVersionProvider
+                    .calculateDbVersionBasedOnRuntimeIfMissing(stackVersion, stack.getExternalDatabaseEngineVersion()));
             stackRepository.save(stack);
         } else {
             // should not happen ever
@@ -1013,6 +1019,11 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     public void updateStackVersion(Long stackId, String stackVersion) {
         stackRepository.updateStackVersion(stackId, stackVersion);
+    }
+
+    public void updateExternalDatabaseEngineVersion(Long stackId, String databaseVersion) {
+        LOGGER.info("Updating DB engine version for [{}] to [{}]", stackId, databaseVersion);
+        stackRepository.updateExternalDatabaseEngineVersion(stackId, databaseVersion);
     }
 
     public void updateDomainDnsResolverByStackId(Long stackId, DnsResolverType actualDnsResolverType) {

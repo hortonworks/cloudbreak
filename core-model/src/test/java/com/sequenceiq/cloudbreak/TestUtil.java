@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -535,7 +536,7 @@ public class TestUtil {
             recipe.setId((long) (i + 1));
             recipe.setName("recipe-" + (i + 1));
             recipe.setContent("base64Content");
-            recipe.setRecipeType(RecipeType.POST_CLUSTER_INSTALL);
+            recipe.setRecipeType(RecipeType.POST_SERVICE_DEPLOYMENT);
             Workspace workspace = new Workspace();
             workspace.setId(1L);
             workspace.setName("Top Secret FBI");
@@ -904,4 +905,7 @@ public class TestUtil {
         return new RdsDetails();
     }
 
+    public static Node node() {
+        return new Node("privateIp", "publicIp", "instanceId", "instanceType", "fqdn", "hostgroup");
+    }
 }

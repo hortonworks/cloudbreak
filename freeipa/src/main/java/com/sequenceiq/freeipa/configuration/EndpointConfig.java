@@ -12,9 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
+import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPStructuredEventV1Controller;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPStructuredEventFilter;
-import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 import com.sequenceiq.freeipa.api.FreeIpaApi;
 import com.sequenceiq.freeipa.controller.ClientTestV1Controller;
@@ -22,11 +22,12 @@ import com.sequenceiq.freeipa.controller.DiagnosticsV1Controller;
 import com.sequenceiq.freeipa.controller.DnsV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaUpgradeV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaV1Controller;
+import com.sequenceiq.freeipa.controller.FreeIpaV1FlowController;
 import com.sequenceiq.freeipa.controller.OperationV1Controller;
 import com.sequenceiq.freeipa.controller.ProgressV1Controller;
+import com.sequenceiq.freeipa.controller.RecipeV1Controller;
 import com.sequenceiq.freeipa.controller.UserV1Controller;
 import com.sequenceiq.freeipa.controller.UtilV1Controller;
-import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.freeipa.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.freeipa.kerberos.v1.KerberosConfigV1Controller;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtV1Controller;
@@ -43,10 +44,23 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS = List.of(
-            UserV1Controller.class, ClientTestV1Controller.class, FreeIpaV1Controller.class, LdapConfigV1Controller.class,
-            KerberosConfigV1Controller.class, KerberosMgmtV1Controller.class, DnsV1Controller.class, OperationV1Controller.class,
-            FlowController.class, FlowPublicController.class, AuthorizationInfoController.class, DiagnosticsV1Controller.class,
-            ProgressV1Controller.class, CDPStructuredEventV1Controller.class, UtilV1Controller.class, FreeIpaUpgradeV1Controller.class);
+            UserV1Controller.class,
+            ClientTestV1Controller.class,
+            FreeIpaV1Controller.class,
+            LdapConfigV1Controller.class,
+            KerberosConfigV1Controller.class,
+            KerberosMgmtV1Controller.class,
+            DnsV1Controller.class,
+            OperationV1Controller.class,
+            FreeIpaV1FlowController.class,
+            FlowPublicController.class,
+            AuthorizationInfoController.class,
+            DiagnosticsV1Controller.class,
+            ProgressV1Controller.class,
+            CDPStructuredEventV1Controller.class,
+            UtilV1Controller.class,
+            FreeIpaUpgradeV1Controller.class,
+            RecipeV1Controller.class);
 
     @Value("${info.app.version:unspecified}")
     private String applicationVersion;

@@ -27,12 +27,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChange
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
@@ -46,7 +47,6 @@ import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -143,9 +143,6 @@ public class StackCommonService {
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     public StackV4Response createInWorkspace(StackV4Request stackRequest, User user, Workspace workspace, boolean distroxRequest) {
         return stackCreatorService.createStack(user, workspace, stackRequest, distroxRequest);
@@ -255,10 +252,11 @@ public class StackCommonService {
     }
 
     public FlowIdentifier rotateSaltPassword(NameOrCrn nameOrCrn, String accountId, RotateSaltPasswordReason reason) {
-        if (!entitlementService.isSaltUserPasswordRotationEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            throw new BadRequestException("Rotating SaltStack user password is not supported in your account");
-        }
         return stackOperationService.rotateSaltPassword(nameOrCrn, accountId, reason);
+    }
+
+    public SaltPasswordStatus getSaltPasswordStatus(NameOrCrn nameOrCrn, String accountId) {
+        return stackOperationService.getSaltPasswordStatus(nameOrCrn, accountId);
     }
 
     private FlowIdentifier putStartInWorkspace(StackDto stack) {
@@ -291,6 +289,14 @@ public class StackCommonService {
         return flowIdentifier;
     }
 
+    public FlowIdentifier putVerticalScalingInWorkspace(NameOrCrn nameOrCrn, String accountId, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+        StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
+        MDCBuilder.buildMdcContext(stack);
+        stackVerticalScaleV4Request.setStackId(stack.getId());
+        validateVerticalScalingRequest(stack, stackVerticalScaleV4Request);
+        return clusterCommonService.putVerticalScaling(stack.getResourceCrn(), stackVerticalScaleV4Request);
+    }
+
     private void validateScalingRequest(StackView stack, Integer scalingAdjustment) {
         if (scalingAdjustment > 0 && !cloudParameterCache.isUpScalingSupported(stack.getCloudPlatform())) {
             throw new BadRequestException(String.format("Upscaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
@@ -299,6 +305,28 @@ public class StackCommonService {
             throw new BadRequestException(String.format("Downscaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
         }
         nodeCountLimitValidator.validateScale(stack.getId(), scalingAdjustment, Crn.safeFromString(stack.getResourceCrn()).getAccountId());
+    }
+
+    private void validateVerticalScalingRequest(StackView stack, StackVerticalScaleV4Request verticalScaleV4Request) {
+        if (!cloudParameterCache.isVerticalScalingSupported(stack.getCloudPlatform())) {
+            throw new BadRequestException(String.format("Vertical scaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
+        }
+        if (verticalScaleV4Request.getTemplate() == null) {
+            throw new BadRequestException(String.format("Define an exiting instancetype to vertically scale the %s Data Hubs.", stack.getCloudPlatform()));
+        }
+        if (verticalScaleV4Request.getTemplate().getInstanceType() == null) {
+            throw new BadRequestException(String.format("Define an exiting instancetype to vertically scale the %s Data Hubs.", stack.getCloudPlatform()));
+        }
+        if (anyAttachedVolumePropertyDefinedInVerticalScalingRequest(verticalScaleV4Request)) {
+            throw new BadRequestException(String.format("Only instance type modification is supported on %s Data Hubs.", stack.getCloudPlatform()));
+        }
+    }
+
+    private boolean anyAttachedVolumePropertyDefinedInVerticalScalingRequest(StackVerticalScaleV4Request verticalScaleV4Request) {
+        return verticalScaleV4Request.getTemplate().getEphemeralVolume() != null
+                || verticalScaleV4Request.getTemplate().getRootVolume() != null
+                || (verticalScaleV4Request.getTemplate().getAttachedVolumes() != null && !verticalScaleV4Request.getTemplate().getAttachedVolumes().isEmpty())
+                || verticalScaleV4Request.getTemplate().getTemporaryStorage() != null;
     }
 
     public void deleteWithKerberosInWorkspace(NameOrCrn nameOrCrn, String accountId, boolean forced) {

@@ -44,7 +44,6 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
@@ -97,9 +96,6 @@ class UpgradeCcmFlowChainIntegrationTest {
     private static final int CALLED_ONCE_TILL_DEREGISTER_MINA = 19;
 
     private static final int CALLED_ONCE_TILL_GENERATE_USERDATA = 20;
-
-    @Inject
-    private FlowRegister flowRegister;
 
     @Inject
     private FlowLogRepository flowLogRepository;

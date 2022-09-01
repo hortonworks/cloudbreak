@@ -13,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -33,14 +34,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.recipe.RecipeCrnListProviderService;
+import com.sequenceiq.freeipa.api.v1.recipe.model.RecipeAttachDetachRequest;
 import com.sequenceiq.freeipa.entity.FreeIpaStackRecipe;
 import com.sequenceiq.freeipa.repository.FreeIpaStackRecipeRepository;
 import com.sequenceiq.freeipa.repository.StackRepository;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaRecipeServiceTest {
@@ -56,6 +60,9 @@ class FreeIpaRecipeServiceTest {
 
     @Mock
     private StackRepository stackRepository;
+
+    @Mock
+    private StackService stackService;
 
     @InjectMocks
     private FreeIpaRecipeService freeIpaRecipeService;
@@ -73,7 +80,7 @@ class FreeIpaRecipeServiceTest {
     public void testGetRecipes() {
         RecipeV4Request recipe1Request = new RecipeV4Request();
         recipe1Request.setName("recipe1");
-        recipe1Request.setType(RecipeV4Type.PRE_CLOUDERA_MANAGER_START);
+        recipe1Request.setType(RecipeV4Type.PRE_SERVICE_DEPLOYMENT);
         recipe1Request.setContent("YmFzaDE=");
         RecipeV4Request recipe2Request = new RecipeV4Request();
         recipe2Request.setName("recipe2");
@@ -86,7 +93,7 @@ class FreeIpaRecipeServiceTest {
         List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(1L);
         RecipeModel recipeModel1 = recipes.stream().filter(recipeModel -> "recipe1".equals(recipeModel.getName())).findFirst().get();
         RecipeModel recipeModel2 = recipes.stream().filter(recipeModel -> "recipe2".equals(recipeModel.getName())).findFirst().get();
-        Assertions.assertEquals(RecipeType.PRE_CLOUDERA_MANAGER_START, recipeModel1.getRecipeType());
+        Assertions.assertEquals(RecipeType.PRE_SERVICE_DEPLOYMENT, recipeModel1.getRecipeType());
         Assertions.assertEquals(RecipeType.PRE_TERMINATION, recipeModel2.getRecipeType());
         Assertions.assertEquals("bash1", recipeModel1.getGeneratedScript());
         Assertions.assertEquals("bash2", recipeModel2.getGeneratedScript());
@@ -174,7 +181,7 @@ class FreeIpaRecipeServiceTest {
         List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(1L);
         RecipeModel recipeModel1 = recipes.stream().filter(recipeModel -> "recipe1".equals(recipeModel.getName())).findFirst().get();
         RecipeModel recipeModel2 = recipes.stream().filter(recipeModel -> "recipe2".equals(recipeModel.getName())).findFirst().get();
-        Assertions.assertEquals(RecipeType.PRE_CLOUDERA_MANAGER_START, recipeModel1.getRecipeType());
+        Assertions.assertEquals(RecipeType.PRE_SERVICE_DEPLOYMENT, recipeModel1.getRecipeType());
         Assertions.assertEquals(RecipeType.PRE_TERMINATION, recipeModel2.getRecipeType());
         Assertions.assertEquals("bash1", recipeModel1.getGeneratedScript());
         Assertions.assertEquals("bash2", recipeModel2.getGeneratedScript());
@@ -195,10 +202,76 @@ class FreeIpaRecipeServiceTest {
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
         List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(1L);
         RecipeModel recipeModel1 = recipes.stream().filter(recipeModel -> "recipe1".equals(recipeModel.getName())).findFirst().get();
-        Assertions.assertEquals(RecipeType.PRE_CLOUDERA_MANAGER_START, recipeModel1.getRecipeType());
+        Assertions.assertEquals(RecipeType.PRE_SERVICE_DEPLOYMENT, recipeModel1.getRecipeType());
         Assertions.assertEquals("bash1", recipeModel1.getGeneratedScript());
         boolean hasRecipeType = freeIpaRecipeService.hasRecipeType(1L, RecipeType.PRE_TERMINATION);
         assertFalse(hasRecipeType);
         assertThat(recipeSet.getValue()).containsExactly("recipe1");
+    }
+
+    @Test
+    void testAttachRecipes() {
+        List<String> recipes = List.of("recipe3", "recipe4");
+        RecipeAttachDetachRequest recipeAttachDetachRequest = new RecipeAttachDetachRequest();
+        recipeAttachDetachRequest.setRecipes(recipes);
+        recipeAttachDetachRequest.setEnvironmentCrn("crn");
+        List<FreeIpaStackRecipe> freeIpaStackRecipes = List.of(new FreeIpaStackRecipe(1L, "recipe1"), new FreeIpaStackRecipe(2L, "recipe2"));
+        when(stackService.getIdByEnvironmentCrnAndAccountId("crn", "accid")).thenReturn(1L);
+        when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
+        ArgumentCaptor<Collection> validationArgumentCaptor = ArgumentCaptor.forClass(Collection.class);
+        freeIpaRecipeService.attachRecipes("accid", recipeAttachDetachRequest);
+        verify(recipeCrnListProviderService).validateRequestedRecipesExistsByName(validationArgumentCaptor.capture());
+        assertThat(validationArgumentCaptor.getValue()).containsExactlyInAnyOrder("recipe3", "recipe4");
+        ArgumentCaptor<Set<FreeIpaStackRecipe>> savedRecipesArgumentCaptor = ArgumentCaptor.forClass(Set.class);
+        verify(freeIpaStackRecipeRepository).saveAll(savedRecipesArgumentCaptor.capture());
+        assertThat(savedRecipesArgumentCaptor.getValue()).extracting(FreeIpaStackRecipe::getRecipe).contains("recipe3", "recipe4");
+    }
+
+    @Test
+    void testAttachRecipesIfOneRecipeIsAttached() {
+        List<String> recipes = List.of("recipe3", "recipe4");
+        RecipeAttachDetachRequest recipeAttachDetachRequest = new RecipeAttachDetachRequest();
+        recipeAttachDetachRequest.setRecipes(recipes);
+        recipeAttachDetachRequest.setEnvironmentCrn("crn");
+        List<FreeIpaStackRecipe> freeIpaStackRecipes = List.of(new FreeIpaStackRecipe(1L, "recipe1"),
+                new FreeIpaStackRecipe(2L, "recipe2"),  new FreeIpaStackRecipe(3L, "recipe3"));
+        when(stackService.getIdByEnvironmentCrnAndAccountId("crn", "accid")).thenReturn(1L);
+        when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
+        ArgumentCaptor<Collection> validationArgumentCaptor = ArgumentCaptor.forClass(Collection.class);
+        freeIpaRecipeService.attachRecipes("accid", recipeAttachDetachRequest);
+        verify(recipeCrnListProviderService).validateRequestedRecipesExistsByName(validationArgumentCaptor.capture());
+        assertThat(validationArgumentCaptor.getValue()).containsExactlyInAnyOrder("recipe3", "recipe4");
+        ArgumentCaptor<Set<FreeIpaStackRecipe>> savedRecipesArgumentCaptor = ArgumentCaptor.forClass(Set.class);
+        verify(freeIpaStackRecipeRepository).saveAll(savedRecipesArgumentCaptor.capture());
+        assertThat(savedRecipesArgumentCaptor.getValue()).extracting(FreeIpaStackRecipe::getRecipe).contains("recipe4");
+    }
+
+    @Test
+    void testDetachRecipes() {
+        List<FreeIpaStackRecipe> freeIpaStackRecipes = List.of(new FreeIpaStackRecipe(1L, "recipe1"), new FreeIpaStackRecipe(2L, "recipe2"));
+        when(stackService.getIdByEnvironmentCrnAndAccountId("crn", "accid")).thenReturn(1L);
+        when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
+        List<String> recipes = List.of("recipe2");
+        RecipeAttachDetachRequest recipeAttachDetachRequest = new RecipeAttachDetachRequest();
+        recipeAttachDetachRequest.setRecipes(recipes);
+        recipeAttachDetachRequest.setEnvironmentCrn("crn");
+        freeIpaRecipeService.detachRecipes("accid", recipeAttachDetachRequest);
+        ArgumentCaptor<Set<String>> deletedRecipesArgumentCaptor = ArgumentCaptor.forClass(Set.class);
+        verify(freeIpaStackRecipeRepository).deleteFreeIpaStackRecipeByStackIdAndRecipeIn(eq(1L), deletedRecipesArgumentCaptor.capture());
+        assertThat(deletedRecipesArgumentCaptor.getValue()).contains("recipe2");
+    }
+
+    @Test
+    void testDetachRecipesButThrowException() {
+        List<FreeIpaStackRecipe> freeIpaStackRecipes = List.of(new FreeIpaStackRecipe(1L, "recipe1"), new FreeIpaStackRecipe(2L, "recipe2"));
+        when(stackService.getIdByEnvironmentCrnAndAccountId("crn", "accid")).thenReturn(1L);
+        when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
+        List<String> recipes = List.of("recipe3");
+        RecipeAttachDetachRequest recipeAttachDetachRequest = new RecipeAttachDetachRequest();
+        recipeAttachDetachRequest.setRecipes(recipes);
+        recipeAttachDetachRequest.setEnvironmentCrn("crn");
+        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class,
+                () -> freeIpaRecipeService.detachRecipes("accid", recipeAttachDetachRequest));
+        assertEquals("recipe3 recipe(s) are not attached to freeipa stack!", badRequestException.getMessage());
     }
 }

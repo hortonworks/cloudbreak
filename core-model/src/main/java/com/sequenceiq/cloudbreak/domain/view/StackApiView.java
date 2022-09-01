@@ -16,7 +16,9 @@ import javax.persistence.Transient;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
+import com.sequenceiq.cloudbreak.domain.converter.DatabaseAvailabilityTypeConverter;
 import com.sequenceiq.cloudbreak.domain.converter.StackTypeConverter;
 import com.sequenceiq.common.api.type.Tunnel;
 
@@ -68,6 +70,11 @@ public class StackApiView extends CompactView {
 
     @Convert(converter = TunnelConverter.class)
     private Tunnel tunnel = Tunnel.DIRECT;
+
+    @Convert(converter = DatabaseAvailabilityTypeConverter.class)
+    private DatabaseAvailabilityType externalDatabaseCreationType;
+
+    private String externalDatabaseEngineVersion;
 
     public String getResourceCrn() {
         return resourceCrn;
@@ -191,5 +198,44 @@ public class StackApiView extends CompactView {
 
     public void setStackVersion(String stackVersion) {
         this.stackVersion = stackVersion;
+    }
+
+    public DatabaseAvailabilityType getExternalDatabaseCreationType() {
+        return externalDatabaseCreationType;
+    }
+
+    public void setExternalDatabaseCreationType(DatabaseAvailabilityType externalDatabaseCreationType) {
+        this.externalDatabaseCreationType = externalDatabaseCreationType;
+    }
+
+    public String getExternalDatabaseEngineVersion() {
+        return externalDatabaseEngineVersion;
+    }
+
+    public void setExternalDatabaseEngineVersion(String externalDatabaseEngineVersion) {
+        this.externalDatabaseEngineVersion = externalDatabaseEngineVersion;
+    }
+
+    @Override
+    public String toString() {
+        return "StackApiView{" +
+                "cluster=" + cluster +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", platformVariant='" + platformVariant + '\'' +
+                ", stackStatus=" + stackStatus +
+                ", instanceGroups=" + instanceGroups +
+                ", created=" + created +
+                ", terminated=" + terminated +
+                ", datalakeCrn='" + datalakeCrn + '\'' +
+                ", type=" + type +
+                ", userView=" + userView +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", stackVersion='" + stackVersion + '\'' +
+                ", nodeCount=" + nodeCount +
+                ", tunnel=" + tunnel +
+                ", externalDatabaseCreationType=" + externalDatabaseCreationType +
+                ", externalDatabaseEngineVersion='" + externalDatabaseEngineVersion + '\'' +
+                "} " + super.toString();
     }
 }

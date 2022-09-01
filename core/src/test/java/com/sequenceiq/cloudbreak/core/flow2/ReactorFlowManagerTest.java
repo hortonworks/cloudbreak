@@ -30,6 +30,8 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
@@ -45,7 +47,7 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.core.flow2.service.TerminationTriggerService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
@@ -140,7 +142,8 @@ public class ReactorFlowManagerTest {
         underTest.triggerManualRepairFlow(STACK_ID);
         underTest.triggerStackRepairFlow(STACK_ID, new UnhealthyInstances());
         underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), false);
-        underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), true, false);
+        underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), true, false, "variant");
+        underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), true, false, "variant", false);
         underTest.triggerStackImageUpdate(new ImageChangeDto(STACK_ID, "asdf"));
         underTest.triggerMaintenanceModeValidationFlow(STACK_ID);
         underTest.triggerClusterCertificationRenewal(STACK_ID);
@@ -159,8 +162,9 @@ public class ReactorFlowManagerTest {
         underTest.triggerStopStartStackDownscale(STACK_ID, instanceIdsByHostgroup, false);
         underTest.triggerClusterServicesRestart(STACK_ID);
         underTest.triggerClusterProxyConfigReRegistration(STACK_ID);
-        underTest.triggerRotateSaltPassword(STACK_ID, RotateSaltPasswordReason.MANUAL);
         underTest.triggerRdsUpgrade(STACK_ID, TargetMajorVersion.VERSION_11);
+        underTest.triggerRotateSaltPassword(STACK_ID, RotateSaltPasswordReason.MANUAL, RotateSaltPasswordType.FALLBACK);
+        underTest.triggerVerticalScale(STACK_ID, new StackVerticalScaleV4Request());
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {

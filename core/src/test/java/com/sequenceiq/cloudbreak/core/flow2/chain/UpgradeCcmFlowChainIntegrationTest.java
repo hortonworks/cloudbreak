@@ -235,7 +235,7 @@ class UpgradeCcmFlowChainIntegrationTest {
     private void verifyFinishingStatCalls(boolean ccmUpgradeSuccess, boolean userDataUpdateSuccess) throws Exception {
         verify(upgradeCcmService, times(ccmUpgradeSuccess ? 1 : 0)).ccmUpgradeFinished(eq(1L), eq(0L));
         verify(resourcesApi, times(userDataUpdateSuccess ? 1 : 0)).updateUserData(any(), any(), any(), eq(USER_DATA));
-        verify(upgradeCcmService, times(ccmUpgradeSuccess ? 0 : 1)).ccmUpgradeFailed(anyLong(), anyLong(), any(), any());
+        verify(upgradeCcmService, times(ccmUpgradeSuccess ? 0 : 1)).ccmUpgradeFailed(any(), anyLong());
     }
 
     private void verifyServiceCalls(int calledOnceCount) throws Exception {

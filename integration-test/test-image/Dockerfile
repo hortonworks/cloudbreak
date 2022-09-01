@@ -1,4 +1,4 @@
-FROM docker-private.infra.cloudera.com/cloudera_base/cldr-java:11.0.13-cldr-jre-slim-buster-15122021
+FROM docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-11-runtime:1.14-3-03082022
 MAINTAINER info@cloudera.com
 
 WORKDIR /

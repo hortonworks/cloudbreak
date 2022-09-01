@@ -84,12 +84,14 @@ import com.sequenceiq.environment.environment.service.EnvironmentStackConfigUpda
 import com.sequenceiq.environment.environment.service.EnvironmentStartService;
 import com.sequenceiq.environment.environment.service.EnvironmentStopService;
 import com.sequenceiq.environment.environment.service.EnvironmentUpgradeCcmService;
+import com.sequenceiq.environment.environment.service.EnvironmentVerticalScaleService;
 import com.sequenceiq.environment.environment.service.cloudstorage.CloudStorageValidator;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConverter;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -132,6 +134,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentUpgradeCcmService upgradeCcmService;
 
+    private final EnvironmentVerticalScaleService environmentVerticalScaleService;
+
     private final StackV4Endpoint stackV4Endpoint;
 
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -154,6 +158,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentFiltering environmentFiltering,
             CloudStorageValidator cloudStorageValidator,
             EnvironmentUpgradeCcmService upgradeCcmService,
+            EnvironmentVerticalScaleService environmentVerticalScaleService,
             StackV4Endpoint stackV4Endpoint,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.environmentApiConverter = environmentApiConverter;
@@ -173,6 +178,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.environmentFiltering = environmentFiltering;
         this.cloudStorageValidator = cloudStorageValidator;
         this.upgradeCcmService = upgradeCcmService;
+        this.environmentVerticalScaleService = environmentVerticalScaleService;
         this.stackV4Endpoint = stackV4Endpoint;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
@@ -472,18 +478,36 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_CCM)
-    public void upgradeCcmByName(@ResourceName String name) {
+    public void upgradeCcmByName(
+            @ResourceName String name) {
         upgradeCcmService.upgradeCcmByName(name);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_CCM)
-    public void upgradeCcmByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn) {
+    public void upgradeCcmByCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn) {
         upgradeCcmService.upgradeCcmByCrn(crn);
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    public void verticalScalingByName(
+            @ResourceName String name,
+            @RequestObject @Valid VerticalScaleRequest updateRequest) {
+        environmentVerticalScaleService.verticalScaleByName(name, updateRequest);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    public void verticalScalingByCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn,
+            @RequestObject @Valid VerticalScaleRequest updateRequest) {
+        environmentVerticalScaleService.verticalScaleByCrn(crn, updateRequest);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public boolean isUpgradeCcmAvailable(@ResourceCrn @TenantAwareParam String crn) {
         EnvironmentDto environmentDto = environmentService.internalGetByCrn(crn);
         return Tunnel.getUpgradables().contains(environmentDto.getTunnel()) ||

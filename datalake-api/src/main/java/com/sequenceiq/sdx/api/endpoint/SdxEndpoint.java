@@ -25,6 +25,7 @@ import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
@@ -340,4 +341,18 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Determines if the datalake can be stopped", nickname = "isStoppable")
     SdxStopValidationResponse isStoppableInternal(@PathParam("crn") String crn, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
+    @Path("/crn/{crn}/vertical_scaling")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Initiates the vertical scaling on Data Lake", produces = MediaType.APPLICATION_JSON,
+            nickname = "verticalScalingByCrnV1")
+    FlowIdentifier verticalScalingByCrn(@PathParam("crn") String crn, @Valid StackVerticalScaleV4Request updateRequest);
+
+    @PUT
+    @Path("/name/{name}/vertical_scaling")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Initiates the vertical scaling on Data Lake", produces = MediaType.APPLICATION_JSON,
+            nickname = "verticalScalingByNameV1")
+    FlowIdentifier verticalScalingByName(@PathParam("name") String name, @Valid StackVerticalScaleV4Request updateRequest);
 }

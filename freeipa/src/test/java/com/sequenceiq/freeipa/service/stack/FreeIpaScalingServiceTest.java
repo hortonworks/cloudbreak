@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.stack;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -22,8 +23,10 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.ScalingPath;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleResponse;
@@ -77,6 +80,20 @@ class FreeIpaScalingServiceTest {
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.upscale(ACCOUNT_ID, request));
 
         assertEquals(exception.getMessage(), "validation failed");
+    }
+
+    @Test
+    public void testVerticalScaleIfValidationSuccessShouldReturnFlowId() {
+        Stack stack = mock(Stack.class);
+        VerticalScaleRequest request = createVerticalScaleRequest();
+
+        when(stack.getId()).thenReturn(1L);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(stack);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
+        when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
+        doNothing().when(validationService).validateStackForVerticalUpscale(any(), any());
+
+        underTest.verticalScale(ACCOUNT_ID, ENV_CRN, request);
     }
 
     @Test
@@ -184,6 +201,15 @@ class FreeIpaScalingServiceTest {
         UpscaleRequest request = new UpscaleRequest();
         request.setEnvironmentCrn(ENV_CRN);
         request.setTargetAvailabilityType(AvailabilityType.HA);
+        return request;
+    }
+
+    private VerticalScaleRequest createVerticalScaleRequest() {
+        VerticalScaleRequest request = new VerticalScaleRequest();
+        request.setGroup("master");
+        InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
+        instanceTemplateRequest.setInstanceType("ec2bug");
+        request.setTemplate(instanceTemplateRequest);
         return request;
     }
 

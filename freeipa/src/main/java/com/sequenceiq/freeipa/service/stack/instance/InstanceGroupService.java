@@ -16,15 +16,16 @@ public class InstanceGroupService {
     @Inject
     private InstanceGroupRepository repository;
 
-    @Inject
-    private InstanceMetaDataService instanceMetaDataService;
-
     public Set<InstanceGroup> findByStackId(Long stackId) {
         return repository.findByStackId(stackId);
     }
 
     public Optional<InstanceGroup> findOneByGroupNameInStack(Long stackId, String groupName) {
         return repository.findOneByGroupNameInStack(stackId, groupName);
+    }
+
+    public Optional<InstanceGroup> getByStackIdAndInstanceGroupNameWithFetchTemplate(Long stackId, String groupName) {
+        return repository.getByStackIdAndInstanceGroupNameWithFetchTemplate(stackId, groupName);
     }
 
     public InstanceGroup save(InstanceGroup instanceGroup) {

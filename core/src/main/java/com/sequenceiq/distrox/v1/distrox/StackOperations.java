@@ -32,11 +32,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Requ
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -46,6 +48,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -59,7 +62,6 @@ import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
@@ -168,9 +170,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     }
 
     public StackViewV4Responses listByEnvironmentCrn(Long workspaceId, String environmentCrn, List<StackType> stackTypes) {
-        Set<StackViewV4Response> stackViewResponses;
         LOGGER.info("List for Stack in workspace {} and environmentCrn {}.", workspaceId, environmentCrn);
-        stackViewResponses = stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, environmentCrn, stackTypes)
+        Set<StackViewV4Response> stackViewResponses =
+                stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, environmentCrn, stackTypes)
                 .stream()
                 .map(s -> stackApiViewToStackViewV4ResponseConverter.convert(s))
                 .collect(Collectors.toSet());
@@ -257,6 +259,10 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return stackCommonService.retryInWorkspace(nameOrCrn, workspaceId);
     }
 
+    public Long getResourceIdByResourceName(String resourceName) {
+        return stackService.getResourceIdByResourceName(resourceName);
+    }
+
     public FlowIdentifier putStop(NameOrCrn nameOrCrn, String accountId) {
         return stackCommonService.putStopInWorkspace(nameOrCrn, accountId);
     }
@@ -269,8 +275,16 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return stackCommonService.rotateSaltPassword(nameOrCrn, accountId, reason);
     }
 
+    public SaltPasswordStatus getSaltPasswordStatus(NameOrCrn nameOrCrn, String accountId) {
+        return stackCommonService.getSaltPasswordStatus(nameOrCrn, accountId);
+    }
+
     public FlowIdentifier putScaling(@NotNull NameOrCrn nameOrCrn, String accountId, @Valid StackScaleV4Request updateRequest) {
         return stackCommonService.putScalingInWorkspace(nameOrCrn, accountId, updateRequest);
+    }
+
+    public FlowIdentifier putVerticalScaling(@NotNull NameOrCrn nameOrCrn, String accountId, @Valid StackVerticalScaleV4Request updateRequest) {
+        return stackCommonService.putVerticalScalingInWorkspace(nameOrCrn, accountId, updateRequest);
     }
 
     public FlowIdentifier repairCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid ClusterRepairV4Request clusterRepairRequest) {
@@ -382,6 +396,10 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     @Override
     public String getResourceCrnByResourceName(String resourceName) {
         return stackService.getResourceCrnInTenant(resourceName, ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    public Long getResourceIdByResourceCrn(String crn) {
+        return stackService.getResourceIdByResourceCrn(crn);
     }
 
     @Override

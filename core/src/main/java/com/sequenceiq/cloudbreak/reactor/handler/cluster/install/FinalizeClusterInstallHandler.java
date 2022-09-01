@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.install;
 
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -7,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -17,6 +20,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.recovery.RdsRecoverySetupService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -40,6 +44,9 @@ public class FinalizeClusterInstallHandler extends ExceptionCatcherEventHandler<
     @Inject
     private StackDtoService stackDtoService;
 
+    @Inject
+    private ClusterHostServiceRunner clusterHostServiceRunner;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(FinalizeClusterInstallRequest.class);
@@ -57,6 +64,8 @@ public class FinalizeClusterInstallHandler extends ExceptionCatcherEventHandler<
         Selectable response;
         try {
             StackDto stackDto = stackDtoService.getById(stackId);
+            clusterHostServiceRunner.createCronForUserHomeCreation(stackDto, stackDto.getAllAvailableInstances().stream()
+                    .map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toSet()));
             clusterBuilderService.finalizeClusterInstall(stackDto);
             if (event.getData().getProvisionType().isRecovery()) {
                 rdsRecoverySetupService.removeRecoverRole(stackId);

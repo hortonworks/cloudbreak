@@ -124,10 +124,10 @@ public class RecipeTemplateService {
     public Map<HostGroup, Set<GeneratedRecipe>> createGeneratedRecipes(Map<HostGroup, List<RecipeModel>> recipeModels, Map<String, Recipe> recipesNameMap,
             Workspace workspace) {
         return recipeModels.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> creteGeneratedRecipes(recipesNameMap, workspace, entry), (k1, k2) -> k1));
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> createGeneratedRecipes(recipesNameMap, workspace, entry), (k1, k2) -> k1));
     }
 
-    private Set<GeneratedRecipe> creteGeneratedRecipes(Map<String, Recipe> recipesNameMap, Workspace workspace, Map.Entry<HostGroup,
+    private Set<GeneratedRecipe> createGeneratedRecipes(Map<String, Recipe> recipesNameMap, Workspace workspace, Map.Entry<HostGroup,
             List<RecipeModel>> hostGroupListEntry) {
         return hostGroupListEntry.getValue().stream()
                 .map(recipeModel -> {

@@ -10,12 +10,13 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
+import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -27,6 +28,8 @@ public class AltusMachineUserService {
 
     private static final String FREEIPA_FLUENT_DATABUS_MACHINE_USER_PATTERN = "freeipa-fluent-databus-uploader-%s";
 
+    private static final String FREEIPA_MONITORING_MACHINE_USER_PATTERN = "freeipa-monitoring-%s";
+
     private final AltusIAMService altusIAMService;
 
     private final StackService stackService;
@@ -34,17 +37,27 @@ public class AltusMachineUserService {
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public AltusMachineUserService(AltusIAMService altusIAMService, StackService stackService,
-        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.altusIAMService = altusIAMService;
         this.stackService = stackService;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
-    public Optional<AltusCredential> createMachineUserWithAccessKeys(Stack stack, Telemetry telemetry) {
+    public Optional<AltusCredential> createDatabusMachineUserWithAccessKeys(Stack stack, Telemetry telemetry) {
         String machineUserName = getFluentMachineUser(stack);
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> altusIAMService.generateMachineUserWithAccessKey(machineUserName,
+                () -> altusIAMService.generateDatabusMachineUserWithAccessKey(machineUserName,
+                        ThreadBasedUserCrnProvider.getUserCrn(),
+                        Crn.fromString(stack.getResourceCrn()).getAccountId(),
+                        telemetry.isUseSharedAltusCredentialEnabled()));
+    }
+
+    public Optional<AltusCredential> createMonitoringMachineUserWithAccessKeys(Stack stack, Telemetry telemetry) {
+        String machineUserName = getMonitoringMachineUser(stack);
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> altusIAMService.generateMonitoringMachineUserWithAccessKey(machineUserName,
                         ThreadBasedUserCrnProvider.getUserCrn(),
                         Crn.fromString(stack.getResourceCrn()).getAccountId(),
                         telemetry.isUseSharedAltusCredentialEnabled()));
@@ -70,6 +83,15 @@ public class AltusMachineUserService {
                         telemetry.isUseSharedAltusCredentialEnabled()));
     }
 
+    public void cleanupMonitoringMachineUser(Stack stack) {
+        String machineUserName = getMonitoringMachineUser(stack);
+        ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> altusIAMService.clearMachineUser(machineUserName,
+                        ThreadBasedUserCrnProvider.getUserCrn(),
+                        Crn.fromString(stack.getResourceCrn()).getAccountId()));
+    }
+
     public List<UserManagementProto.MachineUser> getAllInternalMachineUsers(String accountId) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
@@ -82,9 +104,15 @@ public class AltusMachineUserService {
                 Crn.fromString(stack.getResourceCrn()).getResource());
     }
 
+    public String getMonitoringMachineUser(Stack stack) {
+        return String.format(FREEIPA_MONITORING_MACHINE_USER_PATTERN,
+                Crn.fromString(stack.getResourceCrn()).getResource());
+    }
+
     /**
      * Gather or create DataBus credential for a stack.
-     * On creation it will generate aa new workload user with new access/private keys.
+     * On creation it will generate a new workload user with new access/private keys.
+     *
      * @param stackId id of the stack
      * @return databus credential holder
      */
@@ -94,7 +122,8 @@ public class AltusMachineUserService {
 
     /**
      * Gather or create DataBus credential for a stack.
-     * On creation it will generate aa new workload user with new access/private keys.
+     * On creation it will generate a new workload user with new access/private keys.
+     *
      * @param stack stack object that holds details about the cluster
      * @return databus credential holder
      */
@@ -104,7 +133,7 @@ public class AltusMachineUserService {
         if (stack.getDatabusCredential() != null) {
             LOGGER.debug("Databus credential has been found for the stack");
             DataBusCredential dataBusCredential = new Json(stack.getDatabusCredential()).get(DataBusCredential.class);
-            if (isDataBusCredentialStillExist(telemetry, dataBusCredential, stack)) {
+            if (isCredentialExists(telemetry, dataBusCredential.getMachineUserName(), dataBusCredential.getAccessKey(), stack)) {
                 LOGGER.debug("Databus credential exists both in the stack and on UMS side");
                 return dataBusCredential;
             } else {
@@ -113,14 +142,43 @@ public class AltusMachineUserService {
         } else {
             LOGGER.debug("Databus credential does not exist for the stack, it will be created ...");
         }
-        Optional<AltusCredential> altusCredential = createMachineUserWithAccessKeys(stack, telemetry);
+        Optional<AltusCredential> altusCredential = createDatabusMachineUserWithAccessKeys(stack, telemetry);
         return storeDataBusCredential(altusCredential, stack);
+    }
+
+    public Optional<MonitoringCredential> getOrCreateMonitoringCredentialIfNeeded(Stack stack) throws IOException {
+        LOGGER.debug("Get or create databus credential for stack");
+        Telemetry telemetry = stack.getTelemetry();
+        Optional<MonitoringCredential> monitoringCredential = getMonitoringCredentialIfExists(stack, telemetry);
+        if (monitoringCredential.isEmpty()) {
+            monitoringCredential = createMonitoringMachineUserWithAccessKeys(stack, telemetry)
+                    .map(altusCredential -> storeMonitoringCredential(altusCredential, stack));
+        }
+        return monitoringCredential;
+    }
+
+    private Optional<MonitoringCredential> getMonitoringCredentialIfExists(Stack stack, Telemetry telemetry) throws IOException {
+        Optional<MonitoringCredential> result = Optional.empty();
+        if (stack.getMonitoringCredential() != null) {
+            LOGGER.debug("Monitoring credential has been found for the stack");
+            MonitoringCredential monitoringCredential = new Json(stack.getMonitoringCredential()).get(MonitoringCredential.class);
+            if (isCredentialExists(telemetry, monitoringCredential.getMachineUserName(), monitoringCredential.getAccessKey(), stack)) {
+                LOGGER.debug("Monitoring credential exists both in the stack and on UMS side");
+                result = Optional.of(monitoringCredential);
+            } else {
+                LOGGER.debug("Monitoring credential exists on stack side but does not exists on UMS side, it will be updated ...");
+            }
+        } else {
+            LOGGER.debug("Monitoring credential does not exist for the stack, it will be created ...");
+        }
+        return result;
     }
 
     /**
      * Store databus access / secret keypair and machine user name in the cluster if altus credential exists
+     *
      * @param altusCredential dto for databus access/private key
-     * @param stack component will be attached to this stack
+     * @param stack           component will be attached to this stack
      * @return domain object that holds databus credential
      */
     public DataBusCredential storeDataBusCredential(Optional<AltusCredential> altusCredential, Stack stack) {
@@ -137,19 +195,24 @@ public class AltusMachineUserService {
         return null;
     }
 
-    /**
-     * Check that machine user still have the access key on UMS side
-     * @param dataBusCredential databus credential DTO that comes from cloudbreak database which contains access key and machune user name as well.
-     * @param stack stack object holder that can be used to calculate the machine user name
-     * @return check result - if true, no need to regenerate keys
-     */
-    public boolean isDataBusCredentialStillExist(Telemetry telemetry, DataBusCredential dataBusCredential, Stack stack) {
+    private MonitoringCredential storeMonitoringCredential(AltusCredential altusCredential, Stack stack) {
+        MonitoringCredential monitoringCredential = new MonitoringCredential();
+        monitoringCredential.setMachineUserName(getMonitoringMachineUser(stack));
+        monitoringCredential.setAccessKey(altusCredential.getAccessKey());
+        monitoringCredential.setPrivateKey(altusCredential.getPrivateKey() != null ? new String(altusCredential.getPrivateKey()) : null);
+        String monitoringCredentialJsonString = new Json(monitoringCredential).getValue();
+        stack.setMonitoringCredential(monitoringCredentialJsonString);
+        stackService.save(stack);
+        return monitoringCredential;
+    }
+
+    public boolean isCredentialExists(Telemetry telemetry, String machineUser, String accessKey, Stack stack) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> altusIAMService.doesMachineUserHasAccessKey(
                         ThreadBasedUserCrnProvider.getUserCrn(),
                         Crn.fromString(stack.getResourceCrn()).getAccountId(),
-                        dataBusCredential.getMachineUserName(), dataBusCredential.getAccessKey(),
+                        machineUser, accessKey,
                         telemetry.isUseSharedAltusCredentialEnabled()));
     }
 

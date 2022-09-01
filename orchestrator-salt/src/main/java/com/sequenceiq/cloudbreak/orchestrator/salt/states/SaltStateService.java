@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAuth;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltMaster;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SlsExistsSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 import com.sequenceiq.cloudbreak.service.Retry;
 
@@ -251,6 +252,14 @@ public class SaltStateService {
             throw new Retry.ActionFailedException("Unreachable nodes found.");
         }
         return minionIpAddresses;
+    }
+
+    public boolean stateSlsExists(SaltConnector sc, Target<String> target, String state) {
+        SlsExistsSaltResponse slsExistsSaltResponse = measure(() -> sc.run(target, "state.sls_exists", LOCAL,
+                        SlsExistsSaltResponse.class, NETWORK_IPADDRS_TIMEOUT, state),
+                LOGGER, "State SLS exists call took {}ms");
+        LOGGER.debug("State SLS exists {}: {}", state, slsExistsSaltResponse);
+        return slsExistsSaltResponse.getResult().stream().flatMap(map -> map.values().stream()).allMatch(Boolean::valueOf);
     }
 
     public MinionIpAddressesResponse collectMinionIpAddresses(SaltConnector sc) {

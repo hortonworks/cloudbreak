@@ -3,6 +3,13 @@ package com.sequenceiq.freeipa.service.freeipa.user.conversion;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -16,13 +23,6 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.service.freeipa.user.model.JsonUserMetadata;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
-
-import java.util.Optional;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 @Component
 public class UserMetadataConverter {

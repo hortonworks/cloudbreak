@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -245,7 +246,7 @@ public class SshJClientActions extends SshJClient {
         }
     }
 
-    private Pair<Integer, String> executeSshCommand(String instanceIp, String command) {
+    protected Pair<Integer, String> executeSshCommand(String instanceIp, String command) {
         return executeSshCommand(instanceIp, null, null, null, command);
     }
 
@@ -339,8 +340,24 @@ public class SshJClientActions extends SshJClient {
         return checkMonitoringStatus(testDto, instanceIps, verifyMetricNames, acceptableNokNames);
     }
 
+    /**
+     * Creating new pre-warmed images with Common Monitoring is still in progress. So in the meantime we can install the latest version on the VMs manually.
+     *
+     * @param instanceGroups An instance group is a collection of virtual machine (VM) instances that you can manage as a single entity.
+     * @param hostGroupNames A host group logically grouped hosts regardless of any features that they might or might not have in common.
+     *                          For example: hosts do not have to have the same architecture, configuration, or storage.
+     */
+    private void updateMonitoring(List<String> instanceIps) {
+        instanceIps.stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip,
+                        "sudo yum update --disablerepo=* --enablerepo=cdp-infra-tools --assumeyes --skip-broken > /dev/null 2>&1")));
+    }
+
     public <T extends CloudbreakTestDto> T checkMonitoringStatus(T testDto, List<String> instanceIps, List<String> verifyMetricNames,
             List<String> acceptableNokNames) {
+
+        updateMonitoring(instanceIps);
+
         String monitoringStatusCommand = format("sudo cdp-doctor monitoring status -m %s --format json", StringUtils.join(verifyMetricNames, ","));
         Map<String, Pair<Integer, String>> monitoringStatusReportByIp = instanceIps.stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, monitoringStatusCommand)));
@@ -356,8 +373,6 @@ public class SshJClientActions extends SshJClient {
                                             .filter(servicesInCategory -> "NOK".equalsIgnoreCase(servicesInCategory.getValue())))
                             .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
                     if (MapUtils.isNotEmpty(statusesNotOkInCategory)) {
-                        Log.log(LOGGER, format(" Found 'Not OK' Monitoring statuses '%s' at '%s' instance. " +
-                                "However this is acceptable! ", statusesNotOkInCategory, monitoringStatusReport.getKey()));
                         statusesNotOkInCategory.forEach((service, status) -> {
                             if (acceptableNokNames.stream()
                                     .anyMatch(nokAccepted -> nokAccepted.equalsIgnoreCase(service))) {
@@ -382,20 +397,22 @@ public class SshJClientActions extends SshJClient {
 
     private void createHugheFilesForFilesystemFreeBytesMetric(List<String> instanceIps) {
         String listDisk = "sudo df -h /";
-        String allocateBigFiles = "sudo seq -f '%04.0f' 4 | xargs -I '{}' fallocate -l 5G test_file'{}'.txt";
+        String allocateBigFiles = "sudo seq -f %%04.0f 4 | xargs -I '{}' fallocate -l 5G test_file'{}'.txt";
 
         instanceIps.stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip,
-                        StringUtils.join(List.of(allocateBigFiles, listDisk), " && "))));
+                        StringUtils.join(List.of(listDisk, allocateBigFiles, listDisk), " && "))));
 
         waitingFor(Duration.ofMinutes(1), "Waiting for Monitoring 'node_filesystem_free_bytes' metric to be generated has been interrupted");
     }
 
     private void removeHugheFilesForFilesystemFreeBytesMetric(List<String> instanceIps) {
         String removeAllocatedFiles = "sudo rm -rf test_file{0001..0004}.txt";
+        String listDisk = "sudo df -h /";
 
         instanceIps.stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, removeAllocatedFiles)));
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip,
+                        StringUtils.join(List.of(listDisk, removeAllocatedFiles, listDisk), " && "))));
 
         waitingFor(Duration.ofMinutes(1), "Waiting for Monitoring 'node_filesystem_free_bytes' metric to be generated has been interrupted");
     }
@@ -422,19 +439,8 @@ public class SshJClientActions extends SshJClient {
         return checkFilesystemFreeBytesGeneratedMetric(testDto, instanceIps);
     }
 
-    /**
-     * Right now we cannot add this verification to the Monitoring tests yet. So this has been prepared
-     * but not finished. In the future we can extend and improve the verification based on the finalized
-     * monitoring feature with the latest images.
-     *
-     * @param testDto       Service client entity for tests
-     * @param instanceIps   Stack VMs private IPs
-     * @param <T>           Generalised test DTO
-     * @return the given test DTO for final verify
-     */
-    public <T extends CloudbreakTestDto> T checkFilesystemFreeBytesGeneratedMetric(T testDto, List<String> instanceIps) {
-        createHugheFilesForFilesystemFreeBytesMetric(instanceIps);
-
+    private List<String> checkRequestSignerSuccessCount(List<String> instanceIps) {
+        List<String> requestSignerSuccessCount = new ArrayList<>();
         String monitoringStatusCommand = "sudo cdp-doctor monitoring status -m node_filesystem_free_bytes --format json";
         Map<String, Pair<Integer, String>> monitoringStatusReportByIp = instanceIps.stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, monitoringStatusCommand)));
@@ -453,9 +459,10 @@ public class SshJClientActions extends SshJClient {
                     Log.log(LOGGER, format(" Monitoring Request Signer success count is '%s' at '%s' instance. ", successCount,
                             monitoringStatusReport.getKey()));
                     successCount.forEach(count -> {
-                        if (Integer.getInteger(count) > 0) {
+                        if (Integer.parseInt(count) > 0) {
                             Log.log(LOGGER, format(" Found Monitoring Request Signer success count is '%s' at '%s' instance! ", count,
                                     monitoringStatusReport.getKey()));
+                            requestSignerSuccessCount.add(count);
                         } else {
                             Log.error(LOGGER, format(" Monitoring Request Signer success count has not been generated at '%s' instance! ",
                                     monitoringStatusReport.getKey()));
@@ -473,6 +480,29 @@ public class SshJClientActions extends SshJClient {
                 throw new TestFailException("Cannot parse Common Monitoring Status Report JSON: ", e);
             }
         }
+        return requestSignerSuccessCount;
+    }
+
+    public <T extends CloudbreakTestDto> T checkFilesystemFreeBytesGeneratedMetric(T testDto, List<String> instanceIps) {
+        updateMonitoring(instanceIps);
+        List<String> initialSuccessCount = checkRequestSignerSuccessCount(instanceIps);
+        int successCountByIp = initialSuccessCount.toArray().length;
+        createHugheFilesForFilesystemFreeBytesMetric(instanceIps);
+        removeHugheFilesForFilesystemFreeBytesMetric(instanceIps);
+        List<String> finalSuccessCount = checkRequestSignerSuccessCount(instanceIps);
+
+        IntStream.range(0, successCountByIp).forEach(index -> {
+            if (Integer.parseInt(initialSuccessCount.get(index)) < Integer.parseInt(finalSuccessCount.get(index))) {
+                Log.log(LOGGER, format(" Monitoring Request Signer success count has been updated '%s' at '%s' instance! ", finalSuccessCount.get(index),
+                        instanceIps.get(index)));
+            } else {
+                Log.error(LOGGER, format(" Monitoring Request Signer success count has not been updated at '%s' instance! ",
+                        instanceIps.get(index)));
+                throw new TestFailException(format("Monitoring Request Signer success count has not been updated at '%s' instance!",
+                        instanceIps.get(index)));
+            }
+        });
+
         return testDto;
     }
 }

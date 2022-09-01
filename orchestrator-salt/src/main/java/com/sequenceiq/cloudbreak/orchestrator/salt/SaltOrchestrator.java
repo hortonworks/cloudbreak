@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt;
 
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
 import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.PRE_CLOUDERA_MANAGER_START;
+import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.PRE_SERVICE_DEPLOYMENT;
 import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.convert;
 import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
 import static java.util.function.Predicate.not;
@@ -124,6 +125,8 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private static final String CM_AGENT_CERTDIR_PERMISSION = "cloudera.agent.agent-cert-permission";
 
+    private static final String CREATE_USER_HOME_CRON = "cloudera.createuserhome";
+
     private static final String DISK_INITIALIZE = "format-and-mount-initialize.sh";
 
     private static final String DISK_COMMON = "format-and-mount-common.sh";
@@ -139,6 +142,8 @@ public class SaltOrchestrator implements HostOrchestrator {
     private static final String PERMISSION = "0600";
 
     private static final DateTimeFormatter CHAGE_DATE_PATTERN = DateTimeFormatter.ofPattern("MMM dd, yyyy");
+
+    private static final String CHAGE_DATE_NEVER = "never";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltOrchestrator.class);
 
@@ -763,10 +768,10 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void restartClusterManagerOnMaster(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+    public void restartClusterManagerOnMaster(GatewayConfig gatewayConfig, Set<String> target, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
-            StateRunner stateRunner = new StateRunner(saltStateService, target, allNodes, CM_SERVER_RESTART);
+            StateRunner stateRunner = new StateRunner(saltStateService, target, CM_SERVER_RESTART);
             OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner);
             Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel);
             saltJobRunBootstrapRunner.call();
@@ -777,10 +782,39 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void updateAgentCertDirectoryPermission(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+    public void startClusterManagerWithItsAgents(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException {
+        LOGGER.debug("Start Cluster manager and its agents: [{}]", allNodes);
+        runHighStateWithSpecificRole(gatewayConfig, allNodes, exitCriteriaModel, "cloudera_manager_full_start", "Error occurred during CM start");
+    }
+
+    @Override
+    public void stopClusterManagerWithItsAgents(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException {
+        LOGGER.debug("Stop Cluster manager and its agents: [{}]", allNodes);
+        runHighStateWithSpecificRole(gatewayConfig, allNodes, exitCriteriaModel, "cloudera_manager_full_stop", "Error occurred during CM stop");
+    }
+
+    private void runHighStateWithSpecificRole(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, String role,
+            String errorMsg) throws CloudbreakOrchestratorException {
+        Set<String> targets = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+        try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
+            saltCommandRunner.runModifyGrainCommand(sc,
+                    new GrainAddRunner(saltStateService, targets, allNodes, role), exitCriteriaModel, exitCriteria);
+            runNewService(sc, new HighStateRunner(saltStateService, targets, allNodes), exitCriteriaModel);
+            saltCommandRunner.runModifyGrainCommand(sc,
+                    new GrainRemoveRunner(saltStateService, targets, allNodes, role), exitCriteriaModel, exitCriteria);
+        } catch (Exception e) {
+            LOGGER.error(errorMsg, e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void updateAgentCertDirectoryPermission(GatewayConfig gatewayConfig, Set<String> target, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
-            StateRunner stateRunner = new StateRunner(saltStateService, target, allNodes, CM_AGENT_CERTDIR_PERMISSION);
+            StateRunner stateRunner = new StateRunner(saltStateService, target, CM_AGENT_CERTDIR_PERMISSION);
             OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner);
             Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel);
             saltJobRunBootstrapRunner.call();
@@ -895,6 +929,20 @@ public class SaltOrchestrator implements HostOrchestrator {
             return saltStateService.runCommand(retry, saltConnector, command);
         } catch (RuntimeException e) {
             LOGGER.info("Error occurred during command execution: " + command, e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Map<String, String> runCommandOnHosts(List<GatewayConfig> allGatewayConfigs, Set<String> targetFqdns, String command)
+            throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
+        Target<String> hosts = new HostList(targetFqdns);
+        LOGGER.debug("Execute command: {}, on hosts: {}", command, hosts);
+        try (SaltConnector saltConnector = saltService.createSaltConnector(primaryGateway)) {
+            return saltStateService.runCommandOnHosts(retry, saltConnector, hosts, command);
+        } catch (RuntimeException e) {
+            LOGGER.warn("Error occurred during command execution: " + command, e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1047,10 +1095,10 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void preClusterManagerStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+    public void preServiceDeploymentRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
-        LOGGER.debug("Executing pre-cloudera-manager-start recipes.");
-        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_CLOUDERA_MANAGER_START, false);
+        LOGGER.debug("Executing pre-service-deployment recipes.");
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_SERVICE_DEPLOYMENT, false);
     }
 
     @Override
@@ -1061,10 +1109,10 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void postInstallRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+    public void postServiceDeploymentRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
-        LOGGER.debug("Executing post-cluster-install recipes.");
-        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_CLUSTER_INSTALL, false);
+        LOGGER.debug("Executing post-service-deployment recipes.");
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_SERVICE_DEPLOYMENT, false);
     }
 
     @Override
@@ -1222,15 +1270,15 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void backupDatabase(GatewayConfig primaryGateway, Set<String> target, Set<Node> allNodes, SaltConfig saltConfig,
-            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
-        callBackupRestore(primaryGateway, target, allNodes, saltConfig, exitModel, DATABASE_BACKUP);
+    public void backupDatabase(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException {
+        callBackupRestore(primaryGateway, target, saltConfig, exitModel, DATABASE_BACKUP);
     }
 
     @Override
-    public void restoreDatabase(GatewayConfig primaryGateway, Set<String> target, Set<Node> allNodes, SaltConfig saltConfig,
-            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
-        callBackupRestore(primaryGateway, target, allNodes, saltConfig, exitModel, DATABASE_RESTORE);
+    public void restoreDatabase(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException {
+        callBackupRestore(primaryGateway, target, saltConfig, exitModel, DATABASE_RESTORE);
     }
 
     @Override
@@ -1286,18 +1334,18 @@ public class SaltOrchestrator implements HostOrchestrator {
     private StateRunner createStateRunner(OrchestratorStateParams stateParams) {
         if (stateParams.isParameterized()) {
             if (stateParams.isConcurrent()) {
-                return new ConcurrentParameterizedStateRunner(saltStateService, stateParams.getTargetHostNames(), stateParams.getAllNodes(),
+                return new ConcurrentParameterizedStateRunner(saltStateService, stateParams.getTargetHostNames(),
                         stateParams.getState(), stateParams.getStateParams());
             } else {
-                return new ParameterizedStateRunner(saltStateService, stateParams.getTargetHostNames(), stateParams.getAllNodes(),
+                return new ParameterizedStateRunner(saltStateService, stateParams.getTargetHostNames(),
                         stateParams.getState(), stateParams.getStateParams());
             }
         } else {
-            return new StateRunner(saltStateService, stateParams.getTargetHostNames(), stateParams.getAllNodes(), stateParams.getState());
+            return new StateRunner(saltStateService, stateParams.getTargetHostNames(), stateParams.getState());
         }
     }
 
-    private void callBackupRestore(GatewayConfig primaryGateway, Set<String> target, Set<Node> allNodes, SaltConfig saltConfig,
+    private void callBackupRestore(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig,
             ExitCriteriaModel exitModel, String state) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
@@ -1307,7 +1355,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 saltPillarRunner.call();
             }
 
-            StateRunner stateRunner = new StateRunner(saltStateService, target, allNodes, state);
+            StateRunner stateRunner = new StateRunner(saltStateService, target, state);
             OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner);
             Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel,
                     maxDatabaseDrRetry, maxDatabaseDrRetryOnError);
@@ -1341,25 +1389,21 @@ public class SaltOrchestrator implements HostOrchestrator {
     private void executeRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel,
             RecipeExecutionPhase phase, boolean forced) throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
         int maxRetry = forced ? maxRetryRecipeForced : maxRetryRecipe;
+        RecipeExecutionPhase executedPhase = phase;
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
-            // add 'recipe' grain to all nodes
+            executedPhase = fallbackToOldRecipeExecutionPhaseIfNecessary(phase, gatewayConfig, sc);
             Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(saltStateService, targetHostnames, allNodes, "recipes", phase.value()),
-                    exitCriteriaModel, maxRetry, exitCriteria);
+            addRecipeGrainToNodes(allNodes, exitCriteriaModel, maxRetry, executedPhase, sc, targetHostnames);
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
             runSyncAll(sc, allHostnames, allNodes, exitCriteriaModel);
-            if (phase == PRE_CLOUDERA_MANAGER_START) {
+            if (executedPhase == PRE_CLOUDERA_MANAGER_START || executedPhase == PRE_SERVICE_DEPLOYMENT) {
                 // Execute highstate before recipe. Otherwise ipa domain names will not be resolvable in recipe scripts.
                 runNewService(sc, new HighStateAllRunner(saltStateService, allHostnames, allNodes), exitCriteriaModel, maxRetryRecipe, true);
             } else {
-                // Skip highstate and just execute other recipes for performace.
-                StateRunner stateAllRunner = new StateRunner(saltStateService, targetHostnames, allNodes, "recipes." + phase.value());
-                OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateAllRunner);
-                Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry, false);
-                saltJobRunBootstrapRunner.call();
+                runStateRunnerForRecipe(saltStateService, exitCriteriaModel, executedPhase, maxRetry, sc, targetHostnames);
             }
         } catch (CloudbreakOrchestratorTimeoutException e) {
-            LOGGER.info("Recipe execution timeout. {}", phase, e);
+            LOGGER.info("Recipe execution timeout. {}", executedPhase, e);
             throw e;
         } catch (CloudbreakOrchestratorFailedException e) {
             LOGGER.info("Orchestration error occurred during execution of recipes.", e);
@@ -1371,13 +1415,44 @@ public class SaltOrchestrator implements HostOrchestrator {
             try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
                 // remove 'recipe' grain from all nodes
                 Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-                saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(saltStateService, targetHostnames, allNodes, "recipes", phase.value()),
-                        exitCriteriaModel, maxRetry, exitCriteria);
+                saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(saltStateService, targetHostnames, allNodes, "recipes",
+                        executedPhase.value()), exitCriteriaModel, exitCriteria);
             } catch (Exception e) {
                 LOGGER.info("Error occurred during removing recipe roles.", e);
                 throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
             }
         }
+    }
+
+    private void addRecipeGrainToNodes(Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, int maxRetry, RecipeExecutionPhase executedPhase,
+            SaltConnector sc, Set<String> targetHostnames) throws Exception {
+        saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(saltStateService, targetHostnames, allNodes, "recipes", executedPhase.value()),
+                exitCriteriaModel, exitCriteria);
+    }
+
+    private RecipeExecutionPhase fallbackToOldRecipeExecutionPhaseIfNecessary(RecipeExecutionPhase phase, GatewayConfig gatewayConfig, SaltConnector sc) {
+        boolean phaseSlsExists = doesPhaseSlsExist(saltStateService, gatewayConfig, phase, sc);
+        if (!phaseSlsExists) {
+            RecipeExecutionPhase oldRecipeExecutionPhase = phase.oldRecipeExecutionPhase();
+            LOGGER.info("Salt state file for new recipe execution phase ({}) was not found, it is a cluster with old salt states, fallback to the old " +
+                    "recipe execution phase: {}", phase, oldRecipeExecutionPhase);
+            return oldRecipeExecutionPhase;
+        } else {
+            return phase;
+        }
+    }
+
+    private boolean doesPhaseSlsExist(SaltStateService saltStateService, GatewayConfig gatewayConfig, RecipeExecutionPhase phase, SaltConnector sc) {
+        Target<String> gatewayTargets = new HostList(Set.of(gatewayConfig.getHostname()));
+        return saltStateService.stateSlsExists(sc, gatewayTargets, "recipes." + phase.value());
+    }
+
+    private void runStateRunnerForRecipe(SaltStateService saltStateService, ExitCriteriaModel exitCriteriaModel, RecipeExecutionPhase phase,
+            int maxRetry, SaltConnector sc, Set<String> targetHostnames) throws Exception {
+        StateRunner stateAllRunner = new StateRunner(saltStateService, targetHostnames, "recipes." + phase.value());
+        OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateAllRunner);
+        Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry, false);
+        saltJobRunBootstrapRunner.call();
     }
 
     private void uploadSaltConfig(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel)
@@ -1491,11 +1566,37 @@ public class SaltOrchestrator implements HostOrchestrator {
             String command = String.format("chage -l %s | grep \"Password expires\" | cut -d \":\" -f2", user);
             Map<String, String> passwordExpiryDatesOnHosts = saltStateService.runCommandOnHosts(retry, sc, new HostList(gatewayTargets), command);
             return passwordExpiryDatesOnHosts.values().stream()
-                    .map(dateString -> LocalDate.parse(dateString.trim(), CHAGE_DATE_PATTERN))
+                    .map(String::trim)
+                    .map(SaltOrchestrator::parseDateString)
                     .min(LocalDate::compareTo)
                     .orElseThrow(() -> new IllegalStateException("No password expiry date found for user " + user));
         } catch (Exception e) {
             LOGGER.info("Error occurred during the salt state upload", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    private static LocalDate parseDateString(String dateString) {
+        return CHAGE_DATE_NEVER.equals(dateString) ? LocalDate.MAX : LocalDate.parse(dateString, CHAGE_DATE_PATTERN);
+    }
+
+    @Override
+    public void createCronForUserHomeCreation(List<GatewayConfig> gatewayConfigs, Set<String> targets, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException {
+        LOGGER.info("Create cron for user home creation job on possible targets: {}", targets);
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(gatewayConfigs);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            boolean createUserHomeCronStateExists = saltStateService.stateSlsExists(sc, new HostList(targets), CREATE_USER_HOME_CRON);
+            if (createUserHomeCronStateExists) {
+                StateRunner stateRunner = new StateRunner(saltStateService, targets, CREATE_USER_HOME_CRON);
+                OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner);
+                Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel);
+                saltJobRunBootstrapRunner.call();
+            } else {
+                LOGGER.debug("{} state not exists, the related cron will be created during post cluster install recipe execution.", CREATE_USER_HOME_CRON);
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Creating cron for user home creation failed.", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }

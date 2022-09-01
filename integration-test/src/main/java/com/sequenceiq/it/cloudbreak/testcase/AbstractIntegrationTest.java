@@ -178,10 +178,14 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
-    protected void createDefaultDatahub(TestContext testContext) {
-        createDefaultDatalake(testContext);
+    protected void createDefaultDatahubForExistingDatalake(TestContext testContext) {
         initiateDefaultDatahubCreation(testContext);
         waitForDefaultDatahubCreation(testContext);
+    }
+
+    protected void createDefaultDatahub(TestContext testContext) {
+        createDefaultDatalake(testContext);
+        createDefaultDatahubForExistingDatalake(testContext);
     }
 
     protected void createStorageOptimizedDatahub(TestContext testContext) {

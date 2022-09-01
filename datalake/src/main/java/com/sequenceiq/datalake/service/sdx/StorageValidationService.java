@@ -94,7 +94,7 @@ public class StorageValidationService {
                 () -> cloudProviderServicesV4Endpoint.validateObjectStorage(objectStorageValidateRequest));
     }
 
-    public ValidationResult validateBackupStorage(SdxCluster sdxCluster) {
+    public ValidationResult validateBackupStorage(SdxCluster sdxCluster, String backupLocation) {
         DetailedEnvironmentResponse environmentResponse = environmentService.getDetailedEnvironmentResponseByName(sdxCluster.getEnvName());
         CloudStorageRequest cloudStorageRequest = null;
         try {
@@ -112,7 +112,7 @@ public class StorageValidationService {
         }
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         try {
-            cloudStorageValidator.validateBackupLocation(cloudStorageRequest, environmentResponse, validationResultBuilder);
+            cloudStorageValidator.validateBackupLocation(cloudStorageRequest, environmentResponse, backupLocation, validationResultBuilder);
         } catch (Exception e) {
             String message = String.format("Error occured during object storage validation, validation skipped. Error: %s", e.getMessage());
             LOGGER.warn(message);

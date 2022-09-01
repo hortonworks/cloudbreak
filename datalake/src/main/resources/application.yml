@@ -62,6 +62,7 @@ sdx:
         backupretentionperiod: 30
       nonha:
         backupretentionperiod: 7
+    env.upgrade.database.targetversion: VERSION_11
   stack:
     cmsync:
       sleeptime_sec: 10
@@ -73,6 +74,9 @@ sdx:
     topology:
       name: cdp-proxy
     ssotype: SSO_PROVIDER
+  upgrade.database:
+    sleeptime-sec: 20
+    duration-min: 40
 
   paywall.url: "https://archive.cloudera.com/p/cdp-public/"
 

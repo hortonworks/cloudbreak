@@ -47,23 +47,23 @@ public class InstanceTemplate extends DynamicModel {
      */
     public static final String VOLUME_ENCRYPTION_KEY_ID = "key";
 
-    private final String flavor;
+    private String flavor;
 
-    private final String groupName;
+    private String groupName;
 
-    private final Long privateId;
+    private Long privateId;
 
-    private final List<Volume> volumes;
+    private List<Volume> volumes;
 
-    private final InstanceStatus status;
+    private InstanceStatus status;
 
-    private final Long templateId;
+    private Long templateId;
 
-    private final String imageId;
+    private String imageId;
 
-    private final TemporaryStorage temporaryStorage;
+    private TemporaryStorage temporaryStorage;
 
-    private final Long temporaryStorageCount;
+    private Long temporaryStorageCount;
 
     @JsonCreator
     public InstanceTemplate(@JsonProperty("flavor") String flavor,
@@ -122,6 +122,42 @@ public class InstanceTemplate extends DynamicModel {
 
     public Long getTemporaryStorageCount() {
         return temporaryStorageCount;
+    }
+
+    public void setFlavor(String flavor) {
+        this.flavor = flavor;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    public void setPrivateId(Long privateId) {
+        this.privateId = privateId;
+    }
+
+    public void setVolumes(List<Volume> volumes) {
+        this.volumes = volumes;
+    }
+
+    public void setStatus(InstanceStatus status) {
+        this.status = status;
+    }
+
+    public void setTemplateId(Long templateId) {
+        this.templateId = templateId;
+    }
+
+    public void setImageId(String imageId) {
+        this.imageId = imageId;
+    }
+
+    public void setTemporaryStorage(TemporaryStorage temporaryStorage) {
+        this.temporaryStorage = temporaryStorage;
+    }
+
+    public void setTemporaryStorageCount(Long temporaryStorageCount) {
+        this.temporaryStorageCount = temporaryStorageCount;
     }
 
     @Override

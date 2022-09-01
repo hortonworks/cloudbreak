@@ -33,7 +33,6 @@ import com.sequenceiq.freeipa.client.FreeIpaErrorCodes;
 import com.sequenceiq.freeipa.client.model.Cert;
 import com.sequenceiq.freeipa.client.model.DnsRecord;
 import com.sequenceiq.freeipa.client.model.DnsZone;
-import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
@@ -324,17 +323,17 @@ public class CleanupServiceTest {
         Set<String> usersNames = Set.of(
                 "ldapbind-test-wl-1",
                 "kerberosbind-test-wl-1");
-        Set<User> ipaUsers = Set.of(
-                createUser("ldapbind-test-wl-1"),
-                createUser("ldapbind-test-wl-2"),
-                createUser("kerberosbind-test-wl-1"),
-                createUser("kerberosbind-test-wl-2"),
-                createUser("mockuser0"),
-                createUser("csso_khorvath")
+        Set<String> ipaUserUids = Set.of(
+                "ldapbind-test-wl-1",
+                "ldapbind-test-wl-2",
+                "kerberosbind-test-wl-1",
+                "kerberosbind-test-wl-2",
+                "mockuser0",
+                "csso_khorvath"
         );
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
-        when(freeIpaClient.userFindAll()).thenReturn(ipaUsers);
+        when(freeIpaClient.userListAllUids()).thenReturn(ipaUserUids);
         when(stackService.getStackById(anyLong())).thenReturn(createStack());
 
         Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "test-wl-1", ENV_CRN);
@@ -354,17 +353,17 @@ public class CleanupServiceTest {
         Set<String> usersNames = Set.of(
                 "ldapbind-test-wl-1",
                 "kerberosbind-test-wl-1");
-        Set<User> ipaUsers = Set.of(
-                createUser("ldapbind-test-wl-1"),
-                createUser("ldapbind-test-wl-2"),
-                createUser("kerberosbind-test-wl-1"),
-                createUser("kerberosbind-test-wl-2"),
-                createUser("mockuser0"),
-                createUser("csso_khorvath")
+        Set<String> ipaUserUids = Set.of(
+                "ldapbind-test-wl-1",
+                "ldapbind-test-wl-2",
+                "kerberosbind-test-wl-1",
+                "kerberosbind-test-wl-2",
+                "mockuser0",
+                "csso_khorvath"
         );
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
-        when(freeIpaClient.userFindAll()).thenReturn(ipaUsers);
+        when(freeIpaClient.userListAllUids()).thenReturn(ipaUserUids);
 
         Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "", ENV_CRN);
 
@@ -383,17 +382,17 @@ public class CleanupServiceTest {
         Set<String> usersNames = Set.of(
                 "ldapbind-test-wl-1",
                 "kerberosbind-test-wl-1");
-        Set<User> ipaUsers = Set.of(
-                createUser("ldapbind-test-wl-1"),
-                createUser("ldapbind-test-wl-2"),
-                createUser("kerberosbind-test-wl-1"),
-                createUser("kerberosbind-test-wl-2"),
-                createUser("mockuser0"),
-                createUser("csso_khorvath")
+        Set<String> ipaUserUids = Set.of(
+                "ldapbind-test-wl-1",
+                "ldapbind-test-wl-2",
+                "kerberosbind-test-wl-1",
+                "kerberosbind-test-wl-2",
+                "mockuser0",
+                "csso_khorvath"
         );
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
-        when(freeIpaClient.userFindAll()).thenReturn(ipaUsers);
+        when(freeIpaClient.userListAllUids()).thenReturn(ipaUserUids);
         doThrow(new FreeIpaClientException("Connection failed")).when(freeIpaClient).deleteUser(anyString());
 
         Pair<Set<String>, Map<String, String>> result = cleanupService.removeUsers(STACK_ID, usersNames, "", ENV_CRN);
@@ -414,17 +413,17 @@ public class CleanupServiceTest {
         Set<String> usersNames = Set.of(
                 "ldapbind-test-wl-1",
                 "kerberosbind-test-wl-1");
-        Set<User> ipaUsers = Set.of(
-                createUser("ldapbind-test-wl-1"),
-                createUser("ldapbind-test-wl-2"),
-                createUser("kerberosbind-test-wl-1"),
-                createUser("kerberosbind-test-wl-2"),
-                createUser("mockuser0"),
-                createUser("csso_khorvath")
+        Set<String> ipaUserUids = Set.of(
+                "ldapbind-test-wl-1",
+                "ldapbind-test-wl-2",
+                "kerberosbind-test-wl-1",
+                "kerberosbind-test-wl-2",
+                "mockuser0",
+                "csso_khorvath"
         );
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
-        when(freeIpaClient.userFindAll()).thenReturn(ipaUsers);
+        when(freeIpaClient.userListAllUids()).thenReturn(ipaUserUids);
         when(stackService.getStackById(anyLong())).thenReturn(createStack());
         doThrow(new NotFoundException("Kerberos config not found")).when(kerberosConfigService).delete("envCrn", "accountId", "test-wl-1");
 
@@ -445,17 +444,17 @@ public class CleanupServiceTest {
         Set<String> usersNames = Set.of(
                 "ldapbind-test-wl-1",
                 "kerberosbind-test-wl-1");
-        Set<User> ipaUsers = Set.of(
-                createUser("ldapbind-test-wl-1"),
-                createUser("ldapbind-test-wl-2"),
-                createUser("kerberosbind-test-wl-1"),
-                createUser("kerberosbind-test-wl-2"),
-                createUser("mockuser0"),
-                createUser("csso_khorvath")
+        Set<String> ipaUserUids = Set.of(
+                "ldapbind-test-wl-1",
+                "ldapbind-test-wl-2",
+                "kerberosbind-test-wl-1",
+                "kerberosbind-test-wl-2",
+                "mockuser0",
+                "csso_khorvath"
         );
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
         when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(freeIpaClient);
-        when(freeIpaClient.userFindAll()).thenReturn(ipaUsers);
+        when(freeIpaClient.userListAllUids()).thenReturn(ipaUserUids);
         when(stackService.getStackById(anyLong())).thenReturn(createStack());
         doThrow(new NotFoundException("Ldap config not found")).when(ldapConfigService).delete("envCrn", "accountId", "test-wl-1");
 
@@ -553,12 +552,6 @@ public class CleanupServiceTest {
         for (String user : userIds) {
             verify(freeIpaClient, times(0)).deleteUser(user);
         }
-    }
-
-    private User createUser(String userId) {
-        User user = new User();
-        user.setUid(userId);
-        return user;
     }
 
     private Stack createStack() {

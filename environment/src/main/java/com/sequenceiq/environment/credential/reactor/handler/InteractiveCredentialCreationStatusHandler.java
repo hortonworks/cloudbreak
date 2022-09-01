@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.notification.NotificationService;
@@ -26,9 +25,6 @@ import reactor.bus.Event;
 public class InteractiveCredentialCreationStatusHandler implements EventHandler<InteractiveCredentialCreationStatus> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InteractiveCredentialCreationStatusHandler.class);
-
-    @Inject
-    private CredentialService credentialService;
 
     @Inject
     private NotificationService notificationService;

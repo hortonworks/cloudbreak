@@ -33,7 +33,6 @@ import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.Termina
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
 
 import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class TerminateDatabaseServerHandler extends ExceptionCatcherEventHandler<TerminateDatabaseServerRequest> {
@@ -48,9 +47,6 @@ public class TerminateDatabaseServerHandler extends ExceptionCatcherEventHandler
 
     @Inject
     private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
-
-    @Inject
-    private EventBus eventBus;
 
     @Inject
     private DBResourceService dbResourceService;

@@ -1,13 +1,14 @@
 package com.sequenceiq.freeipa.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 
 public class ClusterProxyErrorRpcListenerTest {
 

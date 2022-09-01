@@ -38,13 +38,14 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUS
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_CUSTOM_CONFIGS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_LONG_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_RESIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_BACKUP_RESTORE_PERMISSION_CHECKS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_RESIZE_RECOVERY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_SELECT_INSTANCE_TYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_ZDU_OS_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_BACKUP_RESTORE_PERMISSION_CHECKS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
@@ -61,6 +62,8 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EMBEDDED;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
@@ -74,6 +77,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SHOW_CL
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_TARGETED_UPSCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_UNBOUND_ELIMINATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_VM_DIAGNOSTICS;
@@ -93,6 +97,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
 import static java.util.Collections.newSetFromMap;
 import static java.util.Optional.ofNullable;
@@ -348,6 +353,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.ccmv2.upgradeToV2Jumpgate.enable}")
     private boolean ccmV2UpgradeToV2JumpgateEnabled;
 
+    @Value("${auth.mock.verticalScaleEnabled.enable}")
+    private boolean verticalScaleEnabled;
+
     @Value("${auth.mock.microdutysdx.enable}")
     private boolean microDutySdxEnabled;
 
@@ -462,6 +470,12 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.workloadiam.sync.enable}")
     private boolean enableWorkloadIamSync;
 
+    @Value("${auth.mock.postgres.upgrade.embedded.enable}")
+    private boolean enablePostgresUpgradeEmbedded;
+
+    @Value("${auth.mock.postgres.upgrade.exception.enable}")
+    private boolean enablePostgresUpgradeException;
+
     private String cbLicense;
 
     private AltusCredential telemetyPublisherCredential;
@@ -540,6 +554,12 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.user.sync.group-size.enforce-limit.enable}")
     private boolean enableUsersyncEnforceGroupMemberLimit;
+
+    @Value("${auth.mock.user.sync.split-freeipa-user-retrieval.enable}")
+    private boolean enableUsersyncSplitFreeIPAUserRetrieval;
+
+    @Value("${auth.mock.datalake.long.time.backup.enable:false}")
+    private boolean enableLongTimeDatalakeBackup;
 
     @PostConstruct
     public void init() {
@@ -809,6 +829,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (ccmV2JumpgateEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CCM_V2_JUMPGATE));
         }
+        if (verticalScaleEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_CB_AWS_VERTICAL_SCALE));
+        }
         if (ccmV2UseOneWayTls) {
             builder.addEntitlements(createEntitlement(CDP_CCM_V2_USE_ONE_WAY_TLS));
         }
@@ -991,6 +1014,18 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableUsersyncEnforceGroupMemberLimit) {
             builder.addEntitlements(createEntitlement(CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT));
+        }
+        if (enablePostgresUpgradeEmbedded) {
+            builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_EMBEDDED));
+        }
+        if (enablePostgresUpgradeException) {
+            builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_EXCEPTION));
+        }
+        if (enableUsersyncSplitFreeIPAUserRetrieval) {
+            builder.addEntitlements(createEntitlement(CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL));
+        }
+        if (enableLongTimeDatalakeBackup) {
+            builder.addEntitlements(createEntitlement(CDP_DATALAKE_BACKUP_LONG_TIMEOUT));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
@@ -1241,6 +1276,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         responseObserver.onNext(ListRolesResponse.newBuilder()
                 .addRole(Role.newBuilder()
                         .setCrn("crn:altus:iam:us-west-1:altus:role:DbusUploader")
+                        .build())
+                .addRole(Role.newBuilder()
+                        .setCrn("crn:altus:iam:us-west-1:altus:role:ComputeMetricsPublisher")
                         .build())
                 .build());
         responseObserver.onCompleted();

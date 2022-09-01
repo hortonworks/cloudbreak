@@ -16,6 +16,7 @@ public enum Status {
     UPDATE_FAILED,
     UPSCALE_FAILED,
     DOWNSCALE_FAILED,
+    VERTICAL_SCALE_FAILED,
     REPAIR_FAILED,
     CREATE_FAILED,
     DELETE_IN_PROGRESS,
@@ -59,6 +60,8 @@ public enum Status {
     public static final Collection<Status> FREEIPA_STOPPED_STATUSES = List.of(STOPPED);
 
     public static final Collection<Status> FREEIPA_CCM_UPGRADEABLE_STATUSES = List.of(AVAILABLE, UPGRADE_CCM_FAILED);
+
+    public static final Collection<Status> FREEIPA_VERTICALLY_SCALABLE_STATUSES = List.of(STOPPED);
 
     public static final Collection<Status> FREEIPA_CCM_UPGRADE_IN_PROGRESS_STATUSES = List.of(UPGRADE_CCM_IN_PROGRESS);
 
@@ -104,6 +107,10 @@ public enum Status {
 
     public boolean isCcmUpgradeablePhase() {
         return FREEIPA_CCM_UPGRADEABLE_STATUSES.contains(this);
+    }
+
+    public boolean isVerticallyScalable() {
+        return FREEIPA_VERTICALLY_SCALABLE_STATUSES.contains(this);
     }
 
 }

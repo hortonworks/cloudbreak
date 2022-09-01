@@ -93,7 +93,13 @@ public enum EnvironmentStatus {
     UPGRADE_CCM_ON_DATAHUB_IN_PROGRESS("Upgrading CCM on Data Hub clusters"),
     UPGRADE_CCM_ON_DATAHUB_FAILED("Upgrading CCM on Data Hub clusters failed"),
     UPGRADE_CCM_FAILED("Upgrade CCM failed"),
-    UPGRADE_CCM_ROLLING_BACK("Rolling back failed CCM upgrade");
+    UPGRADE_CCM_ROLLING_BACK("Rolling back failed CCM upgrade"),
+
+    VERTICAL_SCALE_VALIDATION_IN_PROGRESS("Validation for Vertical Scale"),
+    VERTICAL_SCALE_VALIDATION_FAILED("Validation for Vertical Scale failed"),
+    VERTICAL_SCALE_ON_FREEIPA_IN_PROGRESS("Vertical Scale on FreeIPA"),
+    VERTICAL_SCALE_ON_FREEIPA_FAILED("Vertical Scale on FreeIPA failed"),
+    VERTICAL_SCALE_FAILED("Vertical Scale failed");
 
     private static final Set<EnvironmentStatus> STARTABLE_STATUSES = Set.of(
             AVAILABLE,

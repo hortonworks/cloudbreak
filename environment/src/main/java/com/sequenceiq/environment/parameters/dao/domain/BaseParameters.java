@@ -14,12 +14,19 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 
 @Entity
 @Table(name = "environment_parameters")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "parameters_platform")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "@type")
+@JsonSubTypes({ @JsonSubTypes.Type(value = AwsParameters.class, name = "awsParameters"),
+        @JsonSubTypes.Type(value = AzureParameters.class, name = "azureParameters"),
+        @JsonSubTypes.Type(value = GcpParameters.class, name = "gcpParameters"),
+        @JsonSubTypes.Type(value = YarnParameters.class, name = "yarnParameters") })
 public abstract class BaseParameters {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "environment_parameters_generator")

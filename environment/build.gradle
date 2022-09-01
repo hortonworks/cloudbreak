@@ -127,6 +127,9 @@ dependencies {
     testImplementation group: "org.mockito",               name: "mockito-core",                             version: mockitoVersion
     testImplementation group: "com.google.guava",          name: "guava",                                    version: guavaVersion
     testImplementation group: 'org.assertj',               name: 'assertj-core',                             version: assertjVersion
+
+    testRuntimeClasspath group: 'org.testcontainers',      name: 'postgresql',                               version: testContainersVersion
+    testRuntimeClasspath group: 'org.awaitility',          name: 'awaitility',                               version: awaitilityVersion
 }
 
 bootRun {

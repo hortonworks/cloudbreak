@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.validation.Validator;
@@ -22,9 +21,6 @@ public class CreateFreeIpaRequestValidator implements Validator<CreateFreeIpaReq
 
     @Inject
     private CrnService crnService;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Value("${freeipa.max.instances}")
     private int maxInstances;

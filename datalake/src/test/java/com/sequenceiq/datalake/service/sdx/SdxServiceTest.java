@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
@@ -79,6 +80,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
@@ -104,6 +106,7 @@ import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
@@ -1072,7 +1075,7 @@ class SdxServiceTest {
         withCustomInstanceGroups(sdxClusterRequest);
         RecipeViewV4Responses recipeViewV4Responses = new RecipeViewV4Responses();
         RecipeViewV4Response recipeViewV4Response = new RecipeViewV4Response();
-        recipeViewV4Response.setName("post-install");
+        recipeViewV4Response.setName("post-service-deployment");
         recipeViewV4Responses.setResponses(List.of(recipeViewV4Response));
         when(recipeV4Endpoint.listInternal(anyLong(), anyString())).thenReturn(recipeViewV4Responses);
         long id = 10L;
@@ -1196,7 +1199,7 @@ class SdxServiceTest {
     private void withRecipe(SdxClusterRequest sdxClusterRequest) {
         SdxRecipe recipe = new SdxRecipe();
         recipe.setHostGroup("master");
-        recipe.setName("post-install");
+        recipe.setName("post-service-deployment");
         sdxClusterRequest.setRecipes(Set.of(recipe));
     }
 
@@ -1475,7 +1478,8 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
 
         mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.AWS);
-        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class))).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class)))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
@@ -1564,7 +1568,7 @@ class SdxServiceTest {
         withRecipe(sdxClusterRequest);
         RecipeViewV4Responses recipeViewV4Responses = new RecipeViewV4Responses();
         RecipeViewV4Response recipeViewV4Response = new RecipeViewV4Response();
-        recipeViewV4Response.setName("post-install");
+        recipeViewV4Response.setName("post-service-deployment");
         recipeViewV4Responses.setResponses(List.of(recipeViewV4Response));
         when(recipeV4Endpoint.listInternal(anyLong(), anyString())).thenReturn(recipeViewV4Responses);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
@@ -1652,14 +1656,15 @@ class SdxServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         FlowIdentifier cbFlowIdentifier = mock(FlowIdentifier.class);
-        when(stackV4Endpoint.rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, SDX_CRN, USER_CRN)).thenReturn(cbFlowIdentifier);
+        RotateSaltPasswordRequest request = new RotateSaltPasswordRequest(RotateSaltPasswordReason.MANUAL);
+        when(stackV4Endpoint.rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, SDX_CRN, request, USER_CRN)).thenReturn(cbFlowIdentifier);
         FlowIdentifier sdxFlowIdentifier = mock(FlowIdentifier.class);
         when(sdxReactorFlowManager.triggerSaltPasswordRotationTracker(sdxCluster)).thenReturn(sdxFlowIdentifier);
 
-        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateSaltPassword(sdxCluster));
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateSaltPassword(sdxCluster, RotateSaltPasswordReason.MANUAL));
 
         assertEquals(sdxFlowIdentifier, result);
-        verify(stackV4Endpoint).rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, SDX_CRN, USER_CRN);
+        verify(stackV4Endpoint).rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, SDX_CRN, request, USER_CRN);
         verify(regionAwareInternalCrnGenerator).getInternalCrnForServiceAsString();
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, cbFlowIdentifier);
         verify(sdxReactorFlowManager).triggerSaltPasswordRotationTracker(sdxCluster);
@@ -1688,4 +1693,17 @@ class SdxServiceTest {
         verify(distroxService, times(1)).restartDistroxByCrns(any());
     }
 
+    @Test
+    public void testUpdateDbEngineVersionUpdatesField() {
+        when(sdxClusterRepository.updateDatabaseEngineVersion(SDX_CRN, "10")).thenReturn(1);
+
+        underTest.updateDatabaseEngineVersion(SDX_CRN, "10");
+    }
+
+    @Test
+    public void testUpdateDbEngineVersionFieldNotUpdated() {
+        when(sdxClusterRepository.updateDatabaseEngineVersion(SDX_CRN, "10")).thenReturn(0);
+
+        assertThrows(NotFoundException.class, () -> underTest.updateDatabaseEngineVersion(SDX_CRN, "10"));
+    }
 }

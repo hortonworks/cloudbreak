@@ -1,7 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import javax.inject.Inject;
 
@@ -29,12 +28,6 @@ public class SdxNotificationService {
     public void send(ResourceEvent resourceEvent, Collection<?> messageArgs, SdxCluster sdx) {
         LOGGER.info("SDX Notification has been sent: {}", resourceEvent);
         notificationService.send(resourceEvent, messageArgs, sdxClusterConverter.sdxClusterToResponse(sdx),
-                ThreadBasedUserCrnProvider.getUserCrn());
-    }
-
-    public void send(ResourceEvent resourceEvent, SdxCluster sdx) {
-        LOGGER.info("SDX Notification has been sent: {}", resourceEvent);
-        notificationService.send(resourceEvent, Collections.singleton(sdx.getClusterName()), sdxClusterConverter.sdxClusterToResponse(sdx),
                 ThreadBasedUserCrnProvider.getUserCrn());
     }
 }

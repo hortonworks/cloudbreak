@@ -43,9 +43,9 @@ public interface SdxClusterRepository extends AccountAwareResourceRepository<Sdx
 
     Optional<SdxCluster> findByAccountIdAndCrnAndDeletedIsNull(String accountId, String crn);
 
-    Optional<SdxCluster> findByAccountIdAndOriginalCrnAndDeletedIsNull(String accountId, String crn);
+    List<SdxCluster> findByAccountIdAndOriginalCrnAndDeletedIsNull(String accountId, String crn);
 
-    Optional<SdxCluster> findByAccountIdAndOriginalCrn(String accountId, String crn);
+    List<SdxCluster> findByAccountIdAndOriginalCrn(String accountId, String crn);
 
     Optional<SdxCluster> findByCrnAndDeletedIsNull(String crn);
 
@@ -130,4 +130,8 @@ public interface SdxClusterRepository extends AccountAwareResourceRepository<Sdx
             "WHERE s.name in (:names) " +
             "AND s.accountId = :accountId")
     List<ResourceBasicView> findAllResourceBasicViewByNamesAndAccountId(@Param("names") Collection<String> names, @Param("accountId") String accountId);
+
+    @Modifying
+    @Query("UPDATE SdxCluster s SET s.databaseEngineVersion = :databaseEngineVersion WHERE s.crn = :crn")
+    int updateDatabaseEngineVersion(@Param("crn") String crn, @Param("databaseEngineVersion") String externalDatabaseEngineVersion);
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFoundException;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
@@ -55,6 +56,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntrie
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
@@ -81,7 +84,6 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -106,6 +108,7 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
@@ -160,9 +163,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private RecipeV4Endpoint recipeV4Endpoint;
-
-    @Inject
-    private CloudbreakInternalCrnClient cloudbreakInternalCrnClient;
 
     @Inject
     private DistroxService distroxService;
@@ -285,16 +285,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
         if (sdxCluster.isPresent()) {
             sdxClusterList.add(sdxCluster.get());
-            if (includeDeleted) {
-                sdxCluster = sdxClusterRepository.findByAccountIdAndOriginalCrn(accountIdFromCrn, clusterCrn);
-            } else {
-                sdxCluster = sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
-
-            }
-            if (sdxCluster.isPresent()) {
-                LOGGER.info("Found a detached data lake associated with crn:{}", clusterCrn);
-                sdxClusterList.add(sdxCluster.get());
-            }
+        }
+        if (includeDeleted) {
+            sdxClusterList.addAll(sdxClusterRepository.findByAccountIdAndOriginalCrn(accountIdFromCrn, clusterCrn));
+        } else {
+            sdxClusterList.addAll(sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn));
         }
         if (sdxClusterList.isEmpty()) {
             throw notFound("SDX cluster", clusterCrn).get();
@@ -598,7 +593,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
         stackRequest.setResourceCrn(newSdxCluster.getCrn());
         newSdxCluster.setStackRequest(stackRequest);
-        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster);
+        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster,
+                new DatalakeDrSkipOptions(sdxClusterResizeRequest.isSkipAtlasMetadata(),
+                        sdxClusterResizeRequest.isSkipRangerAudits(), sdxClusterResizeRequest.isSkipRangerMetadata()));
         return Pair.of(sdxCluster, flowIdentifier);
     }
 
@@ -1353,12 +1350,22 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return result;
     }
 
-    public FlowIdentifier rotateSaltPassword(SdxCluster sdxCluster) {
+    public FlowIdentifier rotateSaltPassword(SdxCluster sdxCluster, RotateSaltPasswordReason reason) {
         FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                initiatorUserCrn -> stackV4Endpoint.rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(), initiatorUserCrn)
+                initiatorUserCrn -> stackV4Endpoint.rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(),
+                        new RotateSaltPasswordRequest(reason), initiatorUserCrn)
         );
         cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         return sdxReactorFlowManager.triggerSaltPasswordRotationTracker(sdxCluster);
+    }
+
+    public void updateDatabaseEngineVersion(String crn, String databaseEngineVersion) {
+        int updatedCount = sdxClusterRepository.updateDatabaseEngineVersion(crn, databaseEngineVersion);
+        if (updatedCount < 1) {
+            throw notFoundException("SdxCluster with", crn + " crn");
+        } else {
+            LOGGER.info("Updated database engine version for [{}] with [{}]", crn, databaseEngineVersion);
+        }
     }
 }

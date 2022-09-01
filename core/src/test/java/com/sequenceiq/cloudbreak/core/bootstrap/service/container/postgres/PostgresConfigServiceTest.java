@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres;
 
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService.POSTGRESQL_SERVER;
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService.POSTGRES_COMMON;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -20,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -31,6 +30,14 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 class PostgresConfigServiceTest {
 
     private static final String SSL_CERTS_FILE_PATH = "/foo/bar.pem";
+
+    private static final String POSTGRES_COMMON = "postgres-common";
+
+    private static final String POSTGRESQL_SERVER = "postgresql-server";
+
+    private static final String POSTGRES_VERSION = "postgres_version";
+
+    private static final String DBVERSION = "dbversion";
 
     @Mock
     private RdsConfigProviderFactory rdsConfigProviderFactory;
@@ -59,6 +66,8 @@ class PostgresConfigServiceTest {
     @Test
     void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslDisabled() {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+        when(stack.getStack()).thenReturn(new Stack());
+
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         assertThat(servicePillar).isEmpty();
@@ -68,6 +77,8 @@ class PostgresConfigServiceTest {
     void decorateServicePillarWithPostgresWhenReusedDatabaseListIsEmpty() {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         ReflectionTestUtils.setField(underTest, "databasesReusedDuringRecovery", List.of());
+        when(stack.getStack()).thenReturn(new Stack());
+
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         assertThat(servicePillar).isEmpty();
@@ -77,10 +88,13 @@ class PostgresConfigServiceTest {
     void decorateServicePillarWithPostgresWhenReusedDatabaseListIsNotEmpty() {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         ReflectionTestUtils.setField(underTest, "databasesReusedDuringRecovery", List.of("HIVE"));
+        Stack stackView = new Stack();
+        stackView.setExternalDatabaseEngineVersion(DBVERSION);
+        when(stack.getStack()).thenReturn(stackView);
+
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         assertThat(servicePillar).isNotEmpty();
-
         SaltPillarProperties saltPillarProperties = servicePillar.get(POSTGRESQL_SERVER);
         assertThat(saltPillarProperties).isNotNull();
         assertThat(saltPillarProperties.getPath()).isEqualTo("/postgresql/postgre.sls");
@@ -89,9 +103,9 @@ class PostgresConfigServiceTest {
         assertThat(properties).isNotNull();
         assertThat(properties).hasSize(1);
 
-        Map<String, List<String>> reusedDatabases = (Map<String, List<String>>) properties.get("postgres");
+        Map<String, Object> reusedDatabases = (Map<String, Object>) properties.get("postgres");
         assertThat(reusedDatabases).isNotNull();
-        assertThat(reusedDatabases).containsOnly(entry("recovery_reused_databases", List.of("HIVE")));
+        assertThat(reusedDatabases).containsOnly(entry("recovery_reused_databases", List.of("HIVE")), entry(POSTGRES_VERSION, DBVERSION));
     }
 
     @Test
@@ -103,6 +117,9 @@ class PostgresConfigServiceTest {
         rootCerts.add("cert2");
         when(dbCertificateProvider.getRelatedSslCerts(stack)).thenReturn(rootCerts);
         when(dbCertificateProvider.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
+        Stack stackView = new Stack();
+        stackView.setExternalDatabaseEngineVersion(DBVERSION);
+        when(stack.getStack()).thenReturn(stackView);
 
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 

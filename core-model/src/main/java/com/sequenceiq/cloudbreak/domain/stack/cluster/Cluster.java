@@ -202,6 +202,10 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
     @SecretValue
     private Secret databusCredential = Secret.EMPTY;
 
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret monitoringCredential = Secret.EMPTY;
+
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json customContainerDefinition;
@@ -441,6 +445,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         this.databusCredential = new Secret(databusCredential);
     }
 
+    public String getMonitoringCredential() {
+        return monitoringCredential.getRaw();
+    }
+
+    public void setMonitoringCredential(String monitoringCredential) {
+        this.monitoringCredential = new Secret(monitoringCredential);
+    }
+
     public Gateway getGateway() {
         return hasGateway() ? gateway : null;
     }
@@ -537,6 +549,11 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
     @Override
     public Secret getDatabusCredentialSecret() {
         return databusCredential;
+    }
+
+    @Override
+    public Secret getMonitoringCredentialSecret() {
+        return monitoringCredential;
     }
 
     @Override
@@ -689,7 +706,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
         this.trustStorePwd = new Secret(trustStorePwd);
     }
 
-    public Boolean isTopologyValidation() {
+    public Boolean getTopologyValidation() {
         return topologyValidation;
     }
 
@@ -723,6 +740,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
 
     /**
      * Need this for Jackson deserialization
+     *
      * @param executorType executorType
      */
     public void setExecutorType(ExecutorType executorType) {

@@ -17,6 +17,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.slf4j.Logger;
@@ -81,6 +82,8 @@ public class FreeIpaClient {
 
     private static final boolean USER_ENABLED = false;
 
+    private static final Map<String, Object> UNLIMITED_PARAMS = Map.of("sizelimit", 0, "timelimit", 0);
+
     private JsonRpcHttpClient jsonRpcHttpClient;
 
     private final String apiVersion;
@@ -136,13 +139,26 @@ public class FreeIpaClient {
         }
     }
 
-    public Set<User> userFindAll() throws FreeIpaClientException {
-        List<Object> flags = List.of();
-        Map<String, Object> params = Map.of(
-                "sizelimit", 0,
-                "timelimit", 0,
-                "all", true
-        );
+    public Set<String> userListAllUids() throws FreeIpaClientException {
+        return userFindAll(Optional.empty(), Map.of("pkey_only", true)).stream()
+                .map(User::getUid)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Finds all users in FreeIPA. This command sends a user_find request with the sizelimit
+     * and timelimit set to 0.
+     *
+     * @param searchString      the search string
+     * @param additionalParams  additional parameters, e.g., ("all", true) or ("pkey_only", true)
+     * @return Set of found Users
+     */
+    public Set<User> userFindAll(Optional<String> searchString, Map<String, Object> additionalParams)
+            throws FreeIpaClientException {
+        List<Object> flags = searchString.isEmpty() ? List.of() : List.of(searchString.get());
+        Map<String, Object> params = new HashMap<>(UNLIMITED_PARAMS);
+        params.putAll(additionalParams);
+
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, User.class);
         return (Set<User>) invoke("user_find", flags, params, type).getResult();
@@ -160,13 +176,10 @@ public class FreeIpaClient {
 
     public Set<Role> findAllRole() throws FreeIpaClientException {
         List<Object> flags = List.of();
-        Map<String, Object> params = Map.of(
-                "sizelimit", 0,
-                "timelimit", 0
-        );
+
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, Role.class);
-        return (Set<Role>) invoke("role_find", flags, params, type).getResult();
+        return (Set<Role>) invoke("role_find", flags, UNLIMITED_PARAMS, type).getResult();
     }
 
     public Privilege showPrivilege(String privilegeName) throws FreeIpaClientException {
@@ -177,13 +190,10 @@ public class FreeIpaClient {
 
     public Set<Host> findAllHost() throws FreeIpaClientException {
         List<Object> flags = List.of();
-        Map<String, Object> params = Map.of(
-                "sizelimit", 0,
-                "timelimit", 0
-        );
+
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, Host.class);
-        return (Set<Host>) invoke("host_find", flags, params, type).getResult();
+        return (Set<Host>) invoke("host_find", flags, UNLIMITED_PARAMS, type).getResult();
     }
 
     public Host deleteHost(String fqdn) throws FreeIpaClientException {
@@ -193,13 +203,10 @@ public class FreeIpaClient {
 
     public Set<IpaServer> findAllServers() throws FreeIpaClientException {
         List<Object> flags = List.of();
-        Map<String, Object> params = Map.of(
-                "sizelimit", 0,
-                "timelimit", 0
-        );
+
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, IpaServer.class);
-        return (Set<IpaServer>) invoke("server_find", flags, params, type).getResult();
+        return (Set<IpaServer>) invoke("server_find", flags, UNLIMITED_PARAMS, type).getResult();
     }
 
     public Host deleteServer(String fqdn) throws FreeIpaClientException {
@@ -281,13 +288,10 @@ public class FreeIpaClient {
 
     public Set<Group> groupFindAll() throws FreeIpaClientException {
         List<Object> flags = List.of();
-        Map<String, Object> params = Map.of(
-                "sizelimit", 0,
-                "timelimit", 0
-        );
+
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, Group.class);
-        return (Set<Group>) invoke("group_find", flags, params, type).getResult();
+        return (Set<Group>) invoke("group_find", flags, UNLIMITED_PARAMS, type).getResult();
     }
 
     public Group groupShow(String groupName) throws FreeIpaClientException {
@@ -400,13 +404,10 @@ public class FreeIpaClient {
 
     public Set<Service> findAllService() throws FreeIpaClientException {
         List<Object> flags = List.of();
-        Map<String, Object> params = Map.of(
-                "sizelimit", 0,
-                "timelimit", 0
-        );
+
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, Service.class);
-        return (Set<Service>) invoke("service_find", flags, params, type).getResult();
+        return (Set<Service>) invoke("service_find", flags, UNLIMITED_PARAMS, type).getResult();
     }
 
     public Service deleteService(String canonicalPrincipal) throws FreeIpaClientException {
@@ -705,11 +706,9 @@ public class FreeIpaClient {
 
     public Set<SudoCommand> sudoCommandFindAll() throws FreeIpaClientException {
         List<Object> flags = List.of();
-        Map<String, Object> params = Map.of(
-                "sizelimit", 0,
-                "timelimit", 0);
+
         ParameterizedType type = TypeUtils.parameterize(Set.class, SudoCommand.class);
-        return (Set<SudoCommand>) invoke("sudocmd_find", flags, params, type).getResult();
+        return (Set<SudoCommand>) invoke("sudocmd_find", flags, UNLIMITED_PARAMS, type).getResult();
     }
 
     public Optional<SudoCommand> sudoCommandAdd(String sudoCommand) throws FreeIpaClientException {

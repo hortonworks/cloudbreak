@@ -36,7 +36,7 @@ ipacustodiaRestartSec:
      - name: {{ unitFile | replace("FragmentPath=","") }}
      - mode: ensure
      - content: "Restart=always"
-     - after: \[Service\]
+     - after: ^\[Service\]
      - backup: False
 
 {{ service }}RestartSec:

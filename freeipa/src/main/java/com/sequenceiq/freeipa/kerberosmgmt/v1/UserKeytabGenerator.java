@@ -1,7 +1,15 @@
 package com.sequenceiq.freeipa.kerberosmgmt.v1;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
-import com.sequenceiq.cloudbreak.common.service.Clock;
+import static java.util.Objects.requireNonNull;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import org.apache.kerby.kerberos.kerb.keytab.Keytab;
 import org.apache.kerby.kerberos.kerb.keytab.KeytabEntry;
 import org.apache.kerby.kerberos.kerb.type.KerberosTime;
@@ -12,14 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Base64;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static java.util.Objects.requireNonNull;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 
 /**
  * Kerberos keytab generator - This class is repsonsible for generating a keytab using existing keys

@@ -49,8 +49,6 @@ import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.flow.domain.FlowChainLog;
-import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
@@ -92,22 +90,18 @@ public class DatalakeRestoreActions {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     DatalakeTriggerRestoreEvent payload) {
+                SdxContext sdxContext = SdxContext.from(flowParameters, payload);
 
                 // When SDX is created as part of re-size flow chain, SDX in payload will not have the correct ID.
-                Optional<FlowLogWithoutPayload> lastFlowLog = flowLogService.getLastFlowLog(flowParameters.getFlowId());
-                if (lastFlowLog.isPresent()) {
-                    SdxContext sdxContext;
-                    Optional<FlowChainLog> flowChainLog = flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(lastFlowLog.get().getFlowChainId());
-                    if (flowChainLog.isPresent() && flowChainLog.get().getFlowChainType().equals(DatalakeResizeFlowEventChainFactory.class.getSimpleName())) {
-                        SdxCluster sdxCluster = sdxService.getByNameInAccount(payload.getUserId(), payload.getSdxName());
-                        LOGGER.info("Updating the Sdx-id in context from {} to {}", payload.getResourceId(), sdxCluster.getId());
-                        payload.getDrStatus().setSdxClusterId(sdxCluster.getId());
-                        sdxContext = SdxContext.from(flowParameters, payload);
-                        sdxContext.setSdxId(sdxCluster.getId());
-                        return sdxContext;
-                    }
+                if (flowChainLogService.isFlowTriggeredByFlowChain(
+                        DatalakeResizeFlowEventChainFactory.class.getSimpleName(),
+                        flowLogService.getLastFlowLog(flowParameters.getFlowId()))) {
+                    SdxCluster sdxCluster = sdxService.getByNameInAccount(payload.getUserId(), payload.getSdxName());
+                    LOGGER.info("Updating the Sdx-id in context from {} to {}", payload.getResourceId(), sdxCluster.getId());
+                    payload.getDrStatus().setSdxClusterId(sdxCluster.getId());
+                    sdxContext.setSdxId(sdxCluster.getId());
                 }
-                return SdxContext.from(flowParameters, payload);
+                return sdxContext;
             }
 
             @Override
@@ -121,7 +115,8 @@ public class DatalakeRestoreActions {
                         sdxBackupRestoreService.triggerDatalakeRestore(context.getSdxId(),
                                 payload.getBackupId(),
                                 payload.getBackupLocationOverride(),
-                                payload.getUserId());
+                                payload.getUserId(),
+                                payload.getSkipOptions());
                 variables.put(RESTORE_ID, restoreStatusResponse.getRestoreId());
                 variables.put(BACKUP_ID, restoreStatusResponse.getBackupId());
                 variables.put(OPERATION_ID, restoreStatusResponse.getRestoreId());

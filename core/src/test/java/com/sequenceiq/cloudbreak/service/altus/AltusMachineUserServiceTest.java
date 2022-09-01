@@ -83,7 +83,7 @@ public class AltusMachineUserServiceTest {
     public void testCreateMachineUserAndGenerateKeys() {
         // GIVEN
         Optional<AltusCredential> altusCredential = Optional.of(new AltusCredential("accessKey", "secretKey".toCharArray()));
-        when(altusIAMService.generateMachineUserWithAccessKey(any(), any(), any(), anyBoolean())).thenReturn(altusCredential);
+        when(altusIAMService.generateDatabusMachineUserWithAccessKey(any(), any(), any(), anyBoolean())).thenReturn(altusCredential);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         // WHEN
@@ -91,7 +91,7 @@ public class AltusMachineUserServiceTest {
 
         // THEN
         assertEquals("secretKey", new String(altusCredential.get().getPrivateKey()));
-        verify(altusIAMService, times(1)).generateMachineUserWithAccessKey(any(), any(), any(), anyBoolean());
+        verify(altusIAMService, times(1)).generateDatabusMachineUserWithAccessKey(any(), any(), any(), anyBoolean());
     }
 
     @Test

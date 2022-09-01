@@ -705,7 +705,7 @@ public class StackRequestManifesterTest {
         assertThat(azure).isNotNull();
         AzureEncryptionV4Parameters encryption = azure.getEncryption();
         assertThat(encryption).isNotNull();
-        assertThat(encryption.isEncryptionAtHostEnabled()).isEqualTo(expectedIsEncryptionAtHost);
+        assertThat(encryption.getEncryptionAtHostEnabled()).isEqualTo(expectedIsEncryptionAtHost);
     }
 
     private GcpEncryptionV4Parameters createGcpEncryptionV4Parameters(EncryptionType encryptionType, String encryptionKey) {

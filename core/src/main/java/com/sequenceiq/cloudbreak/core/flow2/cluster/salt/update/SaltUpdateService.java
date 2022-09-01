@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAI
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RUN_SERVICES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SALT_PASSWORD_ROTATE_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SALT_PASSWORD_ROTATE_STARTED_FALLBACK;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SALT_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SALT_UPDATE_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SALT_UPDATE_STARTED;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.view.StackView;
 
@@ -47,8 +50,12 @@ public class SaltUpdateService {
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_RUN_SERVICES);
     }
 
-    public void rotateSaltPassword(Long stackId) {
-        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SALT_PASSWORD_ROTATE_STARTED);
+    public void rotateSaltPassword(Long stackId, RotateSaltPasswordType type) {
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.BOOTSTRAPPING_MACHINES);
+        ResourceEvent event = type.equals(RotateSaltPasswordType.FALLBACK)
+                ? CLUSTER_SALT_PASSWORD_ROTATE_STARTED_FALLBACK
+                : CLUSTER_SALT_PASSWORD_ROTATE_STARTED;
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), event);
     }
 
     public void clusterInstallationFinished(Long stackId) {

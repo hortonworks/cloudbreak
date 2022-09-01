@@ -31,7 +31,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -490,6 +493,19 @@ public class StackToCloudStackConverter {
             result = new Network(subnet, stackNetwork.getNetworkCidrs(), stackNetwork.getOutboundInternetTraffic(), params);
         }
         return result;
+    }
+
+    public CloudStack updateWithVerticalScaleRequest(CloudStack cloudStack, StackVerticalScaleV4Request request) {
+        InstanceTemplateV4Request template = request.getTemplate();
+        if (template != null) {
+            cloudStack.getGroups()
+                .stream()
+                .filter(group -> group.getName().equals(request.getGroup()))
+                .flatMap(group -> group.getInstances().stream())
+                .filter(instance -> !Strings.isNullOrEmpty(template.getInstanceType()))
+                .forEach(instance -> instance.getTemplate().setFlavor(template.getInstanceType()));
+        }
+        return cloudStack;
     }
 
     private OutboundInternetTraffic getOutboundInternetTraffic(com.sequenceiq.cloudbreak.domain.Network stackNetwork) {

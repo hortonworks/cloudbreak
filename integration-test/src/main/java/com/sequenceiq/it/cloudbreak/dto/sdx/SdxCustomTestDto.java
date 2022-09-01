@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -262,6 +263,16 @@ public class SdxCustomTestDto extends AbstractSdxTestDto<SdxCustomClusterRequest
     @Override
     public String getSearchId() {
         return getName();
+    }
+
+    @Override
+    public void deleteForCleanup() {
+        try {
+            setFlow("SDX Custom deletion", getClientForCleanup().getDefaultClient().sdxEndpoint().deleteByCrn(getCrn(), true));
+            awaitForFlow();
+        } catch (NotFoundException nfe) {
+            LOGGER.info("SDX Custom resource not found, thus cleanup not needed.");
+        }
     }
 }
 

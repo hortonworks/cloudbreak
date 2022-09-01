@@ -1,5 +1,16 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
+import static java.util.Objects.requireNonNull;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsGroupConverter;
@@ -10,16 +21,6 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Supplier;
-
-import static java.util.Objects.requireNonNull;
 
 public class ActorHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ActorHandler.class);

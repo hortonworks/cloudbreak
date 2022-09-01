@@ -16,8 +16,10 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -52,6 +54,7 @@ class ConsumptionServiceTest {
     @Mock
     private ConsumptionClientService consumptionClientService;
 
+    @InjectMocks
     private ConsumptionService underTest;
 
     @Captor
@@ -59,12 +62,12 @@ class ConsumptionServiceTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new ConsumptionService(entitlementService, consumptionClientService, CONSUMPTION_ENABLED);
+        ReflectionTestUtils.setField(underTest, "consumptionEnabled", CONSUMPTION_ENABLED);
     }
 
     @Test
     void scheduleStorageConsumptionCollectionIfNeededTestSkipWhenDeploymentFlagDisabled() {
-        underTest = new ConsumptionService(entitlementService, consumptionClientService, CONSUMPTION_DISABLED);
+        ReflectionTestUtils.setField(underTest, "consumptionEnabled", CONSUMPTION_DISABLED);
 
         underTest.scheduleStorageConsumptionCollectionIfNeeded(sdxCluster());
 
@@ -123,7 +126,7 @@ class ConsumptionServiceTest {
 
     @Test
     void unscheduleStorageConsumptionCollectionIfNeededTestSkipWhenDeploymentFlagDisabled() {
-        underTest = new ConsumptionService(entitlementService, consumptionClientService, CONSUMPTION_DISABLED);
+        ReflectionTestUtils.setField(underTest, "consumptionEnabled", CONSUMPTION_DISABLED);
 
         underTest.unscheduleStorageConsumptionCollectionIfNeeded(sdxCluster());
 

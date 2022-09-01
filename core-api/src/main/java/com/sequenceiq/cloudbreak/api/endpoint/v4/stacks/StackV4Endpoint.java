@@ -44,6 +44,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.RE_REGISTER_CLUSTER_PROXY_CONFIG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.ROTATE_CERTIFICATES;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.ROTATE_SALT_PASSWORD_BY_CRN_IN_WORKSPACE_INTERNAL;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.SALT_PASSWORD_STATUS;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.SCALE_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.STACK_UPGRADE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.STACK_UPGRADE_INTERNAL;
@@ -57,6 +58,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_LOAD_BALANCERS;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_LOAD_BALANCER_DNS_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPGRADE_CLUSTER_IN_WORKSPACE;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.VERTICAL_SCALE_BY_NAME;
 
 import java.util.List;
 import java.util.Set;
@@ -81,9 +83,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRota
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
@@ -94,6 +98,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.Upg
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatusResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
@@ -262,7 +267,14 @@ public interface StackV4Endpoint {
     @ApiOperation(value = ROTATE_SALT_PASSWORD_BY_CRN_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "rotateSaltPasswordForStackInWorkspaceV4Internal")
     FlowIdentifier rotateSaltPasswordInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @Valid RotateSaltPasswordRequest request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @GET
+    @Path("internal/{crn}/rotate_salt_password/status")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = SALT_PASSWORD_STATUS, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "getSaltPasswordStatusForStackInWorkspaceV4Internal")
+    SaltPasswordStatusResponse getSaltPasswordStatus(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn);
 
     @PUT
     @Path("{name}/scaling")
@@ -638,4 +650,15 @@ public interface StackV4Endpoint {
     @ApiOperation(value = RE_REGISTER_CLUSTER_PROXY_CONFIG, nickname = "reRegisterClusterProxyConfig")
     FlowIdentifier reRegisterClusterProxyConfig(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
+    @Path("internal/{name}/vertical_scaling")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = VERTICAL_SCALE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "putVerticalScalingStackByNameInternal")
+    FlowIdentifier putVerticalScalingByNameInternal(
+            @PathParam("workspaceId") Long workspaceId,
+            @PathParam("name") String name,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn,
+            @Valid StackVerticalScaleV4Request updateRequest);
 }

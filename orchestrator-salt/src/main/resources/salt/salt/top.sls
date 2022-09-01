@@ -13,6 +13,7 @@ base:
     - logrotate
     - ntp
     - postgresql.root-certs
+    - sshd
 
   'G@roles:ad_member and G@os_family:RedHat':
     - match: compound
@@ -81,6 +82,10 @@ base:
     - match: grain
     - recipes.pre-cloudera-manager-start
 
+  'recipes:pre-service-deployment':
+    - match: grain
+    - recipes.pre-service-deployment
+
   'roles:manager_server':
     - match: grain
     - cloudera.manager.start
@@ -102,6 +107,10 @@ base:
     - match: grain
     - recipes.post-cluster-install
 
+  'recipes:post-service-deployment':
+    - match: grain
+    - recipes.post-service-deployment
+
   'G@roles:ad_leave and G@os_family:RedHat':
     - match: compound
     - sssd.ad-leave
@@ -113,3 +122,13 @@ base:
   'roles:cloudera_manager_agent_stop':
     - match: grain
     - cloudera.agent.agent-stop
+
+  'roles:cloudera_manager_full_stop':
+    - match: grain
+    - cloudera.agent.agent-stop
+    - cloudera.manager.server-stop
+
+  'roles:cloudera_manager_full_start':
+    - match: grain
+    - cloudera.agent.start
+    - cloudera.manager.server-start

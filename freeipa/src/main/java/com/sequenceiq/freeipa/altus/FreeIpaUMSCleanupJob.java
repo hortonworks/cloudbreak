@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -56,10 +57,8 @@ public class FreeIpaUMSCleanupJob extends UMSCleanupJob {
                 .findAllRunning()
                 .stream()
                 .collect(Collectors.groupingBy(Stack::getAccountId,
-                        Collectors.mapping(
-                                altusMachineUserService::getFluentMachineUser,
-                                Collectors.toSet()
-                        )));
+                        Collectors.flatMapping(stack -> Stream.of(altusMachineUserService.getFluentMachineUser(stack),
+                                altusMachineUserService.getMonitoringMachineUser(stack)), Collectors.toSet())));
         for (Map.Entry<String, Set<String>> machineUsersPerAccount : expectedMachineUsers.entrySet()) {
             String accountId = machineUsersPerAccount.getKey();
             List<UserManagementProto.MachineUser> machineUsers =
@@ -67,19 +66,23 @@ public class FreeIpaUMSCleanupJob extends UMSCleanupJob {
             Set<String> machineUserValues = machineUsersPerAccount.getValue();
             for (UserManagementProto.MachineUser machineUser : machineUsers) {
                 String name = machineUser.getMachineUserName();
-                if (name.startsWith("freeipa-fluent") && !machineUserValues.contains(name)) {
-                    LOGGER.debug("Cannot found stack for machine user {} (account: {}). Checks that if it can be deleted.",
-                            name, accountId);
-                    Instant beforeTime = Instant.now().minus(umsCleanupConfig.getMaxAgeDays(), ChronoUnit.DAYS);
-                    Instant creationTime = new Date(machineUser.getCreationDateMs()).toInstant();
-                    if (creationTime.isBefore(beforeTime)) {
-                        altusMachineUserService.cleanupMachineUser(name, accountId);
-                    } else {
-                        LOGGER.debug("Machine user with name {} is not old enough yet, skipping cleanup. (account id: {})",
-                                name, accountId);
-                    }
+                if ((name.startsWith("freeipa-fluent") || name.startsWith("freeipa-monitoring")) && !machineUserValues.contains(name)) {
+                    clearMachineUser(accountId, machineUser, name);
                 }
             }
+        }
+    }
+
+    private void clearMachineUser(String accountId, UserManagementProto.MachineUser machineUser, String name) {
+        LOGGER.debug("Cannot found stack for machine user {} (account: {}). Checks that if it can be deleted.",
+                name, accountId);
+        Instant beforeTime = Instant.now().minus(umsCleanupConfig.getMaxAgeDays(), ChronoUnit.DAYS);
+        Instant creationTime = new Date(machineUser.getCreationDateMs()).toInstant();
+        if (creationTime.isBefore(beforeTime)) {
+            altusMachineUserService.cleanupMachineUser(name, accountId);
+        } else {
+            LOGGER.debug("Machine user with name {} is not old enough yet, skipping cleanup. (account id: {})",
+                    name, accountId);
         }
     }
 }

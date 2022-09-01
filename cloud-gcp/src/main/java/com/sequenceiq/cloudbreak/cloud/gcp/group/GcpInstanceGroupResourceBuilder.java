@@ -12,7 +12,6 @@ import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
@@ -50,11 +49,6 @@ public class GcpInstanceGroupResourceBuilder extends AbstractGcpGroupBuilder {
                 context.getLocation().getAvailabilityZone().value(), new InstanceGroup().setName(resource.getName()));
 
         return executeOperationalRequest(resource, insert);
-    }
-
-    @Override
-    public CloudResourceStatus update(GcpContext context, AuthenticatedContext auth, Group group, Network network, Security security, CloudResource resource) {
-        return null;
     }
 
     @Override

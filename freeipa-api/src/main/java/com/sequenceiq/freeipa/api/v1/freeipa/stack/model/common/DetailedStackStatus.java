@@ -47,6 +47,11 @@ public enum DetailedStackStatus {
     DOWNSCALE_IN_PROGRESS(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.AVAILABLE),
     DOWNSCALE_COMPLETED(Status.AVAILABLE, AvailabilityStatus.AVAILABLE),
     DOWNSCALE_FAILED(Status.DOWNSCALE_FAILED, AvailabilityStatus.UNAVAILABLE),
+    // Vertical scale statuses
+    VERTICAL_SCALE_REQUESTED(Status.UPDATE_REQUESTED, AvailabilityStatus.AVAILABLE),
+    VERTICAL_SCALE_IN_PROGRESS(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.AVAILABLE),
+    VERTICAL_SCALE_COMPLETED(Status.AVAILABLE, AvailabilityStatus.AVAILABLE),
+    VERTICAL_SCALE_FAILED(Status.VERTICAL_SCALE_FAILED, AvailabilityStatus.UNAVAILABLE),
     // Repair statuses
     REPAIR_REQUESTED(Status.UPDATE_REQUESTED, AvailabilityStatus.AVAILABLE),
     REPAIR_IN_PROGRESS(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.AVAILABLE),

@@ -26,9 +26,10 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteCustomAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxGetAuditsAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxGetDatalakeEventsZipAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalResizeRecoveryAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxListAction;
-import com.sequenceiq.it.cloudbreak.action.sdx.SdxRecoveryAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeRecoveryAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshCustomAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshInternalAction;
@@ -37,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxResizeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRestoreAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRestoreInternalAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxRotateSaltPasswordAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStartAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStatusAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopAction;
@@ -145,8 +147,12 @@ public class SdxTestClient {
         return new SdxInternalUpgradeAction();
     }
 
-    public Action<SdxTestDto, SdxClient> recover() {
-        return new SdxRecoveryAction();
+    public Action<SdxTestDto, SdxClient> recoverFromUpgrade() {
+        return new SdxUpgradeRecoveryAction();
+    }
+
+    public Action<SdxInternalTestDto, SdxClient> recoverFromResizeInternal() {
+        return new SdxInternalResizeRecoveryAction();
     }
 
     public Action<SdxInternalTestDto, SdxClient> resize() {
@@ -219,5 +225,9 @@ public class SdxTestClient {
 
     public Action<SdxEventTestDto, SdxClient> getDatalakeEventsZip() {
         return new SdxGetDatalakeEventsZipAction();
+    }
+
+    public Action<SdxInternalTestDto, SdxClient> rotateSaltPassword() {
+        return new SdxRotateSaltPasswordAction();
     }
 }

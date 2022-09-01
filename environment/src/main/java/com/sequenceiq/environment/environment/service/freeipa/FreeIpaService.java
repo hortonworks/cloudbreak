@@ -17,13 +17,17 @@ import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
+import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.operation.OperationView;
+import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
@@ -48,8 +52,11 @@ public class FreeIpaService {
 
     private final EventSenderService eventService;
 
+    private final FreeIpaV1FlowEndpoint flowEndpoint;
+
     public FreeIpaService(FreeIpaV1Endpoint freeIpaV1Endpoint,
             OperationV1Endpoint operationV1Endpoint,
+            FreeIpaV1FlowEndpoint flowEndpoint,
             UserV1Endpoint userV1Endpoint,
             WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory,
@@ -60,6 +67,7 @@ public class FreeIpaService {
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
         this.eventService = eventService;
+        this.flowEndpoint = flowEndpoint;
     }
 
     public DescribeFreeIpaResponse create(CreateFreeIpaRequest createFreeIpaRequest) {
@@ -181,6 +189,18 @@ public class FreeIpaService {
         }
     }
 
+    public FlowLogResponse getFlowStatus(String flowId) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        try {
+            LOGGER.debug("Getting FreeIPA Operation status for flowId {}", flowId);
+            return flowEndpoint.getLastFlowById(flowId);
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to get operation status '{}' in account {} due to: '{}'", flowId, accountId, errorMessage, e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
     public OperationStatus upgradeCcm(String environmentCrn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         try {
@@ -191,6 +211,19 @@ public class FreeIpaService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to upgrade CCM on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public VerticalScaleResponse verticalScale(String environmentCrn, VerticalScaleRequest freeIPAVerticalScaleRequest) {
+        try {
+            LOGGER.debug("Calling FreeIPA CCM upgrade for environment {}", environmentCrn);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> freeIpaV1Endpoint.putVerticalScalingFreeIpaV1ByEnvironmentCrn(environmentCrn, freeIPAVerticalScaleRequest));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to vertical scale on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }

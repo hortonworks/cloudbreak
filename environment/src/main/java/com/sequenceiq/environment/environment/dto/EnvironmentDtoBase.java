@@ -54,7 +54,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
     private String creator;
 
-    private FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder().build();
+    private FreeIpaCreationDto freeIpaCreation;
 
     private AuthenticationDto authentication;
 
@@ -417,7 +417,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
         private String statusReason;
 
-        private FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder().build();
+        private FreeIpaCreationDto freeIpaCreation;
 
         private AuthenticationDto authentication;
 

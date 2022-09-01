@@ -296,6 +296,16 @@ public class MockUserManagementServiceTest {
 
                 {"enableWorkloadIamSync false", "enableWorkloadIamSync", false, "WORKLOAD_IAM_SYNC", false},
                 {"enableWorkloadIamSync true", "enableWorkloadIamSync", true, "WORKLOAD_IAM_SYNC", true},
+
+                {"enableUsersyncEnforceGroupMemberLimit false", "enableUsersyncEnforceGroupMemberLimit", false,
+                        "CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT", false},
+                {"enableUsersyncEnforceGroupMemberLimit true", "enableUsersyncEnforceGroupMemberLimit", true,
+                        "CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT", true},
+
+                {"enableUsersyncSplitFreeIPAUserRetrieval false", "enableUsersyncSplitFreeIPAUserRetrieval", false,
+                        "CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL", false},
+                {"enableUsersyncSplitFreeIPAUserRetrieval true", "enableUsersyncSplitFreeIPAUserRetrieval", true,
+                        "CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL", true},
         };
     }
 

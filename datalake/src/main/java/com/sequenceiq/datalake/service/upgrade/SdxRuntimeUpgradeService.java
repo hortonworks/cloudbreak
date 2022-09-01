@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeClusterConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
@@ -145,7 +146,11 @@ public class SdxRuntimeUpgradeService {
         verifyPaywallAccess(userCrn, request);
         String imageId = determineImageId(request, upgradeCandidates);
         boolean skipBackup = request != null && Boolean.TRUE.equals(request.getSkipBackup());
-        FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(imageId, cluster, shouldReplaceVmsAfterUpgrade(request), skipBackup);
+        boolean skipAtlasMetadata = request != null && Boolean.TRUE.equals(request.isSkipAtlasMetadata());
+        boolean skipRangerAudits = request != null && Boolean.TRUE.equals(request.isSkipRangerAudits());
+        boolean skipRangerMetadata = request != null && Boolean.TRUE.equals(request.isSkipRangerMetadata());
+        DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(skipAtlasMetadata, skipRangerAudits, skipRangerMetadata);
+        FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(imageId, cluster, shouldReplaceVmsAfterUpgrade(request), skipBackup, skipOptions);
         String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE.getMessage(), Collections.singletonList(imageId));
         return new SdxUpgradeResponse(message, flowIdentifier);
     }
@@ -178,8 +183,9 @@ public class SdxRuntimeUpgradeService {
         paywallAccessChecker.checkPaywallAccess(license, paywallUrl);
     }
 
-    private FlowIdentifier triggerDatalakeUpgradeFlow(String imageId, SdxCluster cluster, SdxUpgradeReplaceVms replaceVms, boolean skipBackup) {
-        return sdxReactorFlowManager.triggerDatalakeRuntimeUpgradeFlow(cluster, imageId, replaceVms, skipBackup);
+    private FlowIdentifier triggerDatalakeUpgradeFlow(String imageId, SdxCluster cluster, SdxUpgradeReplaceVms replaceVms,
+            boolean skipBackup, DatalakeDrSkipOptions skipOptions) {
+        return sdxReactorFlowManager.triggerDatalakeRuntimeUpgradeFlow(cluster, imageId, replaceVms, skipBackup, skipOptions);
     }
 
     private String determineImageId(SdxUpgradeRequest upgradeRequest, List<ImageInfoV4Response> upgradeCandidates) {

@@ -27,6 +27,7 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.IamInstanceProfileSpecification;
 import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.ModifyInstanceAttributeRequest;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
@@ -141,6 +142,31 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         return buildableResource;
     }
 
+    @Override
+    public List<CloudResource> update(AwsContext context, CloudInstance instance, long privateId,
+        AuthenticatedContext auth, Group group, CloudStack cloudStack) throws Exception {
+        AmazonEc2Client amazonEc2Client = context.getAmazonEc2Client();
+        Optional<Instance> existedOpt = resourceById(amazonEc2Client, instance.getInstanceId());
+        Instance awsInstance;
+        if (existedOpt.isPresent() && existedOpt.get().getState().getCode() != AWS_INSTANCE_TERMINATED_CODE) {
+            awsInstance = existedOpt.get();
+            LOGGER.info("Instance exists with name: {} ({}), check the state: {}", awsInstance.getInstanceId(), instance.getInstanceId(),
+                    awsInstance.getState().getName());
+            String requestedInstanceType = instance.getTemplate().getFlavor();
+            if (!awsInstance.getInstanceType().equals(requestedInstanceType)) {
+                ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = new ModifyInstanceAttributeRequest();
+                modifyInstanceAttributeRequest.setInstanceId(awsInstance.getInstanceId());
+                modifyInstanceAttributeRequest.setInstanceType(instance.getTemplate().getFlavor());
+                amazonEc2Client.modifyInstanceAttribute(modifyInstanceAttributeRequest);
+            } else {
+                LOGGER.info("Instance with name: {} ({}), using the same type what was requested: {}", awsInstance.getInstanceId(),
+                        requestedInstanceType);
+            }
+
+        }
+        return List.of();
+    }
+
     String getSecurityGroupId(AwsContext context, Group group) {
         List<CloudResource> groupResources = context.getGroupResources(group.getName());
         String securityGroupId = null;
@@ -178,6 +204,14 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         return awsMethodExecutor.execute(() -> {
             DescribeInstancesResult describeInstancesResult = amazonEc2Client.describeInstances(new DescribeInstancesRequest()
                     .withFilters(new Filter().withName("tag:Name").withValues(name)));
+            return describeInstancesResult.getReservations().stream().flatMap(s -> s.getInstances().stream()).findFirst();
+        }, Optional.empty());
+    }
+
+    private Optional<Instance> resourceById(AmazonEc2Client amazonEc2Client, String id) {
+        return awsMethodExecutor.execute(() -> {
+            DescribeInstancesResult describeInstancesResult = amazonEc2Client.describeInstances(new DescribeInstancesRequest()
+                    .withInstanceIds(id));
             return describeInstancesResult.getReservations().stream().flatMap(s -> s.getInstances().stream()).findFirst();
         }, Optional.empty());
     }

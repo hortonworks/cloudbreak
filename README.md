@@ -22,6 +22,7 @@
         + [Running the Environment service in IDEA](#running-the-environment-service-in-idea)
         + [Running the Consumption service in IDEA](#running-the-consumption-service-in-idea)
         + [Running Thunderhead Mock in IDEA](#running-thunderhead-mock-in-idea)
+        + [Running Mock-Infrastructure in IDEA](#running-mock-infrastructure-in-idea)
     * [Command line](#command-line)
         + [Running Cloudbreak from the Command Line](#running-cloudbreak-from-the-command-line)
         + [Running Periscope from the Command Line](#running-periscope-from-the-command-line)
@@ -399,6 +400,18 @@ After importing the `cloudbreak` repo root, launch the Thunderhead Mock applicat
 Replace `<CBD_LOCAL_ETC>` with the full path of your `cbd-local/etc` directory that shall already contain the Cloudera Manager license file `license.txt`.
 
 Please make sure that `thunderhead-api` has also been added to `CB_LOCAL_DEV_LIST` list in `Profile` file of cbd (besides `thunderhead-mock`).
+
+### Running Mock-Infrastructure in IDEA
+
+After importing the `cloudbreak` repo root, launch the mock-infrastructure application by executing the `com.sequenceiq.mock.MockInfrastructureApplication` class (set `Use classpath of module` to `cloudbreak.mock-infrastructure.main`).
+
+Please make sure that `mock-infrastructure` has been added to `CB_LOCAL_DEV_LIST` list in the `Profile` file of cbd.
+
+In the `Profile` file make sure to also add:
+
+```
+export MOCK_INFRASTRUCTURE_HOST=localhost
+```
 
 ## Command line
 

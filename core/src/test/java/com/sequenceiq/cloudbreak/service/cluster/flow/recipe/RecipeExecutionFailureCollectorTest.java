@@ -19,8 +19,8 @@ public class RecipeExecutionFailureCollectorTest {
 
     private static final String EXCEPTION_MESSAGE = "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-cloudera-manager-start failingRecipe1\" run\n"
             + "Stdout: /opt/scripts/recipe-runner.sh post-cloudera-manager-start failingRecipe1 : Timed out after 10 seconds\""
-            + "\"Comment: Command \"/opt/scripts/recipe-runner.sh pre-cloudera-manager-start failingRecipe2\" run\n"
-            + "Stdout: /opt/scripts/recipe-runner.sh pre-cloudera-manager-start failingRecipe2 : Timed out after 10 seconds\""
+            + "\"Comment: Command \"/opt/scripts/recipe-runner.sh pre-service-deployment failingRecipe2\" run\n"
+            + "Stdout: /opt/scripts/recipe-runner.sh pre-service-deployment failingRecipe2 : Timed out after 10 seconds\""
             + "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address"
             + "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address";
 
@@ -42,14 +42,14 @@ public class RecipeExecutionFailureCollectorTest {
 
     @Test
     public void testRecipePhaseExtract() {
-        String example = "Name: /opt/scripts/recipe-runner.sh pre-cloudera-manager-start failing-recipe";
+        String example = "Name: /opt/scripts/recipe-runner.sh pre-service-deployment failing-recipe";
         String result = recipeExecutionFailureHandler.getRecipePhase(example);
-        assertEquals("pre-cloudera-manager-start", result);
+        assertEquals("pre-service-deployment", result);
     }
 
     @Test
     public void testRecipeNameExtract() {
-        String example = "Name: /opt/scripts/recipe-runner.sh pre-cloudera-manager-start failing-recipe";
+        String example = "Name: /opt/scripts/recipe-runner.sh pre-service-deployment failing-recipe";
         String result = recipeExecutionFailureHandler.getFailedRecipeName(example);
         assertEquals("failing-recipe", result);
     }
@@ -71,7 +71,7 @@ public class RecipeExecutionFailureCollectorTest {
         assertEquals("post-cloudera-manager-start", failure.get(0).getPhase());
 
         assertEquals("failingRecipe2", failure.get(1).getRecipeName());
-        assertEquals("pre-cloudera-manager-start", failure.get(1).getPhase());
+        assertEquals("pre-service-deployment", failure.get(1).getPhase());
     }
 
     @Test
@@ -132,8 +132,8 @@ public class RecipeExecutionFailureCollectorTest {
         return Arrays.asList(
                 "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-cloudera-manager-start failingRecipe1\" run\n"
                         + "Stdout: /opt/scripts/recipe-runner.sh post-cloudera-manager-start failingRecipe1 : Timed out after 10 seconds\"",
-                "\"Comment: Command \"/opt/scripts/recipe-runner.sh pre-cloudera-manager-start failingRecipe2\" run\n"
-                        + "Stdout: /opt/scripts/recipe-runner.sh pre-cloudera-manager-start failingRecipe2 : Timed out after 10 seconds\"",
+                "\"Comment: Command \"/opt/scripts/recipe-runner.sh pre-service-deployment failingRecipe2\" run\n"
+                        + "Stdout: /opt/scripts/recipe-runner.sh pre-service-deployment failingRecipe2 : Timed out after 10 seconds\"",
                 "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address",
                 "Comment: One or more requisite failed: postgresql.init-services-db, postgresql.configure-listen-address"
         );

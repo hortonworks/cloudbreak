@@ -172,9 +172,7 @@ public class UpgradeCcmActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 UpgradeCcmFailedEvent concretePayload = (UpgradeCcmFailedEvent) payload;
-                upgradeCcmService.ccmUpgradeFailed(concretePayload.getResourceId(),
-                        Optional.ofNullable(context.getStack()).map(StackView::getClusterId).orElse(null),
-                        concretePayload.getOldTunnel(), concretePayload.getFailureOrigin());
+                upgradeCcmService.ccmUpgradeFailed(concretePayload, Optional.ofNullable(context.getStack()).map(StackView::getClusterId).orElse(null));
                 sendEvent(context);
             }
 

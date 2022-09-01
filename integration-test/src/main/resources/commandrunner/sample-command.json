@@ -1,0 +1,10 @@
+[
+  {
+    "description":  "Check log size",
+    "command":  "du -h /var/log"},
+  {
+    "description": "Hello world",
+    "command":  "echo hello"
+  }
+]
+

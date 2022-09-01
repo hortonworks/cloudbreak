@@ -22,6 +22,8 @@ public class PlatformParametersConsts {
 
     public static final String VOLUME_ATTACHMENT_SUPPORTED = "volumeAttachmentSupported";
 
+    public static final String VERTICAL_SCALING_SUPPORTED = "verticalScalingSupported";
+
     public static final String FREEIPA_STACK_TYPE = "freeipa";
 
     public static final String CLOUD_STACK_TYPE_PARAMETER = "cloudStackType";

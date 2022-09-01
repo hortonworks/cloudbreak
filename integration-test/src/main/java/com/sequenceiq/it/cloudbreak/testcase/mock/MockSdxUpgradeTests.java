@@ -128,7 +128,6 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
         String imageSettings = "imageSettingsUpgrade";
         String networkKey = "someOtherNetwork";
         String clusterCrn = TestCrnGenerator.getDatalakeCrn(UUID.randomUUID().toString(), "cloudera");
-
         testContext
                 .given(networkKey, EnvironmentNetworkTestDto.class)
                 .withMock(new EnvironmentNetworkMockParams())

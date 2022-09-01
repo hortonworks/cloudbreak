@@ -22,7 +22,6 @@ import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
-import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
 public class TlsSecurityService {
@@ -35,9 +34,6 @@ public class TlsSecurityService {
 
     @Inject
     private ClusterProxyService clusterProxyService;
-
-    @Inject
-    private StackService stackService;
 
     public SecurityConfig generateSecurityKeys(String accountId) {
         SecurityConfig securityConfig = new SecurityConfig();

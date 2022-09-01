@@ -15,9 +15,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatusResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -101,19 +104,31 @@ class StackV4ControllerTest {
     @Test
     public void rotateSaltPasswordInternal() {
         String stackCrn = "crn";
-
         when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
-        underTest.rotateSaltPasswordInternal(WORKSPACE_ID, stackCrn, USER_CRN);
+        RotateSaltPasswordRequest request = new RotateSaltPasswordRequest(com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason.MANUAL);
+
+        underTest.rotateSaltPasswordInternal(WORKSPACE_ID, stackCrn, request, USER_CRN);
 
         verify(stackOperations).rotateSaltPassword(NameOrCrn.ofCrn(stackCrn), ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
+    }
+
+    @Test
+    public void getSaltPasswordStatus() {
+        String stackCrn = "crn";
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
+        when(stackOperations.getSaltPasswordStatus(NameOrCrn.ofCrn(stackCrn), ACCOUNT_ID)).thenReturn(SaltPasswordStatus.OK);
+
+        SaltPasswordStatusResponse response = underTest.getSaltPasswordStatus(WORKSPACE_ID, stackCrn);
+
+        Assertions.assertEquals(SaltPasswordStatus.OK, response.getStatus());
     }
 
     @Test
     public void testPrepareClusterUpgradeByCrnInternal() {
         String imageId = "imageId";
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollId");
-        when(stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(STACK_CRN), WORKSPACE_ID, imageId))
-                .thenReturn(flowIdentifier);
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
+        when(stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(STACK_CRN), ACCOUNT_ID, imageId)).thenReturn(flowIdentifier);
 
         FlowIdentifier result = underTest.prepareClusterUpgradeByCrnInternal(WORKSPACE_ID, STACK_CRN, imageId, USER_CRN);
 

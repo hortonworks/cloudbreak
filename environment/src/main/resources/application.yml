@@ -90,6 +90,9 @@ environment:
     contextPath: /freeipa
     synchronizeOnStart: true
     supportedPlatforms: AWS,AZURE,GCP,MOCK
+    groupInstanceCount:
+      default: 2
+      minimum: 1
   sdx:
     url: http://localhost:8086
     contextPath: /dl

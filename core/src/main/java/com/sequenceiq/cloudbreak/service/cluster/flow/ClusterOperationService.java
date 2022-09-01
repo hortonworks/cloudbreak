@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -272,6 +273,10 @@ public class ClusterOperationService {
         } else {
             throw new BadRequestException("The request may not change credential");
         }
+    }
+
+    public FlowIdentifier verticalScale(Long stackId, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+        return flowManager.triggerVerticalScale(stackId, stackVerticalScaleV4Request);
     }
 
     public void reportHealthChange(String crn, Map<String, Optional<String>> failedNodes, Set<String> newHealthyNodes) {

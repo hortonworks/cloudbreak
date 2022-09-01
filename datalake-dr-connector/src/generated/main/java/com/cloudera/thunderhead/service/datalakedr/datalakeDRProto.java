@@ -14,6 +14,151 @@ public final class datalakeDRProto {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
+  /**
+   * <pre>
+   * A common enum used to describe whether terms have been accepted or not
+   * </pre>
+   *
+   * Protobuf enum {@code datalakedr.SkipFlag}
+   */
+  public enum SkipFlag
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <pre>
+     * Default value, indicates no skip flag was included and default behavior should be use
+     * </pre>
+     *
+     * <code>NOT_SET = 0;</code>
+     */
+    NOT_SET(0),
+    /**
+     * <pre>
+     * Set if the flag is set to skip an operation
+     * </pre>
+     *
+     * <code>SKIP = 1;</code>
+     */
+    SKIP(1),
+    /**
+     * <pre>
+     * Set if the flag is set to include an operation
+     * </pre>
+     *
+     * <code>INCLUDE = 2;</code>
+     */
+    INCLUDE(2),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     * Default value, indicates no skip flag was included and default behavior should be use
+     * </pre>
+     *
+     * <code>NOT_SET = 0;</code>
+     */
+    public static final int NOT_SET_VALUE = 0;
+    /**
+     * <pre>
+     * Set if the flag is set to skip an operation
+     * </pre>
+     *
+     * <code>SKIP = 1;</code>
+     */
+    public static final int SKIP_VALUE = 1;
+    /**
+     * <pre>
+     * Set if the flag is set to include an operation
+     * </pre>
+     *
+     * <code>INCLUDE = 2;</code>
+     */
+    public static final int INCLUDE_VALUE = 2;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static SkipFlag valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static SkipFlag forNumber(int value) {
+      switch (value) {
+        case 0: return NOT_SET;
+        case 1: return SKIP;
+        case 2: return INCLUDE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<SkipFlag>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        SkipFlag> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<SkipFlag>() {
+            public SkipFlag findValueByNumber(int number) {
+              return SkipFlag.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final SkipFlag[] VALUES = values();
+
+    public static SkipFlag valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private SkipFlag(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:datalakedr.SkipFlag)
+  }
+
   public interface BackupRestoreOperationStatusOrBuilder extends
       // @@protoc_insertion_point(interface_extends:datalakedr.BackupRestoreOperationStatus)
       com.google.protobuf.MessageOrBuilder {
@@ -7486,6 +7631,63 @@ public final class datalakeDRProto {
      * @return The closeDbConnections.
      */
     boolean getCloseDbConnections();
+
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Ranger and HMS database backup.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 5;</code>
+     * @return The enum numeric value on the wire for skipRangerHmsMetadata.
+     */
+    int getSkipRangerHmsMetadataValue();
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Ranger and HMS database backup.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 5;</code>
+     * @return The skipRangerHmsMetadata.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipRangerHmsMetadata();
+
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Atlas metadata backup.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipAtlasMetadata = 6;</code>
+     * @return The enum numeric value on the wire for skipAtlasMetadata.
+     */
+    int getSkipAtlasMetadataValue();
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Atlas metadata backup.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipAtlasMetadata = 6;</code>
+     * @return The skipAtlasMetadata.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipAtlasMetadata();
+
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Ranger audits backup.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipRangerAudits = 7;</code>
+     * @return The enum numeric value on the wire for skipRangerAudits.
+     */
+    int getSkipRangerAuditsValue();
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Ranger audits backup.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipRangerAudits = 7;</code>
+     * @return The skipRangerAudits.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipRangerAudits();
   }
   /**
    * <pre>
@@ -7508,6 +7710,9 @@ public final class datalakeDRProto {
       datalakeName_ = "";
       backupName_ = "";
       backupLocation_ = "";
+      skipRangerHmsMetadata_ = 0;
+      skipAtlasMetadata_ = 0;
+      skipRangerAudits_ = 0;
     }
 
     @java.lang.Override
@@ -7561,6 +7766,24 @@ public final class datalakeDRProto {
             case 32: {
 
               closeDbConnections_ = input.readBool();
+              break;
+            }
+            case 40: {
+              int rawValue = input.readEnum();
+
+              skipRangerHmsMetadata_ = rawValue;
+              break;
+            }
+            case 48: {
+              int rawValue = input.readEnum();
+
+              skipAtlasMetadata_ = rawValue;
+              break;
+            }
+            case 56: {
+              int rawValue = input.readEnum();
+
+              skipRangerAudits_ = rawValue;
               break;
             }
             default: {
@@ -7748,6 +7971,87 @@ public final class datalakeDRProto {
       return closeDbConnections_;
     }
 
+    public static final int SKIPRANGERHMSMETADATA_FIELD_NUMBER = 5;
+    private int skipRangerHmsMetadata_;
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Ranger and HMS database backup.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 5;</code>
+     * @return The enum numeric value on the wire for skipRangerHmsMetadata.
+     */
+    @java.lang.Override public int getSkipRangerHmsMetadataValue() {
+      return skipRangerHmsMetadata_;
+    }
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Ranger and HMS database backup.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 5;</code>
+     * @return The skipRangerHmsMetadata.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipRangerHmsMetadata() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag result = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.valueOf(skipRangerHmsMetadata_);
+      return result == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.UNRECOGNIZED : result;
+    }
+
+    public static final int SKIPATLASMETADATA_FIELD_NUMBER = 6;
+    private int skipAtlasMetadata_;
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Atlas metadata backup.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipAtlasMetadata = 6;</code>
+     * @return The enum numeric value on the wire for skipAtlasMetadata.
+     */
+    @java.lang.Override public int getSkipAtlasMetadataValue() {
+      return skipAtlasMetadata_;
+    }
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Atlas metadata backup.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipAtlasMetadata = 6;</code>
+     * @return The skipAtlasMetadata.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipAtlasMetadata() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag result = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.valueOf(skipAtlasMetadata_);
+      return result == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.UNRECOGNIZED : result;
+    }
+
+    public static final int SKIPRANGERAUDITS_FIELD_NUMBER = 7;
+    private int skipRangerAudits_;
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Ranger audits backup.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipRangerAudits = 7;</code>
+     * @return The enum numeric value on the wire for skipRangerAudits.
+     */
+    @java.lang.Override public int getSkipRangerAuditsValue() {
+      return skipRangerAudits_;
+    }
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Ranger audits backup.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipRangerAudits = 7;</code>
+     * @return The skipRangerAudits.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipRangerAudits() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag result = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.valueOf(skipRangerAudits_);
+      return result == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.UNRECOGNIZED : result;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -7774,6 +8078,15 @@ public final class datalakeDRProto {
       if (closeDbConnections_ != false) {
         output.writeBool(4, closeDbConnections_);
       }
+      if (skipRangerHmsMetadata_ != com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.NOT_SET.getNumber()) {
+        output.writeEnum(5, skipRangerHmsMetadata_);
+      }
+      if (skipAtlasMetadata_ != com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.NOT_SET.getNumber()) {
+        output.writeEnum(6, skipAtlasMetadata_);
+      }
+      if (skipRangerAudits_ != com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.NOT_SET.getNumber()) {
+        output.writeEnum(7, skipRangerAudits_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -7795,6 +8108,18 @@ public final class datalakeDRProto {
       if (closeDbConnections_ != false) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(4, closeDbConnections_);
+      }
+      if (skipRangerHmsMetadata_ != com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.NOT_SET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(5, skipRangerHmsMetadata_);
+      }
+      if (skipAtlasMetadata_ != com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.NOT_SET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(6, skipAtlasMetadata_);
+      }
+      if (skipRangerAudits_ != com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.NOT_SET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(7, skipRangerAudits_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -7819,6 +8144,9 @@ public final class datalakeDRProto {
           .equals(other.getBackupLocation())) return false;
       if (getCloseDbConnections()
           != other.getCloseDbConnections()) return false;
+      if (skipRangerHmsMetadata_ != other.skipRangerHmsMetadata_) return false;
+      if (skipAtlasMetadata_ != other.skipAtlasMetadata_) return false;
+      if (skipRangerAudits_ != other.skipRangerAudits_) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -7839,6 +8167,12 @@ public final class datalakeDRProto {
       hash = (37 * hash) + CLOSEDBCONNECTIONS_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getCloseDbConnections());
+      hash = (37 * hash) + SKIPRANGERHMSMETADATA_FIELD_NUMBER;
+      hash = (53 * hash) + skipRangerHmsMetadata_;
+      hash = (37 * hash) + SKIPATLASMETADATA_FIELD_NUMBER;
+      hash = (53 * hash) + skipAtlasMetadata_;
+      hash = (37 * hash) + SKIPRANGERAUDITS_FIELD_NUMBER;
+      hash = (53 * hash) + skipRangerAudits_;
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -7985,6 +8319,12 @@ public final class datalakeDRProto {
 
         closeDbConnections_ = false;
 
+        skipRangerHmsMetadata_ = 0;
+
+        skipAtlasMetadata_ = 0;
+
+        skipRangerAudits_ = 0;
+
         return this;
       }
 
@@ -8015,6 +8355,9 @@ public final class datalakeDRProto {
         result.backupName_ = backupName_;
         result.backupLocation_ = backupLocation_;
         result.closeDbConnections_ = closeDbConnections_;
+        result.skipRangerHmsMetadata_ = skipRangerHmsMetadata_;
+        result.skipAtlasMetadata_ = skipAtlasMetadata_;
+        result.skipRangerAudits_ = skipRangerAudits_;
         onBuilt();
         return result;
       }
@@ -8077,6 +8420,15 @@ public final class datalakeDRProto {
         }
         if (other.getCloseDbConnections() != false) {
           setCloseDbConnections(other.getCloseDbConnections());
+        }
+        if (other.skipRangerHmsMetadata_ != 0) {
+          setSkipRangerHmsMetadataValue(other.getSkipRangerHmsMetadataValue());
+        }
+        if (other.skipAtlasMetadata_ != 0) {
+          setSkipAtlasMetadataValue(other.getSkipAtlasMetadataValue());
+        }
+        if (other.skipRangerAudits_ != 0) {
+          setSkipRangerAuditsValue(other.getSkipRangerAuditsValue());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -8434,6 +8786,228 @@ public final class datalakeDRProto {
       public Builder clearCloseDbConnections() {
         
         closeDbConnections_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int skipRangerHmsMetadata_ = 0;
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger and HMS database backup.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 5;</code>
+       * @return The enum numeric value on the wire for skipRangerHmsMetadata.
+       */
+      @java.lang.Override public int getSkipRangerHmsMetadataValue() {
+        return skipRangerHmsMetadata_;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger and HMS database backup.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 5;</code>
+       * @param value The enum numeric value on the wire for skipRangerHmsMetadata to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSkipRangerHmsMetadataValue(int value) {
+        
+        skipRangerHmsMetadata_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger and HMS database backup.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 5;</code>
+       * @return The skipRangerHmsMetadata.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipRangerHmsMetadata() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag result = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.valueOf(skipRangerHmsMetadata_);
+        return result == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger and HMS database backup.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 5;</code>
+       * @param value The skipRangerHmsMetadata to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSkipRangerHmsMetadata(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        skipRangerHmsMetadata_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger and HMS database backup.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSkipRangerHmsMetadata() {
+        
+        skipRangerHmsMetadata_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int skipAtlasMetadata_ = 0;
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Atlas metadata backup.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipAtlasMetadata = 6;</code>
+       * @return The enum numeric value on the wire for skipAtlasMetadata.
+       */
+      @java.lang.Override public int getSkipAtlasMetadataValue() {
+        return skipAtlasMetadata_;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Atlas metadata backup.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipAtlasMetadata = 6;</code>
+       * @param value The enum numeric value on the wire for skipAtlasMetadata to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSkipAtlasMetadataValue(int value) {
+        
+        skipAtlasMetadata_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Atlas metadata backup.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipAtlasMetadata = 6;</code>
+       * @return The skipAtlasMetadata.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipAtlasMetadata() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag result = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.valueOf(skipAtlasMetadata_);
+        return result == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Atlas metadata backup.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipAtlasMetadata = 6;</code>
+       * @param value The skipAtlasMetadata to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSkipAtlasMetadata(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        skipAtlasMetadata_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Atlas metadata backup.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipAtlasMetadata = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSkipAtlasMetadata() {
+        
+        skipAtlasMetadata_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int skipRangerAudits_ = 0;
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger audits backup.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerAudits = 7;</code>
+       * @return The enum numeric value on the wire for skipRangerAudits.
+       */
+      @java.lang.Override public int getSkipRangerAuditsValue() {
+        return skipRangerAudits_;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger audits backup.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerAudits = 7;</code>
+       * @param value The enum numeric value on the wire for skipRangerAudits to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSkipRangerAuditsValue(int value) {
+        
+        skipRangerAudits_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger audits backup.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerAudits = 7;</code>
+       * @return The skipRangerAudits.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipRangerAudits() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag result = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.valueOf(skipRangerAudits_);
+        return result == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger audits backup.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerAudits = 7;</code>
+       * @param value The skipRangerAudits to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSkipRangerAudits(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        skipRangerAudits_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger audits backup.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerAudits = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSkipRangerAudits() {
+        
+        skipRangerAudits_ = 0;
         onChanged();
         return this;
       }
@@ -11293,7 +11867,7 @@ public final class datalakeDRProto {
 
     /**
      * <pre>
-     * When set to true would trigger database restore.
+     * DEPRECATED - Maintained for backwards compatibilty, but has been replaced by the skipRangerHmsMetadata field.
      * </pre>
      *
      * <code>bool includeDatabase = 4;</code>
@@ -11330,6 +11904,69 @@ public final class datalakeDRProto {
      */
     com.google.protobuf.ByteString
         getBackupLocationOverrideBytes();
+
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Ranger and HMS database restore. If the backup used doesn't include the database
+     * information and this flag is set to INCLUDE, the request will fail.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 7;</code>
+     * @return The enum numeric value on the wire for skipRangerHmsMetadata.
+     */
+    int getSkipRangerHmsMetadataValue();
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Ranger and HMS database restore. If the backup used doesn't include the database
+     * information and this flag is set to INCLUDE, the request will fail.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 7;</code>
+     * @return The skipRangerHmsMetadata.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipRangerHmsMetadata();
+
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Atlas metadata restore. If the backup used doesn't include the database information
+     * and this flag is set to INCLUDE, the request will fail.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipAtlasMetadata = 8;</code>
+     * @return The enum numeric value on the wire for skipAtlasMetadata.
+     */
+    int getSkipAtlasMetadataValue();
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Atlas metadata restore. If the backup used doesn't include the database information
+     * and this flag is set to INCLUDE, the request will fail.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipAtlasMetadata = 8;</code>
+     * @return The skipAtlasMetadata.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipAtlasMetadata();
+
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Ranger audit restore. If the backup used doesn't include the database information
+     * and this flag is set to INCLUDE, the request will fail.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipRangerAudits = 9;</code>
+     * @return The enum numeric value on the wire for skipRangerAudits.
+     */
+    int getSkipRangerAuditsValue();
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Ranger audit restore. If the backup used doesn't include the database information
+     * and this flag is set to INCLUDE, the request will fail.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipRangerAudits = 9;</code>
+     * @return The skipRangerAudits.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipRangerAudits();
   }
   /**
    * <pre>
@@ -11353,6 +11990,9 @@ public final class datalakeDRProto {
       backupName_ = "";
       backupId_ = "";
       backupLocationOverride_ = "";
+      skipRangerHmsMetadata_ = 0;
+      skipAtlasMetadata_ = 0;
+      skipRangerAudits_ = 0;
     }
 
     @java.lang.Override
@@ -11417,6 +12057,24 @@ public final class datalakeDRProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               backupLocationOverride_ = s;
+              break;
+            }
+            case 56: {
+              int rawValue = input.readEnum();
+
+              skipRangerHmsMetadata_ = rawValue;
+              break;
+            }
+            case 64: {
+              int rawValue = input.readEnum();
+
+              skipAtlasMetadata_ = rawValue;
+              break;
+            }
+            case 72: {
+              int rawValue = input.readEnum();
+
+              skipRangerAudits_ = rawValue;
               break;
             }
             default: {
@@ -11593,7 +12251,7 @@ public final class datalakeDRProto {
     private boolean includeDatabase_;
     /**
      * <pre>
-     * When set to true would trigger database restore.
+     * DEPRECATED - Maintained for backwards compatibilty, but has been replaced by the skipRangerHmsMetadata field.
      * </pre>
      *
      * <code>bool includeDatabase = 4;</code>
@@ -11665,6 +12323,93 @@ public final class datalakeDRProto {
       }
     }
 
+    public static final int SKIPRANGERHMSMETADATA_FIELD_NUMBER = 7;
+    private int skipRangerHmsMetadata_;
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Ranger and HMS database restore. If the backup used doesn't include the database
+     * information and this flag is set to INCLUDE, the request will fail.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 7;</code>
+     * @return The enum numeric value on the wire for skipRangerHmsMetadata.
+     */
+    @java.lang.Override public int getSkipRangerHmsMetadataValue() {
+      return skipRangerHmsMetadata_;
+    }
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Ranger and HMS database restore. If the backup used doesn't include the database
+     * information and this flag is set to INCLUDE, the request will fail.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 7;</code>
+     * @return The skipRangerHmsMetadata.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipRangerHmsMetadata() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag result = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.valueOf(skipRangerHmsMetadata_);
+      return result == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.UNRECOGNIZED : result;
+    }
+
+    public static final int SKIPATLASMETADATA_FIELD_NUMBER = 8;
+    private int skipAtlasMetadata_;
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Atlas metadata restore. If the backup used doesn't include the database information
+     * and this flag is set to INCLUDE, the request will fail.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipAtlasMetadata = 8;</code>
+     * @return The enum numeric value on the wire for skipAtlasMetadata.
+     */
+    @java.lang.Override public int getSkipAtlasMetadataValue() {
+      return skipAtlasMetadata_;
+    }
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Atlas metadata restore. If the backup used doesn't include the database information
+     * and this flag is set to INCLUDE, the request will fail.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipAtlasMetadata = 8;</code>
+     * @return The skipAtlasMetadata.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipAtlasMetadata() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag result = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.valueOf(skipAtlasMetadata_);
+      return result == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.UNRECOGNIZED : result;
+    }
+
+    public static final int SKIPRANGERAUDITS_FIELD_NUMBER = 9;
+    private int skipRangerAudits_;
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Ranger audit restore. If the backup used doesn't include the database information
+     * and this flag is set to INCLUDE, the request will fail.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipRangerAudits = 9;</code>
+     * @return The enum numeric value on the wire for skipRangerAudits.
+     */
+    @java.lang.Override public int getSkipRangerAuditsValue() {
+      return skipRangerAudits_;
+    }
+    /**
+     * <pre>
+     * Indicates whether or not to skip the Ranger audit restore. If the backup used doesn't include the database information
+     * and this flag is set to INCLUDE, the request will fail.
+     * </pre>
+     *
+     * <code>.datalakedr.SkipFlag skipRangerAudits = 9;</code>
+     * @return The skipRangerAudits.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipRangerAudits() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag result = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.valueOf(skipRangerAudits_);
+      return result == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.UNRECOGNIZED : result;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -11697,6 +12442,15 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocationOverride_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, backupLocationOverride_);
       }
+      if (skipRangerHmsMetadata_ != com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.NOT_SET.getNumber()) {
+        output.writeEnum(7, skipRangerHmsMetadata_);
+      }
+      if (skipAtlasMetadata_ != com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.NOT_SET.getNumber()) {
+        output.writeEnum(8, skipAtlasMetadata_);
+      }
+      if (skipRangerAudits_ != com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.NOT_SET.getNumber()) {
+        output.writeEnum(9, skipRangerAudits_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -11726,6 +12480,18 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocationOverride_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, backupLocationOverride_);
       }
+      if (skipRangerHmsMetadata_ != com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.NOT_SET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(7, skipRangerHmsMetadata_);
+      }
+      if (skipAtlasMetadata_ != com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.NOT_SET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(8, skipAtlasMetadata_);
+      }
+      if (skipRangerAudits_ != com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.NOT_SET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(9, skipRangerAudits_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -11753,6 +12519,9 @@ public final class datalakeDRProto {
           != other.getForce()) return false;
       if (!getBackupLocationOverride()
           .equals(other.getBackupLocationOverride())) return false;
+      if (skipRangerHmsMetadata_ != other.skipRangerHmsMetadata_) return false;
+      if (skipAtlasMetadata_ != other.skipAtlasMetadata_) return false;
+      if (skipRangerAudits_ != other.skipRangerAudits_) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -11778,6 +12547,12 @@ public final class datalakeDRProto {
           getForce());
       hash = (37 * hash) + BACKUPLOCATIONOVERRIDE_FIELD_NUMBER;
       hash = (53 * hash) + getBackupLocationOverride().hashCode();
+      hash = (37 * hash) + SKIPRANGERHMSMETADATA_FIELD_NUMBER;
+      hash = (53 * hash) + skipRangerHmsMetadata_;
+      hash = (37 * hash) + SKIPATLASMETADATA_FIELD_NUMBER;
+      hash = (53 * hash) + skipAtlasMetadata_;
+      hash = (37 * hash) + SKIPRANGERAUDITS_FIELD_NUMBER;
+      hash = (53 * hash) + skipRangerAudits_;
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -11928,6 +12703,12 @@ public final class datalakeDRProto {
 
         backupLocationOverride_ = "";
 
+        skipRangerHmsMetadata_ = 0;
+
+        skipAtlasMetadata_ = 0;
+
+        skipRangerAudits_ = 0;
+
         return this;
       }
 
@@ -11960,6 +12741,9 @@ public final class datalakeDRProto {
         result.includeDatabase_ = includeDatabase_;
         result.force_ = force_;
         result.backupLocationOverride_ = backupLocationOverride_;
+        result.skipRangerHmsMetadata_ = skipRangerHmsMetadata_;
+        result.skipAtlasMetadata_ = skipAtlasMetadata_;
+        result.skipRangerAudits_ = skipRangerAudits_;
         onBuilt();
         return result;
       }
@@ -12029,6 +12813,15 @@ public final class datalakeDRProto {
         if (!other.getBackupLocationOverride().isEmpty()) {
           backupLocationOverride_ = other.backupLocationOverride_;
           onChanged();
+        }
+        if (other.skipRangerHmsMetadata_ != 0) {
+          setSkipRangerHmsMetadataValue(other.getSkipRangerHmsMetadataValue());
+        }
+        if (other.skipAtlasMetadata_ != 0) {
+          setSkipAtlasMetadataValue(other.getSkipAtlasMetadataValue());
+        }
+        if (other.skipRangerAudits_ != 0) {
+          setSkipRangerAuditsValue(other.getSkipRangerAuditsValue());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -12350,7 +13143,7 @@ public final class datalakeDRProto {
       private boolean includeDatabase_ ;
       /**
        * <pre>
-       * When set to true would trigger database restore.
+       * DEPRECATED - Maintained for backwards compatibilty, but has been replaced by the skipRangerHmsMetadata field.
        * </pre>
        *
        * <code>bool includeDatabase = 4;</code>
@@ -12362,7 +13155,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * When set to true would trigger database restore.
+       * DEPRECATED - Maintained for backwards compatibilty, but has been replaced by the skipRangerHmsMetadata field.
        * </pre>
        *
        * <code>bool includeDatabase = 4;</code>
@@ -12377,7 +13170,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * When set to true would trigger database restore.
+       * DEPRECATED - Maintained for backwards compatibilty, but has been replaced by the skipRangerHmsMetadata field.
        * </pre>
        *
        * <code>bool includeDatabase = 4;</code>
@@ -12525,6 +13318,243 @@ public final class datalakeDRProto {
   checkByteStringIsUtf8(value);
         
         backupLocationOverride_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int skipRangerHmsMetadata_ = 0;
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger and HMS database restore. If the backup used doesn't include the database
+       * information and this flag is set to INCLUDE, the request will fail.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 7;</code>
+       * @return The enum numeric value on the wire for skipRangerHmsMetadata.
+       */
+      @java.lang.Override public int getSkipRangerHmsMetadataValue() {
+        return skipRangerHmsMetadata_;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger and HMS database restore. If the backup used doesn't include the database
+       * information and this flag is set to INCLUDE, the request will fail.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 7;</code>
+       * @param value The enum numeric value on the wire for skipRangerHmsMetadata to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSkipRangerHmsMetadataValue(int value) {
+        
+        skipRangerHmsMetadata_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger and HMS database restore. If the backup used doesn't include the database
+       * information and this flag is set to INCLUDE, the request will fail.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 7;</code>
+       * @return The skipRangerHmsMetadata.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipRangerHmsMetadata() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag result = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.valueOf(skipRangerHmsMetadata_);
+        return result == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger and HMS database restore. If the backup used doesn't include the database
+       * information and this flag is set to INCLUDE, the request will fail.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 7;</code>
+       * @param value The skipRangerHmsMetadata to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSkipRangerHmsMetadata(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        skipRangerHmsMetadata_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger and HMS database restore. If the backup used doesn't include the database
+       * information and this flag is set to INCLUDE, the request will fail.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerHmsMetadata = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSkipRangerHmsMetadata() {
+        
+        skipRangerHmsMetadata_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int skipAtlasMetadata_ = 0;
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Atlas metadata restore. If the backup used doesn't include the database information
+       * and this flag is set to INCLUDE, the request will fail.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipAtlasMetadata = 8;</code>
+       * @return The enum numeric value on the wire for skipAtlasMetadata.
+       */
+      @java.lang.Override public int getSkipAtlasMetadataValue() {
+        return skipAtlasMetadata_;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Atlas metadata restore. If the backup used doesn't include the database information
+       * and this flag is set to INCLUDE, the request will fail.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipAtlasMetadata = 8;</code>
+       * @param value The enum numeric value on the wire for skipAtlasMetadata to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSkipAtlasMetadataValue(int value) {
+        
+        skipAtlasMetadata_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Atlas metadata restore. If the backup used doesn't include the database information
+       * and this flag is set to INCLUDE, the request will fail.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipAtlasMetadata = 8;</code>
+       * @return The skipAtlasMetadata.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipAtlasMetadata() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag result = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.valueOf(skipAtlasMetadata_);
+        return result == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Atlas metadata restore. If the backup used doesn't include the database information
+       * and this flag is set to INCLUDE, the request will fail.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipAtlasMetadata = 8;</code>
+       * @param value The skipAtlasMetadata to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSkipAtlasMetadata(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        skipAtlasMetadata_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Atlas metadata restore. If the backup used doesn't include the database information
+       * and this flag is set to INCLUDE, the request will fail.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipAtlasMetadata = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSkipAtlasMetadata() {
+        
+        skipAtlasMetadata_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int skipRangerAudits_ = 0;
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger audit restore. If the backup used doesn't include the database information
+       * and this flag is set to INCLUDE, the request will fail.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerAudits = 9;</code>
+       * @return The enum numeric value on the wire for skipRangerAudits.
+       */
+      @java.lang.Override public int getSkipRangerAuditsValue() {
+        return skipRangerAudits_;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger audit restore. If the backup used doesn't include the database information
+       * and this flag is set to INCLUDE, the request will fail.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerAudits = 9;</code>
+       * @param value The enum numeric value on the wire for skipRangerAudits to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSkipRangerAuditsValue(int value) {
+        
+        skipRangerAudits_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger audit restore. If the backup used doesn't include the database information
+       * and this flag is set to INCLUDE, the request will fail.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerAudits = 9;</code>
+       * @return The skipRangerAudits.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag getSkipRangerAudits() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag result = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.valueOf(skipRangerAudits_);
+        return result == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger audit restore. If the backup used doesn't include the database information
+       * and this flag is set to INCLUDE, the request will fail.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerAudits = 9;</code>
+       * @param value The skipRangerAudits to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSkipRangerAudits(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        skipRangerAudits_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicates whether or not to skip the Ranger audit restore. If the backup used doesn't include the database information
+       * and this flag is set to INCLUDE, the request will fail.
+       * </pre>
+       *
+       * <code>.datalakedr.SkipFlag skipRangerAudits = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSkipRangerAudits() {
+        
+        skipRangerAudits_ = 0;
         onChanged();
         return this;
       }
@@ -12803,6 +13833,26 @@ public final class datalakeDRProto {
      * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
      */
     com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder();
+
+    /**
+     * <pre>
+     * The runtime version of the datalake when the restore was initiated.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The runtimeVersion.
+     */
+    java.lang.String getRuntimeVersion();
+    /**
+     * <pre>
+     * The runtime version of the datalake when the restore was initiated.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The bytes for runtimeVersion.
+     */
+    com.google.protobuf.ByteString
+        getRuntimeVersionBytes();
   }
   /**
    * <pre>
@@ -12832,6 +13882,7 @@ public final class datalakeDRProto {
       endTimestamp_ = "";
       backupLocation_ = "";
       failureReason_ = "";
+      runtimeVersion_ = "";
     }
 
     @java.lang.Override
@@ -12935,6 +13986,12 @@ public final class datalakeDRProto {
                 operationStates_ = subBuilder.buildPartial();
               }
 
+              break;
+            }
+            case 98: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              runtimeVersion_ = s;
               break;
             }
             default: {
@@ -13459,6 +14516,52 @@ public final class datalakeDRProto {
       return getOperationStates();
     }
 
+    public static final int RUNTIMEVERSION_FIELD_NUMBER = 12;
+    private volatile java.lang.Object runtimeVersion_;
+    /**
+     * <pre>
+     * The runtime version of the datalake when the restore was initiated.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The runtimeVersion.
+     */
+    @java.lang.Override
+    public java.lang.String getRuntimeVersion() {
+      java.lang.Object ref = runtimeVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        runtimeVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The runtime version of the datalake when the restore was initiated.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The bytes for runtimeVersion.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getRuntimeVersionBytes() {
+      java.lang.Object ref = runtimeVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        runtimeVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -13506,6 +14609,9 @@ public final class datalakeDRProto {
       if (operationStates_ != null) {
         output.writeMessage(11, getOperationStates());
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 12, runtimeVersion_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -13549,6 +14655,9 @@ public final class datalakeDRProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(11, getOperationStates());
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, runtimeVersion_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -13589,6 +14698,8 @@ public final class datalakeDRProto {
         if (!getOperationStates()
             .equals(other.getOperationStates())) return false;
       }
+      if (!getRuntimeVersion()
+          .equals(other.getRuntimeVersion())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -13624,6 +14735,8 @@ public final class datalakeDRProto {
         hash = (37 * hash) + OPERATIONSTATES_FIELD_NUMBER;
         hash = (53 * hash) + getOperationStates().hashCode();
       }
+      hash = (37 * hash) + RUNTIMEVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getRuntimeVersion().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -13788,6 +14901,8 @@ public final class datalakeDRProto {
           operationStates_ = null;
           operationStatesBuilder_ = null;
         }
+        runtimeVersion_ = "";
+
         return this;
       }
 
@@ -13829,6 +14944,7 @@ public final class datalakeDRProto {
         } else {
           result.operationStates_ = operationStatesBuilder_.build();
         }
+        result.runtimeVersion_ = runtimeVersion_;
         onBuilt();
         return result;
       }
@@ -13919,6 +15035,10 @@ public final class datalakeDRProto {
         }
         if (other.hasOperationStates()) {
           mergeOperationStates(other.getOperationStates());
+        }
+        if (!other.getRuntimeVersion().isEmpty()) {
+          runtimeVersion_ = other.runtimeVersion_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -15042,6 +16162,102 @@ public final class datalakeDRProto {
           operationStates_ = null;
         }
         return operationStatesBuilder_;
+      }
+
+      private java.lang.Object runtimeVersion_ = "";
+      /**
+       * <pre>
+       * The runtime version of the datalake when the restore was initiated.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @return The runtimeVersion.
+       */
+      public java.lang.String getRuntimeVersion() {
+        java.lang.Object ref = runtimeVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          runtimeVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the restore was initiated.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @return The bytes for runtimeVersion.
+       */
+      public com.google.protobuf.ByteString
+          getRuntimeVersionBytes() {
+        java.lang.Object ref = runtimeVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          runtimeVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the restore was initiated.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @param value The runtimeVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRuntimeVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        runtimeVersion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the restore was initiated.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRuntimeVersion() {
+        
+        runtimeVersion_ = getDefaultInstance().getRuntimeVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the restore was initiated.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @param value The bytes for runtimeVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRuntimeVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        runtimeVersion_ = value;
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -19849,6 +21065,26 @@ public final class datalakeDRProto {
      * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
      */
     com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder();
+
+    /**
+     * <pre>
+     * The runtime version of the datalake when the restore was initiated.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The runtimeVersion.
+     */
+    java.lang.String getRuntimeVersion();
+    /**
+     * <pre>
+     * The runtime version of the datalake when the restore was initiated.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The bytes for runtimeVersion.
+     */
+    com.google.protobuf.ByteString
+        getRuntimeVersionBytes();
   }
   /**
    * <pre>
@@ -19878,6 +21114,7 @@ public final class datalakeDRProto {
       endTimestamp_ = "";
       backupLocation_ = "";
       failureReason_ = "";
+      runtimeVersion_ = "";
     }
 
     @java.lang.Override
@@ -19981,6 +21218,12 @@ public final class datalakeDRProto {
                 operationStates_ = subBuilder.buildPartial();
               }
 
+              break;
+            }
+            case 98: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              runtimeVersion_ = s;
               break;
             }
             default: {
@@ -20513,6 +21756,52 @@ public final class datalakeDRProto {
       return getOperationStates();
     }
 
+    public static final int RUNTIMEVERSION_FIELD_NUMBER = 12;
+    private volatile java.lang.Object runtimeVersion_;
+    /**
+     * <pre>
+     * The runtime version of the datalake when the restore was initiated.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The runtimeVersion.
+     */
+    @java.lang.Override
+    public java.lang.String getRuntimeVersion() {
+      java.lang.Object ref = runtimeVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        runtimeVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The runtime version of the datalake when the restore was initiated.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The bytes for runtimeVersion.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getRuntimeVersionBytes() {
+      java.lang.Object ref = runtimeVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        runtimeVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -20560,6 +21849,9 @@ public final class datalakeDRProto {
       if (operationStates_ != null) {
         output.writeMessage(11, getOperationStates());
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 12, runtimeVersion_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -20603,6 +21895,9 @@ public final class datalakeDRProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(11, getOperationStates());
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, runtimeVersion_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -20643,6 +21938,8 @@ public final class datalakeDRProto {
         if (!getOperationStates()
             .equals(other.getOperationStates())) return false;
       }
+      if (!getRuntimeVersion()
+          .equals(other.getRuntimeVersion())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -20678,6 +21975,8 @@ public final class datalakeDRProto {
         hash = (37 * hash) + OPERATIONSTATES_FIELD_NUMBER;
         hash = (53 * hash) + getOperationStates().hashCode();
       }
+      hash = (37 * hash) + RUNTIMEVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getRuntimeVersion().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -20842,6 +22141,8 @@ public final class datalakeDRProto {
           operationStates_ = null;
           operationStatesBuilder_ = null;
         }
+        runtimeVersion_ = "";
+
         return this;
       }
 
@@ -20883,6 +22184,7 @@ public final class datalakeDRProto {
         } else {
           result.operationStates_ = operationStatesBuilder_.build();
         }
+        result.runtimeVersion_ = runtimeVersion_;
         onBuilt();
         return result;
       }
@@ -20973,6 +22275,10 @@ public final class datalakeDRProto {
         }
         if (other.hasOperationStates()) {
           mergeOperationStates(other.getOperationStates());
+        }
+        if (!other.getRuntimeVersion().isEmpty()) {
+          runtimeVersion_ = other.runtimeVersion_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -22116,6 +23422,102 @@ public final class datalakeDRProto {
           operationStates_ = null;
         }
         return operationStatesBuilder_;
+      }
+
+      private java.lang.Object runtimeVersion_ = "";
+      /**
+       * <pre>
+       * The runtime version of the datalake when the restore was initiated.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @return The runtimeVersion.
+       */
+      public java.lang.String getRuntimeVersion() {
+        java.lang.Object ref = runtimeVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          runtimeVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the restore was initiated.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @return The bytes for runtimeVersion.
+       */
+      public com.google.protobuf.ByteString
+          getRuntimeVersionBytes() {
+        java.lang.Object ref = runtimeVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          runtimeVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the restore was initiated.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @param value The runtimeVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRuntimeVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        runtimeVersion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the restore was initiated.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRuntimeVersion() {
+        
+        runtimeVersion_ = getDefaultInstance().getRuntimeVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the restore was initiated.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @param value The bytes for runtimeVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRuntimeVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        runtimeVersion_ = value;
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -29014,89 +30416,99 @@ public final class datalakeDRProto {
       "BackupRestoreState\0220\n\004solr\030\003 \001(\0132\".datal" +
       "akedr.SolrBackupRestoreState\0228\n\010database" +
       "\030\004 \001(\0132&.datalakedr.DatabaseBackupRestor" +
-      "eState\"u\n\025BackupDatalakeRequest\022\024\n\014datal" +
-      "akeName\030\001 \001(\t\022\022\n\nbackupName\030\002 \001(\t\022\026\n\016bac" +
-      "kupLocation\030\003 \001(\t\022\032\n\022closeDbConnections\030" +
-      "\004 \001(\010\"\305\002\n\026BackupDatalakeResponse\022\022\n\nback" +
-      "upName\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\017\n\007userC" +
-      "rn\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022\025\n\rinternalSt" +
-      "ate\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016start" +
-      "Timestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n" +
-      "\016backupLocation\030\t \001(\t\022\025\n\rfailureReason\030\n" +
-      " \001(\t\022?\n\017operationStates\030\013 \001(\0132&.datalake" +
-      "dr.InternalBackupRestoreState\022\026\n\016runtime" +
-      "Version\030\014 \001(\t\"\234\001\n\026RestoreDatalakeRequest" +
-      "\022\024\n\014datalakeName\030\001 \001(\t\022\022\n\nbackupName\030\002 \001" +
-      "(\t\022\020\n\010backupId\030\003 \001(\t\022\027\n\017includeDatabase\030" +
-      "\004 \001(\010\022\r\n\005force\030\005 \001(\010\022\036\n\026backupLocationOv" +
-      "erride\030\006 \001(\t\"\255\002\n\027RestoreDatalakeResponse" +
-      "\022\021\n\taccountId\030\001 \001(\t\022\020\n\010backupId\030\002 \001(\t\022\021\n" +
-      "\trestoreId\030\003 \001(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n\rint" +
-      "ernalState\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026" +
-      "\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010" +
-      " \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfailureR" +
-      "eason\030\n \001(\t\022?\n\017operationStates\030\013 \001(\0132&.d" +
-      "atalakedr.InternalBackupRestoreState\"Y\n\033" +
-      "BackupDatalakeStatusRequest\022\024\n\014datalakeN" +
-      "ame\030\001 \001(\t\022\020\n\010backupId\030\002 \001(\t\022\022\n\nbackupNam" +
-      "e\030\003 \001(\t\"\313\002\n\034BackupDatalakeStatusResponse" +
-      "\022\022\n\nbackupName\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022" +
-      "\017\n\007userCrn\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022\025\n\rin" +
-      "ternalState\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022" +
-      "\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTimestamp\030" +
-      "\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfailure" +
-      "Reason\030\n \001(\t\022?\n\017operationStates\030\013 \001(\0132&." +
-      "datalakedr.InternalBackupRestoreState\022\026\n" +
-      "\016runtimeVersion\030\014 \001(\t\"Y\n\034RestoreDatalake" +
-      "StatusRequest\022\024\n\014datalakeName\030\001 \001(\t\022\021\n\tr" +
-      "estoreId\030\002 \001(\tJ\004\010\003\020\004R\nbackupName\"\263\002\n\035Res" +
-      "toreDatalakeStatusResponse\022\021\n\taccountId\030" +
-      "\001 \001(\t\022\021\n\trestoreId\030\002 \001(\t\022\020\n\010backupId\030\003 \001" +
-      "(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n\rinternalState\030\005 \001" +
-      "(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016startTimesta" +
-      "mp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backup" +
-      "Location\030\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\022?\n" +
-      "\017operationStates\030\013 \001(\0132&.datalakedr.Inte" +
-      "rnalBackupRestoreState\"\301\002\n\022DatalakeBacku" +
-      "pInfo\022\022\n\nbackupName\030\001 \001(\t\022\021\n\taccountId\030\002" +
+      "eState\"\213\002\n\025BackupDatalakeRequest\022\024\n\014data" +
+      "lakeName\030\001 \001(\t\022\022\n\nbackupName\030\002 \001(\t\022\026\n\016ba" +
+      "ckupLocation\030\003 \001(\t\022\032\n\022closeDbConnections" +
+      "\030\004 \001(\010\0223\n\025skipRangerHmsMetadata\030\005 \001(\0162\024." +
+      "datalakedr.SkipFlag\022/\n\021skipAtlasMetadata" +
+      "\030\006 \001(\0162\024.datalakedr.SkipFlag\022.\n\020skipRang" +
+      "erAudits\030\007 \001(\0162\024.datalakedr.SkipFlag\"\305\002\n" +
+      "\026BackupDatalakeResponse\022\022\n\nbackupName\030\001 " +
+      "\001(\t\022\021\n\taccountId\030\002 \001(\t\022\017\n\007userCrn\030\003 \001(\t\022" +
+      "\020\n\010backupId\030\004 \001(\t\022\025\n\rinternalState\030\005 \001(\t" +
+      "\022\024\n\014overallState\030\006 \001(\t\022\026\n\016startTimestamp" +
+      "\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backupLo" +
+      "cation\030\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\022?\n\017o" +
+      "perationStates\030\013 \001(\0132&.datalakedr.Intern" +
+      "alBackupRestoreState\022\026\n\016runtimeVersion\030\014" +
+      " \001(\t\"\262\002\n\026RestoreDatalakeRequest\022\024\n\014datal" +
+      "akeName\030\001 \001(\t\022\022\n\nbackupName\030\002 \001(\t\022\020\n\010bac" +
+      "kupId\030\003 \001(\t\022\027\n\017includeDatabase\030\004 \001(\010\022\r\n\005" +
+      "force\030\005 \001(\010\022\036\n\026backupLocationOverride\030\006 " +
+      "\001(\t\0223\n\025skipRangerHmsMetadata\030\007 \001(\0162\024.dat" +
+      "alakedr.SkipFlag\022/\n\021skipAtlasMetadata\030\010 " +
+      "\001(\0162\024.datalakedr.SkipFlag\022.\n\020skipRangerA" +
+      "udits\030\t \001(\0162\024.datalakedr.SkipFlag\"\305\002\n\027Re" +
+      "storeDatalakeResponse\022\021\n\taccountId\030\001 \001(\t" +
+      "\022\020\n\010backupId\030\002 \001(\t\022\021\n\trestoreId\030\003 \001(\t\022\017\n" +
+      "\007userCrn\030\004 \001(\t\022\025\n\rinternalState\030\005 \001(\t\022\024\n" +
+      "\014overallState\030\006 \001(\t\022\026\n\016startTimestamp\030\007 " +
+      "\001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backupLocat" +
+      "ion\030\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\022?\n\017oper" +
+      "ationStates\030\013 \001(\0132&.datalakedr.InternalB" +
+      "ackupRestoreState\022\026\n\016runtimeVersion\030\014 \001(" +
+      "\t\"Y\n\033BackupDatalakeStatusRequest\022\024\n\014data" +
+      "lakeName\030\001 \001(\t\022\020\n\010backupId\030\002 \001(\t\022\022\n\nback" +
+      "upName\030\003 \001(\t\"\313\002\n\034BackupDatalakeStatusRes" +
+      "ponse\022\022\n\nbackupName\030\001 \001(\t\022\021\n\taccountId\030\002" +
       " \001(\t\022\017\n\007userCrn\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022" +
       "\025\n\rinternalState\030\005 \001(\t\022\024\n\014overallState\030\006" +
       " \001(\t\022\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTimes" +
       "tamp\030\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfa" +
       "ilureReason\030\n \001(\t\022?\n\017operationStates\030\013 \001" +
       "(\0132&.datalakedr.InternalBackupRestoreSta" +
-      "te\022\026\n\016runtimeVersion\030\014 \001(\t\"1\n\031ListDatala" +
-      "keBackupRequest\022\024\n\014datalakeName\030\001 \001(\t\"S\n" +
-      "\032ListDatalakeBackupResponse\0225\n\rdatalake_" +
-      "info\030\001 \003(\0132\036.datalakedr.DatalakeBackupIn" +
-      "fo\"/\n\033CancelDatalakeBackupRequest\022\020\n\010bac" +
-      "kupId\030\001 \001(\t\".\n\034CancelDatalakeBackupRespo" +
-      "nse\022\016\n\006result\030\001 \001(\t\"1\n\034CancelDatalakeRes" +
-      "toreRequest\022\021\n\trestoreId\030\001 \001(\t\"/\n\035Cancel" +
-      "DatalakeRestoreResponse\022\016\n\006result\030\001 \001(\t2" +
-      "\252\006\n\ndatalakeDR\022A\n\nGetVersion\022\027.version.V" +
-      "ersionRequest\032\030.version.VersionResponse\"" +
-      "\000\022Y\n\016BackupDatalake\022!.datalakedr.BackupD" +
-      "atalakeRequest\032\".datalakedr.BackupDatala" +
-      "keResponse\"\000\022\\\n\017RestoreDatalake\022\".datala" +
-      "kedr.RestoreDatalakeRequest\032#.datalakedr" +
-      ".RestoreDatalakeResponse\"\000\022k\n\024BackupData" +
-      "lakeStatus\022\'.datalakedr.BackupDatalakeSt" +
-      "atusRequest\032(.datalakedr.BackupDatalakeS" +
-      "tatusResponse\"\000\022n\n\025RestoreDatalakeStatus" +
-      "\022(.datalakedr.RestoreDatalakeStatusReque" +
-      "st\032).datalakedr.RestoreDatalakeStatusRes" +
-      "ponse\"\000\022f\n\023ListDatalakeBackups\022%.datalak" +
-      "edr.ListDatalakeBackupRequest\032&.datalake" +
-      "dr.ListDatalakeBackupResponse\"\000\022k\n\024Cance" +
-      "lDatalakeBackup\022\'.datalakedr.CancelDatal" +
-      "akeBackupRequest\032(.datalakedr.CancelData" +
-      "lakeBackupResponse\"\000\022n\n\025CancelDatalakeRe" +
-      "store\022(.datalakedr.CancelDatalakeRestore" +
-      "Request\032).datalakedr.CancelDatalakeResto" +
-      "reResponse\"\000B>\n+com.cloudera.thunderhead" +
-      ".service.datalakedrB\017datalakeDRProtob\006pr" +
-      "oto3"
+      "te\022\026\n\016runtimeVersion\030\014 \001(\t\"Y\n\034RestoreDat" +
+      "alakeStatusRequest\022\024\n\014datalakeName\030\001 \001(\t" +
+      "\022\021\n\trestoreId\030\002 \001(\tJ\004\010\003\020\004R\nbackupName\"\313\002" +
+      "\n\035RestoreDatalakeStatusResponse\022\021\n\taccou" +
+      "ntId\030\001 \001(\t\022\021\n\trestoreId\030\002 \001(\t\022\020\n\010backupI" +
+      "d\030\003 \001(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n\rinternalStat" +
+      "e\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016startTi" +
+      "mestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016b" +
+      "ackupLocation\030\t \001(\t\022\025\n\rfailureReason\030\n \001" +
+      "(\t\022?\n\017operationStates\030\013 \001(\0132&.datalakedr" +
+      ".InternalBackupRestoreState\022\026\n\016runtimeVe" +
+      "rsion\030\014 \001(\t\"\301\002\n\022DatalakeBackupInfo\022\022\n\nba" +
+      "ckupName\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\017\n\007use" +
+      "rCrn\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022\025\n\rinternal" +
+      "State\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016sta" +
+      "rtTimestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022" +
+      "\026\n\016backupLocation\030\t \001(\t\022\025\n\rfailureReason" +
+      "\030\n \001(\t\022?\n\017operationStates\030\013 \001(\0132&.datala" +
+      "kedr.InternalBackupRestoreState\022\026\n\016runti" +
+      "meVersion\030\014 \001(\t\"1\n\031ListDatalakeBackupReq" +
+      "uest\022\024\n\014datalakeName\030\001 \001(\t\"S\n\032ListDatala" +
+      "keBackupResponse\0225\n\rdatalake_info\030\001 \003(\0132" +
+      "\036.datalakedr.DatalakeBackupInfo\"/\n\033Cance" +
+      "lDatalakeBackupRequest\022\020\n\010backupId\030\001 \001(\t" +
+      "\".\n\034CancelDatalakeBackupResponse\022\016\n\006resu" +
+      "lt\030\001 \001(\t\"1\n\034CancelDatalakeRestoreRequest" +
+      "\022\021\n\trestoreId\030\001 \001(\t\"/\n\035CancelDatalakeRes" +
+      "toreResponse\022\016\n\006result\030\001 \001(\t*.\n\010SkipFlag" +
+      "\022\013\n\007NOT_SET\020\000\022\010\n\004SKIP\020\001\022\013\n\007INCLUDE\020\0022\252\006\n" +
+      "\ndatalakeDR\022A\n\nGetVersion\022\027.version.Vers" +
+      "ionRequest\032\030.version.VersionResponse\"\000\022Y" +
+      "\n\016BackupDatalake\022!.datalakedr.BackupData" +
+      "lakeRequest\032\".datalakedr.BackupDatalakeR" +
+      "esponse\"\000\022\\\n\017RestoreDatalake\022\".datalaked" +
+      "r.RestoreDatalakeRequest\032#.datalakedr.Re" +
+      "storeDatalakeResponse\"\000\022k\n\024BackupDatalak" +
+      "eStatus\022\'.datalakedr.BackupDatalakeStatu" +
+      "sRequest\032(.datalakedr.BackupDatalakeStat" +
+      "usResponse\"\000\022n\n\025RestoreDatalakeStatus\022(." +
+      "datalakedr.RestoreDatalakeStatusRequest\032" +
+      ").datalakedr.RestoreDatalakeStatusRespon" +
+      "se\"\000\022f\n\023ListDatalakeBackups\022%.datalakedr" +
+      ".ListDatalakeBackupRequest\032&.datalakedr." +
+      "ListDatalakeBackupResponse\"\000\022k\n\024CancelDa" +
+      "talakeBackup\022\'.datalakedr.CancelDatalake" +
+      "BackupRequest\032(.datalakedr.CancelDatalak" +
+      "eBackupResponse\"\000\022n\n\025CancelDatalakeResto" +
+      "re\022(.datalakedr.CancelDatalakeRestoreReq" +
+      "uest\032).datalakedr.CancelDatalakeRestoreR" +
+      "esponse\"\000B>\n+com.cloudera.thunderhead.se" +
+      "rvice.datalakedrB\017datalakeDRProtob\006proto" +
+      "3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -29144,7 +30556,7 @@ public final class datalakeDRProto {
     internal_static_datalakedr_BackupDatalakeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_BackupDatalakeRequest_descriptor,
-        new java.lang.String[] { "DatalakeName", "BackupName", "BackupLocation", "CloseDbConnections", });
+        new java.lang.String[] { "DatalakeName", "BackupName", "BackupLocation", "CloseDbConnections", "SkipRangerHmsMetadata", "SkipAtlasMetadata", "SkipRangerAudits", });
     internal_static_datalakedr_BackupDatalakeResponse_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_datalakedr_BackupDatalakeResponse_fieldAccessorTable = new
@@ -29156,13 +30568,13 @@ public final class datalakeDRProto {
     internal_static_datalakedr_RestoreDatalakeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_RestoreDatalakeRequest_descriptor,
-        new java.lang.String[] { "DatalakeName", "BackupName", "BackupId", "IncludeDatabase", "Force", "BackupLocationOverride", });
+        new java.lang.String[] { "DatalakeName", "BackupName", "BackupId", "IncludeDatabase", "Force", "BackupLocationOverride", "SkipRangerHmsMetadata", "SkipAtlasMetadata", "SkipRangerAudits", });
     internal_static_datalakedr_RestoreDatalakeResponse_descriptor =
       getDescriptor().getMessageTypes().get(9);
     internal_static_datalakedr_RestoreDatalakeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_RestoreDatalakeResponse_descriptor,
-        new java.lang.String[] { "AccountId", "BackupId", "RestoreId", "UserCrn", "InternalState", "OverallState", "StartTimestamp", "EndTimestamp", "BackupLocation", "FailureReason", "OperationStates", });
+        new java.lang.String[] { "AccountId", "BackupId", "RestoreId", "UserCrn", "InternalState", "OverallState", "StartTimestamp", "EndTimestamp", "BackupLocation", "FailureReason", "OperationStates", "RuntimeVersion", });
     internal_static_datalakedr_BackupDatalakeStatusRequest_descriptor =
       getDescriptor().getMessageTypes().get(10);
     internal_static_datalakedr_BackupDatalakeStatusRequest_fieldAccessorTable = new
@@ -29186,7 +30598,7 @@ public final class datalakeDRProto {
     internal_static_datalakedr_RestoreDatalakeStatusResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_RestoreDatalakeStatusResponse_descriptor,
-        new java.lang.String[] { "AccountId", "RestoreId", "BackupId", "UserCrn", "InternalState", "OverallState", "StartTimestamp", "EndTimestamp", "BackupLocation", "FailureReason", "OperationStates", });
+        new java.lang.String[] { "AccountId", "RestoreId", "BackupId", "UserCrn", "InternalState", "OverallState", "StartTimestamp", "EndTimestamp", "BackupLocation", "FailureReason", "OperationStates", "RuntimeVersion", });
     internal_static_datalakedr_DatalakeBackupInfo_descriptor =
       getDescriptor().getMessageTypes().get(14);
     internal_static_datalakedr_DatalakeBackupInfo_fieldAccessorTable = new

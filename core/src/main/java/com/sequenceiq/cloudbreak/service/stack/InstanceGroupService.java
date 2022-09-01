@@ -61,6 +61,10 @@ public class InstanceGroupService {
         return viewRepository.findInstanceGroupsInStack(stackId);
     }
 
+    public Optional<InstanceGroup> getByStackIdAndInstanceGroupNameWithFetchTemplate(Long stackId, String groupName) {
+        return repository.getByStackIdAndInstanceGroupNameWithFetchTemplate(stackId, groupName);
+    }
+
     public Set<InstanceGroup> findNotTerminatedAndNotZombieByStackId(Long stackId) {
         try {
             return transactionService.required(() -> {

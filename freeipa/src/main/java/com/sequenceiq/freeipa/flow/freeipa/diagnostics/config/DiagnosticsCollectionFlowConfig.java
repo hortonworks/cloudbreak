@@ -1,17 +1,17 @@
 package com.sequenceiq.freeipa.flow.freeipa.diagnostics.config;
 
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_CLEANUP_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_COLLECTION_FAILED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_COLLECTION_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_COLLECTION_STATE;
-import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_COLLECTION_FAILED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_ENSURE_MACHINE_USER_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_INIT_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_PREFLIGHT_CHECK_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_SALT_PILLAR_UPDATE_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_SALT_STATE_UPDATE_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_SALT_VALIDATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_UPGRADE_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_UPLOAD_STATE;
-import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_SALT_VALIDATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_VM_PREFLIGHT_CHECK_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.INIT_STATE;
@@ -26,9 +26,9 @@ import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsC
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_PREFLIGHT_CHECK_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_SALT_PILLAR_UPDATE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_SALT_STATE_UPDATE_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_SALT_VALIDATION_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_UPGRADE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_UPLOAD_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_SALT_VALIDATION_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_VM_PREFLIGHT_CHECK_EVENT;
 
 import java.util.List;

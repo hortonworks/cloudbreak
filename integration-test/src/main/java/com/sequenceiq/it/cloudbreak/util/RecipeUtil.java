@@ -18,23 +18,23 @@ public class RecipeUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeUtil.class);
 
-    private static final String PRE_CLOUDERA_MANAGER_START = "classpath:/recipes/pre-ambari.sh";
+    private static final String PRE_SERVICE_DEPLOYMENT = "classpath:/recipes/pre-service-deployment.sh";
 
-    private static final String POST_CLOUDERA_MANAGER_START = "classpath:/recipes/post-ambari.sh";
+    private static final String POST_CLOUDERA_MANAGER_START = "classpath:/recipes/post-cm-start.sh";
 
-    private static final String POST_INSTALL = "classpath:/recipes/post-install.sh";
+    private static final String POST_SERVICE_DEPLOYMENT = "classpath:/recipes/post-service-deployment.sh";
 
     private static final String PRE_TERMINATION = "classpath:/recipes/pre-termination.sh";
 
-    public String generatePreCmStartRecipeContent(ApplicationContext applicationContext) {
+    public String generatePreDeploymentRecipeContent(ApplicationContext applicationContext) {
         try {
-            String recipeContentFromFile = ResourceUtil.readResourceAsString(applicationContext, PRE_CLOUDERA_MANAGER_START);
+            String recipeContentFromFile = ResourceUtil.readResourceAsString(applicationContext, PRE_SERVICE_DEPLOYMENT);
             return Base64.encodeBase64String(recipeContentFromFile.getBytes());
         } catch (IOException e) {
-            LOGGER.error("Cannot generate PRE_CLOUDERA_MANAGER_START recipe content! Cannot find recipe file at path: {} throws: {}!",
-                    PRE_CLOUDERA_MANAGER_START, e.getMessage(), e);
-            throw new TestFailException(format(" Cannot generate PRE_CLOUDERA_MANAGER_START recipe content! Cannot find recipe file at path: %s",
-                    PRE_CLOUDERA_MANAGER_START), e);
+            LOGGER.error("Cannot generate PRE_SERVICE_DEPLOYMENT recipe content! Cannot find recipe file at path: {} throws: {}!",
+                    PRE_SERVICE_DEPLOYMENT, e.getMessage(), e);
+            throw new TestFailException(format(" Cannot generate PRE_SERVICE_DEPLOYMENT recipe content! Cannot find recipe file at path: %s",
+                    PRE_SERVICE_DEPLOYMENT), e);
         }
     }
 
@@ -50,15 +50,15 @@ public class RecipeUtil {
         }
     }
 
-    public String generatePostInstallRecipeContent(ApplicationContext applicationContext) {
+    public String generatePostDeploymentRecipeContent(ApplicationContext applicationContext) {
         try {
-            String recipeContentFromFile = ResourceUtil.readResourceAsString(applicationContext, POST_INSTALL);
+            String recipeContentFromFile = ResourceUtil.readResourceAsString(applicationContext, POST_SERVICE_DEPLOYMENT);
             return Base64.encodeBase64String(recipeContentFromFile.getBytes());
         } catch (IOException e) {
-            LOGGER.error("Cannot generate POST_CLUSTER_INSTALL recipe content! Cannot find recipe file at path: {} throws: {}!",
-                    POST_INSTALL, e.getMessage(), e);
-            throw new TestFailException(format(" Cannot generate POST_CLUSTER_INSTALL recipe content! Cannot find recipe file at path: %s",
-                    POST_INSTALL), e);
+            LOGGER.error("Cannot generate POST_SERVICE_DEPLOYMENT recipe content! Cannot find recipe file at path: {} throws: {}!",
+                    POST_SERVICE_DEPLOYMENT, e.getMessage(), e);
+            throw new TestFailException(format(" Cannot generate POST_SERVICE_DEPLOYMENT recipe content! Cannot find recipe file at path: %s",
+                    POST_SERVICE_DEPLOYMENT), e);
         }
     }
 

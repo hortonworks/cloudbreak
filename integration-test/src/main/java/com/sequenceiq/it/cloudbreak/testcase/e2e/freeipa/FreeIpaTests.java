@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_SERVICE_DEPLOYMENT;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
@@ -55,8 +55,8 @@ public class FreeIpaTests extends AbstractE2ETest {
     public void testCreateStopStartRepairFreeIpaWithTwoInstances(TestContext testContext) {
         String freeIpa = resourcePropertyProvider().getName();
         String recipeName = resourcePropertyProvider().getName();
-        String filePath = "/pre-ambari";
-        String fileName = "pre-ambari";
+        String filePath = "/pre-service-deployment";
+        String fileName = "pre-service-deployment";
 
         int instanceGroupCount = 1;
         int instanceCountByGroup = 2;
@@ -64,8 +64,8 @@ public class FreeIpaTests extends AbstractE2ETest {
         testContext
                 .given(RecipeTestDto.class)
                     .withName(recipeName)
-                    .withContent(recipeUtil.generatePreCmStartRecipeContent(applicationContext))
-                    .withRecipeType(PRE_CLOUDERA_MANAGER_START)
+                    .withContent(recipeUtil.generatePreDeploymentRecipeContent(applicationContext))
+                    .withRecipeType(PRE_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4())
                 .given("telemetry", TelemetryTestDto.class)
                     .withLogging()

@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.InternalServerErrorException;
 
-import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,6 +14,7 @@ import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
 import com.sequenceiq.freeipa.client.model.Group;
 import com.sequenceiq.freeipa.client.model.User;
@@ -52,7 +52,7 @@ public class FreeipaClientTestService {
         FreeIpaClient freeIpaClient = getClientByEnvironmentCrn(environmentCrn);
         try {
             LOGGER.info("Checking for users [{}] in environment {}", Joiner.on(",").join(requestedUsers), environmentCrn);
-            Set<String> freeipaUsers = freeIpaClient.userFindAll().stream().map(User::getUid).collect(Collectors.toSet());
+            Set<String> freeipaUsers = freeIpaClient.userListAllUids();
             LOGGER.debug("Users in freeipa: [{}]", Joiner.on(",").join(freeipaUsers));
             return freeipaUsers.containsAll(requestedUsers);
         } catch (FreeIpaClientException e) {

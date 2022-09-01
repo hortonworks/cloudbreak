@@ -2,11 +2,16 @@ package com.sequenceiq.cloudbreak.service.upgrade.rds;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +40,15 @@ class RdsUpgradeOrchestratorServiceTest {
 
     @Mock
     private StackDtoService stackDtoService;
+
+    @Mock
+    private UpgradeEmbeddedDBStateParamsProvider upgradeEmbeddedDBStateParamsProvider;
+
+    @Mock
+    private UpgradeEmbeddedDBPreparationStateParamsProvider upgradeEmbeddedDBPreparationStateParamsProvider;
+
+    @Mock
+    private BackupRestoreEmbeddedDBStateParamsProvider backupRestoreEmbeddedDBStateParamsProvider;
 
     @Mock
     private GatewayConfigService gatewayConfigService;
@@ -93,10 +107,39 @@ class RdsUpgradeOrchestratorServiceTest {
         assertOtherStateParams(params);
     }
 
+    @Test
+    void testValidateDbDirectorySpace()  throws CloudbreakOrchestratorException {
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k /dbfs | tail -1 | awk '{print $4}'"))).thenReturn(Map.of("fqdn1", "100000"));
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("du -sk /dbfs/pgsql | awk '{print $1}'"))).thenReturn(Map.of("fqdn1", "10000"));
+        when(gatewayConfig.getHostname()).thenReturn("fqdn1");
+        underTest.validateDbDirectorySpace(STACK_ID);
+        verify(hostOrchestrator).runCommandOnHosts(anyList(), eq(Set.of("fqdn1")), eq("df -k /dbfs | tail -1 | awk '{print $4}'"));
+        verify(hostOrchestrator).runCommandOnHosts(anyList(), eq(Set.of("fqdn1")), eq("du -sk /dbfs/pgsql | awk '{print $1}'"));
+    }
+
+    @Test
+    void testValidateDbDirectorySpaceWhenNotEnoughSpace()  throws CloudbreakOrchestratorException {
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k /dbfs | tail -1 | awk '{print $4}'"))).thenReturn(Map.of("fqdn1", "10000"));
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("du -sk /dbfs/pgsql | awk '{print $1}'"))).thenReturn(Map.of("fqdn1", "100000"));
+        when(gatewayConfig.getHostname()).thenReturn("fqdn1");
+        CloudbreakOrchestratorException actualException = Assertions.assertThrows(CloudbreakOrchestratorException.class,
+                () -> underTest.validateDbDirectorySpace(STACK_ID));
+        assertThat(actualException).hasMessageStartingWith("Not enough space on attached db volume for postgres upgrade.");
+    }
+
+    @Test
+    void testValidateDbDirectorySpaceWhenNoPGWResult()  throws CloudbreakOrchestratorException {
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k /dbfs | tail -1 | awk '{print $4}'"))).thenReturn(Map.of("fqdn2", "10000"));
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("du -sk /dbfs/pgsql | awk '{print $1}'"))).thenReturn(Map.of("fqdn1", "100000"));
+        when(gatewayConfig.getHostname()).thenReturn("fqdn1");
+        CloudbreakOrchestratorException actualException = Assertions.assertThrows(CloudbreakOrchestratorException.class,
+                () -> underTest.validateDbDirectorySpace(STACK_ID));
+        assertThat(actualException).hasMessageStartingWith("Space validation on attached db volume failed.");
+    }
+
     private void assertOtherStateParams(OrchestratorStateParams params) {
         assertThat(params.getPrimaryGatewayConfig()).isEqualTo(gatewayConfig);
         assertThat(params.getTargetHostNames()).hasSameElementsAs(Set.of("fqdn1", "fqdn2"));
-        assertThat(params.getAllNodes()).hasSameElementsAs(Set.of(node1, node2));
         assertThat(params.getExitCriteriaModel()).isInstanceOf(ClusterDeletionBasedExitCriteriaModel.class);
         assertThat(((ClusterDeletionBasedExitCriteriaModel) params.getExitCriteriaModel()).getStackId().get()).isEqualTo(STACK_ID);
     }

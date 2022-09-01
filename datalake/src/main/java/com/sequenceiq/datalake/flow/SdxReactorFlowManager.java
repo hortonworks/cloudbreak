@@ -18,8 +18,10 @@ import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_EVEN
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmStateSelectors.UPGRADE_CCM_UPGRADE_STACK_EVENT;
+import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -49,6 +52,7 @@ import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEve
 import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeRecoveryFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxCmDiagnosticsCollectionEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsCollectionEvent;
+import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
@@ -58,6 +62,7 @@ import com.sequenceiq.datalake.flow.salt.rotatepassword.RotateSaltPasswordTracke
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmStackEvent;
+import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
@@ -109,7 +114,8 @@ public class SdxReactorFlowManager {
         return notify(selector, new SdxEvent(selector, cluster.getId(), userId), cluster.getClusterName());
     }
 
-    public FlowIdentifier triggerSdxResize(Long sdxClusterId, SdxCluster newSdxCluster) {
+    public FlowIdentifier triggerSdxResize(Long sdxClusterId, SdxCluster newSdxCluster,
+            DatalakeDrSkipOptions skipOptions) {
         LOGGER.info("Trigger Datalake resizing for: {}", sdxClusterId);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         boolean performBackup = sdxBackupRestoreService.shouldSdxBackupBePerformed(
@@ -118,19 +124,23 @@ public class SdxReactorFlowManager {
         boolean performRestore = sdxBackupRestoreService.shouldSdxRestoreBePerformed(
                 newSdxCluster, entitlementService.isDatalakeBackupOnResizeEnabled(ThreadBasedUserCrnProvider.getAccountId())
         );
+        if (!performBackup) {
+            sdxBackupRestoreService.checkExistingBackup(newSdxCluster, userId);
+        }
         eventSenderService.sendEventAndNotification(newSdxCluster, DATALAKE_RESIZE_TRIGGERED);
         return notify(SDX_RESIZE_FLOW_CHAIN_START_EVENT, new DatalakeResizeFlowChainStartEvent(sdxClusterId, newSdxCluster, userId,
-                environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn()), performBackup, performRestore), newSdxCluster.getClusterName());
+                environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn()), performBackup, performRestore,
+                skipOptions), newSdxCluster.getClusterName());
     }
 
-    public FlowIdentifier triggerSdxResizeRecovery(SdxCluster oldSdxCluster, SdxCluster newSdxCluster) {
+    public FlowIdentifier triggerSdxResizeRecovery(SdxCluster oldSdxCluster, Optional<SdxCluster> newSdxCluster) {
         LOGGER.info("Triggering recovery for failed SDX resize with original cluster: {} and resized cluster: {}",
                 oldSdxCluster, newSdxCluster);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        eventSenderService.sendEventAndNotification(newSdxCluster, ResourceEvent.DATALAKE_RECOVERY_STARTED);
+        eventSenderService.sendEventAndNotification(oldSdxCluster, ResourceEvent.DATALAKE_RECOVERY_STARTED);
         return notify(
                 SDX_RESIZE_RECOVERY_FLOW_CHAIN_START_EVENT,
-                new DatalakeResizeRecoveryFlowChainStartEvent(oldSdxCluster, newSdxCluster, userId),
+                new DatalakeResizeRecoveryFlowChainStartEvent(oldSdxCluster, newSdxCluster.orElse(null), userId),
                 oldSdxCluster.getClusterName()
         );
     }
@@ -150,7 +160,8 @@ public class SdxReactorFlowManager {
         return notify(selector, new SdxRepairStartEvent(selector, cluster.getId(), userId, settings), cluster.getClusterName());
     }
 
-    public FlowIdentifier triggerDatalakeRuntimeUpgradeFlow(SdxCluster cluster, String imageId, SdxUpgradeReplaceVms replaceVms, boolean skipBackup) {
+    public FlowIdentifier triggerDatalakeRuntimeUpgradeFlow(SdxCluster cluster, String imageId, SdxUpgradeReplaceVms replaceVms, boolean skipBackup,
+            DatalakeDrSkipOptions skipOptions) {
         LOGGER.info("Trigger Datalake runtime upgrade for: {} with imageId: {} and replace vm param: {}", cluster, imageId, replaceVms);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         if (!skipBackup && sdxBackupRestoreService.shouldSdxBackupBePerformed(
@@ -159,7 +170,8 @@ public class SdxReactorFlowManager {
             LOGGER.info("Triggering backup before an upgrade");
             return notify(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT,
                     new DatalakeUpgradeFlowChainStartEvent(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT, cluster.getId(),
-                            userId, imageId, replaceVms.getBooleanValue(), environmentClientService.getBackupLocation(cluster.getEnvCrn())),
+                            userId, imageId, replaceVms.getBooleanValue(), environmentClientService.getBackupLocation(cluster.getEnvCrn()),
+                            skipOptions),
                     cluster.getClusterName());
         } else {
             return notify(DATALAKE_UPGRADE_EVENT.event(), new DatalakeUpgradeStartEvent(DATALAKE_UPGRADE_EVENT.event(), cluster.getId(),
@@ -167,12 +179,20 @@ public class SdxReactorFlowManager {
         }
     }
 
+    public FlowIdentifier triggerDatabaseServerUpgradeFlow(SdxCluster cluster, TargetMajorVersion targetMajorVersion) {
+        LOGGER.info("Trigger Database Server Upgrade on Datalake for: {} with targetMajorVersion: {}", cluster, targetMajorVersion);
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxUpgradeDatabaseServerEvent event =
+                new SdxUpgradeDatabaseServerEvent(SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT.event(), cluster.getId(), initiatorUserCrn, targetMajorVersion);
+        return notify(SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT.event(), event, cluster.getClusterName());
+    }
+
     public FlowIdentifier triggerDatalakeRuntimeUpgradePreparationFlow(SdxCluster cluster, String imageId) {
         LOGGER.info("Trigger Datalake runtime upgrade preparation for: {} with imageId: {}", cluster, imageId);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT.event(),
                 new DatalakeUpgradePreparationStartEvent(DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT.event(), cluster.getId(),
-                userId, imageId), cluster.getClusterName());
+                        userId, imageId), cluster.getClusterName());
     }
 
     public FlowIdentifier triggerDatalakeSyncComponentVersionsFromCmFlow(SdxCluster cluster) {

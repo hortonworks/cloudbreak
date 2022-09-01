@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -37,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -44,6 +43,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -79,11 +79,13 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrapFactory;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUpload;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainRemoveRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ModifyGrainBase;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltCommandRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
@@ -148,6 +150,9 @@ class SaltOrchestratorTest {
     @InjectMocks
     private SaltOrchestrator saltOrchestrator;
 
+    @Captor
+    private ArgumentCaptor<Target<String>> targetCaptor;
+
     private List<SaltConnector> saltConnectors;
 
     @BeforeEach
@@ -162,6 +167,8 @@ class SaltOrchestratorTest {
         lenient().when(hostDiscoveryService.determineDomain("test", "test", false)).thenReturn(".example.com");
         lenient().when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(callable);
         lenient().when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), anyInt(), anyBoolean()))
+                .thenReturn(callable);
+        lenient().when(saltRunner.runnerWithUsingErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
                 .thenReturn(callable);
         lenient().when(callable.call()).thenReturn(true);
         lenient().when(saltService.createSaltConnector(any(GatewayConfig.class))).thenReturn(saltConnector);
@@ -345,12 +352,12 @@ class SaltOrchestratorTest {
 
     @Test
     void getMissingNodesTest() {
-        assertThat(saltOrchestrator.getMissingNodes(gatewayConfig, targets), hasSize(0));
+        assertThat(saltOrchestrator.getMissingNodes(gatewayConfig, targets)).hasSize(0);
     }
 
     @Test
     void getAvailableNodesTest() {
-        assertThat(saltOrchestrator.getAvailableNodes(gatewayConfig, targets), hasSize(0));
+        assertThat(saltOrchestrator.getAvailableNodes(gatewayConfig, targets)).hasSize(0);
     }
 
     @Test
@@ -435,7 +442,7 @@ class SaltOrchestratorTest {
 
         inOrder.verify(saltCommandRunner).runModifyGrainCommand(any(), modifyGrainBaseArgumentCaptor.capture(), any(), any());
         ModifyGrainBase modifyGrainBase = modifyGrainBaseArgumentCaptor.getValue();
-        assertThat(modifyGrainBase, instanceOf(GrainAddRunner.class));
+        assertThat(modifyGrainBase).isInstanceOf(GrainAddRunner.class);
         assertEquals("roles", modifyGrainBase.getKey());
         assertEquals("cloudera_manager_agent_stop", modifyGrainBase.getValue());
 
@@ -448,7 +455,7 @@ class SaltOrchestratorTest {
         inOrder.verify(saltCommandRunner).runModifyGrainCommand(any(), modifyGrainBaseArgumentCaptor.capture(), any(), any());
         inOrder.verifyNoMoreInteractions();
         modifyGrainBase = modifyGrainBaseArgumentCaptor.getValue();
-        assertThat(modifyGrainBase, instanceOf(GrainRemoveRunner.class));
+        assertThat(modifyGrainBase).isInstanceOf(GrainRemoveRunner.class);
         assertEquals("roles", modifyGrainBase.getKey());
         assertEquals("cloudera_manager_agent_stop", modifyGrainBase.getValue());
 
@@ -754,12 +761,28 @@ class SaltOrchestratorTest {
     }
 
     @Test
+    void testRunCommandOnHosts() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
+        Map<String, String> response = new HashMap<>();
+        response.put("host1", "sample");
+        String command = "echo sample";
+        when(saltStateService.runCommandOnHosts(eq(retry), eq(saltConnector), any(), eq(command))).thenReturn(response);
+        Map<String, String> result = saltOrchestrator.runCommandOnHosts(allGatewayConfigs,
+                targets.stream().map(Node::getHostname).collect(Collectors.toSet()), command);
+        assertEquals("sample", result.get("host1"));
+        verify(saltStateService).runCommandOnHosts(eq(retry), eq(saltConnector), targetCaptor.capture(), eq(command));
+        Target<String> target = targetCaptor.getValue();
+        assertEquals("10-0-0-1.example.com,10-0-0-2.example.com,10-0-0-3.example.com", target.getTarget());
+    }
+
+    @Test
     void testGetPasswordExpiryDate() throws Exception {
         List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
         String user = "saltuser";
         when(saltStateService.runCommandOnHosts(any(), any(), any(), anyString())).thenReturn(Map.of(
                 "host1", " Jan 01, 2022",
-                "host2", " Mar 10, 2022"
+                "host2", " Mar 10, 2022",
+                "host3", " never"
         ));
 
         LocalDate result = saltOrchestrator.getPasswordExpiryDate(allGatewayConfigs, user);
@@ -770,5 +793,78 @@ class SaltOrchestratorTest {
         assertEquals(2022, result.getYear());
         assertEquals(Month.JANUARY, result.getMonth());
         assertEquals(1, result.getDayOfMonth());
+    }
+
+    @Test
+    void testCreateCronForUserHomeCreationWhenStateExists() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
+        when(saltStateService.stateSlsExists(any(), any(), eq("cloudera.createuserhome"))).thenReturn(Boolean.TRUE);
+        saltOrchestrator.createCronForUserHomeCreation(allGatewayConfigs, Set.of("fqdn"), exitCriteriaModel);
+
+        verify(callable).call();
+        ArgumentCaptor<OrchestratorBootstrap> saltJobIdTrackerCaptor = ArgumentCaptor.forClass(OrchestratorBootstrap.class);
+        verify(saltRunner, times(1)).runner(saltJobIdTrackerCaptor.capture(), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        assertThat(saltJobIdTrackerCaptor.getValue()).isInstanceOf(SaltJobIdTracker.class);
+        SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) saltJobIdTrackerCaptor.getValue();
+        SaltJobRunner saltJobRunner = saltJobIdTracker.getSaltJobRunner();
+        assertEquals(Set.of("fqdn"), saltJobRunner.getTargetHostnames());
+        assertThat(saltJobRunner).isInstanceOf(StateRunner.class);
+        StateRunner stateRunner = (StateRunner) saltJobRunner;
+        assertEquals("cloudera.createuserhome", stateRunner.getState());
+    }
+
+    @Test
+    void testCreateCronForUserHomeCreationWhenStateNotExists() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
+        when(saltStateService.stateSlsExists(any(), any(), eq("cloudera.createuserhome"))).thenReturn(Boolean.FALSE);
+        saltOrchestrator.createCronForUserHomeCreation(allGatewayConfigs, Set.of("fqdn"), exitCriteriaModel);
+
+        verify(callable, never()).call();
+        verify(saltRunner, never()).runner(any(), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+    }
+
+    @Test
+    void testStartClusterManagerWithItsAgents() throws Exception {
+        // GIVEN In setup
+        // WHEN
+        saltOrchestrator.startClusterManagerWithItsAgents(gatewayConfig, targets, exitCriteriaModel);
+        // THEN
+        ArgumentCaptor<ModifyGrainBase> roleCaptor = ArgumentCaptor.forClass(ModifyGrainBase.class);
+        verify(saltCommandRunner, times(2)).runModifyGrainCommand(any(SaltConnector.class), roleCaptor.capture(),
+                any(ExitCriteriaModel.class), any(ExitCriteria.class));
+        assertEquals("roles", roleCaptor.getAllValues().get(0).getKey());
+        assertEquals("cloudera_manager_full_start", roleCaptor.getAllValues().get(0).getValue());
+        assertThat(roleCaptor.getAllValues().get(0)).isInstanceOf(GrainAddRunner.class);
+        assertEquals("roles", roleCaptor.getAllValues().get(1).getKey());
+        assertEquals("cloudera_manager_full_start", roleCaptor.getAllValues().get(1).getValue());
+        assertThat(roleCaptor.getAllValues().get(1)).isInstanceOf(GrainRemoveRunner.class);
+    }
+
+    @Test
+    void testStopClusterManagerWithItsAgents() throws Exception {
+        // GIVEN In setup
+        // WHEN
+        saltOrchestrator.stopClusterManagerWithItsAgents(gatewayConfig, targets, exitCriteriaModel);
+        // THEN
+        ArgumentCaptor<ModifyGrainBase> roleCaptor = ArgumentCaptor.forClass(ModifyGrainBase.class);
+        verify(saltCommandRunner, times(2)).runModifyGrainCommand(any(SaltConnector.class), roleCaptor.capture(),
+                any(ExitCriteriaModel.class), any(ExitCriteria.class));
+        assertEquals("roles", roleCaptor.getAllValues().get(0).getKey());
+        assertEquals("cloudera_manager_full_stop", roleCaptor.getAllValues().get(0).getValue());
+        assertThat(roleCaptor.getAllValues().get(0)).isInstanceOf(GrainAddRunner.class);
+        assertEquals("roles", roleCaptor.getAllValues().get(1).getKey());
+        assertEquals("cloudera_manager_full_stop", roleCaptor.getAllValues().get(1).getValue());
+        assertThat(roleCaptor.getAllValues().get(1)).isInstanceOf(GrainRemoveRunner.class);
+    }
+
+    @Test
+    void testStartClusterManagerWithItsAgentsThrowsException() throws Exception {
+        // GIVEN In setup
+        doThrow(new Exception("errorMsg")).when(saltCommandRunner).runModifyGrainCommand(any(SaltConnector.class), any(ModifyGrainBase.class),
+                any(ExitCriteriaModel.class), any(ExitCriteria.class));
+        // WHEN
+        assertThatThrownBy(() -> saltOrchestrator.stopClusterManagerWithItsAgents(gatewayConfig, targets, exitCriteriaModel))
+                .isInstanceOf(CloudbreakOrchestratorFailedException.class)
+                .hasMessage("errorMsg");
     }
 }

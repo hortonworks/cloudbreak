@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.termination.handler;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,10 +19,12 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
+import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
@@ -68,13 +72,18 @@ public class ExecutePreTerminationRecipesHandler extends ExceptionCatcherEventHa
             boolean hasPreterminationRecipe = freeIpaRecipeService.hasRecipeType(stackId, RecipeType.PRE_TERMINATION);
             if (hasPreterminationRecipe) {
                 Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-                GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+                List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(stackId);
+                Map<String, List<RecipeModel>> recipeMap = stack.getInstanceGroups().stream().map(InstanceGroup::getGroupName)
+                        .collect(Collectors.toMap(instanceGroup -> instanceGroup, instanceGroup -> recipes));
                 Set<InstanceMetaData> availableInstances = stack.getNotDeletedInstanceMetaDataSet().stream()
                         .filter(instanceMetaData -> !InstanceStatus.STOPPED.equals(instanceMetaData.getInstanceStatus()))
                         .collect(Collectors.toSet());
                 if (runPreTerminationRecipesIfAnyNodeAvailable(availableInstances)) {
+                    List<GatewayConfig> gatewayConfigs = gatewayConfigService.getGatewayConfigs(stack, availableInstances);
+                    hostOrchestrator.uploadRecipes(gatewayConfigs, recipeMap, StackBasedExitCriteriaModel.nonCancellableModel());
                     Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(availableInstances);
                     LOGGER.info("Executing pre-termination recipes on nodes: {}", allNodes);
+                    GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
                     hostOrchestrator.preTerminationRecipes(primaryGatewayConfig, allNodes,
                             StackBasedExitCriteriaModel.nonCancellableModel(), request.getForced());
                 } else {

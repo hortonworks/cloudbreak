@@ -23,6 +23,7 @@ import org.mockito.Mockito;
 
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptState;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -44,7 +45,9 @@ class FreeIpaPollerProviderTest {
 
     private final FreeIpaService freeIpaService = Mockito.mock(FreeIpaService.class);
 
-    private final FreeIpaPollerProvider underTest = new FreeIpaPollerProvider(freeIpaService);
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory = Mockito.mock(RegionAwareInternalCrnGeneratorFactory.class);
+
+    private final FreeIpaPollerProvider underTest = new FreeIpaPollerProvider(freeIpaService, regionAwareInternalCrnGeneratorFactory);
 
     @ParameterizedTest
     @MethodSource("freeIpaStopStatuses")

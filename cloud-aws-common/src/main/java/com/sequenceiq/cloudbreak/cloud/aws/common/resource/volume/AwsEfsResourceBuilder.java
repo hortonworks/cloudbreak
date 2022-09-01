@@ -125,6 +125,12 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
     }
 
     @Override
+    public List<CloudResource> update(AwsContext context, CloudInstance instance, long privateId,
+        AuthenticatedContext auth, Group group, CloudStack cloudStack) throws Exception {
+        return List.of();
+    }
+
+    @Override
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource) throws InterruptedException {
         //
         //https://docs.aws.amazon.com/efs/latest/ug/wt1-clean-up.html

@@ -13,10 +13,15 @@ base:
              - logrotate
              - ccm
              - monitoring
+             - sshd
 
            'recipes:pre-cloudera-manager-start':
              - match: grain
              - recipes.pre-cloudera-manager-start
+
+           'recipes:pre-service-deployment':
+             - match: grain
+             - recipes.pre-service-deployment
 
            'roles:freeipa_primary':
              - match: grain
@@ -46,13 +51,13 @@ base:
              - nodestatus
              - freeipa.patch-pki-tomcat
 
-           'recipes:post-cloudera-manager-start':
-             - match: grain
-             - recipes.post-cloudera-manager-start
-
            'recipes:post-cluster-install':
              - match: grain
              - recipes.post-cluster-install
+
+           'recipes:post-service-deployment':
+             - match: grain
+             - recipes.post-service-deployment
 
            'recipes:pre-termination':
              - match: grain

@@ -94,6 +94,11 @@ public class CloudResourceAdvisor {
         Credential credential = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> credentialClientService.getByCrn(credentialCrn));
+        return createForBlueprintByCred(workspaceId, blueprintName, credential, region, platformVariant, availabilityZone, cdpResourceType);
+    }
+
+    public PlatformRecommendation createForBlueprintByCred(Long workspaceId, String blueprintName, Credential credential,
+            String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
         return getPlatformRecommendationByCredential(workspaceId, blueprintName, region, platformVariant, availabilityZone, cdpResourceType, credential);
     }
 

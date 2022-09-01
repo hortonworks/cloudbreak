@@ -130,12 +130,9 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+    public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion) throws Exception {
-        List<CloudResource> cloudResources = databaseServerUpgradeService.upgrade(authenticatedContext, stack, persistenceNotifier, targetMajorVersion);
-        return cloudResources.stream()
-                .map(e -> new CloudResourceStatus(e, ResourceStatus.CREATED))
-                .collect(Collectors.toList());
+        databaseServerUpgradeService.upgrade(authenticatedContext, stack, persistenceNotifier, targetMajorVersion);
     }
 
     @Override
@@ -276,14 +273,21 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
         //group
         List<CloudResource> groupResources = groupResourceService.getGroupResources(variant, resources);
-        List<CloudResourceStatus> groupStatuses = groupResourceService.update(context, auth, stack.getNetwork(), stack.getCloudSecurity(), groupResources);
+        List<CloudResourceStatus> cloudResourceStatuses = groupResourceService.update(context, auth, stack.getNetwork(),
+                stack.getCloudSecurity(), groupResources);
 
         //network
         List<CloudResource> networkResources = networkResourceService.getNetworkResources(variant, resources);
-        List<CloudResourceStatus> networkStatuses = networkResourceService.update(context, auth, stack.getNetwork(), stack.getCloudSecurity(), networkResources);
+        List<CloudResourceStatus> networkStatuses = networkResourceService.update(context, auth, stack.getNetwork(),
+                stack.getCloudSecurity(), networkResources);
+        cloudResourceStatuses.addAll(networkStatuses);
 
-        groupStatuses.addAll(networkStatuses);
-        return groupStatuses;
+        //compute
+        List<CloudResource> computeResources = computeResourceService.getComputeResources(variant, resources);
+        List<CloudResourceStatus> computeStatuses = computeResourceService.update(context, auth, stack, computeResources);
+        cloudResourceStatuses.addAll(computeStatuses);
+
+        return cloudResourceStatuses;
     }
 
     @Override

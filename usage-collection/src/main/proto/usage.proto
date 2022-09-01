@@ -1227,6 +1227,8 @@ message CDPLiftieClusterStatusChanged {
   string customer = 17;
   // the cluster crn
   string clusterCrn = 18;
+  // the customers entitlements
+  repeated string entitlements = 19;
 }
 
 // States of the nodes in a Liftie Cluster
@@ -1370,6 +1372,20 @@ message CDPFreeIPAStatus {
     UPGRADE_FINISHED = 8;
     // The status when CDP FreeIPA upgrade has failed.
     UPGRADE_FAILED = 9;
+
+    // The status when CDP FreeIPA vertical scale is initiated.
+    VERTICAL_SCALE_STARTED = 10;
+    // The status when CDP FreeIPA vertical scale has successfully finished.
+    VERTICAL_SCALE_FINISHED = 11;
+    // The status when CDP FreeIPA vertical scale has failed.
+    VERTICAL_SCALE_FAILED = 12;
+
+    // The status when a FreeIPA ccm upgrade operation is started.
+    CCM_UPGRADE_STARTED = 13;
+    // The status when a FreeIPA ccm upgrade operation completed.
+    CCM_UPGRADE_FINISHED = 14;
+    // The status when a FreeIPA ccm upgrade operation failed.
+    CCM_UPGRADE_FAILED = 15;
   }
 }
 
@@ -1489,6 +1505,20 @@ message CDPClusterStatus {
     UPGRADE_PREPARE_FINISHED = 47;
     // The status when a cluster validate and prepare upgrade operation failed.
     UPGRADE_PREPARE_FAILED = 48;
+
+    // The status when CDP Cluster vertical scale is initiated.
+    VERTICAL_SCALE_STARTED = 49;
+    // The status when CDP Cluster vertical scale has successfully finished.
+    VERTICAL_SCALE_FINISHED = 50;
+    // The status when CDP Cluster vertical scale has failed.
+    VERTICAL_SCALE_FAILED = 51;
+
+    // The status when a cluster ccm upgrade operation is started.
+    CCM_UPGRADE_STARTED = 52;
+    // The status when a cluster ccm upgrade operation completed.
+    CCM_UPGRADE_FINISHED = 53;
+    // The status when a cluster ccm upgrade operation failed.
+    CCM_UPGRADE_FAILED = 54;
   }
 }
 
@@ -1588,8 +1618,8 @@ message CDPProxyDetails {
 
 // Show services for which the customer has provided their own DNS zones
 message CDPOwnDnsZones {
-  // Whether DNS is provided for the postgres by the customer or not
-  bool postgres = 1;
+    // Whether DNS is provided for the postgres by the customer or not
+    bool postgres = 1;
 }
 
 message CDPNetworkDetails {
@@ -1669,6 +1699,8 @@ message CDPFreeIPAExtendedDetails {
   CDPFreeIPAShape freeIPAShape = 1;
   // Image details
   CDPImageDetails imageDetails = 2;
+  // A CDP vertical scale status.
+  CDPVerticalScaleDetails cdpVerticalScaleDetails = 3;
 }
 
 // Generated when FreeIPA status has changed
@@ -1774,6 +1806,8 @@ message CDPClusterDetails {
   // Application defined (product specific) tags for the cluster. The format of this is a map serialized
   // into a string as json. e.g.:   "tags": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
   string applicationTags = 7;
+  // A CDP vertical scale status.
+  CDPVerticalScaleDetails cdpVerticalScaleDetails = 8;
 }
 
 message CDPStatusDetails {
@@ -2969,6 +3003,22 @@ message CDPCDEVirtualClusterRequested {
   // Set of properties used while requesting virtual clusters. The format of this is a map serialized
   // into a string as json. e.g.:   "properties": "{\"prop1\":\"value1\",\"prop2\":\"value2\"}"
   string properties = 10;
+  // Indicates where the CDE Spark driver and executor pods run(spot/Ondemand)
+  CDPCDESpotInstanceUsage.Value spotInstanceUsage = 12;
+}
+
+// CDPCDESpotInstanceUsage indicates where the CDE spark driver and executor pods run(Spot/Ondemand)
+message CDPCDESpotInstanceUsage {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // DEFAULT indicates driver pod runs on on-demand instances while executor pods run on spot instances.
+    DEFAULT = 1;
+    // ALL indicates all the driver and executor pods run on spot instances.
+    ALL = 2;
+    // NONE indicates all the driver and executor pods run on on-demand instances
+    NONE = 3;
+  }
 }
 
 // Generated when status of a CDP CDE virtual cluster changes.
@@ -3307,10 +3357,10 @@ message CDPStackPatchEvent {
 // Type of stack patch event.
 message CDPStackPatchEventType {
   enum Value {
-    UNSET = 0;
-    AFFECTED = 1;
-    SUCCESS = 2;
-    FAILURE = 3;
+      UNSET = 0;
+      AFFECTED = 1;
+      SUCCESS = 2;
+      FAILURE = 3;
   }
 }
 
@@ -3543,5 +3593,10 @@ message CDPAssignTrialStatus {
     // Indicates CAP Trial Request status is FAILED.
     FAILED = 2;
   }
+}
+
+// Generated after vertical scale.
+message CDPVerticalScaleDetails {
+  string newInstanceType = 1;
 }
 

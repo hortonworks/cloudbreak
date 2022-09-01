@@ -38,6 +38,12 @@ public class ModelDescriptions {
 
     public static final String TEMPLATE_DETAILS = "Template details.";
 
+    public static final String DATABASE_SERVER_UPGRADE_RESPONSE_TYPE = "Information about the Database upgrade process, if it succeeded or not.";
+
+    public static final String DATABASE_SERVER_UPGRADE_RESPONSE_REASON = "Reason of the error occurred during the Database upgrade process.";
+
+    public static final String DATABASE_SERVER_UPGRADE_TARGET_MAJOR_VERSION = "The target major version the database server upgrade process should upgrade to.";
+
     public static final String OPERATION_STATUS = "Operation status.";
 
     public static final String OPERATION_STATUS_REASON = "Operation status reason.";
@@ -93,6 +99,12 @@ public class ModelDescriptions {
     public static final String DRY_RUN = "Doesn't perform the actual operation just validates if all preconditions are met.";
 
     public static final String SKIP_BACKUP = "Option to skip the backup before the upgrade.";
+
+    public static final String SKIP_ATLAS = "Option to skip the backup/restore of Atlas data.";
+
+    public static final String SKIP_RANGER_AUDIT = "Option to skip the backup/restore of Ranger Audit data.";
+
+    public static final String SKIP_RANGER_METADATA = "Option to skip the backup/restore of Ranger HMS Metadata.";
 
     public static final String SHOW_AVAILABLE_IMAGES = "Option to show available images.";
 
@@ -175,6 +187,8 @@ public class ModelDescriptions {
     public static final String UNSTOPPABLE_REASON = "Reason why the cluster is not stoppable";
 
     public static final String DATAHUB_CRNS_REFRESHED = "List of Data Hubs that are refreshed with CRN";
+
+    public static final String TARGET_MAJOR_VERSION = "The database major version to upgrade to";
 
     private ModelDescriptions() {
     }

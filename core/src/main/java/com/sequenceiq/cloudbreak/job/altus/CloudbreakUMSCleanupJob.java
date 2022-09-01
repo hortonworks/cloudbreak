@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -62,25 +63,41 @@ public class CloudbreakUMSCleanupJob extends UMSCleanupJob {
         List<DatahubMachineUsers> datahubMachineUsers = getPossibleDatahubMachineUsers(allStackCrns, datahubName);
         Map<String, Set<String>> datahubFluentUsers = getPossibleDatahubFluentUsers(datahubMachineUsers);
         Map<String, Set<String>> datahubTpUsers = getPossibleDatahubTpUsers(datahubMachineUsers);
+        Map<String, Set<String>> datahubMonitoringUsers = getPossibleDatahubMonitoringUsers(datahubMachineUsers);
         for (Map.Entry<String, Set<String>> entry : datalakeMachineUsers.entrySet()) {
             String accountId = entry.getKey();
             List<UserManagementProto.MachineUser> machineUsers =
                     altusMachineUserService.getAllInternalMachineUsers(accountId);
             Set<String> datalakeMachineUsersForAccount = entry.getValue();
-            Set<String> datahubFluentMachineForAccount = datahubFluentUsers.getOrDefault(accountId, new HashSet<>());
-            Set<String> datahubTPMachineForAccount = datahubTpUsers.getOrDefault(accountId, new HashSet<>());
             for (UserManagementProto.MachineUser machineUser : machineUsers) {
                 String name = machineUser.getMachineUserName();
-                if (name.startsWith("datalake-fluent") && !datalakeMachineUsersForAccount.contains(name)) {
-                    cleanupMachineUser(accountId, machineUser, name);
-                } else if (name.startsWith("datahub-fluent") && !datahubFluentMachineForAccount.contains(name)) {
-                    cleanupMachineUser(accountId, machineUser, name);
-                } else if (name.startsWith("datahub-wa-publisher") && !datahubTPMachineForAccount.contains(name)) {
+                if (shouldDeleteMachineUser(name,
+                        datalakeMachineUsersForAccount,
+                        datahubFluentUsers.getOrDefault(accountId, new HashSet<>()),
+                        datahubTpUsers.getOrDefault(accountId, new HashSet<>()),
+                        datahubMonitoringUsers.getOrDefault(accountId, new HashSet<>()))) {
                     cleanupMachineUser(accountId, machineUser, name);
                 }
             }
         }
         LOGGER.debug("Cleaning up unused UMS resources (machine users) has finished.");
+    }
+
+    private boolean shouldDeleteMachineUser(String name,
+            Set<String> datalakeMachineUsers,
+            Set<String> datahubFluentMachineUsers,
+            Set<String> datahubTPMachineUsers,
+            Set<String> datahubMonitoringMachineUsers) {
+        if ((name.startsWith("datalake-fluent") || name.startsWith("datalake-monitoring")) && !datalakeMachineUsers.contains(name)) {
+            return true;
+        } else if (name.startsWith("datahub-fluent") && !datahubFluentMachineUsers.contains(name)) {
+            return true;
+        } else if (name.startsWith("datahub-wa-publisher") && !datahubTPMachineUsers.contains(name)) {
+            return true;
+        } else if (name.startsWith("datahub-monitoring") && !datahubMonitoringMachineUsers.contains(name)) {
+            return true;
+        }
+        return false;
     }
 
     private Map<String, Set<String>> getPossibleDatahubTpUsers(List<DatahubMachineUsers> datahubMachineUsers) {
@@ -97,10 +114,20 @@ public class CloudbreakUMSCleanupJob extends UMSCleanupJob {
         return datahubMachineUsers
                 .stream()
                 .collect(Collectors.groupingBy(DatahubMachineUsers::getAccountId,
-                Collectors.mapping(
-                        DatahubMachineUsers::getFluentUser,
-                        Collectors.toSet()
-                )));
+                        Collectors.mapping(
+                                DatahubMachineUsers::getFluentUser,
+                                Collectors.toSet()
+                        )));
+    }
+
+    private Map<String, Set<String>> getPossibleDatahubMonitoringUsers(List<DatahubMachineUsers> datahubMachineUsers) {
+        return datahubMachineUsers
+                .stream()
+                .collect(Collectors.groupingBy(DatahubMachineUsers::getAccountId,
+                        Collectors.mapping(
+                                DatahubMachineUsers::getMonitoringUser,
+                                Collectors.toSet()
+                        )));
     }
 
     private List<DatahubMachineUsers> getPossibleDatahubMachineUsers(List<Crn> allStackCrns, String datahubName) {
@@ -110,7 +137,8 @@ public class CloudbreakUMSCleanupJob extends UMSCleanupJob {
                 .map(crn -> {
                     String fluentUserName = altusMachineUserService.getFluentDatabusMachineUserName(datahubName, crn.getResource());
                     String tpUserName = String.format(DATABUS_TP_MACHINUE_USER_PATTERN, crn.getResource());
-                    return new DatahubMachineUsers(crn.getAccountId(), fluentUserName, tpUserName);
+                    String monitoringUser = altusMachineUserService.getMonitoringMachineUserName(datahubName, crn.getResource());
+                    return new DatahubMachineUsers(crn.getAccountId(), fluentUserName, tpUserName, monitoringUser);
                 })
                 .collect(Collectors.toList());
     }
@@ -119,11 +147,11 @@ public class CloudbreakUMSCleanupJob extends UMSCleanupJob {
         return allStackCrns
                 .stream()
                 .filter(crn -> datalakeName.equals(crn.getService().getName()))
-                .collect(Collectors.groupingBy(Crn::getAccountId,
-                        Collectors.mapping(
-                                s -> altusMachineUserService.getFluentDatabusMachineUserName(datalakeName, s.getResource()),
-                                Collectors.toSet()
-                        )));
+                .collect(Collectors.groupingBy(Crn::getAccountId, Collectors.flatMapping(
+                        s -> Stream.of(
+                                altusMachineUserService.getFluentDatabusMachineUserName(datalakeName, s.getResource()),
+                                altusMachineUserService.getMonitoringMachineUserName(datalakeName, s.getResource())),
+                        Collectors.toSet())));
     }
 
     private List<Crn> getAllStackCrns() {

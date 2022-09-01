@@ -14,8 +14,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ClusterManage
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ClusterManagerConfigureKerberosSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostClusterManagerStartRecipesFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostClusterManagerStartRecipesSuccess;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostInstallRecipesFailed;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostInstallRecipesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostServiceDeploymentRecipesFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostServiceDeploymentRecipesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.FinalizeClusterInstallFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.FinalizeClusterInstallSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.PrepareDatalakeResourceFailed;
@@ -122,8 +122,8 @@ public enum ClusterCreationEvent implements FlowEvent {
     SUPPRESS_WARNINGS_FAILED_EVENT(EventSelectorUtil.selector(SuppressClusterWarningsFailed.class)),
     CONFIGURE_KERBEROS_SUCCESS_EVENT(EventSelectorUtil.selector(ClusterManagerConfigureKerberosSuccess.class)),
     CONFIGURE_KERBEROS_FAILED_EVENT(EventSelectorUtil.selector(ClusterManagerConfigureKerberosFailed.class)),
-    EXECUTE_POST_INSTALL_RECIPES_FINISHED_EVENT(EventSelectorUtil.selector(ExecutePostInstallRecipesSuccess.class)),
-    EXECUTE_POST_INSTALL_RECIPES_FAILED_EVENT(EventSelectorUtil.selector(ExecutePostInstallRecipesFailed.class)),
+    EXECUTE_POST_INSTALL_RECIPES_FINISHED_EVENT(EventSelectorUtil.selector(ExecutePostServiceDeploymentRecipesSuccess.class)),
+    EXECUTE_POST_INSTALL_RECIPES_FAILED_EVENT(EventSelectorUtil.selector(ExecutePostServiceDeploymentRecipesFailed.class)),
     FINALIZE_CLUSTER_INSTALL_FINISHED_EVENT(EventSelectorUtil.selector(FinalizeClusterInstallSuccess.class)),
     FINALIZE_CLUSTER_INSTALL_FAILED_EVENT(EventSelectorUtil.selector(FinalizeClusterInstallFailed.class)),
     PREPARE_DATALAKE_RESOURCE_FINISHED_EVENT(EventSelectorUtil.selector(PrepareDatalakeResourceSuccess.class)),

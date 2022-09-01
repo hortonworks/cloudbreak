@@ -147,6 +147,10 @@ public enum Status {
         return Sets.immutableEnumSet(AVAILABLE, MAINTENANCE_MODE_ENABLED);
     }
 
+    public static Set<Status> getStoppedStatuses() {
+        return Sets.immutableEnumSet(STOPPED);
+    }
+
     public static Set<Status> getAllowedDataHubStatesForSdxUpgrade() {
         return Sets.immutableEnumSet(STOPPED, DELETE_COMPLETED,
                 CREATE_FAILED, DELETE_FAILED, DELETED_ON_PROVIDER_SIDE);

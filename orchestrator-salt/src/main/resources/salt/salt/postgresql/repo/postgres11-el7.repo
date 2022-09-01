@@ -1,7 +1,11 @@
 [pgdg11]
 name=PostgreSQL 11
-baseurl=https://download.postgresql.org/pub/repos/yum/11/redhat/rhel-7-x86_64
+baseurl=https://archive.cloudera.com/p/postgresql/11/redhat7/
 enabled=1
 priority=1
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-11
+{%- if salt['pillar.get']('cloudera-manager:paywall_username') %}
+username={{ salt['pillar.get']('cloudera-manager:paywall_username') }}
+password={{ salt['pillar.get']('cloudera-manager:paywall_password') }}
+{%- endif %}

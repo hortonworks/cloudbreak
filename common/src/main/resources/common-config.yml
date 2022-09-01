@@ -76,6 +76,9 @@ telemetry:
     blackbox-exporter:
       user: blackboxuser
       port: 9115
+      check-on-all-nodes: false
+      cloud-interval-seconds: 600
+      cloudera-interval-seconds: 1800
     cloudera-manager-exporter:
       user: cmmonitoring
       port: 61010
@@ -85,8 +88,6 @@ telemetry:
       desired-version: 0.4.23
     cdp-logging-agent:
       desired-version: 0.2.16
-    cdp-vm-agent:
-      desired-version: 1.73.1
     cdp-request-signer:
       desired-version: 0.1.1
     metering-agent:
@@ -132,3 +133,7 @@ jobs:
     enabled: true
     interval-in-minutes: 60
     password-expiry-threshold-in-days: 14
+cb:
+  db.override:
+    minRuntimeVersion: 7.2.7
+    engineVersion: 11

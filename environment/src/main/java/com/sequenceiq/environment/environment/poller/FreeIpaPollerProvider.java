@@ -10,9 +10,13 @@ import org.springframework.stereotype.Component;
 import com.dyngr.core.AttemptMaker;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
+import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.flow.api.model.StateStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
@@ -30,8 +34,13 @@ public class FreeIpaPollerProvider {
 
     private final FreeIpaService freeIpaService;
 
-    public FreeIpaPollerProvider(FreeIpaService freeIpaService) {
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    public FreeIpaPollerProvider(
+            FreeIpaService freeIpaService,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.freeIpaService = freeIpaService;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public AttemptMaker<Void> startPoller(Long envId, String envCrn) {
@@ -145,8 +154,28 @@ public class FreeIpaPollerProvider {
         }
     }
 
+    public AttemptResult<Void> verticalScalePoller(Long envId, String envCrn, String flowId) {
+        if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
+            LOGGER.info("FreeIpa polling cancelled in inmemory store, id: " + envId);
+            return AttemptResults.breakFor("FreeIpa polling cancelled in inmemory store, id: " + envId);
+        }
+        FlowLogResponse flowLogResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () ->  freeIpaService.getFlowStatus(flowId));
+        LOGGER.debug("[----------FREEIPA - CHECK----------]Flow status: {}", flowLogResponse);
+        if (flowCompleted(flowLogResponse)) {
+            return AttemptResults.finishWith(null);
+        } else {
+            return checkVerticalScaleStatus(flowLogResponse);
+        }
+    }
+
     private boolean operationCompleted(OperationStatus operationStatus) {
         return OperationState.COMPLETED == operationStatus.getStatus();
+    }
+
+    private boolean flowCompleted(FlowLogResponse flowLogResponse) {
+        return Boolean.TRUE.booleanValue() == flowLogResponse.getFinalized().booleanValue();
     }
 
     private AttemptResult<Void> checkUpgradeCcmStatus(OperationStatus operationStatus) {
@@ -163,6 +192,19 @@ public class FreeIpaPollerProvider {
                 return AttemptResults.breakFor("FreeIpa Upgrade CCM failed.");
             default:
                 return AttemptResults.breakFor("FreeIpa Upgrade CCM failed: unexpected operation status returned: " + state);
+        }
+    }
+
+    private AttemptResult<Void> checkVerticalScaleStatus(FlowLogResponse flowLogResponse) {
+        StateStatus state = flowLogResponse.getStateStatus();
+        switch (state) {
+            case SUCCESSFUL:
+            case PENDING:
+                return AttemptResults.justContinue();
+            case FAILED:
+                return AttemptResults.breakFor("FreeIpa vertical scale failed.");
+            default:
+                return AttemptResults.breakFor("FreeIpa vertical scale failed: unexpected operation status returned: " + state);
         }
     }
 

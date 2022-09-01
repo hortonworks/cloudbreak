@@ -21,6 +21,12 @@ public class MonitoringConfigServiceTest {
 
     private static final Integer DEFAULT_CM_SMON_PORT = 61010;
 
+    private static final String ACCESS_KEY_ID = "ACCESS_KEY_ID";
+
+    private static final char[] PRIVATE_KEY = "PRIVATE_KEY".toCharArray();
+
+    private static final String ACCESS_KEY_TYPE = "RSA";
+
     @InjectMocks
     private MonitoringConfigService underTest;
 
@@ -29,6 +35,9 @@ public class MonitoringConfigServiceTest {
 
     @Mock
     private ExporterConfiguration cmMonitoringConfiguration;
+
+    @Mock
+    private BlackboxExporterConfiguration blackboxExporterConfiguration;
 
     @Mock
     private MonitoringGlobalAuthConfig monitoringGlobalAuthConfig;
@@ -59,13 +68,19 @@ public class MonitoringConfigServiceTest {
         given(monitoringConfiguration.getAgent()).willReturn(monitoringAgentConfiguration);
         given(cmMonitoringConfiguration.getPort()).willReturn(DEFAULT_CM_SMON_PORT);
         given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
+
+        given(monitoringConfiguration.getBlackboxExporter()).willReturn(blackboxExporterConfiguration);
+        given(blackboxExporterConfiguration.getClouderaIntervalSeconds()).willReturn(1000);
+
         given(monitoring.getRemoteWriteUrl()).willReturn("https://myendpoint/api/v1/receive");
         // WHEN
-        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, true, false);
+        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, true, false,
+                ACCESS_KEY_ID, PRIVATE_KEY, ACCESS_KEY_TYPE);
         // THEN
         assertTrue(result.isEnabled());
         assertEquals("https://myendpoint/api/v1/receive", result.getRemoteWriteUrl());
         assertEquals("false", result.toMap().get("useDevStack").toString());
+        assertEquals(1000, result.toMap().get("blackboxExporterClouderaIntervalSeconds"));
         assertEquals(DEFAULT_CM_SMON_PORT, result.getCmMetricsExporterPort());
     }
 
@@ -83,7 +98,8 @@ public class MonitoringConfigServiceTest {
         given(monitoringGlobalAuthConfig.isEnabled()).willReturn(true);
         given(monitoringGlobalAuthConfig.getToken()).willReturn("my-token");
         // WHEN
-        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, true, false);
+        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, true, false,
+                ACCESS_KEY_ID, PRIVATE_KEY, ACCESS_KEY_TYPE);
         // THEN
         assertTrue(result.isEnabled());
         assertEquals("my-token", result.toMap().get("token").toString());
@@ -102,7 +118,8 @@ public class MonitoringConfigServiceTest {
         given(monitoringConfiguration.getAgent()).willReturn(monitoringAgentConfiguration);
         given(monitoringConfiguration.getRemoteWriteUrl()).willReturn("https://myendpoint/$accountid");
         // WHEN
-        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, true, false);
+        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, true, false,
+                ACCESS_KEY_ID, PRIVATE_KEY, ACCESS_KEY_TYPE);
         // THEN
         assertTrue(result.isEnabled());
         assertNull(result.getRemoteWriteUrl());
@@ -120,7 +137,8 @@ public class MonitoringConfigServiceTest {
         given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
         given(monitoringConfiguration.getRemoteWriteUrl()).willReturn("https://myendpoint/$accountid");
         // WHEN
-        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, false, false);
+        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, false, false,
+                ACCESS_KEY_ID, PRIVATE_KEY, ACCESS_KEY_TYPE);
         // THEN
         assertFalse(result.isEnabled());
     }
@@ -137,7 +155,8 @@ public class MonitoringConfigServiceTest {
         given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
         given(monitoringConfiguration.getRemoteWriteUrl()).willReturn("https://myendpoint/$accountid");
         // WHEN
-        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, false, false);
+        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, false, false,
+                ACCESS_KEY_ID, PRIVATE_KEY, ACCESS_KEY_TYPE);
         // THEN
         assertTrue(result.isEnabled());
     }
@@ -146,7 +165,8 @@ public class MonitoringConfigServiceTest {
     public void testCreateMonitoringConfigsWithNulls() {
         // GIVEN
         // WHEN
-        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, null, null, null, true, false);
+        MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, null, null, null, true, false,
+                ACCESS_KEY_ID, PRIVATE_KEY, ACCESS_KEY_TYPE);
         // THEN
         assertFalse(result.isEnabled());
     }

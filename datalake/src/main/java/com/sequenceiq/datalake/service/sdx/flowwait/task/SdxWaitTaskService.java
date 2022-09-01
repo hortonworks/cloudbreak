@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.service.sdx.flowwait.task;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -9,16 +7,12 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.exception.PollerException;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
-import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.flowwait.exception.SdxWaitException;
 
 @Service
 public class SdxWaitTaskService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxWaitTaskService.class);
-
-    @Inject
-    private SdxService sdxService;
 
     /**
      * Will start a wait task on an SDX cluster.

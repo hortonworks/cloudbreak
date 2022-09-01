@@ -65,10 +65,18 @@ public class BootstrapService {
     }
 
     public void bootstrap(Long stackId, List<String> instanceIds) throws CloudbreakOrchestratorException {
-        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataService.findNotTerminatedForStack(stackId).stream()
+        Stack stack = stackRepository.findById(stackId).get();
+        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataService.findNotTerminatedForStack(stack.getId()).stream()
                 .filter(instanceMetaData -> Objects.isNull(instanceIds) || instanceIds.contains(instanceMetaData.getInstanceId()))
                 .collect(Collectors.toSet());
-        Stack stack = stackRepository.findById(stackId).get();
+        bootstrap(stack, instanceMetaDatas, false);
+    }
+
+    public void reBootstrap(Stack stack) throws CloudbreakOrchestratorException {
+        bootstrap(stack, stack.getNotDeletedInstanceMetaDataSet(), true);
+    }
+
+    private void bootstrap(Stack stack, Set<InstanceMetaData> instanceMetaDatas, boolean reBootstrap) throws CloudbreakOrchestratorException {
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getGatewayConfigs(stack, instanceMetaDatas);
 
@@ -85,10 +93,16 @@ public class BootstrapService {
         params.setOs(image.getOs());
         params.setSaltBootstrapFpSupported(true);
         params.setRestartNeededFlagSupported(true);
+
+        StackBasedExitCriteriaModel exitCriteriaModel = new StackBasedExitCriteriaModel(stack.getId());
         try {
-            byte[] stateConfigZip = getStateConfigZip();
-            hostOrchestrator.bootstrapNewNodes(gatewayConfigs, allNodes, allNodes,
-                    stateConfigZip, params, new StackBasedExitCriteriaModel(stackId));
+            if (reBootstrap) {
+                hostOrchestrator.bootstrap(gatewayConfigs, allNodes, params, exitCriteriaModel);
+            } else {
+                byte[] stateConfigZip = getStateConfigZip();
+                hostOrchestrator.bootstrapNewNodes(gatewayConfigs, allNodes, allNodes,
+                        stateConfigZip, params, exitCriteriaModel);
+            }
         } catch (IOException e) {
             LOGGER.error("Couldn't read state config", e);
             throw new CloudbreakOrchestratorFailedException("Couldn't read state config", e);

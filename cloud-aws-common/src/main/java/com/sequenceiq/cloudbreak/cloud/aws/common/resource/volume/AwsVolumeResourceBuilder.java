@@ -295,6 +295,12 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<CloudResource> update(AwsContext context, CloudInstance instance, long privateId,
+        AuthenticatedContext auth, Group group, CloudStack cloudStack) throws Exception {
+        return List.of();
+    }
+
     private Long getEphemeralCount(Group group) {
         Long ephemeralTemplateCount = group.getReferenceInstanceTemplate().getVolumes().stream()
                 .filter(vol -> AwsDiskType.Ephemeral.value().equalsIgnoreCase(vol.getType())).count();

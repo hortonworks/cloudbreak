@@ -10,15 +10,19 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.service.upgrade.database.SdxDatabaseServerUpgradeService;
 import com.sequenceiq.datalake.service.upgrade.SdxRuntimeUpgradeService;
 import com.sequenceiq.datalake.service.upgrade.ccm.SdxCcmUpgradeService;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
+import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
+import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 
@@ -31,6 +35,9 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
 
     @Inject
     private SdxCcmUpgradeService sdxCcmUpgradeService;
+
+    @Inject
+    private SdxDatabaseServerUpgradeService sdxDatabaseServerUpgradeService;
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
@@ -80,6 +87,22 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     @InternalOnly
     public SdxCcmUpgradeResponse upgradeCcm(@ResourceCrn String environmentCrn, @InitiatorUserCrn String initiatorUserCrn) {
         return sdxCcmUpgradeService.upgradeCcm(environmentCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
+    public SdxUpgradeDatabaseServerResponse upgradeDatabaseServerByName(@TenantAwareParam @ResourceName String clusterName,
+            SdxUpgradeDatabaseServerRequest sdxUpgradeDatabaseServerRequest) {
+        NameOrCrn sdxNameOrCrn = NameOrCrn.ofName(clusterName);
+        return sdxDatabaseServerUpgradeService.upgrade(sdxNameOrCrn, sdxUpgradeDatabaseServerRequest.getTargetMajorVersion());
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
+    public SdxUpgradeDatabaseServerResponse upgradeDatabaseServerByCrn(@TenantAwareParam @ResourceCrn String clusterCrn,
+            SdxUpgradeDatabaseServerRequest sdxUpgradeDatabaseServerRequest) {
+        NameOrCrn sdxNameOrCrn = NameOrCrn.ofCrn(clusterCrn);
+        return sdxDatabaseServerUpgradeService.upgrade(sdxNameOrCrn, sdxUpgradeDatabaseServerRequest.getTargetMajorVersion());
     }
 
 }
