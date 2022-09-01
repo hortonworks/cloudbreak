@@ -75,8 +75,8 @@ sdx:
       name: cdp-proxy
     ssotype: SSO_PROVIDER
   upgrade.database:
-    sleeptime_sec: 20
-    duration_min: 40
+    sleeptime-sec: 20
+    duration-min: 40
 
   paywall.url: "https://archive.cloudera.com/p/cdp-public/"
 

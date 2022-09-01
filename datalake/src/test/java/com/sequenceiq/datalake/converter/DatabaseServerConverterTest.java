@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.Databa
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerSslMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -48,6 +49,7 @@ class DatabaseServerConverterTest {
         sourceSslConfig.setSslMode(SslMode.ENABLED);
         sourceSslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
         source.setSslConfig(sourceSslConfig);
+        source.setMajorVersion(MajorVersion.VERSION_12);
 
 
         StackDatabaseServerResponse result = underTest.convert(source);
@@ -68,6 +70,7 @@ class DatabaseServerConverterTest {
         assertThat(resultSslConfig.getSslMode()).isEqualTo(DatabaseServerSslMode.ENABLED);
         assertThat(resultSslConfig.getSslCertificateType()).isEqualTo(DatabaseServerSslCertificateType.CLOUD_PROVIDER_OWNED);
         assertThat(resultSslConfig.getSslCertificates()).isEqualTo(sourceSslConfig.getSslCertificates());
+        assertEquals(source.getMajorVersion(), result.getMajorVersion());
     }
 
     @ParameterizedTest

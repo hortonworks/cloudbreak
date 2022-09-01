@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.sdx;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
+import com.sequenceiq.cloudbreak.api.model.RdsUpgradeResponseType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -91,8 +93,7 @@ public class CloudbreakStackServiceTest {
             setupIam();
             TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
             FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollableId");
-            RdsUpgradeV4Response rdsUpgradeV4Response = new RdsUpgradeV4Response();
-            rdsUpgradeV4Response.setFlowIdentifier(flowIdentifier);
+            RdsUpgradeV4Response rdsUpgradeV4Response = setupResponse(flowIdentifier);
             threadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getUserCrn).thenReturn(USER_CRN);
             threadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(), any(Supplier.class))).thenReturn(rdsUpgradeV4Response);
 
@@ -101,6 +102,35 @@ public class CloudbreakStackServiceTest {
             assertEquals(rdsUpgradeV4Response, response);
             verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         }
+    }
+
+    @Test
+    void testUpgradeRdsByClusterNameInternalWhenErrorResponse() {
+        try (MockedStatic<ThreadBasedUserCrnProvider> threadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+            SdxCluster sdxCluster = setupSdxCluster();
+            setupIam();
+            TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+            RdsUpgradeV4Response rdsUpgradeV4Response = setupResponse(null);
+            threadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getUserCrn).thenReturn(USER_CRN);
+            threadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(), any(Supplier.class))).thenReturn(rdsUpgradeV4Response);
+
+            Assertions.assertThrows(CloudbreakApiException.class, () ->
+                    underTest.upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion)
+            );
+
+            verify(cloudbreakFlowService, never()).saveLastCloudbreakFlowChainId(any(), any());
+        }
+    }
+
+    private static RdsUpgradeV4Response setupResponse(FlowIdentifier flowIdentifier) {
+        RdsUpgradeV4Response rdsUpgradeV4Response = new RdsUpgradeV4Response();
+        if (flowIdentifier != null) {
+            rdsUpgradeV4Response.setFlowIdentifier(flowIdentifier);
+            rdsUpgradeV4Response.setResponseType(RdsUpgradeResponseType.TRIGGERED);
+        } else {
+            rdsUpgradeV4Response.setResponseType(RdsUpgradeResponseType.ERROR);
+        }
+        return rdsUpgradeV4Response;
     }
 
     private static SdxCluster setupSdxCluster() {

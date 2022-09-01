@@ -39,7 +39,7 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
     private SdxService sdxService;
 
     @Inject
-    private PollerRunner pollerRunnerImpl;
+    private PollerRunner pollerRunner;
 
     @Override
     public String selector() {
@@ -59,7 +59,7 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
         String userId = request.getUserId();
         PollingConfig pollingConfig = new PollingConfig(waitParametersService.getSleepTimeInSec(), TimeUnit.SECONDS,
                 waitParametersService.getDurationInMinutes(), TimeUnit.MINUTES);
-        PollerRunnerResult result = pollerRunnerImpl.run(pollingConfig,
+        PollerRunnerResult result = pollerRunner.run(pollingConfig,
                 config -> upgradeDatabaseServerAndPoll(request, sdxCluster, config),
                 "Upgrade database server",
                 sdxCluster
