@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
@@ -202,7 +203,7 @@ class StorageValidationServiceTest {
         when(sdxCluster.getStackRequestToCloudbreak()).thenReturn("StackRequest");
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.validateBackupStorage(sdxCluster, null));
+                () -> underTest.validateBackupStorage(sdxCluster, BackupOperationType.ANY, null));
         assertEquals(exception.getMessage(), "Failed to validate backup storage");
     }
 
@@ -212,7 +213,7 @@ class StorageValidationServiceTest {
         when(sdxCluster.getEnvName()).thenReturn("test environment");
         when(environmentService.getDetailedEnvironmentResponseByName(anyString())).thenReturn(new DetailedEnvironmentResponse());
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.validateBackupStorage(sdxCluster, null));
+                () -> underTest.validateBackupStorage(sdxCluster, BackupOperationType.ANY,  null));
         assertEquals(exception.getMessage(), "Failed to validate backup storage");
     }
 
@@ -229,9 +230,9 @@ class StorageValidationServiceTest {
         when(sdxCluster.getStackRequestToCloudbreak()).thenReturn(stackRequest);
         when(sdxCluster.getEnvName()).thenReturn("test environment");
         when(environmentService.getDetailedEnvironmentResponseByName(anyString())).thenReturn(detailedEnvironmentResponse);
-        ValidationResult validationResult = underTest.validateBackupStorage(sdxCluster, null);
+        ValidationResult validationResult = underTest.validateBackupStorage(sdxCluster, BackupOperationType.ANY, null);
         verify(cloudStorageValidator, times(1)).validateBackupLocation(cloudStorageRequestArgumentCaptor.capture(),
-                detailedEnvironmentResponseArgumentCaptor.capture(), eq(null), any());
+                eq(BackupOperationType.ANY), detailedEnvironmentResponseArgumentCaptor.capture(), eq(null), any());
         Assertions.assertEquals(5, cloudStorageRequestArgumentCaptor.getValue().getLocations().size());
         Assertions.assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getIdentities().size());
         Assertions.assertNull(cloudStorageRequestArgumentCaptor.getValue().getAws());
@@ -250,9 +251,9 @@ class StorageValidationServiceTest {
         when(sdxCluster.getStackRequestToCloudbreak()).thenReturn(stackRequest);
         when(sdxCluster.getEnvName()).thenReturn("test environment");
         when(environmentService.getDetailedEnvironmentResponseByName(anyString())).thenReturn(detailedEnvironmentResponse);
-        ValidationResult validationResult = underTest.validateBackupStorage(sdxCluster, BACKUP_LOCATION);
+        ValidationResult validationResult = underTest.validateBackupStorage(sdxCluster, BackupOperationType.ANY, BACKUP_LOCATION);
         verify(cloudStorageValidator, times(1)).validateBackupLocation(cloudStorageRequestArgumentCaptor.capture(),
-                detailedEnvironmentResponseArgumentCaptor.capture(), eq(BACKUP_LOCATION), any());
+                eq(BackupOperationType.ANY), detailedEnvironmentResponseArgumentCaptor.capture(), eq(BACKUP_LOCATION), any());
         Assertions.assertEquals(5, cloudStorageRequestArgumentCaptor.getValue().getLocations().size());
         Assertions.assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getIdentities().size());
         Assertions.assertNull(cloudStorageRequestArgumentCaptor.getValue().getAws());

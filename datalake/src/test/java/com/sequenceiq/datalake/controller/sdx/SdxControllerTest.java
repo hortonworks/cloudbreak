@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
+import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -206,14 +207,15 @@ class SdxControllerTest {
 
         SdxCluster sdxCluster = getValidSdxCluster();
         sdxCluster.setClusterName(SDX_CLUSTER_NAME);
-        SdxBackupLocationValidationRequest sdxBackupLocationValidationRequest = new SdxBackupLocationValidationRequest(SDX_CLUSTER_NAME);
-        when(storageValidationService.validateBackupStorage(sdxCluster, null)).thenReturn(validationResult);
+        SdxBackupLocationValidationRequest sdxBackupLocationValidationRequest = new SdxBackupLocationValidationRequest(SDX_CLUSTER_NAME,
+                BackupOperationType.ANY);
+        when(storageValidationService.validateBackupStorage(sdxCluster, BackupOperationType.ANY, null)).thenReturn(validationResult);
         when(sdxService.getByNameInAccount(USER_CRN, SDX_CLUSTER_NAME)).thenReturn(sdxCluster);
 
         ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.validateBackupStorage(sdxBackupLocationValidationRequest));
 
         verify(sdxService, times(1)).getByNameInAccount(USER_CRN, SDX_CLUSTER_NAME);
-        verify(storageValidationService, times(1)).validateBackupStorage(sdxCluster, null);
+        verify(storageValidationService, times(1)).validateBackupStorage(sdxCluster, BackupOperationType.ANY, null);
         assertEquals(ValidationResult.State.VALID, result.getState());
     }
 
@@ -224,14 +226,15 @@ class SdxControllerTest {
 
         SdxCluster sdxCluster = getValidSdxCluster();
         sdxCluster.setClusterName(SDX_CLUSTER_NAME);
-        SdxBackupLocationValidationRequest sdxBackupLocationValidationRequest = new SdxBackupLocationValidationRequest(SDX_CLUSTER_NAME, BACKUP_LOCATION);
-        when(storageValidationService.validateBackupStorage(sdxCluster, BACKUP_LOCATION)).thenReturn(validationResult);
+        SdxBackupLocationValidationRequest sdxBackupLocationValidationRequest = new SdxBackupLocationValidationRequest(SDX_CLUSTER_NAME,
+                BackupOperationType.ANY, BACKUP_LOCATION);
+        when(storageValidationService.validateBackupStorage(sdxCluster, BackupOperationType.ANY, BACKUP_LOCATION)).thenReturn(validationResult);
         when(sdxService.getByNameInAccount(USER_CRN, SDX_CLUSTER_NAME)).thenReturn(sdxCluster);
 
         ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.validateBackupStorage(sdxBackupLocationValidationRequest));
 
         verify(sdxService, times(1)).getByNameInAccount(USER_CRN, SDX_CLUSTER_NAME);
-        verify(storageValidationService, times(1)).validateBackupStorage(sdxCluster, BACKUP_LOCATION);
+        verify(storageValidationService, times(1)).validateBackupStorage(sdxCluster, BackupOperationType.ANY, BACKUP_LOCATION);
         assertEquals(ValidationResult.State.VALID, result.getState());
     }
 

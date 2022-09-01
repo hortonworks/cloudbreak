@@ -84,7 +84,7 @@ public class AzureObjectStorageConnectorTest {
 
     private void mockIDBrokerStorageValidationError(int code, CloudError cloudError) {
         Response<ResponseBody> response = Response.error(code, ResponseBody.create("body", MediaType.get("application/json")));
-        when(azureIDBrokerObjectStorageValidator.validateObjectStorage(any(), any(), any(), any(), any(), any())).thenThrow(
+        when(azureIDBrokerObjectStorageValidator.validateObjectStorage(any(), any(), any(), any(), any(), any(), any())).thenThrow(
                 new CloudException("error", response, cloudError));
     }
 }
