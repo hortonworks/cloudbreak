@@ -45,6 +45,7 @@ webhdfs_command()   {
     local path=$2
     local query=$3
     exec {out_fd}>&1
+    echo "webhdfs_command HTTP response:"
     local http_code=$(curl --cookie-jar $WEBHDFS_COOKIE_JAR --cookie $WEBHDFS_COOKIE_JAR \
       -o >(cat >&${out_fd}) \
       --silent \
@@ -53,6 +54,7 @@ webhdfs_command()   {
       -X $method --negotiate -u : \
       "$WEBHDFS_URL$path?$query")
     exec {out_fd}>&-
+    echo "webhdfs_command HTTP status code: ${http_code}"
     chmod 600 $WEBHDFS_COOKIE_JAR
     if [ "$http_code" -ne 200 ]; then
       return $http_code
@@ -179,6 +181,7 @@ else
         exit 1
       else
         echo "chown'ed the home dir $PATH_PREFIX/$user"
+        echo $chown_output
       fi
       echo "$user" >> $EXISTING_USERS_FILE
       number_of_dirs=$((number_of_dirs + 1))
