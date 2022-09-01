@@ -399,6 +399,11 @@ public class SaltStateService {
         return result.iterator().hasNext() ? result.iterator().next() : new HashMap<>();
     }
 
+    public ApplyResponse applyStateSync(SaltConnector sc, String service, Target<String> target) {
+        return measure(() -> sc.run(target, "state.apply", LOCAL, ApplyResponse.class, service), LOGGER,
+                "ApplyState sync took {}ms for service [{}]", service);
+    }
+
     public ApplyResponse applyState(SaltConnector sc, String service, Target<String> target) {
         return measure(() -> sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service), LOGGER,
                 "ApplyState async took {}ms for service [{}]", service);

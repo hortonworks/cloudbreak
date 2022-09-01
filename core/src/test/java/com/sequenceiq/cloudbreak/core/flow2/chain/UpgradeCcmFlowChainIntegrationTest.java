@@ -80,6 +80,7 @@ import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeOrchestratorService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -153,6 +154,9 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     @MockBean
     private UpgradeCcmService upgradeCcmService;
+
+    @MockBean
+    private UpgradeOrchestratorService upgradeOrchestratorService;
 
     @SpyBean
     private FlowChains flowChains;
