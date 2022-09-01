@@ -4,8 +4,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.NotFoundException;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
@@ -29,6 +27,11 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
 
     public RecipeTestDto(TestContext testContext) {
         super(new RecipeV4Request(), testContext);
+    }
+
+    @Override
+    public void deleteForCleanup() {
+        getClientForCleanup().getDefaultClient().recipeV4Endpoint().deleteByCrn(0L, getCrn());
     }
 
     @Override
@@ -98,21 +101,6 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);
         }
-    }
-
-    @Override
-    public void deleteForCleanup() {
-        try {
-            CloudbreakClient client = getClientForCleanup();
-            client.getDefaultClient().recipeV4Endpoint().deleteByCrn(client.getWorkspaceId(), getResponse().getCrn());
-        } catch (NotFoundException nfe) {
-            LOGGER.info("recipe not found, thus cleanup not needed.");
-        }
-    }
-
-    @Override
-    public boolean deletable(RecipeViewV4Response entity) {
-        return name(entity).startsWith(getResourcePropertyProvider().prefix(getCloudPlatform()));
     }
 
     public void setSimpleResponses(RecipeViewV4Responses simpleResponses) {

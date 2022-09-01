@@ -28,10 +28,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
@@ -49,18 +46,20 @@ import net.schmizz.sshj.SSHClient;
 public class SshJClientActions extends SshJClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(SshJClientActions.class);
 
-    private List<String> getFreeIpaInstanceGroupIps(InstanceMetadataType istanceMetadataType, String environmentCrn, FreeIpaClient freeipaClient,
-            boolean publicIp) {
-        return freeipaClient.getDefaultClient().getFreeIpaV1Endpoint()
-                .describe(environmentCrn).getInstanceGroups().stream()
-                .filter(instanceGroup -> instanceGroup.getType().equals(InstanceGroupType.MASTER))
-                .map(InstanceGroupResponse::getMetaData)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .filter(instanceMetaData -> instanceMetaData.getInstanceType().equals(istanceMetadataType))
-                .map(InstanceMetaDataResponse::getPrivateIp)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+    private List<String> getFreeIpaInstanceGroupIps(String environmentCrn, FreeIpaClient freeipaClient, boolean publicIp) {
+        List<String> instanceIPs = new ArrayList<>();
+
+        freeipaClient.getDefaultClient().getFreeIpaV1Endpoint()
+                .describe(environmentCrn).getInstanceGroups().forEach(ig -> {
+                    InstanceMetaDataResponse instanceMetaDataResponse = ig.getMetaData().stream().findFirst().orElse(null);
+                    assert instanceMetaDataResponse != null;
+                    LOGGER.info("The selected Instance Group [{}] and the available Private IP [{}] and Public IP [{}]]. {} ip will be used.",
+                            instanceMetaDataResponse.getInstanceGroup(), instanceMetaDataResponse.getPrivateIp(), instanceMetaDataResponse.getPublicIp(),
+                            publicIp ? "Public" : "Private");
+                    instanceIPs.add(publicIp ? instanceMetaDataResponse.getPublicIp() : instanceMetaDataResponse.getPrivateIp());
+                });
+
+        return instanceIPs;
     }
 
     private List<String> getInstanceGroupIps(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames, boolean publicIp) {
@@ -89,8 +88,8 @@ public class SshJClientActions extends SshJClient {
             if (requiredNumberOfFiles == fileCount) {
                 Log.log(LOGGER, " Required number (%d) of files are available at '%s' on %s instance. ", fileCount, filePath, ip);
             } else {
-                LOGGER.error("Required number ({}) of files are NOT available at '{}' on '{}' instance!", requiredNumberOfFiles, filePath, ip);
-                throw new TestFailException(format("Required number (%d) of files are NOT available at '%s' on '%s' instance!", requiredNumberOfFiles,
+                LOGGER.error("Required number ({}) of files are NOT available at '{}' on {} instance!", requiredNumberOfFiles, filePath, ip);
+                throw new TestFailException(format("Required number (%d) of files are NOT available at '%s' on %s instance!", requiredNumberOfFiles,
                         filePath, ip));
             }
         });
@@ -107,9 +106,9 @@ public class SshJClientActions extends SshJClient {
     }
 
     public <T extends AbstractFreeIpaTestDto> T checkFilesByNameAndPath(T testDto, String environmentCrn, FreeIpaClient freeipaClient,
-            InstanceMetadataType istanceMetadataType, String filePath, String fileName, long requiredNumberOfFiles, String user, String password) {
+            String filePath, String fileName, long requiredNumberOfFiles, String user, String password) {
         String fileListCommand = format("find %s -type f -name %s", filePath, fileName);
-        Map<String, Long> filesByIp = getFreeIpaInstanceGroupIps(istanceMetadataType, environmentCrn, freeipaClient, false).stream()
+        Map<String, Long> filesByIp = getFreeIpaInstanceGroupIps(environmentCrn, freeipaClient, false).stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executefileListCommand(ip, user, password, fileListCommand)));
 
         validateRequiredNumberOfFiles(filesByIp, filePath, requiredNumberOfFiles);
@@ -214,7 +213,7 @@ public class SshJClientActions extends SshJClient {
     }
 
     public FreeIpaTestDto checkNoOutboundInternetTraffic(FreeIpaTestDto testDto, FreeIpaClient freeIpaClient) {
-        getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, testDto.getResponse().getEnvironmentCrn(), freeIpaClient, true)
+        getFreeIpaInstanceGroupIps(testDto.getResponse().getEnvironmentCrn(), freeIpaClient, true)
                 .forEach(this::checkNoOutboundInternetTraffic);
         return testDto;
     }
@@ -271,6 +270,7 @@ public class SshJClientActions extends SshJClient {
 
         try {
             Pair<Integer, String> cmdOut = executeSshCommand(instanceIP, user, password, fileListCommand);
+            Log.log(LOGGER, " Command exit status '%s' and result '%s'. ", cmdOut.getKey(), cmdOut.getValue());
 
             List<String> cmdOutputValues = Stream.of(cmdOut.getValue().split("[\\r\\n\\t]")).filter(Objects::nonNull).collect(Collectors.toList());
             boolean fileFound = cmdOutputValues.stream()
@@ -336,7 +336,7 @@ public class SshJClientActions extends SshJClient {
 
     public FreeIpaTestDto checkMonitoringStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient,
             List<String> verifyMetricNames, List<String> acceptableNokNames) {
-        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(environmentCrn, freeipaClient, false);
         return checkMonitoringStatus(testDto, instanceIps, verifyMetricNames, acceptableNokNames);
     }
 
@@ -435,7 +435,7 @@ public class SshJClientActions extends SshJClient {
     }
 
     public FreeIpaTestDto checkFilesystemFreeBytesGeneratedMetric(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
-        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(environmentCrn, freeipaClient, false);
         return checkFilesystemFreeBytesGeneratedMetric(testDto, instanceIps);
     }
 

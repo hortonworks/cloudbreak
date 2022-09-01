@@ -1,5 +1,0 @@
-name: "freeipa-recipe-tests"
-tests:
-  - name: "freeipa_recipe_tests"
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRecipeTests
