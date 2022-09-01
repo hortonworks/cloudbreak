@@ -47,6 +47,8 @@ import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.model.CloudIdentityType;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+
 @Component
 public class AzureIDBrokerObjectStorageValidator {
 
@@ -60,7 +62,11 @@ public class AzureIDBrokerObjectStorageValidator {
     @Inject
     private AzureStorage azureStorage;
 
-    public ValidationResult validateObjectStorage(AzureClient client,
+    @Inject
+    private EntitlementService entitlementService;
+
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
+    public ValidationResult validateObjectStorage(AzureClient client, String accountId,
             SpiFileSystem spiFileSystem,
             String logsLocationBase,
             String backupLocationBase,
@@ -89,13 +95,17 @@ public class AzureIDBrokerObjectStorageValidator {
                         }
 
                         validateIDBroker(client, roleAssignments, identity, cloudFileSystem, singleResourceGroup, resultBuilder);
-                        Set<Identity> allMappedExistingIdentity = validateAllMappedIdentities(client, cloudFileSystem, resultBuilder);
-                        validateLocation(client, allMappedExistingIdentity,
-                                (StringUtils.isNotEmpty(backupLocationBase)) ? backupLocationBase : logsLocationBase,
-                                resultBuilder);
+                        if (entitlementService.isDatalakeBackupRestorePrechecksEnabled(accountId)) {
+                            Set<Identity> allMappedExistingIdentity = validateAllMappedIdentities(client, cloudFileSystem, resultBuilder);
+                            validateLocation(client, allMappedExistingIdentity,
+                                    (StringUtils.isNotEmpty(backupLocationBase)) ? backupLocationBase : logsLocationBase,
+                                    resultBuilder);
+                        }
                     } else if (LOG.equals(cloudIdentityType)) {
                         validateLocation(client, identity, logsLocationBase, resultBuilder);
-                        validateLocation(client, identity, backupLocationBase, resultBuilder);
+                        if (entitlementService.isDatalakeBackupRestorePrechecksEnabled(accountId)) {
+                            validateLocation(client, identity, backupLocationBase, resultBuilder);
+                        }
                     }
                 } else {
                     addError(resultBuilder, String.format("%s Identity with id %s does not exist in the given Azure subscription. %s",

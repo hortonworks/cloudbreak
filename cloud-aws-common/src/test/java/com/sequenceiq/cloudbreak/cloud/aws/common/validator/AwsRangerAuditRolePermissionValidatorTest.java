@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.amazonaws.auth.policy.Policy;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
+import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.service.identitymapping.AccountMappingSubject;
@@ -209,7 +210,7 @@ public class AwsRangerAuditRolePermissionValidatorTest extends AwsIDBrokerMapped
         CloudS3View cloudFileSystem = new CloudS3View(CloudIdentityType.ID_BROKER);
         cloudFileSystem.setInstanceProfile("arn:aws:iam::11111111111:instance-profile/instanceprofile");
 
-        List<Policy> policies = getValidator().collectBackupRestorePolicies(cloudFileSystem, backupLocation);
+        List<Policy> policies = getValidator().collectBackupRestorePolicies(cloudFileSystem, BackupOperationType.ANY, backupLocation);
 
         assertEquals(2, policies.size());
         Map<String, String> replacements = replacementsCaptor.getValue();
