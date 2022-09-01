@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -31,7 +32,17 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
 
     @Override
     public void deleteForCleanup() {
-        getClientForCleanup().getDefaultClient().recipeV4Endpoint().deleteByCrn(0L, getCrn());
+        try {
+            CloudbreakClient client = getClientForCleanup();
+            client.getDefaultClient().recipeV4Endpoint().deleteByCrn(client.getWorkspaceId(), getResponse().getCrn());
+        } catch (NotFoundException nfe) {
+            LOGGER.info("recipe not found, thus cleanup not needed.");
+        }
+    }
+
+    @Override
+    public boolean deletable(RecipeViewV4Response entity) {
+        return name(entity).startsWith(getResourcePropertyProvider().prefix(getCloudPlatform()));
     }
 
     @Override

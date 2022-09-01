@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
@@ -31,9 +32,9 @@ public class SshJUtil {
     }
 
     public <T extends AbstractFreeIpaTestDto> T checkFilesOnFreeIpaByNameAndPath(T testDto, String environmentCrn, FreeIpaClient freeipaClient,
-            String filePath, String fileName, long requiredNumberOfFiles, String user, String password) {
-        return sshJClientActions.checkFilesByNameAndPath(testDto, environmentCrn, freeipaClient, filePath, fileName, requiredNumberOfFiles, user,
-                password);
+            InstanceMetadataType istanceMetadataType, String filePath, String fileName, long requiredNumberOfFiles, String user, String password) {
+        return sshJClientActions.checkFilesByNameAndPath(testDto, environmentCrn, freeipaClient, istanceMetadataType, filePath, fileName,
+                requiredNumberOfFiles, user, password);
     }
 
     public void checkAwsMountedDisks(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {

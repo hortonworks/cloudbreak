@@ -332,8 +332,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        stackAuthenticationEntity.withPublicKeyId(mockProperties.getPublicKeyId());
-        return stackAuthenticationEntity;
+        return stackAuthenticationEntity.withPublicKeyId(mockProperties.getPublicKeyId());
     }
 
     public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {

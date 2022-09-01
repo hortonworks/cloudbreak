@@ -52,7 +52,6 @@ import com.sequenceiq.it.cloudbreak.util.FreeIpaInstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.azure.AzureCloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
-import com.sequenceiq.it.cloudbreak.util.ssh.action.SshEnaDriverCheckActions;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 /**
@@ -66,9 +65,6 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
 
     @Inject
     private DistroXTestClient distroXTestClient;
-
-    @Inject
-    private SshEnaDriverCheckActions sshEnaDriverCheckActions;
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
