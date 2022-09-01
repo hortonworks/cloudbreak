@@ -45,6 +45,7 @@ webhdfs_command()   {
     local path=$2
     local query=$3
     exec {out_fd}>&1
+    echo "webhdfs_command HTTP response:"
     local http_code=$(curl --cookie-jar $WEBHDFS_COOKIE_JAR --cookie $WEBHDFS_COOKIE_JAR \
       -o >(cat >&${out_fd}) \
       --silent \
@@ -53,9 +54,14 @@ webhdfs_command()   {
       -X $method --negotiate -u : \
       "$WEBHDFS_URL$path?$query")
     exec {out_fd}>&-
-    chmod 600 $WEBHDFS_COOKIE_JAR
-    if [ "$http_code" -ne 200 ]; then
-      return $http_code
+    echo "webhdfs_command HTTP status code: ${http_code}"
+    if [[ "$http_code" -eq 200 ]]; then
+      chmod 600 $WEBHDFS_COOKIE_JAR
+      return 0
+    elif [[ "$http_code" -eq 401 ]]; then
+      return 2
+    else
+      return 1
     fi
 }
 
@@ -167,11 +173,11 @@ else
     if [[ ${hasharr[$user]} != "exist" ]]; then
       chown_output=$(webhdfs_command PUT $PATH_PREFIX/$user "op=SETOWNER&owner=$user&group=$user")
       chown_status=$?
-      if [[ $chown_status -eq 401 ]]; then
+      if [[ $chown_status -eq 2 ]]; then
         echo 'Negotiation failed, retrying after a kinit...'
         kinit_as_hdfs
         chown_output=$(webhdfs_command PUT $PATH_PREFIX/$user "op=SETOWNER&owner=$user&group=$user")
-	chown_status=$?
+        chown_status=$?
       fi
       if [[ $chown_status -ne 0 ]]; then
         echo "chown failed for user home dirs even after a kinit as hdfs user.."
