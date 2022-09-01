@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -24,6 +25,7 @@ import com.sequenceiq.datalake.service.sdx.CloudbreakStackService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.datalake.service.validation.database.DatabaseUpgradeRuntimeValidator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.SdxDatabaseResponseType;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
@@ -57,6 +59,9 @@ public class SdxDatabaseServerUpgradeService {
     @Inject
     private DatabaseEngineVersionReaderService databaseEngineVersionReaderService;
 
+    @Inject
+    private DatabaseUpgradeRuntimeValidator databaseUpgradeRuntimeValidator;
+
     public SdxUpgradeDatabaseServerResponse upgrade(NameOrCrn sdxNameOrCrn, TargetMajorVersion requestedTargetMajorVersion) {
         LOGGER.debug("Upgrade database server called for {} with target major version {}", sdxNameOrCrn, requestedTargetMajorVersion);
         TargetMajorVersion targetMajorVersion = ObjectUtils.defaultIfNull(requestedTargetMajorVersion, defaultTargetMajorVersion);
@@ -65,17 +70,39 @@ public class SdxDatabaseServerUpgradeService {
         MDCBuilder.buildMdcContext(cluster);
 
         DatalakeStatusEnum status = sdxStatusService.getActualStatusForSdx(cluster).getStatus();
-        if (status.isDatabaseServerUpgradeInProgress()) {
-            return upgradeInProgressAnswer(cluster, targetMajorVersion);
+        if (isDatabaseServerUpgradeInProgress(status)) {
+            throwUpgradeInProgressError(cluster, targetMajorVersion);
         }
 
-        if (RUNNING != status && DATALAKE_UPGRADE_DATABASE_SERVER_FAILED != status) {
-            return datalakeNotAvailableForUpgradeAnswer(cluster, targetMajorVersion);
+        if (isDatabaseAvailableForUpgade(status)) {
+            throwDatalakeNotAvailableForUpgradeError(cluster, targetMajorVersion);
         }
 
-        return sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(cluster, targetMajorVersion)
-                ? triggerDatabaseUpgrade(cluster, targetMajorVersion)
-                : alreadyOnLatestAnswer(cluster, targetMajorVersion);
+        if (!isRuntimeVersionAllowedForUpgrade(cluster)) {
+            throwDatalakeRuntimeTooLowError(targetMajorVersion, cluster);
+        }
+
+        if (!isUpgradeNeeded(targetMajorVersion, cluster)) {
+            throwAlreadyOnLatestError(cluster, targetMajorVersion);
+        }
+
+        return triggerDatabaseUpgrade(cluster, targetMajorVersion);
+    }
+
+    private boolean isUpgradeNeeded(TargetMajorVersion targetMajorVersion, SdxCluster cluster) {
+        return sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(cluster, targetMajorVersion);
+    }
+
+    private boolean isDatabaseServerUpgradeInProgress(DatalakeStatusEnum status) {
+        return status.isDatabaseServerUpgradeInProgress();
+    }
+
+    private boolean isRuntimeVersionAllowedForUpgrade(SdxCluster cluster) {
+        return databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(cluster.getRuntime());
+    }
+
+    private boolean isDatabaseAvailableForUpgade(DatalakeStatusEnum status) {
+        return RUNNING != status && DATALAKE_UPGRADE_DATABASE_SERVER_FAILED != status;
     }
 
     public void initUpgradeInCb(SdxCluster sdxCluster, TargetMajorVersion targetMajorVersion) {
@@ -91,25 +118,29 @@ public class SdxDatabaseServerUpgradeService {
     public void updateDatabaseServerEngineVersion(SdxCluster sdxCluster) {
         LOGGER.debug("Updating database server engine version  {} for datalake {}", sdxCluster.getStackCrn(), sdxCluster.getName());
         databaseEngineVersionReaderService.getDatabaseServerMajorVersion(sdxCluster)
-                        .ifPresent(majorVersion -> sdxService.updateDatabaseEngineVersion(sdxCluster.getCrn(), majorVersion.getMajorVersion()));
+                .ifPresent(majorVersion -> sdxService.updateDatabaseEngineVersion(sdxCluster.getCrn(), majorVersion.getMajorVersion()));
     }
 
-    private SdxUpgradeDatabaseServerResponse datalakeNotAvailableForUpgradeAnswer(SdxCluster cluster, TargetMajorVersion targetMajorVersion) {
-        String message = String.format("Data Lake %s is not available for database server upgrade", cluster.getName());
-        LOGGER.info(message);
-        return new SdxUpgradeDatabaseServerResponse(SdxDatabaseResponseType.ERROR, FlowIdentifier.notTriggered(), message, targetMajorVersion);
+    private void throwDatalakeNotAvailableForUpgradeError(SdxCluster cluster, TargetMajorVersion targetMajorVersion) {
+        throwBadRequestException(String.format("Data Lake %s is not available for database server upgrade", cluster.getName()));
     }
 
-    private SdxUpgradeDatabaseServerResponse upgradeInProgressAnswer(SdxCluster cluster, TargetMajorVersion targetMajorVersion) {
-        String message = String.format("Database server upgrade for Data Lake %s is already in progress", cluster.getName());
-        LOGGER.debug(message);
-        return new SdxUpgradeDatabaseServerResponse(SdxDatabaseResponseType.SKIP, FlowIdentifier.notTriggered(), message, targetMajorVersion);
+    private void throwUpgradeInProgressError(SdxCluster cluster, TargetMajorVersion targetMajorVersion) {
+        throwBadRequestException(String.format("Database server upgrade for Data Lake %s is already in progress", cluster.getName()));
     }
 
-    private SdxUpgradeDatabaseServerResponse alreadyOnLatestAnswer(SdxCluster cluster, TargetMajorVersion targetMajorVersion) {
-        String message = String.format("Database server is already on the latest version for data lake %s", cluster.getName());
-        LOGGER.info(message);
-        return new SdxUpgradeDatabaseServerResponse(SdxDatabaseResponseType.SKIP, FlowIdentifier.notTriggered(), message, targetMajorVersion);
+    private void throwAlreadyOnLatestError(SdxCluster cluster, TargetMajorVersion targetMajorVersion) {
+        throwBadRequestException(String.format("Database server is already on the latest version for data lake %s", cluster.getName()));
+    }
+
+    private void throwDatalakeRuntimeTooLowError(TargetMajorVersion targetMajorVersion, SdxCluster cluster) {
+        throwBadRequestException(String.format("The database upgrade of Data Lake %s is not permitted for runtime version %s. The minimum supported runtime" +
+                " version is %s", cluster.getName(), cluster.getRuntime(), databaseUpgradeRuntimeValidator.getMinRuntimeVersion()));
+    }
+
+    private void throwBadRequestException(String message) {
+        LOGGER.warn(message);
+        throw new BadRequestException(message);
     }
 
     private SdxUpgradeDatabaseServerResponse triggerDatabaseUpgrade(SdxCluster cluster, TargetMajorVersion targetMajorVersion) {

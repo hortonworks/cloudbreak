@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgr
 import com.sequenceiq.cloudbreak.api.model.RdsUpgradeResponseType;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -66,10 +67,10 @@ public class RdsUpgradeService {
                 nameOrCrn.getNameOrCrn(), calculatedVersion, targetMajorVersion);
 
         if (getCurrentRdsVersion(nameOrCrn).equals(calculatedVersion.getMajorVersion())) {
-            return alreadyOnLatestAnswer(calculatedVersion);
-        } else {
-            return validateAndTrigger(stack, calculatedVersion, accountId);
+            alreadyOnLatestAnswer(calculatedVersion);
         }
+
+        return validateAndTrigger(stack, calculatedVersion, accountId);
     }
 
     private String getCurrentRdsVersion(NameOrCrn nameOrCrn) {
@@ -80,21 +81,20 @@ public class RdsUpgradeService {
                 .orElse(MajorVersion.VERSION_10.getMajorVersion());
     }
 
-    private RdsUpgradeV4Response alreadyOnLatestAnswer(TargetMajorVersion targetMajorVersion) {
-        LOGGER.info("External database is already on version {}", targetMajorVersion);
-        return new RdsUpgradeV4Response(RdsUpgradeResponseType.SKIP, FlowIdentifier.notTriggered(),
-                getMessage(CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED, List.of(targetMajorVersion.getMajorVersion())), targetMajorVersion);
+    private void alreadyOnLatestAnswer(TargetMajorVersion targetMajorVersion) {
+        String message = getMessage(CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED, List.of(targetMajorVersion.getMajorVersion()));
+        throw new BadRequestException(message);
     }
 
     private RdsUpgradeV4Response validateAndTrigger(StackView stack, TargetMajorVersion targetMajorVersion, String accountId) {
         Optional<String> runtimeValidationError = databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(stack.getStackVersion(), accountId);
         if (runtimeValidationError.isPresent()) {
-            return new RdsUpgradeV4Response(RdsUpgradeResponseType.ERROR, FlowIdentifier.notTriggered(), runtimeValidationError.get(), targetMajorVersion);
+            LOGGER.warn("There was a validation error: {}", runtimeValidationError.get());
+            throw new BadRequestException(runtimeValidationError.get());
         }
         if (!stack.getStatus().isAvailable() && Status.EXTERNAL_DATABASE_UPGRADE_FAILED != stack.getStatus()) {
-            LOGGER.info("Stack {} is not available for RDS upgrade", stack.getName());
-            return new RdsUpgradeV4Response(RdsUpgradeResponseType.ERROR, FlowIdentifier.notTriggered(),
-                    getMessage(CLUSTER_RDS_UPGRADE_NOT_AVAILABLE), targetMajorVersion);
+            LOGGER.warn("Stack {} is not available for RDS upgrade", stack.getName());
+            throw new BadRequestException(getMessage(CLUSTER_RDS_UPGRADE_NOT_AVAILABLE));
         }
 
         LOGGER.info("External database for stack {} will be upgraded to version {}", stack.getName(), targetMajorVersion.getMajorVersion());

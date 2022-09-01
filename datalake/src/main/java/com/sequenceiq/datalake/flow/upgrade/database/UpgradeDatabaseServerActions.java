@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.flow.upgrade.database;
 
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_DATABASE_SERVER_IN_PROGRESS;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_DATABASE_SERVER_FINISHED;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_FAILED_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_FINALIZED_EVENT;
 
@@ -48,7 +49,7 @@ public class UpgradeDatabaseServerActions {
             @Override
             protected void doExecute(SdxContext context, SdxUpgradeDatabaseServerEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Execute upgrade database server flow for SDX: {}", payload.getResourceId());
-                sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_DATABASE_SERVER_IN_PROGRESS, "Database server upgrade in progress",
+                sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_DATABASE_SERVER_IN_PROGRESS, "Database server upgrade is in progress",
                         payload.getResourceId());
                 UpgradeDatabaseServerRequest request = UpgradeDatabaseServerRequest.from(context, payload.getTargetMajorVersion());
                 sendEvent(context, request);
@@ -68,7 +69,7 @@ public class UpgradeDatabaseServerActions {
             @Override
             protected void doExecute(SdxContext context, SdxUpgradeDatabaseServerSuccessEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Database server upgrade finalized for SDX: {}", payload.getResourceId());
-                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_DATABASE_SERVER_FINISHED,
                         "Database server upgrade completed successfully", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.UPGRADE_DATABASE_SERVER_FINISHED, sdxCluster);
                 sendEvent(context, SDX_UPGRADE_DATABASE_SERVER_FINALIZED_EVENT.event(), payload);
