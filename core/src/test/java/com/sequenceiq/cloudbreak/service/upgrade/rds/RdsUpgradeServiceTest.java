@@ -13,6 +13,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgr
 import com.sequenceiq.cloudbreak.api.model.RdsUpgradeResponseType;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -59,7 +61,7 @@ class RdsUpgradeServiceTest {
 
     private static final String ERROR_REASON = "reason";
 
-    private static final TargetMajorVersion TARGET_VERSION =  TargetMajorVersion.VERSION_11;
+    private static final TargetMajorVersion TARGET_VERSION = TargetMajorVersion.VERSION_11;
 
     private static final String WORKSPACE_NAME = "workspaceName";
 
@@ -156,13 +158,11 @@ class RdsUpgradeServiceTest {
         when(messagesService.getMessage(CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED.getMessage(),
                 List.of(MajorVersion.VERSION_11.getMajorVersion()))).thenReturn(ERROR_REASON);
 
-        RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
+        Assertions.assertThatCode(() -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage(ERROR_REASON);
 
         verifyNoInteractions(reactorFlowManager);
-        assertThat(response.getResponseType()).isEqualTo(RdsUpgradeResponseType.SKIP);
-        assertThat(response.getFlowIdentifier()).isEqualTo(FlowIdentifier.notTriggered());
-        assertThat(response.getReason()).isEqualTo(ERROR_REASON);
-        assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.NOT_TRIGGERED);
     }
 
     @Test
@@ -174,13 +174,11 @@ class RdsUpgradeServiceTest {
         String errorMessage = "Runtime version is not valid.";
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.of(errorMessage));
 
-        RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
+        Assertions.assertThatCode(() -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Runtime version is not valid.");
 
         verifyNoInteractions(reactorFlowManager);
-        assertThat(response.getResponseType()).isEqualTo(RdsUpgradeResponseType.ERROR);
-        assertThat(response.getFlowIdentifier()).isEqualTo(FlowIdentifier.notTriggered());
-        assertThat(response.getReason()).isEqualTo(errorMessage);
-        assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.NOT_TRIGGERED);
     }
 
     private StackDatabaseServerResponse createDatabaseServerResponse(MajorVersion majorVersion) {
@@ -197,13 +195,11 @@ class RdsUpgradeServiceTest {
         when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
         when(messagesService.getMessage(CLUSTER_RDS_UPGRADE_NOT_AVAILABLE.getMessage())).thenReturn(ERROR_REASON);
 
-        RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
+        Assertions.assertThatCode(() -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage(ERROR_REASON);
 
         verifyNoInteractions(reactorFlowManager);
-        assertThat(response.getResponseType()).isEqualTo(RdsUpgradeResponseType.ERROR);
-        assertThat(response.getFlowIdentifier()).isEqualTo(FlowIdentifier.notTriggered());
-        assertThat(response.getReason()).isEqualTo(ERROR_REASON);
-        assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.NOT_TRIGGERED);
     }
 
     private Stack createStack(Status status) {

@@ -337,6 +337,7 @@ public enum ResourceEvent {
     DATALAKE_UPGRADE_DATABASE_SERVER_REQUESTED("datalake.database.server.upgrade.requested"),
     DATALAKE_UPGRADE_DATABASE_SERVER_FAILED("datalake.database.server.upgrade.failed"),
     DATALAKE_UPGRADE_DATABASE_SERVER_IN_PROGRESS("datalake.database.server.upgrade.inprogress"),
+    DATALAKE_UPGRADE_DATABASE_SERVER_FINISHED("datalake.database.server.upgrade.succeeded"),
     DATAHUB_UPGRADE_CCM_ERROR_ENVIRONMENT_IS_NOT_LATEST("datahub.ccm.upgrade.error.environment.notlatest"),
     DATAHUB_UPGRADE_CCM_NOT_AVAILABLE("datahub.ccm.upgrade.not.available"),
     DATAHUB_UPGRADE_CCM_ALREADY_UPGRADED("datahub.ccm.upgrade.already.upgraded"),

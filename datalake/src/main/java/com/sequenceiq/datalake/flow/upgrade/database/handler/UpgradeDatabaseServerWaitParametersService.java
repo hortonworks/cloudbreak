@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class UpgradeDatabaseServerWaitParametersService {
 
-    @Value("${sdx.upgrade.database.sleeptime_sec}")
+    @Value("${sdx.upgrade.database.sleeptime-sec}")
     private long sleepTimeInSec;
 
-    @Value("${sdx.upgrade.database.duration_min}")
+    @Value("${sdx.upgrade.database.duration-min}")
     private long durationInMinutes;
 
     public long getSleepTimeInSec() {

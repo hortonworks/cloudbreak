@@ -8,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,6 +20,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -28,6 +30,7 @@ import com.sequenceiq.datalake.service.sdx.CloudbreakStackService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.datalake.service.validation.database.DatabaseUpgradeRuntimeValidator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseResponseType;
@@ -62,6 +65,9 @@ public class SdxDatabaseServerUpgradeServiceTest {
     @Mock
     private CloudbreakStackService cloudbreakStackService;
 
+    @Mock
+    private DatabaseUpgradeRuntimeValidator databaseUpgradeRuntimeValidator;
+
     @InjectMocks
     private SdxDatabaseServerUpgradeService underTest;
 
@@ -75,6 +81,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(sdxCluster, targetMajorVersion)).thenReturn(true);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
         when(reactorFlowManager.triggerDatabaseServerUpgradeFlow(sdxCluster, targetMajorVersion)).thenReturn(flowIdentifier);
+        when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any())).thenReturn(true);
 
         SdxUpgradeDatabaseServerResponse response = underTest.upgrade(NAME_OR_CRN, targetMajorVersion);
 
@@ -94,6 +101,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(sdxCluster, TargetMajorVersion.VERSION_11)).thenReturn(true);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
         when(reactorFlowManager.triggerDatabaseServerUpgradeFlow(sdxCluster, TargetMajorVersion.VERSION_11)).thenReturn(flowIdentifier);
+        when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any())).thenReturn(true);
 
         SdxUpgradeDatabaseServerResponse response = underTest.upgrade(NAME_OR_CRN, null);
 
@@ -113,6 +121,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(sdxCluster, targetMajorVersion)).thenReturn(true);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
         when(reactorFlowManager.triggerDatabaseServerUpgradeFlow(sdxCluster, targetMajorVersion)).thenReturn(flowIdentifier);
+        when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any())).thenReturn(true);
 
         SdxUpgradeDatabaseServerResponse response = underTest.upgrade(NAME_OR_CRN, targetMajorVersion);
 
@@ -136,12 +145,10 @@ public class SdxDatabaseServerUpgradeServiceTest {
         SdxStatusEntity status = getDatalakeStatus(datalakeStatusEnum);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);
 
-        SdxUpgradeDatabaseServerResponse response = underTest.upgrade(NAME_OR_CRN, targetMajorVersion);
+        Assertions.assertThatCode(() -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage(String.format("Data Lake %s is not available for database server upgrade", SDX_CLUSTER_NAME));
 
-        assertEquals(FlowType.NOT_TRIGGERED, response.getFlowIdentifier().getType());
-        assertEquals(String.format("Data Lake %s is not available for database server upgrade", SDX_CLUSTER_NAME), response.getReason());
-        assertEquals(targetMajorVersion, response.getTargetMajorVersion());
-        assertEquals(SdxDatabaseResponseType.ERROR, response.getSdxDatabaseResponseType());
         verify(sdxDatabaseServerUpgradeAvailabilityService, never()).isUpgradeNeeded(any(), any());
         verify(reactorFlowManager, never()).triggerDatabaseServerUpgradeFlow(any(), any());
     }
@@ -155,31 +162,28 @@ public class SdxDatabaseServerUpgradeServiceTest {
         SdxStatusEntity status = getDatalakeStatus(datalakeStatusEnum);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);
 
-        SdxUpgradeDatabaseServerResponse response = underTest.upgrade(NAME_OR_CRN, targetMajorVersion);
+        Assertions.assertThatCode(() -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage(String.format("Database server upgrade for Data Lake %s is already in progress", SDX_CLUSTER_NAME));
 
-        assertEquals(FlowType.NOT_TRIGGERED, response.getFlowIdentifier().getType());
-        assertEquals(String.format("Database server upgrade for Data Lake %s is already in progress", SDX_CLUSTER_NAME), response.getReason());
-        assertEquals(targetMajorVersion, response.getTargetMajorVersion());
-        assertEquals(SdxDatabaseResponseType.SKIP, response.getSdxDatabaseResponseType());
         verify(sdxDatabaseServerUpgradeAvailabilityService, never()).isUpgradeNeeded(any(), any());
         verify(reactorFlowManager, never()).triggerDatabaseServerUpgradeFlow(any(), any());
     }
 
     @Test
-    void testUpgradeWhenAlreadyUpgradedThenUpgradeNotTriggered() {
+    void testUpgradeWhenDatabaseRuntimeTooLowThenNotTriggered() {
         TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
-        SdxCluster sdxCluster = getSdxCluster();
+        SdxCluster sdxCluster = getSdxCluster("tooLow");
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);
-        when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(sdxCluster, targetMajorVersion)).thenReturn(false);
+        when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any())).thenReturn(false);
+        when(databaseUpgradeRuntimeValidator.getMinRuntimeVersion()).thenReturn("minimumVersion");
 
-        SdxUpgradeDatabaseServerResponse response = underTest.upgrade(NAME_OR_CRN, targetMajorVersion);
-
-        assertEquals(FlowType.NOT_TRIGGERED, response.getFlowIdentifier().getType());
-        assertEquals(String.format("Database server is already on the latest version for data lake %s", SDX_CLUSTER_NAME), response.getReason());
-        assertEquals(targetMajorVersion, response.getTargetMajorVersion());
-        assertEquals(SdxDatabaseResponseType.SKIP, response.getSdxDatabaseResponseType());
+        Assertions.assertThatCode(() -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage(String.format("The database upgrade of Data Lake %s is not permitted for runtime version tooLow. The minimum supported runtime " +
+                        "version is minimumVersion", SDX_CLUSTER_NAME));
     }
 
     @Test
@@ -203,11 +207,25 @@ public class SdxDatabaseServerUpgradeServiceTest {
     }
 
     private SdxCluster getSdxCluster() {
+        return getSdxCluster(null);
+    }
+
+    private SdxCluster getSdxCluster(String runtimeVersion) {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setCrn(SDX_CRN);
         sdxCluster.setClusterName(SDX_CLUSTER_NAME);
+        if (runtimeVersion != null) {
+            sdxCluster.setRuntime(runtimeVersion);
+        }
         return sdxCluster;
     }
+
+//    private SdxCluster mockSdxCluster(boolean withExternalDb) {
+//        SdxCluster sdxCluster = mock(SdxCluster.class);
+//        when(sdxCluster.getName()).thenReturn(SDX_CLUSTER_NAME);
+//        when(sdxCluster.hasExternalDatabase()).thenReturn(withExternalDb);
+//        return sdxCluster;
+//    }
 
     private SdxStatusEntity getDatalakeStatus(DatalakeStatusEnum statusEnum) {
         SdxStatusEntity status = new SdxStatusEntity();

@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.api.model.RdsUpgradeResponseType.TRIGGERED;
+
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -56,8 +58,12 @@ public class CloudbreakStackService {
         RdsUpgradeV4Response upgradeResponse =
                 ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> stackV4Endpoint.upgradeRdsByClusterNameInternal(WORKSPACE_ID, sdxCluster.getClusterName(), targetMajorVersion, initiatorUserCrn));
-        cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, upgradeResponse.getFlowIdentifier());
         LOGGER.debug("Launching database server upgrade in core returned: {}", upgradeResponse);
+        if (TRIGGERED != upgradeResponse.getResponseType()) {
+            LOGGER.warn("Could not launch database server upgrade in core, reason: {}", upgradeResponse.getReason());
+            throw new CloudbreakApiException(upgradeResponse.getReason());
+        }
+        cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, upgradeResponse.getFlowIdentifier());
         return upgradeResponse;
     }
 
