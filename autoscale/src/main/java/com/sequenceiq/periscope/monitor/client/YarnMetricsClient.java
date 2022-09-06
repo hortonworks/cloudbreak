@@ -55,7 +55,7 @@ public class YarnMetricsClient {
 
     @Retryable(value = Exception.class, maxAttempts = 2, backoff = @Backoff(delay = 5000))
     public YarnScalingServiceV1Response getYarnMetricsForCluster(Cluster cluster, StackV4Response stackV4Response,
-            String hostGroup, String pollingUserCrn, Optional<Integer> mandatoryDownScaleCount) throws Exception {
+            String hostGroup, String pollingUserCrn, Optional<Integer> maxDecommissionNodeCount) throws Exception {
         TlsConfiguration tlsConfig = tlsSecurityService.getTls(cluster.getId());
         String clusterProxyUrl = clusterProxyConfigurationService.getClusterProxyUrl()
                 .orElseThrow(() -> new RuntimeException(String.format("ClusterProxy Not Configured for Cluster %s, " +
@@ -76,7 +76,7 @@ public class YarnMetricsClient {
         UriBuilder yarnMetricsURI = UriBuilder.fromPath(yarnApiUrl)
                 .queryParam(PARAM_UPSCALE_FACTOR_NODE_RESOURCE_TYPE, DEFAULT_UPSCALE_RESOURCE_TYPE);
 
-        mandatoryDownScaleCount.ifPresent(
+        maxDecommissionNodeCount.ifPresent(
                 scaleDownCount -> yarnMetricsURI.queryParam(PARAM_DOWNSCALE_FACTOR_IN_NODE_COUNT, stackV4Response.getNodeCount()));
 
         YarnScalingServiceV1Response yarnResponse = requestLogging.logResponseTime(

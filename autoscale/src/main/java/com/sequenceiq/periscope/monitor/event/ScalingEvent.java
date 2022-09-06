@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.context.ApplicationEvent;
 
 import com.sequenceiq.periscope.domain.BaseAlert;
+import com.sequenceiq.periscope.model.ScalingAdjustmentType;
 
 public class ScalingEvent extends ApplicationEvent {
 
@@ -17,6 +18,10 @@ public class ScalingEvent extends ApplicationEvent {
     private transient Integer existingClusterNodeCount;
 
     private transient Integer desiredAbsoluteHostGroupNodeCount;
+
+    private transient Integer existingServiceHealthyHostGroupNodeCount;
+
+    private transient ScalingAdjustmentType scalingAdjustmentType;
 
     public ScalingEvent(BaseAlert alert) {
         super(alert);
@@ -56,5 +61,21 @@ public class ScalingEvent extends ApplicationEvent {
 
     public void setExistingClusterNodeCount(Integer existingClusterNodeCount) {
         this.existingClusterNodeCount = existingClusterNodeCount;
+    }
+
+    public Integer getExistingServiceHealthyHostGroupNodeCount() {
+        return existingServiceHealthyHostGroupNodeCount;
+    }
+
+    public void setExistingServiceHealthyHostGroupNodeCount(Integer existingServiceHealthyHostGroupNodeCount) {
+        this.existingServiceHealthyHostGroupNodeCount = existingServiceHealthyHostGroupNodeCount;
+    }
+
+    public ScalingAdjustmentType getScalingAdjustmentType() {
+        return scalingAdjustmentType;
+    }
+
+    public void setScalingAdjustmentType(ScalingAdjustmentType scalingAdjustmentType) {
+        this.scalingAdjustmentType = scalingAdjustmentType;
     }
 }

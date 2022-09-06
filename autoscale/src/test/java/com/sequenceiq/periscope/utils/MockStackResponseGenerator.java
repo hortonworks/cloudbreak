@@ -57,6 +57,7 @@ public class MockStackResponseGenerator {
         StackV4Response mockReponse = new StackV4Response();
         mockReponse.setCrn(clusterCrn);
         mockReponse.setInstanceGroups(instanceGroupV4Responses);
+        mockReponse.setNodeCount(instanceGroupV4Responses.stream().flatMap(ig -> ig.getMetadata().stream()).collect(Collectors.toSet()).size());
         mockReponse.setCloudPlatform(CloudPlatform.AWS);
         return mockReponse;
     }
@@ -101,7 +102,7 @@ public class MockStackResponseGenerator {
         StackV4Response mockResponse = new StackV4Response();
         mockResponse.setCrn(clusterCrn);
         mockResponse.setInstanceGroups(instanceGroupV4Responses);
-        mockResponse.setNodeCount(instanceGroupV4Responses.stream().flatMap(ig -> ig.getMetadata().stream()).collect(Collectors.counting()).intValue());
+        mockResponse.setNodeCount(instanceGroupV4Responses.stream().flatMap(ig -> ig.getMetadata().stream()).collect(Collectors.toSet()).size());
         mockResponse.setCloudPlatform(CloudPlatform.AWS);
         return mockResponse;
     }

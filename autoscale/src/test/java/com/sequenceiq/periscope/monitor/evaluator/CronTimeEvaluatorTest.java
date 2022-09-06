@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -183,8 +184,8 @@ public class CronTimeEvaluatorTest {
             when(stackResponseUtils.getCloudInstanceIdsForHostGroup(any(), any())).thenCallRealMethod();
             when(yarnMetricsClient.getYarnMetricsForCluster(any(Cluster.class), any(StackV4Response.class), anyString(), any(), any(Optional.class)))
                     .thenReturn(yarnScalingServiceV1Response);
-            when(yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(anyString(), any(YarnScalingServiceV1Response.class),
-                    any(Map.class), anyInt(), any(Optional.class), anyInt())).thenCallRealMethod();
+            when(yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(any(YarnScalingServiceV1Response.class),
+                    anyMap())).thenCallRealMethod();
         }
 
         underTest.publishIfNeeded(List.of(alert));
@@ -195,8 +196,8 @@ public class CronTimeEvaluatorTest {
         verify(stackResponseUtils, verificationMode).getCloudInstanceIdsForHostGroup(any(), any());
         verify(yarnMetricsClient, verificationMode).getYarnMetricsForCluster(any(Cluster.class), any(StackV4Response.class), anyString(), anyString(),
                 any(Optional.class));
-        verify(yarnResponseUtils, verificationMode).getYarnRecommendedDecommissionHostsForHostGroup(anyString(), any(YarnScalingServiceV1Response.class),
-                any(Map.class), anyInt(), any(Optional.class), anyInt());
+        verify(yarnResponseUtils, verificationMode).getYarnRecommendedDecommissionHostsForHostGroup(any(YarnScalingServiceV1Response.class),
+                anyMap());
 
         return captor.getValue();
     }

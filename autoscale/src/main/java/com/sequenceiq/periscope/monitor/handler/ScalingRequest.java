@@ -2,6 +2,8 @@ package com.sequenceiq.periscope.monitor.handler;
 
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ACTIVITY_NODE_LIMIT_EXCEEDED;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ACTIVITY_SUCCESS;
+import static com.sequenceiq.periscope.model.ScalingAdjustmentType.REGULAR;
+import static com.sequenceiq.periscope.model.ScalingAdjustmentType.STOPSTART;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +34,7 @@ import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
+import com.sequenceiq.periscope.model.ScalingAdjustmentType;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AuditService;
 import com.sequenceiq.periscope.service.HistoryService;
@@ -53,6 +56,10 @@ public class ScalingRequest implements Runnable {
     private final int desiredHostGroupNodeCount;
 
     private final int existingHostGroupNodeCount;
+
+    private final int existingServiceHealthyHostGroupCount;
+
+    private final ScalingAdjustmentType scalingAdjustmentType;
 
     private final Cluster cluster;
 
@@ -91,20 +98,26 @@ public class ScalingRequest implements Runnable {
     private LimitsConfigurationService limitsConfigurationService;
 
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int existingClusterNodeCount, int existingHostGroupNodeCount,
-            int desiredHostGroupNodeCount, List<String> decommissionNodeIds) {
+            int desiredHostGroupNodeCount, List<String> decommissionNodeIds, int serviceHealthyHostGroupNodeCount,
+            ScalingAdjustmentType scalingAdjustmentType) {
         this.cluster = cluster;
         this.policy = policy;
         this.existingClusterNodeCount = existingClusterNodeCount;
         this.existingHostGroupNodeCount = existingHostGroupNodeCount;
         this.desiredHostGroupNodeCount = desiredHostGroupNodeCount;
         this.decommissionNodeIds = decommissionNodeIds;
+        this.existingServiceHealthyHostGroupCount = serviceHealthyHostGroupNodeCount;
+        this.scalingAdjustmentType = scalingAdjustmentType;
     }
 
     @Override
     public void run() {
         LoggingUtils.buildMdcContext(cluster);
         try {
-            int scalingAdjustment = desiredHostGroupNodeCount - existingHostGroupNodeCount;
+            int scalingAdjustment =
+                    desiredHostGroupNodeCount - (STOPSTART.equals(scalingAdjustmentType)
+                    ? existingServiceHealthyHostGroupCount : existingHostGroupNodeCount);
+
             if (!decommissionNodeIds.isEmpty()) {
                 scaleDownByNodeIds(decommissionNodeIds);
             } else if (scalingAdjustment > 0) {
@@ -137,17 +150,10 @@ public class ScalingRequest implements Runnable {
 
             LOGGER.info("Sending request to add '{}' instance(s) into host group '{}', triggered adjustmentType '{}', cluster '{}', user '{}'",
                     scalingAdjustment, hostGroup, policy.getAdjustmentType(), stackCrn, userCrn);
-            UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
-            updateStackJson.setWithClusterEvent(true);
-            InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
-            instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-            instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
-            updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-
-            if (Boolean.TRUE.equals(cluster.isStopStartScalingEnabled())) {
-                cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStackStartInstancesByCrn(stackCrn, updateStackJson);
-            } else {
-                cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStack(stackCrn, cluster.getClusterPertain().getUserId(), updateStackJson);
+            if (REGULAR.equals(scalingAdjustmentType)) {
+                cloudbreakCommunicator.putStackForCluster(cluster, populateUpdateStackJson(scalingAdjustment, hostGroup));
+            } else if (STOPSTART.equals(scalingAdjustmentType)) {
+                cloudbreakCommunicator.putStackStartInstancesForCluster(cluster, populateUpdateStackJson(scalingAdjustment, hostGroup));
             }
 
             scalingStatus = ScalingStatus.SUCCESS;
@@ -207,7 +213,11 @@ public class ScalingRequest implements Runnable {
             LOGGER.info("Sending request to remove  nodeIdCount '{}', nodeId(s) '{}' from host group '{}', cluster '{}', user '{}'",
                     decommissionNodeIds.size(), decommissionNodeIds, hostGroup, cluster.getStackCrn(),
                     cluster.getClusterPertain().getUserCrn());
-            cloudbreakCommunicator.decommissionInstancesForCluster(cluster, decommissionNodeIds);
+            if (REGULAR.equals(scalingAdjustmentType)) {
+                cloudbreakCommunicator.decommissionInstancesForCluster(cluster, decommissionNodeIds);
+            } else if (STOPSTART.equals(scalingAdjustmentType)) {
+                cloudbreakCommunicator.stopInstancesForCluster(cluster, decommissionNodeIds);
+            }
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = getMessageForCBSuccess();
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_SUCCESSFUL);
@@ -264,6 +274,16 @@ public class ScalingRequest implements Runnable {
                 List.of(policy.getAlert().getAlertType(), policy.getHostGroup(), existingHostGroupNodeCount, desiredHostGroupNodeCount));
     }
 
+    private UpdateStackV4Request populateUpdateStackJson(int scalingAdjustment, String hostGroup) {
+        UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
+        updateStackJson.setWithClusterEvent(true);
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
+        instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
+        instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
+        updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
+        return updateStackJson;
+    }
+
     @VisibleForTesting
     void setMetricService(PeriscopeMetricService metricService) {
         this.metricService = metricService;
@@ -307,5 +327,10 @@ public class ScalingRequest implements Runnable {
     @VisibleForTesting
     void setUsageReportingService(UsageReportingService usageReportingService) {
         this.usageReportingService = usageReportingService;
+    }
+
+    @VisibleForTesting
+    void setCloudbreakCommunicator(CloudbreakCommunicator cloudbreakCommunicator) {
+        this.cloudbreakCommunicator = cloudbreakCommunicator;
     }
 }
