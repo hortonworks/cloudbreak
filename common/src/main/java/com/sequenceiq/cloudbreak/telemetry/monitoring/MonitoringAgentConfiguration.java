@@ -14,6 +14,10 @@ public class MonitoringAgentConfiguration {
 
     private String walTruncateFrequency;
 
+    private String minBackoff;
+
+    private String maxBackoff;
+
     public Integer getPort() {
         return port;
     }
@@ -60,5 +64,21 @@ public class MonitoringAgentConfiguration {
 
     public void setWalTruncateFrequency(String walTruncateFrequency) {
         this.walTruncateFrequency = walTruncateFrequency;
+    }
+
+    public String getMinBackoff() {
+        return minBackoff;
+    }
+
+    public void setMinBackoff(String minBackoff) {
+        this.minBackoff = minBackoff;
+    }
+
+    public String getMaxBackoff() {
+        return maxBackoff;
+    }
+
+    public void setMaxBackoff(String maxBackoff) {
+        this.maxBackoff = maxBackoff;
     }
 }

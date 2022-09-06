@@ -47,6 +47,8 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
         builder.withRetentionMinTime(monitoringConfiguration.getAgent().getRetentionMinTime());
         builder.withRetentionMaxTime(monitoringConfiguration.getAgent().getRetentionMaxTime());
         builder.withWalTruncateFrequency(monitoringConfiguration.getAgent().getWalTruncateFrequency());
+        builder.withMinBackoff(monitoringConfiguration.getAgent().getMinBackoff());
+        builder.withMaxBackoff(monitoringConfiguration.getAgent().getMaxBackoff());
         if (monitoringContext.getCredential() != null) {
             builder.withAccessKeyId(monitoringContext.getCredential().getAccessKey())
                     .withPrivateKey(monitoringContext.getCredential().getPrivateKey().toCharArray())

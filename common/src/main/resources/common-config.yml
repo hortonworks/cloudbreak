@@ -50,6 +50,8 @@ telemetry:
       retention-min-time: "5m"
       retention-max-time: "4h"
       wal-truncate-frequency: "2h"
+      min-backoff: "1s"
+      max-backoff: "20m"
     request-signer:
       enabled: true
       port: 61095

@@ -41,6 +41,9 @@ remote_write:
       credentials_file: /opt/cdp-prometheus/remote_token_file
     {%- endif %}
   {%- endif %}
+    queue_config:
+      min_backoff: {{ monitoring.minBackoff }}
+      max_backoff: {{ monitoring.maxBackoff }}
     tls_config:
       insecure_skip_verify: true
 {%- endif %}
