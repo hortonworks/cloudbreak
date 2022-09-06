@@ -69,6 +69,7 @@ import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersD
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
+import com.sequenceiq.environment.proxy.v1.converter.ProxyRequestToProxyConfigConverter;
 import com.sequenceiq.environment.telemetry.service.AccountTelemetryService;
 
 @Component
@@ -90,6 +91,8 @@ public class EnvironmentApiConverter {
 
     private final NetworkRequestToDtoConverter networkRequestToDtoConverter;
 
+    private final ProxyRequestToProxyConfigConverter proxyRequestToProxyConfigConverter;
+
     private final RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     public EnvironmentApiConverter(TelemetryApiConverter telemetryApiConverter,
@@ -99,6 +102,7 @@ public class EnvironmentApiConverter {
             CredentialService credentialService,
             FreeIpaConverter freeIpaConverter,
             NetworkRequestToDtoConverter networkRequestToDtoConverter,
+            ProxyRequestToProxyConfigConverter proxyRequestToProxyConfigConverter,
             RegionAwareCrnGenerator regionAwareCrnGenerator) {
         this.backupConverter = backupConverter;
         this.telemetryApiConverter = telemetryApiConverter;
@@ -107,6 +111,7 @@ public class EnvironmentApiConverter {
         this.credentialService = credentialService;
         this.freeIpaConverter = freeIpaConverter;
         this.networkRequestToDtoConverter = networkRequestToDtoConverter;
+        this.proxyRequestToProxyConfigConverter = proxyRequestToProxyConfigConverter;
         this.regionAwareCrnGenerator = regionAwareCrnGenerator;
     }
 
@@ -381,6 +386,7 @@ public class EnvironmentApiConverter {
         NullUtil.doIfNotNull(request.getBackup(), backupRequest -> builder.withBackup(backupConverter.convert(request.getBackup())));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
         NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(awsParamsToParametersDto(awsParams, null)));
+        NullUtil.doIfNotNull(request.getProxy(), proxyRequest -> builder.withProxyConfig(proxyRequestToProxyConfigConverter.convert(proxyRequest)));
         return builder.build();
     }
 

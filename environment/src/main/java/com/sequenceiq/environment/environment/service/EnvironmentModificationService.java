@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,7 @@ import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameters.dao.repository.AzureParametersRepository;
 import com.sequenceiq.environment.parameters.service.ParametersService;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneNetwork;
@@ -176,6 +178,7 @@ public class EnvironmentModificationService {
         editTunnelIfChanged(editDto, env);
         editEnvironmentParameters(editDto, env);
         editFreeIPA(editDto, env);
+        editProxyIfChanged(editDto, env);
         Environment saved = environmentService.save(env);
         return environmentDtoConverter.environmentToDto(saved);
     }
@@ -384,6 +387,13 @@ public class EnvironmentModificationService {
         AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = addDnsZoneForSubnetIdsRequest(editDto, environment, networkDto);
         if (shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
             dnsV1Endpoint.addDnsZoneForSubnetIds(addDnsZoneForSubnetIdsRequest);
+        }
+    }
+
+    private void editProxyIfChanged(EnvironmentEditDto editDto, Environment env) {
+        ProxyConfig newProxyConfig = editDto.getProxyConfig();
+        if (newProxyConfig != null && !newProxyConfig.equals(env.getProxyConfig())) {
+            throw new NotImplementedException("Editing the proxy configuration is not supported yet");
         }
     }
 
