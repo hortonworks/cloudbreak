@@ -15,6 +15,7 @@ import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingS
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -50,6 +51,8 @@ public class EnvironmentEditRequest implements Serializable {
 
     @ApiModelProperty(EnvironmentModelDescription.ADMIN_GROUP_NAME)
     private String adminGroupName;
+
+    private ProxyRequest proxy;
 
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
@@ -135,6 +138,14 @@ public class EnvironmentEditRequest implements Serializable {
         this.adminGroupName = adminGroupName;
     }
 
+    public ProxyRequest getProxy() {
+        return proxy;
+    }
+
+    public void setProxy(ProxyRequest proxy) {
+        this.proxy = proxy;
+    }
+
     public AwsEnvironmentParameters getAws() {
         return aws;
     }
@@ -171,6 +182,7 @@ public class EnvironmentEditRequest implements Serializable {
                 ", idBrokerMappingSource=" + idBrokerMappingSource +
                 ", cloudStorageValidation=" + cloudStorageValidation +
                 ", adminGroupName='" + adminGroupName + '\'' +
+                ", proxy='" + proxy + '\'' +
                 ", aws=" + aws +
                 ", azure=" + azure +
                 ", gcp=" + gcp +

@@ -6,6 +6,7 @@ import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageVali
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
 public class EnvironmentEditDto {
 
@@ -33,6 +34,8 @@ public class EnvironmentEditDto {
 
     private final ParametersDto parameters;
 
+    private final ProxyConfig proxyConfig;
+
     public EnvironmentEditDto(
             String description,
             String accountId,
@@ -45,7 +48,8 @@ public class EnvironmentEditDto {
             IdBrokerMappingSource idBrokerMappingSource,
             CloudStorageValidation cloudStorageValidation,
             String adminGroupName,
-            ParametersDto parameters) {
+            ParametersDto parameters,
+            ProxyConfig proxyConfig) {
         this.description = description;
         this.accountId = accountId;
         this.network = network;
@@ -58,6 +62,7 @@ public class EnvironmentEditDto {
         this.cloudStorageValidation = cloudStorageValidation;
         this.adminGroupName = adminGroupName;
         this.parameters = parameters;
+        this.proxyConfig = proxyConfig;
     }
 
     public String getDescription() {
@@ -108,6 +113,10 @@ public class EnvironmentEditDto {
         return parameters;
     }
 
+    public ProxyConfig getProxyConfig() {
+        return proxyConfig;
+    }
+
     public static EnvironmentEditDtoBuilder builder() {
         return new EnvironmentEditDtoBuilder();
     }
@@ -127,6 +136,7 @@ public class EnvironmentEditDto {
                 ", cloudStorageValidation=" + cloudStorageValidation +
                 ", adminGroupName='" + adminGroupName + '\'' +
                 ", parameters=" + parameters +
+                ", proxyConfig=" + proxyConfig +
                 '}';
     }
 
@@ -154,6 +164,8 @@ public class EnvironmentEditDto {
         private String adminGroupName;
 
         private ParametersDto parameters;
+
+        private ProxyConfig proxyConfig;
 
         private EnvironmentEditDtoBuilder() {
         }
@@ -218,9 +230,14 @@ public class EnvironmentEditDto {
             return this;
         }
 
+        public EnvironmentEditDtoBuilder withProxyConfig(ProxyConfig proxyConfig) {
+            this.proxyConfig = proxyConfig;
+            return this;
+        }
+
         public EnvironmentEditDto build() {
             return new EnvironmentEditDto(description, accountId, network, authentication, telemetry, backup, securityAccess, tunnel, idBrokerMappingSource,
-                    cloudStorageValidation, adminGroupName, parameters);
+                    cloudStorageValidation, adminGroupName, parameters, proxyConfig);
         }
     }
 }

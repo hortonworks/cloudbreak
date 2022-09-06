@@ -48,6 +48,7 @@ import com.sequenceiq.environment.network.dao.repository.BaseNetworkRepository;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
 @ExtendWith(MockitoExtension.class)
 public class NetworkServiceTest {
@@ -129,8 +130,8 @@ public class NetworkServiceTest {
                 IdBrokerMappingSource.MOCK,
                 CloudStorageValidation.ENABLED,
                 "adminGroupName",
-                parametersDto
-        );
+                parametersDto,
+                new ProxyConfig());
 
         when(environmentNetworkConverterMap.get(any(CloudPlatform.class)))
                 .thenReturn(environmentNetworkConverter);
@@ -183,8 +184,8 @@ public class NetworkServiceTest {
                 IdBrokerMappingSource.MOCK,
                 CloudStorageValidation.ENABLED,
                 "adminGroupName",
-                parametersDto
-        );
+                parametersDto,
+                new ProxyConfig());
 
         when(environmentNetworkConverterMap.get(any(CloudPlatform.class)))
                 .thenReturn(environmentNetworkConverter);

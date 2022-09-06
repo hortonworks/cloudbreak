@@ -56,6 +56,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.Resourc
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
+import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
@@ -72,6 +73,8 @@ import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
+import com.sequenceiq.environment.proxy.v1.converter.ProxyRequestToProxyConfigConverter;
 import com.sequenceiq.environment.telemetry.domain.AccountTelemetry;
 import com.sequenceiq.environment.telemetry.service.AccountTelemetryService;
 
@@ -116,6 +119,9 @@ public class EnvironmentApiConverterTest {
 
     @Mock
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
+    @Mock
+    private ProxyRequestToProxyConfigConverter proxyRequestToProxyConfigConverter;
 
     @BeforeEach
     void init() {
@@ -177,11 +183,13 @@ public class EnvironmentApiConverterTest {
         AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
+        ProxyConfig proxyConfig = mock(ProxyConfig.class);
 
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
         when(telemetryApiConverter.convert(eq(request.getTelemetry()), any(), anyString())).thenReturn(environmentTelemetry);
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
+        when(proxyRequestToProxyConfigConverter.convert(request.getProxy())).thenReturn(proxyConfig);
 
         EnvironmentEditDto actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.initEditDto(request));
 
@@ -191,6 +199,7 @@ public class EnvironmentApiConverterTest {
         assertAuthentication(request.getAuthentication(), actual.getAuthentication());
         assertEquals(request.getAdminGroupName(), actual.getAdminGroupName());
         assertSecurityAccess(request.getSecurityAccess(), actual.getSecurityAccess());
+        assertEquals(proxyConfig, actual.getProxyConfig());
 
         verify(accountTelemetry).getFeatures();
         verify(accountTelemetryService).getOrDefault(any());
@@ -504,6 +513,7 @@ public class EnvironmentApiConverterTest {
         request.setIdBrokerMappingSource(IdBrokerMappingSource.IDBMMS);
         request.setCloudStorageValidation(CloudStorageValidation.DISABLED);
         request.setAdminGroupName("cb-admin");
+        request.setProxy(new ProxyRequest());
         request.setAws(createAwsRequest());
         return request;
     }
