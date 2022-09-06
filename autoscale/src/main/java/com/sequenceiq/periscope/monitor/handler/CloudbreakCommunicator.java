@@ -1,6 +1,8 @@
 package com.sequenceiq.periscope.monitor.handler;
 
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy.STOPSTART;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +15,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.LimitsConfigurationResponse;
@@ -62,18 +65,40 @@ public class CloudbreakCommunicator {
     }
 
     public void decommissionInstancesForCluster(Cluster cluster, List<String> decommissionNodeIds) {
-        ScalingStrategy scalingStrategy = ScalingStrategy.STOPSTART;
+        ScalingStrategy scalingStrategy = STOPSTART;
         requestLogging.logResponseTime(() -> {
-            if (Boolean.TRUE.equals(cluster.isStopStartScalingEnabled())) {
-                cloudbreakInternalCrnClient.withInternalCrn()
-                        .autoscaleEndpoint().stopInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false, scalingStrategy);
-            } else {
-                cloudbreakInternalCrnClient.withInternalCrn()
-                        .autoscaleEndpoint().decommissionInternalInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false);
-            }
+            cloudbreakInternalCrnClient.withInternalCrn()
+                    .autoscaleEndpoint().decommissionInternalInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false);
             return Optional.empty();
-        }, String.format("DecommissionInstancesForCluster query for cluster crn %s, Scaling strategy %s, NodeIds %s, Scaling Strategy %s",
-                scalingStrategy, cluster.getStackCrn(), scalingStrategy, decommissionNodeIds));
+        }, String.format("DecommissionInstancesForCluster query for cluster crn %s, Scaling strategy %s, NodeIds %s",
+                cluster.getStackCrn(), scalingStrategy, decommissionNodeIds));
+    }
+
+    public void stopInstancesForCluster(Cluster cluster, List<String> decommissionNodeIds) {
+        ScalingStrategy scalingStrategy = STOPSTART;
+        requestLogging.logResponseTime(() -> {
+            cloudbreakInternalCrnClient.withInternalCrn()
+                    .autoscaleEndpoint().stopInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false, scalingStrategy);
+            return Optional.empty();
+        }, String.format("StopInstancesForCluster query for cluster crn: %s, Scaling strategy: %s, NodeIds: %s", cluster.getStackCrn(),
+                scalingStrategy, decommissionNodeIds));
+    }
+
+    public void putStackForCluster(Cluster cluster, UpdateStackV4Request updateStackJson) {
+        requestLogging.logResponseTime(() -> {
+            cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().putStack(cluster.getStackCrn(), cluster.getClusterPertain().getUserId(),
+                    updateStackJson);
+            return Optional.empty();
+        }, String.format("PutStack query for cluster crn: %s, Scaling adjustment: %s, Host group: %s", cluster.getStackCrn(),
+                updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment(), updateStackJson.getInstanceGroupAdjustment().getInstanceGroup()));
+    }
+
+    public void putStackStartInstancesForCluster(Cluster cluster, UpdateStackV4Request updateStackJson) {
+        requestLogging.logResponseTime(() -> {
+            cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().putStackStartInstancesByCrn(cluster.getStackCrn(), updateStackJson);
+            return Optional.empty();
+        }, String.format("PutStackStartInstances query for cluster crn: %s, Scaling adjustment: %s, Host group: %s", cluster.getStackCrn(),
+                updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment(), updateStackJson.getInstanceGroupAdjustment().getInstanceGroup()));
     }
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 10000))

@@ -38,6 +38,7 @@ import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlert;
+import com.sequenceiq.periscope.model.ScalingAdjustmentType;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
@@ -89,6 +90,7 @@ public class ScalingHandlerTest {
         int hostGroupNodeCount = 10;
         List nodeIds = List.of("nodeId1", "nodeId2", "nodeId3");
         int expectedNodeCount = hostGroupNodeCount - nodeIds.size();
+        ScalingAdjustmentType scalingType = ScalingAdjustmentType.REGULAR;
 
         when(scalingEventMock.getAlert()).thenReturn(loadAlertMock);
         when(loadAlertMock.getCluster()).thenReturn(cluster);
@@ -99,8 +101,10 @@ public class ScalingHandlerTest {
         when(scalingEventMock.getExistingHostGroupNodeCount()).thenReturn(hostGroupNodeCount);
         when(scalingEventMock.getDesiredAbsoluteHostGroupNodeCount()).thenReturn(expectedNodeCount);
         when(scalingEventMock.getDecommissionNodeIds()).thenReturn(nodeIds);
+        when(scalingEventMock.getExistingServiceHealthyHostGroupNodeCount()).thenReturn(hostGroupNodeCount);
+        when(scalingEventMock.getScalingAdjustmentType()).thenReturn(scalingType);
         when(applicationContext.getBean("ScalingRequest", cluster, scalingPolicyMock,
-                clusterNodeSize, hostGroupNodeCount, expectedNodeCount, nodeIds)).thenReturn(runnableMock);
+                clusterNodeSize, hostGroupNodeCount, expectedNodeCount, nodeIds, hostGroupNodeCount, scalingType)).thenReturn(runnableMock);
 
         underTest.onApplicationEvent(scalingEventMock);
 
@@ -164,6 +168,8 @@ public class ScalingHandlerTest {
         when(scalingEventMock.getExistingClusterNodeCount()).thenReturn(currentClusterNodeCount);
         when(scalingEventMock.getExistingHostGroupNodeCount()).thenReturn(currentHostGroupCount);
         when(scalingEventMock.getDesiredAbsoluteHostGroupNodeCount()).thenReturn(currentHostGroupCount + scalingAdjument);
+        when(scalingEventMock.getExistingServiceHealthyHostGroupNodeCount()).thenReturn(currentHostGroupCount);
+        when(scalingEventMock.getScalingAdjustmentType()).thenReturn(ScalingAdjustmentType.REGULAR);
 
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(baseAlertMock.getCluster()).thenReturn(cluster);
@@ -171,7 +177,8 @@ public class ScalingHandlerTest {
 
         when(scalingEventMock.getDecommissionNodeIds()).thenCallRealMethod();
         when(applicationContext.getBean("ScalingRequest", cluster, scalingPolicyMock,
-                currentClusterNodeCount, currentHostGroupCount, expectedScaleUpCount, List.of())).thenReturn(runnableMock);
+                currentClusterNodeCount, currentHostGroupCount, expectedScaleUpCount, List.of(), currentHostGroupCount, ScalingAdjustmentType.REGULAR))
+                .thenReturn(runnableMock);
 
         underTest.onApplicationEvent(scalingEventMock);
 

@@ -37,24 +37,24 @@ public class StackResponseUtils {
                         InstanceMetaDataV4Response::getInstanceId));
     }
 
-    public Integer getCloudInstanceIdsWithServicesHealthyForHostGroup(StackV4Response stackResponse, String hostGroup) {
+    public List<String> getCloudInstanceIdsWithServicesHealthyForHostGroup(StackV4Response stackResponse, String hostGroup) {
         return stackResponse.getInstanceGroups().stream()
                 .filter(instanceGroupV4Response -> instanceGroupV4Response.getName().equalsIgnoreCase(hostGroup))
                 .flatMap(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream())
                 .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                 .filter(instanceMetaData -> InstanceStatus.SERVICES_HEALTHY.equals(instanceMetaData.getInstanceStatus()))
-                .collect(Collectors.counting())
-                .intValue();
+                .map(InstanceMetaDataV4Response::getInstanceId)
+                .collect(Collectors.toList());
     }
 
-    public Integer getStoppedInstanceCountInHostGroup(StackV4Response stackV4Response, String policyHostGroup) {
+    public List<String> getStoppedCloudInstanceIdsInHostGroup(StackV4Response stackV4Response, String policyHostGroup) {
         return stackV4Response.getInstanceGroups().stream()
                 .filter(instanceGroupV4Response -> instanceGroupV4Response.getName().equalsIgnoreCase(policyHostGroup))
                 .flatMap(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream())
                 .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                 .filter(instanceMetaData -> InstanceStatus.STOPPED.equals(instanceMetaData.getInstanceStatus()))
-                .collect(Collectors.counting())
-                .intValue();
+                .map(InstanceMetaDataV4Response::getInstanceId)
+                .collect(Collectors.toList());
     }
 
     public Integer getNodeCountForHostGroup(StackV4Response stackResponse, String hostGroup) {

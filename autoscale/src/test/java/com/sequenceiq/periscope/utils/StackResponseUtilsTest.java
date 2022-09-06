@@ -41,7 +41,7 @@ public class StackResponseUtilsTest {
         String hostGroup = "compute";
 
         int servicesHealthyHostGroupSize = underTest.
-                getCloudInstanceIdsWithServicesHealthyForHostGroup(getMockStackV4Response(hostGroup, 2), hostGroup);
+                getCloudInstanceIdsWithServicesHealthyForHostGroup(getMockStackV4Response(hostGroup, 2), hostGroup).size();
 
         assertEquals("Retrieved healthy host group size should match", 1, servicesHealthyHostGroupSize);
     }
@@ -52,8 +52,8 @@ public class StackResponseUtilsTest {
         Integer runningHostGroupCount = 1;
         Integer stoppedHostGroupCount = 3;
 
-        Integer stoppedInstanceCount = underTest.getStoppedInstanceCountInHostGroup(getMockStackV4ResponseForStopStart(hostGroup,
-                runningHostGroupCount, stoppedHostGroupCount), hostGroup);
+        Integer stoppedInstanceCount = underTest.getStoppedCloudInstanceIdsInHostGroup(getMockStackV4ResponseForStopStart(hostGroup,
+                runningHostGroupCount, stoppedHostGroupCount), hostGroup).size();
         assertEquals("Stopped instance count should match", Integer.valueOf(3), stoppedInstanceCount);
     }
 

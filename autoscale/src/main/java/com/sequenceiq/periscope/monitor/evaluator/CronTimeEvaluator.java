@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.monitor.evaluator;
 
+import static com.sequenceiq.periscope.model.ScalingAdjustmentType.REGULAR;
 import static com.sequenceiq.periscope.monitor.evaluator.ScalingConstants.DEFAULT_MAX_SCALE_DOWN_STEP_SIZE;
 
 import java.time.Instant;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -160,6 +162,7 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
         event.setExistingHostGroupNodeCount(hostGroupNodeCount);
         event.setDesiredAbsoluteHostGroupNodeCount(desiredAbsoluteNodeCount);
         event.setExistingClusterNodeCount(stackV4Response.getNodeCount());
+        event.setScalingAdjustmentType(REGULAR);
         if (targetIncrementNodeCount < 0) {
             populateDecommissionCandidates(event, stackV4Response, alert.getCluster(), alert.getScalingPolicy(), -targetIncrementNodeCount);
         }
@@ -176,8 +179,9 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
                     stackV4Response, policy.getHostGroup(), pollingUserCrn, Optional.of(mandatoryDownScaleCount));
             Map<String, String> hostFqdnsToInstanceId = stackResponseUtils.getCloudInstanceIdsForHostGroup(stackV4Response, policy.getHostGroup());
 
-            List<String> decommissionNodes = yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(cluster.getStackCrn(), yarnResponse,
-                    hostFqdnsToInstanceId, mandatoryDownScaleCount, Optional.of(mandatoryDownScaleCount), DEFAULT_MAX_SCALE_DOWN_STEP_SIZE);
+            int allowedDownscale = Math.min(mandatoryDownScaleCount, DEFAULT_MAX_SCALE_DOWN_STEP_SIZE);
+            List<String> decommissionNodes = yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(yarnResponse,
+                    hostFqdnsToInstanceId).stream().limit(allowedDownscale).collect(Collectors.toList());
             event.setDecommissionNodeIds(decommissionNodes);
         } catch (Exception ex) {
             LOGGER.error("Error retrieving decommission candidates for  policy '{}', adjustment type '{}', cluster '{}'",
