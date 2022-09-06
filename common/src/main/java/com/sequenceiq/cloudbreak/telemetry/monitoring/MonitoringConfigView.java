@@ -20,6 +20,10 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private static final String RETENTION_MAX_TIME = "4h";
 
+    private static final String MIN_BACKOFF = "1s";
+
+    private static final String MAX_BACKOFF = "20m";
+
     private static final String WAL_TRUNCATE_FREQUENCY = "2h";
 
     private static final Integer DEFAULT_CM_SMON_PORT = 61010;
@@ -63,6 +67,10 @@ public class MonitoringConfigView implements TelemetryConfigView {
     private final String retentionMinTime;
 
     private final String retentionMaxTime;
+
+    private final String minBackoff;
+
+    private final String maxBackoff;
 
     private final String walTruncateFrequency;
 
@@ -116,6 +124,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
         this.requestSigner = builder.requestSigner;
         this.retentionMinTime = builder.retentionMinTime;
         this.retentionMaxTime = builder.retentionMaxTime;
+        this.minBackoff = builder.minBackoff;
+        this.maxBackoff = builder.maxBackoff;
         this.walTruncateFrequency = builder.walTruncateFrequency;
         this.accessKeyId = builder.accessKeyId;
         this.privateKey = builder.privateKey;
@@ -265,6 +275,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("agentMaxDiskUsage", defaultIfNull(this.agentMaxDiskUsage, AGENT_MAX_DISK_USAGE_DEFAULT));
         map.put("retentionMinTime", defaultIfNull(this.retentionMinTime, RETENTION_MIN_TIME));
         map.put("retentionMaxTime", defaultIfNull(this.retentionMaxTime, RETENTION_MAX_TIME));
+        map.put("minBackoff", defaultIfNull(this.minBackoff, MIN_BACKOFF));
+        map.put("maxBackoff", defaultIfNull(this.maxBackoff, MAX_BACKOFF));
         map.put("walTruncateFrequency", defaultIfNull(this.walTruncateFrequency, WAL_TRUNCATE_FREQUENCY));
         map.put("username", defaultIfNull(this.username, EMPTY_CONFIG_DEFAULT));
         map.put("password", this.password != null ? new String(this.password) : EMPTY_CONFIG_DEFAULT);
@@ -334,6 +346,10 @@ public class MonitoringConfigView implements TelemetryConfigView {
         private String retentionMinTime;
 
         private String retentionMaxTime;
+
+        private String minBackoff;
+
+        private String maxBackoff;
 
         private String walTruncateFrequency;
 
@@ -488,6 +504,16 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         public Builder withWalTruncateFrequency(String walTruncateFrequency) {
             this.walTruncateFrequency = walTruncateFrequency;
+            return this;
+        }
+
+        public Builder withMinBackoff(String minBackoff) {
+            this.minBackoff = minBackoff;
+            return this;
+        }
+
+        public Builder withMaxBackoff(String maxBackoff) {
+            this.maxBackoff = maxBackoff;
             return this;
         }
 
