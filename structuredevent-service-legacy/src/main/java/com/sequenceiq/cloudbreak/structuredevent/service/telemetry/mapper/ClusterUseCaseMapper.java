@@ -62,6 +62,8 @@ public class ClusterUseCaseMapper {
                 UsageProto.CDPClusterStatus.Value.CCM_UPGRADE_STARTED);
         firstStepUseCaseMap.put(Pair.of("", "CoreVerticalScaleFlowConfig"),
                 UsageProto.CDPClusterStatus.Value.VERTICAL_SCALE_STARTED);
+        firstStepUseCaseMap.put(Pair.of("UpgradeRdsFlowEventChainFactory", "ValidateRdsUpgradeFlowConfig"),
+                UsageProto.CDPClusterStatus.Value.DATABASE_UPGRADE_STARTED);
     }
 
     // At the moment we need to introduce a complex logic to figure out the use case
@@ -175,6 +177,10 @@ public class ClusterUseCaseMapper {
                 case "PrepareClusterUpgradeFlowEventChainFactory":
                     useCase = getClusterStatus(nextFlowState, "CLUSTER_UPGRADE_PREPARATION_FINISHED_STATE",
                             UsageProto.CDPClusterStatus.Value.UPGRADE_PREPARE_FINISHED, UsageProto.CDPClusterStatus.Value.UPGRADE_PREPARE_FAILED);
+                    break;
+                case "UpgradeRdsFlowEventChainFactory":
+                    useCase = getClusterStatus(nextFlowState, "UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_FINISHED_EVENT",
+                            UsageProto.CDPClusterStatus.Value.DATABASE_UPGRADE_FINISHED, UsageProto.CDPClusterStatus.Value.DATABASE_UPGRADE_FAILED);
                     break;
                 default:
                     LOGGER.debug("Next flow state: {}", nextFlowState);
