@@ -1,0 +1,61 @@
+package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler;
+
+import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FAILED_EVENT;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+
+import java.time.LocalDateTime;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmService;
+import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmFailureEvent;
+
+import reactor.bus.Event;
+import reactor.bus.EventBus;
+
+@ExtendWith(MockitoExtension.class)
+class UpgradeCcmRevertHandlerTest {
+    private static final long STACK_ID = 234L;
+
+    @Mock
+    private UpgradeCcmService upgradeCcmService;
+
+    @Mock
+    private EventBus eventBus;
+
+    @InjectMocks
+    private UpgradeCcmRevertHandler underTest;
+
+    @Captor
+    private ArgumentCaptor<Event<UpgradeCcmFailureEvent>> eventCaptor;
+
+    private Event<UpgradeCcmFailureEvent> event;
+
+    @BeforeEach
+    void setUp() {
+        UpgradeCcmFailureEvent upgradeCcmEvent = new UpgradeCcmFailureEvent("selector", STACK_ID, Tunnel.CCM,
+                UpgradeCcmCheckPrerequisitesHandler.class, new ArrayIndexOutOfBoundsException(""), LocalDateTime.now(), "reason");
+        event = new Event<>(upgradeCcmEvent);
+    }
+
+    @Test
+    void testRevertAccept() throws CloudbreakOrchestratorException {
+        underTest.accept(event);
+        verify(upgradeCcmService).changeTunnel(STACK_ID, Tunnel.CCM);
+        verify(upgradeCcmService).pushSaltStates(STACK_ID);
+        verify(eventBus).notify(eq(UPGRADE_CCM_FAILED_EVENT.event()), eventCaptor.capture());
+        Event<UpgradeCcmFailureEvent> eventResult = eventCaptor.getValue();
+        assertThat(eventResult.getData().selector()).isEqualTo(UPGRADE_CCM_FAILED_EVENT.event());
+    }
+}

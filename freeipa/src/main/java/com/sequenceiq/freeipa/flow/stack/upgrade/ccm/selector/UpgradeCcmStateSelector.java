@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector;
 
 import com.sequenceiq.flow.event.EventSelectorUtil;
-import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmFailureEvent;
 
 public enum UpgradeCcmStateSelector implements UpgradeCcmFlowEvent {
 
@@ -17,9 +16,14 @@ public enum UpgradeCcmStateSelector implements UpgradeCcmFlowEvent {
     UPGRADE_CCM_HEALTH_CHECK_FINISHED_EVENT,
     UPGRADE_CCM_REMOVE_MINA_FINISHED_EVENT,
     UPGRADE_CCM_DEREGISTER_MINA_FINISHED_EVENT,
-
+    UPGRADE_CCM_FINALIZING_FINISHED_EVENT,
     UPGRADE_CCM_FINISHED_EVENT,
-    UPGRADE_CCM_FAILED_EVENT(UpgradeCcmFailureEvent.class),
+
+    UPGRADE_CCM_FAILED_EVENT,
+    UPGRADE_CCM_FAILED_REVERT_EVENT,
+    UPGRADE_CCM_FAILED_REVERT_ALL_EVENT,
+    UPGRADE_CCM_CLEANING_FAILED_EVENT,
+    UPGRADE_CCM_FINALIZE_FAILED_EVENT,
     UPGRADE_CCM_FAILURE_HANDLED_EVENT;
 
     private final String event;

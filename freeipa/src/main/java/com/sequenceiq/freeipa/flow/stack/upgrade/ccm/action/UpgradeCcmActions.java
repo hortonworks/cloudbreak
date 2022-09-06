@@ -4,12 +4,14 @@ import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmH
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_CHANGE_TUNNEL_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_CHECK_PREREQUISITES_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_DEREGISTER_MINA_EVENT;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_HEALTH_CHECK_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_FINALIZATION_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_OBTAIN_AGENT_DATA_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_PUSH_SALT_STATES_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_RECONFIGURE_NGINX_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_REGISTER_CLUSTER_PROXY_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_REMOVE_MINA_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_REVERT_ALL_FAILURE_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_REVERT_FAILURE_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FINISHED_EVENT;
 
@@ -129,18 +131,6 @@ public class UpgradeCcmActions {
         };
     }
 
-    @Bean(name = "UPGRADE_CCM_HEALTH_CHECK_STATE")
-    public Action<?, ?> healthCheck() {
-        return new AbstractUpgradeCcmEventAction() {
-            @Override
-            protected void doExecute(UpgradeCcmContext context, UpgradeCcmEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Starting health check for FreeIPA CCM upgrade {}", payload);
-                upgradeCcmService.healthCheckState(context.getStack().getId());
-                sendEvent(context, UPGRADE_CCM_HEALTH_CHECK_EVENT.createBasedOn(payload));
-            }
-        };
-    }
-
     @Bean(name = "UPGRADE_CCM_REMOVE_MINA_STATE")
     public Action<?, ?> removeMina() {
         return new AbstractUpgradeCcmEventAction() {
@@ -165,21 +155,55 @@ public class UpgradeCcmActions {
         };
     }
 
+    @Bean(name = "UPGRADE_CCM_FINALIZING_STATE")
+    public Action<?, ?> finalization() {
+        return new AbstractUpgradeCcmEventAction() {
+            @Override
+            protected void doExecute(UpgradeCcmContext context, UpgradeCcmEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("FreeIPA CCM upgrade finalizing {}", payload);
+                sendEvent(context, UPGRADE_CCM_FINALIZATION_EVENT.createBasedOn(payload));
+            }
+        };
+    }
+
     @Bean(name = "UPGRADE_CCM_FINISHED_STATE")
     public Action<?, ?> finished() {
         return new AbstractUpgradeCcmEventAction() {
             @Override
             protected void doExecute(UpgradeCcmContext context, UpgradeCcmEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("FreeIPA CCM upgrade finished {}", payload);
-                upgradeCcmService.finishedState(context.getStack().getId());
+                upgradeCcmService.finishedState(context.getStack().getId(), payload.getMinaRemoved());
                 completeOperation(context.getStack().getAccountId(), context.getStack().getEnvironmentCrn(), variables);
-                sendEvent(context, UPGRADE_CCM_FINISHED_EVENT.event(), new StackEvent(context.getStack().getId()));
+                StackEvent stackEvent = new StackEvent(context.getStack().getId());
+                sendEvent(context, UPGRADE_CCM_FINISHED_EVENT.event(), stackEvent);
             }
         };
     }
 
     @Bean(name = "UPGRADE_CCM_FAILED_STATE")
-    public Action<?, ?> failed() {
+    public Action<?, ?> failedRevertTunnel() {
+        return new AbstractUpgradeCcmAction<>(UpgradeCcmFailureEvent.class) {
+            @Override
+            protected UpgradeCcmContext createFlowContext(FlowParameters flowParameters, StateContext<UpgradeCcmState,
+                    UpgradeCcmStateSelector> stateContext, UpgradeCcmFailureEvent payload) {
+                Flow flow = getFlow(flowParameters.getFlowId());
+                flow.setFlowFailed(payload.getException());
+                return super.createFlowContext(flowParameters, stateContext, payload);
+            }
+
+            @Override
+            protected void doExecute(UpgradeCcmContext context, UpgradeCcmFailureEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("FreeIPA CCM upgrade failed {}", payload);
+                upgradeCcmService.changeTunnel(payload.getResourceId(), payload.getOldTunnel());
+                upgradeCcmService.failedState(context, payload);
+                failOperation(context.getStack().getAccountId(), payload.getException().getMessage(), variables);
+                sendEvent(context, UPGRADE_CCM_FAILURE_HANDLED_EVENT.event(), new StackEvent(context.getStack().getId()));
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_CCM_FINALIZE_FAILED_STATE")
+    public Action<?, ?> failedButDoNothing() {
         return new AbstractUpgradeCcmAction<>(UpgradeCcmFailureEvent.class) {
             @Override
             protected UpgradeCcmContext createFlowContext(FlowParameters flowParameters, StateContext<UpgradeCcmState,
@@ -195,6 +219,44 @@ public class UpgradeCcmActions {
                 upgradeCcmService.failedState(context, payload);
                 failOperation(context.getStack().getAccountId(), payload.getException().getMessage(), variables);
                 sendEvent(context, UPGRADE_CCM_FAILURE_HANDLED_EVENT.event(), new StackEvent(context.getStack().getId()));
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_CCM_REVERT_FAILURE_STATE")
+    public Action<?, ?> failedRevertTunnelAndSaltStates() {
+        return new AbstractUpgradeCcmAction<>(UpgradeCcmFailureEvent.class) {
+            @Override
+            protected UpgradeCcmContext createFlowContext(FlowParameters flowParameters, StateContext<UpgradeCcmState,
+                    UpgradeCcmStateSelector> stateContext, UpgradeCcmFailureEvent payload) {
+                Flow flow = getFlow(flowParameters.getFlowId());
+                flow.setFlowFailed(payload.getException());
+                return super.createFlowContext(flowParameters, stateContext, payload);
+            }
+
+            @Override
+            protected void doExecute(UpgradeCcmContext context, UpgradeCcmFailureEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("FreeIPA CCM upgrade failed, reverting {}", payload);
+                sendEvent(context, UPGRADE_CCM_REVERT_FAILURE_EVENT.createBasedOn(payload));
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_CCM_REVERT_ALL_FAILURE_STATE")
+    public Action<?, ?> failedRevertAll() {
+        return new AbstractUpgradeCcmAction<>(UpgradeCcmFailureEvent.class) {
+            @Override
+            protected UpgradeCcmContext createFlowContext(FlowParameters flowParameters, StateContext<UpgradeCcmState,
+                    UpgradeCcmStateSelector> stateContext, UpgradeCcmFailureEvent payload) {
+                Flow flow = getFlow(flowParameters.getFlowId());
+                flow.setFlowFailed(payload.getException());
+                return super.createFlowContext(flowParameters, stateContext, payload);
+            }
+
+            @Override
+            protected void doExecute(UpgradeCcmContext context, UpgradeCcmFailureEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("FreeIPA CCM upgrade failed, reverting everything {}", payload);
+                sendEvent(context, UPGRADE_CCM_REVERT_ALL_FAILURE_EVENT.createBasedOn(payload));
             }
         };
     }

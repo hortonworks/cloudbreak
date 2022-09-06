@@ -38,6 +38,7 @@ import org.mockito.verification.VerificationMode;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmService;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmEvent;
+import com.sequenceiq.freeipa.service.upgrade.ccm.CcmParametersConfigService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -58,6 +59,9 @@ class UpgradeCcmGenericHandlerTest {
     @Mock
     private EventBus eventBus;
 
+    @Mock
+    private CcmParametersConfigService ccmParametersConfigService;
+
     @Captor
     private ArgumentCaptor<Event<UpgradeCcmEvent>> eventCaptor;
 
@@ -69,11 +73,11 @@ class UpgradeCcmGenericHandlerTest {
             String methodToVerify, Tunnel tunnel, VerificationMode mockVerificationMode, String expectedEndState) throws Exception {
 
         injectMocks(handlerClass);
-        UpgradeCcmEvent upgradeCcmEvent = new UpgradeCcmEvent("selector", STACK_ID, tunnel);
+        UpgradeCcmEvent upgradeCcmEvent = new UpgradeCcmEvent("selector", STACK_ID, tunnel, null);
         Event<UpgradeCcmEvent> event = new Event<>(upgradeCcmEvent);
         underTest.accept(event);
         InOrder inOrder = inOrder(upgradeCcmService);
-        inOrder.verify(upgradeCcmService).changeTunnel(STACK_ID);
+        inOrder.verify(upgradeCcmService).changeTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
         UpgradeCcmService.class.getMethod(methodToVerify, Long.class).invoke(inOrder.verify(upgradeCcmService, mockVerificationMode), STACK_ID);
         verify(eventBus).notify(eq(expectedEndState), eventCaptor.capture());
         Event<UpgradeCcmEvent> eventResult = eventCaptor.getValue();
@@ -84,7 +88,8 @@ class UpgradeCcmGenericHandlerTest {
 
     private void injectMocks(Class<? extends AbstractUpgradeCcmEventHandler> testedClass) throws Exception {
         underTest = testedClass.getDeclaredConstructor().newInstance();
-        new DefaultInjectionEngine().injectMocksOnFields(Set.of(getClass().getDeclaredField("underTest")), Set.of(upgradeCcmService, eventBus), this);
+        new DefaultInjectionEngine().injectMocksOnFields(Set.of(getClass().getDeclaredField("underTest")), Set.of(upgradeCcmService, eventBus,
+                ccmParametersConfigService), this);
     }
 
     static class TestScenarios implements ArgumentsProvider {

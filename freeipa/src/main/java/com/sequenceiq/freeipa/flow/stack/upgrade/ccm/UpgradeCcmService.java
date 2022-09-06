@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.AVAILABLE;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.UPGRADE_CCM_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.UPGRADE_CCM_IN_PROGRESS;
 
 import java.util.Objects;
@@ -102,8 +101,9 @@ public class UpgradeCcmService {
         stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
     }
 
-    public void changeTunnel(Long stackId) {
-        stackService.setTunnelByStackId(stackId, Tunnel.latestUpgradeTarget());
+    public void changeTunnel(Long stackId, Tunnel tunnel) {
+        LOGGER.info("Changing {} stack tunnel type to: {}", stackId, tunnel);
+        stackService.setTunnelByStackId(stackId, tunnel);
     }
 
     public void obtainAgentDataState(Long stackId) {
@@ -175,8 +175,8 @@ public class UpgradeCcmService {
     }
 
     private void healthCheck(Long stackId) {
-        LOGGER.info("Health check for CCM upgrade...");
         Stack stack = stackService.getStackById(stackId);
+        LOGGER.info("Running health check for {}", stack.getName());
         HealthDetailsFreeIpaResponse healthDetails = healthService.getHealthDetails(stack.getEnvironmentCrn(), stack.getAccountId());
         if (healthDetails.getNodeHealthDetails().stream().anyMatch(hd -> !hd.getStatus().isAvailable())) {
             throw new CloudbreakServiceException("One or more FreeIPA instance is not available. Need to roll back CCM upgrade to previous version.");
@@ -207,16 +207,23 @@ public class UpgradeCcmService {
                 stack.getMinaSshdServiceId());
     }
 
-    public void finishedState(Long stackId) {
+    public void finalizeConfiguration(Long stackId) throws CloudbreakOrchestratorException {
+        upgradeCcmOrchestratorService.finalizeConfiguration(stackId);
+    }
+
+    public void finishedState(Long stackId, Boolean minaRemoved) {
         InMemoryStateStore.deleteStack(stackId);
         DetailedStackStatus detailedStatus = AVAILABLE;
         String statusReason = "Upgrade CCM completed";
+        if (!minaRemoved) {
+            statusReason = statusReason + ", but removing MINA was unsuccessful.";
+        }
         stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
     }
 
     public void failedState(UpgradeCcmContext context, UpgradeCcmFailureEvent payload) {
         InMemoryStateStore.deleteStack(payload.getResourceId());
-        DetailedStackStatus detailedStatus = payload.getTransitionStatusAfterFailure().orElse(UPGRADE_CCM_FAILED);
+        DetailedStackStatus detailedStatus = payload.getTransitionStatusAfterFailure();
         stackService.setTunnelByStackId(payload.getResourceId(), payload.getOldTunnel());
         if (payload.getFailureOrigin().equals(UpgradeCcmRegisterClusterProxyHandler.class)) {
             LOGGER.info("Re-registering cluster proxy to previous tunnel {}", payload.getOldTunnel());
