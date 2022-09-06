@@ -42,14 +42,14 @@ class UpgradeCcmChangeTunnelHandlerTest {
 
     @BeforeEach
     void setUp() {
-        UpgradeCcmEvent upgradeCcmEvent = new UpgradeCcmEvent("selector", STACK_ID, Tunnel.CCM);
+        UpgradeCcmEvent upgradeCcmEvent = new UpgradeCcmEvent("selector", STACK_ID, Tunnel.CCM, null);
         event = new Event<>(upgradeCcmEvent);
     }
 
     @Test
     void changeTunnelCalledInAnyCase() {
         underTest.accept(event);
-        verify(upgradeCcmService).changeTunnel(STACK_ID);
+        verify(upgradeCcmService).changeTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
         verify(eventBus).notify(eq(UPGRADE_CCM_TUNNEL_CHANGE_FINISHED_EVENT.event()), eventCaptor.capture());
         Event<UpgradeCcmEvent> eventResult = eventCaptor.getValue();
         assertThat(eventResult.getData().getOldTunnel()).isEqualTo(Tunnel.CCM);

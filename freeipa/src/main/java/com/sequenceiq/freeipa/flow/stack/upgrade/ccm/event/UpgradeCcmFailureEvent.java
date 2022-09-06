@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event;
 
-import java.util.Optional;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.UPGRADE_CCM_FAILED;
+
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,17 +15,23 @@ public class UpgradeCcmFailureEvent extends StackFailureEvent {
 
     private final Tunnel oldTunnel;
 
-    private final Optional<DetailedStackStatus> transitionStatusAfterFailure;
+    private final LocalDateTime revertTime;
+
+    private final DetailedStackStatus transitionStatusAfterFailure;
 
     private final Class<? extends AbstractUpgradeCcmEventHandler> failureOrigin;
 
+    private String statusReason;
+
     public UpgradeCcmFailureEvent(String selector, Long stackId, Tunnel oldTunnel,
-            Class<? extends AbstractUpgradeCcmEventHandler> failureOrigin, Exception exception) {
+            Class<? extends AbstractUpgradeCcmEventHandler> failureOrigin, Exception exception, LocalDateTime revertTime, String statusReason) {
 
         super(selector, stackId, exception);
         this.oldTunnel = oldTunnel;
         this.failureOrigin = failureOrigin;
-        this.transitionStatusAfterFailure = Optional.empty();
+        this.transitionStatusAfterFailure = null;
+        this.revertTime = revertTime;
+        this.statusReason = statusReason;
     }
 
     @JsonCreator
@@ -33,24 +41,35 @@ public class UpgradeCcmFailureEvent extends StackFailureEvent {
             @JsonProperty("oldTunnel") Tunnel oldTunnel,
             @JsonProperty("failureOrigin") Class<? extends AbstractUpgradeCcmEventHandler> failureOrigin,
             @JsonProperty("exception") Exception exception,
-            @JsonProperty("transitionStatusAfterFailure") Optional<DetailedStackStatus> transitionStatus) {
-
+            @JsonProperty("transitionStatusAfterFailure") DetailedStackStatus transitionStatus,
+            @JsonProperty("revertTime") LocalDateTime revertTime,
+            @JsonProperty("statusReason") String statusReason) {
         super(selector, stackId, exception);
         this.oldTunnel = oldTunnel;
         this.failureOrigin = failureOrigin;
         this.transitionStatusAfterFailure = transitionStatus;
+        this.revertTime = revertTime;
+        this.statusReason = statusReason;
     }
 
     public Tunnel getOldTunnel() {
         return oldTunnel;
     }
 
-    public Optional<DetailedStackStatus> getTransitionStatusAfterFailure() {
-        return transitionStatusAfterFailure;
+    public DetailedStackStatus getTransitionStatusAfterFailure() {
+        return transitionStatusAfterFailure == null ? UPGRADE_CCM_FAILED : transitionStatusAfterFailure;
     }
 
     public Class<? extends AbstractUpgradeCcmEventHandler> getFailureOrigin() {
         return failureOrigin;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
+    }
+
+    public LocalDateTime getRevertTime() {
+        return revertTime;
     }
 
     @Override
@@ -59,6 +78,12 @@ public class UpgradeCcmFailureEvent extends StackFailureEvent {
                 "oldTunnel=" + oldTunnel +
                 ", transitionStatusAfterFailure=" + transitionStatusAfterFailure +
                 ", failureOrigin=" + failureOrigin +
+                ", statusReason=" + statusReason +
+                ", revertTime=" + revertTime +
                 "} " + super.toString();
+    }
+
+    public String getStatusReason() {
+        return statusReason;
     }
 }

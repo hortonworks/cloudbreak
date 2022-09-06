@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmService;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmEvent;
@@ -34,13 +35,14 @@ public class UpgradeCcmObtainAgentDataHandler extends AbstractUpgradeCcmEventHan
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
         LOGGER.error("Obtaining agent data for CCM upgrade has failed", e);
-        return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), resourceId, event.getData().getOldTunnel(), getClass(), e);
+        return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), resourceId, event.getData().getOldTunnel(), getClass(),
+                e, event.getData().getRevertTime(), "Upgrading CCM is failed, obtaining agent data has been failed");
     }
 
     @Override
     protected Selectable doAccept(HandlerEvent<UpgradeCcmEvent> event) {
         UpgradeCcmEvent request = event.getData();
-        upgradeCcmService.changeTunnel(request.getResourceId());
+        upgradeCcmService.changeTunnel(request.getResourceId(), Tunnel.latestUpgradeTarget());
         if (request.getOldTunnel().useCcmV1()) {
             LOGGER.info("Obtaining agent data for CCM upgrade...");
             upgradeCcmService.obtainAgentData(request.getResourceId());

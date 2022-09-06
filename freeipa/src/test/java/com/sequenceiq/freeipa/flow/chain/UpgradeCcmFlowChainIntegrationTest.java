@@ -67,7 +67,7 @@ import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmFlowChainTr
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmChangeTunnelHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmCheckPrerequisitesHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmDeregisterMinaHandler;
-import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmHealthCheckHandler;
+import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmFinalizingHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmObtainAgentDataHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmPushSaltStatesHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmReconfigureNginxHandler;
@@ -80,6 +80,7 @@ import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.upgrade.ccm.CcmParametersConfigService;
 
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
@@ -93,9 +94,7 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     private static final int ALL_CALLED_ONCE = 21;
 
-    private static final int CALLED_ONCE_TILL_DEREGISTER_MINA = 19;
-
-    private static final int CALLED_ONCE_TILL_GENERATE_USERDATA = 20;
+    private static final int CALLED_ONCE_TILL_GENERATE_USERDATA = 19;
 
     @Inject
     private FlowLogRepository flowLogRepository;
@@ -173,20 +172,24 @@ class UpgradeCcmFlowChainIntegrationTest {
     @Test
     public void testCcmUpgradeWhenDeregisterMinaFailsInChain() throws Exception {
         doThrow(new BadRequestException()).when(upgradeCcmService).deregisterMina(STACK_ID);
-        testFlow(CALLED_ONCE_TILL_DEREGISTER_MINA, false, false);
+        testFlow(ALL_CALLED_ONCE, true, true, false);
     }
 
     private void testFlow(int calledOnce, boolean ccmUpgradeSuccess, boolean userDataUpdateSuccess) throws Exception {
+        testFlow(calledOnce, ccmUpgradeSuccess, userDataUpdateSuccess, true);
+    }
+
+    private void testFlow(int calledOnce, boolean ccmUpgradeSuccess, boolean userDataUpdateSuccess, boolean minaRemoved) throws Exception {
         triggerFlow();
         letItFlow();
 
         flowFinishedSuccessfully(ccmUpgradeSuccess ? 2 : 1);
         verifyServiceCalls(calledOnce);
-        verifyFinishingStatCalls(ccmUpgradeSuccess, userDataUpdateSuccess);
+        verifyFinishingStatCalls(ccmUpgradeSuccess, userDataUpdateSuccess, minaRemoved);
     }
 
-    private void verifyFinishingStatCalls(boolean ccmUpgradeSuccess, boolean userDataUpdateSuccess) throws Exception {
-        verify(upgradeCcmService, times(ccmUpgradeSuccess ? 1 : 0)).finishedState(STACK_ID);
+    private void verifyFinishingStatCalls(boolean ccmUpgradeSuccess, boolean userDataUpdateSuccess, boolean minaRemoved) throws Exception {
+        verify(upgradeCcmService, times(ccmUpgradeSuccess ? 1 : 0)).finishedState(STACK_ID, minaRemoved);
         verify(resourcesApi, times(userDataUpdateSuccess ? 1 : 0)).updateUserData(any(), any(), any(), eq(USER_DATA));
 
         ArgumentCaptor<UpgradeCcmContext> contextCaptor = ArgumentCaptor.forClass(UpgradeCcmContext.class);
@@ -212,7 +215,7 @@ class UpgradeCcmFlowChainIntegrationTest {
         inOrder.verify(upgradeCcmService, times(expected[i++])).checkPrerequisitesState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).checkPrerequsities(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).changeTunnelState(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(expected[i++])).changeTunnel(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).changeTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
         inOrder.verify(upgradeCcmService, times(expected[i++])).obtainAgentDataState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).obtainAgentData(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).pushSaltStatesState(STACK_ID);
@@ -223,7 +226,6 @@ class UpgradeCcmFlowChainIntegrationTest {
         inOrder.verify(upgradeCcmService, times(expected[i++])).reconfigureNginx(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).registerClusterProxyState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).registerClusterProxyAndCheckHealth(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(expected[i++])).healthCheckState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).removeMinaState(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).removeMina(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).deregisterMinaState(STACK_ID);
@@ -267,13 +269,15 @@ class UpgradeCcmFlowChainIntegrationTest {
             UpgradeCcmUpgradeHandler.class,
             UpgradeCcmReconfigureNginxHandler.class,
             UpgradeCcmRegisterClusterProxyHandler.class,
-            UpgradeCcmHealthCheckHandler.class,
             UpgradeCcmRemoveMinaHandler.class,
             UpgradeCcmObtainAgentDataHandler.class,
             UpgradeCcmDeregisterMinaHandler.class,
+            UpgradeCcmFinalizingHandler.class,
             UpgradeCcmService.class,
             FlowIntegrationTestConfig.class
     })
     static class Config {
+        @MockBean
+        private CcmParametersConfigService ccmParametersConfigService;
     }
 }

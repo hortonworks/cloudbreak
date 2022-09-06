@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler;
 
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_REMOVE_MINA_EVENT;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_CLEANING_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_REMOVE_MINA_FINISHED_EVENT;
 
 import javax.inject.Inject;
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmService;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmEvent;
@@ -35,22 +35,24 @@ public class UpgradeCcmRemoveMinaHandler extends AbstractUpgradeCcmEventHandler 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
         LOGGER.error("Removing Mina for CCM upgrade has failed", e);
-        return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), resourceId,
-                event.getData().getOldTunnel(), getClass(), e);
+        return new UpgradeCcmFailureEvent(UPGRADE_CCM_CLEANING_FAILED_EVENT.event(), resourceId,
+                event.getData().getOldTunnel(), getClass(), e, event.getData().getRevertTime(),
+                "Removing Mina for CCM upgrade has been failed, but new CCMv2 is operational.");
     }
 
     @Override
     protected Selectable doAccept(HandlerEvent<UpgradeCcmEvent> event) {
         UpgradeCcmEvent request = event.getData();
-        upgradeCcmService.changeTunnel(request.getResourceId());
+        upgradeCcmService.changeTunnel(request.getResourceId(), Tunnel.latestUpgradeTarget());
         if (request.getOldTunnel().useCcmV1()) {
             LOGGER.info("Remove Mina for CCM upgrade...");
             try {
                 upgradeCcmService.removeMina(request.getResourceId());
-            } catch (CloudbreakOrchestratorException e) {
-                LOGGER.debug("Failed removing Mina service with a salt state");
-                return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), request.getResourceId(),
-                        event.getData().getOldTunnel(), getClass(), e);
+            } catch (Exception e) {
+                LOGGER.debug("Removing Mina for CCM upgrade has been failed, but new CCMv2 is operational.");
+                UpgradeCcmEvent resultEvent =  UPGRADE_CCM_CLEANING_FAILED_EVENT.createBasedOn(request);
+                resultEvent.setMinaRemoved(Boolean.FALSE);
+                return resultEvent;
             }
         } else {
             LOGGER.info("Remove Mina step is skipped for previous tunnel type '{}'", request.getOldTunnel());
