@@ -212,6 +212,10 @@ message Event {
     CDPAssignTrialAccount cdpAssignTrialAccount = 101;
     // A CDP trial account status is changed/updated.
     CDPTrialAccountStatusChanged cdpTrialAccountStatusChanged = 102;
+    // A recipe is created/attached/detached/deleted.
+    CDPRecipeEvent cdpRecipeEvent = 103;
+    // A cluster (FreeIPA, Data Lake, Data Hub) creation event with recipe related details.
+    CDPClusterCreationRecipeEvent cdpClusterCreationRecipeEvent = 104;
   }
 }
 
@@ -1519,6 +1523,13 @@ message CDPClusterStatus {
     CCM_UPGRADE_FINISHED = 53;
     // The status when a cluster ccm upgrade operation failed.
     CCM_UPGRADE_FAILED = 54;
+
+    // The status when the database server upgrade is started for a DL / DH
+    DATABASE_UPGRADE_STARTED = 55;
+    // The status when the database server upgrade is finished for a DL / DH
+    DATABASE_UPGRADE_FINISHED = 56;
+    // The status when the database server upgrade fails for a DL / DH
+    DATABASE_UPGRADE_FAILED = 57;
   }
 }
 
@@ -3598,5 +3609,69 @@ message CDPAssignTrialStatus {
 // Generated after vertical scale.
 message CDPVerticalScaleDetails {
   string newInstanceType = 1;
+}
+
+// Type of recipe
+message CDPRecipeType {
+  enum Value {
+      // Indicates there is some error, type cannot be recognized
+      UNKNOWN = 0;
+      // Indicates that recipe will be executed before CM start, deprecated status
+      PRE_CLOUDERA_MANAGER_START = 1;
+      // Indicates that recipe will be executed before service starts
+      PRE_SERVICE_DEPLOYMENT = 2;
+      // Indicates that recipe will be executed before termination
+      PRE_TERMINATION = 3;
+      // Indicates that recipe will be executed after CM start, deprecated
+      POST_CLOUDERA_MANAGER_START = 4;
+      // Indicates that recipe will be executed after cluster provision
+      POST_CLUSTER_INSTALL = 5;
+    // Indicates that recipe will be executed after service starts
+      POST_SERVICE_DEPLOYMENT = 6;
+  }
+}
+
+// Status of recipe event
+message CDPRecipeStatus {
+  enum Value {
+    // Indicates that status cannot be recognized
+    UNKNOWN = 0;
+    // Indicates that it is a recipe creation event
+    CREATED = 1;
+    // Indicates that it is a recipe attachment event
+    ATTACHED = 2;
+    // Indicates that it is a recipe detachment event
+    DETACHED = 3;
+    // Indicates that it is a recipe deletion event
+    DELETED = 4;
+  }
+}
+
+// Event about recipe
+message CDPRecipeEvent {
+  // Status of recipe
+  CDPRecipeStatus.Value status = 1;
+  // CRN of recipe
+  string recipeCrn = 2;
+  // Name of recipe
+  string name = 3;
+  // Type of recipe
+  CDPRecipeType.Value type = 4;
+  // Name of host group in case of attachment/detachment, otherwise it is empty
+  string hostGroup = 5;
+  // CRN of related stack in case of attachment/detachment, otherwise it is empty
+  string stackCrn = 6;
+}
+
+// Recipe related event about cluster creation
+message CDPClusterCreationRecipeEvent {
+  // CRN of related stack
+  string stackCrn = 1;
+  // Overall recipe count of related stack
+  int32 recipeCount = 2;
+  // Details of recipe count by type in JSON format
+  string typeDetails = 3;
+  // Details of recipe count by host group in JSON format
+  string hostGroupDetails = 4;
 }
 
