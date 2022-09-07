@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -130,6 +131,23 @@ public class AwsRdsUpgradeOperationsTest {
         assertEquals(TARGET_VERSION, firedRequest.getEngineVersion());
         assertTrue(firedRequest.getAllowMajorVersionUpgrade());
         assertTrue(firedRequest.getApplyImmediately());
+        assertEquals(DB_PARAMETER_GROUP_NAME, firedRequest.getDBParameterGroupName());
+    }
+
+    @Test
+    void testUpgradeRdsWithoutDbParameterGroupName() {
+        RdsEngineVersion targetVersion = new RdsEngineVersion(TARGET_VERSION);
+
+        underTest.upgradeRds(rdsClient, targetVersion, DB_INSTANCE_IDENTIFIER, null);
+
+        ArgumentCaptor<ModifyDBInstanceRequest> modifyRequestCaptor = ArgumentCaptor.forClass(ModifyDBInstanceRequest.class);
+        verify(rdsClient).modifyDBInstance(modifyRequestCaptor.capture());
+        ModifyDBInstanceRequest firedRequest = modifyRequestCaptor.getValue();
+        assertEquals(DB_INSTANCE_IDENTIFIER, firedRequest.getDBInstanceIdentifier());
+        assertEquals(TARGET_VERSION, firedRequest.getEngineVersion());
+        assertTrue(firedRequest.getAllowMajorVersionUpgrade());
+        assertTrue(firedRequest.getApplyImmediately());
+        assertNull(firedRequest.getDBParameterGroupName());
     }
 
     @Test
