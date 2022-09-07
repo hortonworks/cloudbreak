@@ -12,15 +12,20 @@ import org.springframework.stereotype.Service;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
+import com.sequenceiq.cloudbreak.auth.altus.model.MachineUserRequest;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryFeatureService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
@@ -46,54 +51,63 @@ public class AltusMachineUserService {
 
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    private final EntitlementService entitlementService;
+
+    private final TelemetryFeatureService telemetryFeatureService;
+
     public AltusMachineUserService(
             AltusIAMService altusIAMService,
             StackDtoService stackDtoService,
             ClusterService clusterService,
             ComponentConfigProviderService componentConfigProviderService,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory,
+            EntitlementService entitlementService,
+            TelemetryFeatureService telemetryFeatureService) {
         this.altusIAMService = altusIAMService;
         this.stackDtoService = stackDtoService;
         this.clusterService = clusterService;
         this.componentConfigProviderService = componentConfigProviderService;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
+        this.entitlementService = entitlementService;
+        this.telemetryFeatureService = telemetryFeatureService;
     }
 
     /**
      * Generate machine user for fluentd - databus communication
      */
-    public Optional<AltusCredential> generateDatabusMachineUserForFluent(StackView stack, Telemetry telemetry, boolean forced) {
+    public Optional<AltusCredential> generateDatabusMachineUserForFluent(StackView stack, Telemetry telemetry, boolean forced,
+            CdpAccessKeyType cdpAccessKeyType) {
         if (isAnyDataBusBasedFeatureSupported(telemetry) || forced) {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> altusIAMService.generateDatabusMachineUserWithAccessKey(
-                            getFluentDatabusMachineUserName(stack),
-                            ThreadBasedUserCrnProvider.getUserCrn(),
-                            Crn.fromString(stack.getResourceCrn()).getAccountId(),
+                            new MachineUserRequest()
+                                    .setName(getFluentDatabusMachineUserName(stack))
+                                    .setAccountId(Crn.fromString(stack.getResourceCrn()).getAccountId())
+                                    .setActorCrn(ThreadBasedUserCrnProvider.getUserCrn())
+                                    .setCdpAccessKeyType(cdpAccessKeyType),
                             telemetry.isUseSharedAltusCredentialEnabled()));
         }
         return Optional.empty();
     }
 
-    public Optional<AltusCredential> generateMonitoringMachineUser(StackView stack, Telemetry telemetry, boolean forced) {
-        if (isAnyMonitoringFeatureSupported(telemetry) || forced) {
+    public Optional<AltusCredential> generateDatabusMachineUserForFluent(StackView stack, Telemetry telemetry,
+            CdpAccessKeyType cdpAccessKeyType) {
+        return generateDatabusMachineUserForFluent(stack, telemetry, false, cdpAccessKeyType);
+    }
+
+    public Optional<AltusCredential> generateMonitoringMachineUser(StackView stack, Telemetry telemetry, CdpAccessKeyType cdpAccessKeyType) {
+        if (isAnyMonitoringFeatureSupported(telemetry)) {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> altusIAMService.generateMonitoringMachineUserWithAccessKey(
-                            getMonitoringMachineUserName(stack),
-                            ThreadBasedUserCrnProvider.getUserCrn(),
-                            Crn.fromString(stack.getResourceCrn()).getAccountId(),
+                    () -> altusIAMService.generateMonitoringMachineUserWithAccessKey(new MachineUserRequest()
+                                    .setName(getMonitoringMachineUserName(stack))
+                                    .setAccountId(Crn.fromString(stack.getResourceCrn()).getAccountId())
+                                    .setActorCrn(ThreadBasedUserCrnProvider.getUserCrn())
+                                    .setCdpAccessKeyType(cdpAccessKeyType),
                             telemetry.isUseSharedAltusCredentialEnabled()));
         }
         return Optional.empty();
-    }
-
-    public Optional<AltusCredential> generateDatabusMachineUserForFluent(StackView stack, Telemetry telemetry) {
-        return generateDatabusMachineUserForFluent(stack, telemetry, false);
-    }
-
-    public Optional<AltusCredential> generateMonitoringMachineUser(StackView stack, Telemetry telemetry) {
-        return generateMonitoringMachineUser(stack, telemetry, false);
     }
 
     public void clearFluentMachineUser(StackView stack, ClusterView cluster, Telemetry telemetry) {
@@ -154,8 +168,21 @@ public class AltusMachineUserService {
         } else {
             LOGGER.debug("Databus credential does not exist for the stack, it will be created ...");
         }
-        Optional<AltusCredential> altusCredential = generateDatabusMachineUserForFluent(stack, telemetry, true);
-        return storeDataBusCredential(altusCredential, stack);
+        CdpAccessKeyType cdpAccessKeyType = getCdpAccessKeyType(stackDto);
+        Optional<AltusCredential> altusCredential = generateDatabusMachineUserForFluent(stack, telemetry, true, cdpAccessKeyType);
+        return storeDataBusCredential(altusCredential, stack, cdpAccessKeyType);
+    }
+
+    public CdpAccessKeyType getCdpAccessKeyType(StackDto stackDto) {
+        if (!entitlementService.isECDSABasedAccessKeyEnabled(stackDto.getAccountId())) {
+            return CdpAccessKeyType.ED25519;
+        }
+        Optional<Image> image = componentConfigProviderService.findImage(stackDto.getId());
+        if (image.isEmpty()) {
+            return CdpAccessKeyType.ED25519;
+        } else {
+            return telemetryFeatureService.isECDSAAccessKeyTypeSupported(image.get().getPackageVersions()) ? CdpAccessKeyType.ECDSA : CdpAccessKeyType.ED25519;
+        }
     }
 
     /**
@@ -165,12 +192,13 @@ public class AltusMachineUserService {
      * @param stack           component will be attached to this stack
      * @return domain object that holds databus credential
      */
-    public DataBusCredential storeDataBusCredential(Optional<AltusCredential> altusCredential, StackView stack) {
+    public DataBusCredential storeDataBusCredential(Optional<AltusCredential> altusCredential, StackView stack, CdpAccessKeyType cdpAccessKeyType) {
         if (altusCredential.isPresent()) {
             DataBusCredential dataBusCredential = new DataBusCredential();
             dataBusCredential.setMachineUserName(getFluentDatabusMachineUserName(stack));
             dataBusCredential.setAccessKey(altusCredential.get().getAccessKey());
             dataBusCredential.setPrivateKey(altusCredential.get().getPrivateKey() != null ? new String(altusCredential.get().getPrivateKey()) : null);
+            dataBusCredential.setAccessKeyType(cdpAccessKeyType.getValue());
             String databusCredentialJsonString = new Json(dataBusCredential).getValue();
             if (stack.getClusterId() != null) {
                 clusterService.updateDatabusCredentialByClusterId(stack.getClusterId(), databusCredentialJsonString);
@@ -180,12 +208,13 @@ public class AltusMachineUserService {
         return null;
     }
 
-    public MonitoringCredential storeMonitoringCredential(Optional<AltusCredential> altusCredential, StackView stack) {
+    public MonitoringCredential storeMonitoringCredential(Optional<AltusCredential> altusCredential, StackView stack, CdpAccessKeyType cdpAccessKeyType) {
         if (altusCredential.isPresent()) {
             MonitoringCredential monitoringCredential = new MonitoringCredential();
             monitoringCredential.setMachineUserName(getMonitoringMachineUserName(stack));
             monitoringCredential.setAccessKey(altusCredential.get().getAccessKey());
             monitoringCredential.setPrivateKey(altusCredential.get().getPrivateKey() != null ? new String(altusCredential.get().getPrivateKey()) : null);
+            monitoringCredential.setAccessKeyType(cdpAccessKeyType.getValue());
             String monitoringCredentialJsonString = new Json(monitoringCredential).getValue();
             if (stack.getClusterId() != null) {
                 clusterService.updateMonitoringCredentialByClusterId(stack.getClusterId(), monitoringCredentialJsonString);

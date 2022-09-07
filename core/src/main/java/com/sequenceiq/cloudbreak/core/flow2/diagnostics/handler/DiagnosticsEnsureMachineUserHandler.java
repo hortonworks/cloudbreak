@@ -15,6 +15,7 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionEvent;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
+import com.sequenceiq.cloudbreak.telemetry.UMSSecretKeyFormatter;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
@@ -41,7 +42,7 @@ public class DiagnosticsEnsureMachineUserHandler extends AbstractDiagnosticsOper
             LOGGER.debug("Generating databus credential if required for diagnostics support destination.");
             DataBusCredential credential = altusMachineUserService.getOrCreateDataBusCredentialIfNeeded(resourceId);
             parameters.setSupportBundleDbusAccessKey(credential.getAccessKey());
-            parameters.setSupportBundleDbusPrivateKey(credential.getPrivateKey());
+            parameters.setSupportBundleDbusPrivateKey(UMSSecretKeyFormatter.formatSecretKey(credential.getAccessKeyType(), credential.getPrivateKey()));
             parameters.setSupportBundleDbusAccessKeyType(credential.getAccessKeyType());
         }
         return DiagnosticsCollectionEvent.builder()

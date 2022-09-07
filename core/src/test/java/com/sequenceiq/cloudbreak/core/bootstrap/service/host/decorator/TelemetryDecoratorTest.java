@@ -24,6 +24,7 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -103,8 +104,8 @@ public class TelemetryDecoratorTest {
         assertTrue(result.getMeteringContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
         assertTrue(result.getNodeStatusContext().isSaltPingEnabled());
-        verify(altusMachineUserService, times(1)).storeDataBusCredential(any(Optional.class), any(Stack.class));
-        verify(altusMachineUserService, times(1)).storeMonitoringCredential(any(Optional.class), any(Stack.class));
+        verify(altusMachineUserService, times(1)).storeDataBusCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
+        verify(altusMachineUserService, times(1)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
     }
 
     @Test
@@ -135,7 +136,7 @@ public class TelemetryDecoratorTest {
         assertFalse(result.getLogShipperContext().isEnabled());
         assertFalse(result.getMeteringContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
-        verify(altusMachineUserService, times(1)).storeMonitoringCredential(any(Optional.class), any(Stack.class));
+        verify(altusMachineUserService, times(1)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
     }
 
     @Test
@@ -172,16 +173,21 @@ public class TelemetryDecoratorTest {
         given(telemetry.getDatabusEndpoint()).willReturn("https://dbus-dev.com");
         given(altusMachineUserService.isAnyDataBusBasedFeatureSupported(any(Telemetry.class))).willReturn(true);
         given(altusMachineUserService.isAnyMonitoringFeatureSupported(any(Telemetry.class))).willReturn(true);
-        given(altusMachineUserService.storeDataBusCredential(any(Optional.class), any(Stack.class))).willReturn(dataBusCredential);
-        given(altusMachineUserService.generateDatabusMachineUserForFluent(any(Stack.class), any(Telemetry.class))).willReturn(Optional.of(altusCredential));
-        given(altusMachineUserService.generateMonitoringMachineUser(any(Stack.class), any(Telemetry.class))).willReturn(Optional.of(altusCredential));
-        given(altusMachineUserService.storeMonitoringCredential(any(Optional.class), any(Stack.class))).willReturn(monitoringCredential);
+        given(altusMachineUserService.storeDataBusCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class)))
+                .willReturn(dataBusCredential);
+        given(altusMachineUserService.generateDatabusMachineUserForFluent(any(Stack.class), any(Telemetry.class), any(CdpAccessKeyType.class)))
+                .willReturn(Optional.of(altusCredential));
+        given(altusMachineUserService.generateMonitoringMachineUser(any(Stack.class), any(Telemetry.class), any(CdpAccessKeyType.class)))
+                .willReturn(Optional.of(altusCredential));
+        given(altusMachineUserService.storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class)))
+                .willReturn(monitoringCredential);
         given(entitlementService.useDataBusCNameEndpointEnabled(anyString())).willReturn(false);
         given(entitlementService.isDatahubDatabusEndpointValidationEnabled(anyString())).willReturn(true);
         given(entitlementService.nodestatusSaltPingEnabled(anyString())).willReturn(true);
         given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("https://dbus-dev.com");
         given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString())).willReturn("https://cloudera-dbus-dev.amazonaws.com");
         given(vmLogsService.getVmLogs()).willReturn(new ArrayList<>());
+        given(altusMachineUserService.getCdpAccessKeyType(any())).willReturn(CdpAccessKeyType.ECDSA);
     }
 
     private StackDto createStack() {
@@ -211,5 +217,4 @@ public class TelemetryDecoratorTest {
         when(stackDto.getCluster()).thenReturn(cluster);
         return stackDto;
     }
-
 }

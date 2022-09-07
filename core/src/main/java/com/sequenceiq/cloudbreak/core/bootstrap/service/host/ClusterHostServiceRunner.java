@@ -548,17 +548,6 @@ public class ClusterHostServiceRunner {
         servicePillar.putAll(createPillarWithClouderaManagerSettings(clouderaManagerRepo, stackDto, primaryGatewayConfig));
     }
 
-    private <T> T convertOrReturnNull(String value, Class<T> type) {
-        if (StringUtils.isNotBlank(value)) {
-            try {
-                return new Json(value).get(type);
-            } catch (IOException e) {
-                LOGGER.error("Cannot read {} from cluster entity. Continue without value.", type.getSimpleName(), e);
-            }
-        }
-        return null;
-    }
-
     private VirtualGroupRequest getVirtualGroupRequest(String virtualGroupsEnvironmentCrn, Optional<LdapView> ldapView) {
         String adminGroup = ldapView.isPresent() ? ldapView.get().getAdminGroup() : "";
         return new VirtualGroupRequest(virtualGroupsEnvironmentCrn, adminGroup);

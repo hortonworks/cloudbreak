@@ -6,9 +6,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.telemetry.TelemetryPillarConfigGenerator;
+import com.sequenceiq.cloudbreak.telemetry.UMSSecretKeyFormatter;
 import com.sequenceiq.cloudbreak.telemetry.context.DatabusContext;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
-import com.sequenceiq.common.api.telemetry.model.CdpAccessKeyType;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 
 @Service
@@ -16,18 +16,21 @@ public class DatabusConfigService implements TelemetryPillarConfigGenerator<Data
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabusConfigService.class);
 
+    private static final String ED25519 = "Ed25519";
+
     private static final String SALT_STATE = "databus";
 
     @Override
     public DatabusConfigView createConfigs(TelemetryContext context) {
         final DatabusContext databusContext = context.getDatabusContext();
         final DataBusCredential dataBusCredential = databusContext.getCredential();
+        String accessKeySecretAlgorithm = StringUtils.defaultIfBlank(dataBusCredential.getAccessKeyType(), ED25519);
         return new DatabusConfigView.Builder()
                 .withEnabled(databusContext.isEnabled())
                 .withEndpoint(databusContext.getEndpoint())
                 .withAccessKeyId(dataBusCredential.getAccessKey())
-                .withAccessKeySecret(dataBusCredential.getPrivateKey().toCharArray())
-                .withAccessKeySecretAlgorithm(StringUtils.defaultIfBlank(dataBusCredential.getAccessKeyType(), CdpAccessKeyType.ED25519.getValue()))
+                .withAccessKeySecret(UMSSecretKeyFormatter.formatSecretKey(accessKeySecretAlgorithm, dataBusCredential.getPrivateKey()).toCharArray())
+                .withAccessKeySecretAlgorithm(accessKeySecretAlgorithm)
                 .build();
     }
 

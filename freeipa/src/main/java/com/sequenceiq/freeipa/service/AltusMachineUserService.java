@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
+import com.sequenceiq.cloudbreak.auth.altus.model.MachineUserRequest;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -43,23 +45,27 @@ public class AltusMachineUserService {
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
-    public Optional<AltusCredential> createDatabusMachineUserWithAccessKeys(Stack stack, Telemetry telemetry) {
+    public Optional<AltusCredential> createDatabusMachineUserWithAccessKeys(Stack stack, Telemetry telemetry, CdpAccessKeyType cdpAccessKeyType) {
         String machineUserName = getFluentMachineUser(stack);
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> altusIAMService.generateDatabusMachineUserWithAccessKey(machineUserName,
-                        ThreadBasedUserCrnProvider.getUserCrn(),
-                        Crn.fromString(stack.getResourceCrn()).getAccountId(),
+                () -> altusIAMService.generateDatabusMachineUserWithAccessKey(new MachineUserRequest()
+                                .setName(machineUserName)
+                                .setAccountId(Crn.fromString(stack.getResourceCrn()).getAccountId())
+                                .setActorCrn(ThreadBasedUserCrnProvider.getUserCrn())
+                                .setCdpAccessKeyType(cdpAccessKeyType),
                         telemetry.isUseSharedAltusCredentialEnabled()));
     }
 
-    public Optional<AltusCredential> createMonitoringMachineUserWithAccessKeys(Stack stack, Telemetry telemetry) {
+    public Optional<AltusCredential> createMonitoringMachineUserWithAccessKeys(Stack stack, Telemetry telemetry, CdpAccessKeyType cdpAccessKeyType) {
         String machineUserName = getMonitoringMachineUser(stack);
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> altusIAMService.generateMonitoringMachineUserWithAccessKey(machineUserName,
-                        ThreadBasedUserCrnProvider.getUserCrn(),
-                        Crn.fromString(stack.getResourceCrn()).getAccountId(),
+                () -> altusIAMService.generateMonitoringMachineUserWithAccessKey(new MachineUserRequest()
+                                .setName(machineUserName)
+                                .setAccountId(Crn.fromString(stack.getResourceCrn()).getAccountId())
+                                .setActorCrn(ThreadBasedUserCrnProvider.getUserCrn())
+                                .setCdpAccessKeyType(cdpAccessKeyType),
                         telemetry.isUseSharedAltusCredentialEnabled()));
     }
 
@@ -116,8 +122,8 @@ public class AltusMachineUserService {
      * @param stackId id of the stack
      * @return databus credential holder
      */
-    public DataBusCredential getOrCreateDataBusCredentialIfNeeded(Long stackId) throws IOException {
-        return getOrCreateDataBusCredentialIfNeeded(stackService.getStackById(stackId));
+    public DataBusCredential getOrCreateDataBusCredentialIfNeeded(Long stackId, CdpAccessKeyType cdpAccessKeyType) throws IOException {
+        return getOrCreateDataBusCredentialIfNeeded(stackService.getStackById(stackId), cdpAccessKeyType);
     }
 
     /**
@@ -127,7 +133,7 @@ public class AltusMachineUserService {
      * @param stack stack object that holds details about the cluster
      * @return databus credential holder
      */
-    public DataBusCredential getOrCreateDataBusCredentialIfNeeded(Stack stack) throws IOException {
+    public DataBusCredential getOrCreateDataBusCredentialIfNeeded(Stack stack, CdpAccessKeyType cdpAccessKeyType) throws IOException {
         LOGGER.debug("Get or create databus credential for stack");
         Telemetry telemetry = stack.getTelemetry();
         if (stack.getDatabusCredential() != null) {
@@ -142,17 +148,17 @@ public class AltusMachineUserService {
         } else {
             LOGGER.debug("Databus credential does not exist for the stack, it will be created ...");
         }
-        Optional<AltusCredential> altusCredential = createDatabusMachineUserWithAccessKeys(stack, telemetry);
-        return storeDataBusCredential(altusCredential, stack);
+        Optional<AltusCredential> altusCredential = createDatabusMachineUserWithAccessKeys(stack, telemetry, cdpAccessKeyType);
+        return storeDataBusCredential(altusCredential, stack, cdpAccessKeyType);
     }
 
-    public Optional<MonitoringCredential> getOrCreateMonitoringCredentialIfNeeded(Stack stack) throws IOException {
+    public Optional<MonitoringCredential> getOrCreateMonitoringCredentialIfNeeded(Stack stack, CdpAccessKeyType cdpAccessKeyType) throws IOException {
         LOGGER.debug("Get or create databus credential for stack");
         Telemetry telemetry = stack.getTelemetry();
         Optional<MonitoringCredential> monitoringCredential = getMonitoringCredentialIfExists(stack, telemetry);
         if (monitoringCredential.isEmpty()) {
-            monitoringCredential = createMonitoringMachineUserWithAccessKeys(stack, telemetry)
-                    .map(altusCredential -> storeMonitoringCredential(altusCredential, stack));
+            monitoringCredential = createMonitoringMachineUserWithAccessKeys(stack, telemetry, cdpAccessKeyType)
+                    .map(altusCredential -> storeMonitoringCredential(altusCredential, stack, cdpAccessKeyType));
         }
         return monitoringCredential;
     }
@@ -177,16 +183,18 @@ public class AltusMachineUserService {
     /**
      * Store databus access / secret keypair and machine user name in the cluster if altus credential exists
      *
-     * @param altusCredential dto for databus access/private key
-     * @param stack           component will be attached to this stack
+     * @param altusCredential  dto for databus access/private key
+     * @param stack            component will be attached to this stack
+     * @param cdpAccessKeyType access key type
      * @return domain object that holds databus credential
      */
-    public DataBusCredential storeDataBusCredential(Optional<AltusCredential> altusCredential, Stack stack) {
+    public DataBusCredential storeDataBusCredential(Optional<AltusCredential> altusCredential, Stack stack, CdpAccessKeyType cdpAccessKeyType) {
         if (altusCredential.isPresent()) {
             DataBusCredential dataBusCredential = new DataBusCredential();
             dataBusCredential.setMachineUserName(getFluentMachineUser(stack));
             dataBusCredential.setAccessKey(altusCredential.get().getAccessKey());
             dataBusCredential.setPrivateKey(altusCredential.get().getPrivateKey() != null ? new String(altusCredential.get().getPrivateKey()) : null);
+            dataBusCredential.setAccessKeyType(cdpAccessKeyType.getValue());
             String databusCredentialJsonString = new Json(dataBusCredential).getValue();
             stack.setDatabusCredential(databusCredentialJsonString);
             stackService.save(stack);
@@ -195,11 +203,12 @@ public class AltusMachineUserService {
         return null;
     }
 
-    private MonitoringCredential storeMonitoringCredential(AltusCredential altusCredential, Stack stack) {
+    private MonitoringCredential storeMonitoringCredential(AltusCredential altusCredential, Stack stack, CdpAccessKeyType cdpAccessKeyType) {
         MonitoringCredential monitoringCredential = new MonitoringCredential();
         monitoringCredential.setMachineUserName(getMonitoringMachineUser(stack));
         monitoringCredential.setAccessKey(altusCredential.getAccessKey());
         monitoringCredential.setPrivateKey(altusCredential.getPrivateKey() != null ? new String(altusCredential.getPrivateKey()) : null);
+        monitoringCredential.setAccessKeyType(cdpAccessKeyType.getValue());
         String monitoringCredentialJsonString = new Json(monitoringCredential).getValue();
         stack.setMonitoringCredential(monitoringCredentialJsonString);
         stackService.save(stack);

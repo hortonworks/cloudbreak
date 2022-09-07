@@ -6,14 +6,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.telemetry.TelemetryPillarConfigGenerator;
+import com.sequenceiq.cloudbreak.telemetry.UMSSecretKeyFormatter;
 import com.sequenceiq.cloudbreak.telemetry.context.MonitoringContext;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
-import com.sequenceiq.common.api.telemetry.model.CdpAccessKeyType;
 
 @Service
 public class MonitoringConfigService implements TelemetryPillarConfigGenerator<MonitoringConfigView> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MonitoringConfigService.class);
+
+    private static final String ED25519 = "Ed25519";
 
     private static final String SALT_STATE = "monitoring";
 
@@ -50,9 +52,10 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
         builder.withMinBackoff(monitoringConfiguration.getAgent().getMinBackoff());
         builder.withMaxBackoff(monitoringConfiguration.getAgent().getMaxBackoff());
         if (monitoringContext.getCredential() != null) {
+            String accessKeyType = StringUtils.defaultIfBlank(monitoringContext.getCredential().getAccessKeyType(), ED25519);
             builder.withAccessKeyId(monitoringContext.getCredential().getAccessKey())
-                    .withPrivateKey(monitoringContext.getCredential().getPrivateKey().toCharArray())
-                    .withAccessKeyType(StringUtils.defaultIfBlank(monitoringContext.getCredential().getAccessKeyType(), CdpAccessKeyType.ED25519.getValue()));
+                    .withPrivateKey(UMSSecretKeyFormatter.formatSecretKey(accessKeyType, monitoringContext.getCredential().getPrivateKey()).toCharArray())
+                    .withAccessKeyType(accessKeyType);
         }
         fillExporterConfigs(builder, monitoringContext.getSharedPassword());
         fillRequestSignerConfigs(monitoringConfiguration.getRequestSigner(), builder);

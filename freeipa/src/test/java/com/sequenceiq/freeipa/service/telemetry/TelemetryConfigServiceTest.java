@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
 import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentType;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
@@ -124,8 +125,9 @@ public class TelemetryConfigServiceTest {
         given(entitlementService.isFreeIpaDatabusEndpointValidationEnabled(anyString())).willReturn(true);
         given(vmLogsService.getVmLogs()).willReturn(new ArrayList<>());
         given(monitoringConfigService.isMonitoringEnabled(anyBoolean(), anyBoolean())).willReturn(true);
-        given(altusMachineUserService.getOrCreateDataBusCredentialIfNeeded(any(Stack.class))).willReturn(dataBusCredential);
-        given(altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(any(Stack.class))).willReturn(Optional.of(monitoringCredential));
+        given(altusMachineUserService.getOrCreateDataBusCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class))).willReturn(dataBusCredential);
+        given(altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class)))
+                .willReturn(Optional.of(monitoringCredential));
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack(telemetry(true, true, true)));
         // THEN
@@ -135,8 +137,8 @@ public class TelemetryConfigServiceTest {
         assertTrue(result.getDatabusContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
         assertFalse(result.getMeteringContext().isEnabled());
-        verify(altusMachineUserService, times(1)).getOrCreateDataBusCredentialIfNeeded(any(Stack.class));
-        verify(altusMachineUserService, times(1)).getOrCreateMonitoringCredentialIfNeeded(any(Stack.class));
+        verify(altusMachineUserService, times(1)).getOrCreateDataBusCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class));
+        verify(altusMachineUserService, times(1)).getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class));
     }
 
     @Test
@@ -150,14 +152,15 @@ public class TelemetryConfigServiceTest {
         monitoringCredential.setPrivateKey("privateKey");
         given(umsClient.getAccountDetails(anyString(), any())).willReturn(account);
         given(monitoringConfigService.isMonitoringEnabled(anyBoolean(), anyBoolean())).willReturn(true);
-        given(altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(any(Stack.class))).willReturn(Optional.of(monitoringCredential));
+        given(altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class)))
+                .willReturn(Optional.of(monitoringCredential));
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack(telemetry(false, true, false)));
         // THEN
         assertFalse(result.getLogShipperContext().isEnabled());
         assertFalse(result.getDatabusContext().isEnabled());
         assertTrue(result.getMonitoringContext().isEnabled());
-        verify(altusMachineUserService, times(1)).getOrCreateMonitoringCredentialIfNeeded(any(Stack.class));
+        verify(altusMachineUserService, times(1)).getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class));
     }
 
     @Test

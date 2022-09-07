@@ -5,9 +5,10 @@ import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsC
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -22,14 +23,19 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryFeatureService;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsFlowException;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionEvent;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
+import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 import reactor.bus.Event;
 
@@ -42,7 +48,19 @@ public class DiagnosticsEnsureMachineUserHandlerTest {
     private DiagnosticsEnsureMachineUserHandler underTest;
 
     @Mock
+    private StackService stackService;
+
+    @Mock
+    private ImageService imageService;
+
+    @Mock
     private AltusMachineUserService altusMachineUserService;
+
+    @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
+    private TelemetryFeatureService telemetryFeatureService;
 
     @BeforeEach
     public void setUp() {
@@ -53,21 +71,25 @@ public class DiagnosticsEnsureMachineUserHandlerTest {
     @Test
     public void testDoAccept() throws IOException {
         // GIVEN
-        given(altusMachineUserService.getOrCreateDataBusCredentialIfNeeded(anyLong())).willReturn(new DataBusCredential());
+        given(altusMachineUserService.getOrCreateDataBusCredentialIfNeeded(anyLong(), any())).willReturn(new DataBusCredential());
         DiagnosticParameters diagnosticParameters = new DiagnosticParameters();
         diagnosticParameters.setDestination(DiagnosticsDestination.SUPPORT);
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        stack.setAccountId("accountId");
+        given(stackService.getStackById(STACK_ID)).willReturn(stack);
         // WHEN
         DiagnosticsCollectionEvent event = new DiagnosticsCollectionEvent(ENSURE_MACHINE_USER_EVENT.selector(), STACK_ID, "crn",
                 diagnosticParameters);
         underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
         // THEN
-        verify(altusMachineUserService, times(1)).getOrCreateDataBusCredentialIfNeeded(anyLong());
+        verify(altusMachineUserService, times(1)).getOrCreateDataBusCredentialIfNeeded(anyLong(), any());
     }
 
     @Test
     public void testDoAcceptOnError() throws IOException {
         // GIVEN
-        doThrow(new IOException("ex")).when(altusMachineUserService).getOrCreateDataBusCredentialIfNeeded(anyLong());
+        lenient().doThrow(new IOException("ex")).when(altusMachineUserService).getOrCreateDataBusCredentialIfNeeded(anyLong(), any());
         DiagnosticParameters diagnosticParameters = new DiagnosticParameters();
         diagnosticParameters.setDestination(DiagnosticsDestination.SUPPORT);
         // WHEN

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -97,32 +98,31 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         telemetryContext.setClusterType(mapToFluentClusterType(stack.getType()));
         telemetryContext.setTelemetry(telemetry);
         if (telemetry != null) {
-            DatabusContext databusContext = createDatabusContext(stack, telemetry, dataBusCredential, accountId);
+            CdpAccessKeyType cdpAccessKeyType = altusMachineUserService.getCdpAccessKeyType(stackDto);
+            DatabusContext databusContext = createDatabusContext(stack, telemetry, dataBusCredential, accountId, cdpAccessKeyType);
             telemetryContext.setDatabusContext(databusContext);
             telemetryContext.setClusterDetails(createTelemetryClusterDetails(stack, telemetry, databusContext));
             telemetryContext.setMeteringContext(createMeteringContext(stack, telemetry));
             NodeStatusContext nodeStatusContext = createNodeStatusContext(cluster, accountId);
             telemetryContext.setNodeStatusContext(nodeStatusContext);
             telemetryContext.setLogShipperContext(createLogShipperContext(stack, telemetry));
-            telemetryContext.setMonitoringContext(createMonitoringContext(stack, cluster, telemetryContext, accountId, monitoringCredential));
+            telemetryContext.setMonitoringContext(createMonitoringContext(stack, cluster, telemetryContext, accountId, monitoringCredential, cdpAccessKeyType));
         }
         return telemetryContext;
     }
 
-    private DatabusContext createDatabusContext(StackView stack, Telemetry telemetry, DataBusCredential dataBusCredential, String accountId) {
+    private DatabusContext createDatabusContext(StackView stack, Telemetry telemetry, DataBusCredential dataBusCredential, String accountId,
+            CdpAccessKeyType cdpAccessKeyType) {
         boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(accountId);
         String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(telemetry.getDatabusEndpoint(), useDbusCnameEndpoint);
         String databusS3Endpoint = dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint);
         DatabusContext.Builder builder = DatabusContext.builder();
-        AltusCredential dbusCredential = getAltusCredentialForDataBus(stack, accountId, telemetry, dataBusCredential);
+        DataBusCredential dbusCredential = getOrRefreshDataBusCredential(stack, accountId, telemetry, dataBusCredential, cdpAccessKeyType);
         if (telemetry.isAnyDataBusBasedFeatureEnablred()) {
             builder.enabled();
         }
-        if (!dbusCredential.isEmpty()) {
-            DataBusCredential credential = new DataBusCredential();
-            credential.setAccessKey(dbusCredential.getAccessKey());
-            credential.setPrivateKey(new String(dbusCredential.getPrivateKey()));
-            builder.withCredential(credential);
+        if (dbusCredential != null && dbusCredential.isValid()) {
+            builder.withCredential(dbusCredential);
         }
         boolean datalakeCluster = StackType.DATALAKE.equals(stack.getType());
         if (!datalakeCluster && entitlementService.isDatahubDatabusEndpointValidationEnabled(accountId)) {
@@ -135,7 +135,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
     }
 
     private MonitoringContext createMonitoringContext(StackView stack, ClusterView cluster, TelemetryContext telemetryContext,
-            String accountId, MonitoringCredential monitoringCredential) {
+            String accountId, MonitoringCredential monitoringCredential, CdpAccessKeyType cdpAccessKeyType) {
         MonitoringContext.Builder builder = MonitoringContext.builder();
         Telemetry telemetry = telemetryContext.getTelemetry();
         NodeStatusContext nodeStatusContext = telemetryContext.getNodeStatusContext();
@@ -145,10 +145,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         builder.withClusterType(MonitoringClusterType.CLOUDERA_MANAGER);
         if (monitoringEnabled && telemetry.isComputeMonitoringEnabled()) {
             builder.enabled();
-            AltusCredential altusCred = getAltusCredentialForMonitoring(stack, accountId, telemetry, monitoringCredential);
-            MonitoringCredential credential = new MonitoringCredential();
-            credential.setAccessKey(altusCred.getAccessKey());
-            credential.setPrivateKey(new String(altusCred.getPrivateKey()));
+            MonitoringCredential credential = getOrRefreshMonitoringCredential(stack, accountId, telemetry, monitoringCredential, cdpAccessKeyType);
             builder.withCredential(credential);
             MonitoringAuthConfig cmAuthConfig = null;
             if (cluster != null && cluster.getCloudbreakClusterManagerMonitoringUser() != null
@@ -231,35 +228,32 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
                 .build();
     }
 
-    private AltusCredential getAltusCredentialForDataBus(StackView stack, String accountId, Telemetry telemetry, DataBusCredential dataBusCredential) {
+    private DataBusCredential getOrRefreshDataBusCredential(StackView stack, String accountId, Telemetry telemetry, DataBusCredential dataBusCredential,
+            CdpAccessKeyType cdpAccessKeyType) {
         return getAltusCredential(accountId, telemetry, dataBusCredential, "DataBus", altusMachineUserService::isAnyDataBusBasedFeatureSupported,
                 () -> {
-                    Optional<AltusCredential> altusCredential = altusMachineUserService.generateDatabusMachineUserForFluent(stack, telemetry);
-                    return altusMachineUserService.storeDataBusCredential(altusCredential, stack);
+                    Optional<AltusCredential> altusCredential = altusMachineUserService.generateDatabusMachineUserForFluent(stack, telemetry, cdpAccessKeyType);
+                    return altusMachineUserService.storeDataBusCredential(altusCredential, stack, cdpAccessKeyType);
                 });
     }
 
-    private AltusCredential getAltusCredentialForMonitoring(StackView stack, String accountId, Telemetry telemetry, MonitoringCredential credential) {
+    private MonitoringCredential getOrRefreshMonitoringCredential(StackView stack, String accountId, Telemetry telemetry, MonitoringCredential credential,
+            CdpAccessKeyType cdpAccessKeyType) {
         return getAltusCredential(accountId, telemetry, credential, "Monitoring", altusMachineUserService::isAnyMonitoringFeatureSupported,
                 () -> {
-                    Optional<AltusCredential> altusCredential = altusMachineUserService.generateMonitoringMachineUser(stack, telemetry);
-                    return altusMachineUserService.storeMonitoringCredential(altusCredential, stack);
+                    Optional<AltusCredential> altusCredential = altusMachineUserService.generateMonitoringMachineUser(stack, telemetry, cdpAccessKeyType);
+                    return altusMachineUserService.storeMonitoringCredential(altusCredential, stack, cdpAccessKeyType);
                 });
     }
 
-    private <C extends CdpCredential> AltusCredential getAltusCredential(String accountId, Telemetry telemetry,
+    private <C extends CdpCredential> C getAltusCredential(String accountId, Telemetry telemetry,
             C credential, String type, Predicate<Telemetry> featureSupportedFunc, Supplier<C> credGenerator) {
         if (featureSupportedFunc.test(telemetry)) {
             if (needToGenerateCredential(accountId, telemetry, credential, type)) {
                 credential = credGenerator.get();
             }
         }
-        if (credential == null || credential.getAccessKey() == null || credential.getPrivateKey() == null) {
-            return new AltusCredential(null, null);
-        } else {
-            LOGGER.debug("Fill {} altus credential from {} object...", type, credential.getClass().getName());
-            return new AltusCredential(credential.getAccessKey(), credential.getPrivateKey().toCharArray());
-        }
+        return credential;
     }
 
     private <C extends CdpCredential> boolean needToGenerateCredential(String accountId, Telemetry telemetry, C credential, String type) {

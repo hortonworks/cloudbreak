@@ -23,7 +23,7 @@ public abstract class CdpCredential implements Serializable {
     private String privateKey;
 
     @JsonProperty("accessKeyType")
-    private String accessKeyType;
+    private String accessKeyType = "Ed25519";
 
     public String getMachineUserName() {
         return machineUserName;

@@ -105,7 +105,7 @@ public class MonitoringConfigServiceTest {
         // THEN
         assertEquals("myendpoint", result.get("remoteWriteUrl"));
         assertEquals(true, result.get("cmAutoTls"));
-        assertEquals(ACCESS_KEY_TYPE, result.get("accessKeyType"));
+        assertEquals(ACCESS_KEY_TYPE, result.get("monitoringAccessKeyType"));
         assertEquals(true, result.get("enabled"));
         assertEquals("user", result.get("cmUsername"));
         assertEquals(1000, result.get("blackboxExporterClouderaIntervalSeconds"));
