@@ -26,7 +26,7 @@ public class AwsImageUpdateService {
         if (cfTemplate.contains(AwsUpdateService.LAUNCH_CONFIGURATION)) {
             awsLaunchConfigurationImageUpdateService.updateImage(authenticatedContext, stack, cfResource);
         } else if (cfTemplate.contains(AwsUpdateService.LAUNCH_TEMPLATE)) {
-            awsLaunchTemplateUpdateService.updateFields(authenticatedContext,
+            awsLaunchTemplateUpdateService.updateFieldsOnAllLaunchTemplate(authenticatedContext,
                     cfResource.getName(), Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()));
         } else {
             throw new NotImplementedException("Image update for stack template is not implemented yet.");

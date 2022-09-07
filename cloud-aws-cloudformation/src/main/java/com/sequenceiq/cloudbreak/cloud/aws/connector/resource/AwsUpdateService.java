@@ -12,6 +12,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsImageUpdateService;
@@ -21,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.type.CommonResourceType;
@@ -32,6 +35,8 @@ public class AwsUpdateService {
 
     public static final String LAUNCH_TEMPLATE = "AWS::EC2::LaunchTemplate";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsUpdateService.class);
+
     @Inject
     private AwsImageUpdateService awsImageUpdateService;
 
@@ -40,26 +45,49 @@ public class AwsUpdateService {
 
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         ArrayList<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
-        if (!resources.isEmpty() && resources.stream().anyMatch(resource -> CommonResourceType.TEMPLATE == resource.getType().getCommonResourceType()
-                && StringUtils.isNotBlank(resource.getStringParameter(CloudResource.IMAGE)))) {
+        if (!resources.isEmpty()) {
+            if (resources.stream().anyMatch(resource -> CommonResourceType.TEMPLATE == resource.getType().getCommonResourceType()
+                    && StringUtils.isNotBlank(resource.getStringParameter(CloudResource.IMAGE)))) {
+                List<CloudResource> launchConfigurationResources = resources.stream()
+                        .filter(resource -> CommonResourceType.TEMPLATE == resource.getType().getCommonResourceType()
+                                && StringUtils.isNotBlank(resource.getStringParameter(CloudResource.IMAGE))).collect(Collectors.toList());
 
-            List<CloudResource> launchConfigurationResources = resources.stream()
-                    .filter(resource -> CommonResourceType.TEMPLATE == resource.getType().getCommonResourceType()
-                            && StringUtils.isNotBlank(resource.getStringParameter(CloudResource.IMAGE))).collect(Collectors.toList());
+                CloudResource cfResource = getCloudFormationStack(resources);
+                awsImageUpdateService.updateImage(authenticatedContext, stack, cfResource);
 
-            CloudResource cfResource = getCloudFormationStack(resources);
-            awsImageUpdateService.updateImage(authenticatedContext, stack, cfResource);
-
-            launchConfigurationResources.forEach(cloudResource -> cloudResourceStatuses.add(new CloudResourceStatus(cloudResource, ResourceStatus.UPDATED)));
+                launchConfigurationResources.forEach(cloudResource -> cloudResourceStatuses.add(new CloudResourceStatus(cloudResource, ResourceStatus.UPDATED)));
+            } else {
+                updateWithVerticalScaling(authenticatedContext, stack, resources);
+            }
         }
         return cloudResourceStatuses;
+    }
+
+    private void updateWithVerticalScaling(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
+        String cfTemplate = stack.getTemplate();
+        if (cfTemplate.contains(LAUNCH_TEMPLATE)) {
+            CloudResource cfResource = getCloudFormationStack(resources);
+            for (Group group : stack.getGroups()) {
+                Map<LaunchTemplateField, String> updatableFields = Map.of(
+                        LaunchTemplateField.INSTANCE_TYPE,
+                        group.getReferenceInstanceConfiguration().getTemplate().getFlavor()
+                );
+                LOGGER.info("Update fields on launchtemplate {} on group {} on cf {}", updatableFields, group.getName(), cfResource.getName());
+                awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields,
+                        authenticatedContext,
+                        cfResource.getName(),
+                        group);
+            }
+        } else {
+            throw new NotImplementedException("Vertical scale update for stack template is not implemented yet, only for AWS::EC2::LaunchTemplate.");
+        }
     }
 
     public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources, String userData) {
         String cfTemplate = stack.getTemplate();
         if (cfTemplate.contains(LAUNCH_TEMPLATE)) {
             CloudResource cfResource = getCloudFormationStack(resources);
-            awsLaunchTemplateUpdateService.updateFields(authenticatedContext, cfResource.getName(), Map.of(LaunchTemplateField.USER_DATA,
+            awsLaunchTemplateUpdateService.updateFieldsOnAllLaunchTemplate(authenticatedContext, cfResource.getName(), Map.of(LaunchTemplateField.USER_DATA,
                     Base64.getEncoder().encodeToString(userData.getBytes())));
         } else {
             throw new NotImplementedException("UserData update for stack template is not implemented yet, only for AWS::EC2::LaunchTemplate.");
@@ -68,7 +96,7 @@ public class AwsUpdateService {
 
     public void checkUpdate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
         CloudResource cfResource = getCloudFormationStack(resources);
-        awsLaunchTemplateUpdateService.updateFields(authenticatedContext, cfResource.getName(), Map.of(LaunchTemplateField.DESCRIPTION,
+        awsLaunchTemplateUpdateService.updateFieldsOnAllLaunchTemplate(authenticatedContext, cfResource.getName(), Map.of(LaunchTemplateField.DESCRIPTION,
                 String.format("Latest modifyLaunchTemplate check for upgrade: %s", new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(new Date()))),
                 true);
     }

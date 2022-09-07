@@ -48,7 +48,7 @@ public class AwsImageUpdateServiceTest {
 
         String cfName = cfResource.getName();
         verify(awsLaunchConfigurationImageUpdateService).updateImage(ac, stack, cfResource);
-        verify(awsLaunchTemplateUpdateService, never()).updateFields(eq(ac), eq(cfName), anyMap());
+        verify(awsLaunchTemplateUpdateService, never()).updateFieldsOnAllLaunchTemplate(eq(ac), eq(cfName), anyMap());
     }
 
     @Test
@@ -59,7 +59,7 @@ public class AwsImageUpdateServiceTest {
         underTest.updateImage(ac, stack, cfResource);
 
         String cfName = cfResource.getName();
-        verify(awsLaunchTemplateUpdateService).updateFields(eq(ac), eq(cfName), anyMap());
+        verify(awsLaunchTemplateUpdateService).updateFieldsOnAllLaunchTemplate(eq(ac), eq(cfName), anyMap());
         verify(awsLaunchConfigurationImageUpdateService, never()).updateImage(ac, stack, cfResource);
     }
 
@@ -70,7 +70,7 @@ public class AwsImageUpdateServiceTest {
         Assertions.assertThrows(NotImplementedException.class, () -> underTest.updateImage(ac, stack, cfResource));
 
         String cfName = cfResource.getName();
-        verify(awsLaunchTemplateUpdateService, never()).updateFields(eq(ac), eq(cfName), anyMap());
+        verify(awsLaunchTemplateUpdateService, never()).updateFieldsOnAllLaunchTemplate(eq(ac), eq(cfName), anyMap());
         verify(awsLaunchConfigurationImageUpdateService, never()).updateImage(ac, stack, cfResource);
     }
 }

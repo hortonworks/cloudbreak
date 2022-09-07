@@ -3,9 +3,9 @@ package com.sequenceiq.freeipa.flow.freeipa.verticalscale.actions;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_FAILURE_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_FAIL_HANDLED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_FINALIZED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_FINISHED_FAILURE_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.FAIL_HANDLED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.FINALIZED_EVENT;
 
 import java.util.List;
 import java.util.Map;
@@ -105,7 +105,7 @@ public class FreeIpaVerticalScaleActions {
                     sendEvent(ctx, request);
                 } catch (Exception e) {
                     LOGGER.error("Failed to Vertical scaling FreeIPA", e);
-                    sendEvent(ctx, STACK_VERTICALSCALE_FAILURE_EVENT.selector(),
+                    sendEvent(ctx, STACK_VERTICALSCALE_FINISHED_FAILURE_EVENT.selector(),
                             new FreeIpaVerticalScaleFailureEvent(stack.getId(), "Vertical Scale update", Set.of(), Map.of(), e));
                 }
             }
@@ -120,7 +120,7 @@ public class FreeIpaVerticalScaleActions {
             protected void doExecute(StackContext context, FreeIpaVerticalScaleResult payload, Map<Object, Object> variables) {
                 freeIPAVerticalScaleService.updateTemplateWithVerticalScaleInformation(context.getStack().getId(), payload.getFreeIPAVerticalScaleRequest());
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.STOPPED, "Vertical scale complete");
-                sendEvent(context, STACK_VERTICALSCALE_FINALIZED_EVENT.selector(), payload);
+                sendEvent(context, FINALIZED_EVENT.selector(), payload);
             }
         };
     }
@@ -147,7 +147,7 @@ public class FreeIpaVerticalScaleActions {
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.VERTICAL_SCALE_FAILED, errorReason);
                 enableStatusChecker(stack, "Failed vertical scaling FreeIPA");
                 enableNodeStatusChecker(stack, "Failed vertical scaling FreeIPA");
-                sendEvent(context, STACK_VERTICALSCALE_FAIL_HANDLED_EVENT.event(), payload);
+                sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
             }
         };
     }

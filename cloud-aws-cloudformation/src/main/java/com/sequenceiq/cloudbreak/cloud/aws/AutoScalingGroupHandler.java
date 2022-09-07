@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -51,5 +52,11 @@ public class AutoScalingGroupHandler {
         List<AutoScalingGroup> scalingGroups = autoScalingClient.describeAutoScalingGroups(request).getAutoScalingGroups();
         return scalingGroups.stream()
                 .collect(Collectors.toMap(scalingGroup -> scalingGroup, scalingGroup -> autoScalingGroups.get(scalingGroup.getAutoScalingGroupName())));
+    }
+
+    public Optional<AutoScalingGroup> getAutoScalingGroup(AmazonCloudFormationClient cloudFormationClient,
+            AmazonAutoScalingClient autoScalingClient, String stackName, String groupName) {
+        Map<AutoScalingGroup, String> autoScalingGroups = getAutoScalingGroups(cloudFormationClient, autoScalingClient, stackName);
+        return autoScalingGroups.keySet().stream().filter(a -> a.getAutoScalingGroupName().equals(groupName)).findFirst();
     }
 }

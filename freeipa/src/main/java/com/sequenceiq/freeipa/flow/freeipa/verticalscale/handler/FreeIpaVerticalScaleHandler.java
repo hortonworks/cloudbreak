@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.verticalscale.handler;
 
-import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_FAILURE_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_FINISHED_FAILURE_EVENT;
 
 import java.util.List;
 import java.util.Map;
@@ -75,7 +75,7 @@ public class FreeIpaVerticalScaleHandler implements CloudPlatformEventHandler<Fr
                     Set.of(),
                     Map.of(),
                     e);
-            eventBus.notify(STACK_VERTICALSCALE_FAILURE_EVENT.event(), new Event<>(event.getHeaders(), result));
+            eventBus.notify(STACK_VERTICALSCALE_FINISHED_FAILURE_EVENT.event(), new Event<>(event.getHeaders(), result));
         }
     }
 

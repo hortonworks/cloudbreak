@@ -23,18 +23,22 @@ import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Buil
 public class CoreVerticalScaleFlowConfig extends StackStatusFinalizerAbstractFlowConfig<CoreVerticalScaleState, CoreVerticalScaleEvent> {
     private static final List<Transition<CoreVerticalScaleState, CoreVerticalScaleEvent>> TRANSITIONS =
             new Builder<CoreVerticalScaleState, CoreVerticalScaleEvent>()
+
                     .from(INIT_STATE)
                     .to(STACK_VERTICALSCALE_STATE)
                     .event(STACK_VERTICALSCALE_EVENT)
-                        .noFailureEvent()
+                    .noFailureEvent()
+
                     .from(STACK_VERTICALSCALE_STATE)
                     .to(STACK_VERTICALSCALE_FINISHED_STATE)
                     .event(STACK_VERTICALSCALE_FINISHED_EVENT)
-                            .failureEvent(STACK_VERTICALSCALE_FINISHED_FAILURE_EVENT)
+                    .failureEvent(STACK_VERTICALSCALE_FINISHED_FAILURE_EVENT)
+
                     .from(STACK_VERTICALSCALE_FINISHED_STATE)
                     .to(FINAL_STATE)
                     .event(FINALIZED_EVENT)
-                        .failureEvent(FAILURE_EVENT)
+                    .failureEvent(FAILURE_EVENT)
+
                     .build();
 
     private static final FlowEdgeConfig<CoreVerticalScaleState, CoreVerticalScaleEvent> EDGE_CONFIG = new FlowEdgeConfig<>(
