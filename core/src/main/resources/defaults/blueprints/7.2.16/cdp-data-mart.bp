@@ -6,22 +6,6 @@
     "blueprintUpgradeOption": "GA",
     "services": [
       {
-        "refName": "core_settings",
-        "serviceType": "CORE_SETTINGS",
-        "roleConfigGroups": [
-          {
-            "refName": "core_settings-GATEWAY-BASE",
-            "roleType": "GATEWAY",
-            "base": true
-          },
-          {
-            "refName": "core_settings-STORAGEOPERATIONS-BASE",
-            "roleType": "STORAGEOPERATIONS",
-            "base": true
-          }
-        ]
-      },
-      {
         "refName": "hue",
         "serviceType": "HUE",
         "roleConfigGroups": [
@@ -93,8 +77,6 @@
         "refName": "master",
         "cardinality": "1",
         "roleConfigGroupsRefNames": [
-          "core_settings-GATEWAY-BASE",
-          "core_settings-STORAGEOPERATIONS-BASE",
           "hue-HUE_LOAD_BALANCER-BASE",
           "hue-HUE_SERVER-BASE",
           "impala-CATALOGSERVER-BASE",
