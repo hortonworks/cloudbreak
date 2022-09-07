@@ -11,7 +11,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -31,8 +30,8 @@ public class FreeIpaScalingValidationService {
     @Inject
     private AllowedScalingPaths allowedScalingPaths;
 
-    @Value("${freeipa.verticalScalingSupported}")
-    private Set<String> verticalScalingSupported;
+    @Inject
+    private VerticalScalingValidatorService verticalScalingValidatorService;
 
     public void validateStackForUpscale(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath) {
         if (allInstances.size() >= AvailabilityType.HA.getInstanceCount()) {
@@ -43,30 +42,8 @@ public class FreeIpaScalingValidationService {
     }
 
     public void validateStackForVerticalUpscale(Stack stack, VerticalScaleRequest request) {
-        if (!stack.isStopped()) {
-            throw new BadRequestException("Vertical scaling currently only available for FreeIPA when it is stopped");
-        }
-        validateVerticalScalingRequest(stack, request);
-    }
-
-    private void validateVerticalScalingRequest(Stack stack, VerticalScaleRequest verticalScaleV4Request) {
-        if (!verticalScalingSupported.contains(stack.getCloudPlatform())) {
-            throw new BadRequestException(String.format("Vertical scaling is not supported on %s cloud platform", stack.getCloudPlatform()));
-        }
-        if (verticalScaleV4Request.getTemplate() == null) {
-            throw new BadRequestException(String.format("Define an exiting instancetype to vertically scale the %s FreeIPA.", stack.getCloudPlatform()));
-        }
-        if (verticalScaleV4Request.getTemplate().getInstanceType() == null) {
-            throw new BadRequestException(String.format("Define an exiting instancetype to vertically scale the %s FreeIPA.", stack.getCloudPlatform()));
-        }
-        if (anyAttachedVolumePropertyDefinedInVerticalScalingRequest(verticalScaleV4Request)) {
-            throw new BadRequestException(String.format("Only instance type modification is supported on %s FreeIPA.", stack.getCloudPlatform()));
-        }
-    }
-
-    private boolean anyAttachedVolumePropertyDefinedInVerticalScalingRequest(VerticalScaleRequest verticalScaleV4Request) {
-        return verticalScaleV4Request.getTemplate().getAttachedVolumes() != null
-                && !verticalScaleV4Request.getTemplate().getAttachedVolumes().isEmpty();
+        verticalScalingValidatorService.validateStatus(stack);
+        //verticalScalingValidatorService.validateRequest(stack, request);
     }
 
     public void validateStackForDownscale(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath) {

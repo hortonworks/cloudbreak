@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.StateStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -163,11 +164,7 @@ public class FreeIpaPollerProvider {
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () ->  freeIpaService.getFlowStatus(flowId));
         LOGGER.debug("[----------FREEIPA - CHECK----------]Flow status: {}", flowLogResponse);
-        if (flowCompleted(flowLogResponse)) {
-            return AttemptResults.finishWith(null);
-        } else {
-            return checkVerticalScaleStatus(flowLogResponse);
-        }
+        return checkVerticalScaleStatus(flowLogResponse);
     }
 
     private boolean operationCompleted(OperationStatus operationStatus) {
@@ -197,6 +194,17 @@ public class FreeIpaPollerProvider {
 
     private AttemptResult<Void> checkVerticalScaleStatus(FlowLogResponse flowLogResponse) {
         StateStatus state = flowLogResponse.getStateStatus();
+        if (flowCompleted(flowLogResponse) && state.equals(StateStatus.SUCCESSFUL)) {
+            FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> freeIpaService.getFlowCheckStatus(flowLogResponse.getFlowId()));
+            Boolean latestFlowFinalizedAndFailed = flowCheckResponse.getLatestFlowFinalizedAndFailed();
+            if (latestFlowFinalizedAndFailed) {
+                return AttemptResults.breakFor("FreeIpa vertical scale failed.");
+            } else {
+                return AttemptResults.finishWith(null);
+            }
+        }
         switch (state) {
             case SUCCESSFUL:
             case PENDING:

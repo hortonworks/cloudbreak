@@ -7,6 +7,8 @@ import com.amazonaws.services.autoscaling.model.DeleteLaunchConfigurationRequest
 import com.amazonaws.services.autoscaling.model.DeleteLaunchConfigurationResult;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingInstancesRequest;
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingInstancesResult;
 import com.amazonaws.services.autoscaling.model.DescribeLaunchConfigurationsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeLaunchConfigurationsResult;
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest;
@@ -54,6 +56,10 @@ public class AmazonAutoScalingClient extends AmazonClient {
 
     public DetachInstancesResult detachInstances(DetachInstancesRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.detachInstances(request));
+    }
+
+    public DescribeAutoScalingInstancesResult describeAutoScalingInstances(DescribeAutoScalingInstancesRequest request) {
+        return retry.testWith2SecDelayMax15Times(() -> client.describeAutoScalingInstances(request));
     }
 
     public DescribeScalingActivitiesResult describeScalingActivities(DescribeScalingActivitiesRequest request) {

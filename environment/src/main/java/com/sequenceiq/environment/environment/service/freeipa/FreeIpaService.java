@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
@@ -194,6 +195,18 @@ public class FreeIpaService {
         try {
             LOGGER.debug("Getting FreeIPA Operation status for flowId {}", flowId);
             return flowEndpoint.getLastFlowById(flowId);
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to get operation status '{}' in account {} due to: '{}'", flowId, accountId, errorMessage, e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public FlowCheckResponse getFlowCheckStatus(String flowId) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        try {
+            LOGGER.debug("Getting FreeIPA Operation status for flowId {}", flowId);
+            return flowEndpoint.hasFlowRunningByFlowId(flowId);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to get operation status '{}' in account {} due to: '{}'", flowId, accountId, errorMessage, e);

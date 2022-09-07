@@ -56,7 +56,6 @@ public class EnvironmentStatusUpdateService {
 
     public EnvironmentDto updateFailedEnvironmentStatusAndNotify(CommonContext context, BaseFailedFlowEvent failedFlowEvent,
             EnvironmentStatus environmentStatus, ResourceEvent resourceEvent, Enum<?> envState) {
-
         return updateFailedEnvironmentStatusAndNotify(context, failedFlowEvent, environmentStatus, resourceEvent, Set.of(), envState);
     }
 

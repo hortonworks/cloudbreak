@@ -5,10 +5,11 @@ import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.FreeIpaVerticalS
 import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.FreeIpaVerticalScaleState.STACK_VERTICALSCALE_FAILED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.FreeIpaVerticalScaleState.STACK_VERTICALSCALE_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.FreeIpaVerticalScaleState.STACK_VERTICALSCALE_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.FAILURE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_FAILURE_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_FAIL_HANDLED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_FINALIZED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_FINISHED_FAILURE_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.FAIL_HANDLED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.FINALIZED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_FINISHED_EVENT;
 
 import java.util.List;
@@ -23,20 +24,22 @@ import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalSc
 public class FreeIpaVerticalScaleFlowConfig extends AbstractFlowConfiguration<FreeIpaVerticalScaleState, FreeIpaVerticalScaleEvent> {
     private static final List<Transition<FreeIpaVerticalScaleState, FreeIpaVerticalScaleEvent>> TRANSITIONS =
             new Builder<FreeIpaVerticalScaleState, FreeIpaVerticalScaleEvent>()
+                    .defaultFailureEvent(FAILURE_EVENT)
+
                     .from(INIT_STATE)
                     .to(STACK_VERTICALSCALE_STATE)
                     .event(STACK_VERTICALSCALE_EVENT)
-                    .noFailureEvent()
+                    .failureEvent(STACK_VERTICALSCALE_FINISHED_FAILURE_EVENT)
 
                     .from(STACK_VERTICALSCALE_STATE)
                     .to(STACK_VERTICALSCALE_FINISHED_STATE)
                     .event(STACK_VERTICALSCALE_FINISHED_EVENT)
-                    .failureEvent(STACK_VERTICALSCALE_FAILURE_EVENT)
+                    .failureEvent(STACK_VERTICALSCALE_FINISHED_FAILURE_EVENT)
 
                     .from(STACK_VERTICALSCALE_FINISHED_STATE)
                     .to(FINAL_STATE)
-                    .event(STACK_VERTICALSCALE_FINALIZED_EVENT)
-                    .failureEvent(STACK_VERTICALSCALE_FAILURE_EVENT)
+                    .event(FINALIZED_EVENT)
+                    .failureEvent(STACK_VERTICALSCALE_FINISHED_FAILURE_EVENT)
 
                     .build();
 
@@ -44,7 +47,7 @@ public class FreeIpaVerticalScaleFlowConfig extends AbstractFlowConfiguration<Fr
             INIT_STATE,
             FINAL_STATE,
             STACK_VERTICALSCALE_FAILED_STATE,
-            STACK_VERTICALSCALE_FAIL_HANDLED_EVENT);
+            FAIL_HANDLED_EVENT);
 
     public FreeIpaVerticalScaleFlowConfig() {
         super(FreeIpaVerticalScaleState.class, FreeIpaVerticalScaleEvent.class);

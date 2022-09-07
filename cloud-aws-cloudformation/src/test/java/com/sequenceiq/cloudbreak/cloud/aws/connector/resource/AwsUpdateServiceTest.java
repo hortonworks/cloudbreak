@@ -1,8 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsImageUpdateService;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchTemplateUpdateService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -31,6 +37,9 @@ public class AwsUpdateServiceTest {
 
     @Mock
     private AuthenticatedContext ac;
+
+    @Mock
+    private AwsLaunchTemplateUpdateService awsLaunchTemplateUpdateService;
 
     @InjectMocks
     private AwsUpdateService underTest;
@@ -62,8 +71,14 @@ public class AwsUpdateServiceTest {
                 .withName("cf")
                 .withType(ResourceType.CLOUDFORMATION_STACK)
                 .build();
+        CloudResource launch = CloudResource.builder()
+                .withName("cf")
+                .withType(ResourceType.AWS_LAUNCHCONFIGURATION)
+                .build();
+        when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchTemplate");
+        doNothing().when(awsLaunchTemplateUpdateService).updateLaunchTemplate(anyMap(), any(), anyString(), any());
 
-        List<CloudResourceStatus> statuses = underTest.update(ac, stack, Collections.singletonList(cloudResource));
+        List<CloudResourceStatus> statuses = underTest.update(ac, stack, List.of(cloudResource, launch));
 
         verify(awsImageUpdateService, times(0)).updateImage(ac, stack, cloudResource);
         assertEquals(0, statuses.size());
@@ -76,10 +91,16 @@ public class AwsUpdateServiceTest {
                 .withType(ResourceType.AWS_LAUNCHCONFIGURATION)
                 .withParams(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
                 .build();
+        CloudResource cf = CloudResource.builder()
+                .withName("cf")
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .withParams(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
+                .build();
+        doNothing().when(awsLaunchTemplateUpdateService).updateLaunchTemplate(anyMap(), any(), anyString(), any());
 
-        List<CloudResourceStatus> statuses = underTest.update(ac, stack, Collections.singletonList(cloudResource));
+        List<CloudResourceStatus> statuses = underTest.update(ac, stack, List.of(cloudResource, cf));
 
         verify(awsImageUpdateService, times(0)).updateImage(ac, stack, cloudResource);
-        assertEquals(0, statuses.size());
+        assertEquals(1, statuses.size());
     }
 }
