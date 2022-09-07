@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
+import com.sequenceiq.cloudbreak.auth.altus.model.MachineUserRequest;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
@@ -55,32 +57,30 @@ public class AltusIAMService {
     /**
      * Generate databus machine user with access keys
      */
-    public Optional<AltusCredential> generateDatabusMachineUserWithAccessKey(String machineUserName, String actorCrn, String accountId,
-            boolean useSharedCredential) {
+    public Optional<AltusCredential> generateDatabusMachineUserWithAccessKey(MachineUserRequest machineUserRequest, boolean useSharedCredential) {
         return Optional.ofNullable(sharedAltusCredentialProvider.getSharedCredentialIfConfigured(useSharedCredential)
                 .orElse(umsClient.createMachineUserAndGenerateKeys(
-                        machineUserName,
-                        actorCrn,
-                        accountId,
-                        roleCrnGenerator.getBuiltInDatabusRoleCrn(accountId),
+                        machineUserRequest.getName(),
+                        machineUserRequest.getActorCrn(),
+                        machineUserRequest.getAccountId(),
+                        roleCrnGenerator.getBuiltInDatabusRoleCrn(machineUserRequest.getAccountId()),
                         Collections.emptyMap(),
-                        UserManagementProto.AccessKeyType.Value.ED25519,
+                        mapToAccessKeyType(machineUserRequest.getCdpAccessKeyType()),
                         regionAwareInternalCrnGeneratorFactory)));
     }
 
     /**
      * Generate monitoring machine user with access keys
      */
-    public Optional<AltusCredential> generateMonitoringMachineUserWithAccessKey(String machineUserName, String actorCrn, String accountId,
-            boolean useSharedCredential) {
+    public Optional<AltusCredential> generateMonitoringMachineUserWithAccessKey(MachineUserRequest machineUserRequest, boolean useSharedCredential) {
         return Optional.ofNullable(sharedAltusCredentialProvider.getSharedCredentialIfConfigured(useSharedCredential)
                 .orElse(umsClient.createMachineUserAndGenerateKeys(
-                        machineUserName,
-                        actorCrn,
-                        accountId,
-                        roleCrnGenerator.getBuiltInDatabusRoleCrn(accountId),
+                        machineUserRequest.getName(),
+                        machineUserRequest.getActorCrn(),
+                        machineUserRequest.getAccountId(),
+                        roleCrnGenerator.getBuiltInDatabusRoleCrn(machineUserRequest.getAccountId()),
                         Collections.emptyMap(),
-                        UserManagementProto.AccessKeyType.Value.ED25519,
+                        mapToAccessKeyType(machineUserRequest.getCdpAccessKeyType()),
                         regionAwareInternalCrnGeneratorFactory)));
     }
 
@@ -140,5 +140,18 @@ public class AltusIAMService {
 
     public List<UserManagementProto.MachineUser> getAllMachineUsersForAccount(String accountId) {
         return umsClient.listAllMachineUsers(accountId, true, true, regionAwareInternalCrnGeneratorFactory);
+    }
+
+    private UserManagementProto.AccessKeyType.Value mapToAccessKeyType(CdpAccessKeyType cdpAccessKeyType) {
+        switch (cdpAccessKeyType) {
+            case ED25519:
+                return UserManagementProto.AccessKeyType.Value.ED25519;
+            case RSA:
+                return UserManagementProto.AccessKeyType.Value.RSA;
+            case ECDSA:
+                return UserManagementProto.AccessKeyType.Value.ECDSA;
+            default:
+                return UserManagementProto.AccessKeyType.Value.ED25519;
+        }
     }
 }

@@ -273,7 +273,7 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String MOCK_RESOURCE = "mock_resource";
 
-    private static final String SSH_PUBLIC_KEY_PATTERN = "^ssh-(rsa|ed25519)\\s+AAAA(B|C)3NzaC1.*(|\\n)";
+    private static final String SSH_PUBLIC_KEY_PATTERN = "^ssh-(rsa|ed25519|ecdsa)\\s+AAAA(B|C)3NzaC1.*(|\\n)";
 
     // See com.cloudera.thunderhead.service.common.entitlements.CdpEntitlements.CDP_CP_CUSTOM_DL_TEMPLATE
     // not used in CB, but used in CDP CLI, so we need this in mock for local development

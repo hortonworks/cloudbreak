@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -49,12 +50,30 @@ public class ComponentConfigProviderService {
             Component component = getComponent(stackId, ComponentType.IMAGE, ComponentType.IMAGE.name());
             if (component == null) {
                 throw new CloudbreakImageNotFoundException(String.format("Image not found: stackId: %d, componentType: %s, name: %s",
-                    stackId, ComponentType.IMAGE.name(), ComponentType.IMAGE.name()));
+                        stackId, ComponentType.IMAGE.name(), ComponentType.IMAGE.name()));
             }
             LOGGER.debug("Image found! stackId: {}, component: {}", stackId, component);
             return component.getAttributes().get(Image.class);
         } catch (IOException e) {
             throw new CloudbreakServiceException("Failed to read image", e);
+        }
+    }
+
+    public Optional<Image> findImage(Long stackId) {
+        Component component = getComponent(stackId, ComponentType.IMAGE, ComponentType.IMAGE.name());
+        if (component == null) {
+            LOGGER.info("Image not found: stackId: {}, componentType: {}, name: {}", stackId, ComponentType.IMAGE.name(), ComponentType.IMAGE.name());
+            return Optional.empty();
+        }
+        LOGGER.debug("Image found! stackId: {}, component: {}", stackId, component);
+        if (component.getAttributes() == null || StringUtils.isBlank(component.getAttributes().getValue())) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(component.getAttributes().get(Image.class));
+        } catch (IOException e) {
+            LOGGER.info("Couldn't read image.", e);
+            return Optional.empty();
         }
     }
 

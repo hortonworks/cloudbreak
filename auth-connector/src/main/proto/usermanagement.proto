@@ -732,6 +732,9 @@ message AccessKeyType {
     // Private keys are 32 bytes encoded in base64 (44 bytes)
     // Public keys are 32 bytes
     ED25519 = 2;
+    // Private keys are encoded in PKCS#8
+    // Public keys are encoded in X.509
+    ECDSA = 3;
   }
 }
 

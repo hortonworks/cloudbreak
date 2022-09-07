@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
 import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.model.CdpAccessKeyType;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -30,26 +31,29 @@ import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentType;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryContextProvider;
-import com.sequenceiq.cloudbreak.telemetry.context.MeteringContext;
-import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringServiceType;
-import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryFeatureService;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.context.DatabusContext;
 import com.sequenceiq.cloudbreak.telemetry.context.LogShipperContext;
+import com.sequenceiq.cloudbreak.telemetry.context.MeteringContext;
 import com.sequenceiq.cloudbreak.telemetry.context.MonitoringContext;
 import com.sequenceiq.cloudbreak.telemetry.context.NodeStatusContext;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigService;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringServiceType;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryConfigProvider;
+import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
+import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -90,6 +94,12 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
     @Inject
     private TelemetrySaltPillarDecorator telemetrySaltPillarDecorator;
 
+    @Inject
+    private ImageService imageService;
+
+    @Inject
+    private TelemetryFeatureService telemetryFeatureService;
+
     @Override
     public Map<String, SaltPillarProperties> createTelemetryConfigs(Long stackId, Set<TelemetryComponentType> components) {
         Stack stack = stackService.getStackById(stackId);
@@ -106,14 +116,15 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         Telemetry telemetry = stack.getTelemetry();
         telemetryContext.setTelemetry(telemetry);
         telemetryContext.setClusterType(FluentClusterType.FREEIPA);
-        DatabusContext databusContext = createDatabusContext(stack, telemetry);
+        CdpAccessKeyType cdpAccessKeyType = getCdpAccessKeyType(stack);
+        DatabusContext databusContext = createDatabusContext(stack, telemetry, cdpAccessKeyType);
         telemetryContext.setDatabusContext(databusContext);
         telemetryContext.setClusterDetails(createClusterDetails(stack, databusContext));
         NodeStatusContext nodeStatusContext = createNodeStatusContext(stack);
         telemetryContext.setNodeStatusContext(nodeStatusContext);
         if (telemetry != null) {
             telemetryContext.setLogShipperContext(createLogShipperContext(stack, telemetry));
-            telemetryContext.setMonitoringContext(createMonitoringContext(stack, telemetry, nodeStatusContext));
+            telemetryContext.setMonitoringContext(createMonitoringContext(stack, telemetry, nodeStatusContext, cdpAccessKeyType));
             telemetryContext.setPaywallConfigs(getPaywallConfigs(stack));
             telemetryContext.setMeteringContext(MeteringContext.builder().build());
         }
@@ -134,7 +145,8 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
                 .build();
     }
 
-    private MonitoringContext createMonitoringContext(Stack stack, Telemetry telemetry, NodeStatusContext nodeStatusContext) {
+    private MonitoringContext createMonitoringContext(Stack stack, Telemetry telemetry, NodeStatusContext nodeStatusContext,
+            CdpAccessKeyType cdpAccessKeyType) {
         boolean cdpSaasEnabled = entitlementService.isCdpSaasEnabled(stack.getAccountId());
         boolean computeMonitoring = entitlementService.isComputeMonitoringEnabled(stack.getAccountId());
         boolean monitoringEnabled = monitoringConfigService.isMonitoringEnabled(cdpSaasEnabled, computeMonitoring);
@@ -142,7 +154,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         if (monitoringEnabled) {
             builder.enabled();
             try {
-                Optional<MonitoringCredential> monitoringCredential = altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(stack);
+                Optional<MonitoringCredential> monitoringCredential = altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(stack, cdpAccessKeyType);
                 builder.withCredential(monitoringCredential.orElse(null));
             } catch (IOException e) {
                 throw new CloudbreakServiceException(e);
@@ -176,7 +188,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
                 .build();
     }
 
-    private DatabusContext createDatabusContext(Stack stack, Telemetry telemetry) {
+    private DatabusContext createDatabusContext(Stack stack, Telemetry telemetry, CdpAccessKeyType cdpAccessKeyType) {
         DatabusContext.Builder builder = DatabusContext.builder();
         if (telemetry == null) {
             return builder.build();
@@ -188,7 +200,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
                 builder.withValidation();
             }
             try {
-                DataBusCredential credential = altusMachineUserService.getOrCreateDataBusCredentialIfNeeded(stack);
+                DataBusCredential credential = altusMachineUserService.getOrCreateDataBusCredentialIfNeeded(stack, cdpAccessKeyType);
                 builder.withCredential(credential);
             } catch (IOException e) {
                 throw new CloudbreakServiceException(e);
@@ -242,5 +254,14 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
             LOGGER.debug("While CM license exist the username or password is empty");
             return Map.of();
         }
+    }
+
+    private CdpAccessKeyType getCdpAccessKeyType(Stack stack) {
+        if (!entitlementService.isECDSABasedAccessKeyEnabled(stack.getAccountId())) {
+            return CdpAccessKeyType.ED25519;
+        }
+
+        Image image = imageService.getImageForStack(stack);
+        return telemetryFeatureService.isECDSAAccessKeyTypeSupported(image.getPackageVersions()) ? CdpAccessKeyType.ECDSA : CdpAccessKeyType.ED25519;
     }
 }

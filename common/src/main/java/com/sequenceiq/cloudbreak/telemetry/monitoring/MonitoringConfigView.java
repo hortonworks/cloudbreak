@@ -283,7 +283,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("token", this.token != null ? new String(this.token) : EMPTY_CONFIG_DEFAULT);
         map.put("monitoringAccessKeyId", defaultIfNull(this.accessKeyId, EMPTY_CONFIG_DEFAULT));
         map.put("monitoringPrivateKey", this.privateKey != null ? new String(this.privateKey) : EMPTY_CONFIG_DEFAULT);
-        map.put("accessKeyType", defaultIfNull(this.accessKeyType, EMPTY_CONFIG_DEFAULT));
+        map.put("monitoringAccessKeyType", defaultIfNull(this.accessKeyType, EMPTY_CONFIG_DEFAULT));
         if (this.clusterDetails != null) {
             map.putAll(clusterDetails.toMap());
         }
