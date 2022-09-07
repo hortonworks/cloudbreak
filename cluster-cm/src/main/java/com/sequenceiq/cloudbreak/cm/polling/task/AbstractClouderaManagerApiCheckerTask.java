@@ -79,11 +79,11 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
     private boolean handleToleratedError(T pollerObject, ApiException e) {
         if (toleratedErrorCounter < TOLERATED_ERROR_LIMIT) {
             toleratedErrorCounter++;
-            LOGGER.warn("{}. Tolerating till {} occasions.", getToleratedErrorMessage(pollerObject, e), TOLERATED_ERROR_LIMIT, e);
+            LOGGER.warn("{} Tolerating till {} occasions.", getToleratedErrorMessage(pollerObject, e), TOLERATED_ERROR_LIMIT, e);
             return false;
         } else {
             throw new ClouderaManagerOperationFailedException(
-                    String.format("{}. Operation is considered failed.", getToleratedErrorMessage(pollerObject, e)), e);
+                    String.format("%s Operation is considered failed.", getToleratedErrorMessage(pollerObject, e)), e);
         }
     }
 
