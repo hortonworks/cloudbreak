@@ -10,6 +10,10 @@ csdUrls=({%- for url in salt['pillar.get']('cloudera-manager:csd-urls') -%}
 {{ url + " " }}
 {%- endfor %})
 
+{%- if salt['pillar.get']('cloudera-manager:paywall_username') %}
+AUTHENTICATION="-u {{ salt['pillar.get']('cloudera-manager:paywall_username') }}:{{ salt['pillar.get']('cloudera-manager:paywall_password') }}"
+{%- endif %}
+
 for url in ${csdUrls[@]}
 do
   fileName=$(basename $url)
@@ -21,7 +25,7 @@ do
   else
     echo "$(date '+%d/%m/%Y %H:%M:%S') - Downloading ($url) " |& tee -a /var/log/csd_downloader.log
 
-    curl -L -O -R $url
+    curl -L -O -R --fail $AUTHENTICATION $url
   fi
 done
 
