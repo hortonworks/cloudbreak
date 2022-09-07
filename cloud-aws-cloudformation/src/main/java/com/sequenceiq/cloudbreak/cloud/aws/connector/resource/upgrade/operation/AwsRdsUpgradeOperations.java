@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -59,8 +60,10 @@ public class AwsRdsUpgradeOperations {
                 .withDBInstanceIdentifier(dbInstanceIdentifier)
                 .withEngineVersion(targetVersion.getVersion())
                 .withAllowMajorVersionUpgrade(true)
-                .withApplyImmediately(true)
-                .withDBParameterGroupName(dbParameterGroupName);
+                .withApplyImmediately(true);
+        if (StringUtils.isNotEmpty(dbParameterGroupName)) {
+            modifyDBInstanceRequest.withDBParameterGroupName(dbParameterGroupName);
+        }
 
         LOGGER.debug("RDS modify request to upgrade engine version to {} for DB {}, request: {}", targetVersion, dbInstanceIdentifier, modifyDBInstanceRequest);
         try {

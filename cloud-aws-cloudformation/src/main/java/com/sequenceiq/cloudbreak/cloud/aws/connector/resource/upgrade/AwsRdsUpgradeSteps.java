@@ -58,7 +58,12 @@ public class AwsRdsUpgradeSteps {
     public void upgradeRds(AmazonRdsClient rdsClient, DatabaseServer databaseServer, RdsInfo rdsInfo, Version targetMajorVersion) {
         RdsEngineVersion currentRdsVersion = rdsInfo.getRdsEngineVersion();
         RdsEngineVersion upgradeTargetVersion = awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentRdsVersion);
-        String dbParameterGroupName = awsRdsUpgradeOperations.createParameterGroupWithCustomSettings(rdsClient, databaseServer, upgradeTargetVersion);
+        String dbParameterGroupName;
+        if (isCustomParameterGroupNeeded(databaseServer)) {
+            dbParameterGroupName = awsRdsUpgradeOperations.createParameterGroupWithCustomSettings(rdsClient, databaseServer, upgradeTargetVersion);
+        } else {
+            dbParameterGroupName = null;
+        }
         awsRdsUpgradeOperations.upgradeRds(rdsClient, upgradeTargetVersion, databaseServer.getServerId(), dbParameterGroupName);
     }
 
@@ -66,4 +71,7 @@ public class AwsRdsUpgradeSteps {
         awsRdsUpgradeOperations.waitForRdsUpgrade(ac, rdsClient, databaseServer.getServerId());
     }
 
+    private boolean isCustomParameterGroupNeeded(DatabaseServer databaseServer) {
+        return databaseServer.isUseSslEnforcement();
+    }
 }
