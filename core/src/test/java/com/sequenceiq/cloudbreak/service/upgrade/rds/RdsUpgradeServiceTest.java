@@ -1,15 +1,11 @@
 package com.sequenceiq.cloudbreak.service.upgrade.rds;
 
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RDS_UPGRADE_NOT_AVAILABLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,14 +19,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
-import com.sequenceiq.cloudbreak.api.model.RdsUpgradeResponseType;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -54,8 +48,6 @@ class RdsUpgradeServiceTest {
 
     private static final String FLOW_ID = "Mocked flowId";
 
-    private static final String ERROR_REASON = "reason";
-
     private static final TargetMajorVersion TARGET_VERSION =  TargetMajorVersion.VERSION_11;
 
     private static final String WORKSPACE_NAME = "workspaceName";
@@ -74,9 +66,6 @@ class RdsUpgradeServiceTest {
     @Mock
     private DatabaseService databaseService;
 
-    @Mock
-    private CloudbreakMessagesService messagesService;
-
     @InjectMocks
     private RdsUpgradeService underTest;
 
@@ -91,7 +80,6 @@ class RdsUpgradeServiceTest {
         RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
 
         verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION));
-        assertThat(response.getResponseType()).isEqualTo(RdsUpgradeResponseType.TRIGGERED);
         assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
         assertThat(response.getFlowIdentifier().getPollableId()).isEqualTo(FLOW_ID);
     }
@@ -101,15 +89,11 @@ class RdsUpgradeServiceTest {
         Stack stack = createStack(Status.AVAILABLE);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_11));
         when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
-        when(messagesService.getMessage(CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED.getMessage(),
-                List.of(MajorVersion.VERSION_11.getVersion()))).thenReturn(ERROR_REASON);
 
         RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
 
         verifyNoInteractions(reactorFlowManager);
-        assertThat(response.getResponseType()).isEqualTo(RdsUpgradeResponseType.SKIP);
         assertThat(response.getFlowIdentifier()).isEqualTo(FlowIdentifier.notTriggered());
-        assertThat(response.getReason()).isEqualTo(ERROR_REASON);
         assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.NOT_TRIGGERED);
     }
 
@@ -125,14 +109,11 @@ class RdsUpgradeServiceTest {
         Stack stack = createStack(status);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
         when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
-        when(messagesService.getMessage(CLUSTER_RDS_UPGRADE_NOT_AVAILABLE.getMessage())).thenReturn(ERROR_REASON);
 
         RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
 
         verifyNoInteractions(reactorFlowManager);
-        assertThat(response.getResponseType()).isEqualTo(RdsUpgradeResponseType.ERROR);
         assertThat(response.getFlowIdentifier()).isEqualTo(FlowIdentifier.notTriggered());
-        assertThat(response.getReason()).isEqualTo(ERROR_REASON);
         assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.NOT_TRIGGERED);
     }
 

@@ -460,9 +460,6 @@ public enum ResourceEvent {
     CLUSTER_RDS_UPGRADE_FINISHED("cluster.externaldatabase.upgrade.finished"),
     CLUSTER_RDS_UPGRADE_FAILED("cluster.externaldatabase.upgrade.failed"),
 
-    CLUSTER_RDS_UPGRADE_NOT_AVAILABLE("cluster.externaldatabase.upgrade.not.available"),
-    CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED("cluster.externaldatabase.upgrade.already.upgraded"),
-
     CLUSTER_CCM_UPGRADE_TUNNEL_UPDATE("cluster.ccm.upgrade.tunnel.update"),
     CLUSTER_CCM_UPGRADE_PUSH_SALT_STATES("cluster.ccm.upgrade.push.salt.states"),
     CLUSTER_CCM_UPGRADE_RECONFIGURE_NGINX("cluster.ccm.upgrade.reconfigure.nginx"),
