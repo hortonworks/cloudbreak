@@ -1,0 +1,6 @@
+/var/log/httpd-crt-tracking.log {
+    missingok
+    notifempty
+    size 1M
+    rotate 6
+}

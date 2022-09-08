@@ -16,6 +16,25 @@
     - mode: 700
     - source: salt://freeipa/scripts/freeipa_healthagent_getcerts.sh
 
+/cdp/ipahealthagent/httpd-crt-tracking.sh:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 700
+    - source: salt://freeipa/scripts/httpd-crt-tracking.sh
+    - onlyif: test -f /var/lib/ipa/certs/httpd.crt
+
+/lib/systemd/system/httpd-crt-change-tracker.service:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - source: salt://freeipa/services/httpd-crt-change-tracker.service
+    - onlyif: test -f /var/lib/ipa/certs/httpd.crt
+    - require:
+      - file: /cdp/ipahealthagent/httpd-crt-tracking.sh
+
 setup-healthagent:
   cmd.run:
     - name: /opt/salt/scripts/freeipa_healthagent_setup.sh

@@ -102,5 +102,17 @@
   {
     "path": "/cdp/ipahealthagent/ipahealthagent.log",
     "label": "ipahealthagent"
+  },
+  {
+    "path": "/var/log/freeipa-healthagent-getcert.log",
+    "label": "freeipa-healthagent-getcert"
+  },
+  {
+    "path": "/var/log/freeipa-healthagent-setup.log",
+    "label": "freeipa-healthagent-setup"
+  },
+  {
+    "path": "/var/log/httpd-crt-tracking.log",
+    "label": "httpd-crt-tracking"
   }
 ]
