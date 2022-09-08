@@ -9,3 +9,4 @@ install-postgres11:
         - postgresql11
         - postgresql11-contrib
         - postgresql11-docs
+    - fromrepo: pgdg11
