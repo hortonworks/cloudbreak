@@ -136,7 +136,11 @@ addHostToService "HTTP/kdc.$DOMAIN" "$FQDN"
 addHost "kerberos.$DOMAIN"
 addService "HTTP/kerberos.$DOMAIN"
 addHostToService "HTTP/kerberos.$DOMAIN" "$FQDN"
-HTTP_CERT_REQUEST_ID=$(getCertRequestIdFromDir /etc/httpd/alias Server-Cert)
-setDomainsForCert "$HTTP_CERT_REQUEST_ID" "freeipa.$DOMAIN kdc.$DOMAIN kerberos.$DOMAIN"
+
+# httpd Server-Cert (re)submit is needed when the legacy cert db does exist
+if [ -f "/etc/httpd/alias/cert8.db" ]; then
+  HTTP_CERT_REQUEST_ID=$(getCertRequestIdFromDir /etc/httpd/alias Server-Cert)
+  setDomainsForCert "$HTTP_CERT_REQUEST_ID" "freeipa.$DOMAIN kdc.$DOMAIN kerberos.$DOMAIN"
+fi
 
 set +e

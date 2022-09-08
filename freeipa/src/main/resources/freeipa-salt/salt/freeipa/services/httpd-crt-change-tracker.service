@@ -1,0 +1,15 @@
+[Unit]
+Description=Track httpd crt changes in the background by inotifywait
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/cdp/ipahealthagent/httpd-crt-tracking.sh
+Restart=always
+RestartSec=3
+PIDFile=/var/run/httpd-crt-change-tracker.pid
+SyslogIdentifier=httpd-crt-change-tracker
+
+[Install]
+WantedBy=multi-user.target

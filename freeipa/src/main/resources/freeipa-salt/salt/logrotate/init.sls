@@ -1,3 +1,27 @@
+logrotate-freeipa-healthagent-getcert:
+  file.managed:
+    - name: /etc/logrotate.d/freeipa-healthagent-getcert
+    - source: salt://logrotate/conf/freeipa-healthagent-getcert
+    - user: root
+    - group: root
+    - mode: 644
+
+logrotate-freeipa-healthagent-setup:
+  file.managed:
+    - name: /etc/logrotate.d/freeipa-healthagent-setup
+    - source: salt://logrotate/conf/freeipa-healthagent-setup
+    - user: root
+    - group: root
+    - mode: 644
+
+logrotate-httpd-crt-tracking:
+  file.managed:
+    - name: /etc/logrotate.d/freeipa-healthagent-setup
+    - source: salt://logrotate/conf/freeipa-healthagent-setup
+    - user: root
+    - group: root
+    - mode: 644
+
 logrotate-krb5kdc:
   file.managed:
     - name: /etc/logrotate.d/krb5kdc

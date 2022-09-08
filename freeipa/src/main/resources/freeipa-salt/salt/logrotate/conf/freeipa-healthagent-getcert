@@ -1,0 +1,6 @@
+/var/log/freeipa-healthagent-getcert.log {
+    missingok
+    notifempty
+    size 1M
+    rotate 6
+}
