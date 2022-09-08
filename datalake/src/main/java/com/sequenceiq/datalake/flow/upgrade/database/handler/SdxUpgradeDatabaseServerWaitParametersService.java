@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UpgradeDatabaseServerWaitParametersService {
+public class SdxUpgradeDatabaseServerWaitParametersService {
 
     @Value("${sdx.upgrade.database.sleeptime-sec}")
     private long sleepTimeInSec;
