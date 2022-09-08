@@ -24,11 +24,14 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.GlobalOperations;
+import com.google.api.services.compute.Compute.ZoneOperations.Get;
 import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.CustomerEncryptionKey;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.storage.Storage;
+import com.google.api.services.storage.Storage.Buckets.Delete;
 import com.google.api.services.storage.model.Objects;
 import com.google.api.services.storage.model.StorageObject;
 import com.sequenceiq.it.cloudbreak.cloud.v4.gcp.GcpProperties;
@@ -59,7 +62,7 @@ public class GcpClientActions extends GcpClient {
                         .execute();
                 instanceTags.put(instanceId, instance.getLabels());
             } catch (Exception e) {
-                LOGGER.warn(String.format("Failed to get the details of the instance from Gcp with instance id: '%s'", instanceId), e);
+                LOGGER.warn(format("Failed to get the details of the instance from Gcp with instance id: '%s'", instanceId), e);
             }
         }
         return instanceTags;
@@ -83,7 +86,7 @@ public class GcpClientActions extends GcpClient {
                         .collect(Collectors.toList());
                 instanceIdDiskNamesMap.put(instanceId, attachedDiskNames);
             } catch (Exception e) {
-                LOGGER.warn(String.format("Failed to get the details of the instance from Gcp with instance id: '%s'", instanceId), e);
+                LOGGER.warn(format("Failed to get the details of the instance from Gcp with instance id: '%s'", instanceId), e);
             }
         }
         instanceIdDiskNamesMap.forEach((instanceId, diskNames) -> Log.log(LOGGER, format(" Attached disk names are %s for [%s] instance ",
@@ -113,7 +116,7 @@ public class GcpClientActions extends GcpClient {
                     encryptionKeys.add(encryptionKey.get());
                 }
             } catch (Exception e) {
-                LOGGER.warn(String.format("Failed to get the details of the instance from Gcp with instance id: '%s'", instanceId), e);
+                LOGGER.warn(format("Failed to get the details of the instance from Gcp with instance id: '%s'", instanceId), e);
             }
         }
         return encryptionKeys;
@@ -127,6 +130,7 @@ public class GcpClientActions extends GcpClient {
     public void deleteHostGroupInstances(List<String> instanceIds) {
         LOGGER.info("Deleting instances: '{}'", String.join(", ", instanceIds));
         Compute compute = buildCompute();
+        Operation.Error operationError = new Operation.Error();
         for (String instanceId : instanceIds) {
             try {
                 Operation deleteOperationResponse = compute
@@ -136,13 +140,16 @@ public class GcpClientActions extends GcpClient {
                 Log.log(LOGGER, format(" Gcp instance [%s] state is [%s] with message: %s", instanceId, deleteOperationResponse.getStatus(),
                         deleteOperationResponse.getStatusMessage()));
                 try {
-                    waitForComplete(compute, deleteOperationResponse, getProjectId(), TIMEOUT);
+                    operationError = waitForComplete(compute, deleteOperationResponse, getProjectId(), TIMEOUT);
                 } catch (Exception e) {
                     String defaultErrorMessageForInstanceDeletion = getDefaultErrorMessageForInstanceDeletion(instanceId, deleteOperationResponse);
+                    if (operationError != null) {
+                        LOGGER.warn("Waiting for GCP instance delete was resulting in error: {}", operationError.getErrors());
+                    }
                     LOGGER.error(defaultErrorMessageForInstanceDeletion, e);
                     throw new TestFailException(defaultErrorMessageForInstanceDeletion, e);
                 }
-                if (deleteOperationResponse.getStatus().equals("DONE")) {
+                if ("DONE".equals(deleteOperationResponse.getStatus())) {
                     Log.log(LOGGER, format(" Gcp Instance: %s state is DELETED ", instanceId));
                 } else {
                     String defaultErrorMessageForInstanceDeletion = getDefaultErrorMessageForInstanceDeletion(instanceId, deleteOperationResponse);
@@ -153,7 +160,7 @@ public class GcpClientActions extends GcpClient {
                 if (!e.getMessage().contains("Not Found")) {
                     handleGeneralInstanceDeletionError(instanceId, e);
                 } else {
-                    LOGGER.info(String.format("Gcp instance [%s] is not found, thus it is deleted.", instanceId));
+                    LOGGER.info(format("Gcp instance [%s] is not found, thus it is deleted.", instanceId));
                 }
             } catch (IOException e) {
                 handleGeneralInstanceDeletionError(instanceId, e);
@@ -162,41 +169,48 @@ public class GcpClientActions extends GcpClient {
     }
 
     private void handleGeneralInstanceDeletionError(String instanceId, IOException e) {
-        String errorMessage = format("Failed to invoke GCP instance deletion for instance [%s]: ", instanceId, e.getMessage());
+        String errorMessage = format("Failed to invoke GCP instance deletion for instance [%s]: %s", instanceId, e.getMessage());
         LOGGER.error(errorMessage);
         throw new TestFailException(errorMessage, e);
     }
 
     private String getDefaultErrorMessageForInstanceDeletion(String instanceId, Operation deleteOperationResponse) {
-        return String.format(" Gcp Instance [%s] deletion was not successful, actual state of deletion is: %s, status message: %s",
+        return format(" Gcp Instance [%s] deletion was not successful, actual state of deletion is: %s, status message: %s",
                 instanceId, deleteOperationResponse.getStatus(), deleteOperationResponse.getStatusMessage());
     }
 
     public void stopHostGroupInstances(List<String> instanceIds) {
         LOGGER.info("Stopping instances: '{}'", String.join(", ", instanceIds));
         Compute compute = buildCompute();
+        Operation stopInstanceResponse = new Operation();
+        Operation.Error operationError = new Operation.Error();
         for (String instanceId : instanceIds) {
             try {
-                Operation stopInstanceResponse = compute
+                stopInstanceResponse = compute
                         .instances()
                         .stop(getProjectId(), gcpProperties.getAvailabilityZone(), instanceId)
                         .execute();
                 Log.log(LOGGER, format(" Gcp instance [%s] state is [%s] with message: %s", instanceId, stopInstanceResponse.getStatus(),
                         stopInstanceResponse.getStatusMessage()));
-                waitForComplete(compute, stopInstanceResponse, getProjectId(), TIMEOUT);
-                if (stopInstanceResponse.getStatus().equals("DONE")) {
-                    Log.log(LOGGER, format(" Gcp Instance: %s state is STOPPED ", instanceId));
-                } else {
-                    LOGGER.error("Gcp Instance: {} stop has not been successful. So the actual state is: {} with message: {}",
-                            instanceId, stopInstanceResponse.getStatus(), stopInstanceResponse.getStatusMessage());
-                    throw new TestFailException(" Gcp Instance: " + instanceId
-                            + " stop has not been successful, because of the actual state is: "
-                            + stopInstanceResponse.getStatus()
-                            + " with message: "
-                            + stopInstanceResponse.getStatusMessage());
-                }
+                operationError = waitForComplete(compute, stopInstanceResponse, getProjectId(), TIMEOUT);
+            } catch (IOException e) {
+                LOGGER.warn(format("Failed to stop the GCP instance: '%s'", instanceId), e);
             } catch (Exception e) {
-                LOGGER.warn(String.format("Failed to get the details of the instance from Gcp with instance id: '%s'", instanceId), e);
+                if (operationError != null) {
+                    LOGGER.warn("Waiting for GCP instance delete was resulting in error: {}", operationError.getErrors());
+                }
+                LOGGER.warn(format("Failed to wait for the STOPPED state on GCP instance: '%s'", instanceId), e);
+            }
+            if ("DONE".equals(stopInstanceResponse.getStatus())) {
+                Log.log(LOGGER, format(" Gcp Instance: %s state is STOPPED ", instanceId));
+            } else {
+                LOGGER.error("Gcp Instance: {} stop has not been successful. So the actual state is: {} with message: {}",
+                        instanceId, stopInstanceResponse.getStatus(), stopInstanceResponse.getStatusMessage());
+                throw new TestFailException(" Gcp Instance: " + instanceId
+                        + " stop has not been successful, because of the actual state is: "
+                        + stopInstanceResponse.getStatus()
+                        + " with message: "
+                        + stopInstanceResponse.getStatusMessage());
             }
         }
     }
@@ -223,10 +237,10 @@ public class GcpClientActions extends GcpClient {
             }
             LOGGER.info("Waiting for operation: [{}] with details: {} - elapsed rounds [{}] and time [{}] ms", opId, operationDetails, attemps, elapsed);
             if (zone != null) {
-                Compute.ZoneOperations.Get get = compute.zoneOperations().get(projectId, zone, opId);
+                Get get = compute.zoneOperations().get(projectId, zone, opId);
                 operation = get.execute();
             } else {
-                Compute.GlobalOperations.Get get = compute.globalOperations().get(projectId, opId);
+                GlobalOperations.Get get = compute.globalOperations().get(projectId, opId);
                 operation = get.execute();
             }
             if (operation != null) {
@@ -244,7 +258,7 @@ public class GcpClientActions extends GcpClient {
             return new URI(gcpProperties.getCloudStorage().getBaseLocation());
         } catch (URISyntaxException e) {
             LOGGER.error("Google GCS base location path: '{}' is not a valid URI!", gcpProperties.getCloudStorage().getBaseLocation());
-            throw new TestFailException(String.format(" Google GCS base location path: '%s' is not a valid URI! ",
+            throw new TestFailException(format(" Google GCS base location path: '%s' is not a valid URI! ",
                     gcpProperties.getCloudStorage().getBaseLocation()));
         }
     }
@@ -254,7 +268,7 @@ public class GcpClientActions extends GcpClient {
             return new URI(baseLocation);
         } catch (URISyntaxException e) {
             LOGGER.error("Google GCS base location path: '{}' is not a valid URI!", baseLocation);
-            throw new TestFailException(String.format(" Google GCS base location path: '%s' is not a valid URI! ", baseLocation));
+            throw new TestFailException(format(" Google GCS base location path: '%s' is not a valid URI! ", baseLocation));
         }
     }
 
@@ -267,49 +281,62 @@ public class GcpClientActions extends GcpClient {
                         .filter(StringUtils::isNotEmpty)
                         .collect(Collectors.toList()).get(0);
         List<StorageObject> filteredObjects;
+        Objects storageObjects;
+        Storage.Objects.List listObjectsOperation;
 
+        Log.log(LOGGER, format(" Google GCS URI: %s", baseLocationUri));
         Log.log(LOGGER, format(" Google GCS Bucket: %s", bucketName));
         Log.log(LOGGER, format(" Google GCS Key Prefix: %s", keyPrefix));
         Log.log(LOGGER, format(" Google GCS Object: %s", selectedObjectPath));
+
         try {
-            Storage.Objects.List listObjectsOperation = storage.objects().list(bucketName).setPrefix(keyPrefix);
-            Objects storageObjects;
-
-            do {
-                storageObjects = listObjectsOperation.execute();
-                if (storageObjects == null || storageObjects.getItems() == null) {
-                    LOGGER.error("Google GCS path: '{}' does not exist!", keyPrefix);
-                    throw new TestFailException(String.format(" Google GCS path: '%s' does not exist! ", keyPrefix));
-                }
-
-                filteredObjects = storageObjects.getItems().stream()
-                        .filter(storageObject -> {
-                            try {
-                                URI selfLink = new URI(storageObject.getSelfLink());
-                                return selfLink.getPath().contains(selectedObjectPath);
-                            } catch (URISyntaxException e) {
-                                LOGGER.error("Google GCS object: '{}' path: '{}' is not a valid URI!", storageObject.getName(), storageObject.getSelfLink());
-                                throw new TestFailException(String.format(" Google GCS object: '%s' path: '%s' is not a valid URI!",
-                                        storageObject.getName(), storageObject.getSelfLink()));
-                            }
-                        })
-                        .collect(Collectors.toList());
-
-                listObjectsOperation.setPageToken(storageObjects.getNextPageToken());
-            } while (StringUtils.isNotEmpty(storageObjects.getNextPageToken()));
-
-            Log.log(LOGGER, format(" Google GCS object: '%s' contains '%d' sub-objects.", selectedObjectPath, filteredObjects.size()));
-
-            for (StorageObject objectSummary : filteredObjects.stream().limit(10).collect(Collectors.toList())) {
-                if (objectSummary.getSize().compareTo(BigInteger.ZERO) == 0 && !zeroContent) {
-                    LOGGER.error("Google GCS path: '{}' has 0 bytes of content!", selectedObjectPath);
-                    throw new TestFailException(String.format(" Google GCS path: '%s' has 0 bytes of content! ", selectedObjectPath));
-                }
-            }
+            listObjectsOperation = storage.objects().list(bucketName).setPrefix(keyPrefix);
         } catch (Exception e) {
-            String msg = String.format("Failed to list bucket object '%s' from base location '%s'", bucketName, baseLocationUri);
-            LOGGER.error(msg, e);
-            throw new TestFailException(msg, e);
+            LOGGER.error(format("GCP GCS bucket '%s' is not present at base location '%s'", bucketName, baseLocationUri), e);
+            throw new TestFailException(format("GCP GCS bucket '%s' is not present at base location '%s'", bucketName, baseLocationUri), e);
+        }
+
+        do {
+            try {
+                storageObjects = listObjectsOperation.execute();
+            } catch (IOException e) {
+                LOGGER.error(format("GCP GCS bucket '%s' is not accessible at base location '%s'", bucketName, baseLocationUri), e);
+                throw new TestFailException(format("GCP GCS bucket '%s' is not accessible at base location '%s'", bucketName, baseLocationUri), e);
+            }
+
+            if (storageObjects == null || storageObjects.getItems() == null) {
+                LOGGER.error("Google GCS path: '{}' does not exist!", keyPrefix);
+                throw new TestFailException(format(" Google GCS path: '%s' does not exist! ", keyPrefix));
+            }
+
+            filteredObjects = storageObjects.getItems().stream()
+                    .filter(storageObject -> {
+                        try {
+                            URI selfLink = new URI(storageObject.getSelfLink());
+                            return selfLink.getPath().contains(selectedObjectPath);
+                        } catch (URISyntaxException e) {
+                            LOGGER.error("Google GCS object: '{}' path: '{}' is not a valid URI!", storageObject.getName(), storageObject.getSelfLink());
+                            throw new TestFailException(format(" Google GCS object: '%s' path: '%s' is not a valid URI!",
+                                    storageObject.getName(), storageObject.getSelfLink()));
+                        }
+                    })
+                    .collect(Collectors.toList());
+
+            listObjectsOperation.setPageToken(storageObjects.getNextPageToken());
+        } while (StringUtils.isNotEmpty(storageObjects.getNextPageToken()));
+
+        if (filteredObjects.isEmpty()) {
+            Log.error(LOGGER, "Google GCS object: %s has 0 sub-objects!", selectedObjectPath);
+            throw new TestFailException(format("Google GCS object: %s has 0 sub-objects!", selectedObjectPath));
+        } else {
+            Log.log(LOGGER, format(" Google GCS object: '%s' contains '%d' sub-objects.", selectedObjectPath, filteredObjects.size()));
+        }
+
+        for (StorageObject objectSummary : filteredObjects.stream().limit(10).collect(Collectors.toList())) {
+            if (objectSummary.getSize().compareTo(BigInteger.ZERO) == 0 && !zeroContent) {
+                LOGGER.error("Google GCS path: '{}' has 0 bytes of content!", selectedObjectPath);
+                throw new TestFailException(format(" Google GCS path: '%s' has 0 bytes of content! ", selectedObjectPath));
+            }
         }
     }
 
@@ -317,10 +344,10 @@ public class GcpClientActions extends GcpClient {
         LOGGER.info("Delete bucket from base location: '{}'", baseLocation);
         Storage storage = buildStorage();
         try {
-            Storage.Buckets.Delete operation = storage.buckets().delete(baseLocation);
+            Delete operation = storage.buckets().delete(baseLocation);
             operation.execute();
         } catch (IOException ioException) {
-            String msg = String.format("Failed to delete bucket from base location '%s'", baseLocation);
+            String msg = format("Failed to delete bucket from base location '%s'", baseLocation);
             LOGGER.error(msg, ioException);
             throw new TestFailException(msg, ioException);
         }
@@ -333,6 +360,7 @@ public class GcpClientActions extends GcpClient {
         String keyPrefix = Arrays.stream(StringUtils.split(baseLocationUri.getPath(), "/"))
                 .filter(StringUtils::isNotEmpty)
                 .collect(Collectors.toList()).get(0);
+        Objects storageObjects;
 
         Log.log(LOGGER, format(" Google GCS URI: %s", baseLocationUri));
         Log.log(LOGGER, format(" Google GCS Bucket: %s", bucketName));
@@ -341,18 +369,18 @@ public class GcpClientActions extends GcpClient {
 
         try {
             Storage.Objects.List listObjectsOperation = storage.objects().list(bucketName).setPrefix(keyPrefix);
-            Objects storageObjects = listObjectsOperation.execute();
-            if (!storageObjects.isEmpty()) {
-                return String.format("https://console.cloud.google.com/storage/browser/%s/%s%s?project=gcp-dev-cloudbreak",
-                        bucketName, keyPrefix, clusterLogPath);
-            } else {
-                LOGGER.error("Google GCS path: '{}' does not exist!", baseLocationUri);
-                throw new TestFailException(String.format(" Google GCS path: '%s' does not exist! ", baseLocationUri));
-            }
-        } catch (Exception e) {
-            String msg = String.format("Google GCS bucket '%s' is NOT present!", bucketName);
+            storageObjects = listObjectsOperation.execute();
+        } catch (IOException e) {
+            String msg = format("Google GCS bucket '%s' is NOT present!", bucketName);
             LOGGER.error(msg, e);
             throw new TestFailException(msg, e);
+        }
+        if (!storageObjects.isEmpty()) {
+            return format("https://console.cloud.google.com/storage/browser/%s/%s%s?project=gcp-dev-cloudbreak",
+                    bucketName, keyPrefix, clusterLogPath);
+        } else {
+            LOGGER.error("Google GCS path: '{}' does not exist!", baseLocationUri);
+            throw new TestFailException(format(" Google GCS path: '%s' does not exist! ", baseLocationUri));
         }
     }
 }

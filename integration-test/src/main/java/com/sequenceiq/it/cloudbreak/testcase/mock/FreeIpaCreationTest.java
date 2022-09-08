@@ -70,7 +70,7 @@ public class FreeIpaCreationTest extends AbstractMockTest {
                     .withRecipeType(PRE_TERMINATION)
                 .when(recipeTestClient.createV4())
                 .given(FreeIpaTestDto.class)
-                .withRecipe(Set.of(preRecipeName, postInstallRecipeName, preTerminationRecipeName))
+                .withRecipes(Set.of(preRecipeName, postInstallRecipeName, preTerminationRecipeName))
                 .when(freeIpaTestClient.create())
                 .enableVerification()
                 .await(Status.AVAILABLE)

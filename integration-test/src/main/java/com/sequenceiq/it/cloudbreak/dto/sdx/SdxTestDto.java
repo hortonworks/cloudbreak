@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -293,6 +293,26 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         sdxRecipe.setName(recipeName);
         sdxRecipe.setHostGroup(hostGroup);
         recipes.add(sdxRecipe);
+        return this;
+    }
+
+    public SdxTestDto withRecipes(Set<String> recipeNames, String hostGroup) {
+        Set<SdxRecipe> sdxRecipes = getRequest().getRecipes();
+        Set<SdxRecipe> newRecipes = new HashSet<>();
+        SdxRecipe sdxRecipe = new SdxRecipe();
+
+        recipeNames.forEach(recipeName -> {
+            sdxRecipe.setName(recipeName);
+            sdxRecipe.setHostGroup(hostGroup);
+            newRecipes.add(sdxRecipe);
+        });
+
+        if (CollectionUtils.isEmpty(sdxRecipes)) {
+            getRequest().setRecipes(newRecipes);
+        } else {
+            sdxRecipes.addAll(newRecipes);
+            getRequest().setRecipes(sdxRecipes);
+        }
         return this;
     }
 

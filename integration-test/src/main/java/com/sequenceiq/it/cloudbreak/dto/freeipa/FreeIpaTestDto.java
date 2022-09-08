@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.util.Strings;
 
@@ -414,8 +415,27 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return this;
     }
 
-    public FreeIpaTestDto withRecipe(Set<String> recipes) {
-        getRequest().setRecipes(recipes);
+    public FreeIpaTestDto withRecipes(Set<String> recipeNames) {
+        Set<String> existingRecipes = getRequest().getRecipes();
+
+        if (CollectionUtils.isEmpty(existingRecipes)) {
+            getRequest().setRecipes(recipeNames);
+        } else {
+            existingRecipes.addAll(recipeNames);
+            getRequest().setRecipes(existingRecipes);
+        }
+        return this;
+    }
+
+    public FreeIpaTestDto withRecipe(String recipeName) {
+        Set<String> existingRecipes = getRequest().getRecipes();
+
+        if (CollectionUtils.isEmpty(existingRecipes)) {
+            getRequest().setRecipes(Set.of(recipeName));
+        } else {
+            existingRecipes.add(recipeName);
+            getRequest().setRecipes(existingRecipes);
+        }
         return this;
     }
 

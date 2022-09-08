@@ -125,6 +125,8 @@ public interface CloudProvider {
 
     String getBaseLocation();
 
+    String getBaseLocationForPreTermination();
+
     String getSubnetCIDR();
 
     String getAccessCIDR();

@@ -316,6 +316,11 @@ public class YarnCloudProvider extends AbstractCloudProvider {
         return null;
     }
 
+    @Override
+    public String getBaseLocationForPreTermination() {
+        return null;
+    }
+
     public String getInstanceProfile() {
         return null;
     }

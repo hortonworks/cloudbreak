@@ -90,4 +90,8 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
                 cloudProvider,
                 not(equalToIgnoringCase(cloudPlatform.name())));
     }
+
+    protected String getBaseLocationForPreTermination(TestContext testContext) {
+        return testContext.getCloudProvider().getBaseLocationForPreTermination();
+    }
 }

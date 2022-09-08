@@ -1,12 +1,13 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
 import static com.sequenceiq.it.cloudbreak.assertion.distrox.DistroXExternalDatabaseAssertion.validateTemplateContainsExternalDatabaseHostname;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -31,6 +32,7 @@ import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAsserti
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.azure.AzureCloudProvider;
@@ -44,11 +46,13 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
+import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 import com.sequenceiq.it.cloudbreak.util.FreeIpaInstanceUtil;
+import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.azure.AzureCloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
@@ -96,6 +100,12 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
     @Inject
     private AzureCloudFunctionality azureCloudFunctionality;
 
+    @Inject
+    private RecipeTestClient recipeTestClient;
+
+    @Inject
+    private RecipeUtil recipeUtil;
+
     @Override
     protected void setupTest(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
@@ -104,7 +114,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
         createDefaultCredential(testContext);
     }
 
-    @AfterMethod(onlyForGroups = { "azure_singlerg" }, dependsOnMethods = { "tearDown", "tearDownSpotValidateTags" })
+    @AfterMethod(onlyForGroups = "azure_singlerg", dependsOnMethods = { "tearDown", "tearDownSpotValidateTags" })
     public void singleResourceGroupTearDown(Object[] data) {
         LOGGER.info("Delete the '{}' resource group after test has been done!", resourceGroupForTest);
         deleteResourceGroupCreatedForEnvironment(resourceGroupForTest);
@@ -118,10 +128,19 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                 and = "SDX then distroX with encrypted volumes also should be created for environment",
             then = "freeIpa, sdx and distroX volumes should be encrypted with the provided key")
     public void testCreateDistroXWithEncryptedVolumes(TestContext testContext) {
+        String preTerminationRecipeName = resourcePropertyProvider().getName();
         DistroXDatabaseRequest distroXDatabaseRequest = new DistroXDatabaseRequest();
+
+        testContext.given(RecipeTestDto.class)
+                    .withName(preTerminationRecipeName)
+                    .withContent(recipeUtil.generatePreTerminationRecipeContentForE2E(applicationContext, preTerminationRecipeName))
+                    .withRecipeType(PRE_TERMINATION)
+                .when(recipeTestClient.createV4());
+
         List<DistroXInstanceGroupTestDto> distroXInstanceGroupTestDtos = new DistroXInstanceGroupsBuilder(testContext)
                 .defaultHostGroup()
                 .withDiskEncryption()
+                .withRecipes(Set.of(preTerminationRecipeName))
                 .build();
         distroXDatabaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
 
@@ -171,10 +190,13 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                 .then(this::verifyAwsEnaDriver)
                 .then(new AwsAvailabilityZoneAssertion())
                 .then(validateTemplateContainsExternalDatabaseHostname())
+                .when(distroXTestClient.delete())
+                .await(STACK_DELETED)
+                .then((tc, testDto, client) -> verifyPreTerminationRecipe(tc, testDto, getBaseLocationForPreTermination(tc), preTerminationRecipeName))
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT, groups = { "azure_singlerg" })
+    @Test(dataProvider = TEST_CONTEXT, groups = "azure_singlerg")
     @UseSpotInstances
     @Description(
             given = "there is a valid Azure credential and a new resource group",
@@ -189,7 +211,9 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                 .build();
         distroXDatabaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
 
-        createResourceGroupForEnvironment(testContext);
+        ResourceGroup createdResourceGroup = createResourceGroupForEnvironment(testContext);
+        LOGGER.info("The single resource group '{}' has been provisioned with status '{}' before test has been started!", createdResourceGroup.name(),
+                createdResourceGroup.provisioningState());
 
         testContext
                 .given(EnvironmentNetworkTestDto.class)
@@ -247,10 +271,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
 
     private ResourceGroup createResourceGroupForEnvironment(TestContext testContext) {
         resourceGroupForTest = resourcePropertyProvider().getName();
-        Map<String, String> tags = new HashMap<>() {{
-            put("owner", testContext.getActingUserOwnerTag());
-            put("creation-timestamp", testContext.getCreationTimestampTag());
-        }};
+        Map<String, String> tags = Map.of("owner", testContext.getActingUserOwnerTag(), "creation-timestamp", testContext.getCreationTimestampTag());
         return azureCloudFunctionality.createResourceGroup(resourceGroupForTest, tags);
     }
 
@@ -291,6 +312,11 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
         List<String> volumeKmsKeyIds = new ArrayList<>(testContext.getCloudProvider().getCloudFunctionality()
                 .listVolumeEncryptionKeyIds(testDto.getName(), resourceGroupForTest, instanceIds));
         testContext.getCloudProvider().verifyVolumeEncryptionKey(volumeKmsKeyIds, testContext.given(EnvironmentTestDto.class).getRequest().getName());
+        return testDto;
+    }
+
+    private DistroXTestDto verifyPreTerminationRecipe(TestContext testContext, DistroXTestDto testDto, String cloudStorageBaseLocation, String recipeName) {
+        testContext.getCloudProvider().getCloudFunctionality().cloudStorageListContainer(cloudStorageBaseLocation, recipeName, false);
         return testDto;
     }
 }

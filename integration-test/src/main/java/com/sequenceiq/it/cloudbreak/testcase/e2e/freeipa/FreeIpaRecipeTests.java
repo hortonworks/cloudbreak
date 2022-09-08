@@ -122,7 +122,7 @@ public class FreeIpaRecipeTests extends AbstractE2ETest {
                     .withReportClusterLogs()
                 .given(FreeIpaTestDto.class)
                     .withTelemetry("telemetry")
-                    .withRecipe(Set.of(preRecipeName, postInstallRecipeName))
+                    .withRecipes(Set.of(preRecipeName, postInstallRecipeName))
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .awaitForHealthyInstances()

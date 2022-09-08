@@ -383,6 +383,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         return String.join("/", awsProperties.getCloudStorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
     }
 
+    @Override
+    public String getBaseLocationForPreTermination() {
+        return String.join("/", awsProperties.getCloudStorage().getBaseLocation(), "pre-termination");
+    }
+
     public String getInstanceProfile() {
         return awsProperties.getCloudStorage().getS3().getInstanceProfile();
     }
