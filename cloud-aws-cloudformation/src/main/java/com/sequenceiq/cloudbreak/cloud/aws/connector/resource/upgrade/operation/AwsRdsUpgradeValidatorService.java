@@ -23,13 +23,6 @@ public class AwsRdsUpgradeValidatorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsRdsUpgradeValidatorService.class);
 
-    public void validateRdsCanBeUpgraded(RdsInfo rdsInfo, Version targetMajorVersion) {
-        LOGGER.debug("Rds state is: {} and db instance statuses are: {} ", rdsInfo.getRdsState(), rdsInfo.getDbArnToInstanceStatuses());
-
-        validateRdsIsAvailableOrUpgrading(rdsInfo);
-        validateRdsMajorVersionIsSmallerThanTarget(rdsInfo, targetMajorVersion);
-    }
-
     public void validateUpgradePresentForTargetMajorVersion(Optional<RdsEngineVersion> upgradeTargetForMajorVersion) {
         if (upgradeTargetForMajorVersion.isEmpty()) {
             String message = "There are no matching RDS upgrade versions to choose from.";
@@ -52,7 +45,7 @@ public class AwsRdsUpgradeValidatorService {
         }
     }
 
-    private void validateRdsIsAvailableOrUpgrading(RdsInfo rdsInfo) {
+    public void validateRdsIsAvailableOrUpgrading(RdsInfo rdsInfo) {
         if (OTHER == rdsInfo.getRdsState() || UNKNOWN == rdsInfo.getRdsState()) {
             String message = String.format("RDS upgrade is not possible as one or more instances are not in a correct state: %s",
                     getNotApplicableStates(rdsInfo.getDbArnToInstanceStatuses()));
@@ -61,13 +54,14 @@ public class AwsRdsUpgradeValidatorService {
         }
     }
 
-    private void validateRdsMajorVersionIsSmallerThanTarget(RdsInfo rdsInfo, Version targetMajorVersion) {
-        if (new MajorVersionComparator().compare(rdsInfo.getRdsEngineVersion(), new RdsEngineVersion(targetMajorVersion.getMajorVersion())) >= 0) {
-            String message = String.format("Cannot start upgrade as the RDS major version %s is not smaller than the target version %s",
-                    rdsInfo.getRdsEngineVersion(), targetMajorVersion);
-            LOGGER.debug(message);
-            throw new CloudConnectorException(message);
-        }
+    public boolean isRdsMajorVersionSmallerThanTarget(RdsInfo rdsInfo, Version targetMajorVersion) {
+        MajorVersionComparator majorVersionComparator = new MajorVersionComparator();
+        RdsEngineVersion currentVersion = rdsInfo.getRdsEngineVersion();
+        RdsEngineVersion targetVersion = new RdsEngineVersion(targetMajorVersion.getMajorVersion());
+        boolean upgradeNeeded = majorVersionComparator.compare(currentVersion, targetVersion) < 0;
+        LOGGER.debug("Comparing current DB version to target major version if an upgrade is needed. Current version: {}. target version: {}. upgarde needed: {}",
+                currentVersion, targetVersion, upgradeNeeded);
+        return upgradeNeeded;
     }
 
     private Set<String> getNotApplicableStates(Map<String, String> dbArnToInstanceStatuses) {
