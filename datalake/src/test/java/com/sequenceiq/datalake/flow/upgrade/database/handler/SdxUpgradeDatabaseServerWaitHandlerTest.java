@@ -14,12 +14,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerFailedEvent;
-import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerSuccessEvent;
-import com.sequenceiq.datalake.flow.upgrade.database.event.UpgradeDatabaseServerRequest;
+import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerWaitSuccessEvent;
+import com.sequenceiq.datalake.flow.upgrade.database.event.UpgradeDatabaseServerWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.poller.PollerRunner;
@@ -30,7 +29,7 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
-public class UpgradeDatabaseServerHandlerTest {
+public class SdxUpgradeDatabaseServerWaitHandlerTest {
 
     private static final long SLEEP_TIME_SECONDS = 17L;
 
@@ -41,7 +40,7 @@ public class UpgradeDatabaseServerHandlerTest {
     private static final long DURATION_MINUTES = 20L;
 
     @Mock
-    private UpgradeDatabaseServerWaitParametersService waitParametersService;
+    private SdxUpgradeDatabaseServerWaitParametersService waitParametersService;
 
     @Mock
     private SdxDatabaseServerUpgradeService sdxDatabaseServerUpgradeService;
@@ -53,18 +52,17 @@ public class UpgradeDatabaseServerHandlerTest {
     private PollerRunner pollerRunner;
 
     @InjectMocks
-    private UpgradeDatabaseServerHandler underTest;
+    private SdxUpgradeDatabaseServerWaitHandler underTest;
 
     @Test
     void testSelector() {
-        assertEquals(EventSelectorUtil.selector(UpgradeDatabaseServerRequest.class), underTest.selector());
+        assertEquals(EventSelectorUtil.selector(UpgradeDatabaseServerWaitRequest.class), underTest.selector());
     }
 
     @Test
     void testDefaultFailureEvent() {
         Exception e = new Exception();
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
-        Event<UpgradeDatabaseServerRequest> event = setupEvent(targetMajorVersion);
+        Event<UpgradeDatabaseServerWaitRequest> event = setupEvent();
 
         Selectable selectable = underTest.defaultFailureEvent(RESOURCE_ID, e, event);
 
@@ -73,8 +71,7 @@ public class UpgradeDatabaseServerHandlerTest {
 
     @Test
     void testDoAcceptWhenSuccess() {
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
-        HandlerEvent<UpgradeDatabaseServerRequest> event = setupHandlerEvent(targetMajorVersion);
+        HandlerEvent<UpgradeDatabaseServerWaitRequest> event = setupHandlerEvent();
         SdxCluster sdxCluster = new SdxCluster();
         when(sdxService.getById(SDX_ID)).thenReturn(sdxCluster);
         new PollerRunnerMock().mockSuccess(pollerRunner);
@@ -83,8 +80,7 @@ public class UpgradeDatabaseServerHandlerTest {
 
         Selectable selectable = underTest.doAccept(event);
 
-        assertEquals(EventSelectorUtil.selector(SdxUpgradeDatabaseServerSuccessEvent.class), selectable.getSelector());
-        verify(sdxDatabaseServerUpgradeService).initUpgradeInCb(sdxCluster, targetMajorVersion);
+        assertEquals(EventSelectorUtil.selector(SdxUpgradeDatabaseServerWaitSuccessEvent.class), selectable.getSelector());
         ArgumentCaptor<PollingConfig> pollingConfigCaptor = ArgumentCaptor.forClass(PollingConfig.class);
         verify(sdxDatabaseServerUpgradeService).waitDatabaseUpgradeInCb(eq(sdxCluster), pollingConfigCaptor.capture());
         PollingConfig pollingConfig = pollingConfigCaptor.getValue();
@@ -97,8 +93,7 @@ public class UpgradeDatabaseServerHandlerTest {
 
     @Test
     void testDoAcceptWhenFailure() {
-        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
-        HandlerEvent<UpgradeDatabaseServerRequest> event = setupHandlerEvent(targetMajorVersion);
+        HandlerEvent<UpgradeDatabaseServerWaitRequest> event = setupHandlerEvent();
         SdxCluster sdxCluster = new SdxCluster();
         when(sdxService.getById(SDX_ID)).thenReturn(sdxCluster);
         new PollerRunnerMock().mockError(pollerRunner);
@@ -108,7 +103,6 @@ public class UpgradeDatabaseServerHandlerTest {
         Selectable selectable = underTest.doAccept(event);
 
         assertEquals(EventSelectorUtil.selector(SdxUpgradeDatabaseServerFailedEvent.class), selectable.getSelector());
-        verify(sdxDatabaseServerUpgradeService).initUpgradeInCb(sdxCluster, targetMajorVersion);
         ArgumentCaptor<PollingConfig> pollingConfigCaptor = ArgumentCaptor.forClass(PollingConfig.class);
         verify(sdxDatabaseServerUpgradeService).waitDatabaseUpgradeInCb(eq(sdxCluster), pollingConfigCaptor.capture());
         PollingConfig pollingConfig = pollingConfigCaptor.getValue();
@@ -118,13 +112,12 @@ public class UpgradeDatabaseServerHandlerTest {
         assertEquals(TimeUnit.MINUTES, pollingConfig.getDurationTimeUnit());
     }
 
-    private HandlerEvent<UpgradeDatabaseServerRequest> setupHandlerEvent(TargetMajorVersion targetMajorVersion) {
-        return new HandlerEvent<>(setupEvent(targetMajorVersion));
+    private HandlerEvent<UpgradeDatabaseServerWaitRequest> setupHandlerEvent() {
+        return new HandlerEvent<>(setupEvent());
     }
 
-    private Event<UpgradeDatabaseServerRequest> setupEvent(TargetMajorVersion targetMajorVersion) {
-        UpgradeDatabaseServerRequest request = new UpgradeDatabaseServerRequest(SDX_ID, "userId", targetMajorVersion);
-        return new Event<>(request);
+    private Event<UpgradeDatabaseServerWaitRequest> setupEvent() {
+        return new Event<>(new UpgradeDatabaseServerWaitRequest(SDX_ID, "userId"));
     }
 
 }

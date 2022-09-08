@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerFailedEvent;
-import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerSuccessEvent;
-import com.sequenceiq.datalake.flow.upgrade.database.event.UpgradeDatabaseServerRequest;
+import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerWaitSuccessEvent;
+import com.sequenceiq.datalake.flow.upgrade.database.event.UpgradeDatabaseServerWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.poller.PollerRunner;
@@ -25,12 +25,12 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import reactor.bus.Event;
 
 @Component
-public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<UpgradeDatabaseServerRequest> {
+public class SdxUpgradeDatabaseServerWaitHandler extends ExceptionCatcherEventHandler<UpgradeDatabaseServerWaitRequest> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeDatabaseServerHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeDatabaseServerWaitHandler.class);
 
     @Inject
-    private UpgradeDatabaseServerWaitParametersService waitParametersService;
+    private SdxUpgradeDatabaseServerWaitParametersService waitParametersService;
 
     @Inject
     private SdxDatabaseServerUpgradeService sdxDatabaseServerUpgradeService;
@@ -43,36 +43,35 @@ public class UpgradeDatabaseServerHandler extends ExceptionCatcherEventHandler<U
 
     @Override
     public String selector() {
-        return EventSelectorUtil.selector(UpgradeDatabaseServerRequest.class);
+        return EventSelectorUtil.selector(UpgradeDatabaseServerWaitRequest.class);
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeDatabaseServerRequest> event) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeDatabaseServerWaitRequest> event) {
         return new SdxUpgradeDatabaseServerFailedEvent(resourceId, event.getData().getUserId(), e, "");
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent<UpgradeDatabaseServerRequest> event) {
-        UpgradeDatabaseServerRequest request = event.getData();
+    protected Selectable doAccept(HandlerEvent<UpgradeDatabaseServerWaitRequest> event) {
+        UpgradeDatabaseServerWaitRequest request = event.getData();
         SdxCluster sdxCluster = sdxService.getById(request.getResourceId());
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
         PollingConfig pollingConfig = new PollingConfig(waitParametersService.getSleepTimeInSec(), TimeUnit.SECONDS,
                 waitParametersService.getDurationInMinutes(), TimeUnit.MINUTES);
         PollerRunnerResult result = pollerRunner.run(pollingConfig,
-                config -> upgradeDatabaseServerAndPoll(request, sdxCluster, config),
+                config -> upgradeDatabaseServerAndPoll(sdxCluster, config),
                 "Upgrade database server",
                 sdxCluster
         );
         LOGGER.debug("Result from pollerRunner for task upgrading the database server is {}", result);
         return result.isSuccess()
-                ? new SdxUpgradeDatabaseServerSuccessEvent(sdxId, userId)
+                ? new SdxUpgradeDatabaseServerWaitSuccessEvent(sdxId, userId)
                 : new SdxUpgradeDatabaseServerFailedEvent(sdxId, userId, result.getException(), result.getMessage());
     }
 
-    private void upgradeDatabaseServerAndPoll(UpgradeDatabaseServerRequest request, SdxCluster sdxCluster, PollingConfig config) {
-        LOGGER.debug("Initiating database server upgrade for SDX: {}", sdxCluster.getName());
-        sdxDatabaseServerUpgradeService.initUpgradeInCb(sdxCluster, request.getTargetMajorVersion());
+    private void upgradeDatabaseServerAndPoll(SdxCluster sdxCluster, PollingConfig config) {
+        LOGGER.debug("Waiting for database server upgrade for SDX: {}", sdxCluster.getName());
         sdxDatabaseServerUpgradeService.waitDatabaseUpgradeInCb(sdxCluster, config);
         sdxDatabaseServerUpgradeService.updateDatabaseServerEngineVersion(sdxCluster);
     }

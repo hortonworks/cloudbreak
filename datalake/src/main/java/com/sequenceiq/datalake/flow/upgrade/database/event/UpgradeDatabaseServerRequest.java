@@ -33,5 +33,5 @@ public class UpgradeDatabaseServerRequest extends SdxEvent {
                 "targetMajorVersion=" + targetMajorVersion +
                 "} " + super.toString();
     }
-}
 
+}
