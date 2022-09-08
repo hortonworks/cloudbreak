@@ -78,11 +78,12 @@ public class AwsRdsUpgradeServiceTest {
     void testUpgrade() {
         RdsInfo rdsInfo = new RdsInfo(RdsState.AVAILABLE, null, null);
         when(awsRdsUpgradeSteps.getRdsInfo(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(rdsInfo);
+        when(awsRdsUpgradeValidatorService.isRdsMajorVersionSmallerThanTarget(rdsInfo, targetMajorVersion)).thenReturn(true);
 
         underTest.upgrade(ac, databaseStack, targetMajorVersion);
 
         InOrder inOrder = Mockito.inOrder(awsRdsUpgradeValidatorService, awsRdsUpgradeSteps);
-        inOrder.verify(awsRdsUpgradeValidatorService).validateRdsCanBeUpgraded(rdsInfo, targetMajorVersion);
+        inOrder.verify(awsRdsUpgradeValidatorService).validateRdsIsAvailableOrUpgrading(rdsInfo);
         inOrder.verify(awsRdsUpgradeSteps).upgradeRds(rdsClient, databaseServer, rdsInfo, targetMajorVersion);
         inOrder.verify(awsRdsUpgradeSteps).waitForUpgrade(ac, rdsClient, databaseServer);
     }
@@ -91,11 +92,12 @@ public class AwsRdsUpgradeServiceTest {
     void testUpgradeWhenRdsIsUpgradingThenUpgradeIsNotCalled() {
         RdsInfo rdsInfo = new RdsInfo(RdsState.UPGRADING, null, null);
         when(awsRdsUpgradeSteps.getRdsInfo(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(rdsInfo);
+        when(awsRdsUpgradeValidatorService.isRdsMajorVersionSmallerThanTarget(rdsInfo, targetMajorVersion)).thenReturn(true);
 
         underTest.upgrade(ac, databaseStack, targetMajorVersion);
 
         InOrder inOrder = Mockito.inOrder(awsRdsUpgradeValidatorService, awsRdsUpgradeSteps);
-        inOrder.verify(awsRdsUpgradeValidatorService).validateRdsCanBeUpgraded(rdsInfo, targetMajorVersion);
+        inOrder.verify(awsRdsUpgradeValidatorService).validateRdsIsAvailableOrUpgrading(rdsInfo);
         inOrder.verify(awsRdsUpgradeSteps).waitForUpgrade(ac, rdsClient, databaseServer);
         verify(awsRdsUpgradeSteps, never()).upgradeRds(rdsClient, databaseServer, rdsInfo, targetMajorVersion);
     }
@@ -104,7 +106,8 @@ public class AwsRdsUpgradeServiceTest {
     void testUpgradeIfValidateThrowsThenNoUpgrade() {
         RdsInfo rdsInfo = new RdsInfo(RdsState.UNKNOWN, null, null);
         when(awsRdsUpgradeSteps.getRdsInfo(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(rdsInfo);
-        doThrow(CloudConnectorException.class).when(awsRdsUpgradeValidatorService).validateRdsCanBeUpgraded(rdsInfo, targetMajorVersion);
+        when(awsRdsUpgradeValidatorService.isRdsMajorVersionSmallerThanTarget(rdsInfo, targetMajorVersion)).thenReturn(true);
+        doThrow(CloudConnectorException.class).when(awsRdsUpgradeValidatorService).validateRdsIsAvailableOrUpgrading(rdsInfo);
 
         Assertions.assertThrows(CloudConnectorException.class, () ->
             underTest.upgrade(ac, databaseStack, targetMajorVersion)
@@ -118,6 +121,7 @@ public class AwsRdsUpgradeServiceTest {
     void testUpgradeWhenUpgradeThrowsThenDoNotWait() {
         RdsInfo rdsInfo = new RdsInfo(RdsState.AVAILABLE, null, null);
         when(awsRdsUpgradeSteps.getRdsInfo(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(rdsInfo);
+        when(awsRdsUpgradeValidatorService.isRdsMajorVersionSmallerThanTarget(rdsInfo, targetMajorVersion)).thenReturn(true);
         doThrow(CloudConnectorException.class).when(awsRdsUpgradeSteps).upgradeRds(rdsClient, databaseServer, rdsInfo, targetMajorVersion);
 
         Assertions.assertThrows(CloudConnectorException.class, () ->
@@ -125,8 +129,20 @@ public class AwsRdsUpgradeServiceTest {
         );
 
         InOrder inOrder = Mockito.inOrder(awsRdsUpgradeValidatorService, awsRdsUpgradeSteps);
-        inOrder.verify(awsRdsUpgradeValidatorService).validateRdsCanBeUpgraded(rdsInfo, targetMajorVersion);
+        inOrder.verify(awsRdsUpgradeValidatorService).validateRdsIsAvailableOrUpgrading(rdsInfo);
         inOrder.verify(awsRdsUpgradeSteps).upgradeRds(rdsClient, databaseServer, rdsInfo, targetMajorVersion);
+        verify(awsRdsUpgradeSteps, never()).waitForUpgrade(ac, rdsClient, databaseServer);
+    }
+
+    @Test
+    void testUpgradeWhenRdsMajorVersionIsNotSmallerThanTargetThenUpgradeIsNotCalled() {
+        RdsInfo rdsInfo = new RdsInfo(RdsState.AVAILABLE, null, null);
+        when(awsRdsUpgradeSteps.getRdsInfo(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(rdsInfo);
+        when(awsRdsUpgradeValidatorService.isRdsMajorVersionSmallerThanTarget(rdsInfo, targetMajorVersion)).thenReturn(false);
+
+        underTest.upgrade(ac, databaseStack, targetMajorVersion);
+
+        verify(awsRdsUpgradeSteps, never()).upgradeRds(rdsClient, databaseServer, rdsInfo, targetMajorVersion);
         verify(awsRdsUpgradeSteps, never()).waitForUpgrade(ac, rdsClient, databaseServer);
     }
 

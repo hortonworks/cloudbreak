@@ -39,9 +39,11 @@ public class AwsRdsUpgradeService {
 
         AmazonRdsClient rdsClient = getAmazonRdsClient(ac);
         RdsInfo rdsInfo = getRdsInfo(dbInstanceIdentifier, rdsClient);
-        validateIfRdsCanBeUpgraded(targetMajorVersion, rdsInfo);
-        upgadeRdsIfNeeded(targetMajorVersion, databaseServer, rdsClient, rdsInfo);
-        waitForRdsUpgrade(ac, databaseServer, rdsClient);
+        if (awsRdsUpgradeValidatorService.isRdsMajorVersionSmallerThanTarget(rdsInfo, targetMajorVersion)) {
+            awsRdsUpgradeValidatorService.validateRdsIsAvailableOrUpgrading(rdsInfo);
+            upgradeRdsIfNotUpgradingAlready(targetMajorVersion, databaseServer, rdsClient, rdsInfo);
+            waitForRdsUpgrade(ac, databaseServer, rdsClient);
+        }
         LOGGER.debug("RDS upgrade done for DB: {}", dbInstanceIdentifier);
     }
 
@@ -49,11 +51,7 @@ public class AwsRdsUpgradeService {
         return awsRdsUpgradeSteps.getRdsInfo(rdsClient, dbInstanceIdentifier);
     }
 
-    private void validateIfRdsCanBeUpgraded(Version targetMajorVersion, RdsInfo rdsInfo) {
-        awsRdsUpgradeValidatorService.validateRdsCanBeUpgraded(rdsInfo, targetMajorVersion);
-    }
-
-    private void upgadeRdsIfNeeded(Version targetMajorVersion, DatabaseServer databaseServer, AmazonRdsClient rdsClient, RdsInfo rdsInfo) {
+    private void upgradeRdsIfNotUpgradingAlready(Version targetMajorVersion, DatabaseServer databaseServer, AmazonRdsClient rdsClient, RdsInfo rdsInfo) {
         if (AVAILABLE == rdsInfo.getRdsState()) {
             LOGGER.debug("RDS {} is in available state, calling upgrade.", databaseServer.getServerId());
             awsRdsUpgradeSteps.upgradeRds(rdsClient, databaseServer, rdsInfo, targetMajorVersion);
