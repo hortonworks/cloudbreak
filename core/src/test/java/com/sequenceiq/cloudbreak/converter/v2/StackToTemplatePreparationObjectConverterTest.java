@@ -79,6 +79,7 @@ import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
+import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsViewProvider;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -248,6 +249,9 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private DatalakeService datalakeService;
+
+    @Mock
+    private CustomConfigurationsService customConfigurationsService;
 
     @Spy
     @SuppressFBWarnings(value = "UrF", justification = "This gets injected")
@@ -496,6 +500,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenCustomConfigsProvidedThenItShouldBeInvoked() {
         CustomConfigurationsView expected = mock(CustomConfigurationsView.class);
+        when(customConfigurationsService.getByCrn(any())).thenReturn(customConfigurations);
         when(customConfigurationsViewProvider.getCustomConfigurationsView(customConfigurations)).thenReturn(expected);
         when(stackMock.getType()).thenReturn(StackType.WORKLOAD);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
@@ -521,6 +526,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenClusterHasCustomConfigsWithEmptyRuntime() {
         CustomConfigurationsView expected = new CustomConfigurationsView("test-name", "test-crn", "", Collections.emptySet());
+        when(customConfigurationsService.getByCrn(any())).thenReturn(customConfigurations);
         when(customConfigurationsViewProvider.getCustomConfigurationsView(customConfigurations)).thenReturn(expected);
         when(stackMock.getType()).thenReturn(StackType.WORKLOAD);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
@@ -536,6 +542,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenClusterHasCustomConfigsWithMismatchedRuntime() {
         CustomConfigurationsView expected = new CustomConfigurationsView("test-name", "test-crn", "7.2.14", Collections.emptySet());
+        when(customConfigurationsService.getByCrn(any())).thenReturn(customConfigurations);
         when(customConfigurationsViewProvider.getCustomConfigurationsView(customConfigurations)).thenReturn(expected);
         when(stackMock.getType()).thenReturn(StackType.WORKLOAD);
         when(stackMock.getStackVersion()).thenReturn("7.2.15");

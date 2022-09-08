@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
+import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
@@ -58,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
+import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsViewProvider;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -187,6 +189,9 @@ public class StackToTemplatePreparationObjectConverter {
 
     @Inject
     private DatalakeService datalakeService;
+
+    @Inject
+    private CustomConfigurationsService customConfigurationsService;
 
     public TemplatePreparationObject convert(StackDtoDelegate source) {
         try {
@@ -323,7 +328,8 @@ public class StackToTemplatePreparationObjectConverter {
     private CustomConfigurationsView getCustomConfigurationsView(StackView source, ClusterView cluster) {
         CustomConfigurationsView customConfigurationsView = null;
         if (StackType.WORKLOAD.equals(source.getType()) && cluster.getCustomConfigurations() != null) {
-            customConfigurationsView = customConfigurationsViewProvider.getCustomConfigurationsView(cluster.getCustomConfigurations());
+            CustomConfigurations customConfigurationsWithConfigurations = customConfigurationsService.getByCrn(cluster.getCustomConfigurations().getCrn());
+            customConfigurationsView = customConfigurationsViewProvider.getCustomConfigurationsView(customConfigurationsWithConfigurations);
             if (!Strings.isNullOrEmpty(customConfigurationsView.getRuntimeVersion()) &&
                     !source.getStackVersion().equals(customConfigurationsView.getRuntimeVersion())) {
                 throw new CustomConfigurationsRuntimeVersionException("Custom Configurations runtime version mismatch!");
