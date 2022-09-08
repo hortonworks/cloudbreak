@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.event;
 
 public enum ResourceEvent {
     SDX_CLUSTER_CREATED("resource.sdx.created"),
+    SDX_CLUSTER_IS_RUNNING("resource.sdx.is.running"),
     SDX_CLUSTER_PROVISION_STARTED("resource.sdx.provisionstarted"),
     SDX_CLUSTER_PROVISION_FINISHED("resource.sdx.provisionfinished"),
     SDX_CLUSTER_DELETED("resource.sdx.deleted"),
