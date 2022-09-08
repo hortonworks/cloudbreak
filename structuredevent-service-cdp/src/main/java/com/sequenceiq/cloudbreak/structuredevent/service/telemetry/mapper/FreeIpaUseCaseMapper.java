@@ -32,6 +32,10 @@ public class FreeIpaUseCaseMapper {
     @PostConstruct
     void initUseCaseMaps() {
         firstStepUseCaseMap = new HashMap<>();
+        firstStepUseCaseMap.put(Pair.of("ProvisionFlowEventChainFactory", "StackProvisionFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.CREATE_STARTED);
+        firstStepUseCaseMap.put(Pair.of("", "StackTerminationFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.DELETE_STARTED);
+        firstStepUseCaseMap.put(Pair.of("", "StackStopFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.SUSPEND_STARTED);
+        firstStepUseCaseMap.put(Pair.of("", "StackStartFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.RESUME_STARTED);
         firstStepUseCaseMap.put(Pair.of("", "UpscaleFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.UPSCALE_STARTED);
         firstStepUseCaseMap.put(Pair.of("", "DownscaleFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.DOWNSCALE_STARTED);
         firstStepUseCaseMap.put(Pair.of("", "FreeIpaVerticalScaleFlowConfig"), UsageProto.CDPFreeIPAStatus.Value.VERTICAL_SCALE_STARTED);
@@ -67,6 +71,26 @@ public class FreeIpaUseCaseMapper {
         String rootFlowType = StringUtils.isNotEmpty(rootFlowChainType) ? rootFlowChainType : flowType;
         if (rootFlowType != null) {
             switch (rootFlowType) {
+                case "ProvisionFlowEventChainFactory":
+                    useCase = getFreeIpaStatus(nextFlowState, "FREEIPA_PROVISION_FINISHED_STATE",
+                            UsageProto.CDPFreeIPAStatus.Value.CREATE_FINISHED,
+                            UsageProto.CDPFreeIPAStatus.Value.CREATE_FAILED);
+                    break;
+                case "StackTerminationFlowConfig":
+                    useCase = getFreeIpaStatus(nextFlowState, "TERMINATION_FINISHED_STATE",
+                            UsageProto.CDPFreeIPAStatus.Value.DELETE_FINISHED,
+                            UsageProto.CDPFreeIPAStatus.Value.DELETE_FAILED);
+                    break;
+                case "StackStopFlowConfig":
+                    useCase = getFreeIpaStatus(nextFlowState, "STOP_FINISHED_STATE",
+                            UsageProto.CDPFreeIPAStatus.Value.SUSPEND_FINISHED,
+                            UsageProto.CDPFreeIPAStatus.Value.SUSPEND_FAILED);
+                    break;
+                case "StackStartFlowConfig":
+                    useCase = getFreeIpaStatus(nextFlowState, "START_FINISHED_STATE",
+                            UsageProto.CDPFreeIPAStatus.Value.RESUME_FINISHED,
+                            UsageProto.CDPFreeIPAStatus.Value.RESUME_FAILED);
+                    break;
                 case "UpscaleFlowConfig":
                     useCase = getFreeIpaStatus(nextFlowState, "UPSCALE_FINISHED_STATE",
                             UsageProto.CDPFreeIPAStatus.Value.UPSCALE_FINISHED,

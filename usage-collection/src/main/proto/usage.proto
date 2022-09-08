@@ -1386,6 +1386,34 @@ message CDPFreeIPAStatus {
     CCM_UPGRADE_FINISHED = 14;
     // The status when a FreeIPA ccm upgrade operation failed.
     CCM_UPGRADE_FAILED = 15;
+
+    // The status when CDP FreeIPA creation started.
+    CREATE_STARTED = 16;
+    // The status when CDP FreeIPA creation finished.
+    CREATE_FINISHED = 17;
+    // The status when CDP FreeIPA creation failed.
+    CREATE_FAILED = 18;
+
+    // The status when CDP FreeIPA deletion started
+    DELETE_STARTED = 19;
+    // The status when CDP FreeIPA deletion finished.
+    DELETE_FINISHED = 20;
+    // The status when CDP FreeIPA deletion failed.
+    DELETE_FAILED = 21;
+
+    // The status when CDP FreeIPA is trying to suspend.
+    SUSPEND_STARTED = 22;
+    // The status when CDP FreeIPA is suspended.
+    SUSPEND_FINISHED = 23;
+    // The status when CDP FreeIPA failed to suspend.
+    SUSPEND_FAILED = 24;
+
+    // The status when CDP FreeIPA is trying to resume.
+    RESUME_STARTED = 25;
+    // The status when CDP FreeIPA completed resuming.
+    RESUME_FINISHED = 26;
+    // The status when CDP FreeIPA failed to resume.
+    RESUME_FAILED = 27;
   }
 }
 

@@ -49,6 +49,15 @@ class FreeIpaUseCaseMapperTest {
     void testInitNextFlowStateWithCorrectFlowChainAndFlowTypeMappedToCorrectUseCase() {
         Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.UPSCALE_STARTED,
                 mapFlowDetailsToUseCase(null, UPSCALEFLOWCONFIG, INIT_STATE));
+        Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.CREATE_STARTED,
+                mapFlowDetailsToUseCase("ProvisionFlowEventChainFactory", "StackProvisionFlowConfig", INIT_STATE));
+        Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.DELETE_STARTED,
+                mapFlowDetailsToUseCase(null, "StackTerminationFlowConfig", INIT_STATE));
+        Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.SUSPEND_STARTED,
+                mapFlowDetailsToUseCase(null, "StackStopFlowConfig", INIT_STATE));
+        Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.RESUME_STARTED,
+                mapFlowDetailsToUseCase(null, "StackStartFlowConfig", INIT_STATE));
+
     }
 
     @Test
@@ -71,6 +80,28 @@ class FreeIpaUseCaseMapperTest {
                 mapFlowDetailsToUseCase(null, UPSCALEFLOWCONFIG, SOMETHING_FAILED_STATE));
         Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.UPSCALE_FAILED,
                 mapFlowDetailsToUseCase(null, UPSCALEFLOWCONFIG, "SOME_FAIL_STATE"));
+
+        Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.CREATE_FINISHED,
+                mapFlowDetailsToUseCase("ProvisionFlowEventChainFactory", "FreeIpaProvisionFlowConfig", "FREEIPA_PROVISION_FINISHED_STATE"));
+        Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.CREATE_FAILED,
+                mapFlowDetailsToUseCase("ProvisionFlowEventChainFactory", "StackProvisionFlowConfig", SOMETHING_FAILED_STATE));
+        Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.CREATE_FAILED,
+                mapFlowDetailsToUseCase("ProvisionFlowEventChainFactory", "FreeIpaProvisionFlowConfig", SOMETHING_FAILED_STATE));
+
+        Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.DELETE_FINISHED,
+                mapFlowDetailsToUseCase(null, "StackTerminationFlowConfig", "TERMINATION_FINISHED_STATE"));
+        Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.DELETE_FAILED,
+                mapFlowDetailsToUseCase(null, "StackTerminationFlowConfig", SOMETHING_FAILED_STATE));
+
+        Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.SUSPEND_FINISHED,
+                mapFlowDetailsToUseCase(null, "StackStopFlowConfig", "STOP_FINISHED_STATE"));
+        Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.SUSPEND_FAILED,
+                mapFlowDetailsToUseCase(null, "StackStopFlowConfig", SOMETHING_FAILED_STATE));
+
+        Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.RESUME_FINISHED,
+                mapFlowDetailsToUseCase(null, "StackStartFlowConfig", "START_FINISHED_STATE"));
+        Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.RESUME_FAILED,
+                mapFlowDetailsToUseCase(null, "StackStartFlowConfig", SOMETHING_FAILED_STATE));
     }
 
     @Test
