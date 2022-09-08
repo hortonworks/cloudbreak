@@ -409,6 +409,12 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         return String.join("/", gcpProperties.getCloudStorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
     }
 
+    @Override
+    public String getBaseLocationForPreTermination() {
+        return String.join("/", gcpProperties.getCloudStorage().getBaseLocation(),
+                "pre-termination");
+    }
+
     public String getServiceAccountEmail() {
         return gcpProperties.getCloudStorage().getGcs().getServiceAccountEmail();
     }

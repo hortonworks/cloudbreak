@@ -1,9 +1,12 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_SERVICE_DEPLOYMENT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -42,22 +45,36 @@ public class SdxRecipeTests extends PreconditionSdxE2ETest {
     )
     public void testSDXPreClouderaManagerStartRecipe(TestContext testContext) {
         String recipeName = resourcePropertyProvider().getName();
+        String preTerminationRecipeName = resourcePropertyProvider().getName();
         String filePath = "/pre-service-deployment";
         String fileName = "pre-service-deployment";
         String masterInstanceGroup = "master";
         testContext
-                .given(RecipeTestDto.class)
+                .given("preTermination", RecipeTestDto.class)
+                    .withName(preTerminationRecipeName)
+                    .withContent(recipeUtil.generatePreTerminationRecipeContentForE2E(applicationContext, preTerminationRecipeName))
+                    .withRecipeType(PRE_TERMINATION)
+                .when(recipeTestClient.createV4(), key("preTermination"))
+                .given("preDeployment", RecipeTestDto.class)
                     .withName(recipeName)
                     .withContent(recipeUtil.generatePreDeploymentRecipeContent(applicationContext))
                     .withRecipeType(PRE_SERVICE_DEPLOYMENT)
-                .when(recipeTestClient.createV4())
+                .when(recipeTestClient.createV4(), key("preDeployment"))
                 .given(SdxTestDto.class)
-                    .withRecipe(recipeName, masterInstanceGroup)
+                    .withRecipes(Set.of(recipeName, preTerminationRecipeName), masterInstanceGroup)
                     .withCloudStorage()
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName()), filePath, fileName, 1, null, null, sshJUtil))
+                .when(sdxTestClient.delete())
+                .await(SdxClusterStatusResponse.DELETED)
+                .then((tc, testDto, client) -> verifyPreTerminationRecipe(tc, testDto, getBaseLocationForPreTermination(tc), preTerminationRecipeName))
                 .validate();
+    }
+
+    private SdxTestDto verifyPreTerminationRecipe(TestContext testContext, SdxTestDto testDto, String cloudStorageBaseLocation, String recipeName) {
+        testContext.getCloudProvider().getCloudFunctionality().cloudStorageListContainer(cloudStorageBaseLocation, recipeName, false);
+        return testDto;
     }
 }

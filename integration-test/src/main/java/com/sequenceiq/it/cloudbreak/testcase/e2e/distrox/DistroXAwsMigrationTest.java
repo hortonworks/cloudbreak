@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeReplaceVms;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
@@ -30,6 +31,7 @@ public class DistroXAwsMigrationTest extends AbstractE2ETest {
 
     @Override
     protected void setupTest(TestContext testContext) {
+        assertSupportedCloudPlatform(CloudPlatform.AWS);
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);

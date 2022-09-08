@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_SERVICE_DEPLOYMENT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
@@ -55,6 +56,7 @@ public class FreeIpaTests extends AbstractE2ETest {
     public void testCreateStopStartRepairFreeIpaWithTwoInstances(TestContext testContext) {
         String freeIpa = resourcePropertyProvider().getName();
         String recipeName = resourcePropertyProvider().getName();
+        String preTerminationRecipeName = resourcePropertyProvider().getName();
         String filePath = "/pre-service-deployment";
         String fileName = "pre-service-deployment";
 
@@ -62,18 +64,23 @@ public class FreeIpaTests extends AbstractE2ETest {
         int instanceCountByGroup = 2;
 
         testContext
-                .given(RecipeTestDto.class)
+                .given("preTermination", RecipeTestDto.class)
+                    .withName(preTerminationRecipeName)
+                    .withContent(recipeUtil.generatePreTerminationRecipeContentForE2E(applicationContext, preTerminationRecipeName))
+                    .withRecipeType(PRE_TERMINATION)
+                .when(recipeTestClient.createV4(), key("preTermination"))
+                .given("preDeployment", RecipeTestDto.class)
                     .withName(recipeName)
                     .withContent(recipeUtil.generatePreDeploymentRecipeContent(applicationContext))
                     .withRecipeType(PRE_SERVICE_DEPLOYMENT)
-                .when(recipeTestClient.createV4())
+                .when(recipeTestClient.createV4(), key("preDeployment"))
                 .given("telemetry", TelemetryTestDto.class)
                     .withLogging()
                     .withReportClusterLogs()
                 .given(freeIpa, FreeIpaTestDto.class)
                     .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
                     .withTelemetry("telemetry")
-                    .withRecipe(Set.of(recipeName))
+                    .withRecipes(Set.of(recipeName, preTerminationRecipeName))
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .awaitForHealthyInstances()
@@ -102,6 +109,12 @@ public class FreeIpaTests extends AbstractE2ETest {
                 .given(freeIpa, FreeIpaTestDto.class)
                 .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))
                 .await(FREEIPA_DELETE_COMPLETED)
+                .then((tc, testDto, client) -> verifyPreTerminationRecipe(tc, testDto, getBaseLocationForPreTermination(tc), preTerminationRecipeName))
                 .validate();
+    }
+
+    private FreeIpaTestDto verifyPreTerminationRecipe(TestContext testContext, FreeIpaTestDto testDto, String cloudStorageBaseLocation, String recipeName) {
+        testContext.getCloudProvider().getCloudFunctionality().cloudStorageListContainer(cloudStorageBaseLocation, recipeName, false);
+        return testDto;
     }
 }

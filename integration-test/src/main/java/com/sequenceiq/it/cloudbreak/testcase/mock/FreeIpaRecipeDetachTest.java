@@ -72,7 +72,7 @@ public class FreeIpaRecipeDetachTest extends AbstractMockTest {
                 .withRecipeType(POST_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4())
                 .given(FreeIpaTestDto.class)
-                .withRecipe(Set.of(preRecipeName, postInstallRecipeName))
+                .withRecipes(Set.of(preRecipeName, postInstallRecipeName))
                 .withFreeIpaHa(1, 2)
                 .when(freeIpaTestClient.create())
                 .enableVerification()

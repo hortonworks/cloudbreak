@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.dto.distrox;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STACK_DELETED;
+import static java.lang.String.format;
 
 import java.util.Collections;
 import java.util.List;
@@ -194,13 +195,13 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         if (!getInstanceIdsForAction().isEmpty()) {
             return awaitForInstance(Map.of(getInstanceIdsForAction(), instanceStatus));
         } else {
-            throw new IllegalStateException(String.format("There is no '%s' instance to wait!", instanceStatus));
+            throw new IllegalStateException(format("There is no '%s' instance to wait!", instanceStatus));
         }
     }
 
     public DistroXTestDto awaitForHostGroup(String hostGroup, InstanceStatus instanceStatus) {
         if (!getTestContext().getExceptionMap().isEmpty()) {
-            Log.await(LOGGER, String.format("Await for host group should be skipped because of previous error. awaitForHostGroup [%s] - [%s]",
+            Log.await(LOGGER, format("Await for host group should be skipped because of previous error. awaitForHostGroup [%s] - [%s]",
                     hostGroup, instanceStatus));
             return this;
         }

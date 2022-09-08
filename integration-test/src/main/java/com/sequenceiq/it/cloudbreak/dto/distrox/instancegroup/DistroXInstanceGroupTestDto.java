@@ -6,9 +6,13 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.GATEWAY;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.WORKER;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
@@ -76,6 +80,7 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
                 .withType(hostGroupType.getInstanceGroupType())
                 .withName(hostGroupType.getName())
                 .withNetwork(SubnetId.all())
+                .withRecipes(entity.getRequest().getRecipeNames())
                 .withTemplate(testContext.given(DistroXInstanceTemplateTestDto.class));
     }
 
@@ -85,8 +90,24 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
     }
 
     public DistroXInstanceGroupTestDto withRecipes(String... recipeNames) {
+        Set<String> recipes = new HashSet<String>();
         for (String recipeName : recipeNames) {
-            getRequest().getRecipeNames().add(recipeName);
+            recipes = getRequest().getRecipeNames();
+            recipes.add(recipeName);
+        }
+        getRequest().setRecipeNames(recipes);
+        return this;
+    }
+
+    public DistroXInstanceGroupTestDto withRecipes(Set<String> recipeNames) {
+        if (CollectionUtils.isNotEmpty(recipeNames)) {
+            Set<String> recipes = getRequest().getRecipeNames();
+            if (CollectionUtils.isNotEmpty(recipes)) {
+                recipes.addAll(recipeNames);
+                getRequest().setRecipeNames(recipes);
+            } else {
+                getRequest().setRecipeNames(recipeNames);
+            }
         }
         return this;
     }

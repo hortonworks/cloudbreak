@@ -193,6 +193,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getBaseLocationForPreTermination() {
+        return delegate.getBaseLocationForPreTermination();
+    }
+
+    @Override
     public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
         return getDelegate(volume).attachedVolume(volume);
     }

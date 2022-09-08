@@ -7,9 +7,11 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.WORKER;
 import static com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupTestDto.withHostGroup;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -51,6 +53,11 @@ public class DistroXInstanceGroupsBuilder {
         return this;
     }
 
+    public DistroXInstanceGroupsBuilder withRecipes(Set<String> recipeNames) {
+        getInstanceGroupRequests().forEach(instanceGroupRequest -> instanceGroupRequest.setRecipeNames(recipeNames));
+        return this;
+    }
+
     public List<DistroXInstanceGroupTestDto> build() {
         return distroXInstanceGroupTestDtoList;
     }
@@ -63,5 +70,15 @@ public class DistroXInstanceGroupsBuilder {
 
     private InstanceTemplateV1Request getInstanceTemplate(DistroXInstanceGroupTestDto distroXInstanceGroupTestDto) {
         return distroXInstanceGroupTestDto.getRequest().getTemplate();
+    }
+
+    private List<InstanceGroupV1Request> getInstanceGroupRequests() {
+        return distroXInstanceGroupTestDtoList.stream()
+                .map(this::getInstanceGroupRequest)
+                .collect(Collectors.toList());
+    }
+
+    private InstanceGroupV1Request getInstanceGroupRequest(DistroXInstanceGroupTestDto distroXInstanceGroupTestDto) {
+        return distroXInstanceGroupTestDto.getRequest();
     }
 }

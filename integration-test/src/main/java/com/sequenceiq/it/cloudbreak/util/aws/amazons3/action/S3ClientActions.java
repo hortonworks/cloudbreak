@@ -16,6 +16,7 @@ import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3Object;
@@ -43,9 +44,9 @@ public class S3ClientActions extends S3Client {
                 ObjectListing objectListing = s3Client.listObjects(listObjectsRequest);
 
                 do {
-                    List<DeleteObjectsRequest.KeyVersion> deletableObjects = Lists.newArrayList();
+                    List<KeyVersion> deletableObjects = Lists.newArrayList();
                     for (S3ObjectSummary objectSummary : objectListing.getObjectSummaries()) {
-                        deletableObjects.add(new DeleteObjectsRequest.KeyVersion(objectSummary.getKey()));
+                        deletableObjects.add(new KeyVersion(objectSummary.getKey()));
                     }
                     DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
                     deleteObjectsRequest.setKeys(deletableObjects);
@@ -103,9 +104,9 @@ public class S3ClientActions extends S3Client {
                     }
                 } while (filteredObjectSummaries.isEmpty() && objectListing.isTruncated());
 
-                if (filteredObjectSummaries.size() == 0) {
+                if (filteredObjectSummaries.isEmpty()) {
                     LOGGER.error("Amazon S3 object: {} has 0 sub-objects!", selectedObject);
-                    throw new TestFailException(String.format("Amazon S3 object: %s has 0 sub-objects!", selectedObject));
+                    throw new TestFailException(format("Amazon S3 object: %s has 0 sub-objects!", selectedObject));
                 } else {
                     Log.log(LOGGER, format(" Amazon S3 object: %s contains %d sub-objects.",
                             selectedObject, filteredObjectSummaries.size()));
@@ -117,7 +118,7 @@ public class S3ClientActions extends S3Client {
 
                     if (!zeroContent && object.getObjectMetadata().getContentLength() == 0) {
                         LOGGER.error("Amazon S3 path: {} has 0 bytes of content!", object.getKey());
-                        throw new TestFailException(String.format("Amazon S3 path: %s has 0 bytes of content!", object.getKey()));
+                        throw new TestFailException(format("Amazon S3 path: %s has 0 bytes of content!", object.getKey()));
                     }
                     try {
                         inputStream.abort();

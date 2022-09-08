@@ -359,6 +359,12 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         return String.join("/", azureProperties.getCloudStorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
     }
 
+    @Override
+    public String getBaseLocationForPreTermination() {
+        return String.join("/", azureProperties.getCloudStorage().getBaseLocation(),
+                "pre-termination");
+    }
+
     public String getAssumerIdentity() {
         return azureProperties.getCloudStorage().getAdlsGen2().getAssumerIdentity();
     }

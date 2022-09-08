@@ -391,6 +391,12 @@ public class MockCloudProvider extends AbstractCloudProvider {
         return String.join("/", mockProperties.getCloudStorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
     }
 
+    @Override
+    public String getBaseLocationForPreTermination() {
+        return String.join("/", mockProperties.getCloudStorage().getBaseLocation(),
+                "pre-termination");
+    }
+
     public String getInstanceProfile() {
         return mockProperties.getCloudStorage().getS3().getInstanceProfile();
     }
