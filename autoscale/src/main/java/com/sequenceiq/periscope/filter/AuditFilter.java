@@ -17,11 +17,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.periscope.api.AutoscaleApi;
 import com.sequenceiq.periscope.service.AuditService;
 
 public class AuditFilter extends OncePerRequestFilter {
 
-    private static final Pattern PATTERN = Pattern.compile(".*/v1/distrox/?(.*)");
+    private static final Pattern V1_DISTROX_PATH_PATTERN = Pattern.compile(".*" + AutoscaleApi.API_ROOT_CONTEXT + "/v1/distrox/?(.*)");
+
+    private static final Pattern ALL_VERSIONED_PATH_PATTERN = Pattern.compile(".*" + AutoscaleApi.API_ROOT_CONTEXT + "/v?(.*)");
 
     private final AuditService auditService;
 
@@ -29,10 +32,13 @@ public class AuditFilter extends OncePerRequestFilter {
 
     private final Boolean auditEnabled;
 
-    public AuditFilter(Boolean auditEnabled, AuditService auditService, AuthenticatedUserService authenticatedUserService) {
+    private final boolean auditAllEndpointsEnabled;
+
+    public AuditFilter(Boolean auditEnabled, AuditService auditService, AuthenticatedUserService authenticatedUserService, boolean auditAllEndpointsEnabled) {
         this.auditEnabled = auditEnabled;
         this.auditService = auditService;
         this.authenticatedUserService = authenticatedUserService;
+        this.auditAllEndpointsEnabled = auditAllEndpointsEnabled;
     }
 
     @Override
@@ -53,10 +59,17 @@ public class AuditFilter extends OncePerRequestFilter {
     }
 
     protected boolean includePathPattern(String requestPath) {
-        Matcher matcher = PATTERN.matcher(requestPath);
-        if (matcher.matches()) {
-            return true;
+        boolean result = false;
+        if (auditAllEndpointsEnabled) {
+            result = patternMatches(ALL_VERSIONED_PATH_PATTERN, requestPath);
+        } else {
+            result = patternMatches(V1_DISTROX_PATH_PATTERN, requestPath);
         }
-        return false;
+        return result;
+    }
+
+    private boolean patternMatches(Pattern pattern, String requestPath) {
+        Matcher matcher = pattern.matcher(requestPath);
+        return matcher.matches();
     }
 }

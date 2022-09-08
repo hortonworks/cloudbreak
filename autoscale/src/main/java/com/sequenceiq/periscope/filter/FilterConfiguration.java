@@ -27,6 +27,9 @@ public class FilterConfiguration {
     @Value("${altus.audit.enabled:false}")
     private boolean auditEnabled;
 
+    @Value("${cb.audit.allEndpoints.enabled:false}")
+    private boolean auditAllEndpointsEnabled;
+
     @Bean(name = "CloudbreakUserConfiguratorFilter")
     public FilterRegistrationBean<CloudbreakUserConfiguratorFilter> identityUserConfiguratorFilterRegistrationBean() {
         FilterRegistrationBean<CloudbreakUserConfiguratorFilter> registrationBean = new FilterRegistrationBean<>();
@@ -40,7 +43,7 @@ public class FilterConfiguration {
     @Bean(name = "AuditFilter")
     public FilterRegistrationBean<AuditFilter> auditFilterRegistrationBean() {
         FilterRegistrationBean<AuditFilter> registrationBean = new FilterRegistrationBean<>();
-        AuditFilter filter = new AuditFilter(auditEnabled, auditService, authenticatedUserService);
+        AuditFilter filter = new AuditFilter(auditEnabled, auditService, authenticatedUserService, auditAllEndpointsEnabled);
         registrationBean.setFilter(filter);
         registrationBean.setOrder(FilterOrderConstants.AUDIT_FILTER_ORDER);
         return registrationBean;
