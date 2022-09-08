@@ -52,7 +52,7 @@ public class AuditFilterTest {
     @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        underTest = new AuditFilter(true, auditService, authenticatedUserService);
+        underTest = new AuditFilter(true, auditService, authenticatedUserService, false);
     }
 
     @Test
@@ -130,6 +130,67 @@ public class AuditFilterTest {
                 {"/as/api/v1/distrox/crn/testcrn/history", true},
                 {"/as/api/v1/distrox/name/testcluster/history/", true},
                 {"/as/api/v1/distrox/crn/testcrn/history/", true},
+
+                {"/as/api/v2/clusters/1", false},
+                {"/as/api/v2/clusters/1/enable", false},
+                {"/as/api/v2/clusters/2/disable", false},
+                {"/as/api/v2/clusters/3/suspended", false},
+                {"/as/api/v2/clusters/3/running", false},
+
+                {"/as/health", false},
+                {"/as/info", false},
+                {"/as/metrics", false},
+        });
+    }
+
+    @ParameterizedTest(name = "{0}: testMatch(url: {1}, should match {2}")
+    @MethodSource("patternMatchingOnAllEndpoints")
+    public void testIncludePathPatternWithAuditEnabledOnAllEndpoints(String url, boolean match) {
+        underTest = new AuditFilter(true, auditService, authenticatedUserService, true);
+        if (match) {
+            assertTrue(underTest.includePathPattern(url));
+        } else {
+            assertFalse(underTest.includePathPattern(url));
+        }
+    }
+
+    private static Iterable<Object[]> patternMatchingOnAllEndpoints() {
+        return Arrays.asList(new Object[][]{
+                {"/as/api/v1/distrox", true},
+                {"/as/api/v1/distrox/", true},
+
+                {"/as/api/v1/distrox/name/testcluster/autoscale_config", true},
+                {"/as/api/v1/distrox/name/testcluster/autoscale_config/", true},
+                {"/as/api/v1/distrox/name/testcluster/autoscale_config/test", true},
+
+                {"/as/api/v1/distrox/name/testcluster/autoscale", true},
+                {"/as/api/v1/distrox/name/testcluster/autoscale/", true},
+                {"/as/api/v1/distrox/name/testcluster/autoscale/test", true},
+
+                {"/as/api/v1/distrox/crn/testcrn/autoscale_config", true},
+                {"/as/api/v1/distrox/crn/testcrn/autoscale_config/", true},
+                {"/as/api/v1/distrox/crn/testcrn/autoscale_config/test", true},
+
+                {"/as/api/v1/distrox/crn/testcrn/autoscale", true},
+                {"/as/api/v1/distrox/crn/testcrn/autoscale/", true},
+                {"/as/api/v1/distrox/crn/testcrn/autoscale/test", true},
+
+                {"/as/api/v1/distrox/name/testcluster/history", true},
+                {"/as/api/v1/distrox/crn/testcrn/history", true},
+                {"/as/api/v1/distrox/name/testcluster/history/", true},
+                {"/as/api/v1/distrox/crn/testcrn/history/", true},
+
+
+                {"/as/api/v2/clusters/1", true},
+                {"/as/api/v2/clusters/1/", true},
+                {"/as/api/v2/clusters/1/enable", true},
+                {"/as/api/v2/clusters/2/disable", true},
+                {"/as/api/v2/clusters/3/suspended", true},
+                {"/as/api/v2/clusters/3/running", true},
+
+                {"/as/api/vNEWERTHANEVERYTHING/clusters/3/running", true},
+                {"/as/api//v1333/distrox/", true},
+
 
                 {"/as/health", false},
                 {"/as/info", false},
