@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.cloudbreak.api.model.RdsUpgradeResponseType.TRIGGERED;
-
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -55,16 +53,19 @@ public class CloudbreakStackService {
 
     public RdsUpgradeV4Response upgradeRdsByClusterNameInternal(SdxCluster sdxCluster, TargetMajorVersion targetMajorVersion) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        RdsUpgradeV4Response upgradeResponse =
-                ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                        () -> stackV4Endpoint.upgradeRdsByClusterNameInternal(WORKSPACE_ID, sdxCluster.getClusterName(), targetMajorVersion, initiatorUserCrn));
-        LOGGER.debug("Launching database server upgrade in core returned: {}", upgradeResponse);
-        if (TRIGGERED != upgradeResponse.getResponseType()) {
-            LOGGER.warn("Could not launch database server upgrade in core, reason: {}", upgradeResponse.getReason());
-            throw new CloudbreakApiException(upgradeResponse.getReason());
+        try {
+            RdsUpgradeV4Response upgradeResponse =
+                    ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                            () -> stackV4Endpoint.upgradeRdsByClusterNameInternal(WORKSPACE_ID, sdxCluster.getClusterName(), targetMajorVersion,
+                                    initiatorUserCrn));
+            LOGGER.debug("Launching database server upgrade in core returned: {}", upgradeResponse);
+            cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, upgradeResponse.getFlowIdentifier());
+            return upgradeResponse;
+        } catch (WebApplicationException e) {
+            String message = String.format("Could not launch database server upgrade in core, reason: %s.", exceptionMessageExtractor.getErrorMessage(e));
+            LOGGER.warn(message, e);
+            throw new CloudbreakApiException(message, e);
         }
-        cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, upgradeResponse.getFlowIdentifier());
-        return upgradeResponse;
     }
 
 }

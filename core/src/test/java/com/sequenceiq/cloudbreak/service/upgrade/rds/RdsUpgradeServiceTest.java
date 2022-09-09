@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
-import com.sequenceiq.cloudbreak.api.model.RdsUpgradeResponseType;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -105,7 +104,6 @@ class RdsUpgradeServiceTest {
         RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
 
         verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION));
-        assertThat(response.getResponseType()).isEqualTo(RdsUpgradeResponseType.TRIGGERED);
         assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
         assertThat(response.getFlowIdentifier().getPollableId()).isEqualTo(FLOW_ID);
     }
@@ -127,7 +125,6 @@ class RdsUpgradeServiceTest {
         RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), null);
 
         verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION));
-        assertThat(response.getResponseType()).isEqualTo(RdsUpgradeResponseType.TRIGGERED);
         assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
         assertThat(response.getFlowIdentifier().getPollableId()).isEqualTo(FLOW_ID);
     }
@@ -145,7 +142,6 @@ class RdsUpgradeServiceTest {
         RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
 
         verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION));
-        assertThat(response.getResponseType()).isEqualTo(RdsUpgradeResponseType.TRIGGERED);
         assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
         assertThat(response.getFlowIdentifier().getPollableId()).isEqualTo(FLOW_ID);
     }

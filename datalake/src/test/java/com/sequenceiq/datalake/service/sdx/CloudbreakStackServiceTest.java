@@ -24,7 +24,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
-import com.sequenceiq.cloudbreak.api.model.RdsUpgradeResponseType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -110,9 +109,9 @@ public class CloudbreakStackServiceTest {
             SdxCluster sdxCluster = setupSdxCluster();
             setupIam();
             TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
-            RdsUpgradeV4Response rdsUpgradeV4Response = setupResponse(null);
             threadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getUserCrn).thenReturn(USER_CRN);
-            threadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(), any(Supplier.class))).thenReturn(rdsUpgradeV4Response);
+            threadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(), any(Supplier.class)))
+                    .thenThrow(new WebApplicationException());
 
             Assertions.assertThrows(CloudbreakApiException.class, () ->
                     underTest.upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion)
@@ -124,12 +123,7 @@ public class CloudbreakStackServiceTest {
 
     private static RdsUpgradeV4Response setupResponse(FlowIdentifier flowIdentifier) {
         RdsUpgradeV4Response rdsUpgradeV4Response = new RdsUpgradeV4Response();
-        if (flowIdentifier != null) {
-            rdsUpgradeV4Response.setFlowIdentifier(flowIdentifier);
-            rdsUpgradeV4Response.setResponseType(RdsUpgradeResponseType.TRIGGERED);
-        } else {
-            rdsUpgradeV4Response.setResponseType(RdsUpgradeResponseType.ERROR);
-        }
+        rdsUpgradeV4Response.setFlowIdentifier(flowIdentifier);
         return rdsUpgradeV4Response;
     }
 

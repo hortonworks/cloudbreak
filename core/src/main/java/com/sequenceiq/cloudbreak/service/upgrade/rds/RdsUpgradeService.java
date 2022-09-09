@@ -18,9 +18,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
-import com.sequenceiq.cloudbreak.api.model.RdsUpgradeResponseType;
-import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -103,7 +102,7 @@ public class RdsUpgradeService {
 
     private RdsUpgradeV4Response triggerRdsUpgradeFlow(StackView stack, TargetMajorVersion targetMajorVersion) {
         FlowIdentifier triggeredFlowId = reactorFlowManager.triggerRdsUpgrade(stack.getId(), targetMajorVersion);
-        return new RdsUpgradeV4Response(RdsUpgradeResponseType.TRIGGERED, triggeredFlowId, null, targetMajorVersion);
+        return new RdsUpgradeV4Response(triggeredFlowId, targetMajorVersion);
     }
 
     private String getMessage(ResourceEvent resourceEvent) {
