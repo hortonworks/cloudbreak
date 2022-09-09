@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
+import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.structuredevent.event.CustomConfigurationsDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
@@ -46,6 +48,9 @@ public class StackToStackDetailsConverterTest {
 
     @Mock
     private EmbeddedDatabaseService embeddedDatabaseService;
+
+    @Mock
+    private CustomConfigurationsService customConfigurationsService;
 
     @InjectMocks
     private StackToStackDetailsConverter underTest;
@@ -107,7 +112,8 @@ public class StackToStackDetailsConverterTest {
 
         CustomConfigurationsDetails customConfigurationsDetails = new CustomConfigurationsDetails();
 
-        Mockito.when(customConfigurationsToCustomConfigurationsDetailsConverter.convert(any(CustomConfigurations.class)))
+        when(customConfigurationsService.getByCrn(any())).thenReturn(customConfigurations);
+        when(customConfigurationsToCustomConfigurationsDetailsConverter.convert(any(CustomConfigurations.class)))
                 .thenReturn(customConfigurationsDetails);
 
         // WHEN

@@ -15,9 +15,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
+import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -55,6 +57,9 @@ public class StackToStackDetailsConverter {
     @Inject
     private EmbeddedDatabaseService embeddedDatabaseService;
 
+    @Inject
+    private CustomConfigurationsService customConfigurationsService;
+
     public StackDetails convert(StackView source, ClusterView cluster, List<InstanceGroupDto> instanceGroupDtos) {
         StackDetails stackDetails = new StackDetails();
         stackDetails.setId(source.getId());
@@ -72,8 +77,8 @@ public class StackToStackDetailsConverter {
             stackDetails.setDetailedStatus(source.getDetailedStatus().name());
         }
         if (cluster != null && cluster.getCustomConfigurations() != null) {
-            stackDetails.setCustomConfigurations(
-                    customConfigurationsToCustomConfigurationsDetailsConverter.convert(cluster.getCustomConfigurations()));
+            CustomConfigurations customConfigurationsWithConfigurations = customConfigurationsService.getByCrn(cluster.getCustomConfigurations().getCrn());
+            stackDetails.setCustomConfigurations(customConfigurationsToCustomConfigurationsDetailsConverter.convert(customConfigurationsWithConfigurations));
         }
         stackDetails.setStatusReason(source.getStatusReason());
         stackDetails.setInstanceGroups(
