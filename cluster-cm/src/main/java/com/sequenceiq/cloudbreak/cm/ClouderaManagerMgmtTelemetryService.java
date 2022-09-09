@@ -1,15 +1,18 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cm.util.ConfigUtils.makeApiConfigList;
-import static java.lang.module.ModuleDescriptor.Version;
 import static java.util.stream.Collectors.joining;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,6 +23,7 @@ import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.MgmtRoleConfigGroupsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiRole;
@@ -88,10 +92,6 @@ public class ClouderaManagerMgmtTelemetryService {
     private static final String TELEMETRY_UPLOAD_LOGS = "telemetry.upload.job.logs";
 
     private static final String TELEMETRY_WA_DEFAULT_CLUSTER_TYPE = "DATALAKE";
-
-    private static final String CM_SMON_SUPPORT_FROM_VERSION = "7.2.15";
-
-    private static final String CM_SMON_PROMETHEUS_ADAPTER_SUPPORT_FROM_VERSION = "7.2.16";
 
     private static final String SMON_PROMETHEUS_PORT = "prometheus_metrics_endpoint_port";
 
@@ -165,19 +165,19 @@ public class ClouderaManagerMgmtTelemetryService {
             final Telemetry telemetry) throws ApiException {
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         if (isMonitoringSupported(stack, telemetry, accountId)) {
-            Version cmSmonPrometheusAdapterVersion = Version.parse(CM_SMON_PROMETHEUS_ADAPTER_SUPPORT_FROM_VERSION);
-            Version cmSmonVersion = Version.parse(CM_SMON_SUPPORT_FROM_VERSION);
-            Version runtimeVersion = Version.parse(stack.getStackVersion());
-            if (runtimeVersion.compareTo(cmSmonVersion) >= 0) {
+            MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(client);
+            ApiConfigList serviecMonitorConfigList = mgmtRoleConfigGroupsResourceApi.readConfig(
+                    String.format(MGMT_CONFIG_GROUP_NAME_PATTERN, SERVICE_MONITOR), "FULL");
+            List<String> allConfigKeys = getKeysFromApiConfigList(serviecMonitorConfigList);
+            if (allConfigKeys.containsAll(List.of(SMON_PROMETHEUS_USERNAME, SMON_PROMETHEUS_PASSWORD, SMON_PROMETHEUS_PORT))) {
                 String monitoringUser = stack.getCluster().getCloudbreakClusterManagerMonitoringUser();
                 String monitoringPassword = stack.getCluster().getCloudbreakClusterManagerMonitoringPassword();
                 Integer exporterPort = monitoringConfiguration.getClouderaManagerExporter().getPort();
-                MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(client);
                 Map<String, String> configsToUpdate = new HashMap<>();
                 configsToUpdate.put(SMON_PROMETHEUS_USERNAME, monitoringUser);
                 configsToUpdate.put(SMON_PROMETHEUS_PASSWORD, monitoringPassword);
                 configsToUpdate.put(SMON_PROMETHEUS_PORT, String.valueOf(exporterPort));
-                if (runtimeVersion.compareTo(cmSmonPrometheusAdapterVersion) >= 0) {
+                if (allConfigKeys.contains(SMON_PROMETHEUS_ADAPTER_ENABLED)) {
                     LOGGER.debug("Prometheus adapter is enabled for service monitor.");
                     configsToUpdate.put(SMON_PROMETHEUS_ADAPTER_ENABLED, "true");
                 }
@@ -186,6 +186,12 @@ public class ClouderaManagerMgmtTelemetryService {
                         "Set service monitoring configs for CM metrics exporter by CB", configList);
             }
         }
+    }
+
+    private List<String> getKeysFromApiConfigList(ApiConfigList serviecMonitorConfigList) {
+        return serviecMonitorConfigList != null && CollectionUtils.isNotEmpty(serviecMonitorConfigList.getItems())
+                ? serviecMonitorConfigList.getItems().stream().map(ApiConfig::getName).collect(Collectors.toList())
+                : new ArrayList<>();
     }
 
     @VisibleForTesting
