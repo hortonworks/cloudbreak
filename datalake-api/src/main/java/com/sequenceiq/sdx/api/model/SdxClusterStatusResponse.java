@@ -66,4 +66,7 @@ public enum SdxClusterStatusResponse {
     DATALAKE_UPGRADE_DATABASE_SERVER_FAILED,
     DATALAKE_UPGRADE_DATABASE_SERVER_FINISHED;
 
+    public boolean isRunning() {
+        return RUNNING.equals(this);
+    }
 }

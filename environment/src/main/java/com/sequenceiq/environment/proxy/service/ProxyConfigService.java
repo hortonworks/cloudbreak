@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.repository.ProxyConfigRepository;
 
@@ -41,14 +42,18 @@ public class ProxyConfigService implements CompositeAuthResourcePropertyProvider
 
     private final TransactionService transactionService;
 
+    private final ProxyConfigModificationService proxyConfigModificationService;
+
     public ProxyConfigService(ProxyConfigRepository proxyConfigRepository,
             RegionAwareCrnGenerator regionAwareCrnGenerator,
             OwnerAssignmentService ownerAssignmentService,
-            TransactionService transactionService) {
+            TransactionService transactionService,
+            ProxyConfigModificationService proxyConfigModificationService) {
         this.proxyConfigRepository = proxyConfigRepository;
         this.regionAwareCrnGenerator = regionAwareCrnGenerator;
         this.ownerAssignmentService = ownerAssignmentService;
         this.transactionService = transactionService;
+        this.proxyConfigModificationService = proxyConfigModificationService;
     }
 
     public ProxyConfig get(Long id) {
@@ -130,6 +135,10 @@ public class ProxyConfigService implements CompositeAuthResourcePropertyProvider
         } catch (TransactionService.TransactionExecutionException e) {
             throw e.getCause();
         }
+    }
+
+    public void modify(Environment environment, ProxyConfig proxyConfig) {
+        proxyConfigModificationService.modify(environment, proxyConfig);
     }
 
     public List<ResourceWithId> getProxyResources() {

@@ -2,11 +2,11 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.ws.rs.BadRequestException;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +51,7 @@ import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameters.dao.repository.AzureParametersRepository;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
+import com.sequenceiq.environment.proxy.service.ProxyConfigService;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneNetwork;
@@ -82,6 +83,8 @@ public class EnvironmentModificationService {
 
     private final DnsV1Endpoint dnsV1Endpoint;
 
+    private final ProxyConfigService proxyConfigService;
+
     public EnvironmentModificationService(
             EnvironmentDtoConverter environmentDtoConverter,
             EnvironmentService environmentService,
@@ -93,7 +96,8 @@ public class EnvironmentModificationService {
             EnvironmentResourceService environmentResourceService,
             EnvironmentEncryptionService environmentEncryptionService,
             AzureParametersRepository azureParametersRepository,
-            DnsV1Endpoint dnsV1Endpoint) {
+            DnsV1Endpoint dnsV1Endpoint,
+            ProxyConfigService proxyConfigService) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentService = environmentService;
         this.credentialService = credentialService;
@@ -105,6 +109,7 @@ public class EnvironmentModificationService {
         this.environmentEncryptionService = environmentEncryptionService;
         this.azureParametersRepository = azureParametersRepository;
         this.dnsV1Endpoint = dnsV1Endpoint;
+        this.proxyConfigService = proxyConfigService;
     }
 
     public EnvironmentDto editByName(String environmentName, EnvironmentEditDto editDto) {
@@ -178,8 +183,8 @@ public class EnvironmentModificationService {
         editTunnelIfChanged(editDto, env);
         editEnvironmentParameters(editDto, env);
         editFreeIPA(editDto, env);
-        editProxyIfChanged(editDto, env);
         Environment saved = environmentService.save(env);
+        triggerEditProxyIfChanged(editDto, saved);
         return environmentDtoConverter.environmentToDto(saved);
     }
 
@@ -390,10 +395,11 @@ public class EnvironmentModificationService {
         }
     }
 
-    private void editProxyIfChanged(EnvironmentEditDto editDto, Environment env) {
-        ProxyConfig newProxyConfig = editDto.getProxyConfig();
-        if (newProxyConfig != null && !newProxyConfig.equals(env.getProxyConfig())) {
-            throw new NotImplementedException("Editing the proxy configuration is not supported yet");
+    private void triggerEditProxyIfChanged(EnvironmentEditDto editDto, Environment env) {
+        if (editDto.getProxyConfig() != null &&
+                (env.getProxyConfig() == null || !Objects.equals(editDto.getProxyConfig().getName(), env.getProxyConfig().getName()))) {
+            ProxyConfig newProxyConfig = proxyConfigService.getByNameForAccountId(editDto.getProxyConfig().getName(), editDto.getAccountId());
+            proxyConfigService.modify(env, newProxyConfig);
         }
     }
 
