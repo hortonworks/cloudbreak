@@ -242,9 +242,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        return stackAuthenticationEntity
-                .withLoginUserName("cloudbreak")
-                .withPublicKey(commonCloudProperties().getSshPublicKey());
+        return stackAuthenticationEntity.withPublicKey(commonCloudProperties().getSshPublicKey());
     }
 
     @Override

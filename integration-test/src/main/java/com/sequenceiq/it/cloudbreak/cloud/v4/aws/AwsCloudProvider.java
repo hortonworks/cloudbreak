@@ -318,9 +318,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        return stackAuthenticationEntity
-                .withLoginUserName("cloudbreak")
-                .withPublicKeyId(awsProperties.getPublicKeyId());
+        return stackAuthenticationEntity.withPublicKeyId(awsProperties.getPublicKeyId());
     }
 
     @Override

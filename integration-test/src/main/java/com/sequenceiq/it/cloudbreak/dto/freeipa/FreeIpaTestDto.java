@@ -317,9 +317,11 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     private FreeIpaTestDto withAuthentication(StackAuthenticationTestDto stackAuthentication) {
         StackAuthenticationV4Request request = stackAuthentication.getRequest();
         StackAuthenticationRequest authReq = new StackAuthenticationRequest();
-        authReq.setLoginUserName(request.getLoginUserName());
         authReq.setPublicKey(request.getPublicKey());
         authReq.setPublicKeyId(request.getPublicKeyId());
+        authReq.setLoginUserName(StringUtils.isBlank(request.getLoginUserName())
+                ? "cloudbreak"
+                : request.getLoginUserName());
         getRequest().setAuthentication(authReq);
         return this;
     }

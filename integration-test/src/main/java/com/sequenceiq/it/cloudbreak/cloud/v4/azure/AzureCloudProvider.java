@@ -265,9 +265,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        return stackAuthenticationEntity
-                .withLoginUserName("cloudbreak")
-                .withPublicKey(commonCloudProperties().getSshPublicKey());
+        return stackAuthenticationEntity.withPublicKey(commonCloudProperties().getSshPublicKey());
     }
 
     public Set<String> getSubnetIds() {
