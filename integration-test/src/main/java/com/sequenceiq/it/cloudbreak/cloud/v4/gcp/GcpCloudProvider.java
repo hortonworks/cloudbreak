@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
@@ -142,8 +143,8 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public EnvironmentSecurityAccessTestDto environmentSecurityAccess(EnvironmentSecurityAccessTestDto environmentSecurityAccessTestDto) {
-        EnvironmentSecurityAccessTestDto envSecAcc = super.environmentSecurityAccess(environmentSecurityAccessTestDto);
+    public EnvironmentSecurityAccessTestDto environmentSecurityAccess(EnvironmentSecurityAccessTestDto environmentSecurityAccess) {
+        EnvironmentSecurityAccessTestDto envSecAcc = super.environmentSecurityAccess(environmentSecurityAccess);
         return envSecAcc.withDefaultSecurityGroupId(gcpProperties.getSecurityAccess().getDefaultSecurityGroup())
                 .withSecurityGroupIdForKnox(gcpProperties.getSecurityAccess().getKnoxSecurityGroup());
     }
@@ -364,7 +365,13 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        return stackAuthenticationEntity.withPublicKey(commonCloudProperties().getSshPublicKey());
+        StackAuthenticationV4Request request = stackAuthenticationEntity.getRequest();
+        stackAuthenticationEntity.withPublicKeyId(request.getPublicKeyId());
+        stackAuthenticationEntity.withPublicKey(StringUtils.isBlank(request.getPublicKey())
+                ? commonCloudProperties().getSshPublicKey()
+                : request.getPublicKey());
+        stackAuthenticationEntity.withLoginUserName(request.getLoginUserName());
+        return stackAuthenticationEntity;
     }
 
     @Override
@@ -447,7 +454,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     private <T> T notImplementedException() {
-        throw new NotImplementedException(String.format("Not implemented on %s", getCloudPlatform()));
+        throw new NotImplementedException(format("Not implemented on %s", getCloudPlatform()));
     }
 
     @Override
