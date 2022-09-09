@@ -8,14 +8,17 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.consumption.api.v1.consumption.model.request.CloudResourceConsumptionRequest;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionRequest;
 import com.sequenceiq.consumption.api.doc.ConsumptionOpDescription;
 import com.sequenceiq.consumption.api.v1.consumption.model.response.ConsumptionExistenceResponse;
@@ -57,4 +60,39 @@ public interface ConsumptionInternalEndpoint {
             @QueryParam("monitoredResourceCrn") String monitoredResourceCrn, @NotEmpty @QueryParam("storageLocation") String storageLocation,
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
             @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+
+    @POST
+    @Path("schedule")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConsumptionOpDescription.SCHEDULE_CLOUD_RESOURCE, produces = MediaType.APPLICATION_JSON,
+            nickname = "scheduleConsumtpionCollection")
+    void scheduleConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
+            @Valid @NotNull CloudResourceConsumptionRequest request,
+            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+
+    @DELETE
+    @Path("{monitoredResourceCrn}/unschedule")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConsumptionOpDescription.UNSCHEDULE_CLOUD_RESOURCE, produces = MediaType.APPLICATION_JSON,
+            nickname = "unscheduleConsumptionCollection")
+    void unscheduleConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
+            @NotNull @ValidCrn(resource = {CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.ENVIRONMENT})
+            @PathParam("monitoredResourceCrn") String monitoredResourceCrn,
+            @NotEmpty @QueryParam("cloudResourceId") String cloudResourceId,
+            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+
+    @GET
+    @Path("{monitoredResourceCrn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConsumptionOpDescription.CLOUD_RESOURCE_EXISTS, produces = MediaType.APPLICATION_JSON,
+            nickname = "ConsumptionCollectionExists")
+    ConsumptionExistenceResponse doesConsumptionCollectionExist(@AccountId @QueryParam("accountId") String accountId,
+            @NotNull @ValidCrn(resource = {CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.ENVIRONMENT})
+            @PathParam("monitoredResourceCrn") String monitoredResourceCrn,
+            @NotEmpty @QueryParam("cloudResourceId") String cloudResourceId,
+            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+
 }
