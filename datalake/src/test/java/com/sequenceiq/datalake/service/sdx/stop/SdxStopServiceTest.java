@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessage
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.FreeipaService;
 import com.sequenceiq.datalake.service.sdx.DistroxService;
@@ -74,9 +73,6 @@ public class SdxStopServiceTest {
 
     @Mock
     private FreeipaService freeipaService;
-
-    @Mock
-    private EventSenderService eventSenderService;
 
     @Mock
     private CloudbreakFlowService cloudbreakFlowService;

@@ -67,6 +67,8 @@ class ProvisionerServiceTest {
 
     private static final AtomicLong CLUSTER_ID = new AtomicLong(10000L);
 
+    private static final String SDX_NAME = "sdx";
+
     @Mock
     private SdxClusterRepository sdxClusterRepository;
 
@@ -207,6 +209,7 @@ class ProvisionerServiceTest {
     void startForcedStackDeletionStackFound() {
         long clusterId = CLUSTER_ID.incrementAndGet();
         SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
+        sdxCluster.setClusterName(SDX_NAME);
         when(sdxService.getById(clusterId)).thenReturn(sdxCluster);
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.CREATE_FAILED);
@@ -214,7 +217,7 @@ class ProvisionerServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.startStackDeletion(clusterId, true);
 
-        verify(stackV4Endpoint).deleteInternal(eq(0L), eq(null), eq(true), nullable(String.class));
+        verify(stackV4Endpoint).deleteInternal(eq(0L), eq(SDX_NAME), eq(true), nullable(String.class));
     }
 
     @Test

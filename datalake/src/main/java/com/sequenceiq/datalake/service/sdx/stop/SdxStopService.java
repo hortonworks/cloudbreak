@@ -17,11 +17,9 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.chain.DatalakeResizeFlowEventChainFactory;
 import com.sequenceiq.datalake.service.FreeipaService;
@@ -74,9 +72,6 @@ public class SdxStopService {
     private CloudbreakPoller cloudbreakPoller;
 
     @Inject
-    private EventSenderService eventSenderService;
-
-    @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
@@ -104,7 +99,6 @@ public class SdxStopService {
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> stackV4Endpoint.putStopInternal(0L, sdxCluster.getClusterName(), initiatorUserCrn));
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS, "Datalake stop in progress", sdxCluster);
-            eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.SDX_STOP_STARTED);
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (NotFoundException e) {
             LOGGER.error("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());

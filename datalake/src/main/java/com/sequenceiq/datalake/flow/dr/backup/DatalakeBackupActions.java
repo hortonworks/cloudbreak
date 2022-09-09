@@ -1,13 +1,11 @@
 package com.sequenceiq.datalake.flow.dr.backup;
 
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_BACKUP_FINISHED;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -96,9 +94,6 @@ public class DatalakeBackupActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeTriggerBackupEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Triggering data lake backup for {}", payload.getResourceId());
-
-                SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_BACKUP_IN_PROGRESS);
 
                 DatalakeBackupStatusResponse backupStatusResponse =
                         sdxBackupRestoreService.triggerDatalakeBackup(payload.getResourceId(), payload.getBackupLocation(),
@@ -231,7 +226,6 @@ public class DatalakeBackupActions {
                 String operationId = (String) variables.get(OPERATION_ID);
                 String backupId = (String) variables.get(BACKUP_ID);
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                eventSenderService.sendEventAndNotification(sdxCluster, DATALAKE_DATABASE_BACKUP_FINISHED);
                 SdxDatabaseBackupStatusResponse backupStatusResponse =
                         sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, operationId);
                 if (backupStatusResponse.getStatus().equals(DatalakeDatabaseDrStatus.INPROGRESS)) {
@@ -264,9 +258,6 @@ public class DatalakeBackupActions {
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_BACKUP_FINISHED,
                         "Datalake backup finished, Datalake is running", payload.getResourceId());
-
-                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_BACKUP_FINISHED);
-
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_FINISHED, sdxCluster);
             }
 
@@ -326,7 +317,6 @@ public class DatalakeBackupActions {
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_FAILED, sdxCluster);
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(exception);
-                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_BACKUP_FAILED, List.of(exception.getMessage()));
 
                 sendEvent(context, DATALAKE_BACKUP_FAILURE_HANDLED_EVENT.event(), payload);
             }
@@ -344,7 +334,7 @@ public class DatalakeBackupActions {
             reason.append("Upgrade not started, datalake backup failed.");
         } else {
             if (exception instanceof PollerStoppedException) {
-                reason.append("Backup timed out, see the backup status using cdp-cli for the latest.");
+                reason.append("Backup timed out, see the backup status using cdp-cli for more information.");
             } else {
                 reason.append("Backup failed, returning datalake to running state.");
             }

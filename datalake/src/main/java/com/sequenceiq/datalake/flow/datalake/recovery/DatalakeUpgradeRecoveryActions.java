@@ -114,8 +114,6 @@ public class DatalakeUpgradeRecoveryActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeRecoverySuccessEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Sdx recovery was finalized with sdx id: {}", payload.getResourceId());
-                SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_RECOVERY_FINISHED);
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_RECOVERY_FINISHED,
