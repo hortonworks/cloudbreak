@@ -6,10 +6,14 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -22,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -29,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.S
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -129,7 +135,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     public SdxInternalTestDto withoutDatabase() {
-        final SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setCreate(false);
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         getRequest().setExternalDatabase(sdxDatabaseRequest);
@@ -230,7 +236,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
                 .withInstanceGroupsEntity(InstanceGroupTestDto.sdxHostGroup(getTestContext()))
                 .withInstanceGroups(MASTER.getName(), IDBROKER.getName())
-                .withStackAuthentication(getAuthentication(getTestContext().given(StackAuthenticationTestDto.class), templateJson))
+                .withStackAuthentication(getAuthenticationFromTemplate(getTestContext().given(StackAuthenticationTestDto.class), templateJson))
                 .withCluster(cluster);
         SdxInternalTestDto sdxInternalTestDto = withStackRequest(stack.getRequest());
         sdxInternalTestDto.withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion());
@@ -352,10 +358,10 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public SdxInternalTestDto awaitForMasterDeletedOnProvider() {
         Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
                 getResponse().getStackV4Response().getInstanceGroups().stream()
-                        .filter(instanceGroupV4Response -> MASTER.getName().equals(instanceGroupV4Response.getName()))
-                        .collect(Collectors.toMap(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
+                        .filter(instanceGroup -> MASTER.getName().equals(instanceGroup.getName()))
+                        .collect(Collectors.toMap(instanceGroup -> instanceGroup.getMetadata().stream()
                                 .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
-                        instanceMetaDataV4Response -> InstanceStatus.DELETED_ON_PROVIDER_SIDE)));
+                        instanceMetaData -> InstanceStatus.DELETED_ON_PROVIDER_SIDE)));
         return awaitForInstance(instanceStatusMap);
     }
 
@@ -443,22 +449,42 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         }
     }
 
-    private StackAuthenticationTestDto getAuthentication(StackAuthenticationTestDto authentication, JSONObject templateJson) {
+    private StackAuthenticationTestDto getAuthenticationFromTemplate(StackAuthenticationTestDto authentication, JSONObject templateJson) {
+        // for testSDXFromTemplateCanBeCreatedThenDeletedSuccessfully mock test.
         String templatePublicKeyId;
         StackAuthenticationV4Request request = authentication.getRequest();
+        List<String> authParameterKeys = List.of("publicKeyId", "publicKey", "loginUserName");
+        List<String> authParametersValues = new ArrayList<>();
+        Map<String, String> fetchedTemplateAuthentication;
+
         try {
-            // for testSDXFromTemplateCanBeCreatedThenDeletedSuccessfully mock test.
-            templatePublicKeyId = templateJson.getJSONObject("authentication").getString("publicKeyId");
-            return authentication.withPublicKeyId(StringUtils.isBlank(templatePublicKeyId)
-                    ? request.getPublicKeyId()
-                    : templatePublicKeyId);
-        } catch (JSONException e) {
-            LOGGER.warn("Cannot get Authentication from SDX template: {}", templateJson, e);
-            authentication.withPublicKeyId(request.getPublicKeyId());
-            authentication.withPublicKey(request.getPublicKey());
-            authentication.withLoginUserName(request.getLoginUserName());
+            JSONObject templateAuthentication = templateJson.getJSONObject("authentication");
+            fetchedTemplateAuthentication = JsonUtil.readValue(templateAuthentication.toString(),
+                    new TypeReference<>() {
+                    });
+        } catch (JSONException | IOException e) {
+            LOGGER.warn("Cannot get or fetch Authentication from SDX template (going further with Cloud Provider defaults): {}", templateJson, e);
             return getCloudProvider().stackAuthentication(authentication);
         }
+
+        LOGGER.info("Fetched Authentication parameters: {}", fetchedTemplateAuthentication);
+        authParameterKeys.forEach(parameter -> authParametersValues.add(fetchedTemplateAuthentication.entrySet().stream()
+                .filter(authParam -> parameter.equalsIgnoreCase(authParam.getKey()))
+                .map(Entry::getValue)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null)));
+        LOGGER.info("Found Authentication parameters: {}", authParametersValues);
+        authentication.withPublicKeyId(StringUtils.isBlank(authParametersValues.get(0))
+                ? request.getPublicKeyId()
+                : authParametersValues.get(0));
+        authentication.withPublicKey(StringUtils.isBlank(authParametersValues.get(1))
+                ? request.getPublicKey()
+                : authParametersValues.get(1));
+        authentication.withLoginUserName(StringUtils.isBlank(authParametersValues.get(2))
+                ? request.getLoginUserName()
+                : authParametersValues.get(2));
+        return authentication;
     }
 
     private String getClusterPassword(JSONObject templateJson) {

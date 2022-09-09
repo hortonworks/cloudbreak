@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.YarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
@@ -69,7 +71,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public EnvironmentTestDto environment(EnvironmentTestDto environment) {
-        final AttachedFreeIpaRequest attachedFreeIpaRequest = new AttachedFreeIpaRequest();
+        AttachedFreeIpaRequest attachedFreeIpaRequest = new AttachedFreeIpaRequest();
         attachedFreeIpaRequest.setCreate(Boolean.FALSE);
 
         return environment
@@ -232,7 +234,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     private <T> T throwNotImplementedException() {
-        throw new NotImplementedException(String.format("Not implemented on %s", getCloudPlatform()));
+        throw new NotImplementedException(format("Not implemented on %s", getCloudPlatform()));
     }
 
     @Override
@@ -242,7 +244,13 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        return stackAuthenticationEntity.withPublicKey(commonCloudProperties().getSshPublicKey());
+        StackAuthenticationV4Request request = stackAuthenticationEntity.getRequest();
+        stackAuthenticationEntity.withPublicKeyId(request.getPublicKeyId());
+        stackAuthenticationEntity.withPublicKey(StringUtils.isBlank(request.getPublicKey())
+                ? commonCloudProperties().getSshPublicKey()
+                : request.getPublicKey());
+        stackAuthenticationEntity.withLoginUserName(request.getLoginUserName());
+        return stackAuthenticationEntity;
     }
 
     @Override

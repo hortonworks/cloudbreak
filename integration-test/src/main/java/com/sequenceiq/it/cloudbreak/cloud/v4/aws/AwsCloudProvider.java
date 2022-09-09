@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -318,7 +319,13 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        return stackAuthenticationEntity.withPublicKeyId(awsProperties.getPublicKeyId());
+        StackAuthenticationV4Request request = stackAuthenticationEntity.getRequest();
+        stackAuthenticationEntity.withPublicKeyId(StringUtils.isBlank(request.getPublicKeyId())
+                ? awsProperties.getPublicKeyId()
+                : request.getPublicKeyId());
+        stackAuthenticationEntity.withPublicKey(request.getPublicKey());
+        stackAuthenticationEntity.withLoginUserName(request.getLoginUserName());
+        return stackAuthenticationEntity;
     }
 
     @Override

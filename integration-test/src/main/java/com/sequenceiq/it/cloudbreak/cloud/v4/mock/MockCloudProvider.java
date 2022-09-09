@@ -8,6 +8,7 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.MockStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.model.FileSystemType;
@@ -182,7 +184,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
         if (imageCatalog.getTestContext() instanceof MockedTestContext) {
             imageCatalog.withUrl(imageCatalogMockServerSetup.getPreWarmedImageCatalogUrl());
         } else {
-            imageCatalog.withUrl(String.format("https://%s:%d", mockInfrastructureHost, 10090));
+            imageCatalog.withUrl(format("https://%s:%d", mockInfrastructureHost, 10090));
         }
         return imageCatalog;
     }
@@ -206,7 +208,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     private <T> T throwNotImplementedException() {
-        throw new NotImplementedException(String.format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
+        throw new NotImplementedException(format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
                 "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
     }
 
@@ -332,7 +334,13 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        return stackAuthenticationEntity.withPublicKeyId(mockProperties.getPublicKeyId());
+        StackAuthenticationV4Request request = stackAuthenticationEntity.getRequest();
+        stackAuthenticationEntity.withPublicKeyId(StringUtils.isBlank(request.getPublicKeyId())
+                ? mockProperties.getPublicKeyId()
+                : request.getPublicKeyId());
+        stackAuthenticationEntity.withPublicKey(request.getPublicKey());
+        stackAuthenticationEntity.withLoginUserName(request.getLoginUserName());
+        return stackAuthenticationEntity;
     }
 
     public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {

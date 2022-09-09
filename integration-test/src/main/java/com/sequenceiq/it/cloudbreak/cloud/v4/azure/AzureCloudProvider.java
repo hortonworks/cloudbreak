@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
@@ -37,6 +38,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
+import com.sequenceiq.it.cloudbreak.cloud.v4.azure.AzureProperties.Network;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
@@ -211,9 +213,9 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public NetworkV4TestDto network(NetworkV4TestDto networkTestDto) {
         AzureNetworkV4Parameters parameters = new AzureNetworkV4Parameters();
-        AzureProperties.Network network = azureProperties.getNetwork();
+        Network network = azureProperties.getNetwork();
         parameters.setNoPublicIp(network.getNoPublicIp());
-        parameters.setSubnetId(network.getSubnetIds().stream().findFirst().get());
+        parameters.setSubnetId(network.getSubnetIds().stream().findFirst().orElse(null));
         parameters.setNetworkId(network.getNetworkId());
         parameters.setResourceGroupName(network.getResourceGroupName());
         parameters.setDatabasePrivateDnsZoneId(network.getDatabasePrivateDnsZoneId());
@@ -245,7 +247,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     private EnvironmentNetworkAzureParams environmentNetworkParameters() {
         EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
-        AzureProperties.Network network = azureProperties.getNetwork();
+        Network network = azureProperties.getNetwork();
         environmentNetworkAzureParams.setNetworkId(network.getNetworkId());
         environmentNetworkAzureParams.setNoPublicIp(network.getNoPublicIp());
         environmentNetworkAzureParams.setResourceGroupName(network.getResourceGroupName());
@@ -265,7 +267,13 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        return stackAuthenticationEntity.withPublicKey(commonCloudProperties().getSshPublicKey());
+        StackAuthenticationV4Request request = stackAuthenticationEntity.getRequest();
+        stackAuthenticationEntity.withPublicKeyId(request.getPublicKeyId());
+        stackAuthenticationEntity.withPublicKey(StringUtils.isBlank(request.getPublicKey())
+                ? commonCloudProperties().getSshPublicKey()
+                : request.getPublicKey());
+        stackAuthenticationEntity.withLoginUserName(request.getLoginUserName());
+        return stackAuthenticationEntity;
     }
 
     public Set<String> getSubnetIds() {
@@ -408,7 +416,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     private String notImplementedException() {
-        throw new NotImplementedException(String.format("Not implemented on %s", getCloudPlatform()));
+        throw new NotImplementedException(format("Not implemented on %s", getCloudPlatform()));
     }
 
     @Override
