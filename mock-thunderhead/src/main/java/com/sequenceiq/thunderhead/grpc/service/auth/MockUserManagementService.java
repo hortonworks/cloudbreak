@@ -17,6 +17,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VARIANT_MIGRATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ENCRYPTION_AT_HOST;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
@@ -64,6 +65,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EMBEDDED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
@@ -97,7 +99,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
 import static java.util.Collections.newSetFromMap;
 import static java.util.Optional.ofNullable;
@@ -475,6 +476,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.postgres.upgrade.exception.enable}")
     private boolean enablePostgresUpgradeException;
+
+    @Value("${auth.mock.postgres.upgrade.skip.attached.datahubs.check.enable}")
+    private boolean skipPostgresUpgradeAttachedDatahubsCheck;
 
     private String cbLicense;
 
@@ -1026,6 +1030,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableLongTimeDatalakeBackup) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_BACKUP_LONG_TIMEOUT));
+        }
+        if (skipPostgresUpgradeAttachedDatahubsCheck) {
+            builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
