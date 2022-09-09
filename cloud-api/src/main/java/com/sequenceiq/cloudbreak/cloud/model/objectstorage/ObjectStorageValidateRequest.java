@@ -5,6 +5,7 @@ import java.util.Objects;
 import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformAware;
+import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
@@ -26,6 +27,8 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
 
     private String backupLocationBase;
 
+    private BackupOperationType backupOperationType;
+
     private AzureParameters azure;
 
     private MockAccountMappingSettings mockAccountMappingSettings;
@@ -40,6 +43,7 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         this.spiFileSystem = builder.spiFileSystem;
         this.logsLocationBase = builder.logsLocationBase;
         this.backupLocationBase = builder.backupLocationBase;
+        this.backupOperationType = builder.backupOperationType;
         this.mockAccountMappingSettings = builder.mockAccountMappingSettings;
         this.azure = builder.azure;
     }
@@ -96,6 +100,14 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         this.backupLocationBase = backupLocationBase;
     }
 
+    public BackupOperationType getBackupOperationType() {
+        return backupOperationType;
+    }
+
+    public void setBackupOperationType(BackupOperationType backupOperationType) {
+        this.backupOperationType = backupOperationType;
+    }
+
     public MockAccountMappingSettings getMockAccountMappingSettings() {
         return mockAccountMappingSettings;
     }
@@ -112,6 +124,7 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         this.azure = azure;
     }
 
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -126,6 +139,8 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
                 Objects.equals(cloudStorageRequest, request.cloudStorageRequest) &&
                 Objects.equals(spiFileSystem, request.spiFileSystem) &&
                 Objects.equals(logsLocationBase, request.logsLocationBase) &&
+                Objects.equals(backupLocationBase, request.backupLocationBase) &&
+                Objects.equals(backupOperationType, request.backupOperationType) &&
                 Objects.equals(azure, request.azure);
     }
 
@@ -141,7 +156,8 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
                 ", cloudStorageRequest='" + JsonUtil.writeValueAsStringSilent(cloudStorageRequest) + '\'' +
                 ", spiFileSystem='" + spiFileSystem + '\'' +
                 ", logsLocationBase='" + logsLocationBase + '\'' +
-                ", azureParameters='" + azure + '\'' +
+                ", backupLocationBase='" + backupLocationBase + '\'' +
+                ", backupOperationType='" + backupOperationType + '\'' +
                 '}';
     }
 
@@ -168,6 +184,8 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         private String logsLocationBase;
 
         private String backupLocationBase;
+
+        private BackupOperationType backupOperationType;
 
         private MockAccountMappingSettings mockAccountMappingSettings;
 
@@ -200,6 +218,11 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
 
         public Builder withBackupLocationBase(String backupLocationBase) {
             this.backupLocationBase = backupLocationBase;
+            return this;
+        }
+
+        public Builder withBackupOperationType(BackupOperationType backupOperationType) {
+            this.backupOperationType = backupOperationType;
             return this;
         }
 
