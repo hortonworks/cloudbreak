@@ -25,6 +25,7 @@ import com.cloudera.api.swagger.MgmtRoleConfigGroupsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.client.ApiResponse;
+import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -286,6 +287,11 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         Features features = new Features();
         features.addMonitoring(true);
         telemetry.setFeatures(features);
+        given(mgmtRoleConfigGroupsResourceApi.readConfig(any(), anyString())).willReturn(new ApiConfigList()
+                .addItemsItem(new ApiConfig().name("prometheus_metrics_endpoint_port"))
+                .addItemsItem(new ApiConfig().name("prometheus_metrics_endpoint_username"))
+                .addItemsItem(new ApiConfig().name("prometheus_metrics_endpoint_password"))
+                .addItemsItem(new ApiConfig().name("prometheus_adapter_enabled")));
         given(monitoringConfiguration.isEnabled()).willReturn(true);
         given(monitoringConfiguration.getClouderaManagerExporter()).willReturn(cmMonitoringConfiguration);
         given(monitoringConfiguration.isPaasSupport()).willReturn(true);
@@ -294,6 +300,7 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         // WHEN
         underTest.updateServiceMonitorConfigs(stack, apiClient, telemetry);
         // THEN
+        verify(mgmtRoleConfigGroupsResourceApi, times(1)).readConfig(any(), anyString());
         verify(mgmtRoleConfigGroupsResourceApi, times(1)).updateConfig(any(), anyString(), any());
     }
 
