@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
+import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
@@ -121,7 +122,8 @@ public class CloudStorageValidatorTest {
 
         when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(new ObjectStorageValidateResponse());
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), environment, null, validationResultBuilder));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), BackupOperationType.ANY,
+                environment, null, validationResultBuilder));
         assertFalse(validationResultBuilder.build().hasError());
     }
 
@@ -137,8 +139,8 @@ public class CloudStorageValidatorTest {
 
         when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(new ObjectStorageValidateResponse());
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), environment, CUSTOM_BACKUP_LOCATION,
-                validationResultBuilder));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), BackupOperationType.ANY, environment,
+                CUSTOM_BACKUP_LOCATION, validationResultBuilder));
         verify(cloudProviderServicesV4Endpoint, times(1)).validateObjectStorage(captor.capture());
         assertEquals(CUSTOM_BACKUP_LOCATION, captor.getValue().getBackupLocationBase());
         assertFalse(validationResultBuilder.build().hasError());
@@ -160,7 +162,7 @@ public class CloudStorageValidatorTest {
         objectStorageValidateResponse.setError("dummy failure");
         when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(objectStorageValidateResponse);
         ValidationResultBuilder validationResultBuilderforFailure = new ValidationResultBuilder();
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), environment, null,
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), BackupOperationType.ANY, environment, null,
                 validationResultBuilderforFailure));
         verify(cloudProviderServicesV4Endpoint, times(1)).validateObjectStorage(captor.capture());
         assertTrue(captor.getValue().getCloudStorageRequest().getLocations().isEmpty());
@@ -187,9 +189,10 @@ public class CloudStorageValidatorTest {
         objectStorageValidateResponse.setError("dummy failure");
         when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(objectStorageValidateResponse);
         ValidationResultBuilder validationResultBuilderforFailure = new ValidationResultBuilder();
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), environment, CUSTOM_BACKUP_LOCATION,
-                validationResultBuilderforFailure));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), BackupOperationType.ANY,
+                environment, CUSTOM_BACKUP_LOCATION, validationResultBuilderforFailure));
         verify(cloudProviderServicesV4Endpoint, times(1)).validateObjectStorage(captor.capture());
+        assertTrue(captor.getValue().getBackupOperationType().name().equals(BackupOperationType.ANY.name()));
         assertTrue(captor.getValue().getCloudStorageRequest().getLocations().isEmpty());
         assertEquals("id", captor.getValue().getCredential().getId());
         assertEquals("acc", captor.getValue().getCredential().getAccountId());
