@@ -18,12 +18,14 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -442,11 +444,20 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     private StackAuthenticationTestDto getAuthentication(StackAuthenticationTestDto authentication, JSONObject templateJson) {
+        String templatePublicKeyId;
+        StackAuthenticationV4Request request = authentication.getRequest();
         try {
-            return authentication.withPublicKeyId(templateJson.getJSONObject("authentication").getString("publicKeyId"));
+            // for testSDXFromTemplateCanBeCreatedThenDeletedSuccessfully mock test.
+            templatePublicKeyId = templateJson.getJSONObject("authentication").getString("publicKeyId");
+            return authentication.withPublicKeyId(StringUtils.isBlank(templatePublicKeyId)
+                    ? request.getPublicKeyId()
+                    : templatePublicKeyId);
         } catch (JSONException e) {
-            LOGGER.error("Cannot get Authentication from template: {}", templateJson, e);
-            return getCloudProvider().stackAuthentication(getTestContext().get(StackAuthenticationTestDto.class));
+            LOGGER.warn("Cannot get Authentication from SDX template: {}", templateJson, e);
+            authentication.withPublicKeyId(request.getPublicKeyId());
+            authentication.withPublicKey(request.getPublicKey());
+            authentication.withLoginUserName(request.getLoginUserName());
+            return getCloudProvider().stackAuthentication(authentication);
         }
     }
 

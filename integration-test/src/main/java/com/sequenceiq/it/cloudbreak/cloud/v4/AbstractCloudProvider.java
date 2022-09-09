@@ -20,6 +20,7 @@ import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -247,11 +248,15 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public EnvironmentAuthenticationTestDto environmentAuthentication(EnvironmentAuthenticationTestDto environmentAuthenticationEntity) {
-        return environmentAuthenticationEntity.withPublicKey(
-                StringUtils.isNotEmpty(commonCloudProperties.getSshPublicKey())
-                        ? commonCloudProperties.getSshPublicKey()
-                        : DUMMY_SSH_KEY
-        );
+        EnvironmentAuthenticationRequest request = environmentAuthenticationEntity.getRequest();
+        environmentAuthenticationEntity.withPublicKey(StringUtils.isNotBlank(commonCloudProperties.getSshPublicKey())
+                ? commonCloudProperties.getSshPublicKey()
+                : DUMMY_SSH_KEY);
+        environmentAuthenticationEntity.withPublicKeyId(request.getPublicKeyId());
+        environmentAuthenticationEntity.withLoginUserName(StringUtils.isBlank(request.getLoginUserName())
+                ? "cloudbreak"
+                : request.getLoginUserName());
+        return environmentAuthenticationEntity;
     }
 
     @Override
