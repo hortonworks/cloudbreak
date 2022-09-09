@@ -16,7 +16,7 @@ public class DatabusConfigService implements TelemetryPillarConfigGenerator<Data
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabusConfigService.class);
 
-    private static final String SALT_STATE = "datatabus";
+    private static final String SALT_STATE = "databus";
 
     @Override
     public DatabusConfigView createConfigs(TelemetryContext context) {
