@@ -34,7 +34,7 @@ telemetry:
     scrape-interval-seconds: 60
     dev-stack: false
     status-processor:
-      enabled: true
+      enabled: false
       workers: 1
       queue-size-limit: 1000
       http-timeout-seconds: 30
