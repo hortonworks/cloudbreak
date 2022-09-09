@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFo
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.PROVISIONING_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -1209,7 +1210,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     private void checkIfSdxIsDeletable(SdxCluster sdxCluster, boolean forced) {
-        if (!forced && sdxCluster.hasExternalDatabase() && StringUtils.isEmpty(sdxCluster.getDatabaseCrn())) {
+        SdxStatusEntity actualStatusForSdx = sdxStatusService.getActualStatusForSdx(sdxCluster);
+        if (!forced && actualStatusForSdx.getStatus() != PROVISIONING_FAILED &&
+                sdxCluster.hasExternalDatabase() && StringUtils.isEmpty(sdxCluster.getDatabaseCrn())) {
             throw new BadRequestException(String.format("Can not find external database for Data Lake, but it was requested: %s. Please use force delete.",
                     sdxCluster.getClusterName()));
         }
