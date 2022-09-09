@@ -67,6 +67,8 @@ import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameters.dao.domain.GcpParameters;
 import com.sequenceiq.environment.parameters.dao.repository.AzureParametersRepository;
 import com.sequenceiq.environment.parameters.service.ParametersService;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
+import com.sequenceiq.environment.proxy.service.ProxyConfigService;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
 
@@ -111,6 +113,9 @@ class EnvironmentModificationServiceTest {
 
     @MockBean
     private DnsV1Endpoint dnsV1Endpoint;
+
+    @MockBean
+    private ProxyConfigService proxyConfigService;
 
     @Mock
     private EnvironmentValidatorService validatorService;
@@ -850,6 +855,33 @@ class EnvironmentModificationServiceTest {
         verify(environmentDtoConverter, times(1)).environmentToDto(any());
         verify(environmentDtoConverter, times(1)).networkToNetworkDto(any());
 
+    }
+
+    @Test
+    void editProxyConfig() {
+        ProxyConfig newProxyConfig = new ProxyConfig();
+        newProxyConfig.setName("proxy-name");
+        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withProxyConfig(newProxyConfig)
+                .build();
+
+        Environment environment = new Environment();
+        ProxyConfig oldProxyConfig = new ProxyConfig();
+        oldProxyConfig.setName("old-proxy-name");
+        environment.setProxyConfig(oldProxyConfig);
+        when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID)))
+                .thenReturn(Optional.of(environment));
+        when(environmentService.save(environment)).thenReturn(environment);
+        when(environmentDtoConverter.environmentToDto(environment))
+                .thenReturn(new EnvironmentDto());
+        when(proxyConfigService.getByNameForAccountId(eq(newProxyConfig.getName()), eq(ACCOUNT_ID))).thenReturn(newProxyConfig);
+
+        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+
+        verify(environmentService, times(1)).findByNameAndAccountIdAndArchivedIsFalse(any(), anyString());
+        verify(environmentService, times(1)).save(any());
+        verify(proxyConfigService, times(1)).modify(environment, newProxyConfig);
     }
 
     @Configuration

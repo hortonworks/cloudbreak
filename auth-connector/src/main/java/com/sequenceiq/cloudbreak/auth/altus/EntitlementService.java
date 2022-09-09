@@ -55,6 +55,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_EDIT_PROXY_CONFIG;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_PRIVILEGED_USER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_CLUSTER_PROXY;
@@ -566,6 +567,10 @@ public class EntitlementService {
 
     public boolean isECDSABasedAccessKeyEnabled(String accountId) {
         return isEntitlementRegistered(accountId, ACCESS_KEY_ECDSA);
+    }
+
+    public boolean isEditProxyConfigEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_ENVIRONMENT_EDIT_PROXY_CONFIG);
     }
 
     public List<String> getEntitlements(String accountId) {

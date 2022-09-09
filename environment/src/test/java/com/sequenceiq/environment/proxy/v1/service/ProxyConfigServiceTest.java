@@ -3,7 +3,6 @@ package com.sequenceiq.environment.proxy.v1.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -14,10 +13,15 @@ import javax.ws.rs.BadRequestException;
 
 import org.hibernate.JDBCException;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -26,6 +30,7 @@ import com.sequenceiq.environment.proxy.repository.ProxyConfigRepository;
 import com.sequenceiq.environment.proxy.service.ProxyConfigService;
 import com.sequenceiq.environment.proxy.v1.ProxyTestSource;
 
+@ExtendWith(MockitoExtension.class)
 public class ProxyConfigServiceTest {
 
     private static final String ACCOUNT_ID = "account";
@@ -39,25 +44,25 @@ public class ProxyConfigServiceTest {
     private static final ProxyConfig PROXY_CONFIG = ProxyTestSource.getProxyConfig();
 
     @Mock
-    private final ProxyConfigRepository proxyConfigRepository;
+    private ProxyConfigRepository proxyConfigRepository;
 
     @Mock
-    private final RegionAwareCrnGenerator regionAwareCrnGenerator;
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     @Mock
-    private final TransactionService transactionService;
+    private TransactionService transactionService;
 
     @Mock
-    private final OwnerAssignmentService ownerAssignmentService;
+    private OwnerAssignmentService ownerAssignmentService;
 
+    @Mock
+    private EntitlementService entitlementService;
+
+    @InjectMocks
     private ProxyConfigService underTestProxyConfigService;
 
-    public ProxyConfigServiceTest() throws TransactionService.TransactionExecutionException {
-        proxyConfigRepository = mock(ProxyConfigRepository.class);
-        regionAwareCrnGenerator = mock(RegionAwareCrnGenerator.class);
-        ownerAssignmentService = mock(OwnerAssignmentService.class);
-        transactionService = mock(TransactionService.class);
-        underTestProxyConfigService = new ProxyConfigService(proxyConfigRepository, regionAwareCrnGenerator, ownerAssignmentService, transactionService);
+    @BeforeEach
+    public void setUp() throws TransactionService.TransactionExecutionException {
         lenient().doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(any(), any(), anyString());
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }

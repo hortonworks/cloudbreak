@@ -113,4 +113,7 @@ public enum Status {
         return FREEIPA_VERTICALLY_SCALABLE_STATUSES.contains(this);
     }
 
+    public boolean isAvailable() {
+        return AVAILABLE.equals(this);
+    }
 }
