@@ -5,7 +5,8 @@ import com.sequenceiq.cloudbreak.common.mappable.StorageType;
 public enum ConsumptionType {
 
     UNKNOWN(StorageType.UNKNOWN),
-    STORAGE(StorageType.S3);
+    STORAGE(StorageType.S3),
+    EBS(StorageType.EBS);
 
     private final StorageType storageType;
 

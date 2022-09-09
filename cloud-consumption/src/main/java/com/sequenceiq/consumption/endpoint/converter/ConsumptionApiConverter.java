@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
+import com.sequenceiq.consumption.api.v1.consumption.model.request.CloudResourceConsumptionRequest;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.ConsumptionBaseRequest;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionRequest;
 import com.sequenceiq.consumption.dto.ConsumptionCreationDto;
@@ -23,6 +24,13 @@ public class ConsumptionApiConverter {
         Builder builder = initCreationDtoBuilder(request, ConsumptionType.STORAGE);
         return builder
                 .withStorageLocation(request.getStorageLocation())
+                .build();
+    }
+
+    public ConsumptionCreationDto initCreationDtoForCloudResource(CloudResourceConsumptionRequest request, ConsumptionType consumptionType) {
+        Builder builder = initCreationDtoBuilder(request, consumptionType);
+        return builder
+                .withStorageLocation(request.getCloudResourceId())
                 .build();
     }
 
