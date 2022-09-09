@@ -152,7 +152,9 @@ freeipa:
       /**/*
     denyCommands: >
       /bin/su
-
+  permission.polling:
+    interval: 20
+    delaymin: 5
 info:
   app:
     capabilities:

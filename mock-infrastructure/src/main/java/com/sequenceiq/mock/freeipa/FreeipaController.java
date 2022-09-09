@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @RestController
 @RequestMapping("/{mock_uuid}/ipa")
 public class FreeipaController {
@@ -33,12 +35,12 @@ public class FreeipaController {
 
     @PostMapping("/session/json")
     public Object postSessionJson(@PathVariable("mock_uuid") String mockUuid, @RequestBody String body) throws Exception {
-        return freeIpaRouteHandler.handle(mockUuid, body);
+        return new ObjectMapper().writeValueAsString(freeIpaRouteHandler.handle(mockUuid, body));
     }
 
     @GetMapping("/session/json")
     public Object getSessionJson(@PathVariable("mock_uuid") String mockUuid, @RequestBody String body) throws Exception {
-        return freeIpaRouteHandler.handle(mockUuid, body);
+        return new ObjectMapper().writeValueAsString(freeIpaRouteHandler.handle(mockUuid, body));
     }
 
     @GetMapping(value = "/user_find", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
