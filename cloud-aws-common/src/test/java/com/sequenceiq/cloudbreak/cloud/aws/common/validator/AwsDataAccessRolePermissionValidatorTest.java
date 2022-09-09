@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -21,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.amazonaws.auth.policy.Policy;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
-import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.service.identitymapping.AccountMappingSubject;
@@ -204,36 +202,12 @@ public class AwsDataAccessRolePermissionValidatorTest extends AwsIDBrokerMappedR
         CloudS3View cloudFileSystem = new CloudS3View(CloudIdentityType.ID_BROKER);
         cloudFileSystem.setInstanceProfile("arn:aws:iam::11111111111:instance-profile/instanceprofile");
 
-        List<Policy> policies = getValidator().collectBackupRestorePolicies(cloudFileSystem, BackupOperationType.ANY, backupLocation);
+        List<Policy> policies = getValidator().collectBackupRestorePolicies(cloudFileSystem, backupLocation);
 
         assertEquals(2, policies.size());
         Map<String, String> replacements = replacementsCaptor.getValue();
         assertEquals("bucket", replacements.get("${BACKUP_BUCKET}"));
         assertEquals("bucket/cluster", replacements.get("${BACKUP_LOCATION_BASE}"));
         assertEquals("aws", replacements.get("${ARN_PARTITION}"));
-
-        policies = getValidator().collectBackupRestorePolicies(cloudFileSystem, BackupOperationType.BACKUP, backupLocation);
-        assertEquals(1, policies.size());
-
-        policies = getValidator().collectBackupRestorePolicies(cloudFileSystem, BackupOperationType.RESTORE, backupLocation);
-        assertEquals(1, policies.size());
-    }
-
-    @Test
-    public void testCollectBackupFiles() {
-
-        List<String> policies = getValidator().getPolicyFiles(BackupOperationType.ANY);
-
-        assertEquals(2, policies.size());
-        assertTrue(policies.contains(getValidator().getBackupPolicy()));
-        assertTrue(policies.contains(getValidator().getRestorePolicy()));
-
-        policies = getValidator().getPolicyFiles(BackupOperationType.BACKUP);
-        assertEquals(1, policies.size());
-        assertTrue(policies.contains(getValidator().getBackupPolicy()));
-
-        policies = getValidator().getPolicyFiles(BackupOperationType.RESTORE);
-        assertEquals(1, policies.size());
-        assertTrue(policies.contains(getValidator().getRestorePolicy()));
     }
 }

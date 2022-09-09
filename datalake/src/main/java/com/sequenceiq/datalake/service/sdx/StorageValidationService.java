@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -95,7 +94,7 @@ public class StorageValidationService {
                 () -> cloudProviderServicesV4Endpoint.validateObjectStorage(objectStorageValidateRequest));
     }
 
-    public ValidationResult validateBackupStorage(SdxCluster sdxCluster, BackupOperationType backupOperationType, String backupLocation) {
+    public ValidationResult validateBackupStorage(SdxCluster sdxCluster, String backupLocation) {
         DetailedEnvironmentResponse environmentResponse = environmentService.getDetailedEnvironmentResponseByName(sdxCluster.getEnvName());
         CloudStorageRequest cloudStorageRequest = null;
         try {
@@ -113,7 +112,7 @@ public class StorageValidationService {
         }
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         try {
-            cloudStorageValidator.validateBackupLocation(cloudStorageRequest, backupOperationType, environmentResponse, backupLocation, validationResultBuilder);
+            cloudStorageValidator.validateBackupLocation(cloudStorageRequest, environmentResponse, backupLocation, validationResultBuilder);
         } catch (Exception e) {
             String message = String.format("Error occured during object storage validation, validation skipped. Error: %s", e.getMessage());
             LOGGER.warn(message);

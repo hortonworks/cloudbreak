@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
@@ -107,16 +106,14 @@ public class CloudStorageValidator {
      * @param environment Details of the environment on which validation is performed.
      * @param validationResultBuilder Builder to gather the failures.
      */
-    public void validateBackupLocation(CloudStorageRequest cloudStorageRequest, BackupOperationType backupOperationType,
-            DetailedEnvironmentResponse environment, String customBackupLocation,
+    public void validateBackupLocation(CloudStorageRequest cloudStorageRequest, DetailedEnvironmentResponse environment, String customBackupLocation,
             ValidationResult.ValidationResultBuilder validationResultBuilder) {
         String backupLocation = !Strings.isNullOrEmpty(customBackupLocation) ? customBackupLocation : getBackupLocationBase(environment);
         LOGGER.info("Validating backup Location: {}", backupLocation);
         Credential credential = getCredential(environment);
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
         List<StorageLocationBase> locations = cloudStorageRequest.getLocations();
-        ObjectStorageValidateRequest request = createBackupLocationValidateRequest(cloudCredential, backupOperationType, cloudStorageRequest,
-                environment, backupLocation);
+        ObjectStorageValidateRequest request = createBackupLocationValidateRequest(cloudCredential, cloudStorageRequest, environment, backupLocation);
         ObjectStorageValidateResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> cloudProviderServicesV4Endpoint.validateObjectStorage(request));
@@ -158,8 +155,7 @@ public class CloudStorageValidator {
     }
 
     private ObjectStorageValidateRequest createBackupLocationValidateRequest(
-            CloudCredential credential, BackupOperationType backupOperationType,
-            CloudStorageRequest cloudStorageRequest,
+            CloudCredential credential, CloudStorageRequest cloudStorageRequest,
             DetailedEnvironmentResponse environment, String backupLocation) {
         cloudStorageRequest.setLocations(Collections.emptyList());
         ObjectStorageValidateRequest.Builder result = ObjectStorageValidateRequest.builder()
@@ -167,7 +163,6 @@ public class CloudStorageValidator {
                 .withCredential(credential)
                 .withCloudStorageRequest(cloudStorageRequest)
                 .withBackupLocationBase(backupLocation)
-                .withBackupOperationType(backupOperationType)
                 .withAzureParameters(getSingleResourceGroupName(environment));
         if (environment.getIdBrokerMappingSource() == MOCK) {
             result.withMockSettings(environment.getLocation().getName(), environment.getAdminGroupName());

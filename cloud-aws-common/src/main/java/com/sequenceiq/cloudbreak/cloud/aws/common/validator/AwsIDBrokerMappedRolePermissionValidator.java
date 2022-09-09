@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.validator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -26,7 +25,6 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
-import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
@@ -81,7 +79,7 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
      * @param validationResultBuilder builder for any errors encountered
      */
     public void validate(AmazonIdentityManagementClient iam, CloudS3View cloudFileSystem, String backupLocation, String accountId,
-            BackupOperationType backupOperationType, ValidationResultBuilder validationResultBuilder) {
+            ValidationResultBuilder validationResultBuilder) {
         AccountMappingBase accountMappings = cloudFileSystem.getAccountMapping();
         if (accountMappings != null) {
             SortedSet<String> roleArns = getRoleArnsForUsers(getUsers(), accountMappings.getUserMappings());
@@ -95,7 +93,7 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
             SortedSet<String> warnings = new TreeSet<>();
             List<Policy> policies = collectPolicies(cloudFileSystem, policyFileNames);
             if (shouldValidateBackupLocation(accountId, backupLocation)) {
-                policies.addAll(collectBackupRestorePolicies(cloudFileSystem, backupOperationType, backupLocation));
+                policies.addAll(collectBackupRestorePolicies(cloudFileSystem, backupLocation));
             }
             for (Role role : roles) {
                 try {
@@ -156,27 +154,14 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
      * @param backupLocation Location of backup
      * @return list of AWS policies that have to applied
      */
-    List<Policy> collectBackupRestorePolicies(CloudS3View cloudFileSystem, BackupOperationType backupOperationType, String backupLocation) {
+    List<Policy> collectBackupRestorePolicies(CloudS3View cloudFileSystem, String backupLocation) {
         List<Policy> policies = new ArrayList<>();
         if (!Strings.isNullOrEmpty(backupLocation)) {
             Map<String, String> replacements = getBackupPolicyJsonReplacements(cloudFileSystem, backupLocation);
-            List<String> policyFileNames = getPolicyFiles(backupOperationType);
+            List<String> policyFileNames = Arrays.asList(getBackupPolicy(), getRestorePolicy());
             policies.addAll(getPolicies(policyFileNames, replacements));
         }
         return policies;
-    }
-
-    List<String> getPolicyFiles(BackupOperationType backupOperationType) {
-        switch (backupOperationType) {
-            case ANY:
-                return Arrays.asList(getBackupPolicy(), getRestorePolicy());
-            case BACKUP:
-                return Arrays.asList(getBackupPolicy());
-            case RESTORE:
-                return Arrays.asList(getRestorePolicy());
-            default:
-                return Collections.EMPTY_LIST;
-        }
     }
 
     /**
