@@ -101,8 +101,6 @@ public class DatalakeUpgradeRecoveryActionsTest {
 
     @Test
     public void datalakeRecoveryFinished() throws Exception {
-        SdxCluster sdxCluster = generateCluster();
-        when(sdxService.getById(anyLong())).thenReturn(sdxCluster);
         AbstractAction action = (AbstractAction) datalakeUpgradeRecoveryActions.finishedAction();
         initActionPrivateFields(action);
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
@@ -122,8 +120,6 @@ public class DatalakeUpgradeRecoveryActionsTest {
                 eq(ResourceEvent.DATALAKE_RECOVERY_FINISHED),
                 eq("Recovery finished"),
                 eq(SDX_ID));
-        verify(eventSenderService, times(1))
-                .sendEventAndNotification(eq(sdxCluster), eq(ResourceEvent.DATALAKE_RECOVERY_FINISHED));
     }
 
     private SdxCluster generateCluster() {

@@ -252,11 +252,12 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, StackCreationSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
-                        "Datalake is running", payload.getResourceId());
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(
+                        DatalakeStatusEnum.RUNNING, ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED,
+                        "Datalake is running", payload.getResourceId()
+                );
                 metricService.incrementMetricCounter(MetricType.SDX_CREATION_FINISHED, sdxCluster);
                 jobService.schedule(context.getSdxId(), SdxClusterJobAdapter.class);
-                eventSenderService.notifyEvent(context, ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED);
                 sendEvent(context, SDX_CREATE_FINALIZED_EVENT.event(), payload);
             }
 
@@ -291,7 +292,6 @@ public class SdxCreateActions {
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.PROVISIONING_FAILED,
                             statusReason, payload.getResourceId());
                     metricService.incrementMetricCounter(MetricType.SDX_CREATION_FAILED, sdxCluster);
-                    eventSenderService.notifyEvent(context, ResourceEvent.SDX_CLUSTER_CREATION_FAILED);
                 } catch (NotFoundException notFoundException) {
                     LOGGER.info("Can not set status to SDX_CREATION_FAILED because data lake was not found");
                 } catch (DatalakeStatusUpdateException datalakeStatusUpdateException) {

@@ -15,7 +15,6 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.refresh.event.DatahubRefreshFailedEvent;
@@ -45,9 +44,6 @@ public class DatahubRefreshActions {
     @Inject
     private SdxStatusService sdxStatusService;
 
-    @Inject
-    private EventSenderService eventSenderService;
-
     @Bean(name = "DATAHUB_REFRESH_START_STATE")
     public Action<?, ?> startDatahubRefreshAction() {
         return new AbstractSdxAction<>(DatahubRefreshStartEvent.class) {
@@ -69,9 +65,7 @@ public class DatahubRefreshActions {
                 LOGGER.info("Start Data Hub refresh associated with Sdx: {}", payload.getSdxName());
                 SdxCluster sdxCluster = sdxService.getById(context.getSdxId());
                 variables.put(SDX, sdxCluster);
-                eventSenderService.sendEventAndNotification(
-                        sdxCluster, ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_STARTED);
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_STARTED,
                         "Data Hub refresh in progress", payload.getResourceId());
                 sdxRefreshService.refreshAllDatahub(payload.getResourceId());
                 sendEvent(context, DatahubRefreshFlowEvent.DATAHUB_REFRESH_IN_PROGRESS_EVENT.selector(), payload);
@@ -118,9 +112,10 @@ public class DatahubRefreshActions {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Data Hub refresh finished for: {}", payload.getResourceId());
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, "Datahub refresh finished", payload.getResourceId());
-                eventSenderService.sendEventAndNotification(
-                        (SdxCluster) variables.get(SDX), ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_FINISHED);
+                sdxStatusService.setStatusForDatalakeAndNotify(
+                        DatalakeStatusEnum.RUNNING, ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_FINISHED,
+                        "Datahub refresh finished", payload.getResourceId()
+                );
                 sdxRefreshService.refreshAllDatahub(payload.getResourceId());
                 sendEvent(context, DatahubRefreshFlowEvent.DATAHUB_REFRESH_FINALIZED_EVENT.selector(), payload);
 
@@ -145,9 +140,7 @@ public class DatahubRefreshActions {
             @Override
             protected void doExecute(SdxContext context, DatahubRefreshFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.error("Data Hub refresh failed for: {}", payload.getResourceId(), payload.getException());
-                eventSenderService.sendEventAndNotification(
-                        (SdxCluster) variables.get(SDX), ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_FAILED);
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_FAILED,
                         "Data Hub refresh failed", payload.getResourceId());
                 sendEvent(context, DatahubRefreshFlowEvent.DATAHUB_REFRESH_FAILED_HANDLED_EVENT.selector(), payload);
 

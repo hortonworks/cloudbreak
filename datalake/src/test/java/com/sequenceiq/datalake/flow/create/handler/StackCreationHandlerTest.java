@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.flow.create.handler;
 
-import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.STACK_CREATION_FINISHED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -29,7 +28,6 @@ import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
-import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -42,9 +40,6 @@ class StackCreationHandlerTest {
 
     @Mock
     private ProvisionerService provisionerService;
-
-    @Mock
-    private SdxStatusService sdxStatusService;
 
     @Mock
     private SdxService sdxService;
@@ -78,8 +73,6 @@ class StackCreationHandlerTest {
         Assertions.assertEquals("StackCreationSuccessEvent", eventNotified);
         Assertions.assertEquals(StackCreationSuccessEvent.class, event.getData().getClass());
         Assertions.assertEquals(stackId, ((StackCreationSuccessEvent) event.getData()).getResourceId());
-        verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(STACK_CREATION_FINISHED,
-                "Datalake stack created", (Long) stackId);
     }
 
     @Test

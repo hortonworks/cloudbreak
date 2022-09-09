@@ -18,9 +18,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
-import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.SdxFailedEvent;
@@ -52,9 +50,6 @@ public class SdxStopActions {
 
     @Inject
     private SdxStopService stopService;
-
-    @Inject
-    private EventSenderService eventSenderService;
 
     @Inject
     private FlowLogService flowLogService;
@@ -221,7 +216,6 @@ public class SdxStopActions {
                     statusReason = "Datalake resize failure: " + statusReason;
                 }
 
-                eventSenderService.notifyEvent(context, ResourceEvent.SDX_STOP_FAILED);
                 sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, statusReason, payload.getResourceId());
                 sendEvent(context, SDX_STOP_FAILED_HANDLED_EVENT.event(), payload);
             }
