@@ -105,6 +105,7 @@ import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -727,7 +728,9 @@ class SdxServiceTest {
     void testDeleteSdxWhenSdxHasAttachedDataHubsShouldThrowBadRequestBecauseSdxCanNotDeletedIfAttachedClustersAreAvailable() {
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
         StackViewV4Response stackViewV4Response = new StackViewV4Response();
         stackViewV4Response.setName("existingDistroXCluster");
         stackViewV4Response.setStatus(Status.AVAILABLE);
@@ -743,7 +746,9 @@ class SdxServiceTest {
     void testDeleteSdxWhenSdxHasStoppedDataHubsShouldThrowBadRequest() {
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
         StackViewV4Response stackViewV4Response = new StackViewV4Response();
         stackViewV4Response.setName("existingDistroXCluster");
         stackViewV4Response.setStatus(Status.STOPPED);
@@ -795,11 +800,31 @@ class SdxServiceTest {
         sdxCluster.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
         sdxCluster.setDatabaseCrn(null);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.deleteSdx(USER_CRN, "sdx-cluster-name", false));
         assertEquals(String.format("Can not find external database for Data Lake, but it was requested: %s. Please use force delete.",
                 sdxCluster.getClusterName()), badRequestException.getMessage());
+    }
+
+    @Test
+    void testDeleteSdxWhenSdxHasExternalDatabaseButCrnIsMissingShouldNotThrowNotFoundException() {
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
+        sdxCluster.setDatabaseCrn(null);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.PROVISIONING_FAILED);
+        when(sdxReactorFlowManager.triggerSdxDeletion(eq(sdxCluster), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "id"));
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
+        underTest.deleteSdx(USER_CRN, "sdx-cluster-name", false);
+        verify(sdxClusterRepository, times(1)).save(sdxCluster);
+        verify(sdxStatusService, times(1))
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
+        verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, false);
+        verify(flowCancelService, times(1)).cancelRunningFlows(SDX_ID);
     }
 
     @Test
