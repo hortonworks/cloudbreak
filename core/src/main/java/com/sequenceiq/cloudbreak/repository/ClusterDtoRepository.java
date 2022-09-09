@@ -43,6 +43,7 @@ public interface ClusterDtoRepository extends Repository<Cluster, Long> {
             "c.cloudbreakClusterManagerMonitoringUser as cloudbreakClusterManagerMonitoringUserSecret, " +
             "c.databusCredential as databusCredentialSecret, " +
             "c.embeddedDatabaseOnAttachedDisk as embeddedDatabaseOnAttachedDisk, " +
+            "cc as customConfigurations, " +
 
             "c.keyStorePwd as keyStorePwdSecret, " +
             "c.trustStorePwd as trustStorePwdSecret, " +
@@ -54,6 +55,7 @@ public interface ClusterDtoRepository extends Repository<Cluster, Long> {
             "LEFT JOIN c.stack s " +
             "LEFT JOIN c.fileSystem f " +
             "LEFT JOIN c.additionalFileSystem af " +
+            "LEFT JOIN c.customConfigurations cc " +
             "WHERE s.id = :stackId "
     )
     Optional<ClusterViewDelegate> findByStackId(@Param("stackId") Long stackId);

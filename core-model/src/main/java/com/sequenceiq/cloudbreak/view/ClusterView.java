@@ -85,6 +85,7 @@ public interface ClusterView extends MdcContextInfoProvider {
 
     FileSystem getAdditionalFileSystem();
 
+    // getConfigurations() can cause lazy init, need to re-fetch with crn
     CustomConfigurations getCustomConfigurations();
 
     Boolean getEmbeddedDatabaseOnAttachedDisk();
