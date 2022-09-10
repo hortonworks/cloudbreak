@@ -72,6 +72,7 @@ import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeOrchestratorService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.HealthCheckService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.UpgradeCcmOrchestratorService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -128,6 +129,9 @@ class UpgradeCcmFlowIntegrationTest {
     @SpyBean
     private UpgradeCcmService upgradeCcmService;
 
+    @SpyBean
+    private UpgradeOrchestratorService upgradeOrchestratorService;
+
     private Stack stack;
 
     @BeforeEach
@@ -143,9 +147,9 @@ class UpgradeCcmFlowIntegrationTest {
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
         verify(flowLogRepository, times(2)).save(flowLog.capture());
         Assertions.assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
-        InOrder inOrder = Mockito.inOrder(upgradeCcmService);
+        InOrder inOrder = Mockito.inOrder(upgradeCcmService, upgradeOrchestratorService);
         inOrder.verify(upgradeCcmService, times(1)).updateTunnel(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(1)).pushSaltState(STACK_ID, CLUSTER_ID);
+        inOrder.verify(upgradeOrchestratorService, times(1)).pushSaltState(STACK_ID, CLUSTER_ID);
         inOrder.verify(upgradeCcmService, times(1)).reconfigureNginx(STACK_ID);
         inOrder.verify(upgradeCcmService, times(1)).registerClusterProxyAndCheckHealth(STACK_ID);
         inOrder.verify(upgradeCcmService, times(1)).removeAgent(STACK_ID, Tunnel.CCM);
@@ -163,7 +167,7 @@ class UpgradeCcmFlowIntegrationTest {
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
         verify(flowLogRepository, times(2)).save(flowLog.capture());
         Assertions.assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
-        InOrder inOrder = Mockito.inOrder(upgradeCcmService);
+        InOrder inOrder = Mockito.inOrder(upgradeCcmService, upgradeOrchestratorService);
         inOrder.verify(upgradeCcmService, times(1)).updateTunnel(STACK_ID);
         ArgumentCaptor<UpgradeCcmFailedEvent> failedEventCaptor = ArgumentCaptor.forClass(UpgradeCcmFailedEvent.class);
         inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(failedEventCaptor.capture(), eq(CLUSTER_ID));
@@ -171,7 +175,7 @@ class UpgradeCcmFlowIntegrationTest {
         Assertions.assertEquals(STACK_ID, failedEvent.getResourceId());
         Assertions.assertEquals(Tunnel.CCM, failedEvent.getOldTunnel());
         Assertions.assertEquals(TunnelUpdateHandler.class, failedEvent.getFailureOrigin());
-        verify(upgradeCcmService, never()).pushSaltState(STACK_ID, CLUSTER_ID);
+        verify(upgradeOrchestratorService, never()).pushSaltState(STACK_ID, CLUSTER_ID);
         verify(upgradeCcmService, never()).reconfigureNginx(STACK_ID);
         verify(upgradeCcmService, never()).registerClusterProxyAndCheckHealth(STACK_ID);
         verify(upgradeCcmService, never()).deregisterAgent(STACK_ID, Tunnel.CCM);
@@ -188,9 +192,9 @@ class UpgradeCcmFlowIntegrationTest {
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
         verify(flowLogRepository, times(2)).save(flowLog.capture());
         Assertions.assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
-        InOrder inOrder = Mockito.inOrder(upgradeCcmService);
+        InOrder inOrder = Mockito.inOrder(upgradeCcmService, upgradeOrchestratorService);
         inOrder.verify(upgradeCcmService, times(1)).updateTunnel(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(1)).pushSaltState(STACK_ID, CLUSTER_ID);
+        inOrder.verify(upgradeOrchestratorService, times(1)).pushSaltState(STACK_ID, CLUSTER_ID);
         inOrder.verify(upgradeCcmService, times(1)).reconfigureNginx(STACK_ID);
         inOrder.verify(upgradeCcmService, times(1)).registerClusterProxyAndCheckHealth(STACK_ID);
         ArgumentCaptor<UpgradeCcmFailedEvent> failedEventCaptor = ArgumentCaptor.forClass(UpgradeCcmFailedEvent.class);

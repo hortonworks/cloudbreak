@@ -99,7 +99,7 @@ public class CustomConfigurationsService implements CompositeAuthResourcePropert
         return customConfigurations;
     }
 
-    private CustomConfigurations getByCrn(String crn) {
+    public CustomConfigurations getByCrn(String crn) {
         LOGGER.info("Retrieving custom configurations by crn: {}", crn);
 
         return customConfigurationsRepository.findByCrn(crn).orElseThrow(NotFoundException.notFound("Custom Configurations", crn));

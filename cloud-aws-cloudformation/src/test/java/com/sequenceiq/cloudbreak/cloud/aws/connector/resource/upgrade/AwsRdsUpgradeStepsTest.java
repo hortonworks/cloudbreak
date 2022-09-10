@@ -102,12 +102,27 @@ public class AwsRdsUpgradeStepsTest {
         RdsEngineVersion targetVersion = new RdsEngineVersion(TARGET_VERSION);
         RdsInfo rdsInfo = new RdsInfo(RdsState.AVAILABLE, null, currentVersion);
         when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
+        when(databaseServer.isUseSslEnforcement()).thenReturn(true);
         when(awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion)).thenReturn(targetVersion);
         when(awsRdsUpgradeOperations.createParameterGroupWithCustomSettings(rdsClient, databaseServer, targetVersion)).thenReturn(DB_PARAMETER_GROUP_NAME);
 
         underTest.upgradeRds(rdsClient, databaseServer, rdsInfo, targetMajorVersion);
 
         verify(awsRdsUpgradeOperations).upgradeRds(rdsClient, targetVersion, DB_INSTANCE_IDENTIFIER, DB_PARAMETER_GROUP_NAME);
+    }
+
+    @Test
+    void testUpgradeRdsWithoutEnforceSsl() {
+        RdsEngineVersion currentVersion = new RdsEngineVersion(CURRENT_VERSION);
+        RdsEngineVersion targetVersion = new RdsEngineVersion(TARGET_VERSION);
+        RdsInfo rdsInfo = new RdsInfo(RdsState.AVAILABLE, null, currentVersion);
+        when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
+        when(awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion)).thenReturn(targetVersion);
+
+        underTest.upgradeRds(rdsClient, databaseServer, rdsInfo, targetMajorVersion);
+
+        verify(awsRdsUpgradeOperations, never()).createParameterGroupWithCustomSettings(rdsClient, databaseServer, targetVersion);
+        verify(awsRdsUpgradeOperations).upgradeRds(rdsClient, targetVersion, DB_INSTANCE_IDENTIFIER, null);
     }
 
     @Test
@@ -129,6 +144,7 @@ public class AwsRdsUpgradeStepsTest {
         RdsEngineVersion currentVersion = new RdsEngineVersion(CURRENT_VERSION);
         RdsEngineVersion targetVersion = new RdsEngineVersion(TARGET_VERSION);
         RdsInfo rdsInfo = new RdsInfo(RdsState.AVAILABLE, null, currentVersion);
+        when(databaseServer.isUseSslEnforcement()).thenReturn(true);
         when(awsRdsUpgradeOperations.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion)).thenReturn(targetVersion);
         when(awsRdsUpgradeOperations.createParameterGroupWithCustomSettings(rdsClient, databaseServer, targetVersion)).thenThrow(RuntimeException.class);
 

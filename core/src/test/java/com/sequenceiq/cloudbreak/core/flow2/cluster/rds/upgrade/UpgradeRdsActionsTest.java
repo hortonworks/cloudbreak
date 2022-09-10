@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade;
 
 
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -12,25 +10,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.AbstractUpgradeRdsEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataBackupRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataBackupResult;
@@ -70,97 +60,69 @@ class UpgradeRdsActionsTest {
     @InjectMocks
     private UpgradeRdsActions upgradeRdsActions;
 
-    @ParameterizedTest
-    @MethodSource("provideTestCombinations")
-    public void backupDataFromRds(CloudPlatform cloudPlatform, boolean embeddedDatabaseOnAttachedDisk, boolean runBackup) throws Exception {
-
-        StackView stack = mock(StackView.class);
-        ClusterView cluster = mock(ClusterView.class);
+    @Test
+    public void testShouldBackupDataFromRds() throws Exception {
         AbstractAction action = (AbstractAction) upgradeRdsActions.backupDataFromRds();
-        initGlobalPrivateFields();
-        initActionPrivateFields(action);
-        AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
         UpgradeRdsStopServicesResult triggerEvent = new UpgradeRdsStopServicesResult(STACK_ID, TargetMajorVersion.VERSION_11);
-        UpgradeRdsContext rdsContext = new UpgradeRdsContext(new FlowParameters(FLOW_ID, FLOW_ID, null), stack, cluster, TargetMajorVersion.VERSION_11);
-        when(runningFlows.getFlowChainId(anyString())).thenReturn(FLOW_ID);
-        when(stack.getCloudPlatform()).thenReturn(cloudPlatform.name());
-        when(stack.getId()).thenReturn(STACK_ID);
-        when(cluster.getEmbeddedDatabaseOnAttachedDisk()).thenReturn(embeddedDatabaseOnAttachedDisk);
-        testSupport.doExecute(rdsContext, triggerEvent, new HashMap<>());
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true);
 
-        if (runBackup) {
-            verify(upgradeRdsService).backupRdsState(STACK_ID);
-        } else {
-            verify(upgradeRdsService, never()).backupRdsState(STACK_ID);
-        }
-
-        ArgumentCaptor<AbstractUpgradeRdsEvent> captor = ArgumentCaptor.forClass(AbstractUpgradeRdsEvent.class);
-        verify(reactorEventFactory, times(1)).createEvent(any(), captor.capture());
-        AbstractUpgradeRdsEvent captorValue = captor.getValue();
-        if (runBackup) {
-            assertEquals(UpgradeRdsDataBackupRequest.class, captorValue.getClass());
-        } else {
-            assertEquals(UpgradeRdsDataBackupResult.class, captorValue.getClass());
-        }
-        assertEquals(STACK_ID, captorValue.getResourceId());
-        assertEquals(TargetMajorVersion.VERSION_11, captorValue.getVersion());
+        verify(upgradeRdsService).backupRdsState(STACK_ID);
+        verifyBackupRestoreAction(UpgradeRdsDataBackupRequest.class);
     }
 
-    @ParameterizedTest
-    @MethodSource("provideTestCombinations")
-    public void restoreDataFromRds(CloudPlatform cloudPlatform, boolean embeddedDatabaseOnAttachedDisk, boolean runRestore) throws Exception {
+    @Test
+    public void testShouldNotBackupDataFromRds() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.backupDataFromRds();
+        UpgradeRdsStopServicesResult triggerEvent = new UpgradeRdsStopServicesResult(STACK_ID, TargetMajorVersion.VERSION_11);
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, false);
 
-        StackView stack = mock(StackView.class);
-        ClusterView cluster = mock(ClusterView.class);
+        verify(upgradeRdsService, never()).backupRdsState(STACK_ID);
+        verifyBackupRestoreAction(UpgradeRdsDataBackupResult.class);
+    }
+
+    @Test
+    public void testShouldRestoreDataFromRds() throws Exception {
         AbstractAction action = (AbstractAction) upgradeRdsActions.restoreDataToRds();
-        initGlobalPrivateFields();
-        initActionPrivateFields(action);
-        AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
         UpgradeRdsUpgradeDatabaseServerResult triggerEvent = new UpgradeRdsUpgradeDatabaseServerResult(STACK_ID, TargetMajorVersion.VERSION_11);
-        UpgradeRdsContext rdsContext = new UpgradeRdsContext(new FlowParameters(FLOW_ID, FLOW_ID, null), stack, cluster, TargetMajorVersion.VERSION_11);
-        when(runningFlows.getFlowChainId(anyString())).thenReturn(FLOW_ID);
-        when(stack.getCloudPlatform()).thenReturn(cloudPlatform.name());
-        when(stack.getId()).thenReturn(STACK_ID);
-        when(cluster.getEmbeddedDatabaseOnAttachedDisk()).thenReturn(embeddedDatabaseOnAttachedDisk);
-        testSupport.doExecute(rdsContext, triggerEvent, new HashMap<>());
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true);
 
-        if (runRestore) {
-            verify(upgradeRdsService).restoreRdsState(STACK_ID);
-        } else {
-            verify(upgradeRdsService, never()).restoreRdsState(STACK_ID);
-        }
-
-        ArgumentCaptor<AbstractUpgradeRdsEvent> captor = ArgumentCaptor.forClass(AbstractUpgradeRdsEvent.class);
-        verify(reactorEventFactory, times(1)).createEvent(any(), captor.capture());
-        AbstractUpgradeRdsEvent captorValue = captor.getValue();
-        if (runRestore) {
-            assertEquals(UpgradeRdsDataRestoreRequest.class, captorValue.getClass());
-        } else {
-            assertEquals(UpgradeRdsDataRestoreResult.class, captorValue.getClass());
-        }
-        assertEquals(STACK_ID, captorValue.getResourceId());
-        assertEquals(TargetMajorVersion.VERSION_11, captorValue.getVersion());
+        verify(upgradeRdsService).restoreRdsState(STACK_ID);
+        verifyBackupRestoreAction(UpgradeRdsDataRestoreRequest.class);
     }
 
-    private void initGlobalPrivateFields() {
-        Field cloudPlatformsToRunBackupRestore = ReflectionUtils.findField(UpgradeRdsActions.class, "cloudPlatformsToRunBackupRestore");
-        ReflectionUtils.makeAccessible(cloudPlatformsToRunBackupRestore);
-        ReflectionUtils.setField(cloudPlatformsToRunBackupRestore, upgradeRdsActions, Set.of(AZURE));
+    @Test
+    public void testShouldNotRestoreDataFromRds() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.restoreDataToRds();
+        UpgradeRdsUpgradeDatabaseServerResult triggerEvent = new UpgradeRdsUpgradeDatabaseServerResult(STACK_ID, TargetMajorVersion.VERSION_11);
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, false);
+
+        verify(upgradeRdsService, never()).restoreRdsState(STACK_ID);
+        verifyBackupRestoreAction(UpgradeRdsDataRestoreResult.class);
     }
 
-    private void initActionPrivateFields(Action<?, ?> action) {
+    private void mockAndTriggerRdsUpgradeAction(AbstractAction action, AbstractUpgradeRdsEvent triggerEvent,
+            boolean shouldRunDataBackupRestore) throws Exception {
         ReflectionTestUtils.setField(action, null, runningFlows, FlowRegister.class);
         ReflectionTestUtils.setField(action, null, eventBus, EventBus.class);
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);
+        when(runningFlows.getFlowChainId(anyString())).thenReturn(FLOW_ID);
+
+        StackView stack = mock(StackView.class);
+        when(stack.getId()).thenReturn(STACK_ID);
+        ClusterView cluster = mock(ClusterView.class);
+        when(upgradeRdsService.shouldRunDataBackupRestore(stack, cluster)).thenReturn(shouldRunDataBackupRestore);
+        UpgradeRdsContext context =  new UpgradeRdsContext(new FlowParameters(FLOW_ID, FLOW_ID, null), stack, cluster, TargetMajorVersion.VERSION_11);
+
+        AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
+        testSupport.doExecute(context, triggerEvent, new HashMap<>());
     }
 
-    private static Stream<Arguments> provideTestCombinations() {
-        return Stream.of(
-                //cloudPlatform,embeddedDatabaseOnAttachedDisk,runBackup
-                Arguments.of(AZURE, true, false),
-                Arguments.of(AZURE, false, true),
-                Arguments.of(AWS, true, false),
-                Arguments.of(AWS, false, false)
-                );
+    private void verifyBackupRestoreAction(Object expectedEvent) {
+        ArgumentCaptor<AbstractUpgradeRdsEvent> captor = ArgumentCaptor.forClass(AbstractUpgradeRdsEvent.class);
+        verify(reactorEventFactory, times(1)).createEvent(any(), captor.capture());
+        AbstractUpgradeRdsEvent captorValue = captor.getValue();
+        assertEquals(expectedEvent, captorValue.getClass());
+        assertEquals(STACK_ID, captorValue.getResourceId());
+        assertEquals(TargetMajorVersion.VERSION_11, captorValue.getVersion());
     }
 }

@@ -27,7 +27,6 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.database.DatabaseUpgradeRuntimeValidator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.sdx.api.model.SdxDatabaseResponseType;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
 
 @Service
@@ -148,9 +147,8 @@ public class SdxDatabaseServerUpgradeService {
         sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_DATABASE_SERVER_REQUESTED, "Database server upgrade requested",
                 cluster.getId());
         FlowIdentifier flowIdentifier = reactorFlowManager.triggerDatabaseServerUpgradeFlow(cluster, targetMajorVersion);
-        String reason = String.format("RDS database server upgrade has been initiated for stack %s", cluster.getName());
-        LOGGER.info(reason);
-        return new SdxUpgradeDatabaseServerResponse(SdxDatabaseResponseType.TRIGGERED, flowIdentifier, reason, targetMajorVersion);
+        LOGGER.info("RDS database server upgrade has been initiated for stack {}", cluster.getName());
+        return new SdxUpgradeDatabaseServerResponse(flowIdentifier, targetMajorVersion);
     }
 
 }
