@@ -19,11 +19,9 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.ccm.key.CcmResourceUtil;
 import com.sequenceiq.cloudbreak.ccm.termination.CcmResourceTerminationListener;
 import com.sequenceiq.cloudbreak.ccm.termination.CcmV2AgentTerminationListener;
-import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -54,9 +52,6 @@ public class UpgradeCcmService {
 
     @Inject
     private StackDtoService stackDtoService;
-
-    @Inject
-    private ClusterServiceRunner clusterServiceRunner;
 
     @Inject
     private UpgradeCcmOrchestratorService upgradeCcmOrchestratorService;
@@ -148,15 +143,6 @@ public class UpgradeCcmService {
 
     public void updateTunnel(Long stackId) {
         stackService.setTunnelByStackId(stackId, Tunnel.latestUpgradeTarget());
-    }
-
-    public void pushSaltState(Long stackId, Long clusterId) {
-        InMemoryStateStore.putStack(stackId, PollGroup.POLLABLE);
-        if (clusterId != null) {
-            InMemoryStateStore.putCluster(clusterId, PollGroup.POLLABLE);
-        }
-        clusterServiceRunner.redeployStates(stackId);
-        clusterServiceRunner.redeployGatewayPillar(stackId);
     }
 
     public void reconfigureNginx(Long stackId) throws CloudbreakOrchestratorException {

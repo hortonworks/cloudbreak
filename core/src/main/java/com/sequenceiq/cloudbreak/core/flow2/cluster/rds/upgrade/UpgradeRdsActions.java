@@ -2,19 +2,16 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -43,9 +40,6 @@ public class UpgradeRdsActions {
     @Inject
     private UpgradeRdsService upgradeRdsService;
 
-    @Value("${cb.db.env.upgrade.rds.backuprestore.cloudplatforms}")
-    private Set<CloudPlatform> cloudPlatformsToRunBackupRestore;
-
     @Bean(name = "UPGRADE_RDS_STOP_SERVICES_STATE")
     public Action<?, ?> stopServicesAndCm() {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsTriggerRequest.class) {
@@ -67,7 +61,7 @@ public class UpgradeRdsActions {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsStopServicesResult.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsStopServicesResult payload, Map<Object, Object> variables) {
-                if (runDataBackupRestore(context)) {
+                if (upgradeRdsService.shouldRunDataBackupRestore(context.getStack(), context.getCluster())) {
                     upgradeRdsService.backupRdsState(payload.getResourceId());
                 }
                 sendEvent(context);
@@ -75,7 +69,7 @@ public class UpgradeRdsActions {
 
             @Override
             protected Selectable createRequest(UpgradeRdsContext context) {
-                return runDataBackupRestore(context) ?
+                return upgradeRdsService.shouldRunDataBackupRestore(context.getStack(), context.getCluster()) ?
                         new UpgradeRdsDataBackupRequest(context.getStackId(), context.getVersion()) :
                         new UpgradeRdsDataBackupResult(context.getStackId(), context.getVersion());
             }
@@ -103,7 +97,7 @@ public class UpgradeRdsActions {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsUpgradeDatabaseServerResult.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsUpgradeDatabaseServerResult payload, Map<Object, Object> variables) {
-                if (runDataBackupRestore(context)) {
+                if (upgradeRdsService.shouldRunDataBackupRestore(context.getStack(), context.getCluster())) {
                     upgradeRdsService.restoreRdsState(payload.getResourceId());
                 }
                 sendEvent(context);
@@ -111,7 +105,7 @@ public class UpgradeRdsActions {
 
             @Override
             protected Selectable createRequest(UpgradeRdsContext context) {
-                return runDataBackupRestore(context) ?
+                return upgradeRdsService.shouldRunDataBackupRestore(context.getStack(), context.getCluster()) ?
                         new UpgradeRdsDataRestoreRequest(context.getStackId(), context.getVersion()) :
                         new UpgradeRdsDataRestoreResult(context.getStackId(), context.getVersion());
             }
@@ -183,13 +177,5 @@ public class UpgradeRdsActions {
                 return new StackEvent(UpgradeRdsEvent.FAIL_HANDLED_EVENT.event(), context.getStack().getId());
             }
         };
-    }
-
-    private boolean runDataBackupRestore(UpgradeRdsContext context) {
-        boolean platformSupported = cloudPlatformsToRunBackupRestore.contains(CloudPlatform.valueOf(context.getStack().getCloudPlatform()));
-        boolean embeddedDatabaseOnAttachedDisk = context.getCluster().getEmbeddedDatabaseOnAttachedDisk();
-        LOGGER.debug("Running backup and restore based on conditions: platformSupported: {}, embeddedDatabaseOnAttachedDisk: {}",
-                platformSupported, embeddedDatabaseOnAttachedDisk);
-        return platformSupported && !embeddedDatabaseOnAttachedDisk;
     }
 }

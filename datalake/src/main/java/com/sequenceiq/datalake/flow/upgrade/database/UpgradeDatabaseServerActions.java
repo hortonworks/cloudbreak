@@ -5,6 +5,7 @@ import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_FAILED_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_FINALIZED_EVENT;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -86,7 +87,8 @@ public class UpgradeDatabaseServerActions {
                 String statusReason = exception.getMessage() != null
                         ? exception.getMessage()
                         : "Database server upgrade failed";
-                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, statusReason, payload.getResourceId());
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(
+                        failedStatus, Collections.singleton(statusReason), statusReason, payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.UPGRADE_DATABASE_SERVER_FAILED, sdxCluster);
                 sendEvent(context, SDX_UPGRADE_DATABASE_SERVER_FAILED_HANDLED_EVENT.event(), payload);
             }

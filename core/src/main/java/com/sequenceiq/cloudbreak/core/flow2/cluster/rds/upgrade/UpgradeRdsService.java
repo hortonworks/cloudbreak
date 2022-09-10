@@ -20,7 +20,10 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.upgrade.rds.DatabaseUpgradeBackupRestoreChecker;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeOrchestratorService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class UpgradeRdsService {
@@ -38,6 +41,9 @@ public class UpgradeRdsService {
 
     @Inject
     private CloudbreakMessagesService messagesService;
+
+    @Inject
+    private DatabaseUpgradeBackupRestoreChecker backupRestoreChecker;
 
     void stopServicesState(Long stackId) {
         setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_STOP_SERVICES), ResourceEvent.CLUSTER_RDS_UPGRADE_STOP_SERVICES);
@@ -114,6 +120,10 @@ public class UpgradeRdsService {
         }
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DATABASE_UPGRADE_FAILED, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_FAILED, exception.getMessage());
+    }
+
+    public boolean shouldRunDataBackupRestore(StackView stack, ClusterView cluster) {
+        return backupRestoreChecker.shouldRunDataBackupRestore(stack, cluster);
     }
 
     private String getMessage(ResourceEvent resourceEvent) {
