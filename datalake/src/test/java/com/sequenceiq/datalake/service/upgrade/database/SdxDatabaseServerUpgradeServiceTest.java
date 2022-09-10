@@ -33,7 +33,6 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.database.DatabaseUpgradeRuntimeValidator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
-import com.sequenceiq.sdx.api.model.SdxDatabaseResponseType;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -86,9 +85,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         SdxUpgradeDatabaseServerResponse response = underTest.upgrade(NAME_OR_CRN, targetMajorVersion);
 
         assertEquals(flowIdentifier, response.getFlowIdentifier());
-        assertEquals("RDS database server upgrade has been initiated for stack " + SDX_CLUSTER_NAME, response.getReason());
         assertEquals(targetMajorVersion, response.getTargetMajorVersion());
-        assertEquals(SdxDatabaseResponseType.TRIGGERED, response.getSdxDatabaseResponseType());
     }
 
     @Test
@@ -106,9 +103,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         SdxUpgradeDatabaseServerResponse response = underTest.upgrade(NAME_OR_CRN, null);
 
         assertEquals(flowIdentifier, response.getFlowIdentifier());
-        assertEquals("RDS database server upgrade has been initiated for stack " + SDX_CLUSTER_NAME, response.getReason());
         assertEquals(TargetMajorVersion.VERSION_11, response.getTargetMajorVersion());
-        assertEquals(SdxDatabaseResponseType.TRIGGERED, response.getSdxDatabaseResponseType());
     }
 
     @Test
@@ -126,9 +121,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         SdxUpgradeDatabaseServerResponse response = underTest.upgrade(NAME_OR_CRN, targetMajorVersion);
 
         assertEquals(flowIdentifier, response.getFlowIdentifier());
-        assertEquals("RDS database server upgrade has been initiated for stack " + SDX_CLUSTER_NAME, response.getReason());
         assertEquals(targetMajorVersion, response.getTargetMajorVersion());
-        assertEquals(SdxDatabaseResponseType.TRIGGERED, response.getSdxDatabaseResponseType());
     }
 
     @ParameterizedTest
@@ -219,13 +212,6 @@ public class SdxDatabaseServerUpgradeServiceTest {
         }
         return sdxCluster;
     }
-
-//    private SdxCluster mockSdxCluster(boolean withExternalDb) {
-//        SdxCluster sdxCluster = mock(SdxCluster.class);
-//        when(sdxCluster.getName()).thenReturn(SDX_CLUSTER_NAME);
-//        when(sdxCluster.hasExternalDatabase()).thenReturn(withExternalDb);
-//        return sdxCluster;
-//    }
 
     private SdxStatusEntity getDatalakeStatus(DatalakeStatusEnum statusEnum) {
         SdxStatusEntity status = new SdxStatusEntity();
