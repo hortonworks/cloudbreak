@@ -184,7 +184,7 @@ public class FreeIpaClient {
 
     public Privilege showPrivilege(String privilegeName) throws FreeIpaClientException {
         List<Object> flags = List.of(privilegeName);
-        Map<String, Object> params = Map.of();
+        Map<String, Object> params = Map.of("all", true);
         return (Privilege) invoke("privilege_show", flags, params, Privilege.class).getResult();
     }
 
