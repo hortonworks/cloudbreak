@@ -80,7 +80,8 @@ public class FreeipaChecker {
                 status = DetailedStackStatus.UNHEALTHY;
             }
 
-            return new SyncResult("FreeIpa is " + status + ", " + statusCheckPair.getSecond(), status, statusCheckPair.getFirst());
+            LOGGER.info("FreeIpa is {}, node health cheks: {}", status, statusCheckPair.getSecond());
+            return new SyncResult("FreeIpa is " + status, status, statusCheckPair.getFirst());
         } catch (Exception e) {
             LOGGER.info("Error occurred during status fetch: " + e.getMessage(), e);
             return new SyncResult("FreeIpa is unreachable, because error occurred: " + e.getMessage(), DetailedStackStatus.UNREACHABLE, null);
