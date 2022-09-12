@@ -15,14 +15,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cedarsoftware.util.io.JsonWriter;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
@@ -76,38 +74,35 @@ class FlowChainLogServiceTest {
         assertEquals(List.of(flowChainLogA, flowChainLogB, flowChainLogC, flowChainLogD, flowChainLogES2), result);
     }
 
-    @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = {false, true})
-    void testCheckIfThereIsEventInQueues(boolean useJackson) {
+    @Test
+    void testCheckIfThereIsEventInQueues() {
         List<FlowChainLog> flowChains = List.of(
-                flowChainLog("1", true, 1L, useJackson),
-                flowChainLog("1", true, 2L, useJackson),
-                flowChainLog("2", true, 1L, useJackson),
-                flowChainLog("2", false, 2L, useJackson)
+                flowChainLog("1", true, 1L),
+                flowChainLog("1", true, 2L),
+                flowChainLog("2", true, 1L),
+                flowChainLog("2", false, 2L)
         );
         assertTrue(underTest.hasEventInFlowChainQueue(flowChains));
     }
 
-    @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = {false, true})
-    void testCheckIfThereIsNoEventInQueues(boolean useJackson) {
+    @Test
+    void testCheckIfThereIsNoEventInQueues() {
         List<FlowChainLog> flowChains = List.of(
-                flowChainLog("1", true, 1L, useJackson),
-                flowChainLog("1", false, 2L, useJackson),
-                flowChainLog("2", true, 1L, useJackson),
-                flowChainLog("2", false, 2L, useJackson)
+                flowChainLog("1", true, 1L),
+                flowChainLog("1", false, 2L),
+                flowChainLog("2", true, 1L),
+                flowChainLog("2", false, 2L)
         );
         assertFalse(underTest.hasEventInFlowChainQueue(flowChains));
     }
 
-    @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = {false, true})
-    void testCheckIfThereIsEventInQueuesBasedOnlatestChains(boolean useJackson) {
+    @Test
+    void testCheckIfThereIsEventInQueuesBasedOnlatestChains() {
         List<FlowChainLog> flowChains = List.of(
-                flowChainLog("1", false, 1L, useJackson),
-                flowChainLog("1", true, 2L, useJackson),
-                flowChainLog("2", false, 1L, useJackson),
-                flowChainLog("2", true, 2L, useJackson)
+                flowChainLog("1", false, 1L),
+                flowChainLog("1", true, 2L),
+                flowChainLog("2", false, 1L),
+                flowChainLog("2", true, 2L)
         );
         assertTrue(underTest.hasEventInFlowChainQueue(flowChains));
     }
@@ -157,7 +152,7 @@ class FlowChainLogServiceTest {
         flowChainLog.setFlowChainId(flowChainId);
         flowChainLog.setParentFlowChainId(parentFlowChainId);
         flowChainLog.setCreated(created);
-        flowChainLog.setChain(JsonWriter.objectToJson(new ConcurrentLinkedQueue<>()));
+        flowChainLog.setChainJackson(JsonUtil.writeValueAsStringSilent(new ConcurrentLinkedQueue<>()));
         return flowChainLog;
     }
 
@@ -171,16 +166,13 @@ class FlowChainLogServiceTest {
                 .thenReturn(children);
     }
 
-    private FlowChainLog flowChainLog(String flowChanId, boolean hasEventInQueue, Long created, boolean useJackson) {
+    private FlowChainLog flowChainLog(String flowChanId, boolean hasEventInQueue, Long created) {
         FlowChainLog flowChainLog = flowChainLog(flowChanId, flowChanId + FLOWCHAIN_PARENT_SUFFIX, created);
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         if (hasEventInQueue) {
             flowEventChain.add(new TestEvent());
         }
-        flowChainLog.setChain(JsonWriter.objectToJson(flowEventChain));
-        if (useJackson) {
-            flowChainLog.setChainJackson(TypedJsonUtil.writeValueAsStringSilent(flowEventChain));
-        }
+        flowChainLog.setChainJackson(TypedJsonUtil.writeValueAsStringSilent(flowEventChain));
         return flowChainLog;
     }
 

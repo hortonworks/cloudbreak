@@ -37,7 +37,7 @@ public class FlowLogsToListDiagnosticsCollectionResponseConverter {
                         DiagnosticsCollection collection = new DiagnosticsCollection();
                         collection.setFlowId(flowLog.getFlowId());
                         collection.setCreated(flowLog.getCreated());
-                        collection.setProperties(flowPayloadToDiagnosticDetailsConverter.convert(flowLog.getPayload()));
+                        collection.setProperties(flowPayloadToDiagnosticDetailsConverter.convert(flowLog.getPayloadJackson()));
                         collection.setStatus(calculateStatus(flowLog));
                         collection.setCurrentFlowStatus(flowLog.getCurrentState());
                         collection.setProgressPercentage(calculateProgressPercentage(flowLog));

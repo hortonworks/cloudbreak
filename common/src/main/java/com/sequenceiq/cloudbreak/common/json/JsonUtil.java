@@ -10,7 +10,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cedarsoftware.util.io.JsonReader;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -59,6 +58,15 @@ public class JsonUtil {
 
     public static <T> T readValue(String content, Class<T> valueType) throws IOException {
         return MAPPER.readValue(content, valueType);
+    }
+
+    public static <T> T readValueUnchecked(String content, Class<T> valueType) {
+        try {
+            return MAPPER.readValue(content, valueType);
+        } catch (IOException e) {
+            LOGGER.error("Failed to deserialize with Jackson: {}", content, e);
+            throw new IllegalStateException("Cannot convert Json string to object.", e);
+        }
     }
 
     public static <T> T readValue(String content, TypeReference<T> valueTypeRef) throws IOException {
@@ -178,26 +186,6 @@ public class JsonUtil {
             return true;
         } catch (IOException ignore) {
             return false;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> T readValueWithJsonIoFallback(String jackson, String jsonio, Class<T> valueType) {
-        try {
-            return readValue(jackson, valueType);
-        } catch (IOException e) {
-            LOGGER.error("Failed to deserialize with Jackson, falling back to json-io. JSON: {}", jackson, e);
-            return (T) JsonReader.jsonToJava(jsonio);
-        }
-    }
-
-    public static void checkReadability(String jackson, Class<?> valueType) {
-        if (jackson != null) {
-            try {
-                readValue(jackson, valueType);
-            } catch (IOException e) {
-                LOGGER.error("Failed to deserialize with Jackson: {}", jackson, e);
-            }
         }
     }
 

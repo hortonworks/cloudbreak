@@ -82,7 +82,7 @@ public class FreeIpaDeletionService {
         Optional<FlowLog> optionalFlowLog = findLatestTerminationFlowLogWithInitState(stack);
         if (optionalFlowLog.isPresent()) {
             FlowLog flowLog = optionalFlowLog.get();
-            LOGGER.debug("Found termination flowlog with id [{}] and payload [{}]", flowLog.getFlowId(), flowLog.getPayload());
+            LOGGER.debug("Found termination flowlog with id [{}] and payload [{}]", flowLog.getFlowId(), flowLog.getPayloadJackson());
         } else {
             fireTerminationEvent(stack, forced);
         }

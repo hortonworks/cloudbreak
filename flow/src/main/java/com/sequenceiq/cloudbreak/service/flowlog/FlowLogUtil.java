@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
@@ -81,46 +80,42 @@ public class FlowLogUtil {
     }
 
     public static Payload tryDeserializeTriggerEvent(FlowChainLog flowChainLog) {
-        return tryDeserialize(flowChainLog.getTriggerEventJackson(), flowChainLog.getTriggerEvent(), Payload.class, false);
+        return tryDeserialize(flowChainLog.getTriggerEventJackson(), Payload.class, false);
     }
 
     public static Payload tryDeserializePayload(FlowLog flowLog) {
-        return tryDeserialize(flowLog.getPayloadJackson(), flowLog.getPayload(), Payload.class, false);
+        return tryDeserialize(flowLog.getPayloadJackson(), Payload.class, false);
     }
 
     public static Payload deserializePayload(FlowLog flowLog) {
-        return deserialize(flowLog.getPayloadJackson(), flowLog.getPayload(), Payload.class, false);
+        return deserialize(flowLog.getPayloadJackson(), Payload.class, false);
     }
 
     public static Map<Object, Object> deserializeVariables(FlowLog flowLog) {
-        return (Map<Object, Object>) deserialize(flowLog.getVariablesJackson(), flowLog.getVariables(), Map.class, true);
+        return (Map<Object, Object>) deserialize(flowLog.getVariablesJackson(), Map.class, true);
     }
 
     public static Map<Object, Object> tryDeserializeVariables(FlowLog flowLog) {
-        return (Map<Object, Object>) tryDeserialize(flowLog.getVariablesJackson(), flowLog.getVariables(), Map.class, true);
+        return (Map<Object, Object>) tryDeserialize(flowLog.getVariablesJackson(), Map.class, true);
     }
 
-    private static <T> T tryDeserialize(String json, String jsonIo, Class<T> type, boolean useTypedJsonReader) {
-        if (null == jsonIo && null == json) {
+    private static <T> T tryDeserialize(String json, Class<T> type, boolean useTypedJsonReader) {
+        if (null == json) {
             return null;
         }
         try {
-            return deserialize(json, jsonIo, type, useTypedJsonReader);
+            return deserialize(json, type, useTypedJsonReader);
         } catch (Exception e) {
             LOGGER.warn("Deserialization failed {}", e.getMessage(), e);
             return null;
         }
     }
 
-    private static <T> T deserialize(String json, String jsonIo, Class<T> type, boolean useTypedJsonReader) {
-        if (null != json) {
-            if (useTypedJsonReader) {
-                return TypedJsonUtil.readValueWithJsonIoFallback(json, jsonIo, type);
-            } else {
-                return JsonUtil.readValueWithJsonIoFallback(json, jsonIo, type);
-            }
+    private static <T> T deserialize(String json, Class<T> type, boolean useTypedJsonReader) {
+        if (useTypedJsonReader) {
+            return TypedJsonUtil.readValueUnchecked(json, type);
         } else {
-            return (T) JsonReader.jsonToJava(jsonIo);
+            return JsonUtil.readValueUnchecked(json, type);
         }
     }
 }

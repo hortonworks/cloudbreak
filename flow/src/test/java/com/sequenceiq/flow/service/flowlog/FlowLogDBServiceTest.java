@@ -43,7 +43,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
-import com.cedarsoftware.util.io.JsonWriter;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -157,12 +156,8 @@ class FlowLogDBServiceTest {
         FlowLog savedFlowLog = flowLogCaptor.getValue();
         assertEquals(flowLog.getId(), savedFlowLog.getId());
 
-        String payloadJson = JsonWriter.objectToJson(payload, Map.of());
-        String variablesJson = JsonWriter.objectToJson(variables, Map.of());
         String payloadJackson = JsonUtil.writeValueAsStringSilent(payload);
         String variablesJackson = TypedJsonUtil.writeValueAsStringSilent(variables);
-        assertEquals(payloadJson, savedFlowLog.getPayload());
-        assertEquals(variablesJson, savedFlowLog.getVariables());
         assertEquals(payloadJackson, savedFlowLog.getPayloadJackson());
         assertEquals(variablesJackson, savedFlowLog.getVariablesJackson());
     }
@@ -298,7 +293,6 @@ class FlowLogDBServiceTest {
         assertThat(savedFlowLog.getStateStatus()).isEqualTo(StateStatus.SUCCESSFUL);
         assertThat(savedFlowLog.getOperationType()).isEqualTo(OperationType.DIAGNOSTICS);
         assertThat(savedFlowLog.getCloudbreakNodeId()).isEqualTo(NODE_ID);
-        assertThat(savedFlowLog.getVariables()).isNull();
         assertThat(savedFlowLog.getVariablesJackson()).isNull();
     }
 
@@ -317,7 +311,6 @@ class FlowLogDBServiceTest {
         assertThat(savedFlowLog.getStateStatus()).isEqualTo(StateStatus.SUCCESSFUL);
         assertThat(savedFlowLog.getOperationType()).isEqualTo(OperationType.DIAGNOSTICS);
         assertThat(savedFlowLog.getCloudbreakNodeId()).isEqualTo(NODE_ID);
-        assertThat(savedFlowLog.getVariables()).isEqualTo(JsonWriter.objectToJson(params));
         assertThat(savedFlowLog.getVariablesJackson()).isEqualTo(TypedJsonUtil.writeValueAsStringSilent(params));
     }
 
