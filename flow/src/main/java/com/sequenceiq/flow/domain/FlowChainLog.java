@@ -10,7 +10,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 
-import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 
@@ -31,16 +30,10 @@ public class FlowChainLog {
 
     private String parentFlowChainId;
 
-    @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT", nullable = false)
-    private String chain;
-
     @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT")
     private String chainJackson;
 
     private String flowTriggerUserCrn;
-
-    @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT")
-    private String triggerEvent;
 
     @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT")
     private String triggerEventJackson;
@@ -49,16 +42,14 @@ public class FlowChainLog {
 
     }
 
-    public FlowChainLog(String flowChainType, String flowChainId, String parentFlowChainId, String chain, String chainJackson, String flowTriggerUserCrn,
-            String triggerEvent, String triggerEventJackson) {
+    public FlowChainLog(String flowChainType, String flowChainId, String parentFlowChainId, String chainJackson, String flowTriggerUserCrn,
+            String triggerEventJackson) {
 
         this.flowChainType = flowChainType;
         this.flowChainId = flowChainId;
         this.parentFlowChainId = parentFlowChainId;
-        this.chain = chain;
         this.chainJackson = chainJackson;
         this.flowTriggerUserCrn = flowTriggerUserCrn;
-        this.triggerEvent = triggerEvent;
         this.triggerEventJackson = triggerEventJackson;
     }
 
@@ -94,20 +85,9 @@ public class FlowChainLog {
         this.parentFlowChainId = parentFlowChainId;
     }
 
-    public String getChain() {
-        return chain;
-    }
-
+    @SuppressWarnings("unchecked")
     public Queue<Selectable> getChainAsQueue() {
-        if (null != chainJackson) {
-            return TypedJsonUtil.readValueWithJsonIoFallback(chainJackson, chain, Queue.class);
-        } else {
-            return (Queue<Selectable>) JsonReader.jsonToJava(chain);
-        }
-    }
-
-    public void setChain(String chain) {
-        this.chain = chain;
+        return TypedJsonUtil.readValueUnchecked(chainJackson, Queue.class);
     }
 
     public String getFlowTriggerUserCrn() {
@@ -124,14 +104,6 @@ public class FlowChainLog {
 
     public void setFlowChainType(String flowChainType) {
         this.flowChainType = flowChainType;
-    }
-
-    public String getTriggerEvent() {
-        return triggerEvent;
-    }
-
-    public void setTriggerEvent(String triggerEvent) {
-        this.triggerEvent = triggerEvent;
     }
 
     public String getChainJackson() {

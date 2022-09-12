@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cedarsoftware.util.io.JsonReader;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -113,8 +112,7 @@ public class InfoCollectorConclusionStep extends ConclusionStep {
         debugInfo.append(" - Related flowChainId: ").append(relatedFlowChainLog.getFlowChainId())
                 .append(", parentFlowChainId: ").append(relatedFlowChainLog.getParentFlowChainId())
                 .append(", flowChainType: ").append(relatedFlowChainLog.getFlowChainType())
-                .append(", triggerEvent: ").append(relatedFlowChainLog.getTriggerEventJackson() != null
-                        ? relatedFlowChainLog.getTriggerEventJackson() : relatedFlowChainLog.getTriggerEvent())
+                .append(", triggerEvent: ").append(relatedFlowChainLog.getTriggerEventJackson())
                 .append("\n");
     }
 
@@ -127,20 +125,16 @@ public class InfoCollectorConclusionStep extends ConclusionStep {
         debugInfo.append("\nLatest flowChainId: ").append(flowChainLog.getFlowChainId())
                 .append(", parentFlowChainId: ").append(flowChainLog.getParentFlowChainId())
                 .append(", flowChainType: ").append(flowChainLog.getFlowChainType())
-                .append(", triggerEvent: ").append(flowChainLog.getTriggerEventJackson() != null
-                        ? flowChainLog.getTriggerEventJackson() : flowChainLog.getTriggerEvent())
+                .append(", triggerEvent: ").append(flowChainLog.getTriggerEventJackson())
                 .append("\n");
         debugInfo.append("Flow chain steps: \n");
 
         try {
-            Queue<Selectable> queue;
-            if (null != flowChainLog.getChainJackson()) {
-                queue = TypedJsonUtil.readValueWithJsonIoFallback(flowChainLog.getChainJackson(), flowChainLog.getChain(), Queue.class);
-            } else {
-                queue = (Queue<Selectable>) JsonReader.jsonToJava(flowChainLog.getChain());
-            }
+            Queue<Selectable> queue = flowChainLog.getChainJackson() == null
+                    ? null
+                    : TypedJsonUtil.readValue(flowChainLog.getChainJackson(), Queue.class);
             if (queue != null) {
-                queue.stream().forEach(selectable -> appentFlowChainElementInfo(debugInfo, selectable));
+                queue.forEach(selectable -> appentFlowChainElementInfo(debugInfo, selectable));
             }
         } catch (Exception e) {
             LOGGER.warn("Failed to parse flow chain queue", e);

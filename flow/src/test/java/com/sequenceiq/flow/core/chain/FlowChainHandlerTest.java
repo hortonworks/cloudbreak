@@ -12,8 +12,6 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -74,23 +72,14 @@ class FlowChainHandlerTest {
         verifyNoInteractions(flowChains, flowStatCache, flowChainOperationTypeConfig);
     }
 
-    @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = { false, true })
-    void testRestoreFlowChain(boolean useJackson) {
+    @Test
+    void testRestoreFlowChain() {
         FlowChainLog flowChainLog = new FlowChainLog(FLOW_CHAIN_TYPE, FLOW_CHAIN_ID, PARENT_FLOW_CHAIN_ID,
-                "{\"@type\":\"java.util.concurrent.ConcurrentLinkedQueue\",\"@items\":[{\"@type\":\"" +
+                "[{\"@type\":\"" +
                         SimpleSelectable.class.getName() + "\",\"resourceId\":" + RESOURCE_ID + ",\"key\":\"" + SIMPLE_VALUE + "\"," +
-                        "\"selector\":\"" + SELECTOR + "\"}]}",
-                useJackson
-                        ? "[{\"@type\":\"" +
-                            SimpleSelectable.class.getName() + "\",\"resourceId\":" + RESOURCE_ID + ",\"key\":\"" + SIMPLE_VALUE + "\"," +
-                            "\"selector\":\"" + SELECTOR + "\"}]"
-                        : null,
+                        "\"selector\":\"" + SELECTOR + "\"}]",
                 USER_CRN,
-                "{\"@type\":\"" + SimpleSelectable.class.getName() + "\",\"key\":\"" + TRIGGER_VALUE + "\"}",
-                useJackson
-                        ? "{\"@type\":\"" + SimpleSelectable.class.getName() + "\",\"key\":\"" + TRIGGER_VALUE + "\"}"
-                        : null);
+                "{\"@type\":\"" + SimpleSelectable.class.getName() + "\",\"key\":\"" + TRIGGER_VALUE + "\"}");
         when(flowLogService.findFirstByFlowChainIdOrderByCreatedDesc(FLOW_CHAIN_ID)).thenReturn(Optional.of(flowChainLog));
         when(flowChainOperationTypeConfig.getFlowTypeOperationTypeMap()).thenReturn(Map.of(FLOW_CHAIN_TYPE, OperationType.PROVISION));
         underTest.restoreFlowChain(FLOW_CHAIN_ID);

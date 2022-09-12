@@ -89,7 +89,6 @@ dependencies {
   api group: 'org.springframework.security',        name: 'spring-security-jwt',              version: '1.0.8.RELEASE'
   api group: 'org.springframework.security',        name: 'spring-security-core',             version: springSecurityVersion
   api group: 'org.springframework.security',        name: 'spring-security-config',           version: springSecurityVersion
-  implementation group: 'com.cedarsoftware',        name: 'json-io',                          version: '4.9.12'
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test',       version: springBootVersion
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: springBootVersion

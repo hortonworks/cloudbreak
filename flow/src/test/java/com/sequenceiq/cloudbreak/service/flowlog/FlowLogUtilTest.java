@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -184,48 +182,43 @@ class FlowLogUtilTest {
         assertFalse(FlowLogUtil.getPendingFlowLog(flowLogs).isPresent());
     }
 
-    @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = { false, true })
-    void testTryDeserializeTriggerEvent(boolean useJackson) {
-        FlowChainLog flowChainLog = getFlowChainLog(useJackson);
+    @Test
+    void testTryDeserializeTriggerEvent() {
+        FlowChainLog flowChainLog = getFlowChainLog();
         Payload payload = FlowLogUtil.tryDeserializeTriggerEvent(flowChainLog);
-        assertEquals("triggerEvent" + (useJackson ? "Jackson" : "") + "Value", ((SimplePayload) payload).getKey());
+        assertEquals("triggerEventJacksonValue", ((SimplePayload) payload).getKey());
     }
 
     @Test
     void testTryDeserializeTriggerEventAllNull() {
-        FlowChainLog flowChainLog = new FlowChainLog("type", "id", "parentId", null, null, "userCrn", null, null);
+        FlowChainLog flowChainLog = new FlowChainLog("type", "id", "parentId", null, "userCrn", null);
         Payload payload = FlowLogUtil.tryDeserializeTriggerEvent(flowChainLog);
         assertNull(payload);
     }
 
     @Test
     void testTryDeserializeTriggerEventContainsGarbage() {
-        FlowChainLog flowChainLog = new FlowChainLog("type", "id", "parentId", "garbage", "garbage", "userCrn", "garbage", "garbage");
+        FlowChainLog flowChainLog = new FlowChainLog("type", "id", "parentId", "garbage", "userCrn", "garbage");
         Payload payload = FlowLogUtil.tryDeserializeTriggerEvent(flowChainLog);
         assertNull(payload);
     }
 
-    private static FlowChainLog getFlowChainLog(boolean useJackson) {
-        return new FlowChainLog("type", "id", "parentId", "any", "any", "userCrn",
-                "{\"@type\":\"" + SimplePayload.class.getName() + "\",\"key\":\"triggerEventValue\"}",
-                useJackson
-                    ? "{\"@type\":\"" + SimplePayload.class.getName() + "\",\"key\":\"triggerEventJacksonValue\"}"
-                    : null);
+    private static FlowChainLog getFlowChainLog() {
+        return new FlowChainLog("type", "id", "parentId", "any", "userCrn",
+                "{\"@type\":\"" + SimplePayload.class.getName() + "\",\"key\":\"triggerEventJacksonValue\"}");
     }
 
-    @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = { false, true })
-    void testTryDeserializePayload(boolean useJackson) {
-        FlowLog flowLog = getFlowLog(useJackson);
+    @Test
+    void testTryDeserializePayload() {
+        FlowLog flowLog = getFlowLog();
         Payload payload = FlowLogUtil.tryDeserializePayload(flowLog);
-        assertEquals("payload" + (useJackson ? "Jackson" : "") + "Value", ((SimplePayload) payload).getKey());
+        assertEquals("payloadJacksonValue", ((SimplePayload) payload).getKey());
     }
 
     @Test
     void testTryDeserializePayloadAllNull() {
-        FlowLog flowLog = new FlowLog(123L, "flowId", "chainId", "userCrn", "nextEvent", null, null,
-                com.sequenceiq.flow.domain.ClassValue.of(SimplePayload.class), null, null,
+        FlowLog flowLog = new FlowLog(123L, "flowId", "chainId", "userCrn", "nextEvent", null,
+                com.sequenceiq.flow.domain.ClassValue.of(SimplePayload.class), null,
                 com.sequenceiq.flow.domain.ClassValue.ofUnknown("unknown"), "currentState");
         Payload payload = FlowLogUtil.tryDeserializePayload(flowLog);
         assertNull(payload);
@@ -234,22 +227,19 @@ class FlowLogUtilTest {
     @Test
     void testTryDeserializePayloadContainsGarbage() {
         FlowLog flowLog = new FlowLog(123L, "flowId", "chainId", "userCrn", "nextEvent",
-                "garbage", "garbage",
+                "garbage",
                 com.sequenceiq.flow.domain.ClassValue.of(SimplePayload.class),
-                "garbage", "garbage",
+                "garbage",
                 com.sequenceiq.flow.domain.ClassValue.ofUnknown("unknown"), "currentState");
         Payload payload = FlowLogUtil.tryDeserializePayload(flowLog);
         assertNull(payload);
     }
 
-    private static FlowLog getFlowLog(boolean useJackson) {
+    private static FlowLog getFlowLog() {
         return new FlowLog(123L, "flowId", "chainId", "userCrn", "nextEvent",
-                "{\"@type\":\"" + SimplePayload.class.getName() + "\",\"key\":\"payloadValue\"}",
-                useJackson
-                        ? "{\"@type\":\"" + SimplePayload.class.getName() + "\",\"key\":\"payloadJacksonValue\"}"
-                        : null,
+                "{\"@type\":\"" + SimplePayload.class.getName() + "\",\"key\":\"payloadJacksonValue\"}",
                 com.sequenceiq.flow.domain.ClassValue.of(SimplePayload.class),
-                "any", "any",
+                "any",
                 com.sequenceiq.flow.domain.ClassValue.ofUnknown("unknown"), "currentState");
     }
 

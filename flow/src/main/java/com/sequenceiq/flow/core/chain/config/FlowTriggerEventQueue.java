@@ -40,4 +40,14 @@ public class FlowTriggerEventQueue {
     public Queue<Selectable> getQueue() {
         return queue;
     }
+
+    @Override
+    public String toString() {
+        return "FlowTriggerEventQueue{" +
+                "parentFlowChainId='" + parentFlowChainId + '\'' +
+                ", flowChainName='" + flowChainName + '\'' +
+                ", triggerEvent=" + triggerEvent +
+                ", queue=" + queue +
+                '}';
+    }
 }
