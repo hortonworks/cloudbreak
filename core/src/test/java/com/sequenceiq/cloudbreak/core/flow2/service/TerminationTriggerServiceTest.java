@@ -15,14 +15,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cedarsoftware.util.io.JsonWriter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -161,40 +158,36 @@ class TerminationTriggerServiceTest {
         verifyTerminationEventFired(false, true, false);
     }
 
-    @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = { false, true })
-    void whenStackNotDeletedAndNotForcedTerminationFlowLogAndNotForcedShouldNotTerminate(boolean useJackson) {
-        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(getTerminationFlowLog(false, useJackson)));
+    @Test
+    void whenStackNotDeletedAndNotForcedTerminationFlowLogAndNotForcedShouldNotTerminate() {
+        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(getTerminationFlowLog(false)));
 
         underTest.triggerTermination(getAvailableStack(), false);
 
         verifyNoTerminationEventFired();
     }
 
-    @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = { false, true })
-    void whenStackNotDeletedAndForcedTerminationFlowLogAndNotForcedShouldNotTerminate(boolean useJackson) {
-        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(getTerminationFlowLog(true, useJackson)));
+    @Test
+    void whenStackNotDeletedAndForcedTerminationFlowLogAndNotForcedShouldNotTerminate() {
+        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(getTerminationFlowLog(true)));
 
         underTest.triggerTermination(getAvailableStack(), false);
 
         verifyNoTerminationEventFired();
     }
 
-    @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = { false, true })
-    void whenStackNotDeletedAndForcedTerminationFlowLogAndForcedShouldNotTerminate(boolean useJackson) {
-        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(getTerminationFlowLog(true, useJackson)));
+    @Test
+    void whenStackNotDeletedAndForcedTerminationFlowLogAndForcedShouldNotTerminate() {
+        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(getTerminationFlowLog(true)));
 
         underTest.triggerTermination(getAvailableStack(), true);
 
         verifyNoTerminationEventFired();
     }
 
-    @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = { false, true })
-    void whenStackNotDeletedAndNotForcedTerminationFlowLogAndForcedShouldTerminate(boolean useJackson) {
-        FlowLog flowLog = getTerminationFlowLog(false, useJackson);
+    @Test
+    void whenStackNotDeletedAndNotForcedTerminationFlowLogAndForcedShouldTerminate() {
+        FlowLog flowLog = getTerminationFlowLog(false);
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(flowLog));
         setupKerberized();
 
@@ -287,15 +280,12 @@ class TerminationTriggerServiceTest {
         when(kerberosConfigService.isKerberosConfigExistsForEnvironment(anyString(), anyString())).thenReturn(Boolean.FALSE);
     }
 
-    private FlowLog getTerminationFlowLog(boolean forced, boolean useJackson) {
+    private FlowLog getTerminationFlowLog(boolean forced) {
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowType(ClassValue.of(StackTerminationFlowConfig.class));
         flowLog.setCurrentState("INIT_STATE");
         TerminationEvent event = new TerminationEvent("selector", 1L, forced ? TerminationType.FORCED : TerminationType.REGULAR);
-        flowLog.setPayload(JsonWriter.objectToJson(event));
-        if (useJackson) {
-            flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(event));
-        }
+        flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(event));
         flowLog.setPayloadType(ClassValue.of(TerminationEvent.class));
         return flowLog;
     }

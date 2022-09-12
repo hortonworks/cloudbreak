@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.flow.domain.FlowChainLog;
@@ -83,11 +82,7 @@ public class FlowLogUtil {
             return null;
         } else {
             try {
-                if (null != flowChainLog.getTriggerEventJackson()) {
-                    return JsonUtil.readValueWithJsonIoFallback(flowChainLog.getTriggerEventJackson(), flowChainLog.getTriggerEvent(), Payload.class);
-                } else {
-                    return (Payload) JsonReader.jsonToJava(flowChainLog.getTriggerEvent());
-                }
+                return JsonUtil.readValue(flowChainLog.getTriggerEventJackson(), Payload.class);
             } catch (Exception exception) {
                 LOGGER.warn("Couldn't deserialize trigger event from flow chain log {}", flowChainLog);
                 return null;
@@ -100,12 +95,7 @@ public class FlowLogUtil {
             return null;
         } else {
             try {
-                if (null != flowLog.getPayloadJackson()) {
-                    return JsonUtil.readValueWithJsonIoFallback(flowLog.getPayloadJackson(), flowLog.getPayload(), Payload.class);
-                } else {
-                    return (Payload) JsonReader.jsonToJava(flowLog.getPayload());
-                }
-
+                return JsonUtil.readValue(flowLog.getPayloadJackson(), Payload.class);
             } catch (Exception exception) {
                 LOGGER.warn("Couldn't deserialize payload from flow log {}", flowLog);
                 return null;

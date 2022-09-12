@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -16,12 +15,10 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.cedarsoftware.util.io.JsonWriter;
 import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.event.Payload;
@@ -68,10 +65,6 @@ public class FlowLogDBService implements FlowLogService {
     private ApplicationFlowInformation applicationFlowInformation;
 
     @Inject
-    @Qualifier("JsonWriterOptions")
-    private Map<String, Object> writeOptions;
-
-    @Inject
     private TransactionService transactionService;
 
     @Inject
@@ -80,32 +73,17 @@ public class FlowLogDBService implements FlowLogService {
     @Override
     public FlowLog save(FlowParameters flowParameters, String flowChainId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
             FlowState currentState) {
-        String payloadAsString = getSerializedString(payload);
-        String variablesJson = variables == null ? null : getSerializedString(variables);
         String payloadJackson = JsonUtil.writeValueAsStringSilent(payload);
-        JsonUtil.checkReadability(payloadJackson, Payload.class);
         String variablesJackson = TypedJsonUtil.writeValueAsStringSilent(variables);
-        TypedJsonUtil.checkReadability(variablesJackson, Map.class);
 
         FlowLog flowLog = new FlowLog(payload.getResourceId(), flowParameters.getFlowId(), flowChainId, flowParameters.getFlowTriggerUserCrn(), key,
-                payloadAsString, payloadJackson, ClassValue.of(payload.getClass()), variablesJson, variablesJackson,
+                "", payloadJackson, ClassValue.of(payload.getClass()), "{}", variablesJackson,
                 ClassValue.of(flowType), currentState.toString());
         flowLog.setOperationType(StringUtils.isNotBlank(flowParameters.getFlowOperationType())
                 ? OperationType.valueOf(flowParameters.getFlowOperationType())
                 : OperationType.UNKNOWN);
         flowLog.setCloudbreakNodeId(nodeConfig.getId());
         return flowLogRepository.save(flowLog);
-    }
-
-    public String getSerializedString(Object object) {
-        String objectAsString;
-        try {
-            objectAsString = JsonWriter.objectToJson(object, writeOptions);
-        } catch (Exception e) {
-            LOGGER.debug("Somehow can not serialize object to string, try another method..", e);
-            objectAsString = JsonUtil.writeValueAsStringSilent(object);
-        }
-        return objectAsString;
     }
 
     @Override
@@ -150,10 +128,7 @@ public class FlowLogDBService implements FlowLogService {
             }
             FlowLog flowLog = new FlowLog(resourceId, flowId, state, Boolean.TRUE, StateStatus.SUCCESSFUL, operationType);
             if (contextParams != null) {
-                String variablesJson = getSerializedString(contextParams);
                 String variablesJackson = TypedJsonUtil.writeValueAsStringSilent(contextParams);
-                TypedJsonUtil.checkReadability(variablesJackson, Map.class);
-                flowLog.setVariables(variablesJson);
                 flowLog.setVariablesJackson(variablesJackson);
             }
             flowLog.setCloudbreakNodeId(nodeConfig.getId());
@@ -165,18 +140,13 @@ public class FlowLogDBService implements FlowLogService {
     @Override
     public void saveChain(String flowChainId, String parentFlowChainId, FlowTriggerEventQueue chain, String flowTriggerUserCrn) {
         String chainType = chain.getFlowChainName();
-        String chainJson = JsonWriter.objectToJson(chain.getQueue());
         String chainJackson = TypedJsonUtil.writeValueAsStringSilent(chain.getQueue());
-        TypedJsonUtil.checkReadability(chainJackson, Queue.class);
-        String triggerEventJson = null;
         String triggerEventJackson = null;
         if (chain.getTriggerEvent() != null) {
-            triggerEventJson = JsonWriter.objectToJson(chain.getTriggerEvent(), writeOptions);
             triggerEventJackson = JsonUtil.writeValueAsStringSilent(chain.getTriggerEvent());
-            JsonUtil.checkReadability(triggerEventJackson, Payload.class);
         }
-        FlowChainLog chainLog = new FlowChainLog(chainType, flowChainId, parentFlowChainId, chainJson, chainJackson, flowTriggerUserCrn,
-                triggerEventJson, triggerEventJackson);
+        FlowChainLog chainLog = new FlowChainLog(chainType, flowChainId, parentFlowChainId, "{}", chainJackson, flowTriggerUserCrn,
+                "{}", triggerEventJackson);
         flowChainLogService.save(chainLog);
     }
 
@@ -249,17 +219,13 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     public void updateLastFlowLogPayload(FlowLog lastFlowLog, Payload payload, Map<Object, Object> variables) {
-        String payloadJson = JsonWriter.objectToJson(payload, writeOptions);
         String payloadJackson = JsonUtil.writeValueAsStringSilent(payload);
-        JsonUtil.checkReadability(payloadJackson, Payload.class);
-        String variablesJson = JsonWriter.objectToJson(variables, writeOptions);
         String variablesJackson = TypedJsonUtil.writeValueAsStringSilent(variables);
-        TypedJsonUtil.checkReadability(variablesJackson, Map.class);
         Optional.ofNullable(lastFlowLog)
                 .ifPresent(flowLog -> {
-                    flowLog.setPayload(payloadJson);
+                    flowLog.setPayload(null);
                     flowLog.setPayloadJackson(payloadJackson);
-                    flowLog.setVariables(variablesJson);
+                    flowLog.setVariables("{}");
                     flowLog.setVariablesJackson(variablesJackson);
                     flowLogRepository.save(flowLog);
                 });

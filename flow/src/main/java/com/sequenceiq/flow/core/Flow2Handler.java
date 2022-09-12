@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
@@ -508,12 +507,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                     .findFirst();
             try {
                 String flowChainType = flowChainLogService.getFlowChainType(flowLog.getFlowChainId());
-                Payload payload;
-                if (null != flowLog.getPayloadJackson()) {
-                    payload = JsonUtil.readValueWithJsonIoFallback(flowLog.getPayloadJackson(), flowLog.getPayload(), Payload.class);
-                } else {
-                    payload = (Payload) JsonReader.jsonToJava(flowLog.getPayload());
-                }
+                Payload payload = JsonUtil.readValue(flowLog.getPayloadJackson(), Payload.class);
                 Flow flow = flowConfig.get().createFlow(flowLog.getFlowId(), flowLog.getFlowChainId(), payload.getResourceId(), flowChainType);
                 runningFlows.put(flow, flowLog.getFlowChainId());
                 flowStatCache.put(flow.getFlowId(), flowLog.getFlowChainId(), payload.getResourceId(),
@@ -521,12 +515,8 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 if (flowLog.getFlowChainId() != null) {
                     flowChainHandler.restoreFlowChain(flowLog.getFlowChainId());
                 }
-                Map<Object, Object> variables;
-                if (null != flowLog.getVariablesJackson()) {
-                    variables = TypedJsonUtil.readValueWithJsonIoFallback(flowLog.getVariablesJackson(), flowLog.getVariables(), Map.class);
-                } else {
-                    variables = (Map<Object, Object>) JsonReader.jsonToJava(flowLog.getVariables());
-                }
+                @SuppressWarnings("unchecked")
+                Map<Object, Object> variables = (Map<Object, Object>) TypedJsonUtil.readValue(flowLog.getVariablesJackson(), Map.class);
                 flow.initialize(flowLog.getCurrentState(), variables);
                 RestartAction restartAction = flowConfig.get().getRestartAction(flowLog.getNextEvent());
                 if (restartAction != null) {

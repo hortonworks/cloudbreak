@@ -29,8 +29,6 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
@@ -45,7 +43,6 @@ import org.springframework.statemachine.access.StateMachineAccessor;
 import org.springframework.statemachine.config.StateMachineFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.cedarsoftware.util.io.JsonWriter;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
@@ -562,16 +559,12 @@ class Flow2HandlerTest {
         verify(flowLogService, times(1)).terminate(STACK_ID, FLOW_ID);
     }
 
-    @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = { false, true })
-    void testRestartFlow(boolean useJackson) throws TransactionExecutionException {
-        FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID, useJackson);
+    @Test
+    void testRestartFlow() throws TransactionExecutionException {
+        FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID);
         Payload payload = new TestPayload(STACK_ID);
         flowLog.setPayloadType(ClassValue.of(TestPayload.class));
-        flowLog.setPayload(JsonWriter.objectToJson(payload));
-        if (useJackson) {
-            flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(payload));
-        }
+        flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(payload));
         when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
 
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
@@ -598,16 +591,12 @@ class Flow2HandlerTest {
         assertEquals(FLOW_TRIGGER_USERCRN, flowParameters.getFlowTriggerUserCrn());
     }
 
-    @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = { false, true })
-    void testRestartFlowNoRestartAction(boolean useJackson) throws TransactionExecutionException {
-        FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID, useJackson);
+    @Test
+    void testRestartFlowNoRestartAction() throws TransactionExecutionException {
+        FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID);
         Payload payload = new TestPayload(STACK_ID);
         flowLog.setPayloadType(ClassValue.of(TestPayload.class));
-        flowLog.setPayload(JsonWriter.objectToJson(payload));
-        if (useJackson) {
-            flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(payload));
-        }
+        flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(payload));
         when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
 
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
@@ -624,16 +613,12 @@ class Flow2HandlerTest {
         verify(defaultRestartAction, never()).restart(any(), any(), any(), any());
     }
 
-    @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = { false, true })
-    void testRestartFlowNoRestartActionNoFlowChainId(boolean useJackson) throws TransactionExecutionException {
-        FlowLog flowLog = createFlowLog(null, useJackson);
+    @Test
+    void testRestartFlowNoRestartActionNoFlowChainId() throws TransactionExecutionException {
+        FlowLog flowLog = createFlowLog(null);
         Payload payload = new TestPayload(STACK_ID);
         flowLog.setPayloadType(ClassValue.of(TestPayload.class));
-        flowLog.setPayload(JsonWriter.objectToJson(payload));
-        if (useJackson) {
-            flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(payload));
-        }
+        flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(payload));
         when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
 
@@ -649,13 +634,10 @@ class Flow2HandlerTest {
         verify(defaultRestartAction, never()).restart(any(), any(), any(), any());
     }
 
-    private FlowLog createFlowLog(String flowChainId, boolean useJackson) {
+    private FlowLog createFlowLog(String flowChainId) {
         FlowLog flowLog = new FlowLog(STACK_ID, FLOW_ID, "START_STATE", true, StateStatus.SUCCESSFUL, OperationType.UNKNOWN);
         flowLog.setFlowType(ClassValue.of(HelloWorldFlowConfig.class));
-        flowLog.setVariables(JsonWriter.objectToJson(new HashMap<>()));
-        if (useJackson) {
-            flowLog.setVariablesJackson(TypedJsonUtil.writeValueAsStringSilent(new HashMap<>()));
-        }
+        flowLog.setVariablesJackson(TypedJsonUtil.writeValueAsStringSilent(new HashMap<>()));
         flowLog.setFlowChainId(flowChainId);
         flowLog.setNextEvent(NEXT_EVENT);
         flowLog.setFlowTriggerUserCrn(FLOW_TRIGGER_USERCRN);

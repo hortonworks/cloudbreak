@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cedarsoftware.util.io.JsonReader;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -133,12 +132,7 @@ public class InfoCollectorConclusionStep extends ConclusionStep {
         debugInfo.append("Flow chain steps: \n");
 
         try {
-            Queue<Selectable> queue;
-            if (null != flowChainLog.getChainJackson()) {
-                queue = TypedJsonUtil.readValueWithJsonIoFallback(flowChainLog.getChainJackson(), flowChainLog.getChain(), Queue.class);
-            } else {
-                queue = (Queue<Selectable>) JsonReader.jsonToJava(flowChainLog.getChain());
-            }
+            Queue<Selectable> queue = TypedJsonUtil.readValue(flowChainLog.getChainJackson(), Queue.class);
             if (queue != null) {
                 queue.stream().forEach(selectable -> appentFlowChainElementInfo(debugInfo, selectable));
             }

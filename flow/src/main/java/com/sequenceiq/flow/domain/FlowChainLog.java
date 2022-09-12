@@ -10,7 +10,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 
-import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 
@@ -98,12 +97,9 @@ public class FlowChainLog {
         return chain;
     }
 
+    @SuppressWarnings("unchecked")
     public Queue<Selectable> getChainAsQueue() {
-        if (null != chainJackson) {
-            return TypedJsonUtil.readValueWithJsonIoFallback(chainJackson, chain, Queue.class);
-        } else {
-            return (Queue<Selectable>) JsonReader.jsonToJava(chain);
-        }
+        return TypedJsonUtil.readValueUnchecked(chainJackson, Queue.class);
     }
 
     public void setChain(String chain) {
