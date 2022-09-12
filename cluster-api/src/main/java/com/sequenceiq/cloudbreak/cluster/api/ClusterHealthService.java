@@ -11,5 +11,7 @@ public interface ClusterHealthService {
 
     boolean isClusterManagerRunning();
 
+    boolean checkRMhealth(Optional<String> runtimeVersion);
+
     DetailedHostStatuses getDetailedHostStatuses(Optional<String> runtimeVersion);
 }

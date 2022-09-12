@@ -48,7 +48,8 @@ public class RecoveryCandidateCollectionService {
             Set<String> startedInstanceIdsOnCloudProvider) {
         ClusterHealthService clusterHealthService = clusterApiConnectors.getConnector(stack).clusterHealthService();
 
-        if (clusterHealthService.isClusterManagerRunning()) {
+        if (clusterHealthService.isClusterManagerRunning() &&
+                clusterHealthService.checkRMhealth(runtimeVersionService.getRuntimeVersion(stack.getCluster().getId()))) {
             List<InstanceMetadataView> startedInstancesMetadata = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(
                     stack.getAllAvailableInstances(),
                     hostGroupName,

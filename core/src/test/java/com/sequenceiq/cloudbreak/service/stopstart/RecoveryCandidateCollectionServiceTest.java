@@ -188,6 +188,7 @@ class RecoveryCandidateCollectionServiceTest {
         doReturn(Boolean.TRUE).when(clusterHealthService).isClusterManagerRunning();
         doReturn(detailedHostStatuses).when(clusterHealthService).getDetailedHostStatuses(any(Optional.class));
         doReturn(allInstancesInHg).when(stack).getAllAvailableInstances();
+        doReturn(Boolean.TRUE).when(clusterHealthService).checkRMhealth(any(Optional.class));
         doReturn(runningInstances).when(cloudInstanceIdToInstanceMetaDataConverter).getNotDeletedAndNotZombieInstances(
                 anyList(), anyString(), anySet());
     }

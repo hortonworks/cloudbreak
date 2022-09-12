@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -70,6 +71,8 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
 
     private StackDtoDelegate stack;
 
+    private DetailedHostStatuses detailedHostStatuses = null;
+
     private ApiClient apiClient;
 
     private HttpClientConfig httpClientConfig;
@@ -92,6 +95,27 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
     }
 
     @Override
+    public boolean checkRMhealth(Optional<String> runtimeVersion) {
+        detailedHostStatuses = getDetailedHostStatuses(runtimeVersion);
+        Map<HostName, Optional<DetailedServicesHealthCheck>> health = detailedHostStatuses.getServicesHealth();
+        Iterator hm = health.entrySet().iterator();
+        //I am working on removing this while loop.
+        while (hm.hasNext()) {
+            Map.Entry mapElement = (Map.Entry) hm.next();
+            String str = mapElement.getKey().toString();
+            if (str.contains("master")) {
+                DetailedServicesHealthCheck detailedServicesHealthCheck = health.get(mapElement.getKey()).get();
+                Set<String> servicesName = detailedServicesHealthCheck.getServicesWithBadHealth();
+                boolean checkForYarn = servicesName.contains("yarn");
+                if (checkForYarn) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
     public boolean isClusterManagerRunning() {
         try {
             clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient).getVersion();
@@ -104,24 +128,29 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
 
     @Override
     public DetailedHostStatuses getDetailedHostStatuses(Optional<String> runtimeVersion) {
-        List<ApiHost> apiHosts = getHostsFromCM();
-        Map<HostName, Optional<DetailedHostHealthCheck>> hostsHealth = apiHosts.stream().collect(Collectors.toMap(
-                apiHost -> hostName(apiHost.getHostname()),
-                ClouderaManagerClusterHealthService::getDetailedHostHealthCheck));
+        if(detailedHostStatuses != null) {
+            List<ApiHost> apiHosts = getHostsFromCM();
+            Map<HostName, Optional<DetailedHostHealthCheck>> hostsHealth = apiHosts.stream().collect(Collectors.toMap(
+                    apiHost -> hostName(apiHost.getHostname()),
+                    ClouderaManagerClusterHealthService::getDetailedHostHealthCheck));
 
-        Map<HostName, Optional<DetailedServicesHealthCheck>> servicesHealth = apiHosts.stream().collect(Collectors.toMap(
-                apiHost -> hostName(apiHost.getHostname()),
-                apiHost -> getDetailedServicesHealthCheck(apiHost, runtimeVersion)));
+            Map<HostName, Optional<DetailedServicesHealthCheck>> servicesHealth = apiHosts.stream().collect(Collectors.toMap(
+                    apiHost -> hostName(apiHost.getHostname()),
+                    apiHost -> getDetailedServicesHealthCheck(apiHost, runtimeVersion)));
 
-        Map<HostName, Optional<DetailedCertHealthCheck>>  certHealth = apiHosts.stream().collect(Collectors.toMap(
-                apiHost -> hostName(apiHost.getHostname()),
-                ClouderaManagerClusterHealthService::getDetailedCertificateCheck));
+            Map<HostName, Optional<DetailedCertHealthCheck>> certHealth = apiHosts.stream().collect(Collectors.toMap(
+                    apiHost -> hostName(apiHost.getHostname()),
+                    ClouderaManagerClusterHealthService::getDetailedCertificateCheck));
 
-        DetailedHostStatuses detailedHostStatuses = new DetailedHostStatuses(hostsHealth, servicesHealth, certHealth);
+            DetailedHostStatuses detailedHostStatuses = new DetailedHostStatuses(hostsHealth, servicesHealth, certHealth);
 
-        LOGGER.debug("Creating 'DetailedHostStatuses' with {}", detailedHostStatuses);
+            LOGGER.debug("Creating 'DetailedHostStatuses' with {}", detailedHostStatuses);
 
-        return detailedHostStatuses;
+            return detailedHostStatuses;
+        }
+        else {
+            return detailedHostStatuses;
+        }
     }
 
     private List<ApiHost> getHostsFromCM() {
