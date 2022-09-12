@@ -74,6 +74,7 @@ allprojects {
   blacklist {
     flag {
       block group: 'org.powermock'
+      block group: 'com.cedarsoftware', name: 'json-io'
     }
   }
 

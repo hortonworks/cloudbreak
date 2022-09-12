@@ -19,11 +19,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cedarsoftware.util.io.JsonWriter;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -65,14 +65,14 @@ class InfoCollectorConclusionStepTest {
     @Test
     public void testCollectDebugInfo() {
         when(flowLogDBService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(eq(STACK_ID))).thenReturn(List.of(
-                new FlowLog(STACK_ID, FLOW_ID, FLOW_CHAIN_ID, "user", "NEXT_EVENT", "payload", "payloadJackson",
-                        ClassValue.ofUnknown("PayloadType"), "variables", null, ClassValue.ofUnknown("FlowType"), "CURRENT_STATE")
+                new FlowLog(STACK_ID, FLOW_ID, FLOW_CHAIN_ID, "user", "NEXT_EVENT", "payloadJackson",
+                        ClassValue.ofUnknown("PayloadType"), "variables", ClassValue.ofUnknown("FlowType"), "CURRENT_STATE")
         ));
         Queue<Selectable> queue = new LinkedBlockingQueue<>();
         queue.add(new StackAndClusterUpscaleTriggerEvent("selector", STACK_ID, new HashMap<>(), ScalingType.UPSCALE_TOGETHER, null, null, null));
-        String chain = JsonWriter.objectToJson(queue);
-        FlowChainLog flowChainLog = new FlowChainLog("flowChainType", FLOW_CHAIN_ID, "parentFLowChainId", chain, null,
-                "user", "triggerEvent", null);
+        String chainJackson = JsonUtil.writeValueAsStringSilent(queue);
+        FlowChainLog flowChainLog = new FlowChainLog("flowChainType", FLOW_CHAIN_ID, "parentFLowChainId", chainJackson,
+                "user", "triggerEvent");
         when(flowChainLogService.findByFlowChainIdOrderByCreatedDesc(eq(FLOW_CHAIN_ID))).thenReturn(List.of(flowChainLog));
         when(flowChainLogService.getRelatedFlowChainLogs(anyList())).thenReturn(List.of(flowChainLog));
         when(stackStatusService.findAllStackStatusesById(eq(STACK_ID), anyLong())).thenReturn(List.of(

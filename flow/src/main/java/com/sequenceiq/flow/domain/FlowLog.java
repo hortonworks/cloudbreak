@@ -37,16 +37,10 @@ public class FlowLog {
     private String nextEvent;
 
     @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT")
-    private String payload;
-
-    @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT")
     private String payloadJackson;
 
     @Convert(converter = ClassValueConverter.class)
     private ClassValue payloadType;
-
-    @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT")
-    private String variables;
 
     @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT")
     private String variablesJackson;
@@ -101,10 +95,8 @@ public class FlowLog {
             String flowChainId,
             String flowTriggerUserCrn,
             String nextEvent,
-            String payload,
             String payloadJackson,
             ClassValue payloadType,
-            String variables,
             String variablesJackson,
             ClassValue flowType,
             String currentState) {
@@ -113,10 +105,8 @@ public class FlowLog {
         this.flowChainId = flowChainId;
         this.flowTriggerUserCrn = flowTriggerUserCrn;
         this.nextEvent = nextEvent;
-        this.payload = payload;
         this.payloadJackson = payloadJackson;
         this.payloadType = payloadType;
-        this.variables = variables;
         this.variablesJackson = variablesJackson;
         this.flowType = flowType;
         this.currentState = currentState;
@@ -128,16 +118,14 @@ public class FlowLog {
             String flowChainId,
             String flowTriggerUserCrn,
             String nextEvent,
-            String payload,
             String payloadJackson,
             ClassValue payloadType,
-            String variables,
             String variablesJackson,
             ClassValue flowType,
             String currentState,
             Long endTime) {
-        this(resourceId, flowId, flowChainId, flowTriggerUserCrn, nextEvent, payload,
-                payloadJackson, payloadType, variables, variablesJackson, flowType, currentState);
+        this(resourceId, flowId, flowChainId, flowTriggerUserCrn, nextEvent,
+                payloadJackson, payloadType, variablesJackson, flowType, currentState);
         this.endTime = endTime;
     }
 
@@ -189,14 +177,6 @@ public class FlowLog {
         this.nextEvent = nextEvent;
     }
 
-    public String getPayload() {
-        return payload;
-    }
-
-    public void setPayload(String payload) {
-        this.payload = payload;
-    }
-
     public ClassValue getPayloadType() {
         return payloadType;
     }
@@ -211,10 +191,6 @@ public class FlowLog {
 
     public void setFlowType(ClassValue flowType) {
         this.flowType = flowType;
-    }
-
-    public String getVariables() {
-        return variables;
     }
 
     public String getCurrentState() {
@@ -239,10 +215,6 @@ public class FlowLog {
 
     public void setCloudbreakNodeId(String cloudbreakNodeId) {
         this.cloudbreakNodeId = cloudbreakNodeId;
-    }
-
-    public void setVariables(String variables) {
-        this.variables = variables;
     }
 
     public Long getVersion() {
