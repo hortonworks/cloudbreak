@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.migration.handler;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,6 +11,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.cloudformation.model.AmazonCloudFormationException;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.StackResource;
@@ -33,11 +35,7 @@ public class AwsMigrationUtil {
     public boolean allInstancesDeletedFromCloudFormation(AuthenticatedContext ac, CloudResource cloudResource) {
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AwsCredentialView awsCredential = new AwsCredentialView(ac.getCloudCredential());
-        DescribeStackResourcesResult describeStackResourcesResult = awsClient.createCloudFormationClient(awsCredential, regionName)
-                .describeStackResources(new DescribeStackResourcesRequest().withStackName(cloudResource.getName()));
-        List<StackResource> asGroups = describeStackResourcesResult.getStackResources().stream()
-                .filter(it -> "AWS::AutoScaling::AutoScalingGroup".equals(it.getResourceType()))
-                .collect(Collectors.toList());
+        List<StackResource> asGroups = getStackResourceIfCfExists(ac, cloudResource);
         LOGGER.debug("AutoScalingGroup fetched: {}", asGroups);
         boolean empty = true;
         int i = 0;
@@ -49,5 +47,27 @@ public class AwsMigrationUtil {
             i++;
         }
         return empty;
+    }
+
+    private List<StackResource> getStackResourceIfCfExists(AuthenticatedContext ac, CloudResource cloudResource) {
+        String regionName = ac.getCloudContext().getLocation().getRegion().value();
+        AwsCredentialView awsCredential = new AwsCredentialView(ac.getCloudCredential());
+        List<StackResource> asGroups = new ArrayList<>();
+        String stackName = cloudResource.getName();
+        try {
+            DescribeStackResourcesResult describeStackResourcesResult = awsClient.createCloudFormationClient(awsCredential, regionName)
+                    .describeStackResources(new DescribeStackResourcesRequest().withStackName(stackName));
+            asGroups = describeStackResourcesResult.getStackResources().stream()
+                    .filter(it -> "AWS::AutoScaling::AutoScalingGroup".equals(it.getResourceType()))
+                    .collect(Collectors.toList());
+        } catch (AmazonCloudFormationException e) {
+            if (e.getErrorMessage().contains(stackName + " does not exist")) {
+                LOGGER.info("CloudFormation resource does not found: {}", e.getMessage());
+            } else {
+                LOGGER.error("Cannot describe stack resources: {}", e.getMessage(), e);
+                throw e;
+            }
+        }
+        return asGroups;
     }
 }
