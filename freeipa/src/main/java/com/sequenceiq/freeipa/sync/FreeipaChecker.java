@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
@@ -79,8 +80,11 @@ public class FreeipaChecker {
             } else {
                 status = DetailedStackStatus.UNHEALTHY;
             }
-
-            return new SyncResult("FreeIpa is " + status + ", " + statusCheckPair.getSecond(), status, statusCheckPair.getFirst());
+            String statusReason = "FreeIpa is " + status;
+            if (StringUtils.isNotBlank(statusCheckPair.getSecond())) {
+                statusReason += ", " + statusCheckPair.getSecond();
+            }
+            return new SyncResult(statusReason, status, statusCheckPair.getFirst());
         } catch (Exception e) {
             LOGGER.info("Error occurred during status fetch: " + e.getMessage(), e);
             return new SyncResult("FreeIpa is unreachable, because error occurred: " + e.getMessage(), DetailedStackStatus.UNREACHABLE, null);
