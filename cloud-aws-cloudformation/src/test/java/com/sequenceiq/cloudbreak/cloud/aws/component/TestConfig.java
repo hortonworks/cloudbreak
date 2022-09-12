@@ -41,7 +41,8 @@ import io.opentracing.Tracer;
 @TestConfiguration
 @ComponentScan(basePackages = {
         "com.sequenceiq.cloudbreak.cloud.aws",
-        "com.sequenceiq.cloudbreak.cloud.template"})
+        "com.sequenceiq.cloudbreak.cloud.template",
+        "com.sequenceiq.cloudbreak.polling"})
 @Import(ComponentTestUtil.class)
 @TestPropertySource(properties = {
         "cb.max.aws.resource.name.length=200",
