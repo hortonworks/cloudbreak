@@ -26,6 +26,8 @@ public class RestClientUtil {
 
     private static final int CONNECT_TIMEOUT_MS = 20_000;
 
+    private static final int READ_TIMEOUT_MS = 60_000;
+
     private static final Map<ConfigKey, Client> CLIENTS = new ConcurrentHashMap<>();
 
     private RestClientUtil() {
@@ -72,7 +74,7 @@ public class RestClientUtil {
         ClientConfig config = new ClientConfig();
         config.property(ClientProperties.FOLLOW_REDIRECTS, "false");
         config.property(ClientProperties.CONNECT_TIMEOUT, connectionTimeout);
-        readTimeout.ifPresent(rt -> config.property(ClientProperties.READ_TIMEOUT, rt));
+        config.property(ClientProperties.READ_TIMEOUT, readTimeout.orElse(READ_TIMEOUT_MS));
         config.register(MultiPartFeature.class);
         config.register(RequestIdProviderFeature.class);
         config.register(EncodingFilter.class);
@@ -94,7 +96,7 @@ public class RestClientUtil {
         ClientConfig config = new ClientConfig();
         config.property(ClientProperties.FOLLOW_REDIRECTS, "false");
         config.property(ClientProperties.CONNECT_TIMEOUT, configKey.getTimeout().orElse(CONNECT_TIMEOUT_MS));
-        configKey.getTimeout().ifPresent(rt -> config.property(ClientProperties.READ_TIMEOUT, rt));
+        config.property(ClientProperties.READ_TIMEOUT, configKey.getTimeout().orElse(READ_TIMEOUT_MS));
         config.register(MultiPartFeature.class);
         config.register(RequestIdProviderFeature.class);
 
