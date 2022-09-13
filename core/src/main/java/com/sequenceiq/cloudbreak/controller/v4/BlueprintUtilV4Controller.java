@@ -71,10 +71,12 @@ public class BlueprintUtilV4Controller extends NotificationController implements
     @Override
     @Deprecated
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL)
-    public RecommendationV4Response createRecommendation(Long workspaceId, String blueprintName, @ResourceName String credentialName,
-            String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
+    public RecommendationV4Response createRecommendation(Long workspaceId, String definitionName, String blueprintName,
+            @ResourceName String credentialName, String region, String platformVariant, String availabilityZone,
+            CdpResourceType cdpResourceType) {
         return blueprintService.getRecommendation(
                 threadLocalService.getRequestedWorkspaceId(),
+                definitionName,
                 blueprintName,
                 credentialName,
                 region,
@@ -85,11 +87,12 @@ public class BlueprintUtilV4Controller extends NotificationController implements
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL)
-    public RecommendationV4Response createRecommendationByCredCrn(Long workspaceId, String blueprintName,
+    public RecommendationV4Response createRecommendationByCredCrn(Long workspaceId, String definitionName, String blueprintName,
             @TenantAwareParam @ResourceCrn String credentialCrn, @NotEmpty String region, String platformVariant,
             String availabilityZone, CdpResourceType resourceType) {
         return blueprintService.getRecommendationByCredentialCrn(
                 threadLocalService.getRequestedWorkspaceId(),
+                definitionName,
                 blueprintName,
                 credentialCrn,
                 region,
@@ -100,11 +103,12 @@ public class BlueprintUtilV4Controller extends NotificationController implements
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public RecommendationV4Response createRecommendationByEnvCrn(Long workspaceId, String blueprintName,
+    public RecommendationV4Response createRecommendationByEnvCrn(Long workspaceId, String definitionName, String blueprintName,
             @TenantAwareParam @ResourceCrn String environmentCrn, @NotEmpty String region, String platformVariant,
             String availabilityZone, CdpResourceType resourceType) {
         return blueprintService.getRecommendationByEnvironmentCrn(
                 threadLocalService.getRequestedWorkspaceId(),
+                definitionName,
                 blueprintName,
                 environmentCrn,
                 region,
