@@ -3,11 +3,14 @@ package com.sequenceiq.cloudbreak.service.cost;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.common.cost.RealTimeCost;
+import com.sequenceiq.cloudbreak.service.cost.co2.CarbonCalculatorService;
 
 @Service
 public class ClusterCostService {
@@ -16,7 +19,8 @@ public class ClusterCostService {
 
     private static final double MAGIC_CLOUDERA_COST = 1.3;
 
-    private static final double MAGIC_CO2 = 122.1;
+    @Inject
+    private CarbonCalculatorService carbonCalculatorService;
 
     public List<RealTimeCost> getCosts(StackViewV4Responses responses) {
         List<RealTimeCost> realTimeCosts = new ArrayList<>();
@@ -28,7 +32,7 @@ public class ClusterCostService {
             realTimeCost.setResourceCrn(stack.getCrn());
             realTimeCost.setHourlyProviderUsd(MAGIC_PROVIDER_COST);
             realTimeCost.setHourlyClouderaUsd(MAGIC_CLOUDERA_COST);
-            realTimeCost.setHourlyCO2(MAGIC_CO2);
+            realTimeCost.setHourlyCO2(carbonCalculatorService.getHourlyCarbonFootPrintByCrn(stack.getCrn()));
             realTimeCosts.add(realTimeCost);
         }
         return realTimeCosts;
