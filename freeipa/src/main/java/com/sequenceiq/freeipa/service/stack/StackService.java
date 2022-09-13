@@ -147,6 +147,10 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
         }
     }
 
+    public List<Stack> getMultipleDistinctByEnvironmentCrnsAndAccountIdWithList(Collection<String> environmentCrns, String accountId) {
+        return stackRepository.findMultipleDistinctByEnvironmentCrnsAndAccountIdWithList(environmentCrns, accountId);
+    }
+
     public List<Stack> findAllByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
         return stackRepository.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
     }

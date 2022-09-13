@@ -371,15 +371,15 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "FROM Stack s "
             + "WHERE s.workspace.id = :id AND s.terminated = null "
             + "AND s.environmentCrn = :environmentCrn "
-            + "AND (s.type IS null OR s.type = :stackType)")
+            + "AND (s.type IS null OR s.type = :stackTypes)")
     List<ResourceWithId> getAsAuthorizationResourcesByEnvCrn(@Param("id") Long id, @Param("environmentCrn") String environmentCrn,
-            @Param("stackType") StackType stackType);
+            @Param("stackTypes") List<StackType> stackTypes);
 
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(s.id, s.resourceCrn, s.environmentCrn) "
             + "FROM Stack s "
             + "WHERE s.workspace.id = :id AND s.terminated = null "
-            + "AND (s.type IS null OR s.type = :stackType)")
-    List<ResourceWithId> getAsAuthorizationResources(@Param("id") Long id, @Param("stackType") StackType stackType);
+            + "AND (s.type IS null OR s.type = :stackTypes)")
+    List<ResourceWithId> getAsAuthorizationResources(@Param("id") Long id, @Param("stackTypes") List<StackType> stackTypes);
 
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(s.id, s.resourceCrn, s.environmentCrn) "
             + "FROM Stack s "

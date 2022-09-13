@@ -29,6 +29,8 @@ public class DataHubFiltering extends AbstractAuthorizationFiltering<StackViewV4
 
     public static final String ENV_CRN = "ENV_CRN";
 
+    private static final List<StackType> STACK_TYPES = List.of(StackType.WORKLOAD);
+
     @Inject
     private StackOperations stackOperations;
 
@@ -53,9 +55,9 @@ public class DataHubFiltering extends AbstractAuthorizationFiltering<StackViewV4
         Optional<String> envCrn = resolveEnvCrn(args);
         Long workspaceId = workspaceService.getForCurrentUser().getId();
         if (envCrn.isPresent()) {
-            return stackService.getAsAuthorizationResourcesByEnvCrn(workspaceId, envCrn.get(), StackType.WORKLOAD);
+            return stackService.getAsAuthorizationResourcesByEnvCrn(workspaceId, envCrn.get(), STACK_TYPES);
         } else {
-            return stackService.getAsAuthorizationResources(workspaceId, StackType.WORKLOAD);
+            return stackService.getAsAuthorizationResources(workspaceId, STACK_TYPES);
         }
     }
 
@@ -63,16 +65,15 @@ public class DataHubFiltering extends AbstractAuthorizationFiltering<StackViewV4
     protected StackViewV4Responses filterByIds(List<Long> authorizedResourceIds, Map<String, Object> args) {
         Optional<String> envCrn = resolveEnvCrn(args);
         Long workspaceId = workspaceService.getForCurrentUser().getId();
-        return stackOperations.listByStackIds(workspaceId, authorizedResourceIds, envCrn.orElse(null), List.of(StackType.WORKLOAD));
+        return stackOperations.listByStackIds(workspaceId, authorizedResourceIds, envCrn.orElse(null), STACK_TYPES);
     }
 
     @Override
     protected StackViewV4Responses getAll(Map<String, Object> args) {
-        List<StackType> stackTypes = List.of(StackType.WORKLOAD);
         String envName = getEnvName(args);
         return Strings.isNullOrEmpty(envName)
-                ? stackOperations.listByEnvironmentCrn(workspaceService.getForCurrentUser().getId(), getEnvCrn(args), stackTypes)
-                : stackOperations.listByEnvironmentName(workspaceService.getForCurrentUser().getId(), envName, stackTypes);
+                ? stackOperations.listByEnvironmentCrn(workspaceService.getForCurrentUser().getId(), getEnvCrn(args), STACK_TYPES)
+                : stackOperations.listByEnvironmentName(workspaceService.getForCurrentUser().getId(), envName, STACK_TYPES);
     }
 
     private Optional<String> resolveEnvCrn(Map<String, Object> args) {

@@ -41,6 +41,9 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.id= :id ")
     Optional<Stack> findOneWithLists(@Param("id") Long id);
 
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.resourceCrn = :resourceCrn")
+    Optional<Stack> findOneWithListsByResourceCrn(@Param("resourceCrn") String resourceCrn);
+
     @Query("SELECT s FROM Stack s "
             + "LEFT JOIN FETCH s.instanceGroups ig "
             + "LEFT JOIN FETCH ig.instanceMetaData "
@@ -79,6 +82,14 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Query("SELECT s FROM Stack s LEFT JOIN ChildEnvironment c ON c.stack.id = s.id WHERE s.accountId = :accountId "
             + "AND (s.environmentCrn IN :environmentCrns OR c.environmentCrn IN :environmentCrns) AND s.terminated = -1")
     List<Stack> findMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(
+            @Param("environmentCrns") Collection<String> environmentCrns,
+            @Param("accountId") String accountId);
+
+    @Query("SELECT DISTINCT s FROM Stack s "
+            + "LEFT JOIN FETCH s.instanceGroups ig "
+            + "LEFT JOIN FETCH ig.instanceMetaData "
+            + "WHERE s.accountId = :accountId AND s.environmentCrn IN :environmentCrns AND s.terminated = -1")
+    List<Stack> findMultipleDistinctByEnvironmentCrnsAndAccountIdWithList(
             @Param("environmentCrns") Collection<String> environmentCrns,
             @Param("accountId") String accountId);
 

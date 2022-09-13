@@ -239,6 +239,11 @@ public interface InstanceMetaDataRepository extends JpaRepository<InstanceMetaDa
             + "GROUP BY s.id")
     StackInstanceCount countByStackId(@Param("stackId") Long stackId);
 
+    @Query("SELECT COUNT(i) as instanceCount "
+            + "FROM InstanceMetaData i "
+            + "WHERE i.instanceStatus <> 'TERMINATED' AND i.instanceGroup.id = :instanceGroupId")
+    int countByInstanceGroupId(@Param("instanceGroupId") Long instanceGroupId);
+
     @Query("SELECT s.id as stackId, COUNT(i) as instanceCount "
             + "FROM InstanceMetaData i JOIN i.instanceGroup ig JOIN ig.stack s WHERE s.workspace.id= :id AND i.instanceStatus = 'SERVICES_UNHEALTHY' "
             + "GROUP BY s.id")
