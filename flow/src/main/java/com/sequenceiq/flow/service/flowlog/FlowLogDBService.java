@@ -41,6 +41,7 @@ import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -340,6 +341,17 @@ public class FlowLogDBService implements FlowLogService {
     @Override
     public List<FlowLog> findAllByFlowIdOrderByCreatedDesc(String flowId) {
         return flowLogRepository.findAllByFlowIdOrderByCreatedDesc(flowId);
+    }
+
+    public boolean isFlowConfigAlreadyRunning(Long id, Class<? extends FlowConfiguration<?>> flowConfigurationClass) {
+        Optional<FlowLog> lastFlowLog = getLastFlowLog(id);
+        boolean running = false;
+        if (lastFlowLog.isPresent()) {
+            FlowLog flowLog = lastFlowLog.get();
+            running = flowLog.getFlowType().getClassValue().equals(flowConfigurationClass)
+                    && flowLog.getStateStatus() == StateStatus.PENDING;
+        }
+        return running;
     }
 
     public Long getResourceIdByCrnOrName(String resource) {

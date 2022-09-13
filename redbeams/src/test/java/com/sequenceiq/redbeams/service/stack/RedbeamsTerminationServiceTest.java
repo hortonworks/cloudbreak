@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.service.stack;
 
+import static com.sequenceiq.redbeams.api.model.common.Status.DELETE_COMPLETED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -16,8 +17,6 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
@@ -25,8 +24,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
@@ -37,6 +37,7 @@ import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationEvent;
+import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationFlowConfig;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,6 +75,9 @@ class RedbeamsTerminationServiceTest {
 
     @Mock
     private FlowCancelService cancelService;
+
+    @Mock
+    private FlowLogService flowLogService;
 
     @InjectMocks
     private RedbeamsTerminationService underTest;
@@ -136,11 +140,10 @@ class RedbeamsTerminationServiceTest {
         verifyTermination(1L);
     }
 
-    @ParameterizedTest
-    @EnumSource(value = Status.class, names = {"DELETE_REQUESTED", "PRE_DELETE_IN_PROGRESS", "DELETE_IN_PROGRESS", "DELETE_COMPLETED"})
-    void testTerminateWhenTerminationIsInOneOfTheStatesAndArchivedShouldNotCallTermination(Status status) {
+    @Test
+    void testTerminateWhenTerminationIsDeleteCompletedAndArchivedShouldNotCallTermination() {
         when(databaseServerConfigService.getByCrn(SERVER_CRN_STRING)).thenReturn(server);
-        dbStack.getDbStackStatus().setStatus(status);
+        dbStack.getDbStackStatus().setStatus(DELETE_COMPLETED);
         server.setArchived(true);
         when(dbStackService.getByCrn(SERVER_CRN_STRING)).thenReturn(dbStack);
 
@@ -153,28 +156,10 @@ class RedbeamsTerminationServiceTest {
         verify(flowManager, never()).notify(eq(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector()), any());
     }
 
-    @ParameterizedTest
-    @EnumSource(value = Status.class, names = {"DELETE_REQUESTED", "PRE_DELETE_IN_PROGRESS", "DELETE_IN_PROGRESS"})
-    void testTerminateWhenTerminationIsInOneOfTheStatesAndNOTArchivedShouldNotCallTermination(Status status) {
+    @Test
+    void testTerminateWhenTerminationIsDeletedCompletedAndNOTArchivedShouldCallTermination() {
         when(databaseServerConfigService.getByCrn(SERVER_CRN_STRING)).thenReturn(server);
-        dbStack.getDbStackStatus().setStatus(status);
-        server.setArchived(false);
-        when(dbStackService.getByCrn(SERVER_CRN_STRING)).thenReturn(dbStack);
-
-        DatabaseServerConfig terminatingServer = underTest.terminateByCrn(SERVER_CRN_STRING, true);
-
-        assertEquals(server, terminatingServer);
-
-        verify(dbStackStatusUpdater, never()).updateStatus(anyLong(), any());
-        verify(cancelService, never()).cancelRunningFlows(1L);
-        verify(flowManager, never()).notify(eq(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector()), any());
-    }
-
-    @ParameterizedTest
-    @EnumSource(value = Status.class, names = {"DELETE_COMPLETED"})
-    void testTerminateWhenTerminationIsInOneOfTheStatesAndNOTArchivedShouldCallTermination(Status status) {
-        when(databaseServerConfigService.getByCrn(SERVER_CRN_STRING)).thenReturn(server);
-        dbStack.getDbStackStatus().setStatus(status);
+        dbStack.getDbStackStatus().setStatus(DELETE_COMPLETED);
         server.setArchived(false);
         when(dbStackService.getByCrn(SERVER_CRN_STRING)).thenReturn(dbStack);
 
@@ -185,6 +170,23 @@ class RedbeamsTerminationServiceTest {
         verify(dbStackStatusUpdater).updateStatus(anyLong(), any());
         verify(cancelService).cancelRunningFlows(1L);
         verify(flowManager).notify(eq(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector()), any());
+    }
+
+    @Test
+    void testTerminateWhenTerminationTerminationFlowIsRunningAndIsDeletedCompletedAndNotArchivedShouldNotCallTermination() {
+        when(databaseServerConfigService.getByCrn(SERVER_CRN_STRING)).thenReturn(server);
+        dbStack.getDbStackStatus().setStatus(DELETE_COMPLETED);
+        server.setArchived(false);
+        when(flowLogService.isFlowConfigAlreadyRunning(1L, RedbeamsTerminationFlowConfig.class)).thenReturn(true);
+        when(dbStackService.getByCrn(SERVER_CRN_STRING)).thenReturn(dbStack);
+
+        DatabaseServerConfig terminatingServer = underTest.terminateByCrn(SERVER_CRN_STRING, true);
+
+        assertEquals(server, terminatingServer);
+
+        verify(dbStackStatusUpdater, never()).updateStatus(anyLong(), any());
+        verify(cancelService, never()).cancelRunningFlows(1L);
+        verify(flowManager, never()).notify(eq(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector()), any());
     }
 
     @Test
