@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 
@@ -174,6 +175,30 @@ class ClusterTemplateV4RequestToClusterTemplateConverterTest {
 
         assertNotNull(result);
         assertEquals(DatalakeRequired.OPTIONAL, result.getDatalakeRequired());
+    }
+
+    @Test
+    void testGatewayGroupWhenNotPresented() {
+        ClusterTemplateV4Request clusterTemplateV4RequestForAws = ClusterTemplateTestUtil.createClusterTemplateV4RequestForAws();
+        clusterTemplateV4RequestForAws.getDistroXTemplate().getInstanceGroups()
+                .stream()
+                .forEach(ig -> ig.setType(InstanceGroupType.CORE));
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.convert(clusterTemplateV4RequestForAws));
+        assertEquals(badRequestException.getMessage(),
+                "You must specify one instance group with 'GATEWAY' type which will include the Cloudera Manager server.");
+    }
+
+    @Test
+    void testGatewayGroupWhenMultiplePresented() {
+        ClusterTemplateV4Request clusterTemplateV4RequestForAws = ClusterTemplateTestUtil.createClusterTemplateV4RequestForAws();
+        clusterTemplateV4RequestForAws.getDistroXTemplate().getInstanceGroups()
+                .stream()
+                .forEach(ig -> ig.setType(InstanceGroupType.GATEWAY));
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.convert(clusterTemplateV4RequestForAws));
+        assertEquals(badRequestException.getMessage(),
+                "You must specify only one instance group with 'GATEWAY' type which will include the Cloudera Manager server.");
     }
 
     @Test
