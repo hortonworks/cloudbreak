@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.flow.dr.validation.event;
 
+import java.util.Collections;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -27,14 +28,14 @@ public class DatalakeTriggerBackupValidationEvent extends DatalakeDatabaseDrStar
             @JsonProperty("backupLocation") String backupLocation,
             @JsonProperty("reason") DatalakeBackupFailureReason reason,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
-        super(selector, sdxId, userId, SdxOperationType.BACKUP, accepted);
+        super(selector, sdxId, userId, SdxOperationType.BACKUP, Collections.emptyList(), accepted);
         this.backupLocation = backupLocation;
         this.reason = reason;
     }
 
     public DatalakeTriggerBackupValidationEvent(String selector, Long sdxId, String userId, String backupLocation,
             DatalakeBackupFailureReason reason) {
-        super(selector, sdxId, userId, SdxOperationType.BACKUP);
+        super(selector, sdxId, userId, SdxOperationType.BACKUP, Collections.emptyList());
         this.backupLocation = backupLocation;
         this.reason = reason;
     }
