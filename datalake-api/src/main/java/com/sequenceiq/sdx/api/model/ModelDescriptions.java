@@ -12,6 +12,8 @@ public class ModelDescriptions {
 
     public static final String CLOSE_CONNECTIONS = "The conditional parameter for whether connections to the database will be closed during backup or not.";
 
+    public static final String SKIP_DATABASE_NAMES = "The names of the Databases not to be backed up, or blank for all";
+
     public static final String ENVIRONMENT_CRN = "Environment crn.";
 
     public static final String ENVIRONMENT_NAME = "The name of the environment.";

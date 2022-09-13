@@ -78,7 +78,7 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
             ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, cluster.getId());
             String rangerAdminGroup = rangerVirtualGroupService.getRangerVirtualGroup(stack);
             SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), rangerAdminGroup,
-                    request.isCloseConnections(), stack);
+                    request.isCloseConnections(), request.getSkipDatabaseNames(), stack);
             hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel);
 
             result = new DatabaseBackupSuccess(stackId);

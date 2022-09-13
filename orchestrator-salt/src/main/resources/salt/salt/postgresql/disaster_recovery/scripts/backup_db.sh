@@ -16,7 +16,7 @@ if [[ $# -lt 6 || $# -gt 7 || "$1" == "None" ]]; then
   echo "  4. PostgreSQL user name."
   echo "  5. Ranger admin group."
   echo "  6. Whether or not to close connections for the database while it is being backed up."
-  echo "  7. (optional) Name of the database to backup. If not given, will backup ranger and hive databases."
+  echo "  7. (optional) Name of the databases to backup. If not given, will backup ranger and hive databases."
   exit 1
 fi
 
@@ -26,7 +26,7 @@ PORT="$3"
 USERNAME="$4"
 RANGERGROUP="$5"
 CLOSECONNECTIONS="$6"
-DATABASENAME="${7-}"
+DATABASENAMES="${@: 7}"
 LOGFILE=/var/log/dl_postgres_backup.log
 echo "Logs at ${LOGFILE}"
 
@@ -169,15 +169,17 @@ run_backup() {
 
   doLog "INFO Conditional variable for closing connections to database during backup is set to ${CLOSECONNECTIONS}"
 
-  if [[ -z "$DATABASENAME" ]]; then
+  if [[ -z "$DATABASENAMES" ]]; then
     doLog "INFO No database name provided. Will backup hive, ranger, profiler_agent and profiler_metric databases."
     backup_database_for_service "hive"
     backup_database_for_service "ranger"
     backup_database_for_service "profiler_agent"
     backup_database_for_service "profiler_metric"
   else
-    doLog "INFO Backing up ${DATABASENAME}."
-    backup_database_for_service "${DATABASENAME}"
+    for db in $DATABASENAMES; do
+      doLog "INFO Backing up ${db}."
+      backup_database_for_service "${db}"
+    done
   fi
 
   rmdir -v "$DATE_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
