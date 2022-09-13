@@ -8,6 +8,7 @@ import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAK
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_TRIGGER_RESTORE_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 
+import java.util.Collections;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -46,7 +47,7 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
             chain.add(new DatalakeTriggerBackupEvent(DATALAKE_TRIGGER_BACKUP_EVENT.event(),
                     event.getResourceId(), event.getUserId(), event.getBackupLocation(), "resize" + System.currentTimeMillis(),
                     event.getSkipOptions(),
-                    DatalakeBackupFailureReason.BACKUP_ON_RESIZE, event.accepted()));
+                    DatalakeBackupFailureReason.BACKUP_ON_RESIZE, Collections.emptyList(), event.accepted()));
             // Stop datalake
             chain.add(new SdxStartStopEvent(SDX_STOP_EVENT.event(), event.getResourceId(), event.getUserId(), STOP_DATAHUBS));
         } else {

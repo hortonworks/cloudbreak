@@ -1,12 +1,16 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.dr;
 
 import static com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator.DATABASE_BACKUP_POSTFIX;
+import static com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator.DATABASE_NAMES_KEY;
 import static com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator.DISASTER_RECOVERY_KEY;
 import static com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator.OBJECT_STORAGE_URL_KEY;
 import static com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator.RANGER_ADMIN_GROUP_KEY;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -37,13 +41,14 @@ public class BackupRestoreSaltConfigGeneratorTest {
         Stack placeholderStack = new Stack();
         placeholderStack.setCloudPlatform(cloudPlatform);
 
-        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, placeholderStack);
+        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, Collections.emptyList(), placeholderStack);
 
         Map<String, Object> disasterRecoveryProperties = saltConfig.getServicePillarConfig().get("disaster-recovery").getProperties();
         Map<String, String> disasterRecoveryKeyValuePairs = (Map<String, String>) disasterRecoveryProperties.get(DISASTER_RECOVERY_KEY);
 
         assertEquals("s3a://test/backups/backupId_database_backup", disasterRecoveryKeyValuePairs.get(OBJECT_STORAGE_URL_KEY));
         assertEquals(RANGER_ADMIN_GROUP, disasterRecoveryKeyValuePairs.get(RANGER_ADMIN_GROUP_KEY));
+        assertNull(disasterRecoveryKeyValuePairs.get(DATABASE_NAMES_KEY));
     }
 
     @Test
@@ -54,7 +59,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
         Stack placeholderStack = new Stack();
         placeholderStack.setCloudPlatform(cloudPlatform);
 
-        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, placeholderStack);
+        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, Collections.emptyList(), placeholderStack);
 
         Map<String, Object> disasterRecoveryProperties = saltConfig.getServicePillarConfig().get("disaster-recovery").getProperties();
         Map<String, String> disasterRecoveryKeyValuePairs = (Map<String, String>) disasterRecoveryProperties.get(DISASTER_RECOVERY_KEY);
@@ -67,12 +72,30 @@ public class BackupRestoreSaltConfigGeneratorTest {
         placeholderStack = new Stack();
         placeholderStack.setCloudPlatform(cloudPlatform);
 
-        saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, placeholderStack);
+        saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, Collections.emptyList(), placeholderStack);
 
         disasterRecoveryProperties = saltConfig.getServicePillarConfig().get("disaster-recovery").getProperties();
         disasterRecoveryKeyValuePairs = (Map<String, String>) disasterRecoveryProperties.get(DISASTER_RECOVERY_KEY);
 
         assertEquals("hdfs://test/backups/backupId_database_backup", disasterRecoveryKeyValuePairs.get(OBJECT_STORAGE_URL_KEY));
+    }
+
+    @Test
+    public void testCreateSaltConfigWithSkipDatabaseNames() throws URISyntaxException {
+        String cloudPlatform = "aws";
+        String location = "/test/backups";
+        Stack placeholderStack = new Stack();
+        placeholderStack.setCloudPlatform(cloudPlatform);
+
+        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, List.of("hive"), placeholderStack);
+
+        Map<String, Object> disasterRecoveryProperties = saltConfig.getServicePillarConfig().get("disaster-recovery").getProperties();
+        Map<String, String> disasterRecoveryKeyValuePairs = (Map<String, String>) disasterRecoveryProperties.get(DISASTER_RECOVERY_KEY);
+
+        assertEquals("s3a://test/backups/backupId_database_backup", disasterRecoveryKeyValuePairs.get(OBJECT_STORAGE_URL_KEY));
+        assertEquals(RANGER_ADMIN_GROUP, disasterRecoveryKeyValuePairs.get(RANGER_ADMIN_GROUP_KEY));
+        assertEquals("ranger profiler_agent profiler_metric", disasterRecoveryKeyValuePairs.get(DATABASE_NAMES_KEY));
+
     }
 
     @Test
@@ -82,7 +105,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
         Stack placeholderStack = new Stack();
         placeholderStack.setCloudPlatform(cloudPlatform);
 
-        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, placeholderStack);
+        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, Collections.emptyList(), placeholderStack);
 
         Map<String, Object> disasterRecoveryProperties = saltConfig.getServicePillarConfig().get("disaster-recovery").getProperties();
         Map<String, String> disasterRecoveryKeyValuePairs = (Map<String, String>) disasterRecoveryProperties.get(DISASTER_RECOVERY_KEY);
@@ -97,7 +120,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
         Stack placeholderStack = new Stack();
         placeholderStack.setCloudPlatform(cloudPlatform);
 
-        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, placeholderStack);
+        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, Collections.emptyList(), placeholderStack);
 
         Map<String, Object> disasterRecoveryProperties = saltConfig.getServicePillarConfig().get("disaster-recovery").getProperties();
         Map<String, String> disasterRecoveryKeyValuePairs = (Map<String, String>) disasterRecoveryProperties.get(DISASTER_RECOVERY_KEY);
@@ -112,7 +135,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
         Stack placeholderStack = new Stack();
         placeholderStack.setCloudPlatform(cloudPlatform);
 
-        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, placeholderStack);
+        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, Collections.emptyList(), placeholderStack);
 
         Map<String, Object> disasterRecoveryProperties = saltConfig.getServicePillarConfig().get("disaster-recovery").getProperties();
         Map<String, String> disasterRecoveryKeyValuePairs = (Map<String, String>) disasterRecoveryProperties.get(DISASTER_RECOVERY_KEY);
@@ -127,7 +150,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
         Stack placeholderStack = new Stack();
         placeholderStack.setCloudPlatform(cloudPlatform);
 
-        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, placeholderStack);
+        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, Collections.emptyList(),  placeholderStack);
 
         Map<String, Object> disasterRecoveryProperties = saltConfig.getServicePillarConfig().get("disaster-recovery").getProperties();
         Map<String, String> disasterRecoveryKeyValuePairs = (Map<String, String>) disasterRecoveryProperties.get(DISASTER_RECOVERY_KEY);
@@ -142,7 +165,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
         Stack placeholderStack = new Stack();
         placeholderStack.setCloudPlatform(cloudPlatform);
 
-        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, placeholderStack);
+        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, Collections.emptyList(), placeholderStack);
 
         Map<String, Object> disasterRecoveryProperties = saltConfig.getServicePillarConfig().get("disaster-recovery").getProperties();
         Map<String, String> disasterRecoveryKeyValuePairs = (Map<String, String>) disasterRecoveryProperties.get(DISASTER_RECOVERY_KEY);
@@ -157,7 +180,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
         Stack placeholderStack = new Stack();
         placeholderStack.setCloudPlatform(cloudPlatform);
 
-        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, placeholderStack);
+        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, Collections.emptyList(), placeholderStack);
 
         Map<String, Object> disasterRecoveryProperties = saltConfig.getServicePillarConfig().get("disaster-recovery").getProperties();
         Map<String, String> disasterRecoveryKeyValuePairs = (Map<String, String>) disasterRecoveryProperties.get(DISASTER_RECOVERY_KEY);
