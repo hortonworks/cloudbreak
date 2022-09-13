@@ -344,34 +344,34 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void asyncTagHost(String hostname, HostsResourceApi hostsResourceApi, String instanceGroupName) {
-            ApiEntityTag tag = new ApiEntityTag().name(HOST_TEMPLATE_NAME_TAG).value(instanceGroupName);
-            try {
-                ApiCallback<List<ApiEntityTag>> callback = new ApiCallback<>() {
-                    @Override
-                    public void onFailure(ApiException e, int i, Map<String, List<String>> map) {
-                        LOGGER.error("Tagging failed for host [{}]: {}. Response headers: {}", hostname, e.getMessage(), map, e);
-                        throw new ClouderaManagerOperationFailedException("Host tagging failed for host: " + hostname, e);
-                    }
+        ApiEntityTag tag = new ApiEntityTag().name(HOST_TEMPLATE_NAME_TAG).value(instanceGroupName);
+        try {
+            ApiCallback<List<ApiEntityTag>> callback = new ApiCallback<>() {
+                @Override
+                public void onFailure(ApiException e, int i, Map<String, List<String>> map) {
+                    LOGGER.error("Tagging failed for host [{}]: {}. Response headers: {}", hostname, e.getMessage(), map, e);
+                    throw new ClouderaManagerOperationFailedException("Host tagging failed for host: " + hostname, e);
+                }
 
-                    @Override
-                    public void onSuccess(List<ApiEntityTag> apiEntityTags, int i, Map<String, List<String>> map) {
-                        LOGGER.debug("Tagging successful for host: [{}]. Body: {}, headers: {}", hostname, apiEntityTags, map);
-                    }
+                @Override
+                public void onSuccess(List<ApiEntityTag> apiEntityTags, int i, Map<String, List<String>> map) {
+                    LOGGER.debug("Tagging successful for host: [{}]. Body: {}, headers: {}", hostname, apiEntityTags, map);
+                }
 
-                    @Override
-                    public void onUploadProgress(long l, long l1, boolean b) {
-                    }
+                @Override
+                public void onUploadProgress(long l, long l1, boolean b) {
+                }
 
-                    @Override
-                    public void onDownloadProgress(long l, long l1, boolean b) {
-                    }
-                };
-                LOGGER.debug("Tagging host [{}] with [{}]", hostname, tag);
-                hostsResourceApi.addTagsAsync(hostname, List.of(tag), callback);
-            } catch (ApiException e) {
-                LOGGER.error("Error while tagging host: [{}]", hostname, e);
-                throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
-            }
+                @Override
+                public void onDownloadProgress(long l, long l1, boolean b) {
+                }
+            };
+            LOGGER.debug("Tagging host [{}] with [{}]", hostname, tag);
+            hostsResourceApi.addTagsAsync(hostname, List.of(tag), callback);
+        } catch (ApiException e) {
+            LOGGER.error("Error while tagging host: [{}]", hostname, e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -828,10 +828,12 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         try {
             LOGGER.debug("Stopping all Cloudera Runtime services");
 
-            if (clouderaManagerPollingServiceProvider.checkCmStatus(stack, apiClient).isTimeout()) {
-                skipStopWithStoppedCm();
-            } else {
+            ExtendedPollingResult extendedPollingResult = clouderaManagerPollingServiceProvider.checkCmStatus(stack, apiClient);
+            if (extendedPollingResult.isSuccess()) {
                 stopWithRunningCm(disableKnoxAutorestart, cluster, clustersResourceApi);
+            } else {
+                logPollingResult(extendedPollingResult);
+                skipStopWithStoppedCm();
             }
         } catch (ApiException e) {
             LOGGER.info("Couldn't stop Cloudera Manager services", e);
@@ -839,10 +841,18 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         }
     }
 
+    private void logPollingResult(ExtendedPollingResult extendedPollingResult) {
+        String errorMessage = "Unknown error from poller";
+        if (extendedPollingResult.getException() != null) {
+            errorMessage = extendedPollingResult.getException().getMessage();
+        }
+        LOGGER.info("We will skip the CM stop, because the polling result wasn't success: {}, error: {}", extendedPollingResult.getPollingResult(),
+                errorMessage, extendedPollingResult.getException());
+    }
+
     private void skipStopWithStoppedCm() {
         LOGGER.debug("No need to stop Cloudera Manager services as Cloudera Manager is already stopped");
-        eventService
-                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPED);
+        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPED);
     }
 
     private void stopWithRunningCm(boolean disableKnoxAutorestart, ClusterView cluster, ClustersResourceApi clustersResourceApi)
