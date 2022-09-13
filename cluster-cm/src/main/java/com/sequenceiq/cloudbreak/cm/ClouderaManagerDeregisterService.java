@@ -65,8 +65,12 @@ public class ClouderaManagerDeregisterService {
                 if (datalakeDto.isPresent()) {
                     LOGGER.info("The current cluster {} is a Data Hub cluster so teardown REQUIRED.", stack.getName());
                     DatalakeDto datalake = datalakeDto.get();
-                    ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(datalakeClient(datalake));
-                    clustersResourceApi.tearDownWorkloadCluster(datalake.getName(), stack.getName());
+                    if (!datalakeDto.get().getStatus().isTerminatedOrDeletionInProgress()) {
+                        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(datalakeClient(datalake));
+                        clustersResourceApi.tearDownWorkloadCluster(datalake.getName(), stack.getName());
+                    } else {
+                        LOGGER.info("Teardown is required but the datalake already deleted or in deletion phase: {}", datalake.getStatus());
+                    }
                 } else {
                     LOGGER.info("The current cluster {} is a Data Lake cluster so teardown NOT_REQUIRED.", stack.getName());
                 }

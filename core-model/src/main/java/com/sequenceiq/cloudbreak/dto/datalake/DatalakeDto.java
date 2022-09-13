@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.dto.datalake;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 
 public class DatalakeDto {
@@ -14,11 +15,14 @@ public class DatalakeDto {
 
     private final String password;
 
+    private final Status status;
+
     private DatalakeDto(DatalakeDtoBuilder builder) {
         gatewayPort = builder.gatewayPort;
         user = builder.user;
         password = builder.password;
         httpClientConfig = builder.httpClientConfig;
+        status = builder.status;
         name = builder.name;
     }
 
@@ -40,6 +44,10 @@ public class DatalakeDto {
 
     public String getPassword() {
         return password;
+    }
+
+    public Status getStatus() {
+        return status;
     }
 
     @Override
@@ -64,6 +72,8 @@ public class DatalakeDto {
         private String user;
 
         private String password;
+
+        private Status status;
 
         private DatalakeDtoBuilder() {
         }
@@ -90,6 +100,11 @@ public class DatalakeDto {
 
         public DatalakeDto.DatalakeDtoBuilder withPassword(String password) {
             this.password = password;
+            return this;
+        }
+
+        public DatalakeDto.DatalakeDtoBuilder withStatus(Status status) {
+            this.status = status;
             return this;
         }
 
