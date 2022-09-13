@@ -8,6 +8,7 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
+import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
@@ -62,6 +63,8 @@ public interface FlowLogService {
     List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long id);
 
     Optional<FlowLog> getLastFlowLog(Long resourceId);
+
+    boolean isFlowConfigAlreadyRunning(Long id, Class<? extends FlowConfiguration<?>> flowConfiguration);
 
     List<FlowLog> findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(Long id);
 

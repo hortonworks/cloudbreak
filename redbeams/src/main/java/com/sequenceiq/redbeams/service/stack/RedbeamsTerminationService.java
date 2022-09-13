@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
@@ -18,6 +19,7 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationEvent;
+import com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationFlowConfig;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 
 @Service
@@ -42,6 +44,9 @@ public class RedbeamsTerminationService {
     @Inject
     private DatabaseServerConfigService databaseServerConfigService;
 
+    @Inject
+    private FlowLogService flowLogService;
+
     public DatabaseServerConfig terminateByCrn(String crn, boolean force) {
         return terminate(databaseServerConfigService.getByCrn(crn), force);
     }
@@ -61,7 +66,8 @@ public class RedbeamsTerminationService {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Terminate called for: {} with force: {}", dbStack, force);
         }
-        if (dbStack.getStatus().isDeleteInProgressOrCompleted() && !deletetedOnProviderSide(server, dbStack)) {
+
+        if (flowLogService.isFlowConfigAlreadyRunning(dbStack.getId(), RedbeamsTerminationFlowConfig.class) || isAlreadyDeleted(server, dbStack)) {
             LOGGER.debug("DatabaseServer with crn {} is already being deleted", dbStack.getResourceCrn());
             return server;
         }
@@ -76,9 +82,8 @@ public class RedbeamsTerminationService {
         return server;
     }
 
-    private boolean deletetedOnProviderSide(DatabaseServerConfig server, DBStack dbStack) {
-        // This is the case when user only delete the database on the provider but not the Cloudformation template
-        return !server.isArchived() && dbStack.getStatus().isDeleteCompleted();
+    private boolean isAlreadyDeleted(DatabaseServerConfig server, DBStack dbStack) {
+        return server.isArchived() && dbStack.getStatus().isDeleteCompleted();
     }
 
     public Set<DatabaseServerConfig> terminateMultipleByCrn(Set<String> crns, boolean force) {

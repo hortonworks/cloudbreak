@@ -2,6 +2,7 @@ package com.sequenceiq.flow.service.flowlog;
 
 import static com.sequenceiq.flow.core.FlowConstants.FINISHED_STATE;
 import static com.sequenceiq.flow.core.FlowConstants.TERMINATED_STATE;
+import static com.sequenceiq.flow.domain.ClassValue.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,6 +31,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
 import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -347,6 +349,45 @@ class FlowLogDBServiceTest {
         flowLog.setFlowId(flowId);
         flowLog.setFlowChainId(flowId + "chain");
         return flowLog;
+    }
+
+    @Test
+    void testIsTerminatedFlowAlreadyRunningWhenHasActiveTerminationFlow() throws ClassNotFoundException {
+        FlowLog flowLog = mock(FlowLog.class);
+        com.sequenceiq.flow.domain.ClassValue terminationFlowConfig = of(TerminationFlowConfig.class.getName());
+        when(flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(1L)).thenReturn(Optional.of(flowLog));
+        when(flowLog.getFlowType()).thenReturn(terminationFlowConfig);
+        when(flowLog.getStateStatus()).thenReturn(StateStatus.PENDING);
+        boolean actual = underTest.isFlowConfigAlreadyRunning(1L, TerminationFlowConfig.class);
+        Assertions.assertTrue(actual);
+    }
+
+    @Test
+    void testIsTerminatedFlowAlreadyRunningWhenLastFlowIsTerminationButNotPending() throws ClassNotFoundException {
+        FlowLog flowLog = mock(FlowLog.class);
+        com.sequenceiq.flow.domain.ClassValue terminationFlowConfig = of(TerminationFlowConfig.class.getName());
+        when(flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(1L)).thenReturn(Optional.of(flowLog));
+        when(flowLog.getFlowType()).thenReturn(terminationFlowConfig);
+        when(flowLog.getStateStatus()).thenReturn(StateStatus.SUCCESSFUL);
+        boolean actual = underTest.isFlowConfigAlreadyRunning(1L, TerminationFlowConfig.class);
+        Assertions.assertFalse(actual);
+    }
+
+    @Test
+    void testIsTerminatedFlowAlreadyRunningWhenLastFlowIsNotTermination() throws ClassNotFoundException {
+        FlowLog flowLog = mock(FlowLog.class);
+        com.sequenceiq.flow.domain.ClassValue terminationFlowConfig = of(TerminationFlowConfig.class.getName());
+        when(flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(1L)).thenReturn(Optional.of(flowLog));
+        when(flowLog.getFlowType()).thenReturn(terminationFlowConfig);
+        boolean actual = underTest.isFlowConfigAlreadyRunning(1L, TerminationFlowConfig.class);
+        Assertions.assertFalse(actual);
+    }
+
+    @Test
+    void testIsTerminatedFlowAlreadyRunningWhenNoLastFlow() {
+        when(flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(1L)).thenReturn(Optional.empty());
+        boolean actual = underTest.isFlowConfigAlreadyRunning(1L, TerminationFlowConfig.class);
+        Assertions.assertFalse(actual);
     }
 
     public static class TerminationFlowConfig extends AbstractFlowConfiguration<MockFlowState, MockFlowEvent> {
