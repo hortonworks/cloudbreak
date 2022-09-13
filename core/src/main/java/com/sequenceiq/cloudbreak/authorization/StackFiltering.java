@@ -1,4 +1,4 @@
-package com.sequenceiq.distrox.v1.distrox.authorization;
+package com.sequenceiq.cloudbreak.authorization;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,13 +23,13 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 
 @Component
-public class DataHubFiltering extends AbstractAuthorizationFiltering<StackViewV4Responses> {
+public class StackFiltering extends AbstractAuthorizationFiltering<StackViewV4Responses> {
 
     public static final String ENV_NAME = "ENV_NAME";
 
     public static final String ENV_CRN = "ENV_CRN";
 
-    private static final List<StackType> STACK_TYPES = List.of(StackType.WORKLOAD);
+    private static final List<StackType> STACK_TYPES = List.of(StackType.WORKLOAD, StackType.DATALAKE);
 
     @Inject
     private StackOperations stackOperations;
