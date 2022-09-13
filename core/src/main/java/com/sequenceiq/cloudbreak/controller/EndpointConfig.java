@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.controller.v4.BlueprintUtilV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.BlueprintV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.CloudProviderServicesV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.CloudbreakInfoV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.ClusterCostV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ClusterTemplateV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.CustomConfigurationsV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.CustomImageCatalogV4Controller;
@@ -93,7 +94,8 @@ public class EndpointConfig extends ResourceConfig {
             AuthorizationInfoController.class,
             DistroXUpgradeV1Controller.class,
             DistroXDatabaseServerV1Controller.class,
-            AuthorizationUtilEndpoint.class
+            AuthorizationUtilEndpoint.class,
+            ClusterCostV4Controller.class
     );
 
     @Value("${info.app.version:unspecified}")

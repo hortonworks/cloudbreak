@@ -23,7 +23,7 @@ public class DataHubAuthorizationResourceProvider extends AbstractAuthorizationR
 
     @Override
     protected List<ResourceWithId> findByAccoundId(String accountId) {
-        return stackService.getAsAuthorizationResources(workspaceService.getForCurrentUser().getId(), StackType.WORKLOAD);
+        return stackService.getAsAuthorizationResources(workspaceService.getForCurrentUser().getId(), List.of(StackType.WORKLOAD));
     }
 
     @Override

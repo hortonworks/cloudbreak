@@ -449,6 +449,10 @@ public class InstanceMetaDataService {
         return repository.countByStackId(stackId);
     }
 
+    public int countByInstanceGroupId(Long instanceGroupId) {
+        return repository.countByInstanceGroupId(instanceGroupId);
+    }
+
     public List<InstanceMetaData> findAllByInstanceGroupAndInstanceStatus(InstanceGroup instanceGroup,
             com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus status) {
         return repository.findAllByInstanceGroupAndInstanceStatus(instanceGroup, status);
