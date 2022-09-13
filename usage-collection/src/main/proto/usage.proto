@@ -3689,6 +3689,8 @@ message CDPRecipeEvent {
   string hostGroup = 5;
   // CRN of related stack in case of attachment/detachment, otherwise it is empty
   string stackCrn = 6;
+  // corresponding account id
+  string accountId = 7;
 }
 
 // Recipe related event about cluster creation
@@ -3701,5 +3703,7 @@ message CDPClusterCreationRecipeEvent {
   string typeDetails = 3;
   // Details of recipe count by host group in JSON format
   string hostGroupDetails = 4;
+  // corresponding account id
+  string accountId = 5;
 }
 

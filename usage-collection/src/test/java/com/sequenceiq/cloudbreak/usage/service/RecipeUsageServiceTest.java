@@ -16,10 +16,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 
 @ExtendWith(MockitoExtension.class)
 public class RecipeUsageServiceTest {
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:5678";
 
     private static final String NAME = "name";
 
@@ -73,7 +76,8 @@ public class RecipeUsageServiceTest {
     public void testAttachmentUsageReportWithLimitedInformation() {
         doNothing().when(usageReporter).cdpRecipeEvent(any());
 
-        underTest.sendAttachedUsageReport(NAME, Optional.empty(), Optional.empty(), STACK_CRN, Optional.empty());
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.sendAttachedUsageReport(NAME, Optional.empty(), Optional.empty(), STACK_CRN, Optional.empty()));
 
         ArgumentCaptor<UsageProto.CDPRecipeEvent> eventCaptor = ArgumentCaptor.forClass(UsageProto.CDPRecipeEvent.class);
         verify(usageReporter).cdpRecipeEvent(eventCaptor.capture());
@@ -87,7 +91,8 @@ public class RecipeUsageServiceTest {
     public void testDetachmentUsageReportWithLimitedInformation() {
         doNothing().when(usageReporter).cdpRecipeEvent(any());
 
-        underTest.sendDetachedUsageReport(NAME, Optional.empty(), Optional.empty(), STACK_CRN, Optional.empty());
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.sendDetachedUsageReport(NAME, Optional.empty(), Optional.empty(), STACK_CRN, Optional.empty()));
 
         ArgumentCaptor<UsageProto.CDPRecipeEvent> eventCaptor = ArgumentCaptor.forClass(UsageProto.CDPRecipeEvent.class);
         verify(usageReporter).cdpRecipeEvent(eventCaptor.capture());
@@ -101,7 +106,8 @@ public class RecipeUsageServiceTest {
     public void testClusterCreationUsageReportWithLimitedInformation() {
         doNothing().when(usageReporter).cdpClusterCreationRecipeEvent(any());
 
-        underTest.sendClusterCreationRecipeUsageReport(STACK_CRN, 0, Optional.empty(), Optional.empty());
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.sendClusterCreationRecipeUsageReport(STACK_CRN, 0, Optional.empty(), Optional.empty()));
 
         ArgumentCaptor<UsageProto.CDPClusterCreationRecipeEvent> eventCaptor = ArgumentCaptor.forClass(UsageProto.CDPClusterCreationRecipeEvent.class);
         verify(usageReporter).cdpClusterCreationRecipeEvent(eventCaptor.capture());
@@ -114,7 +120,8 @@ public class RecipeUsageServiceTest {
     public void testAttachmentUsageReport() {
         doNothing().when(usageReporter).cdpRecipeEvent(any());
 
-        underTest.sendAttachedUsageReport(NAME, Optional.of(CRN), Optional.of(VALID_TYPE), STACK_CRN, Optional.of(HOST_GROUP));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.sendAttachedUsageReport(NAME, Optional.of(CRN), Optional.of(VALID_TYPE), STACK_CRN, Optional.of(HOST_GROUP)));
 
         ArgumentCaptor<UsageProto.CDPRecipeEvent> eventCaptor = ArgumentCaptor.forClass(UsageProto.CDPRecipeEvent.class);
         verify(usageReporter).cdpRecipeEvent(eventCaptor.capture());
@@ -129,7 +136,8 @@ public class RecipeUsageServiceTest {
     public void testDetachmentUsageReport() {
         doNothing().when(usageReporter).cdpRecipeEvent(any());
 
-        underTest.sendDetachedUsageReport(NAME, Optional.of(CRN), Optional.of(INVALID_TYPE), STACK_CRN, Optional.of(HOST_GROUP));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.sendDetachedUsageReport(NAME, Optional.of(CRN), Optional.of(INVALID_TYPE), STACK_CRN, Optional.of(HOST_GROUP)));
 
         ArgumentCaptor<UsageProto.CDPRecipeEvent> eventCaptor = ArgumentCaptor.forClass(UsageProto.CDPRecipeEvent.class);
         verify(usageReporter).cdpRecipeEvent(eventCaptor.capture());
@@ -144,7 +152,7 @@ public class RecipeUsageServiceTest {
     public void testCreationUsageReport() {
         doNothing().when(usageReporter).cdpRecipeEvent(any());
 
-        underTest.sendCreatedUsageReport(NAME, CRN, VALID_TYPE);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.sendCreatedUsageReport(NAME, CRN, VALID_TYPE));
 
         ArgumentCaptor<UsageProto.CDPRecipeEvent> eventCaptor = ArgumentCaptor.forClass(UsageProto.CDPRecipeEvent.class);
         verify(usageReporter).cdpRecipeEvent(eventCaptor.capture());
@@ -159,7 +167,7 @@ public class RecipeUsageServiceTest {
     public void testDeletionUsageReport() {
         doNothing().when(usageReporter).cdpRecipeEvent(any());
 
-        underTest.sendDeletedUsageReport(NAME, CRN, INVALID_TYPE);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.sendDeletedUsageReport(NAME, CRN, INVALID_TYPE));
 
         ArgumentCaptor<UsageProto.CDPRecipeEvent> eventCaptor = ArgumentCaptor.forClass(UsageProto.CDPRecipeEvent.class);
         verify(usageReporter).cdpRecipeEvent(eventCaptor.capture());
@@ -174,7 +182,8 @@ public class RecipeUsageServiceTest {
     public void testClusterCreationUsageReport() {
         doNothing().when(usageReporter).cdpClusterCreationRecipeEvent(any());
 
-        underTest.sendClusterCreationRecipeUsageReport(STACK_CRN, 0, Optional.of("{}"), Optional.of("{}"));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.sendClusterCreationRecipeUsageReport(STACK_CRN, 0, Optional.of("{}"), Optional.of("{}")));
 
         ArgumentCaptor<UsageProto.CDPClusterCreationRecipeEvent> eventCaptor = ArgumentCaptor.forClass(UsageProto.CDPClusterCreationRecipeEvent.class);
         verify(usageReporter).cdpClusterCreationRecipeEvent(eventCaptor.capture());
