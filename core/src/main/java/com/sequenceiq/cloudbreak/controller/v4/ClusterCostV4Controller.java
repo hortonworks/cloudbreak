@@ -1,4 +1,4 @@
-package com.sequenceiq.distrox.v1.distrox.controller;
+package com.sequenceiq.cloudbreak.controller.v4;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATAHUB;
 
@@ -12,21 +12,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.cost.ClusterCostV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.authorization.StackFiltering;
 import com.sequenceiq.cloudbreak.common.cost.RealTimeCost;
 import com.sequenceiq.cloudbreak.common.cost.RealTimeCostResponse;
 import com.sequenceiq.cloudbreak.service.cost.ClusterCostService;
-import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXCostV1Endpoint;
-import com.sequenceiq.distrox.v1.distrox.authorization.DataHubFiltering;
 
 @Controller
 @Transactional(Transactional.TxType.NEVER)
-public class DistroXCostV1Controller implements DistroXCostV1Endpoint {
+public class ClusterCostV4Controller implements ClusterCostV4Endpoint {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXCostV1Controller.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCostV4Controller.class);
 
     @Inject
-    private DataHubFiltering dataHubFiltering;
+    private StackFiltering stackFiltering;
 
     @Inject
     private ClusterCostService clusterCostService;
@@ -34,7 +34,7 @@ public class DistroXCostV1Controller implements DistroXCostV1Endpoint {
     @Override
     @FilterListBasedOnPermissions
     public RealTimeCostResponse list() {
-        StackViewV4Responses responses = dataHubFiltering.filterDataHubs(DESCRIBE_DATAHUB, null, null);
+        StackViewV4Responses responses = stackFiltering.filterDataHubs(DESCRIBE_DATAHUB, null, null);
         List<RealTimeCost> realTimeCosts = clusterCostService.getCosts(responses);
         return new RealTimeCostResponse(realTimeCosts);
     }

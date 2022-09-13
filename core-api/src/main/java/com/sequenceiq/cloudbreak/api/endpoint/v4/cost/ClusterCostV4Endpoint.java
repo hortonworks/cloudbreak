@@ -1,4 +1,4 @@
-package com.sequenceiq.distrox.api.v1.distrox.endpoint;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.cost;
 
 import static com.sequenceiq.environment.api.doc.environment.EnvironmentDescription.ENVIRONMENT_NOTES;
 
@@ -16,12 +16,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @RetryAndMetrics
-@Path("/v1/distrox/cost")
+@Path("/v4/cost")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/distrox/cost", protocols = "http,https",
+@Api(value = "/v4/cost", protocols = "http,https",
         consumes = MediaType.APPLICATION_JSON)
-public interface DistroXCostV1Endpoint {
+public interface ClusterCostV4Endpoint {
 
     @GET
     @Path("")

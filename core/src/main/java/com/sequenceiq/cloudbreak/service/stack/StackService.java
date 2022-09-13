@@ -950,12 +950,12 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return stackRepository.findByWorkspaceIdAnStackIds(workspaceId, stackIds, stackTypes);
     }
 
-    public List<ResourceWithId> getAsAuthorizationResourcesByEnvCrn(Long workspaceId, String environmentCrn, StackType stackType) {
-        return stackRepository.getAsAuthorizationResourcesByEnvCrn(workspaceId, environmentCrn, stackType);
+    public List<ResourceWithId> getAsAuthorizationResourcesByEnvCrn(Long workspaceId, String environmentCrn, List<StackType> stackTypes) {
+        return stackRepository.getAsAuthorizationResourcesByEnvCrn(workspaceId, environmentCrn, stackTypes);
     }
 
-    public List<ResourceWithId> getAsAuthorizationResources(Long workspaceId, StackType stackType) {
-        return stackRepository.getAsAuthorizationResources(workspaceId, stackType);
+    public List<ResourceWithId> getAsAuthorizationResources(Long workspaceId, List<StackType> stackTypes) {
+        return stackRepository.getAsAuthorizationResources(workspaceId, stackTypes);
     }
 
     public List<ResourceWithId> getAsAuthorizationResourcesByCrns(Long workspaceId, StackType stackType, List<String> crns) {

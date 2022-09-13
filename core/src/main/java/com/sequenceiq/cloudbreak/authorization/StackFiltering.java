@@ -1,4 +1,4 @@
-package com.sequenceiq.distrox.v1.distrox.authorization;
+package com.sequenceiq.cloudbreak.authorization;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,9 +10,9 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.list.AbstractAuthorizationFiltering;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -23,13 +23,13 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 
 @Component
-public class DataHubFiltering extends AbstractAuthorizationFiltering<StackViewV4Responses> {
+public class StackFiltering extends AbstractAuthorizationFiltering<StackViewV4Responses> {
 
     public static final String ENV_NAME = "ENV_NAME";
 
     public static final String ENV_CRN = "ENV_CRN";
 
-    private static final List<StackType> STACK_TYPES = List.of(StackType.WORKLOAD);
+    private static final List<StackType> STACK_TYPES = List.of(StackType.WORKLOAD, StackType.DATALAKE);
 
     @Inject
     private StackOperations stackOperations;
