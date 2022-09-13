@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -34,6 +35,10 @@ public class SaltService {
 
     public SaltConnector createSaltConnector(GatewayConfig gatewayConfig) {
         return new SaltConnector(gatewayConfig, saltErrorResolver, restDebug, tracer);
+    }
+
+    public SaltConnector createSaltConnector(GatewayConfig gatewayConfig, int connectTimeoutMs, int readTimeout) {
+        return new SaltConnector(gatewayConfig, saltErrorResolver, restDebug, tracer, connectTimeoutMs, OptionalInt.of(readTimeout));
     }
 
     public List<SaltConnector> createSaltConnector(Collection<GatewayConfig> gatewayConfigs) {

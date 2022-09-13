@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
@@ -36,6 +37,7 @@ import com.sequenceiq.freeipa.entity.FreeIpaStackRecipe;
 import com.sequenceiq.freeipa.repository.FreeIpaStackRecipeRepository;
 import com.sequenceiq.freeipa.repository.StackRepository;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.util.RecipeAttachmentChecker;
 
 @Service
 public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvider {
@@ -59,6 +61,12 @@ public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvide
 
     @Inject
     private RecipeUsageService recipeUsageService;
+
+    @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
+    private RecipeAttachmentChecker recipeAttachmentChecker;
 
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
@@ -125,14 +133,27 @@ public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvide
     public void attachRecipes(String accountId, RecipeAttachDetachRequest recipeAttach) {
         String environmentCrn = recipeAttach.getEnvironmentCrn();
         ResourceBasicView stackResourceBasicView = stackService.getResourceBasicViewByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        Set<String> existingRecipes = getRecipeNamesForStack(stackResourceBasicView.getId());
+        validateRecipeAttachmentAllowed(accountId, existingRecipes, stackResourceBasicView.getId());
         List<String> newRecipes = recipeAttach.getRecipes();
         LOGGER.info("Attach {} recipes, env crn: {}", newRecipes, environmentCrn);
         recipeCrnListProviderService.validateRequestedRecipesExistsByName(newRecipes);
-        Set<String> existingRecipes = getRecipeNamesForStack(stackResourceBasicView.getId());
         List<String> recipesToSave = newRecipes.stream().filter(newRecipe -> !existingRecipes.contains(newRecipe)).collect(Collectors.toList());
         saveRecipes(recipesToSave, stackResourceBasicView.getId());
-        recipesToSave.stream().forEach(recipe -> recipeUsageService.sendAttachedUsageReport(recipe, Optional.empty(), Optional.empty(),
+        recipesToSave.forEach(recipe -> recipeUsageService.sendAttachedUsageReport(recipe, Optional.empty(), Optional.empty(),
                 stackResourceBasicView.getResourceCrn(), Optional.empty()));
+    }
+
+    private void validateRecipeAttachmentAllowed(String accountId, Set<String> existingRecipes, Long stackId) {
+        if (!entitlementService.isFmsRecipesEnabled(accountId)) {
+            throw new BadRequestException("FreeIpa recipe support is not enabled for this account");
+        }
+        if (existingRecipes.isEmpty()) {
+            boolean recipeAttachmentAvailable = recipeAttachmentChecker.isRecipeAttachmentAvailable(stackId);
+            if (!recipeAttachmentAvailable) {
+                throw new BadRequestException("Recipe attachment is not supported for this FreeIpa, please upgrade it first");
+            }
+        }
     }
 
     public void detachRecipes(String accountId, RecipeAttachDetachRequest recipeDetach) {
