@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cost.cloudera.ClouderaCostCache;
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
 import com.sequenceiq.cloudbreak.cost.model.DiskCostDto;
 import com.sequenceiq.cloudbreak.cost.model.InstanceGroupCostDto;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
@@ -29,8 +30,6 @@ import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class InstanceTypeCollectorService {
-
-    private static final double MAGIC_PRICE_PER_DISK_GB = 0.000138;
 
     @Inject
     private InstanceGroupService instanceGroupService;
@@ -62,7 +61,8 @@ public class InstanceTypeCollectorService {
         List<InstanceGroupCostDto> instanceGroupCostDtos = new ArrayList<>();
         for (InstanceGroupView instanceGroupView : instanceGroupService.getInstanceGroupViewByStackId(stack.getId())) {
             int count = instanceMetaDataService.countByInstanceGroupId(instanceGroupView.getId());
-            String instanceType = instanceGroupView.getTemplate().getInstanceType();
+            Template template = instanceGroupView.getTemplate();
+            String instanceType = template == null ? "" : template.getInstanceType();
             InstanceGroupCostDto instanceGroupCostDto = new InstanceGroupCostDto();
             instanceGroupCostDto.setPricePerInstance(getPricePerInstance(cloudPlatform, region, instanceType));
             instanceGroupCostDto.setCoresPerInstance(getCpuCountPerInstance(cloudPlatform, region, instanceType, credential));
@@ -73,10 +73,8 @@ public class InstanceTypeCollectorService {
 
             List<DiskCostDto> diskCostDtos = new ArrayList<>();
             for (VolumeTemplate volumeTemplate : instanceGroupView.getTemplate().getVolumeTemplates()) {
-                DiskCostDto diskCostDto = new DiskCostDto();
-                diskCostDto.setCount(volumeTemplate.getVolumeCount());
-                diskCostDto.setSize(volumeTemplate.getVolumeSize());
-                diskCostDto.setPricePerDiskGB(MAGIC_PRICE_PER_DISK_GB);
+                DiskCostDto diskCostDto = new DiskCostDto(volumeTemplate.getVolumeCount(), volumeTemplate.getVolumeSize(),
+                        getStoragePricePerGBHour(cloudPlatform, region, volumeTemplate.getVolumeType(), volumeTemplate.getVolumeSize()));
                 diskCostDtos.add(diskCostDto);
             }
             instanceGroupCostDto.setDisksPerInstance(diskCostDtos);
@@ -119,6 +117,19 @@ public class InstanceTypeCollectorService {
                 return awsPricingCache.getMemoryForInstanceType(region, instanceType);
             case AZURE:
                 return azurePricingCache.getMemoryForInstanceType(region, instanceType, convertCredentialToExtendedCloudCredential(credential, "azure"));
+            case GCP:
+                throw new NotImplementedException("Cost calculation for GCP is not implemented!");
+            default:
+                throw new NotImplementedException(String.format("Getting memory for the specified cloud platform [%s], is unsupported.", cloudPlatform));
+        }
+    }
+
+    private double getStoragePricePerGBHour(CloudPlatform cloudPlatform, String region, String storageType, int storageSize) {
+        switch (cloudPlatform) {
+            case AWS:
+                return awsPricingCache.getStoragePricePerGBHour(region, storageType);
+            case AZURE:
+                return azurePricingCache.getStoragePricePerGBHour(region, storageType, storageSize);
             case GCP:
                 throw new NotImplementedException("Cost calculation for GCP is not implemented!");
             default:

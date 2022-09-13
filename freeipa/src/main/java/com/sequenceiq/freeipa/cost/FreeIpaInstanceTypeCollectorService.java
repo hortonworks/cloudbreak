@@ -25,12 +25,15 @@ import com.sequenceiq.cloudbreak.cost.model.InstanceGroupCostDto;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.CredentialService;
 
 @Service
 public class FreeIpaInstanceTypeCollectorService {
 
-    private static final double MAGIC_PRICE_PER_DISK_GB = 0.000138;
+    private static final String DEFAULT_ROOT_DISK_TYPE = "standard";
+
+    private static final int DEFAULT_ROOT_DISK_SIZE = 100;
 
     @Inject
     private CredentialService credentialService;
@@ -55,7 +58,8 @@ public class FreeIpaInstanceTypeCollectorService {
 
         List<InstanceGroupCostDto> instanceGroupCostDtos = new ArrayList<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            String instanceType = instanceGroup.getTemplate().getInstanceType();
+            Template template = instanceGroup.getTemplate();
+            String instanceType = template.getInstanceType();
             InstanceGroupCostDto instanceGroupCostDto = new InstanceGroupCostDto();
             instanceGroupCostDto.setPricePerInstance(getPricePerInstance(cloudPlatform, region, instanceType));
             instanceGroupCostDto.setCoresPerInstance(getCpuCountPerInstance(cloudPlatform, region, instanceType, credential));
@@ -64,11 +68,18 @@ public class FreeIpaInstanceTypeCollectorService {
             instanceGroupCostDto.setType(instanceType);
             instanceGroupCostDto.setCount(instanceGroup.getInstanceMetaData().size());
 
-            DiskCostDto diskCostDto = new DiskCostDto();
-            diskCostDto.setCount(instanceGroup.getTemplate().getVolumeCount());
-            diskCostDto.setSize(instanceGroup.getTemplate().getRootVolumeSize());
-            diskCostDto.setPricePerDiskGB(MAGIC_PRICE_PER_DISK_GB);
-            instanceGroupCostDto.setDisksPerInstance(List.of(diskCostDto));
+            List<DiskCostDto> diskCostDtos = new ArrayList<>();
+            DiskCostDto rootDiskCostDto = new DiskCostDto(1, template.getRootVolumeSize(),
+                    getStoragePricePerGBHour(cloudPlatform, region, DEFAULT_ROOT_DISK_TYPE, DEFAULT_ROOT_DISK_SIZE));
+            diskCostDtos.add(rootDiskCostDto);
+
+            if (template.getVolumeCount() > 0) {
+                DiskCostDto diskCostDto = new DiskCostDto(template.getVolumeCount(), template.getVolumeSize(),
+                        getStoragePricePerGBHour(cloudPlatform, region, template.getVolumeType(), template.getVolumeSize()));
+                diskCostDtos.add(diskCostDto);
+            }
+
+            instanceGroupCostDto.setDisksPerInstance(diskCostDtos);
 
             instanceGroupCostDtos.add(instanceGroupCostDto);
         }
@@ -108,6 +119,19 @@ public class FreeIpaInstanceTypeCollectorService {
                 return awsPricingCache.getMemoryForInstanceType(region, instanceType);
             case AZURE:
                 return azurePricingCache.getMemoryForInstanceType(region, instanceType, convertCredentialToExtendedCloudCredential(credential, "azure"));
+            case GCP:
+                throw new NotImplementedException("Cost calculation for GCP is not implemented!");
+            default:
+                throw new NotImplementedException(String.format("Getting memory for the specified cloud platform [%s], is unsupported.", cloudPlatform));
+        }
+    }
+
+    private double getStoragePricePerGBHour(CloudPlatform cloudPlatform, String region, String storageType, int storageSize) {
+        switch (cloudPlatform) {
+            case AWS:
+                return awsPricingCache.getStoragePricePerGBHour(region, storageType);
+            case AZURE:
+                return azurePricingCache.getStoragePricePerGBHour(region, storageType, storageSize);
             case GCP:
                 throw new NotImplementedException("Cost calculation for GCP is not implemented!");
             default:

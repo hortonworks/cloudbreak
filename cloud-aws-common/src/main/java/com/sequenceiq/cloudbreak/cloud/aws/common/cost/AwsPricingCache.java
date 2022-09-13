@@ -2,12 +2,14 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.cost;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.pricing.AWSPricing;
@@ -17,11 +19,13 @@ import com.amazonaws.services.pricing.model.FilterType;
 import com.amazonaws.services.pricing.model.GetProductsRequest;
 import com.amazonaws.services.pricing.model.GetProductsResult;
 import com.amazonaws.services.pricing.model.NotFoundException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.common.cost.model.PriceListElement;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.cost.model.PricingCacheKey;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Service("awsPricingCache")
 public class AwsPricingCache {
@@ -30,20 +34,41 @@ public class AwsPricingCache {
 
     private static final String PRICING_API_ENDPOINT_REGION = "us-east-1";
 
+    private static final String AWS_STORAGE_PRICING_JSON_LOCATION = "cost/aws-storage-pricing.json";
+
     private static final int CACHE_MAX_SIZE = 100;
 
     private static final int CACHE_RETENTION_IN_MINUTES = 5;
 
-    @Inject
-    private AWSPricing awsPricing;
+    private static final int HOURS_IN_30_DAYS = 720;
 
     private final Cache<PricingCacheKey, PriceListElement> cache;
+
+    private final Map<String, Map<String, Double>> storagePricingCache;
+
+    @Inject
+    private AWSPricing awsPricing;
 
     public AwsPricingCache() {
         this.cache = CacheBuilder.newBuilder()
                 .maximumSize(CACHE_MAX_SIZE)
                 .expireAfterAccess(Duration.ofMinutes(CACHE_RETENTION_IN_MINUTES))
                 .build();
+        this.storagePricingCache = loadStoragePriceList();
+    }
+
+    private static Map<String, Map<String, Double>> loadStoragePriceList() {
+        ClassPathResource classPathResource = new ClassPathResource(AWS_STORAGE_PRICING_JSON_LOCATION);
+        if (classPathResource.exists()) {
+            try {
+                String json = FileReaderUtils.readFileFromClasspath(AWS_STORAGE_PRICING_JSON_LOCATION);
+                return JsonUtil.readValue(json, new TypeReference<>() {
+                });
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to load AWS storage price json!", e);
+            }
+        }
+        throw new RuntimeException("Failed to load AWS storage price json!");
     }
 
     public double getPriceForInstanceType(String region, String instanceType) {
@@ -64,6 +89,13 @@ public class AwsPricingCache {
         PriceListElement priceListElement = getPriceList(region, instanceType);
         String memory = priceListElement.getProduct().getAttributes().getMemory();
         return Integer.parseInt(memory.replaceAll("\\D", ""));
+    }
+
+    public double getStoragePricePerGBHour(String region, String storageType) {
+        Map<String, Double> pricingForRegion = storagePricingCache.getOrDefault(region, Map.of());
+        String checkedStorageType = storageType == null ? "standard" : storageType;
+        double priceInGBMonth = pricingForRegion.getOrDefault(checkedStorageType, 0.0);
+        return priceInGBMonth / HOURS_IN_30_DAYS;
     }
 
     private PriceListElement getPriceList(String region, String instanceType) {

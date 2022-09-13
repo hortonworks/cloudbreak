@@ -65,6 +65,17 @@ public class AzurePricingCacheTest {
     }
 
     @Test
+    void getStoragePricePerGBHour() {
+        double premiumssd = underTest.getStoragePricePerGBHour("westus2", "PremiumSSD_LRS", 500);
+        double standardssd = underTest.getStoragePricePerGBHour("westus2", "StandardSSD_LRS", 500);
+        double standardhdd = underTest.getStoragePricePerGBHour("westus2", "StandardHDD", 500);
+
+        Assertions.assertEquals(0.09244, premiumssd, 0.00001);
+        Assertions.assertEquals(0.05333, standardssd, 0.00001);
+        Assertions.assertEquals(0.03022, standardhdd, 0.00001);
+    }
+
+    @Test
     void getUsdPriceAlreadyInCache() {
         AzurePricingCache spiedUnderTest = spy(underTest);
         doReturn(getPriceResponse()).when(spiedUnderTest).retryableGetPriceResponse(any());
