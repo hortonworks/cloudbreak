@@ -1432,7 +1432,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     private RecipeExecutionPhase fallbackToOldRecipeExecutionPhaseIfNecessary(RecipeExecutionPhase phase, GatewayConfig gatewayConfig, SaltConnector sc) {
-        boolean phaseSlsExists = doesPhaseSlsExist(saltStateService, gatewayConfig, phase, sc);
+        boolean phaseSlsExists = doesRecipePhaseSlsExist(saltStateService, gatewayConfig, phase, sc);
         if (!phaseSlsExists) {
             RecipeExecutionPhase oldRecipeExecutionPhase = phase.oldRecipeExecutionPhase();
             LOGGER.info("Salt state file for new recipe execution phase ({}) was not found, it is a cluster with old salt states, fallback to the old " +
@@ -1443,7 +1443,19 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
-    private boolean doesPhaseSlsExist(SaltStateService saltStateService, GatewayConfig gatewayConfig, RecipeExecutionPhase phase, SaltConnector sc) {
+    public boolean doesPhaseSlsExistWithTimeouts(GatewayConfig gatewayConfig, String stateSlsName, int connectTimeoutMs, int readTimeout)
+            throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig, connectTimeoutMs, readTimeout)) {
+            Target<String> gatewayTargets = new HostList(Set.of(gatewayConfig.getHostname()));
+            return saltStateService.stateSlsExists(sc, gatewayTargets, stateSlsName);
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during phase sls check (with timeout settings: connect timeout {} ms, read timeout {} ms)", connectTimeoutMs,
+                    readTimeout, e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    private boolean doesRecipePhaseSlsExist(SaltStateService saltStateService, GatewayConfig gatewayConfig, RecipeExecutionPhase phase, SaltConnector sc) {
         Target<String> gatewayTargets = new HostList(Set.of(gatewayConfig.getHostname()));
         return saltStateService.stateSlsExists(sc, gatewayTargets, "recipes." + phase.value());
     }

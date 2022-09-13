@@ -152,4 +152,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
             throws CloudbreakOrchestratorFailedException;
 
     List<Map<String, JsonNode>> applyOrchestratorState(OrchestratorStateParams stateParams) throws CloudbreakOrchestratorFailedException;
+
+    boolean doesPhaseSlsExistWithTimeouts(GatewayConfig gatewayConfig, String stateSlsName, int connectTimeoutMs, int readTimeout)
+            throws CloudbreakOrchestratorFailedException;
 }

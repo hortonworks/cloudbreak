@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.client.Client;
@@ -78,6 +79,8 @@ public class SaltConnector implements Closeable {
 
     private static final int PROXY_TIMEOUT = 90000;
 
+    private static final int CONNECT_TIMEOUT_MS = 20_000;
+
     private final Client restClient;
 
     private final WebTarget saltTarget;
@@ -90,14 +93,15 @@ public class SaltConnector implements Closeable {
 
     private final String hostname;
 
-    public SaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver, boolean debug, Tracer tracer) {
-        this.hostname = gatewayConfig.getHostname();
-        ClientTracingFeature tracingFeature = new ClientTracingFeature.Builder(tracer)
-                .withTraceSerialization(false)
-                .withDecorators(List.of(new TracingClientSpanDecorator())).build();
+    public SaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver, boolean debug, Tracer tracer,
+            int connectTimeoutMs, OptionalInt readTimeout) {
         try {
-            restClient = RestClientUtil.createClient(
-                    gatewayConfig.getServerCert(), gatewayConfig.getClientCert(), gatewayConfig.getClientKey(), debug);
+            restClient = RestClientUtil.createClient(gatewayConfig.getServerCert(), gatewayConfig.getClientCert(), gatewayConfig.getClientKey(),
+                    connectTimeoutMs, readTimeout, debug);
+            this.hostname = gatewayConfig.getHostname();
+            ClientTracingFeature tracingFeature = new ClientTracingFeature.Builder(tracer)
+                    .withTraceSerialization(false)
+                    .withDecorators(List.of(new TracingClientSpanDecorator())).build();
             String saltBootPasswd = Optional.ofNullable(gatewayConfig.getSaltBootPassword()).orElse(SALT_BOOT_PASSWORD);
             saltTarget = restClient.target(gatewayConfig.getGatewayUrl())
                     .register(HttpAuthenticationFeature.basic(SALT_BOOT_USER, saltBootPasswd))
@@ -110,6 +114,10 @@ public class SaltConnector implements Closeable {
         } catch (Exception e) {
             throw new RuntimeException("Failed to create rest client with 2-way-ssl config", e);
         }
+    }
+
+    public SaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver, boolean debug, Tracer tracer) {
+        this(gatewayConfig, saltErrorResolver, debug, tracer, CONNECT_TIMEOUT_MS, OptionalInt.empty());
     }
 
     @Measure(SaltConnector.class)
