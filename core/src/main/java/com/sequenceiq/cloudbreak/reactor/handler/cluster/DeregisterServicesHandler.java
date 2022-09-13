@@ -69,6 +69,7 @@ public class DeregisterServicesHandler implements EventHandler<DeregisterService
                                 .withPassword(dataLake.getCluster().getCloudbreakAmbariPassword())
                                 .withUser(dataLake.getCluster().getCloudbreakAmbariUser())
                                 .withName(dataLake.getName())
+                                .withStatus(dataLake.getStatus())
                                 .build()
                 );
             }

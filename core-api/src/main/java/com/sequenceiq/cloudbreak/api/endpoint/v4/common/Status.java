@@ -130,6 +130,14 @@ public enum Status {
                 || STOP_REQUESTED.equals(this);
     }
 
+    public boolean isTerminatedOrDeletionInProgress() {
+        return DELETE_COMPLETED == this
+                || DELETE_FAILED == this
+                || DELETE_IN_PROGRESS == this
+                || DELETED_ON_PROVIDER_SIDE == this
+                || PRE_DELETE_IN_PROGRESS == this;
+    }
+
     public Status mapToFailedIfInProgress() {
         if (isInProgress()) {
             Status result = IN_PROGRESS_TO_FINAL_STATUS_MAPPING.get(this);
