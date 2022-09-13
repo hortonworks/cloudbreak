@@ -90,7 +90,7 @@ public class FreeIpaPostInstallService {
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
         freeIpaTopologyService.updateReplicationTopology(stackId, Set.of(), freeIpaClient);
         if (fullPostInstall) {
-            setInitialFreeIpaPolicies(freeIpaClient);
+            setInitialFreeIpaPolicies(stack, freeIpaClient);
             synchronizeUsers(stack);
         }
         if (freeIpaRecipeService.hasRecipeType(stackId, RecipeType.POST_SERVICE_DEPLOYMENT, RecipeType.POST_CLUSTER_INSTALL)) {
@@ -109,13 +109,13 @@ public class FreeIpaPostInstallService {
         hostOrchestrator.postServiceDeploymentRecipes(primaryGatewayConfig, allNodes, new StackBasedExitCriteriaModel(stack.getId()));
     }
 
-    private void setInitialFreeIpaPolicies(FreeIpaClient freeIpaClient) throws Exception {
+    private void setInitialFreeIpaPolicies(Stack stack, FreeIpaClient freeIpaClient) throws Exception {
         Set<Permission> permission = freeIpaClient.findPermission(SET_PASSWORD_EXPIRATION_PERMISSION);
         if (permission.isEmpty()) {
             freeIpaClient.addPasswordExpirationPermission(SET_PASSWORD_EXPIRATION_PERMISSION);
         }
         freeIpaClient.addPermissionToPrivilege(USER_ADMIN_PRIVILEGE, SET_PASSWORD_EXPIRATION_PERMISSION);
-        freeIpaPermissionService.setPermissions(freeIpaClient);
+        freeIpaPermissionService.setPermissions(stack, freeIpaClient);
         if (!Objects.equals(MAX_USERNAME_LENGTH, freeIpaClient.getUsernameLength())) {
             LOGGER.debug("Set maximum username length to {}", MAX_USERNAME_LENGTH);
             freeIpaClient.setUsernameLength(MAX_USERNAME_LENGTH);

@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.aws.util.poller.Poller;
+import com.sequenceiq.cloudbreak.polling.Poller;
 
 @Component
 public class UpgradeStartPoller {

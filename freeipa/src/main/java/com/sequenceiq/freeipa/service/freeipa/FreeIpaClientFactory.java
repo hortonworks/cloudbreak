@@ -173,6 +173,11 @@ public class FreeIpaClientFactory {
         return getFreeIpaClient(stack.getId(), false, false, Optional.empty());
     }
 
+    public FreeIpaClient getFreeIpaClientForInstance(Stack stack, String fqdn) throws FreeIpaClientException {
+        LOGGER.debug("Creating FreeIpaClient for stack {}", stack.getResourceCrn());
+        return getFreeIpaClient(stack.getId(), false, false, Optional.of(fqdn));
+    }
+
     public FreeIpaClient getFreeIpaClientForStackForLegacyHealthCheck(Stack stack, String freeIpaFqdn) throws FreeIpaClientException {
         LOGGER.debug("Creating FreeIpaClient for legacy health checks for stack {} for {}", stack.getResourceCrn(), freeIpaFqdn);
         return getFreeIpaClient(stack.getId(), true, true, Optional.of(freeIpaFqdn));

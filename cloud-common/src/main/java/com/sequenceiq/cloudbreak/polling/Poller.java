@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.util.poller;
+package com.sequenceiq.cloudbreak.polling;
 
 import java.util.concurrent.TimeUnit;
 
