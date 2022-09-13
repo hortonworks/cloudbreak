@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.flow.dr.backup.event;
 
+import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -33,8 +34,9 @@ public class DatalakeTriggerBackupEvent extends DatalakeDatabaseDrStartBaseEvent
             @JsonProperty("backupName") String backupName,
             @JsonProperty("skipOptions") DatalakeDrSkipOptions skipOptions,
             @JsonProperty("reason") DatalakeBackupFailureReason reason,
+            @JsonProperty("skipDatabaseNames") List<String> skipDatabaseNames,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
-        super(selector, sdxId, userId, SdxOperationType.BACKUP, accepted);
+        super(selector, sdxId, userId, SdxOperationType.BACKUP, skipDatabaseNames, accepted);
         this.backupLocation = backupLocation;
         this.backupName = backupName;
         this.skipOptions = skipOptions;
@@ -42,8 +44,8 @@ public class DatalakeTriggerBackupEvent extends DatalakeDatabaseDrStartBaseEvent
     }
 
     public DatalakeTriggerBackupEvent(String selector, Long sdxId, String userId, String backupLocation, String backupName,
-            DatalakeBackupFailureReason reason, DatalakeDrSkipOptions skipOptions) {
-        super(selector, sdxId, userId, SdxOperationType.BACKUP);
+            DatalakeBackupFailureReason reason, DatalakeDrSkipOptions skipOptions, List<String> skipDatabaseNames) {
+        super(selector, sdxId, userId, SdxOperationType.BACKUP, skipDatabaseNames);
         this.backupLocation = backupLocation;
         this.backupName = backupName;
         this.reason = reason;

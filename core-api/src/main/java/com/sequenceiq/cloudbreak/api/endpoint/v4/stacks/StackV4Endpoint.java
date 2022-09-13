@@ -522,6 +522,7 @@ public interface StackV4Endpoint {
     @ApiOperation(value = DATABASE_BACKUP, nickname = "databaseBackup")
     BackupV4Response backupDatabaseByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
+            @QueryParam("skipDatabaseNames") List<String> skipDatabaseNames,
             @AccountId @QueryParam("accountId") String accountId);
 
     @POST
@@ -530,7 +531,8 @@ public interface StackV4Endpoint {
     @ApiOperation(value = DATABASE_BACKUP_INTERNAL, nickname = "databaseBackupInternal")
     BackupV4Response backupDatabaseByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupId") String backupId, @QueryParam("backupLocation") String backupLocation,
-            @QueryParam("closeConnections") boolean closeConnections, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("closeConnections") boolean closeConnections,
+            @QueryParam("skipDatabaseNames") List<String> skipDatabaseNames, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST
     @Path("{name}/database_restore")
