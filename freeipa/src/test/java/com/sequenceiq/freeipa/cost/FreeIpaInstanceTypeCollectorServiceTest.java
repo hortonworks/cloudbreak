@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.cost;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -65,6 +66,7 @@ public class FreeIpaInstanceTypeCollectorServiceTest {
         when(awsPricingCache.getPriceForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(0.5);
         when(awsPricingCache.getCpuCountForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(8);
         when(awsPricingCache.getMemoryForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(16);
+        when(awsPricingCache.getStoragePricePerGBHour(REGION, "standard")).thenReturn(MAGIC_PRICE_PER_DISK_GB);
         when(credentialService.getCredentialByEnvCrn(any())).thenReturn(getCredential("AWS"));
 
         ClusterCostDto clusterCostDto = underTest.getAllInstanceTypes(getStack("AWS"));
@@ -77,6 +79,7 @@ public class FreeIpaInstanceTypeCollectorServiceTest {
         when(azurePricingCache.getPriceForInstanceType(REGION, INSTANCE_TYPE)).thenReturn(0.5);
         when(azurePricingCache.getCpuCountForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(8);
         when(azurePricingCache.getMemoryForInstanceType(eq(REGION), eq(INSTANCE_TYPE), any())).thenReturn(16);
+        when(azurePricingCache.getStoragePricePerGBHour(eq(REGION), eq("standard"), anyInt())).thenReturn(MAGIC_PRICE_PER_DISK_GB);
         when(credentialService.getCredentialByEnvCrn(any())).thenReturn(getCredential("AZURE"));
 
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
@@ -94,9 +97,10 @@ public class FreeIpaInstanceTypeCollectorServiceTest {
         Assertions.assertEquals(8, instanceGroupCostDto.getCoresPerInstance());
         Assertions.assertEquals(16, instanceGroupCostDto.getMemoryPerInstance());
         Assertions.assertEquals(1.0, instanceGroupCostDto.getTotalClouderaPrice());
-        DiskCostDto diskCostDto = instanceGroupCostDto.getDisksPerInstance().get(0);
-        Assertions.assertEquals(500, diskCostDto.getTotalDiskSizeInGb());
-        Assertions.assertEquals(MAGIC_PRICE_PER_DISK_GB * 2 * 250, diskCostDto.getTotalDiskPrice());
+        DiskCostDto diskCostDto1 = instanceGroupCostDto.getDisksPerInstance().get(0);
+        DiskCostDto diskCostDto2 = instanceGroupCostDto.getDisksPerInstance().get(1);
+        Assertions.assertEquals(750, diskCostDto1.getTotalDiskSizeInGb() + diskCostDto2.getTotalDiskSizeInGb());
+        Assertions.assertEquals(MAGIC_PRICE_PER_DISK_GB * 3 * 250, diskCostDto1.getTotalDiskPrice() + diskCostDto2.getTotalDiskPrice(), 0.001);
     }
 
     private Stack getStack(String cloudPlatform) {
@@ -115,6 +119,8 @@ public class FreeIpaInstanceTypeCollectorServiceTest {
         template.setInstanceType(INSTANCE_TYPE);
         template.setVolumeCount(2);
         template.setRootVolumeSize(250);
+        template.setVolumeSize(250);
+        template.setVolumeType("standard");
         instanceGroup.setTemplate(template);
         instanceGroup.setInstanceMetaData(Set.of(new InstanceMetaData(), new InstanceMetaData()));
         return instanceGroup;

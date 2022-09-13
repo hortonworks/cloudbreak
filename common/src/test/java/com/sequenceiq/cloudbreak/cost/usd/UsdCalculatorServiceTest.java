@@ -34,10 +34,7 @@ public class UsdCalculatorServiceTest {
 
     private ClusterCostDto getClusterCostDto() {
         // provider cost per disk: 2 * 100 * 0,01 = 2.00
-        DiskCostDto diskCostDto = new DiskCostDto();
-        diskCostDto.setCount(2);
-        diskCostDto.setSize(100);
-        diskCostDto.setPricePerDiskGB(0.01);
+        DiskCostDto diskCostDto = new DiskCostDto(2, 100, 0.01);
 
         // provider cost per instance group: (6 * 0.50) + 2.00 = 5.00
         InstanceGroupCostDto instanceGroupCostDto = new InstanceGroupCostDto();

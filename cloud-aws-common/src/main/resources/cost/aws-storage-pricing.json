@@ -1,0 +1,137 @@
+{
+  "ap-south-1": {
+    "st1": 0.051,
+    "standard": 0.05,
+    "gp2": 0.114
+  },
+  "eu-south-1": {
+    "st1": 0.0525,
+    "standard": 0.0525,
+    "gp2": 0.1155
+  },
+  "eu-south-2": {
+    "st1": 0.05,
+    "standard": 0.05,
+    "gp2": 0.11
+  },
+  "us-gov-east-1": {
+    "st1": 0.054,
+    "standard": 0.066,
+    "gp2": 0.12
+  },
+  "me-central-1": {
+    "st1": 0.055,
+    "standard": 0.055,
+    "gp2": 0.121
+  },
+  "ca-central-1": {
+    "st1": 0.05,
+    "standard": 0.055,
+    "gp2": 0.11
+  },
+  "eu-central-1": {
+    "st1": 0.054,
+    "standard": 0.054,
+    "gp2": 0.119
+  },
+  "eu-central-2": {
+    "st1": 0.065,
+    "standard": 0.059,
+    "gp2": 0.143
+  },
+  "us-west-1": {
+    "st1": 0.054,
+    "standard": 0.055,
+    "gp2": 0.12
+  },
+  "us-west-2": {
+    "st1": 0.045,
+    "standard": 0.05,
+    "gp2": 0.1
+  },
+  "af-south-1": {
+    "st1": 0.0595,
+    "standard": 0.0595,
+    "gp2": 0.1309
+  },
+  "eu-north-1": {
+    "st1": 0.0475,
+    "standard": 0.0475,
+    "gp2": 0.1045
+  },
+  "eu-west-3": {
+    "st1": 0.053,
+    "standard": 0.053,
+    "gp2": 0.116
+  },
+  "eu-west-2": {
+    "st1": 0.053,
+    "standard": 0.053,
+    "gp2": 0.116
+  },
+  "eu-west-1": {
+    "st1": 0.05,
+    "standard": 0.05,
+    "gp2": 0.11
+  },
+  "ap-northeast-3": {
+    "st1": 0.054,
+    "standard": 0.05,
+    "gp2": 0.12
+  },
+  "ap-northeast-2": {
+    "st1": 0.051,
+    "standard": 0.05,
+    "gp2": 0.114
+  },
+  "ap-northeast-1": {
+    "st1": 0.054,
+    "standard": 0.05,
+    "gp2": 0.12
+  },
+  "me-south-1": {
+    "st1": 0.055,
+    "standard": 0.055,
+    "gp2": 0.121
+  },
+  "sa-east-1": {
+    "st1": 0.086,
+    "standard": 0.068,
+    "gp2": 0.19
+  },
+  "ap-east-1": {
+    "st1": 0.0594,
+    "standard": 0.055,
+    "gp2": 0.132
+  },
+  "us-gov-west-1": {
+    "st1": 0.054,
+    "standard": 0.066,
+    "gp2": 0.12
+  },
+  "ap-southeast-1": {
+    "st1": 0.054,
+    "standard": 0.05,
+    "gp2": 0.12
+  },
+  "ap-southeast-2": {
+    "st1": 0.054,
+    "standard": 0.055,
+    "gp2": 0.12
+  },
+  "ap-southeast-3": {
+    "st1": 0.054,
+    "standard": 0.05,
+    "gp2": 0.12
+  },
+  "us-east-1": {
+    "st1": 0.045,
+    "standard": 0.05,
+    "gp2": 0.1
+  },
+  "us-east-2": {
+    "st1": 0.045,
+    "standard": 0.05,
+    "gp2": 0.1
+  }
+}

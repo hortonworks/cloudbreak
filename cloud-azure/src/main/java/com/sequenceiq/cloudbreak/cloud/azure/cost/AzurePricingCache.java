@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.cost;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -17,10 +18,12 @@ import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.cost.model.PriceResponse;
@@ -29,7 +32,9 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.cost.model.PricingCacheKey;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Service("azurePricingCache")
@@ -39,6 +44,10 @@ public class AzurePricingCache {
 
     private static final String PRICING_API_REQUEST_TEMPLATE = "https://prices.azure.com/api/retail/prices?$filter=%s";
 
+    private static final String AZURE_STORAGE_PRICING_JSON_LOCATION = "cost/azure-storage-pricing.json";
+
+    private static final String AZURE_DISK_SIZES_JSON_LOCATION = "cost/azure-disk-sizes.json";
+
     private static final int MAX_ATTEMPTS = 5;
 
     private static final int BACKOFF_DELAY = 500;
@@ -47,11 +56,17 @@ public class AzurePricingCache {
 
     private static final int CACHE_RETENTION_IN_MINUTES = 5;
 
+    private static final int HOURS_IN_30_DAYS = 720;
+
     private final Client client = ClientBuilder.newClient();
 
     private final Cache<PricingCacheKey, PriceResponse> priceCache;
 
     private final Cache<PricingCacheKey, VmTypeMeta> vmCache;
+
+    private final Map<String, Map<String, Double>> storagePricingCache;
+
+    private final Map<String, Map<String, Map<String, Integer>>> azureDiskSizes;
 
     @Inject
     private CloudParameterService cloudParameterService;
@@ -65,12 +80,43 @@ public class AzurePricingCache {
                 .maximumSize(CACHE_MAX_SIZE)
                 .expireAfterAccess(Duration.ofMinutes(CACHE_RETENTION_IN_MINUTES))
                 .build();
+        this.storagePricingCache = loadStoragePricing();
+        this.azureDiskSizes = loadAzureDiskSizes();
+    }
+
+    private static Map<String, Map<String, Double>> loadStoragePricing() {
+        ClassPathResource classPathResource = new ClassPathResource(AZURE_STORAGE_PRICING_JSON_LOCATION);
+        if (classPathResource.exists()) {
+            try {
+                String json = FileReaderUtils.readFileFromClasspath(AZURE_STORAGE_PRICING_JSON_LOCATION);
+                return JsonUtil.readValue(json, new TypeReference<>() {
+                });
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to load Azure storage price json!", e);
+            }
+        }
+        throw new RuntimeException("Failed to load Azure storage price json!");
+    }
+
+    private static Map<String, Map<String, Map<String, Integer>>> loadAzureDiskSizes() {
+        ClassPathResource classPathResource = new ClassPathResource(AZURE_DISK_SIZES_JSON_LOCATION);
+        if (classPathResource.exists()) {
+            try {
+                String json = FileReaderUtils.readFileFromClasspath(AZURE_DISK_SIZES_JSON_LOCATION);
+                return JsonUtil.readValue(json, new TypeReference<>() {
+                });
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to load Azure disk size json!", e);
+            }
+        }
+        throw new RuntimeException("Failed to load Azure disk size json!");
     }
 
     public double getPriceForInstanceType(String region, String instanceType) {
         PriceResponse priceResponse = getPriceResponse(region, instanceType);
-        return priceResponse.getItems().stream().findFirst().orElseThrow(() -> new NotFoundException(
-                String.format("Couldn't find the price for the requested region [%s] and instance type [%s] combination!", region, instanceType)))
+        return priceResponse.getItems().stream().findFirst()
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Couldn't find the price for the requested region [%s] and instance type [%s] combination!", region, instanceType)))
                 .getRetailPrice();
     }
 
@@ -82,6 +128,25 @@ public class AzurePricingCache {
     public int getMemoryForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential) {
         VmTypeMeta instanceTypeMetadata = getVmMetadata(region, instanceType, extendedCloudCredential);
         return instanceTypeMetadata.getMemoryInGb().intValue();
+    }
+
+    public double getStoragePricePerGBHour(String region, String storageType, int volumeSize) {
+        Map<String, Double> pricesForRegion = storagePricingCache.get(region);
+        String specificVolumeType = getAzureStorageTypeBySize(storageType, volumeSize);
+        return pricesForRegion.get(specificVolumeType) / HOURS_IN_30_DAYS;
+    }
+
+    private String getAzureStorageTypeBySize(String volumeType, int volumeSize) {
+        Map<String, Map<String, Integer>> specificVolumeTypes = azureDiskSizes.get(volumeType);
+        if (specificVolumeTypes == null) {
+            throw new NotFoundException(String.format("Specific volume type not found for volume type %s", volumeType));
+        }
+        for (Map.Entry<String, Map<String, Integer>> entry : specificVolumeTypes.entrySet()) {
+            if (volumeSize > entry.getValue().get("minSize") && volumeSize <= entry.getValue().get("maxSize")) {
+                return entry.getKey();
+            }
+        }
+        throw new NotFoundException(String.format("Specific volume type not found for volume type %s and size %d", volumeType, volumeSize));
     }
 
     private PriceResponse getPriceResponse(String region, String instanceType) {

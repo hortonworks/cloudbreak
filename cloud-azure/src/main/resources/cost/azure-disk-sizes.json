@@ -1,0 +1,164 @@
+{
+  "PremiumSSD_LRS": {
+    "p1": {
+      "minSize": 0,
+      "maxSize": 4
+    },
+    "p2": {
+      "minSize": 4,
+      "maxSize": 8
+    },
+    "p3": {
+      "minSize": 8,
+      "maxSize": 16
+    },
+    "p4": {
+      "minSize": 16,
+      "maxSize": 32
+    },
+    "p6": {
+      "minSize": 32,
+      "maxSize": 64
+    },
+    "p10": {
+      "minSize": 64,
+      "maxSize": 128
+    },
+    "p15": {
+      "minSize": 128,
+      "maxSize": 256
+    },
+    "p20": {
+      "minSize": 256,
+      "maxSize": 512
+    },
+    "p30": {
+      "minSize": 512,
+      "maxSize": 1024
+    },
+    "p40": {
+      "minSize": 1024,
+      "maxSize": 2048
+    },
+    "p50": {
+      "minSize": 2048,
+      "maxSize": 4096
+    },
+    "p60": {
+      "minSize": 4096,
+      "maxSize": 8192
+    },
+    "p70": {
+      "minSize": 8192,
+      "maxSize": 16384
+    },
+    "p80": {
+      "minSize": 16384,
+      "maxSize": 32767
+    }
+  },
+  "StandardSSD_LRS": {
+    "e1": {
+      "minSize": 0,
+      "maxSize": 4
+    },
+    "e2": {
+      "minSize": 4,
+      "maxSize": 8
+    },
+    "e3": {
+      "minSize": 8,
+      "maxSize": 16
+    },
+    "e4": {
+      "minSize": 16,
+      "maxSize": 32
+    },
+    "e6": {
+      "minSize": 32,
+      "maxSize": 64
+    },
+    "e10": {
+      "minSize": 64,
+      "maxSize": 128
+    },
+    "e15": {
+      "minSize": 128,
+      "maxSize": 256
+    },
+    "e20": {
+      "minSize": 256,
+      "maxSize": 512
+    },
+    "e30": {
+      "minSize": 512,
+      "maxSize": 1024
+    },
+    "e40": {
+      "minSize": 1024,
+      "maxSize": 2048
+    },
+    "e50": {
+      "minSize": 2048,
+      "maxSize": 4096
+    },
+    "e60": {
+      "minSize": 4096,
+      "maxSize": 8192
+    },
+    "e70": {
+      "minSize": 8192,
+      "maxSize": 16384
+    },
+    "e80": {
+      "minSize": 16384,
+      "maxSize": 32767
+    }
+  },
+  "StandardHDD": {
+    "s4": {
+      "minSize": 16,
+      "maxSize": 32
+    },
+    "s6": {
+      "minSize": 32,
+      "maxSize": 64
+    },
+    "s10": {
+      "minSize": 64,
+      "maxSize": 128
+    },
+    "s15": {
+      "minSize": 128,
+      "maxSize": 256
+    },
+    "s20": {
+      "minSize": 256,
+      "maxSize": 512
+    },
+    "s30": {
+      "minSize": 512,
+      "maxSize": 1024
+    },
+    "s40": {
+      "minSize": 1024,
+      "maxSize": 2048
+    },
+    "s50": {
+      "minSize": 2048,
+      "maxSize": 4096
+    },
+    "s60": {
+      "minSize": 4096,
+      "maxSize": 8192
+    },
+    "s70": {
+      "minSize": 8192,
+      "maxSize": 16384
+    },
+    "s80": {
+      "minSize": 16384,
+      "maxSize": 32767
+    }
+  }
+}
