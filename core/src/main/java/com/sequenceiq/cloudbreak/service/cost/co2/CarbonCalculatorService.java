@@ -3,11 +3,11 @@ package com.sequenceiq.cloudbreak.service.cost.co2;
 import java.util.Map;
 
 import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.cost.service.RegionEmissionFactorService;
 import com.sequenceiq.cloudbreak.service.cost.InstanceTypeCollectorService;
 
 // CHECKSTYLE:OFF
@@ -21,9 +21,14 @@ public class CarbonCalculatorService {
     private static final double CO2_RATE_CALIFORNIA = 347;
 
     @Inject
+    private RegionEmissionFactorService regionEmissionFactorService;
+
+    @Inject
     private InstanceTypeCollectorService instanceTypeCollectorService;
 
     public double getHourlyCarbonFootPrintByCrn(String crn) {
+        LOGGER.info("Demonstrte that emission-factor works: {}", regionEmissionFactorService.get("us-east-1"));
+
         LOGGER.info("Calculating CO2FP for resource: {}", crn);
         //filter nodes that are not in available status
         Map<String, Long> instanceTypeList = instanceTypeCollectorService.getAllInstanceTypesByCrn(crn);
