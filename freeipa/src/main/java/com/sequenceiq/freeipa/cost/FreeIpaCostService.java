@@ -1,6 +1,7 @@
-package com.sequenceiq.cloudbreak.service.cost;
+package com.sequenceiq.freeipa.cost;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -13,9 +14,10 @@ import com.sequenceiq.cloudbreak.common.cost.RealTimeCost;
 import com.sequenceiq.cloudbreak.cost.co2.CarbonCalculatorService;
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
 import com.sequenceiq.cloudbreak.cost.usd.UsdCalculatorService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 
 @Service
-public class ClusterCostService {
+public class FreeIpaCostService {
 
     private static final double MAGIC_PROVIDER_COST = 5.3;
 
@@ -28,17 +30,16 @@ public class ClusterCostService {
     private UsdCalculatorService usdCalculatorService;
 
     @Inject
-    private InstanceTypeCollectorService instanceTypeCollectorService;
+    private FreeIpaInstanceTypeCollectorService instanceTypeCollectorService;
 
-    public Map<String, RealTimeCost> getCosts(StackViewV4Responses responses) {
+    public Map<String, RealTimeCost> getCosts(List<ListFreeIpaResponse> responses) {
         Map<String, RealTimeCost> realTimeCosts = new HashMap<>();
 
         //TODO Ricsi / Laci code comes here
-        for (StackViewV4Response stack : responses.getResponses()) {
+        for (ListFreeIpaResponse stack : responses) {
             ClusterCostDto clusterCost = instanceTypeCollectorService.getAllInstanceTypesByCrn(stack.getCrn());
             RealTimeCost realTimeCost = new RealTimeCost();
             realTimeCost.setEnvCrn(stack.getEnvironmentCrn());
-            realTimeCost.setResourceName(stack.getName());
             realTimeCost.setHourlyProviderUsd(usdCalculatorService.calculateProviderCost(clusterCost));
             realTimeCost.setHourlyClouderaUsd(usdCalculatorService.calculateClouderaCost(clusterCost));
             realTimeCost.setHourlyCO2(carbonCalculatorService.getHourlyCarbonFootPrintByCrn(clusterCost));

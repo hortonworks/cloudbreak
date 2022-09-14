@@ -3,18 +3,13 @@ package com.sequenceiq.cloudbreak.service.cost.co2;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.cost.co2.CarbonCalculatorService;
 import com.sequenceiq.cloudbreak.service.cost.InstanceTypeCollectorService;
 
 @ExtendWith(MockitoExtension.class)

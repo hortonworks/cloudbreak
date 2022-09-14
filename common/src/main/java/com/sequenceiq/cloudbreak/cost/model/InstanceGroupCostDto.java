@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cost.model;
+package com.sequenceiq.cloudbreak.cost.model;
 
 import java.util.List;
 
@@ -20,6 +20,14 @@ public class InstanceGroupCostDto {
 
     public int getTotalvCpuCores() {
         return coresPerInstance * count;
+    }
+
+    public double getTotalProviderPrice() {
+        return pricePerInstance * count;
+    }
+
+    public double getTotalClouderaPrice() {
+        return clouderaPricePerInstance * count;
     }
 
     public String getType() {
