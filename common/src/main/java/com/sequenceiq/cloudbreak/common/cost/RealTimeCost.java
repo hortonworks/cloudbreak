@@ -8,22 +8,20 @@ public class RealTimeCost implements Serializable {
 
     private String resourceName;
 
-    private Double hourlyProviderUsd;
+    private String type;
 
-    private Double hourlyClouderaUsd;
+    private double hourlyProviderUsd;
 
-    private Double hourlyCO2;
+    private double hourlyClouderaUsd;
 
-    public RealTimeCost() {
+    private double hourlyCO2;
 
+    public String getType() {
+        return type;
     }
 
-    public RealTimeCost(String envCrn, String resourceName, Double hourlyProviderUsd, Double hourlyClouderaUsd, Double hourlyCO2) {
-        this.envCrn = envCrn;
-        this.resourceName = resourceName;
-        this.hourlyProviderUsd = hourlyProviderUsd;
-        this.hourlyClouderaUsd = hourlyClouderaUsd;
-        this.hourlyCO2 = hourlyCO2;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getEnvCrn() {
@@ -42,34 +40,28 @@ public class RealTimeCost implements Serializable {
         this.resourceName = resourceName;
     }
 
-    public Double getHourlyProviderUsd() {
+    public double getHourlyProviderUsd() {
         return hourlyProviderUsd;
     }
 
-    public void setHourlyProviderUsd(Double hourlyProviderUsd) {
+    public void setHourlyProviderUsd(double hourlyProviderUsd) {
         this.hourlyProviderUsd = hourlyProviderUsd;
     }
 
-    public Double getHourlyClouderaUsd() {
+    public double getHourlyClouderaUsd() {
         return hourlyClouderaUsd;
     }
 
-    public void setHourlyClouderaUsd(Double hourlyClouderaUsd) {
+    public void setHourlyClouderaUsd(double hourlyClouderaUsd) {
         this.hourlyClouderaUsd = hourlyClouderaUsd;
     }
 
-    public Double getHourlyCO2() {
+    public double getHourlyCO2() {
         return hourlyCO2;
     }
 
-    public void setHourlyCO2(Double hourlyCO2) {
+    public void setHourlyCO2(double hourlyCO2) {
         this.hourlyCO2 = hourlyCO2;
     }
 
-    public RealTimeCost add(RealTimeCost o1) {
-        this.hourlyProviderUsd += o1.hourlyProviderUsd;
-        this.hourlyClouderaUsd += o1.hourlyClouderaUsd;
-        this.hourlyCO2 += o1.hourlyCO2;
-        return this;
-    }
 }

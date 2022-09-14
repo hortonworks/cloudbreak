@@ -34,6 +34,7 @@ public class StackApiViewToStackViewV4ResponseConverter {
             stackViewResponse.setCluster(clusterApiViewToClusterViewV4ResponseConverter
                     .convert(source.getCluster()));
         }
+        stackViewResponse.setType(source.getType());
         stackViewResponse.setTunnel(source.getTunnel());
         stackViewResponse.setNodeCount(source.getNodeCount());
         stackViewResponse.setStatus(source.getStatus());

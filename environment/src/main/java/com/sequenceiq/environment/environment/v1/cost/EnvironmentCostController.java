@@ -10,6 +10,7 @@ import javax.transaction.Transactional;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.cloudbreak.common.cost.EnvironmentRealTimeCostResponse;
 import com.sequenceiq.cloudbreak.common.cost.RealTimeCostResponse;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentCostV1Endpoint;
@@ -31,8 +32,8 @@ public class EnvironmentCostController implements EnvironmentCostV1Endpoint {
 
     @Override
     @FilterListBasedOnPermissions
-    public RealTimeCostResponse list() {
+    public EnvironmentRealTimeCostResponse list() {
         List<EnvironmentDto> environmentDtos = environmentFiltering.filterEnvironments(DESCRIBE_ENVIRONMENT);
-        return new RealTimeCostResponse(environmentCostService.getCosts(environmentDtos));
+        return new EnvironmentRealTimeCostResponse(environmentCostService.getCosts(environmentDtos));
     }
 }

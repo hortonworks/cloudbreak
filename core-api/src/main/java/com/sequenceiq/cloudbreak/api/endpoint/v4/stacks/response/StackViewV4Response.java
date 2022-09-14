@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
@@ -69,6 +70,8 @@ public class StackViewV4Response implements JsonEntity {
 
     @ApiModelProperty(StackModelDescription.EXTERNAL_DATABASE)
     private DatabaseResponse externalDatabase;
+
+    private StackType type;
 
     public String getCrn() {
         return crn;
@@ -222,6 +225,14 @@ public class StackViewV4Response implements JsonEntity {
         this.externalDatabase = externalDatabase;
     }
 
+    public StackType getType() {
+        return type;
+    }
+
+    public void setType(StackType type) {
+        this.type = type;
+    }
+
     @Override
     public String toString() {
         return "StackViewV4Response{" +
@@ -244,6 +255,7 @@ public class StackViewV4Response implements JsonEntity {
                 ", stackVersion='" + stackVersion + '\'' +
                 ", upgradeable=" + upgradeable +
                 ", externalDatabase=" + externalDatabase +
+                ", type=" + type +
                 '}';
     }
 }
