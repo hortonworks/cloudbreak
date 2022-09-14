@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.upgrade.database;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -177,6 +178,24 @@ public class SdxDatabaseServerUpgradeServiceTest {
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(String.format("The database upgrade of Data Lake %s is not permitted for runtime version tooLow. The minimum supported runtime " +
                         "version is minimumVersion", SDX_CLUSTER_NAME));
+    }
+
+    @Test
+    void testUpgradeWhenUpgradeCheckThrowsExceptionThenNotTriggered() {
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        SdxCluster sdxCluster = getSdxCluster();
+        when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
+        SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);
+        when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(sdxCluster, targetMajorVersion)).thenReturn(true);
+        when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any())).thenReturn(true);
+        doThrow(new BadRequestException("badrequest")).when(cloudbreakStackService).checkUpgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion);
+
+        Assertions.assertThatCode(() -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("badrequest");
+
+        verify(reactorFlowManager, never()).triggerDatabaseServerUpgradeFlow(any(), any());
     }
 
     @Test

@@ -51,6 +51,20 @@ public class CloudbreakStackService {
         }
     }
 
+    public void checkUpgradeRdsByClusterNameInternal(SdxCluster sdxCluster, TargetMajorVersion targetMajorVersion) {
+        try {
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+            ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> stackV4Endpoint.checkUpgradeRdsByClusterNameInternal(WORKSPACE_ID, sdxCluster.getClusterName(), targetMajorVersion,
+                            initiatorUserCrn));
+        } catch (RuntimeException e) {
+            String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
+            String message = "Rds upgrade validation failed: " + exceptionMessage;
+            LOGGER.warn(message);
+            throw new CloudbreakApiException(message, e);
+        }
+    }
+
     public RdsUpgradeV4Response upgradeRdsByClusterNameInternal(SdxCluster sdxCluster, TargetMajorVersion targetMajorVersion) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         try {

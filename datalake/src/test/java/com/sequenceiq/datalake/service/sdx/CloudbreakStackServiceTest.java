@@ -1,7 +1,9 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -44,7 +46,9 @@ public class CloudbreakStackServiceTest {
 
     private static final long WORKSPACE_ID = 0L;
 
-    private static final String USER_CRN = "userCrn";
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
+
+    private static final String ERROR_MSG = "error";
 
     @Mock
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -119,6 +123,33 @@ public class CloudbreakStackServiceTest {
 
             verify(cloudbreakFlowService, never()).saveLastCloudbreakFlowChainId(any(), any());
         }
+    }
+
+    @Test
+    void testCheckUpgradeRdsByClusterNameInternal() {
+        SdxCluster sdxCluster = setupSdxCluster();
+        setupIam();
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.checkUpgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion));
+
+        verify(stackV4Endpoint).checkUpgradeRdsByClusterNameInternal(WORKSPACE_ID, sdxCluster.getName(), targetMajorVersion, USER_CRN);
+    }
+
+    @Test
+    void testCheckUpgradeRdsByClusterNameInternalThrowsException() {
+        SdxCluster sdxCluster = setupSdxCluster();
+        setupIam();
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        when(exceptionMessageExtractor.getErrorMessage(any(Exception.class))).thenReturn(ERROR_MSG);
+        doThrow(new RuntimeException(ERROR_MSG)).when(stackV4Endpoint)
+                .checkUpgradeRdsByClusterNameInternal(WORKSPACE_ID, sdxCluster.getName(), targetMajorVersion, USER_CRN);
+
+        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.checkUpgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion)))
+                .isInstanceOf(CloudbreakApiException.class)
+                .hasCauseInstanceOf(RuntimeException.class)
+                .hasRootCauseMessage(ERROR_MSG)
+                .hasMessage("Rds upgrade validation failed: " + ERROR_MSG);
     }
 
     private static RdsUpgradeV4Response setupResponse(FlowIdentifier flowIdentifier) {

@@ -77,6 +77,8 @@ public class OperationDescriptions {
         public static final String CHECK_STACK_UPGRADE = "Checks for upgrade options by name";
         public static final String STACK_UPGRADE = "Upgrades a cluster to the latest CM or CDH version";
         public static final String STACK_UPGRADE_INTERNAL = "Upgrades a cluster to the latest CM or CDH version, internal only";
+        public static final String CHECK_RDS_UPGRADE_INTERNAL =
+                "Checks that upgrade of the external database of a cluster to a given version is possible, internal only";
         public static final String RDS_UPGRADE_INTERNAL = "Upgrades the external database of a cluster to a given version, internal only";
         public static final String LIST_RETRYABLE_FLOWS = "List retryable failed flows";
         public static final String DATABASE_BACKUP = "Performs a backup of the database to a provided location";
