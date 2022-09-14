@@ -4,6 +4,7 @@ public class RegionEmissionFactor {
 
     private String region;
 
+    // tCo2/h/kwh
     private double co2e;
 
     private String country;
