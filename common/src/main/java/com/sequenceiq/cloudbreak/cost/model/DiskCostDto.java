@@ -6,6 +6,12 @@ public class DiskCostDto {
 
     private int count;
 
+    private double pricePerDiskGB;
+
+    public double getTotalDiskPrice() {
+        return size * count * pricePerDiskGB;
+    }
+
     public int getSize() {
         return size;
     }
@@ -20,5 +26,13 @@ public class DiskCostDto {
 
     public void setCount(int count) {
         this.count = count;
+    }
+
+    public double getPricePerDiskGB() {
+        return pricePerDiskGB;
+    }
+
+    public void setPricePerDiskGB(double pricePerDiskGB) {
+        this.pricePerDiskGB = pricePerDiskGB;
     }
 }
