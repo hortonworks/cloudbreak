@@ -1,24 +1,24 @@
 package com.sequenceiq.cloudbreak.common.cost;
 
-import java.util.List;
+import java.util.Map;
 
 public class RealTimeCostResponse {
 
-    private List<RealTimeCost> cost;
+    private Map<String, RealTimeCost> cost;
 
     public RealTimeCostResponse() {
 
     }
 
-    public RealTimeCostResponse(List<RealTimeCost> cost) {
+    public RealTimeCostResponse(Map<String, RealTimeCost> cost) {
         this.cost = cost;
     }
 
-    public List<RealTimeCost> getCost() {
+    public Map<String, RealTimeCost> getCost() {
         return cost;
     }
 
-    public void setCost(List<RealTimeCost> cost) {
+    public void setCost(Map<String, RealTimeCost> cost) {
         this.cost = cost;
     }
 }
