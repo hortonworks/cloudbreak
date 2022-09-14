@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.api.CoreApi;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.cost.ClusterCostV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.DiagnosticsV4Endpoint;
@@ -23,7 +24,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoi
 import com.sequenceiq.cloudbreak.client.ApiClientRequestFilter;
 import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
-import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXCostV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXUpgradeV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
@@ -63,8 +63,8 @@ public class CloudbreakApiClientConfig {
 
     @Bean
     @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
-    DistroXCostV1Endpoint distroXCostV1Endpoint(WebTarget cloudbreakApiClientWebTarget) {
-        return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, DistroXCostV1Endpoint.class);
+    ClusterCostV4Endpoint clusterCostV1Endpoint(WebTarget cloudbreakApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, ClusterCostV4Endpoint.class);
     }
 
     @Bean
