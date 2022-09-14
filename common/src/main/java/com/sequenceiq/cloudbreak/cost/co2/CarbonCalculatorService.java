@@ -19,17 +19,19 @@ import com.sequenceiq.cloudbreak.cost.model.InstanceGroupCostDto;
 public class CarbonCalculatorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CarbonCalculatorService.class);
+
     //AWS min/max avg 2.12 Wh/vCPU
     private static final double AWS_AVG_VCPU = 2.12;
+
+    // W/GB
+    private static final double AWS_MEMORY_GB = 0.375;
 
     @Inject
     private RegionEmissionFactorService regionEmissionFactorService;
 
     public double getHourlyCarbonFootPrintByCrn(ClusterCostDto instanceTypeList) {
-        //filter nodes that are not in available status
         LOGGER.info("Collected instance types: {}", instanceTypeList);
-        double summarizedWhConsumption = calculateCpuInWh(instanceTypeList) + calculateDiskInWh() + calculateMemoryInWh();
-        // get cluster proper region for CO2 rate
+        double summarizedWhConsumption = calculateCpuInWh(instanceTypeList) + calculateMemoryInWh(instanceTypeList) + calculateDiskInWh();
         RegionEmissionFactor emissionFactor = getCo2RateForRegion(instanceTypeList);
         LOGGER.info("RegionEmissionFactor for region {} is: {}", instanceTypeList.getRegion(), emissionFactor);
         return summarizedWhConsumption / 1000.0 * emissionFactor.getCo2e() * 1000000.0;
@@ -46,9 +48,10 @@ public class CarbonCalculatorService {
         return 0;
     }
 
-    private double calculateMemoryInWh() {
-        LOGGER.info("Skipping Memory calculation and counting with 0");
-        return 0;
+    private double calculateMemoryInWh(ClusterCostDto dto) {
+        IntSummaryStatistics totalMemoryCountInGb = dto.getInstanceGroups().stream().collect(Collectors.summarizingInt(InstanceGroupCostDto::getTotalMemoryInGb));
+        LOGGER.info("Cluster memorySize in GB: {}", totalMemoryCountInGb);
+        return totalMemoryCountInGb.getSum() * AWS_MEMORY_GB;
     }
 
     private RegionEmissionFactor getCo2RateForRegion(ClusterCostDto dto) {

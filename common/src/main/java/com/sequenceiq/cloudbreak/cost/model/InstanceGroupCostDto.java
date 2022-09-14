@@ -22,6 +22,10 @@ public class InstanceGroupCostDto {
         return coresPerInstance * count;
     }
 
+    public int getTotalMemoryInGb() {
+        return memoryPerInstance * count;
+    }
+
     public double getTotalProviderPrice() {
         return pricePerInstance * count;
     }
@@ -84,5 +88,18 @@ public class InstanceGroupCostDto {
 
     public void setClouderaPricePerInstance(double clouderaPricePerInstance) {
         this.clouderaPricePerInstance = clouderaPricePerInstance;
+    }
+
+    @Override
+    public String toString() {
+        return "InstanceGroupCostDto{" +
+                "type='" + type + '\'' +
+                ", count=" + count +
+                ", coresPerInstance=" + coresPerInstance +
+                ", memoryPerInstance=" + memoryPerInstance +
+                ", pricePerInstance=" + pricePerInstance +
+                ", clouderaPricePerInstance=" + clouderaPricePerInstance +
+                ", disksPerInstance=" + disksPerInstance +
+                '}';
     }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 public class ClusterCostDto {
 
     private String region;
+    private List<InstanceGroupCostDto> instanceGroups;
 
     public List<InstanceGroupCostDto> getInstanceGroups() {
         return instanceGroups;
@@ -14,8 +15,6 @@ public class ClusterCostDto {
         this.instanceGroups = instanceGroups;
     }
 
-    private List<InstanceGroupCostDto> instanceGroups;
-
     public String getRegion() {
         return region;
     }
@@ -24,4 +23,11 @@ public class ClusterCostDto {
         this.region = region;
     }
 
+    @Override
+    public String toString() {
+        return "ClusterCostDto{" +
+                "region='" + region + '\'' +
+                ", instanceGroups=" + instanceGroups +
+                '}';
+    }
 }
