@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cost.banzai.BanzaiCache;
 import com.sequenceiq.cloudbreak.cost.cloudera.ClouderaCostCache;
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
+import com.sequenceiq.cloudbreak.cost.model.DiskCostDto;
 import com.sequenceiq.cloudbreak.cost.model.InstanceGroupCostDto;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -43,6 +44,13 @@ public class FreeIpaInstanceTypeCollectorService {
             instanceGroupCostDto.setClouderaPricePerInstance(clouderaCostCache.getPriceByType(instanceType));
             instanceGroupCostDto.setType(instanceType);
             instanceGroupCostDto.setCount(instanceGroup.getInstanceMetaData().size());
+
+            DiskCostDto diskCostDto = new DiskCostDto();
+            diskCostDto.setCount(instanceGroup.getTemplate().getVolumeCount());
+            diskCostDto.setSize(instanceGroup.getTemplate().getRootVolumeSize());
+            diskCostDto.setPricePerDiskGB(0.000138);
+            instanceGroupCostDto.setDisksPerInstance(List.of(diskCostDto));
+
             instanceGroupCostDtos.add(instanceGroupCostDto);
         }
         clusterCostDto.setInstanceGroups(instanceGroupCostDtos);

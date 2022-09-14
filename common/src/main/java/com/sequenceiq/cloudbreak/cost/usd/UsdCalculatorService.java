@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cost.usd;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
+import com.sequenceiq.cloudbreak.cost.model.DiskCostDto;
 import com.sequenceiq.cloudbreak.cost.model.InstanceGroupCostDto;
 
 @Service
@@ -12,6 +13,9 @@ public class UsdCalculatorService {
         double price = 0.0;
         for (InstanceGroupCostDto instanceGroup : clusterCostDto.getInstanceGroups()) {
             price += instanceGroup.getTotalProviderPrice();
+            for (DiskCostDto diskCostDto : instanceGroup.getDisksPerInstance()) {
+                price += diskCostDto.getTotalDiskPrice();
+            }
         }
         return price;
     }
@@ -19,7 +23,7 @@ public class UsdCalculatorService {
     public double calculateClouderaCost(ClusterCostDto clusterCostDto) {
         double price = 0.0;
         for (InstanceGroupCostDto instanceGroup : clusterCostDto.getInstanceGroups()) {
-            price += instanceGroup.getClouderaPricePerInstance();
+            price += instanceGroup.getTotalClouderaPrice();
         }
         return price;
     }

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cost.banzai.BanzaiCache;
 import com.sequenceiq.cloudbreak.cost.cloudera.ClouderaCostCache;
+import com.sequenceiq.cloudbreak.cost.model.DiskCostDto;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.repository.StackDtoRepository;
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
 import com.sequenceiq.cloudbreak.cost.model.InstanceGroupCostDto;
@@ -54,6 +56,17 @@ public class InstanceTypeCollectorService {
             instanceGroupCostDto.setClouderaPricePerInstance(clouderaCostCache.getPriceByType(instanceType));
             instanceGroupCostDto.setType(instanceType);
             instanceGroupCostDto.setCount(count);
+
+            List<DiskCostDto> diskCostDtos = new ArrayList<>();
+            for (VolumeTemplate volumeTemplate : instanceGroupView.getTemplate().getVolumeTemplates()) {
+                DiskCostDto diskCostDto = new DiskCostDto();
+                diskCostDto.setCount(volumeTemplate.getVolumeCount());
+                diskCostDto.setSize(volumeTemplate.getVolumeSize());
+                diskCostDto.setPricePerDiskGB(0.000138);
+                diskCostDtos.add(diskCostDto);
+            }
+            instanceGroupCostDto.setDisksPerInstance(diskCostDtos);
+
             instanceGroupCostDtos.add(instanceGroupCostDto);
         }
         clusterCostDto.setInstanceGroups(instanceGroupCostDtos);
