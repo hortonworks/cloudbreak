@@ -26,12 +26,8 @@ public class CarbonCalculatorService {
     @Inject
     private InstanceTypeCollectorService instanceTypeCollectorService;
 
-    public double getHourlyCarbonFootPrintByCrn(String crn) {
-        LOGGER.info("Demonstrte that emission-factor works: {}", regionEmissionFactorService.get("us-east-1"));
-
-        LOGGER.info("Calculating CO2FP for resource: {}", crn);
+    public double getHourlyCarbonFootPrintByCrn(Map<String, Long> instanceTypeList) {
         //filter nodes that are not in available status
-        Map<String, Long> instanceTypeList = instanceTypeCollectorService.getAllInstanceTypesByCrn(crn);
         LOGGER.info("Collected instnace types: {}", instanceTypeList);
         double summarizedWhConsumption = calculateCpuInWh() + calculateDiskInWh() + calculateMemoryInWh();
         // get cluster proper region for CO2 rate
