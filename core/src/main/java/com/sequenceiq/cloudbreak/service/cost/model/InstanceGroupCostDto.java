@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.cost.model;
 
 import java.util.List;
 
-public class Instance {
+public class InstanceGroupCostDto {
 
     private String type;
 
@@ -14,7 +14,7 @@ public class Instance {
 
     private double pricePerInstance;
 
-    private List<Disk> disksPerInstance;
+    private List<DiskCostDto> disksPerInstance;
 
     public String getType() {
         return type;
@@ -48,11 +48,11 @@ public class Instance {
         this.memoryPerInstance = memoryPerInstance;
     }
 
-    public List<Disk> getDisksPerInstance() {
+    public List<DiskCostDto> getDisksPerInstance() {
         return disksPerInstance;
     }
 
-    public void setDisksPerInstance(List<Disk> disksPerInstance) {
+    public void setDisksPerInstance(List<DiskCostDto> disksPerInstance) {
         this.disksPerInstance = disksPerInstance;
     }
 }

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cost.model;
 
-public class Disk {
+public class DiskCostDto {
 
     private int size;
 

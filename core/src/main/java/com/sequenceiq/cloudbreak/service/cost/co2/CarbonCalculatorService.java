@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.cost.service.RegionEmissionFactorService;
 import com.sequenceiq.cloudbreak.service.cost.InstanceTypeCollectorService;
+import com.sequenceiq.cloudbreak.service.cost.model.ClusterCostDto;
 
 // CHECKSTYLE:OFF
 @Service
@@ -26,7 +27,7 @@ public class CarbonCalculatorService {
     @Inject
     private InstanceTypeCollectorService instanceTypeCollectorService;
 
-    public double getHourlyCarbonFootPrintByCrn(Map<String, Long> instanceTypeList) {
+    public double getHourlyCarbonFootPrintByCrn(ClusterCostDto instanceTypeList) {
         //filter nodes that are not in available status
         LOGGER.info("Collected instnace types: {}", instanceTypeList);
         double summarizedWhConsumption = calculateCpuInWh() + calculateDiskInWh() + calculateMemoryInWh();
