@@ -154,7 +154,7 @@ freeipa:
       /bin/su
   permission.polling:
     interval: 20
-    delaymin: 5
+    delaymin: 15
 info:
   app:
     capabilities:
