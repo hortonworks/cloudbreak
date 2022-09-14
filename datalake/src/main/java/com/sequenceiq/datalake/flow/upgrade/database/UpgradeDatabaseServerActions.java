@@ -1,7 +1,7 @@
 package com.sequenceiq.datalake.flow.upgrade.database;
 
-import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_DATABASE_SERVER_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_DATABASE_SERVER_FINISHED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_DATABASE_SERVER_IN_PROGRESS;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_FAILED_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_FINALIZED_EVENT;
 
@@ -23,7 +23,9 @@ import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerEvent;
 import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerFailedEvent;
 import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerSuccessEvent;
+import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerWaitSuccessEvent;
 import com.sequenceiq.datalake.flow.upgrade.database.event.UpgradeDatabaseServerRequest;
+import com.sequenceiq.datalake.flow.upgrade.database.event.UpgradeDatabaseServerWaitRequest;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -40,7 +42,7 @@ public class UpgradeDatabaseServerActions {
     private SdxMetricService metricService;
 
     @Bean(name = "SDX_UPGRADE_DATABASE_SERVER_UPGRADE_STATE")
-    public Action<?, ?> upgradeDatabase() {
+    public Action<?, ?> callUpgradeDatabaseInCore() {
         return new AbstractUpgradeDatabaseServerSdxAction<>(SdxUpgradeDatabaseServerEvent.class) {
 
             @Override
@@ -59,12 +61,26 @@ public class UpgradeDatabaseServerActions {
         };
     }
 
-    @Bean(name = "SDX_UPGRADE_DATABASE_SERVER_FINISHED_STATE")
-    public Action<?, ?> finishedAction() {
+    @Bean(name = "SDX_UPGRADE_DATABASE_SERVER_WAIT_UPGRADE_STATE")
+    public Action<?, ?> waitForUpgradeDatabaseInCore() {
         return new AbstractUpgradeDatabaseServerSdxAction<>(SdxUpgradeDatabaseServerSuccessEvent.class) {
 
             @Override
             protected void doExecute(SdxContext context, SdxUpgradeDatabaseServerSuccessEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Wait for upgrade database server flow in core for SDX: {}", payload.getResourceId());
+                UpgradeDatabaseServerWaitRequest request = UpgradeDatabaseServerWaitRequest.from(context);
+                sendEvent(context, request);
+            }
+
+        };
+    }
+
+    @Bean(name = "SDX_UPGRADE_DATABASE_SERVER_FINISHED_STATE")
+    public Action<?, ?> finishedAction() {
+        return new AbstractUpgradeDatabaseServerSdxAction<>(SdxUpgradeDatabaseServerWaitSuccessEvent.class) {
+
+            @Override
+            protected void doExecute(SdxContext context, SdxUpgradeDatabaseServerWaitSuccessEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Database server upgrade finalized for SDX: {}", payload.getResourceId());
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_DATABASE_SERVER_FINISHED,
                         "Database server upgrade completed successfully", payload.getResourceId());

@@ -104,6 +104,7 @@ auth:
     salt.rotatepassword.enable: true
     postgres.upgrade.embedded.enable: true
     postgres.upgrade.exception.enable: false
+    postgres.upgrade.skip.attached.datahubs.check.enable: false
 
 crn:
   partition: cdp

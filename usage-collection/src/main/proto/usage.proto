@@ -1551,6 +1551,13 @@ message CDPClusterStatus {
     CCM_UPGRADE_FINISHED = 53;
     // The status when a cluster ccm upgrade operation failed.
     CCM_UPGRADE_FAILED = 54;
+
+    // The status when the database server upgrade is started for a DL / DH
+    DATABASE_UPGRADE_STARTED = 55;
+    // The status when the database server upgrade is finished for a DL / DH
+    DATABASE_UPGRADE_FINISHED = 56;
+    // The status when the database server upgrade fails for a DL / DH
+    DATABASE_UPGRADE_FAILED = 57;
   }
 }
 

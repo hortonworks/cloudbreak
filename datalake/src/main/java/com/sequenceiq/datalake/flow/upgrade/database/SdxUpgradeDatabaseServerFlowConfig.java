@@ -6,11 +6,13 @@ import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseSe
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerState.SDX_UPGRADE_DATABASE_SERVER_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerState.SDX_UPGRADE_DATABASE_SERVER_FINISHED_STATE;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerState.SDX_UPGRADE_DATABASE_SERVER_UPGRADE_STATE;
+import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerState.SDX_UPGRADE_DATABASE_SERVER_WAIT_UPGRADE_STATE;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_FAILED_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_FINALIZED_EVENT;
-import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_SUCCESS_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT;
+import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_SUCCESS_EVENT;
+import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_WAIT_SUCCESS_EVENT;
 
 import java.util.List;
 
@@ -25,17 +27,20 @@ public class SdxUpgradeDatabaseServerFlowConfig extends AbstractFlowConfiguratio
 
     private static final List<Transition<SdxUpgradeDatabaseServerState, SdxUpgradeDatabaseServerStateSelectors>> TRANSITIONS =
             new Transition.Builder<SdxUpgradeDatabaseServerState, SdxUpgradeDatabaseServerStateSelectors>()
-            .defaultFailureEvent(SDX_UPGRADE_DATABASE_SERVER_FAILED_EVENT)
+                    .defaultFailureEvent(SDX_UPGRADE_DATABASE_SERVER_FAILED_EVENT)
 
-            .from(INIT_STATE).to(SDX_UPGRADE_DATABASE_SERVER_UPGRADE_STATE)
-            .event(SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT).defaultFailureEvent()
+                    .from(INIT_STATE).to(SDX_UPGRADE_DATABASE_SERVER_UPGRADE_STATE)
+                    .event(SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT).defaultFailureEvent()
 
-            .from(SDX_UPGRADE_DATABASE_SERVER_UPGRADE_STATE).to(SDX_UPGRADE_DATABASE_SERVER_FINISHED_STATE)
-            .event(SDX_UPGRADE_DATABASE_SERVER_SUCCESS_EVENT).defaultFailureEvent()
+                    .from(SDX_UPGRADE_DATABASE_SERVER_UPGRADE_STATE).to(SDX_UPGRADE_DATABASE_SERVER_WAIT_UPGRADE_STATE)
+                    .event(SDX_UPGRADE_DATABASE_SERVER_SUCCESS_EVENT).defaultFailureEvent()
 
-            .from(SDX_UPGRADE_DATABASE_SERVER_FINISHED_STATE).to(FINAL_STATE)
-            .event(SDX_UPGRADE_DATABASE_SERVER_FINALIZED_EVENT).defaultFailureEvent()
-            .build();
+                    .from(SDX_UPGRADE_DATABASE_SERVER_WAIT_UPGRADE_STATE).to(SDX_UPGRADE_DATABASE_SERVER_FINISHED_STATE)
+                    .event(SDX_UPGRADE_DATABASE_SERVER_WAIT_SUCCESS_EVENT).defaultFailureEvent()
+
+                    .from(SDX_UPGRADE_DATABASE_SERVER_FINISHED_STATE).to(FINAL_STATE)
+                    .event(SDX_UPGRADE_DATABASE_SERVER_FINALIZED_EVENT).defaultFailureEvent()
+                    .build();
 
     private static final FlowEdgeConfig<SdxUpgradeDatabaseServerState, SdxUpgradeDatabaseServerStateSelectors> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, SDX_UPGRADE_DATABASE_SERVER_FAILED_STATE, SDX_UPGRADE_DATABASE_SERVER_FAILED_HANDLED_EVENT);

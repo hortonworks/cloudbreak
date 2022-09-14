@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_FOR_UPGRADE_CLUSTER_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_IMAGE_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_IMAGE_IN_WORKSPACE_INTERNAL;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_RDS_UPGRADE_INTERNAL;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_STACK_UPGRADE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CREATE_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CREATE_IN_WORKSPACE_INTERNAL;
@@ -446,6 +447,15 @@ public interface StackV4Endpoint {
     @ApiOperation(value = STACK_UPGRADE_INTERNAL, nickname = "prepareClusterUpgradeByCrnInternal")
     FlowIdentifier prepareClusterUpgradeByCrnInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
             @QueryParam("imageId") String imageId, @QueryParam("initiatorUserCrn")  String initiatorUserCrn);
+
+    @PUT
+    @Path("internal/{name}/check_rds_upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CHECK_RDS_UPGRADE_INTERNAL, nickname = "checkUpgradeRdsByNameInternal")
+    void checkUpgradeRdsByClusterNameInternal(@PathParam("workspaceId") Long workspaceId,
+            @NotEmpty @ResourceName @PathParam("name") String clusterName,
+            @QueryParam("targetVersion") TargetMajorVersion targetMajorVersion,
+            @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.USER) @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
     @Path("internal/{name}/rds_upgrade")
