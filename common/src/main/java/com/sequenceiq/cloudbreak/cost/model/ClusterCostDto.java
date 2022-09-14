@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cost.model;
+package com.sequenceiq.cloudbreak.cost.model;
 
 import java.util.List;
 
