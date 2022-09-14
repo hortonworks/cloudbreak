@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.service.cloud;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -30,22 +29,24 @@ public class CloudResourceRetrieverService implements ResourceRetriever {
     private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
 
     @Override
-    public Optional<CloudResource> findByResourceReferenceAndStatusAndType(String resourceReference, CommonStatus status, ResourceType resourceType) {
-        Optional<Resource> optionalResource = resourceService.findByResourceReferenceAndStatusAndType(resourceReference, status, resourceType);
-        LOGGER.debug("Resource retrieved by optionalResource reference: {}, status: {} and type: {}. Is present: {}", resourceReference, status, resourceType,
-                optionalResource.isPresent());
-        return optionalResource
-                .map(resource -> resourceToCloudResourceConverter.convert(resource));
+    public List<CloudResource> findByResourceReferencesAndStatusAndType(List<String> resourceReferences, CommonStatus status, ResourceType resourceType) {
+        List<Resource> resources = resourceService.findByResourceReferencesAndStatusAndType(resourceReferences, status, resourceType);
+        LOGGER.debug("Resource retrieved by resource references({}): {}, status: {} and type: {}. Retrieved size: {}", resourceReferences.size(),
+                resourceReferences, status, resourceType, resources.size());
+        return resources.stream()
+                .map(resource -> resourceToCloudResourceConverter.convert(resource))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<CloudResource> findByResourceReferenceAndStatusAndTypeAndStack(String resourceReference,
-        CommonStatus status, ResourceType resourceType, Long stackId) {
-        Optional<Resource> optionalResource = resourceService.findByResourceReferenceAndStatusAndTypeAndStack(resourceReference, status, resourceType, stackId);
-        LOGGER.debug("Resource retrieved by optionalResource reference: {}, status: {}, type: {}, stackId: {}. Is present: {}", resourceReference, status,
-                resourceType, stackId, optionalResource.isPresent());
-        return optionalResource
-                .map(resource -> resourceToCloudResourceConverter.convert(resource));
+    public List<CloudResource> findByResourceReferencesAndStatusAndTypeAndStack(List<String> resourceReferences, CommonStatus status, ResourceType resourceType,
+            Long stackId) {
+        List<Resource> resources = resourceService.findByResourceReferencesAndStatusAndTypeAndStack(resourceReferences, status, resourceType, stackId);
+        LOGGER.debug("Resource retrieved by resource references({}): {}, status: {} and type: {}, stackId: {}. Retrieved size: {}", resourceReferences.size(),
+                resourceReferences, status, resourceType, stackId, resources.size());
+        return resources.stream()
+                .map(resource -> resourceToCloudResourceConverter.convert(resource))
+                .collect(Collectors.toList());
     }
 
     @Override

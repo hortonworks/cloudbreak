@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.notification.model;
 
-import java.util.Optional;
+import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -12,7 +12,7 @@ import reactor.rx.Promises;
 
 public class ResourceRetrievalNotification {
 
-    private final String resourceReference;
+    private final List<String> resourceReferences;
 
     private final CommonStatus status;
 
@@ -20,22 +20,22 @@ public class ResourceRetrievalNotification {
 
     private final Long stackId;
 
-    private final Promise<Optional<CloudResource>> promise;
+    private final Promise<List<CloudResource>> promise;
 
-    public ResourceRetrievalNotification(String resourceReference, CommonStatus status, ResourceType resourceType) {
-        this(resourceReference, status, resourceType, null);
+    public ResourceRetrievalNotification(List<String> resourceReferences, CommonStatus status, ResourceType resourceType) {
+        this(resourceReferences, status, resourceType, null);
     }
 
-    public ResourceRetrievalNotification(String resourceReference, CommonStatus status, ResourceType resourceType, Long stackId) {
-        this.resourceReference = resourceReference;
+    public ResourceRetrievalNotification(List<String> resourceReferences, CommonStatus status, ResourceType resourceType, Long stackId) {
+        this.resourceReferences = resourceReferences;
         this.status = status;
         this.resourceType = resourceType;
         this.promise = Promises.prepare();
         this.stackId = stackId;
     }
 
-    public String getResourceReference() {
-        return resourceReference;
+    public List<String> getResourceReferences() {
+        return resourceReferences;
     }
 
     public CommonStatus getStatus() {
@@ -46,11 +46,11 @@ public class ResourceRetrievalNotification {
         return resourceType;
     }
 
-    public Promise<Optional<CloudResource>> getPromise() {
+    public Promise<List<CloudResource>> getPromise() {
         return promise;
     }
 
-    public Optional<CloudResource> getResult() {
+    public List<CloudResource> getResult() {
         try {
             return promise.await();
         } catch (InterruptedException e) {
@@ -64,10 +64,12 @@ public class ResourceRetrievalNotification {
 
     @Override
     public String toString() {
-        return "ResourceRetrievalNotification{" + "resourceReference=" + resourceReference
-                + "status=" + status
-                + "resourceType=" + resourceType
-                + ", promise=" + promise
-                + ", stackId=" + stackId;
+        StringBuilder sb = new StringBuilder("ResourceRetrievalNotification{");
+        sb.append("resourceReference=").append(resourceReferences);
+        sb.append("status=").append(status);
+        sb.append("resourceType=").append(resourceType);
+        sb.append(", promise=").append(promise);
+        sb.append(", stackId=").append(stackId);
+        return sb.toString();
     }
 }

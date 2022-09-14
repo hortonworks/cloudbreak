@@ -3,12 +3,13 @@ package com.sequenceiq.freeipa.service.cloud;
 import static com.sequenceiq.common.api.type.CommonStatus.REQUESTED;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_MANAGED_IMAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.Optional;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +25,7 @@ import com.sequenceiq.freeipa.service.resource.ResourceService;
 @ExtendWith(MockitoExtension.class)
 public class CloudResourceRetrieverServiceTest {
 
-    private static final String RESOURCE_REFERENCE = "resource-reference";
+    private static final List<String> RESOURCE_REFERENCE = List.of("resource-reference");
 
     private static final Long STACK_ID = 1L;
 
@@ -41,13 +42,13 @@ public class CloudResourceRetrieverServiceTest {
 
     @Test
     public void testGetByResourceReferenceShouldReturnEmptyList() {
-        when(resourceService.findByResourceReferenceAndStatusAndTypeAndStack(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE, STACK_ID))
-                .thenReturn(Optional.empty());
+        when(resourceService.findByResourceReferencesAndStatusAndTypeAndStack(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE, STACK_ID))
+                .thenReturn(List.of());
 
-        Optional<CloudResource> actual = underTest.findByResourceReferenceAndStatusAndTypeAndStack(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE, STACK_ID);
+        List<CloudResource> actual = underTest.findByResourceReferencesAndStatusAndTypeAndStack(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE, STACK_ID);
 
         assertTrue(actual.isEmpty());
-        verify(resourceService).findByResourceReferenceAndStatusAndTypeAndStack(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE, STACK_ID);
+        verify(resourceService).findByResourceReferencesAndStatusAndTypeAndStack(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE, STACK_ID);
     }
 
     @Test
@@ -55,15 +56,15 @@ public class CloudResourceRetrieverServiceTest {
         Resource resource = createResource();
         CloudResource cloudResource = createCloudResource();
 
-        when(resourceService.findByResourceReferenceAndStatusAndTypeAndStack(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE, STACK_ID))
-                .thenReturn(Optional.of(resource));
+        when(resourceService.findByResourceReferencesAndStatusAndTypeAndStack(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE, STACK_ID))
+                .thenReturn(List.of(resource));
         when(cloudResourceConverter.convert(resource)).thenReturn(cloudResource);
 
-        Optional<CloudResource> actual = underTest.findByResourceReferenceAndStatusAndTypeAndStack(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE, STACK_ID);
+        List<CloudResource> actual = underTest.findByResourceReferencesAndStatusAndTypeAndStack(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE, STACK_ID);
 
-        assertTrue(actual.isPresent());
-        assertEquals(cloudResource, actual.get());
-        verify(resourceService).findByResourceReferenceAndStatusAndTypeAndStack(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE, STACK_ID);
+        assertFalse(actual.isEmpty());
+        assertEquals(cloudResource, actual.get(0));
+        verify(resourceService).findByResourceReferencesAndStatusAndTypeAndStack(RESOURCE_REFERENCE, REQUESTED, AZURE_MANAGED_IMAGE, STACK_ID);
         verify(cloudResourceConverter).convert(resource);
     }
 

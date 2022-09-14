@@ -14,6 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.handler.AbstractComponentTest;
@@ -32,6 +33,9 @@ public class UpscaleStackComponentTest extends AbstractComponentTest<UpscaleStac
 
     @MockBean
     private StackUpscaleService stackUpscaleService;
+
+    @MockBean
+    private CloudFormationStackUtil cfStackUtil;
 
     @Test
     public void testUpscaleStack() throws QuotaExceededException {
@@ -54,7 +58,7 @@ public class UpscaleStackComponentTest extends AbstractComponentTest<UpscaleStac
     @Override
     protected CloudPlatformRequest<UpscaleStackResult> getRequest() {
         return new UpscaleStackRequest<>(g().createCloudContext(), g().createCloudCredential(), g().createCloudStack(),
-                g().createCloudResourceList(), new AdjustmentTypeWithThreshold(AdjustmentType.BEST_EFFORT, 5L));
+                g().createCloudResourceList(), new AdjustmentTypeWithThreshold(AdjustmentType.BEST_EFFORT, 5L), false);
     }
 
     @Configuration

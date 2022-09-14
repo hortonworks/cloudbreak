@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -102,6 +103,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Mock
     private EmbeddedDatabaseService embeddedDatabaseService;
+
+    @Mock
+    private StackUpgradeService stackUpgradeService;
 
     @Mock
     private StackDto stackDto;
@@ -438,7 +442,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
         String triggeredVariant = "AWS_NATIVE";
-        when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
+        when(stackUpgradeService.awsVariantMigrationIsFeasible(stackView, triggeredVariant)).thenReturn(true);
         ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), Map.of(), false, triggeredVariant);
 
         underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);

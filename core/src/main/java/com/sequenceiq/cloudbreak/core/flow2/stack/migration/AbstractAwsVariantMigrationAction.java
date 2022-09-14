@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -52,7 +53,7 @@ abstract class AbstractAwsVariantMigrationAction<P extends Payload>
                 .withName(stack.getName())
                 .withCrn(stack.getResourceCrn())
                 .withPlatform(stack.getCloudPlatform())
-                .withVariant(stack.getPlatformVariant())
+                .withVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant())
                 .withLocation(location)
                 .withWorkspaceId(stack.getWorkspaceId())
                 .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())

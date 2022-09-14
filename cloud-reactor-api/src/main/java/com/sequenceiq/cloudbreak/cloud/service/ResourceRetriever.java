@@ -9,9 +9,9 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 public interface ResourceRetriever {
 
-    Optional<CloudResource> findByResourceReferenceAndStatusAndType(String resourceReference, CommonStatus status, ResourceType resourceType);
+    List<CloudResource> findByResourceReferencesAndStatusAndType(List<String> resourceReferences, CommonStatus status, ResourceType resourceType);
 
-    default Optional<CloudResource> findByResourceReferenceAndStatusAndTypeAndStack(String resourceReference, CommonStatus status, ResourceType resourceType,
+    default List<CloudResource> findByResourceReferencesAndStatusAndTypeAndStack(List<String> resourceReferences, CommonStatus status, ResourceType resourceType,
             Long stackId) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }

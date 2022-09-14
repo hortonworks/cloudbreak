@@ -27,6 +27,12 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
+import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
+
+import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsMigrationUtilTest {
@@ -54,6 +60,21 @@ public class AwsMigrationUtilTest {
 
     @Mock
     private AmazonAutoScalingClient amazonAutoScalingClient;
+
+    @Mock
+    private LoadBalancerPersistenceService loadBalancerPersistenceService;
+
+    @Mock
+    private StackDtoService stackDtoService;
+
+    @Mock
+    private MetadataSetupService metadataSetupService;
+
+    @Mock
+    private ResourceRetriever resourceRetriever;
+
+    @Mock
+    private EventBus eventBus;
 
     @Test
     public void testAllInstancesDeletedFromCloudFormationWhenASGroupNotFound() {

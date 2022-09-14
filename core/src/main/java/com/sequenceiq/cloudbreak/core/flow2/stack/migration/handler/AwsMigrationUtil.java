@@ -19,7 +19,25 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataRequest;
+import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataResult;
+import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
+import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.ResourceType;
+
+import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class AwsMigrationUtil {
@@ -31,6 +49,21 @@ public class AwsMigrationUtil {
 
     @Inject
     private AwsCloudFormationClient awsClient;
+
+    @Inject
+    private LoadBalancerPersistenceService loadBalancerPersistenceService;
+
+    @Inject
+    private StackDtoService stackDtoService;
+
+    @Inject
+    private MetadataSetupService metadataSetupService;
+
+    @Inject
+    private ResourceRetriever resourceRetriever;
+
+    @Inject
+    private EventBus eventBus;
 
     public boolean allInstancesDeletedFromCloudFormation(AuthenticatedContext ac, CloudResource cloudResource) {
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
@@ -69,5 +102,34 @@ public class AwsMigrationUtil {
             }
         }
         return asGroups;
+    }
+
+    public void changeLoadBalancer(AuthenticatedContext ac) {
+        List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = collectLoadBalancerMetadata(ac, ac.getCloudContext().getId());
+        StackView stack = stackDtoService.getStackViewById(ac.getCloudContext().getId());
+        metadataSetupService.saveLoadBalancerMetadata(stack, cloudLoadBalancerMetadata);
+    }
+
+    private List<CloudLoadBalancerMetadata> collectLoadBalancerMetadata(AuthenticatedContext authenticatedContext, Long stackId) {
+        List<LoadBalancerType> loadBalancerTypes = loadBalancerPersistenceService.findByStackId(stackId).stream()
+                .map(LoadBalancer::getType)
+                .collect(Collectors.toList());
+        List<CloudResource> cloudResources = resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, stackId);
+        CollectLoadBalancerMetadataRequest request = new CollectLoadBalancerMetadataRequest(authenticatedContext.getCloudContext(),
+                authenticatedContext.getCloudCredential(), loadBalancerTypes, cloudResources);
+        eventBus.notify(request.selector(), Event.wrap(request));
+        try {
+            CollectLoadBalancerMetadataResult res = request.await();
+            LOGGER.debug("Collect load balancer metadata result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                String msg = "Failed to collect the load balancer metadata. " + res.getErrorDetails().getMessage();
+                LOGGER.debug(msg);
+                throw new CloudbreakServiceException(msg, res.getErrorDetails());
+            }
+            return res.getResults();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while collect load balancer metadata", e);
+            throw new OperationException(e);
+        }
     }
 }
