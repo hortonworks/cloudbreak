@@ -30,7 +30,7 @@ public class ClouderaCostCache {
         try {
             this.priceCache = loadPriceList().stream().collect(Collectors.toMap(ClouderaPrice::getType, ClouderaPrice::getCost));
         } catch (IOException e) {
-            LOGGER.warn("Failed to load price factor!", e);
+            LOGGER.warn("Failed to load price cache!", e);
         }
     }
 
@@ -45,7 +45,7 @@ public class ClouderaCostCache {
             String json = FileReaderUtils.readFileFromClasspath(CLOUDERA_PRICE_LOCATION);
             return JsonUtil.readValue(json, new TypeReference<List<ClouderaPrice>>() {});
         }
-        throw new RuntimeException("Failed to load emission factor!");
+        throw new RuntimeException("Failed to load price cache!");
     }
 }
 
