@@ -30,7 +30,7 @@ public class BanzaiCache {
     @Inject
     private BanzaiResponseReader responseReader;
 
-    private Map<String, Map<String, Double>> cache = new HashMap<>();
+    private Map<String, Map<String, BanzaiProductResponse>> cache = new HashMap<>();
 
     private static final Set<String> REGIONS = Set.of(
             "us-east-1",
@@ -52,7 +52,7 @@ public class BanzaiCache {
         }
     }
 
-    private Map<String, Double> getPrice(String region) {
+    private Map<String, BanzaiProductResponse> getPrice(String region) {
         Client client = ClientBuilder.newClient();
 
         WebTarget webTarget = client.target(String.format("https://alpha.dev.banzaicloud.com/cloudinfo/api/v1/providers/amazon/services/compute/regions/%s/products", region));
@@ -62,13 +62,12 @@ public class BanzaiCache {
                     .orElseThrow(() -> new BanzaiOperationFailedException(String.format("Exception occured when we tried to setup the cache on region %s", region)))
                     .getProducts()
                     .stream()
-                    .collect(Collectors.toMap(BanzaiProductResponse::getType, BanzaiProductResponse::getOnDemandPrice));
+                    .collect(Collectors.toMap(BanzaiProductResponse::getType, e -> e));
         } catch (RuntimeException e) {
             throw new BanzaiOperationFailedException(
                     String.format("Exception occured when we tried to setup the cache on region %s", region), e);
         }
     }
-
 
     private Response executeCall(URI path, Callable<Response> toCall) {
         try {
@@ -78,7 +77,6 @@ public class BanzaiCache {
         }
     }
 
-
     private Invocation.Builder createInvocationBuilder(WebTarget webTarget) {
         return webTarget
                 .request()
@@ -86,16 +84,37 @@ public class BanzaiCache {
                 .header(REQUEST_ID_HEADER, UUID.randomUUID().toString());
     }
 
-    private Map<String, Map<String, Double>> getCache() {
-        return cache;
+    public Double priceByInstanceType(String region, String machineType) {
+        Map<String, BanzaiProductResponse> stringBanzaiProductResponseMap = cache.get(region);
+        if (stringBanzaiProductResponseMap != null) {
+            BanzaiProductResponse banzaiProductResponse = stringBanzaiProductResponseMap.get(machineType);
+            if (banzaiProductResponse != null) {
+                return banzaiProductResponse.getOnDemandPrice();
+            }
+        }
+        return 1.0;
     }
 
-    public Double priceByInstanceType(String region, String machineType) {
-        Double aDouble = cache.get(region).get(machineType);
-        if (aDouble == null) {
-            return 1.0;
+    public int cpuByInstanceType(String region, String machineType) {
+        Map<String, BanzaiProductResponse> stringBanzaiProductResponseMap = cache.get(region);
+        if (stringBanzaiProductResponseMap != null) {
+            BanzaiProductResponse banzaiProductResponse = stringBanzaiProductResponseMap.get(machineType);
+            if (banzaiProductResponse != null) {
+                return banzaiProductResponse.getCpusPerVm();
+            }
         }
-        return aDouble;
+        return 2;
+    }
+
+    public int memoryByInstanceType(String region, String machineType) {
+        Map<String, BanzaiProductResponse> stringBanzaiProductResponseMap = cache.get(region);
+        if (stringBanzaiProductResponseMap != null) {
+            BanzaiProductResponse banzaiProductResponse = stringBanzaiProductResponseMap.get(machineType);
+            if (banzaiProductResponse != null) {
+                return banzaiProductResponse.getMemPerVm();
+            }
+        }
+        return 4;
     }
 
 }

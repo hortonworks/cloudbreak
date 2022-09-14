@@ -11,6 +11,10 @@ public class BanzaiProductResponse {
 
     private Double onDemandPrice;
 
+    private int memPerVm;
+
+    private int cpusPerVm;
+
     public String getType() {
         return type;
     }
@@ -25,5 +29,21 @@ public class BanzaiProductResponse {
 
     public void setOnDemandPrice(Double onDemandPrice) {
         this.onDemandPrice = onDemandPrice;
+    }
+
+    public int getMemPerVm() {
+        return memPerVm;
+    }
+
+    public void setMemPerVm(int memPerVm) {
+        this.memPerVm = memPerVm;
+    }
+
+    public int getCpusPerVm() {
+        return cpusPerVm;
+    }
+
+    public void setCpusPerVm(int cpusPerVm) {
+        this.cpusPerVm = cpusPerVm;
     }
 }
