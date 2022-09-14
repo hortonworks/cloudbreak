@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.cost;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -10,10 +9,10 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.cloudbreak.banzai.BanzaiCache;
 import com.sequenceiq.cloudbreak.common.cost.RealTimeCost;
 import com.sequenceiq.cloudbreak.service.cost.co2.CarbonCalculatorService;
 import com.sequenceiq.cloudbreak.service.cost.model.ClusterCostDto;
+import com.sequenceiq.cloudbreak.service.cost.usd.UsdCalculatorService;
 
 @Service
 public class ClusterCostService {
@@ -26,6 +25,9 @@ public class ClusterCostService {
     private CarbonCalculatorService carbonCalculatorService;
 
     @Inject
+    private UsdCalculatorService usdCalculatorService;
+
+    @Inject
     private InstanceTypeCollectorService instanceTypeCollectorService;
 
     public Map<String, RealTimeCost> getCosts(StackViewV4Responses responses) {
@@ -36,8 +38,8 @@ public class ClusterCostService {
             ClusterCostDto clusterCost = instanceTypeCollectorService.getAllInstanceTypesByCrn(stack.getCrn());
             RealTimeCost realTimeCost = new RealTimeCost();
             realTimeCost.setEnvCrn(stack.getEnvironmentCrn());
-            realTimeCost.setHourlyProviderUsd(MAGIC_PROVIDER_COST);
-            realTimeCost.setHourlyClouderaUsd(MAGIC_CLOUDERA_COST);
+            realTimeCost.setHourlyProviderUsd(usdCalculatorService.calculateProviderCost(clusterCost));
+            realTimeCost.setHourlyClouderaUsd(usdCalculatorService.calculateClouderaCost(clusterCost));
             realTimeCost.setHourlyCO2(carbonCalculatorService.getHourlyCarbonFootPrintByCrn(clusterCost));
             realTimeCosts.put(stack.getCrn(), realTimeCost);
         }

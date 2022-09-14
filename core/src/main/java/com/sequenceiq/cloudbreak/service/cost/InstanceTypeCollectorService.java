@@ -2,15 +2,14 @@ package com.sequenceiq.cloudbreak.service.cost;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.banzai.BanzaiCache;
+import com.sequenceiq.cloudbreak.cost.banzai.BanzaiCache;
+import com.sequenceiq.cloudbreak.cost.cloudera.ClouderaCostCache;
 import com.sequenceiq.cloudbreak.repository.StackDtoRepository;
 import com.sequenceiq.cloudbreak.service.cost.model.ClusterCostDto;
 import com.sequenceiq.cloudbreak.service.cost.model.InstanceGroupCostDto;
@@ -34,6 +33,9 @@ public class InstanceTypeCollectorService {
     @Inject
     private BanzaiCache banzaiCache;
 
+    @Inject
+    private ClouderaCostCache clouderaCostCache;
+
     public ClusterCostDto getAllInstanceTypesByCrn(String crn) {
         Optional<StackViewDelegate> stackViewDelegate = stackRepository.findByCrn(crn);
         //get list of all instancetype
@@ -48,8 +50,11 @@ public class InstanceTypeCollectorService {
             InstanceGroupCostDto instanceGroupCostDto = new InstanceGroupCostDto();
             instanceGroupCostDto.setMemoryPerInstance(banzaiCache.memoryByInstanceType(region, instanceType));
             instanceGroupCostDto.setCoresPerInstance(banzaiCache.cpuByInstanceType(region, instanceType));
+            instanceGroupCostDto.setPricePerInstance(banzaiCache.priceByInstanceType(region, instanceType));
+            instanceGroupCostDto.setClouderaPricePerInstance(clouderaCostCache.getPriceByType(instanceType));
             instanceGroupCostDto.setType(instanceType);
             instanceGroupCostDto.setCount(count);
+            instanceGroupCostDtos.add(instanceGroupCostDto);
         }
         clusterCostDto.setInstanceGroups(instanceGroupCostDtos);
         return clusterCostDto;
