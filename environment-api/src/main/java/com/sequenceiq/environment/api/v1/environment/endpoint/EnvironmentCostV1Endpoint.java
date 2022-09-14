@@ -8,7 +8,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.common.cost.RealTimeCostResponse;
+import com.sequenceiq.cloudbreak.common.cost.EnvironmentRealTimeCostResponse;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
 
@@ -25,6 +25,6 @@ public interface EnvironmentCostV1Endpoint {
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.LIST, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "listEnvironmentCostV1")
-    RealTimeCostResponse list();
+    EnvironmentRealTimeCostResponse list();
 
 }
