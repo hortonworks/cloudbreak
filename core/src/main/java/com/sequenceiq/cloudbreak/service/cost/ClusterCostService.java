@@ -43,6 +43,7 @@ public class ClusterCostService {
             realTimeCost.setHourlyProviderUsd(usdCalculatorService.calculateProviderCost(clusterCost));
             realTimeCost.setHourlyClouderaUsd(usdCalculatorService.calculateClouderaCost(clusterCost));
             realTimeCost.setHourlyCO2(carbonCalculatorService.getHourlyCarbonFootPrintByCrn(clusterCost));
+            realTimeCost.setHourlyEnergykWh(carbonCalculatorService.getHourlyEnergyConsumptionkWhByCrn(clusterCost));
             realTimeCosts.put(stack.getCrn(), realTimeCost);
         }
         return realTimeCosts;
