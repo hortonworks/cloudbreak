@@ -1,5 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cost.co2;
-
+// CHECKSTYLE:OFF
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;

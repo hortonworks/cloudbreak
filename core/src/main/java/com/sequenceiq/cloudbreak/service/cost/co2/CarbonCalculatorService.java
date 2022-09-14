@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
+// CHECKSTYLE:OFF
 @Service
 public class CarbonCalculatorService {
 

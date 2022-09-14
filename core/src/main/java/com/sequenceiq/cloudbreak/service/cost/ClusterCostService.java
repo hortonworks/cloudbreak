@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cost;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -22,18 +22,17 @@ public class ClusterCostService {
     @Inject
     private CarbonCalculatorService carbonCalculatorService;
 
-    public List<RealTimeCost> getCosts(StackViewV4Responses responses) {
-        List<RealTimeCost> realTimeCosts = new ArrayList<>();
+    public Map<String, RealTimeCost> getCosts(StackViewV4Responses responses) {
+        Map<String, RealTimeCost> realTimeCosts = new HashMap<>();
 
         //TODO Ricsi / Laci code comes here
         for (StackViewV4Response stack : responses.getResponses()) {
             RealTimeCost realTimeCost = new RealTimeCost();
             realTimeCost.setEnvCrn(stack.getEnvironmentCrn());
-            realTimeCost.setResourceCrn(stack.getCrn());
             realTimeCost.setHourlyProviderUsd(MAGIC_PROVIDER_COST);
             realTimeCost.setHourlyClouderaUsd(MAGIC_CLOUDERA_COST);
             realTimeCost.setHourlyCO2(carbonCalculatorService.getHourlyCarbonFootPrintByCrn(stack.getCrn()));
-            realTimeCosts.add(realTimeCost);
+            realTimeCosts.put(stack.getCrn(), realTimeCost);
         }
         return realTimeCosts;
     }

@@ -21,6 +21,7 @@ import com.sequenceiq.freeipa.api.FreeIpaApi;
 import com.sequenceiq.freeipa.controller.ClientTestV1Controller;
 import com.sequenceiq.freeipa.controller.DiagnosticsV1Controller;
 import com.sequenceiq.freeipa.controller.DnsV1Controller;
+import com.sequenceiq.freeipa.controller.FreeIpaCostV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaUpgradeV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaV1FlowController;
@@ -61,7 +62,8 @@ public class EndpointConfig extends ResourceConfig {
             CDPStructuredEventV1Controller.class,
             UtilV1Controller.class,
             FreeIpaUpgradeV1Controller.class,
-            RecipeV1Controller.class);
+            RecipeV1Controller.class,
+            FreeIpaCostV1Controller.class);
 
     @Value("${info.app.version:unspecified}")
     private String applicationVersion;
