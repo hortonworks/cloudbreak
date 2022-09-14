@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.banzai;
+package com.sequenceiq.cloudbreak.cost.banzai;
 
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Response;

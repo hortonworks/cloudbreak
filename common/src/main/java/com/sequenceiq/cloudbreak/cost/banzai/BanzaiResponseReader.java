@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.banzai;
+package com.sequenceiq.cloudbreak.cost.banzai;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static javax.ws.rs.core.Response.Status.Family.SUCCESSFUL;

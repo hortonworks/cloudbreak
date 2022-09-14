@@ -1,0 +1,382 @@
+[
+  {
+    "type": "m5.xlarge",
+    "cost": 0.0800
+  },
+  {
+    "type": "m5.2xlarge",
+    "cost": 0.1600
+  },
+  {
+    "type": "m5.4xlarge",
+    "cost": 0.3200
+  },
+  {
+    "type": "m5.8xlarge",
+    "cost": 0.6400
+  },
+  {
+    "type": "m5.12xlarge",
+    "cost": 0.9600
+  },
+  {
+    "type": "m5.16xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "m5.24xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "m5d.xlarge",
+    "cost": 0.0800
+  },
+  {
+    "type": "m5d.2xlarge",
+    "cost": 0.1600
+  },
+  {
+    "type": "m5d.4xlarge",
+    "cost": 0.3200
+  },
+  {
+    "type": "m5d.8xlarge",
+    "cost": 0.6400
+  },
+  {
+    "type": "m5d.12xlarge",
+    "cost": 0.9600
+  },
+  {
+    "type": "m5d.16xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "m5d.24xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "m5n.2xlarge",
+    "cost": 0.1600
+  },
+  {
+    "type": "m5n.4xlarge",
+    "cost": 0.3200
+  },
+  {
+    "type": "m5n.8xlarge",
+    "cost": 0.6400
+  },
+  {
+    "type": "m5dn.xlarge",
+    "cost": 0.0800
+  },
+  {
+    "type": "m5dn.2xlarge",
+    "cost": 0.1600
+  },
+  {
+    "type": "m5dn.4xlarge",
+    "cost": 0.3200
+  },
+  {
+    "type": "m5dn.8xlarge",
+    "cost": 0.6400
+  },
+  {
+    "type": "m5dn.12xlarge",
+    "cost": 0.9600
+  },
+  {
+    "type": "m5dn.16xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "m5dn.24xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "m5a.xlarge",
+    "cost": 0.0800
+  },
+  {
+    "type": "m5a.2xlarge",
+    "cost": 0.1600
+  },
+  {
+    "type": "m5a.4xlarge",
+    "cost": 0.3200
+  },
+  {
+    "type": "m5a.8xlarge",
+    "cost": 0.6400
+  },
+  {
+    "type": "m5a.12xlarge",
+    "cost": 0.9600
+  },
+  {
+    "type": "m5a.16xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "m5a.24xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "m5ad.xlarge",
+    "cost": 0.0800
+  },
+  {
+    "type": "m5ad.2xlarge",
+    "cost": 0.1600
+  },
+  {
+    "type": "m5ad.4xlarge",
+    "cost": 0.3200
+  },
+  {
+    "type": "m5ad.8xlarge",
+    "cost": 0.6400
+  },
+  {
+    "type": "m5ad.12xlarge",
+    "cost": 0.9600
+  },
+  {
+    "type": "m5ad.16xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "m5ad.24xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "r5.4xlarge",
+    "cost": 0.5333
+  },
+  {
+    "type": "r5.8xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "r5.16xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "r5n.4xlarge",
+    "cost": 0.5333
+  },
+  {
+    "type": "r5n.8xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "r5n.16xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "r5d.xlarge",
+    "cost": 0.1333
+  },
+  {
+    "type": "r5d.4xlarge",
+    "cost": 0.5333
+  },
+  {
+    "type": "r5d.8xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "r5d.12xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "r5d.16xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "r5dn.xlarge",
+    "cost": 0.1333
+  },
+  {
+    "type": "r5dn.4xlarge",
+    "cost": 0.5333
+  },
+  {
+    "type": "r5dn.8xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "r5dn.16xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "r5a.4xlarge",
+    "cost": 0.5333
+  },
+  {
+    "type": "r5a.8xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "r5ad.xlarge",
+    "cost": 0.1333
+  },
+  {
+    "type": "r5ad.4xlarge",
+    "cost": 0.5333
+  },
+  {
+    "type": "r5ad.8xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "r5ad.12xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "r5ad.16xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "r4.xlarge",
+    "cost": 0.1283
+  },
+  {
+    "type": "r4.2xlarge",
+    "cost": 0.2567
+  },
+  {
+    "type": "r4.4xlarge",
+    "cost": 0.5133
+  },
+  {
+    "type": "r4.8xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "x1e.2xlarge",
+    "cost": 0.8667
+  },
+  {
+    "type": "c5.2xlarge",
+    "cost": 0.1067
+  },
+  {
+    "type": "c5.4xlarge",
+    "cost": 0.2133
+  },
+  {
+    "type": "c5.9xlarge",
+    "cost": 0.4800
+  },
+  {
+    "type": "c5.12xlarge",
+    "cost": 0.6400
+  },
+  {
+    "type": "c5a.2xlarge",
+    "cost": 0.1067
+  },
+  {
+    "type": "c5a.4xlarge",
+    "cost": 0.2133
+  },
+  {
+    "type": "c5a.8xlarge",
+    "cost": 0.4267
+  },
+  {
+    "type": "c5a.12xlarge",
+    "cost": 0.6400
+  },
+  {
+    "type": "i3.2xlarge",
+    "cost": 0.2567
+  },
+  {
+    "type": "i3.4xlarge",
+    "cost": 0.5133
+  },
+  {
+    "type": "i3.8xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "i3en.3xlarge",
+    "cost": 0.4000
+  },
+  {
+    "type": "i3en.6xlarge",
+    "cost": 0.8000
+  },
+  {
+    "type": "i3en.12xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "h1.2xlarge",
+    "cost": 0.1600
+  },
+  {
+    "type": "h1.4xlarge",
+    "cost": 0.3200
+  },
+  {
+    "type": "h1.8xlarge",
+    "cost": 0.6400
+  },
+  {
+    "type": "d2.xlarge",
+    "cost": 0.1283
+  },
+  {
+    "type": "d2.2xlarge",
+    "cost": 0.2567
+  },
+  {
+    "type": "d2.4xlarge",
+    "cost": 0.5133
+  },
+  {
+    "type": "d2.8xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "d3.xlarge",
+    "cost": 0.1333
+  },
+  {
+    "type": "d3.4xlarge",
+    "cost": 0.5333
+  },
+  {
+    "type": "d3.8xlarge",
+    "cost": 1.0000
+  },
+  {
+    "type": "d3en.2xlarge",
+    "cost": 0.1600
+  },
+  {
+    "type": "d3en.4xlarge",
+    "cost": 0.3200
+  },
+  {
+    "type": "d3en.6xlarge",
+    "cost": 0.4800
+  },
+  {
+    "type": "d3en.8xlarge",
+    "cost": 0.6400
+  },
+  {
+    "type": "p3.2xlarge",
+    "cost": 1.1942
+  },
+  {
+    "type": "p3.8xlarge",
+    "cost": 4.7500
+  }
+]
