@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cost.co2;
+package com.sequenceiq.cloudbreak.cost.co2;
 
 import java.util.IntSummaryStatistics;
 import java.util.stream.Collectors;
@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.cost.model.RegionEmissionFactor;
 import com.sequenceiq.cloudbreak.common.cost.service.RegionEmissionFactorService;
-import com.sequenceiq.cloudbreak.service.cost.model.ClusterCostDto;
-import com.sequenceiq.cloudbreak.service.cost.model.InstanceGroupCostDto;
+import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
+import com.sequenceiq.cloudbreak.cost.model.InstanceGroupCostDto;
 
 // CHECKSTYLE:OFF
 @Service
