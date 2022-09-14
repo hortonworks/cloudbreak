@@ -6,6 +6,8 @@ public class RealTimeCost implements Serializable {
 
     private String envCrn;
 
+    private String resourceName;
+
     private Double hourlyProviderUsd;
 
     private Double hourlyClouderaUsd;
@@ -16,8 +18,9 @@ public class RealTimeCost implements Serializable {
 
     }
 
-    public RealTimeCost(String envCrn, Double hourlyProviderUsd, Double hourlyClouderaUsd, Double hourlyCO2) {
+    public RealTimeCost(String envCrn, String resourceName, Double hourlyProviderUsd, Double hourlyClouderaUsd, Double hourlyCO2) {
         this.envCrn = envCrn;
+        this.resourceName = resourceName;
         this.hourlyProviderUsd = hourlyProviderUsd;
         this.hourlyClouderaUsd = hourlyClouderaUsd;
         this.hourlyCO2 = hourlyCO2;
@@ -29,6 +32,14 @@ public class RealTimeCost implements Serializable {
 
     public void setEnvCrn(String envCrn) {
         this.envCrn = envCrn;
+    }
+
+    public String getResourceName() {
+        return resourceName;
+    }
+
+    public void setResourceName(String resourceName) {
+        this.resourceName = resourceName;
     }
 
     public Double getHourlyProviderUsd() {
