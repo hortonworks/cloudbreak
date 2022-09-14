@@ -8,7 +8,7 @@ public class ModelDescriptions {
 
     public static final String BACKUP_LOCATION = "The location where the database backup will be stored.";
 
-    public static final String OPERATION_TYPE = "The type of operation.";
+    public static final String OPERATION_TYPE = "The type of disaster recovery operation.";
 
     public static final String CLOSE_CONNECTIONS = "The conditional parameter for whether connections to the database will be closed during backup or not.";
 

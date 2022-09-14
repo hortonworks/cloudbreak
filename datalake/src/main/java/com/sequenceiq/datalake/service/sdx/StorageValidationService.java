@@ -89,6 +89,7 @@ public class StorageValidationService {
                 .withCloudPlatform(credentialResponse.getCloudPlatform())
                 .withCredential(cloudCredential)
                 .withCloudStorageRequest(cloudStorageRequest)
+                .withBackupOperationType(BackupOperationType.NONE)
                 .build();
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),

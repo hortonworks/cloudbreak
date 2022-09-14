@@ -167,6 +167,9 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
     }
 
     List<String> getPolicyFiles(BackupOperationType backupOperationType) {
+        if (backupOperationType == null) {
+            return Collections.EMPTY_LIST;
+        }
         switch (backupOperationType) {
             case ANY:
                 return Arrays.asList(getBackupPolicy(), getRestorePolicy());

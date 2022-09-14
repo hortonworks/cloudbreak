@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
@@ -62,6 +63,7 @@ public class CloudStorageValidator {
         ObjectStorageValidateRequest.Builder objectStorageValidateBuilder = ObjectStorageValidateRequest.builder()
                 .withCloudPlatform(credential.getCloudPlatform())
                 .withCredential(cloudCredential)
+                .withBackupOperationType(BackupOperationType.NONE)
                 .withCloudStorageRequest(cloudStorageRequest);
         if (loggingConfigured) {
             objectStorageValidateBuilder.withLogsLocationBase(telemetryRequest.getLogging().getStorageLocation());
