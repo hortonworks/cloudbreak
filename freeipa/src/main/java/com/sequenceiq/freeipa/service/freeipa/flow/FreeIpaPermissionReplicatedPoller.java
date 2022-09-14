@@ -46,8 +46,10 @@ public class FreeIpaPermissionReplicatedPoller implements AttemptMaker<Void> {
             LOGGER.info("[{}] permission is replicated for [{}] privilege on all instances", permission, privilegeName);
             return AttemptResults.justFinish();
         } else {
-            LOGGER.debug("[{}] permission is missing on {} instances for [{}] privilege", permission, replicationMissingForInstance, privilegeName);
-            return AttemptResults.justContinue();
+            String message = String.format("[%s] permission is missing on %s instances for [%s] privilege",
+                    permission, replicationMissingForInstance, privilegeName);
+            LOGGER.debug(message);
+            return AttemptResults.continueFor(new Exception(message));
         }
     }
 }

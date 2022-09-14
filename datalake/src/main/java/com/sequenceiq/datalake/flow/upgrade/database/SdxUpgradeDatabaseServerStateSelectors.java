@@ -2,6 +2,8 @@ package com.sequenceiq.datalake.flow.upgrade.database;
 
 import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerFailedEvent;
 import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerSuccessEvent;
+import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerWaitSuccessEvent;
+import com.sequenceiq.datalake.flow.upgrade.database.event.UpgradeDatabaseServerWaitRequest;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
@@ -9,6 +11,8 @@ public enum SdxUpgradeDatabaseServerStateSelectors implements FlowEvent {
 
     SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT,
     SDX_UPGRADE_DATABASE_SERVER_SUCCESS_EVENT(SdxUpgradeDatabaseServerSuccessEvent.class),
+    SDX_UPGRADE_DATABASE_SERVER_WAIT_UPGRADE_EVENT(UpgradeDatabaseServerWaitRequest.class),
+    SDX_UPGRADE_DATABASE_SERVER_WAIT_SUCCESS_EVENT(SdxUpgradeDatabaseServerWaitSuccessEvent.class),
     SDX_UPGRADE_DATABASE_SERVER_FAILED_EVENT(SdxUpgradeDatabaseServerFailedEvent.class),
     SDX_UPGRADE_DATABASE_SERVER_FAILED_HANDLED_EVENT,
     SDX_UPGRADE_DATABASE_SERVER_FINALIZED_EVENT;
