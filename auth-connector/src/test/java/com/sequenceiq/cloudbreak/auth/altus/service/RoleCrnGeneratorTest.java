@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.auth.altus.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
@@ -27,10 +28,6 @@ public class RoleCrnGeneratorTest {
 
     private static final String ACCOUNT_ID = "altus";
 
-    private static final String TEST_ROLE_1 = "TestRole1";
-
-    private static final String TEST_ROLE_2 = "TestRole2";
-
     @Mock
     private GrpcUmsClient grpcUmsClient;
 
@@ -39,40 +36,36 @@ public class RoleCrnGeneratorTest {
 
     @BeforeEach
     public void setup() {
-        when(grpcUmsClient.getRoles(any())).thenReturn(Set.of(
-                "crn:altus:iam:us-west-1:altus:role:TestRole1",
-                "crn:altus:iam:us-west-1:altus:role:TestRole2"));
+        lenient().when(grpcUmsClient.getRoles(any())).thenReturn(Set.of(
+                "crn:altus:iam:us-west-1:altus:role:DbusUploader",
+                "crn:altus:iam:us-west-1:altus:role:ComputeMetricsPublisher"));
         when(grpcUmsClient.getResourceRoles(any())).thenReturn(Set.of(
-                "crn:altus:iam:us-west-1:altus:resourceRole:TestRole1",
-                "crn:altus:iam:us-west-1:altus:resourceRole:TestRole2"));
+                "crn:altus:iam:us-west-1:altus:resourceRole:Owner",
+                "crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin"));
     }
 
     @Test
     public void testGetExistingRoles() {
-        Crn testRole1 = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getRoleCrn(TEST_ROLE_1, "altus"));
-        Crn testRole2 = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getRoleCrn(TEST_ROLE_2, "altus"));
+        Crn testRole1 = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getRoleCrn(UmsRole.DBUS_UPLOADER, ACCOUNT_ID));
+        Crn testRole2 = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getRoleCrn(UmsRole.COMPUTE_METRICS_PUBLISHER, ACCOUNT_ID));
         existingRoleAssertions(testRole1, testRole2, Crn.ResourceType.ROLE);
 
-        testRole1 = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getResourceRoleCrn(TEST_ROLE_1, "altus"));
-        testRole2 = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getResourceRoleCrn(TEST_ROLE_2, "altus"));
+        testRole1 = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getResourceRoleCrn(UmsResourceRole.OWNER, ACCOUNT_ID));
+        testRole2 = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getResourceRoleCrn(UmsResourceRole.ENVIRONMENT_ADMIN, ACCOUNT_ID));
         existingRoleAssertions(testRole1, testRole2, Crn.ResourceType.RESOURCE_ROLE);
     }
 
     @Test
     public void testGetNonExistingRoles() {
         assertThrows(InternalServerErrorException.class, () -> ThreadBasedUserCrnProvider.doAs(ACTOR, () ->
-                underTest.getRoleCrn("whatever", "altus")));
-        assertThrows(InternalServerErrorException.class, () -> ThreadBasedUserCrnProvider.doAs(ACTOR, () ->
-                underTest.getResourceRoleCrn("whatever", "altus")));
+                underTest.getResourceRoleCrn(UmsResourceRole.ENVIRONMENT_USER, ACCOUNT_ID)));
     }
 
     private void existingRoleAssertions(Crn testRole1, Crn testRole2, Crn.ResourceType roleType) {
         assertEquals(ACCOUNT_ID, testRole1.getAccountId());
-        assertEquals(TEST_ROLE_1, testRole1.getResource());
         assertEquals(roleType, testRole1.getResourceType());
 
         assertEquals(ACCOUNT_ID, testRole2.getAccountId());
-        assertEquals(TEST_ROLE_2, testRole2.getResource());
         assertEquals(roleType, testRole2.getResourceType());
     }
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.thunderhead.grpc.service.auth;
 
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
@@ -114,6 +115,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -232,6 +234,8 @@ import com.google.common.io.Resources;
 import com.google.protobuf.util.JsonFormat;
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.altus.service.UmsResourceRole;
+import com.sequenceiq.cloudbreak.auth.altus.service.UmsRole;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.util.SanitizerUtil;
@@ -1282,15 +1286,17 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void listRoles(ListRolesRequest request, StreamObserver<ListRolesResponse> responseObserver) {
         LOGGER.info("List roles for account: {}", request.getAccountId());
-        responseObserver.onNext(ListRolesResponse.newBuilder()
-                .addRole(Role.newBuilder()
-                        .setCrn("crn:altus:iam:us-west-1:altus:role:DbusUploader")
-                        .build())
-                .addRole(Role.newBuilder()
-                        .setCrn("crn:altus:iam:us-west-1:altus:role:ComputeMetricsPublisher")
-                        .build())
-                .build());
+        ListRolesResponse.Builder builder = ListRolesResponse.newBuilder();
+        Arrays.stream(UmsRole.values()).forEach(role -> builder.addRole(getRole(role)));
+        responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
+    }
+
+    private UserManagementProto.Role getRole(UmsRole role) {
+        checkNotNull(role);
+        return UserManagementProto.Role.newBuilder()
+                .setCrn("crn:altus:iam:us-west-1:altus:role:" + role.getRoleName())
+                .build();
     }
 
     /**
@@ -1426,15 +1432,17 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void listResourceRoles(UserManagementProto.ListResourceRolesRequest request,
             StreamObserver<UserManagementProto.ListResourceRolesResponse> responseObserver) {
-        responseObserver.onNext(UserManagementProto.ListResourceRolesResponse.newBuilder()
-                .addResourceRole(UserManagementProto.ResourceRole.newBuilder()
-                        .setCrn("crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin")
-                        .build())
-                .addResourceRole(UserManagementProto.ResourceRole.newBuilder()
-                        .setCrn("crn:altus:iam:us-west-1:altus:resourceRole:Owner")
-                        .build())
-                .build());
+        UserManagementProto.ListResourceRolesResponse.Builder builder = UserManagementProto.ListResourceRolesResponse.newBuilder();
+        Arrays.stream(UmsResourceRole.values()).forEach(umsResourceRole -> builder.addResourceRole(getResourceRole(umsResourceRole)));
+        responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
+    }
+
+    private UserManagementProto.ResourceRole getResourceRole(UmsResourceRole resourceRole) {
+        checkNotNull(resourceRole);
+        return UserManagementProto.ResourceRole.newBuilder()
+                .setCrn("crn:altus:iam:us-west-1:altus:resourceRole:" + resourceRole.getResourceRoleName())
+                .build();
     }
 
     private ResourceAssignee createResourceAssignee(String resourceCrn) {
