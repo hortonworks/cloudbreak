@@ -50,11 +50,11 @@ public abstract class TracedQuartzJob extends QuartzJobBean {
         Optional<MdcContextInfoProvider> mdcContextConfigProvider = getMdcContextConfigProvider();
         if (mdcContextConfigProvider == null) {
             LOGGER.debug("getMdcContextConfigProvider does not implemented, try the old one");
-            Object mdcContextObject = getMdcContextObject();
+            Optional<Object> mdcContextObject = getMdcContextObject();
             if (mdcContextObject == null) {
                 throw new IllegalArgumentException("Please implement one of them: getMdcContextObject() or getMdcContextConfigProvider()");
             } else {
-                MDCBuilder.buildMdcContext(mdcContextObject);
+                MDCBuilder.buildMdcContext(mdcContextObject.orElse(null));
             }
         } else {
             MDCBuilder.buildMdcContextFromInfoProvider(mdcContextConfigProvider.orElse(null));
