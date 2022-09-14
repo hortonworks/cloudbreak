@@ -74,16 +74,20 @@ public class EnvironmentRealTimeCost implements Serializable {
         this.hourlyProviderUsd += o1.getHourlyProviderUsd();
         this.hourlyClouderaUsd += o1.getHourlyClouderaUsd();
         this.hourlyCO2 += o1.getHourlyCO2();
-        switch (o1.getType()) {
-            case "FREEIPA":
-                freeipa = o1;
-                break;
-            case "DATALAKE":
-                datalake = o1;
-                break;
-            case "WORKLOAD":
-                datahubs.put(resourceCrn, o1);
-                break;
+        if (o1.getType() != null) {
+
+            switch (o1.getType()) {
+                case "FREEIPA":
+                    freeipa = o1;
+                    break;
+                case "DATALAKE":
+                    datalake = o1;
+                    break;
+                case "WORKLOAD":
+                    datahubs.put(resourceCrn, o1);
+                    break;
+            }
+
         }
         return this;
     }
