@@ -6,11 +6,13 @@ public class Instance {
 
     private String type;
 
-    private String count;
+    private int count;
 
     private int coresPerInstance;
 
     private int memoryPerInstance;
+
+    private double pricePerInstance;
 
     private List<Disk> disksPerInstance;
 
@@ -22,11 +24,11 @@ public class Instance {
         this.type = type;
     }
 
-    public String getCount() {
+    public int getCount() {
         return count;
     }
 
-    public void setCount(String count) {
+    public void setCount(int count) {
         this.count = count;
     }
 
