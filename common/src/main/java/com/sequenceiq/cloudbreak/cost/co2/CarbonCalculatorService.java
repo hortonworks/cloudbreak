@@ -29,12 +29,15 @@ public class CarbonCalculatorService {
     @Inject
     private RegionEmissionFactorService regionEmissionFactorService;
 
-    public double getHourlyCarbonFootPrintByCrn(ClusterCostDto instanceTypeList) {
+    public double getHourlyEnergyConsumptionkWhByCrn(ClusterCostDto instanceTypeList) {
         LOGGER.info("Collected instance types: {}", instanceTypeList);
         double summarizedWhConsumption = calculateCpuInWh(instanceTypeList) + calculateMemoryInWh(instanceTypeList) + calculateDiskInWh();
+        return summarizedWhConsumption / 1000.0;
+    }
+    public double getHourlyCarbonFootPrintByCrn(ClusterCostDto instanceTypeList) {
         RegionEmissionFactor emissionFactor = getCo2RateForRegion(instanceTypeList);
         LOGGER.info("RegionEmissionFactor for region {} is: {}", instanceTypeList.getRegion(), emissionFactor);
-        return summarizedWhConsumption / 1000.0 * emissionFactor.getCo2e() * 1000000.0;
+        return getHourlyEnergyConsumptionkWhByCrn(instanceTypeList) * emissionFactor.getCo2e() * 1000000.0;
     }
 
     private double calculateCpuInWh(ClusterCostDto dto) {

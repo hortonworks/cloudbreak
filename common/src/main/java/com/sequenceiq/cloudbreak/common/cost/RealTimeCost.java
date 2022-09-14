@@ -16,6 +16,8 @@ public class RealTimeCost implements Serializable {
 
     private double hourlyCO2;
 
+    private double hourlyEnergykWh;
+
     public String getType() {
         return type;
     }
@@ -64,4 +66,11 @@ public class RealTimeCost implements Serializable {
         this.hourlyCO2 = hourlyCO2;
     }
 
+    public double getHourlyEnergykWh() {
+        return hourlyEnergykWh;
+    }
+
+    public void setHourlyEnergykWh(double hourlyEnergykWh) {
+        this.hourlyEnergykWh = hourlyEnergykWh;
+    }
 }

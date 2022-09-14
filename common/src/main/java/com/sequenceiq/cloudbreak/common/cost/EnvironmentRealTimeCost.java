@@ -12,6 +12,8 @@ public class EnvironmentRealTimeCost implements Serializable {
 
     private double hourlyCO2;
 
+    private double hourlyEnergykWh;
+
     private RealTimeCost freeipa;
 
     private RealTimeCost datalake;
@@ -70,10 +72,19 @@ public class EnvironmentRealTimeCost implements Serializable {
         this.datahubs = datahubs;
     }
 
+    public double getHourlyEnergykWh() {
+        return hourlyEnergykWh;
+    }
+
+    public void setHourlyEnergykWh(double hourlyEnergykWh) {
+        this.hourlyEnergykWh = hourlyEnergykWh;
+    }
+
     public EnvironmentRealTimeCost add(String resourceCrn, RealTimeCost o1) {
         this.hourlyProviderUsd += o1.getHourlyProviderUsd();
         this.hourlyClouderaUsd += o1.getHourlyClouderaUsd();
         this.hourlyCO2 += o1.getHourlyCO2();
+        this.hourlyEnergykWh += o1.getHourlyEnergykWh();
         if (o1.getType() != null) {
 
             switch (o1.getType()) {
