@@ -36,7 +36,7 @@
         "template": {
           "attachedVolumes": [
             {
-              "count": 1,
+              "count": 0,
               "size": 300,
               "type": "StandardSSD_LRS"
             }
@@ -59,7 +59,7 @@
         "template": {
           "attachedVolumes": [
             {
-              "count": 1,
+              "count": 0,
               "size": 300,
               "type": "StandardSSD_LRS"
             }
