@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.banzai;
+package com.sequenceiq.cloudbreak.cost.banzai;
 
 import static com.sequenceiq.cloudbreak.logger.MDCContextFilter.REQUEST_ID_HEADER;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;

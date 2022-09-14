@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.banzai;
+package com.sequenceiq.cloudbreak.cost.banzai;
 
 import java.util.Set;
 

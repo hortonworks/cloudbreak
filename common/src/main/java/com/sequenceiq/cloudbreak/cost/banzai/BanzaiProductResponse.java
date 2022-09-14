@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.banzai;
+package com.sequenceiq.cloudbreak.cost.banzai;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

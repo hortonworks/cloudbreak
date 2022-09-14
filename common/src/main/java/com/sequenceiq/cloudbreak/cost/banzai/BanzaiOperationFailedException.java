@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.banzai;
+package com.sequenceiq.cloudbreak.cost.banzai;
 
 public class BanzaiOperationFailedException extends RuntimeException {
 

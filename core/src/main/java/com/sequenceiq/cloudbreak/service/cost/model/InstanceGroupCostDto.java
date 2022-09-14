@@ -14,6 +14,8 @@ public class InstanceGroupCostDto {
 
     private double pricePerInstance;
 
+    private double clouderaPricePerInstance;
+
     private List<DiskCostDto> disksPerInstance;
 
     public String getType() {
@@ -54,5 +56,21 @@ public class InstanceGroupCostDto {
 
     public void setDisksPerInstance(List<DiskCostDto> disksPerInstance) {
         this.disksPerInstance = disksPerInstance;
+    }
+
+    public double getPricePerInstance() {
+        return pricePerInstance;
+    }
+
+    public void setPricePerInstance(double pricePerInstance) {
+        this.pricePerInstance = pricePerInstance;
+    }
+
+    public double getClouderaPricePerInstance() {
+        return clouderaPricePerInstance;
+    }
+
+    public void setClouderaPricePerInstance(double clouderaPricePerInstance) {
+        this.clouderaPricePerInstance = clouderaPricePerInstance;
     }
 }
