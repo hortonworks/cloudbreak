@@ -31,7 +31,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
@@ -60,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -104,6 +104,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     @Inject
     private EmbeddedDatabaseService embeddedDatabaseService;
+
+    @Inject
+    private StackUpgradeService stackUpgradeService;
 
     @Override
     public String initEvent() {
@@ -254,20 +257,13 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             String originalPlatformVariant = stackView.getPlatformVariant();
             LOGGER.debug("Upgrade flow, checking that the variant migration is triggerable from original: '{}' to new: '{}', groupName: '{}'",
                     originalPlatformVariant, triggeredVariant, groupName);
-            if (awsVariantMigrationIsFeasible(stackView, triggeredVariant, originalPlatformVariant)) {
+            if (stackUpgradeService.awsVariantMigrationIsFeasible(stackView, triggeredVariant)) {
                 LOGGER.info("Migration variant is needed from '{}' to: '{}', groupName: '{}'", originalPlatformVariant, triggeredVariant, groupName);
                 flowTriggers.add(awsVariantMigrationTriggerEvent(event.getResourceId(), groupName));
             }
         } else {
             LOGGER.debug("Don't need to migrate the stack, variant: {}, groupName: {}", triggeredVariant, groupName);
         }
-    }
-
-    private boolean awsVariantMigrationIsFeasible(StackView stackView, String triggeredVariant, String originalPlatformVariant) {
-        Crn crn = Crn.safeFromString(stackView.getResourceCrn());
-        return AwsConstants.AwsVariant.AWS_VARIANT.variant().value().equals(originalPlatformVariant)
-                && AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value().equals(triggeredVariant)
-                && entitlementService.awsVariantMigrationEnable(crn.getAccountId());
     }
 
     private AwsVariantMigrationTriggerEvent awsVariantMigrationTriggerEvent(Long resourceId, String groupName) {

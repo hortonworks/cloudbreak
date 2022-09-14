@@ -157,7 +157,7 @@ class StackUpscaleServiceTest {
         CloudStack cloudStack = new CloudStack(groups, mock(Network.class), mock(Image.class), Collections.emptyMap(), Collections.emptyMap(), "template",
                 mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class));
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
-                cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold);
+                cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         stackUpscaleService.upscale(mock(AuthenticatedContext.class), upscaleStackRequest, connector);
         verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");
@@ -205,7 +205,7 @@ class StackUpscaleServiceTest {
         CloudStack cloudStack = new CloudStack(groups, mock(Network.class), mock(Image.class), Collections.emptyMap(), Collections.emptyMap(), "template",
                 mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class));
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
-                cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold);
+                cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         Assertions.assertThrows(CloudConnectorException.class, () -> stackUpscaleService.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
                 connector));
         verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
@@ -247,7 +247,7 @@ class StackUpscaleServiceTest {
         CloudStack cloudStack = new CloudStack(groups, mock(Network.class), mock(Image.class), Collections.emptyMap(), Collections.emptyMap(), "template",
                 mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class));
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
-                cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold);
+                cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         Assertions.assertThrows(CloudConnectorException.class, () -> stackUpscaleService.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
                 connector));
         verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
@@ -291,7 +291,7 @@ class StackUpscaleServiceTest {
         CloudStack cloudStack = new CloudStack(groups, mock(Network.class), mock(Image.class), Collections.emptyMap(), Collections.emptyMap(), "template",
                 mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class));
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
-                cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold);
+                cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         stackUpscaleService.upscale(mock(AuthenticatedContext.class), upscaleStackRequest, connector);
         verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");
@@ -339,7 +339,7 @@ class StackUpscaleServiceTest {
         CloudStack cloudStack = new CloudStack(groups, mock(Network.class), mock(Image.class), Collections.emptyMap(), Collections.emptyMap(), "template",
                 mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class));
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
-                cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold);
+                cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         Assertions.assertThrows(CloudConnectorException.class, () -> stackUpscaleService.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
                 connector));
         verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
@@ -382,7 +382,7 @@ class StackUpscaleServiceTest {
         CloudStack cloudStack = new CloudStack(groups, mock(Network.class), mock(Image.class), Collections.emptyMap(), Collections.emptyMap(), "template",
                 mock(InstanceAuthentication.class), "username", "publickey", mock(SpiFileSystem.class));
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
-                cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold);
+                cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         stackUpscaleService.upscale(mock(AuthenticatedContext.class), upscaleStackRequest, connector);
         verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");

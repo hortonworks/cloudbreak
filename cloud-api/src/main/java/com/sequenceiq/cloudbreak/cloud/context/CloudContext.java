@@ -125,6 +125,21 @@ public class CloudContext {
         return originalName;
     }
 
+    public Builder createPrototype() {
+        return CloudContext.Builder.builder()
+                .withId(getId())
+                .withName(getName())
+                .withPlatform(getPlatform())
+                .withVariant(getVariant())
+                .withLocation(getLocation())
+                .withAccountId(getAccountId())
+                .withTenantId(getTenantId())
+                .withUserName(getUserName())
+                .withCrn(getCrn())
+                .withGovCloud(isGovCloud())
+                .withOriginalName(getOriginalName());
+    }
+
     @Override
     public String toString() {
         return "CloudContext{" +

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.notification;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -35,6 +37,10 @@ public interface PersistenceRetriever {
     }
 
     default Optional<CloudResource> retrieveFirstByTypeAndStatusForStack(ResourceType resourceType, CommonStatus status, Long stackId) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    default List<CloudResource> notifyRetrieveAll(Long stackId, Set<String> resourceReferences, CommonStatus status, ResourceType resourceType) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 }

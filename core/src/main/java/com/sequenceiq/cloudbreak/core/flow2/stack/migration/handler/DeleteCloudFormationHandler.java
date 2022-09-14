@@ -73,6 +73,7 @@ public class DeleteCloudFormationHandler implements CloudPlatformEventHandler<De
             boolean cloudFormationTemplateDeleted = false;
             if (cfCloudResource.isPresent()) {
                 if (awsMigrationUtil.allInstancesDeletedFromCloudFormation(ac, cfCloudResource.get())) {
+                    awsMigrationUtil.changeLoadBalancer(ac);
                     terminateCfStackAndResource(cloudContext, cloudStack, ac, cfCloudResource.get());
                     cloudFormationTemplateDeleted = true;
                 } else {

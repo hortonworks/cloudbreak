@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -107,6 +108,9 @@ public class StackUpscaleActions {
 
     @Inject
     private EnvironmentClientService environmentClientService;
+
+    @Inject
+    private StackUpgradeService stackUpgradeService;
 
     @Bean(name = "UPDATE_DOMAIN_DNS_RESOLVER_STATE")
     public Action<?, ?> updateDomainDnsResolverAction() {
@@ -183,11 +187,6 @@ public class StackUpscaleActions {
         return new AbstractStackUpscaleAction<>(UpscaleStackValidationResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, UpscaleStackValidationResult payload, Map<Object, Object> variables) {
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(StackScalingFlowContext context) {
                 Map<String, Integer> hostGroupWithInstanceCountToCreate = getHostGroupsWithInstanceCountToCreate(context);
                 StackDto stack = stackDtoService.getById(context.getStackId());
                 StackDtoDelegate updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, hostGroupWithInstanceCountToCreate,
@@ -202,8 +201,11 @@ public class StackUpscaleActions {
                     adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, exactNumber.longValue());
                 }
                 LOGGER.info("Adjustment type with threshold for upscale request: {}", adjustmentTypeWithThreshold);
-                return new UpscaleStackRequest<UpscaleStackResult>(context.getCloudContext(), context.getCloudCredential(), updatedCloudStack, resources,
-                        adjustmentTypeWithThreshold);
+                String triggeredVariant = (String) variables.get(TRIGGERED_VARIANT);
+                boolean migrationNeed = stackUpgradeService.awsVariantMigrationIsFeasible(stack.getStack(), triggeredVariant);
+                UpscaleStackRequest<UpscaleStackResult> request = new UpscaleStackRequest<>(context.getCloudContext(), context.getCloudCredential(),
+                        updatedCloudStack, resources, adjustmentTypeWithThreshold, migrationNeed);
+                sendEvent(context, request);
             }
         };
     }

@@ -1,6 +1,6 @@
 package com.sequenceiq.consumption.service.cloud;
 
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
@@ -19,7 +19,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 public class CloudResourceRetrieverService implements ResourceRetriever {
 
     @Override
-    public Optional<CloudResource> findByResourceReferenceAndStatusAndType(String resourceReference, CommonStatus status, ResourceType resourceType) {
+    public List<CloudResource> findByResourceReferencesAndStatusAndType(List<String> resourceReferences, CommonStatus status, ResourceType resourceType) {
         throw new UnsupportedOperationException("Cloud resource retrieval is not supported.");
     }
 }

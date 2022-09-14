@@ -16,11 +16,14 @@ public class UpscaleStackRequest<T> extends CloudStackRequest<T> {
 
     private final AdjustmentTypeWithThreshold adjustmentTypeWithThreshold;
 
+    private final boolean migrationNeed;
+
     public UpscaleStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack stack, List<CloudResource> resourceList,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, boolean migrationNeed) {
         super(cloudContext, cloudCredential, stack);
         this.resourceList = resourceList;
         this.adjustmentTypeWithThreshold = adjustmentTypeWithThreshold;
+        this.migrationNeed = migrationNeed;
     }
 
     public List<CloudResource> getResourceList() {
@@ -29,6 +32,10 @@ public class UpscaleStackRequest<T> extends CloudStackRequest<T> {
 
     public AdjustmentTypeWithThreshold getAdjustmentWithThreshold() {
         return adjustmentTypeWithThreshold;
+    }
+
+    public boolean isMigrationNeed() {
+        return migrationNeed;
     }
 
     @Override

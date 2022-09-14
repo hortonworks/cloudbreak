@@ -80,17 +80,17 @@ public class ResourceService {
         return repository.saveAll(resources);
     }
 
-    public Optional<Resource> findByResourceReferenceAndStatusAndType(String resourceReference, CommonStatus status, ResourceType resourceType) {
-        return repository.findByResourceReferenceAndStatusAndType(resourceReference, status, resourceType);
+    public List<Resource> findByResourceReferencesAndStatusAndType(List<String> resourceReferences, CommonStatus status, ResourceType resourceType) {
+        return repository.findByResourceReferencesAndStatusAndType(resourceReferences, status, resourceType);
     }
 
     public Optional<Resource> findByResourceReferenceAndType(String resourceReference, ResourceType resourceType) {
         return repository.findByResourceReferenceAndType(resourceReference, resourceType);
     }
 
-    public Optional<Resource> findByResourceReferenceAndStatusAndTypeAndStack(String resourceReference, CommonStatus status, ResourceType resourceType,
+    public List<Resource> findByResourceReferencesAndStatusAndTypeAndStack(List<String> resourceReferences, CommonStatus status, ResourceType resourceType,
             Long stackId) {
-        return repository.findByResourceReferenceAndStatusAndTypeAndStack(resourceReference, status, resourceType, stackId);
+        return repository.findByResourceReferenceAndStatusAndTypeAndStack(resourceReferences, status, resourceType, stackId);
     }
 
     public Optional<Resource> findFirstByStatusAndTypeAndStack(CommonStatus status, ResourceType resourceType, Long stackId) {

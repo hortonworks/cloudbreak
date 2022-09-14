@@ -27,4 +27,12 @@ public class StackUpgradeService {
         return variant;
     }
 
+    public boolean awsVariantMigrationIsFeasible(StackView stackView, String triggeredVariant) {
+        Crn crn = Crn.safeFromString(stackView.getResourceCrn());
+        String originalPlatformVariant = stackView.getPlatformVariant();
+        return AwsConstants.AwsVariant.AWS_VARIANT.variant().value().equals(originalPlatformVariant)
+                && AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value().equals(triggeredVariant)
+                && entitlementService.awsVariantMigrationEnable(crn.getAccountId());
+    }
+
 }

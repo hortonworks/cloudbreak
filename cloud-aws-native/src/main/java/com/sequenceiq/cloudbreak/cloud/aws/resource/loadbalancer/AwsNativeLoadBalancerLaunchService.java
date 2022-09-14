@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -323,14 +324,21 @@ public class AwsNativeLoadBalancerLaunchService {
 
     private void registerTarget(AmazonElasticLoadBalancingClient loadBalancingClient, Long stackId, AwsTargetGroup targetGroup) {
         LOGGER.debug("Registering targets to target group '{}'", targetGroup.getArn());
-        Set<TargetDescription> targetDescriptions = targetGroup.getInstanceIds().stream()
-                .map(privateId -> {
-                    String instanceId = persistenceRetriever.notifyRetrieve(stackId, privateId, CommonStatus.CREATED, ResourceType.AWS_INSTANCE)
-                            .orElseThrow(() -> {
-                                String notFoundMsg = String.format("No AWS instance resource found with private id('%s') for stack('%s')", privateId, stackId);
-                                return new CloudConnectorException(notFoundMsg);
-                            })
-                            .getInstanceId();
+        Set<String> privateIds = targetGroup.getInstanceIds();
+        List<CloudResource> cloudResources = persistenceRetriever.notifyRetrieveAll(stackId, privateIds, CommonStatus.CREATED, ResourceType.AWS_INSTANCE);
+        if (privateIds.size() != cloudResources.size()) {
+            List<String> cloudResourceReferences = cloudResources.stream()
+                    .filter(cr -> cr.getReference() != null)
+                    .map(CloudResource::getReference)
+                    .collect(toList());
+            Set<String> missingPrivateIds = new HashSet<>(privateIds);
+            cloudResourceReferences.forEach(missingPrivateIds::remove);
+            LOGGER.debug("The following resources are missing from DB: {}", missingPrivateIds);
+
+        }
+        Set<TargetDescription> targetDescriptions = cloudResources.stream()
+                .map(cloudResource -> {
+                    String instanceId = cloudResource.getInstanceId();
                     return new TargetDescription()
                             .withPort(targetGroup.getPort())
                             .withId(instanceId);

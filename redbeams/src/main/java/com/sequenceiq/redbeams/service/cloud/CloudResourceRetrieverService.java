@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.service.cloud;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -28,8 +30,8 @@ public class CloudResourceRetrieverService implements ResourceRetriever {
     private DBResourceToCloudResourceConverter cloudResourceConverter;
 
     @Override
-    public Optional<CloudResource> findByResourceReferenceAndStatusAndType(String resourceReference, CommonStatus status, ResourceType resourceType) {
-        return Optional.empty();
+    public List<CloudResource> findByResourceReferencesAndStatusAndType(List<String> resourceReferences, CommonStatus status, ResourceType resourceType) {
+        return Collections.emptyList();
     }
 
     @Override

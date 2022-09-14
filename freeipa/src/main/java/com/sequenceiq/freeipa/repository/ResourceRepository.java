@@ -25,19 +25,20 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
     @Query("SELECT r FROM Resource r WHERE r.stack.id = :stackId")
     List<Resource> findAllByStackId(@Param("stackId") long stackId);
 
-    @Query("SELECT r FROM Resource r WHERE r.resourceReference = :resourceReference AND r.resourceStatus = :status AND r.resourceType = :type "
+    @Query("SELECT r FROM Resource r WHERE r.resourceReference in :resourceReferences AND r.resourceStatus = :status AND r.resourceType = :type "
             + "AND r.stack.id is null")
-    Optional<Resource> findByResourceReferenceAndStatusAndType(@Param("resourceReference") String resourceReference, @Param("status") CommonStatus status,
+    List<Resource> findByResourceReferencesAndStatusAndType(@Param("resourceReferences") List<String> resourceReferences,
+            @Param("status") CommonStatus status,
             @Param("type") ResourceType type);
 
     @Query("SELECT r FROM Resource r WHERE r.resourceReference = :resourceReference AND r.resourceType = :type AND r.stack.id is null")
     Optional<Resource> findByResourceReferenceAndType(@Param("resourceReference") String resourceReference,
             @Param("type") ResourceType type);
 
-    @Query("SELECT r FROM Resource r WHERE r.resourceReference = :resourceReference AND r.resourceStatus = :status AND r.resourceType = :type "
+    @Query("SELECT r FROM Resource r WHERE r.resourceReference in :resourceReferences AND r.resourceStatus = :status AND r.resourceType = :type "
             + "AND r.stack.id = :stackId")
-    Optional<Resource> findByResourceReferenceAndStatusAndTypeAndStack(
-            @Param("resourceReference") String resourceReference,
+    List<Resource> findByResourceReferencesAndStatusAndTypeAndStack(
+            @Param("resourceReferences") List<String> resourceReferences,
             @Param("status") CommonStatus status,
             @Param("type") ResourceType resourceType,
             @Param("stackId") Long stackId);

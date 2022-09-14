@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.resourcepersister;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -31,8 +32,8 @@ public class ResourceService {
         return repository.saveAll(resources);
     }
 
-    public Optional<Resource> findByResourceReferenceAndStatusAndType(String resourceReference, CommonStatus status, ResourceType resourceType) {
-        return repository.findByResourceReferenceAndStatusAndType(resourceReference, status, resourceType);
+    public List<Resource> findByResourceReferencesAndStatusAndType(List<String> resourceReferences, CommonStatus status, ResourceType resourceType) {
+        return repository.findByResourceReferencesAndStatusAndType(resourceReferences, status, resourceType);
     }
 
     public Optional<Resource> findByResourceReferenceAndType(String resourceReference, ResourceType resourceType) {

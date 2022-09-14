@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.resourcepersister;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -25,12 +27,14 @@ public class CloudResourceRetrieverService implements ResourceRetriever {
     private ResourceService resourceService;
 
     @Override
-    public Optional<CloudResource> findByResourceReferenceAndStatusAndType(String resourceReference, CommonStatus status, ResourceType resourceType) {
-        Optional<Resource> optionalResource = resourceService.findByResourceReferenceAndStatusAndType(resourceReference, status, resourceType);
-        LOGGER.debug("Resource retrieved by optionalResource reference: {}, status: {} and type: {}. Is present: {}", resourceReference, status, resourceType,
-                optionalResource.isPresent());
-        return optionalResource
-                .map(resource -> cloudResourceConverter.convert(resource));
+    public List<CloudResource> findByResourceReferencesAndStatusAndType(List<String> resourceReferences, CommonStatus status, ResourceType resourceType) {
+        List<Resource> resources = resourceService.findByResourceReferencesAndStatusAndType(resourceReferences, status, resourceType);
+        LOGGER.debug("Resource retrieved by resource reference ({}): {}, status: {} and type: {}. Is present: {}", resourceReferences.size(),
+                resourceReferences, status, resourceType, resources.size());
+        return resources
+                .stream()
+                .map(resource -> cloudResourceConverter.convert(resource))
+                .collect(Collectors.toList());
     }
 
     public Optional<CloudResource> findByEnvironmentIdAndType(Long environmentId, ResourceType resourceType) {
