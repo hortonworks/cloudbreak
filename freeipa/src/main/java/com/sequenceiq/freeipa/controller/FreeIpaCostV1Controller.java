@@ -26,11 +26,11 @@ public class FreeIpaCostV1Controller implements FreeIpaCostV1Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaCostV1Controller.class);
 
-    private static final double MAGIC_PROVIDER_COST = 1.3;
+    private static final double MAGIC_PROVIDER_COST = 0.0;
 
-    private static final double MAGIC_CLOUDERA_COST = 1.3;
+    private static final double MAGIC_CLOUDERA_COST = 0.0;
 
-    private static final double MAGIC_CO2 = 0.1;
+    private static final double MAGIC_CO2 = 0.0;
 
     @Inject
     private FreeIpaFiltering freeIpaFiltering;

@@ -1,15 +1,18 @@
 package com.sequenceiq.cloudbreak.service.cost.co2;
 
-import java.util.Map;
+import java.util.IntSummaryStatistics;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.cost.model.RegionEmissionFactor;
 import com.sequenceiq.cloudbreak.common.cost.service.RegionEmissionFactorService;
-import com.sequenceiq.cloudbreak.service.cost.InstanceTypeCollectorService;
 import com.sequenceiq.cloudbreak.service.cost.model.ClusterCostDto;
+import com.sequenceiq.cloudbreak.service.cost.model.InstanceGroupCostDto;
 
 // CHECKSTYLE:OFF
 @Service
@@ -18,42 +21,37 @@ public class CarbonCalculatorService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CarbonCalculatorService.class);
     //AWS min/max avg 2.12 Wh/vCPU
     private static final double AWS_AVG_VCPU = 2.12;
-    //g/kWh
-    private static final double CO2_RATE_CALIFORNIA = 347;
 
     @Inject
     private RegionEmissionFactorService regionEmissionFactorService;
 
-    @Inject
-    private InstanceTypeCollectorService instanceTypeCollectorService;
-
     public double getHourlyCarbonFootPrintByCrn(ClusterCostDto instanceTypeList) {
         //filter nodes that are not in available status
-        LOGGER.info("Collected instnace types: {}", instanceTypeList);
-        double summarizedWhConsumption = calculateCpuInWh() + calculateDiskInWh() + calculateMemoryInWh();
+        LOGGER.info("Collected instance types: {}", instanceTypeList);
+        double summarizedWhConsumption = calculateCpuInWh(instanceTypeList) + calculateDiskInWh() + calculateMemoryInWh();
         // get cluster proper region for CO2 rate
-        return summarizedWhConsumption * getCo2RateForRegion() / 1000;
+        RegionEmissionFactor emissionFactor = getCo2RateForRegion(instanceTypeList);
+        LOGGER.info("RegionEmissionFactor for region {} is: {}", instanceTypeList.getRegion(), emissionFactor);
+        return summarizedWhConsumption / 1000.0 * emissionFactor.getCo2e() * 1000000.0;
     }
 
-    private double calculateCpuInWh() {
-        return 20 * AWS_AVG_VCPU;
+    private double calculateCpuInWh(ClusterCostDto dto) {
+        IntSummaryStatistics vCpuCount = dto.getInstanceGroups().stream().collect(Collectors.summarizingInt(InstanceGroupCostDto::getTotalvCpuCores));
+        LOGGER.info("Cluster vCpuCount is: {}", vCpuCount);
+        return vCpuCount.getSum() * AWS_AVG_VCPU;
     }
 
     private double calculateDiskInWh() {
-        return 5.0;
+        LOGGER.info("Skipping Disk calculation and counting with 0");
+        return 0;
     }
 
     private double calculateMemoryInWh() {
-        return 3.0;
+        LOGGER.info("Skipping Memory calculation and counting with 0");
+        return 0;
     }
 
-    private double getCo2RateForRegion() {
-        return CO2_RATE_CALIFORNIA;
+    private RegionEmissionFactor getCo2RateForRegion(ClusterCostDto dto) {
+        return regionEmissionFactorService.get(dto.getRegion());
     }
-
-
-    private double getVcpuCountForCluster() {
-        return 300;
-    }
-
 }
