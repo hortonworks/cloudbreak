@@ -4,9 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -30,6 +32,8 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -38,6 +42,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.type.CdpResourceType;
@@ -65,6 +70,9 @@ public class TemplateValidatorTest {
 
     @Mock
     private CloudParameterService cloudParameterService;
+
+    @Mock
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Mock
     private LocationService locationService;
@@ -199,6 +207,8 @@ public class TemplateValidatorTest {
     @Test
     public void validateMasterDataVolumeZeroCountZeroSize() {
         instanceGroup = createInstanceGroup(0, 0, false, false, false, "c3.2xlarge");
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(2)).error(anyString());
     }
@@ -206,6 +216,8 @@ public class TemplateValidatorTest {
     @Test
     public void validateMasterDataVolumeCountOne() {
         instanceGroup = createInstanceGroup(1, 1, false, false, false, "c3.2xlarge");
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
     }
@@ -214,6 +226,8 @@ public class TemplateValidatorTest {
     public void validateMasterDataVolumeInvalidCount() {
         // volume count is larger than the max value of 24
         instanceGroup = createInstanceGroup(25, 1, false, false, false, "c3.2xlarge");
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(1)).error(anyString());
     }
@@ -221,6 +235,8 @@ public class TemplateValidatorTest {
     @Test
     public void validateMasterDataVolumeDefaultSize() {
         instanceGroup = createInstanceGroup(1, 100, false, false, false, "c3.2xlarge");
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(0)).error(anyString());
     }
@@ -228,6 +244,73 @@ public class TemplateValidatorTest {
     @Test
     public void validateMasterDataVolumeInvalidSize() {
         instanceGroup = createInstanceGroup(1, 18000, false, false, false, "c3.2xlarge");
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
+        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
+        Mockito.verify(builder, Mockito.times(1)).error(anyString());
+    }
+
+    @Test
+    public void validateCoordinatorandExecutorVolumeZeroCountZeroSize() {
+        instanceGroup = createInstanceGroup(0, 0, false, false, false, "c3.2xlarge");
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
+        Set<ServiceComponent> services = new HashSet<>();
+        ServiceComponent service = ServiceComponent.of("IMPALA", "IMPALAD");
+        services.add(service);
+        when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
+        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
+        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+    }
+
+    @Test
+    public void validateCoordinatorandExecutorVolumeCountOne() {
+        instanceGroup = createInstanceGroup(1, 1, false, false, false, "c3.2xlarge");
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
+        Set<ServiceComponent> services = new HashSet<>();
+        ServiceComponent service = ServiceComponent.of("IMPALA", "IMPALAD");
+        services.add(service);
+        when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
+        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
+        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+    }
+
+    @Test
+    public void validateCoordinatorandExecutorVolumeSizeInValid() {
+        instanceGroup = createInstanceGroup(1, 18000, false, false, false, "c3.2xlarge");
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
+        Set<ServiceComponent> services = new HashSet<>();
+        ServiceComponent service = ServiceComponent.of("IMPALA", "IMPALAD");
+        services.add(service);
+        when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
+        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
+        Mockito.verify(builder, Mockito.times(1)).error(anyString());
+    }
+
+    @Test
+    public void validateCoordinatorandExecutorVolumeDefaultSize() {
+        instanceGroup = createInstanceGroup(1, 100, false, false, false, "c3.2xlarge");
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
+        Set<ServiceComponent> services = new HashSet<>();
+        ServiceComponent service = ServiceComponent.of("IMPALA", "IMPALAD");
+        services.add(service);
+        when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
+        underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
+        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+    }
+
+    @Test
+    public void validateCoordinatorandExecutorVolumeCountInvalid() {
+        instanceGroup = createInstanceGroup(25, 100, false, false, false, "c3.2xlarge");
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
+        Set<ServiceComponent> services = new HashSet<>();
+        ServiceComponent service = ServiceComponent.of("IMPALA", "IMPALAD");
+        services.add(service);
+        when(cmTemplateProcessor.getAllComponents()).thenReturn(services);
         underTest.validate(credential, instanceGroup, stack, CdpResourceType.DATALAKE, optionalUser, builder);
         Mockito.verify(builder, Mockito.times(1)).error(anyString());
     }

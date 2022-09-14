@@ -877,6 +877,9 @@ cb:
           - service: YARN
             role: NODEMANAGER
             required: false
+          - service: IMPALA
+            role: IMPALAD
+            required: false
         roles:
           - role: GATEWAY
             required: false
