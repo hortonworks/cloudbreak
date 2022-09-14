@@ -26,16 +26,20 @@ public class ClusterCostService {
     @Inject
     private BanzaiCache banzaiCache;
 
+    @Inject
+    private InstanceTypeCollectorService instanceTypeCollectorService;
+
     public Map<String, RealTimeCost> getCosts(StackViewV4Responses responses) {
         Map<String, RealTimeCost> realTimeCosts = new HashMap<>();
 
         //TODO Ricsi / Laci code comes here
         for (StackViewV4Response stack : responses.getResponses()) {
+            Map<String, Long> instanceTypeList = instanceTypeCollectorService.getAllInstanceTypesByCrn(stack.getCrn());
             RealTimeCost realTimeCost = new RealTimeCost();
             realTimeCost.setEnvCrn(stack.getEnvironmentCrn());
             realTimeCost.setHourlyProviderUsd(MAGIC_PROVIDER_COST);
             realTimeCost.setHourlyClouderaUsd(MAGIC_CLOUDERA_COST);
-            realTimeCost.setHourlyCO2(carbonCalculatorService.getHourlyCarbonFootPrintByCrn(stack.getCrn()));
+            realTimeCost.setHourlyCO2(carbonCalculatorService.getHourlyCarbonFootPrintByCrn(instanceTypeList));
             realTimeCosts.put(stack.getCrn(), realTimeCost);
         }
         return realTimeCosts;
