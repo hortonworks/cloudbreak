@@ -222,7 +222,11 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         }
 
         public Builder withBackupOperationType(BackupOperationType backupOperationType) {
-            this.backupOperationType = backupOperationType;
+            if (backupOperationType != null) {
+                this.backupOperationType = backupOperationType;
+            } else {
+                this.backupOperationType = BackupOperationType.ANY;
+            }
             return this;
         }
 
