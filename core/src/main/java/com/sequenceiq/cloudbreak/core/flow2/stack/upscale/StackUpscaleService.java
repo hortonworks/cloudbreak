@@ -131,9 +131,10 @@ public class StackUpscaleService {
     public Set<String> finishExtendMetadata(StackView stackView, Integer scalingAdjustment, CollectMetadataResult payload) throws TransactionExecutionException {
         return transactionService.required(() -> {
             List<CloudVmMetaDataStatus> coreInstanceMetaData = payload.getResults();
-            int newInstances = metadataSetupService.saveInstanceMetaData(stackView, coreInstanceMetaData, CREATED);
+            metadataSetupService.saveInstanceMetaData(stackView, coreInstanceMetaData, CREATED);
             Set<String> upscaleCandidateAddresses = coreInstanceMetaData.stream().filter(im -> im.getMetaData().getPrivateIp() != null)
                     .map(im -> im.getMetaData().getPrivateIp()).collect(Collectors.toSet());
+            int newInstances = upscaleCandidateAddresses.size();
             try {
                 clusterService.updateClusterStatusByStackIdOutOfTransaction(stackView.getId(), DetailedStackStatus.EXTENDING_METADATA_FINISHED);
             } catch (TransactionExecutionException e) {
