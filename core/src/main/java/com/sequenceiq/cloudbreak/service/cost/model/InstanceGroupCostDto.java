@@ -18,6 +18,10 @@ public class InstanceGroupCostDto {
 
     private List<DiskCostDto> disksPerInstance;
 
+    public int getTotalvCpuCores() {
+        return coresPerInstance * count;
+    }
+
     public String getType() {
         return type;
     }
