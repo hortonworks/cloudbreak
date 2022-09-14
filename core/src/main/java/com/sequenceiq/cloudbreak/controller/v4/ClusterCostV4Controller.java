@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.controller.v4;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATAHUB;
 
-import java.util.List;
-
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
@@ -15,7 +13,6 @@ import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.cost.ClusterCostV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.authorization.StackFiltering;
-import com.sequenceiq.cloudbreak.common.cost.RealTimeCost;
 import com.sequenceiq.cloudbreak.common.cost.RealTimeCostResponse;
 import com.sequenceiq.cloudbreak.service.cost.ClusterCostService;
 
@@ -35,7 +32,6 @@ public class ClusterCostV4Controller implements ClusterCostV4Endpoint {
     @FilterListBasedOnPermissions
     public RealTimeCostResponse list() {
         StackViewV4Responses responses = stackFiltering.filterDataHubs(DESCRIBE_DATAHUB, null, null);
-        List<RealTimeCost> realTimeCosts = clusterCostService.getCosts(responses);
-        return new RealTimeCostResponse(realTimeCosts);
+        return new RealTimeCostResponse(clusterCostService.getCosts(responses));
     }
 }
