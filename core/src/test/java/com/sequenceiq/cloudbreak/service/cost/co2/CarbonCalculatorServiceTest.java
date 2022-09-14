@@ -3,32 +3,54 @@ package com.sequenceiq.cloudbreak.service.cost.co2;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.cost.model.RegionEmissionFactor;
+import com.sequenceiq.cloudbreak.common.cost.service.RegionEmissionFactorService;
 import com.sequenceiq.cloudbreak.cost.co2.CarbonCalculatorService;
-import com.sequenceiq.cloudbreak.service.cost.InstanceTypeCollectorService;
+import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
+import com.sequenceiq.cloudbreak.cost.model.InstanceGroupCostDto;
 
 @ExtendWith(MockitoExtension.class)
 class CarbonCalculatorServiceTest {
 
-    private static final String TEST_CRN ="crn:cdp:datahub:us-west-1:e7b1345f-4ae1-4594-9113-fc91f22ef8bd:cluster:c7da2918-dd14-49ed-9b43-33ff55bd6309";
-
     @Mock
-    private InstanceTypeCollectorService instanceTypeCollectorService;
+    private RegionEmissionFactorService regionEmissionFactorService;
 
     @InjectMocks
     private CarbonCalculatorService underTest;
 
-//    @Test
-//    void getHourlyCarbonFootPrintByCrn() {
-//        //TODO: add some usecases
-//        Stack dummyStack = new Stack();
-//        Map<String, Long> instanceTypeCounts = new HashMap<>();
-//        when(instanceTypeCollectorService.getAllInstanceTypesByCrn(any())).thenReturn(instanceTypeCounts);
-//        assertEquals(17.4888, underTest.getHourlyCarbonFootPrintByCrn(Map.of()));
-//    }
+    @Test
+    void getHourlyCarbonFootPrintByCrn() {
+        //TODO: add some usecases
+        ClusterCostDto testDto = new ClusterCostDto();
+        RegionEmissionFactor emissionFactor = new RegionEmissionFactor();
+        emissionFactor.setCo2e(0.0001234);
+        when(regionEmissionFactorService.get(any())).thenReturn(emissionFactor);
+        assertEquals(6.972716999999999, underTest.getHourlyCarbonFootPrintByCrn(createClusterCostDto(3, 5)));
+        assertEquals(8.360966999999999, underTest.getHourlyCarbonFootPrintByCrn(createClusterCostDto(3, 15)));
+    }
+
+    private ClusterCostDto createClusterCostDto(int instanceCount, int memorySize) {
+        ClusterCostDto testDto = new ClusterCostDto();
+        testDto.setRegion("us-west-1");
+        List<InstanceGroupCostDto> instanceGroupCostDtos = new ArrayList<>();
+        InstanceGroupCostDto singleDto = new InstanceGroupCostDto();
+        singleDto.setCount(instanceCount);
+        singleDto.setCoresPerInstance(8);
+        singleDto.setType("m5.xlarge");
+        singleDto.setMemoryPerInstance(memorySize);
+        instanceGroupCostDtos.add(singleDto);
+        testDto.setInstanceGroups(instanceGroupCostDtos);
+        return testDto;
+    }
 }
