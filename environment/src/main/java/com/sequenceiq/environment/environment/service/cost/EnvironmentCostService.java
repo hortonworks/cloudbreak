@@ -36,7 +36,8 @@ public class EnvironmentCostService {
         for (Map.Entry<String, RealTimeCost> dhCostEntry : totalCosts.entrySet()) {
             RealTimeCost dhCost = dhCostEntry.getValue();
             String envCrn = dhCostEntry.getValue().getEnvCrn();
-            RealTimeCost cost = environmentCost.getOrDefault(envCrn, new RealTimeCost(envCrn, 0.0, 0.0, 0.0));
+
+            RealTimeCost cost = environmentCost.getOrDefault(envCrn, new RealTimeCost(envCrn, null, 0.0, 0.0, 0.0));
             environmentCost.put(envCrn, cost.add(dhCost));
         }
         LOGGER.debug("Cost summed for environments: {}", environmentCost);

@@ -38,6 +38,7 @@ public class ClusterCostService {
             ClusterCostDto clusterCost = instanceTypeCollectorService.getAllInstanceTypesByCrn(stack.getCrn());
             RealTimeCost realTimeCost = new RealTimeCost();
             realTimeCost.setEnvCrn(stack.getEnvironmentCrn());
+            realTimeCost.setResourceName(stack.getName());
             realTimeCost.setHourlyProviderUsd(usdCalculatorService.calculateProviderCost(clusterCost));
             realTimeCost.setHourlyClouderaUsd(usdCalculatorService.calculateClouderaCost(clusterCost));
             realTimeCost.setHourlyCO2(carbonCalculatorService.getHourlyCarbonFootPrintByCrn(clusterCost));

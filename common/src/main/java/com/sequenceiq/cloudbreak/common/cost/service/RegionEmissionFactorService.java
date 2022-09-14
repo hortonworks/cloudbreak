@@ -37,7 +37,7 @@ public class RegionEmissionFactorService {
     }
 
     public RegionEmissionFactor get(String region) {
-        return emissionFactorMap.get(region);
+        return emissionFactorMap.getOrDefault(region, new RegionEmissionFactor());
     }
 
     private List<RegionEmissionFactor> loadEmissionList() throws IOException {
