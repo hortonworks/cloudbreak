@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.flow.upgrade.database;
 
-import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_DATABASE_SERVER_FINISHED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_DATABASE_SERVER_IN_PROGRESS;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_FAILED_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_FINALIZED_EVENT;
@@ -17,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
@@ -82,8 +82,11 @@ public class UpgradeDatabaseServerActions {
             @Override
             protected void doExecute(SdxContext context, SdxUpgradeDatabaseServerWaitSuccessEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Database server upgrade finalized for SDX: {}", payload.getResourceId());
-                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_DATABASE_SERVER_FINISHED,
-                        "Database server upgrade completed successfully", payload.getResourceId());
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(
+                        DatalakeStatusEnum.RUNNING,
+                        ResourceEvent.DATALAKE_UPGRADE_DATABASE_SERVER_FINISHED,
+                        "Datalake Database server upgrade completed successfully",
+                        payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.UPGRADE_DATABASE_SERVER_FINISHED, sdxCluster);
                 sendEvent(context, SDX_UPGRADE_DATABASE_SERVER_FINALIZED_EVENT.event(), payload);
             }
