@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.banzai.BanzaiCache;
 import com.sequenceiq.cloudbreak.common.cost.RealTimeCost;
 import com.sequenceiq.cloudbreak.service.cost.co2.CarbonCalculatorService;
 
@@ -21,6 +22,9 @@ public class ClusterCostService {
 
     @Inject
     private CarbonCalculatorService carbonCalculatorService;
+
+    @Inject
+    private BanzaiCache banzaiCache;
 
     public Map<String, RealTimeCost> getCosts(StackViewV4Responses responses) {
         Map<String, RealTimeCost> realTimeCosts = new HashMap<>();
