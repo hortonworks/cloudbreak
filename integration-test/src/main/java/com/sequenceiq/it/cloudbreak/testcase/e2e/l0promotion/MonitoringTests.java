@@ -92,6 +92,7 @@ public class MonitoringTests extends AbstractE2ETest {
                     .withTelemetry("telemetry")
                     .withTunnel(testContext.getTunnel())
                     .withCreateFreeIpa(Boolean.TRUE)
+                    .withOneFreeIpaNode()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaUserSyncTestDto.class)

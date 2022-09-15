@@ -116,6 +116,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                     .withNetwork()
                     .withTelemetry("telemetry")
                     .withCreateFreeIpa(Boolean.TRUE)
+                    .withOneFreeIpaNode()
                     .withFreeIpaRecipe(Set.of(recipeName))
                     .addTags(ENV_TAGS)
                 .when(environmentTestClient.create())

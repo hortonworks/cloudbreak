@@ -83,6 +83,7 @@ public class DistroXBigScaleTest extends AbstractE2ETest {
                     .withTunnel(testContext.getTunnel())
                     .addTags(COST_REDUCER_TAGS)
                     .withCreateFreeIpa(Boolean.TRUE)
+                    .withOneFreeIpaNode()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaUserSyncTestDto.class)

@@ -117,6 +117,11 @@ public class EnvironmentTestDto
                 .withTunnel(getTestContext().getTunnel());
     }
 
+    public EnvironmentTestDto withOneFreeIpaNode() {
+        getRequest().getFreeIpa().setInstanceCountByGroup(1);
+        return this;
+    }
+
     public EnvironmentTestDto withCreateFreeIpa(Boolean create) {
         getRequest().getFreeIpa().setCreate(create);
         return this;
