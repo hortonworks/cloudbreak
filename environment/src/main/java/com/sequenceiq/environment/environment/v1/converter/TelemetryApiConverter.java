@@ -49,8 +49,6 @@ public class TelemetryApiConverter {
 
     private final String monitoringEndpointConfig;
 
-    private final String monitoringPaasEndpointConfig;
-
     private final EntitlementService entitlementService;
 
     public TelemetryApiConverter(TelemetryConfiguration configuration, EntitlementService entitlementService) {
@@ -59,7 +57,6 @@ public class TelemetryApiConverter {
         this.monitoringEnabled = configuration.getMonitoringConfiguration().isEnabled();
         this.paasMonitoringEnabled = configuration.getMonitoringConfiguration().isPaasSupport();
         this.monitoringEndpointConfig = configuration.getMonitoringConfiguration().getRemoteWriteUrl();
-        this.monitoringPaasEndpointConfig = configuration.getMonitoringConfiguration().getPaasRemoteWriteUrl();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
     }
 
@@ -166,13 +163,12 @@ public class TelemetryApiConverter {
         EnvironmentMonitoring monitoring = new EnvironmentMonitoring();
         boolean saas = isSaas(accountId);
         if (isMonitoringEnabled(accountId, saas)) {
-            String unformattedMonitoringEndpoint = getUnformattedMonitoringEndpoint(saas);
             if (monitoringRequest != null) {
                 String preEndpoint = StringUtils.isNotBlank(monitoringRequest.getRemoteWriteUrl())
-                        ? monitoringRequest.getRemoteWriteUrl() : unformattedMonitoringEndpoint;
+                        ? monitoringRequest.getRemoteWriteUrl() : monitoringEndpointConfig;
                 monitoring.setRemoteWriteUrl(replaceAccountId(preEndpoint, accountId));
             } else {
-                monitoring.setRemoteWriteUrl(replaceAccountId(unformattedMonitoringEndpoint, accountId));
+                monitoring.setRemoteWriteUrl(replaceAccountId(monitoringEndpointConfig, accountId));
             }
         }
         return monitoring;
@@ -351,9 +347,5 @@ public class TelemetryApiConverter {
 
     private boolean isSaas(String accountId) {
         return entitlementService.isCdpSaasEnabled(accountId);
-    }
-
-    private String getUnformattedMonitoringEndpoint(boolean saas) {
-        return saas || StringUtils.isBlank(monitoringPaasEndpointConfig) ? monitoringEndpointConfig : monitoringPaasEndpointConfig;
     }
 }
