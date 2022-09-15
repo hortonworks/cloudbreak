@@ -5,6 +5,8 @@ import java.util.List;
 public class ClusterCostDto {
 
     private String region;
+
+    private String status;
     private List<InstanceGroupCostDto> instanceGroups;
 
     public List<InstanceGroupCostDto> getInstanceGroups() {
@@ -15,6 +17,14 @@ public class ClusterCostDto {
         this.instanceGroups = instanceGroups;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public String getRegion() {
         return region;
     }
@@ -23,10 +33,15 @@ public class ClusterCostDto {
         this.region = region;
     }
 
+    public boolean isComputeRunning() {
+        return !status.startsWith("STOPPED") && !status.startsWith("DELETED");
+    }
+
     @Override
     public String toString() {
         return "ClusterCostDto{" +
                 "region='" + region + '\'' +
+                ", status='" + status + '\'' +
                 ", instanceGroups=" + instanceGroups +
                 '}';
     }

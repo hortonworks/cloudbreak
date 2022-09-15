@@ -12,7 +12,9 @@ public class UsdCalculatorService {
     public double calculateProviderCost(ClusterCostDto clusterCostDto) {
         double price = 0.0;
         for (InstanceGroupCostDto instanceGroup : clusterCostDto.getInstanceGroups()) {
-            price += instanceGroup.getTotalProviderPrice();
+            if (clusterCostDto.isComputeRunning()) {
+                price += instanceGroup.getTotalProviderPrice();
+            }
             for (DiskCostDto diskCostDto : instanceGroup.getDisksPerInstance()) {
                 price += diskCostDto.getTotalDiskPrice();
             }
@@ -20,10 +22,12 @@ public class UsdCalculatorService {
         return price;
     }
 
-    public double calculateClouderaCost(ClusterCostDto clusterCostDto) {
+    public double calculateClouderaCost(ClusterCostDto clusterCostDto, String type) {
         double price = 0.0;
-        for (InstanceGroupCostDto instanceGroup : clusterCostDto.getInstanceGroups()) {
-            price += instanceGroup.getTotalClouderaPrice();
+        if ("WORKLOAD".equals(type) && clusterCostDto.isComputeRunning()) {
+            for (InstanceGroupCostDto instanceGroup : clusterCostDto.getInstanceGroups()) {
+                price += instanceGroup.getTotalClouderaPrice();
+            }
         }
         return price;
     }
