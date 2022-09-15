@@ -9,7 +9,11 @@ public class DiskCostDto {
     private double pricePerDiskGB;
 
     public double getTotalDiskPrice() {
-        return size * count * pricePerDiskGB;
+        return getTotalDiskSizeInGb() * pricePerDiskGB;
+    }
+
+    public int getTotalDiskSizeInGb() {
+        return size * count;
     }
 
     public int getSize() {
