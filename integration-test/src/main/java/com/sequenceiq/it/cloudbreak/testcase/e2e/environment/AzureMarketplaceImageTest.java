@@ -55,8 +55,8 @@ public class AzureMarketplaceImageTest extends AbstractE2ETest {
                 .given(EnvironmentTestDto.class)
                 .withNetwork()
                 .withTelemetry("telemetry")
-
                 .withCreateFreeIpa(Boolean.TRUE)
+                .withOneFreeIpaNode()
                 .withMarketplaceFreeIpaImage()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)

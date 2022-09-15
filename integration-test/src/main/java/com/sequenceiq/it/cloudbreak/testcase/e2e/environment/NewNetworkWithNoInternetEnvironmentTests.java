@@ -80,6 +80,7 @@ public class NewNetworkWithNoInternetEnvironmentTests extends AbstractE2ETest {
                 .withNetwork(networkKey)
                 .withTelemetry("telemetry")
                 .withCreateFreeIpa(Boolean.TRUE)
+                .withOneFreeIpaNode()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .then((tc, testDto, cc) -> environmentTestClient.describe().action(tc, testDto, cc))
