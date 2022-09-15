@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_REVERT_ALL_EVENT;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -11,6 +13,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmServic
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmRegisterClusterProxyRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmRegisterClusterProxyResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFailedEvent;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -33,7 +36,8 @@ public class RegisterClusterProxyHandler extends ExceptionCatcherEventHandler<Up
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmRegisterClusterProxyRequest> event) {
         LOGGER.error("Registering cluster proxy for CCM upgrade has failed", e);
-        return new UpgradeCcmFailedEvent(resourceId, event.getData().getOldTunnel(), getClass(), e);
+        return new UpgradeCcmFailedEvent(UPGRADE_CCM_REVERT_ALL_EVENT.event(), resourceId, event.getData().getClusterId(),
+                event.getData().getOldTunnel(), getClass(), e, event.getData().getRevertTime());
     }
 
     @Override
@@ -41,8 +45,8 @@ public class RegisterClusterProxyHandler extends ExceptionCatcherEventHandler<Up
         UpgradeCcmRegisterClusterProxyRequest request = event.getData();
         Long stackId = request.getResourceId();
         LOGGER.info("Registering to cluster proxy for CCM upgrade...");
-        upgradeCcmService.updateTunnel(stackId);
+        upgradeCcmService.updateTunnel(stackId, Tunnel.latestUpgradeTarget());
         upgradeCcmService.registerClusterProxyAndCheckHealth(stackId);
-        return new UpgradeCcmRegisterClusterProxyResult(stackId, request.getClusterId(), request.getOldTunnel());
+        return new UpgradeCcmRegisterClusterProxyResult(stackId, request.getClusterId(), request.getOldTunnel(), request.getRevertTime());
     }
 }

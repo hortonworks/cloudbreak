@@ -44,11 +44,11 @@ class TunnelUpdateHandlerTest {
 
     @Test
     void doAccept() {
-        UpgradeCcmTunnelUpdateRequest request = new UpgradeCcmTunnelUpdateRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM);
+        UpgradeCcmTunnelUpdateRequest request = new UpgradeCcmTunnelUpdateRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM, null);
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
-        verify(upgradeCcmService).updateTunnel(STACK_ID);
+        verify(upgradeCcmService).updateTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
         assertThat(result.selector()).isEqualTo("UPGRADECCMTUNNELUPDATERESULT");
     }
 

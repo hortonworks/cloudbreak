@@ -5,22 +5,29 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCc
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_DEREGISTER_AGENTS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_FAILED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_HEALTH_CHECK_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_FINALIZING_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_PUSH_SALT_STATES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_RECONFIGURE_NGINX_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_REGISTER_CLUSTER_PROXY_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_REMOVE_AGENTS_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_REVERT_ALL_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_REVERT_SALTSTATE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_REVERT_TUNNEL_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_TUNNEL_UPDATE_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmState.UPGRADE_CCM_DEREGISTER_AGENT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmState.UPGRADE_CCM_FAILED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmState.UPGRADE_CCM_FINALIZE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmState.UPGRADE_CCM_FINISHED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmState.UPGRADE_CCM_HEALTH_CHECK_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmState.UPGRADE_CCM_PUSH_SALT_STATES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmState.UPGRADE_CCM_RECONFIGURE_NGINX_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmState.UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmState.UPGRADE_CCM_REMOVE_AGENT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmState.UPGRADE_CCM_REVERT_ALL_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmState.UPGRADE_CCM_REVERT_SALTSTATE_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmState.UPGRADE_CCM_REVERT_TUNNEL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmState.UPGRADE_CCM_TUNNEL_UPDATE_STATE;
 
 import java.util.List;
@@ -51,24 +58,48 @@ public class UpgradeCcmFlowConfig extends StackStatusFinalizerAbstractFlowConfig
                     .event(UPGRADE_CCM_PUSH_SALT_STATES_FINISHED_EVENT)
                     .defaultFailureEvent()
 
+                    .from(UPGRADE_CCM_PUSH_SALT_STATES_STATE).to(UPGRADE_CCM_REVERT_TUNNEL_STATE)
+                    .event(UPGRADE_CCM_REVERT_TUNNEL_EVENT)
+                    .defaultFailureEvent()
+
                     .from(UPGRADE_CCM_RECONFIGURE_NGINX_STATE).to(UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE)
                     .event(UPGRADE_CCM_RECONFIGURE_NGINX_FINISHED_EVENT)
                     .defaultFailureEvent()
 
-                    .from(UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE).to(UPGRADE_CCM_HEALTH_CHECK_STATE)
+                    .from(UPGRADE_CCM_RECONFIGURE_NGINX_STATE).to(UPGRADE_CCM_REVERT_SALTSTATE_STATE)
+                    .event(UPGRADE_CCM_REVERT_SALTSTATE_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE).to(UPGRADE_CCM_REMOVE_AGENT_STATE)
                     .event(UPGRADE_CCM_REGISTER_CLUSTER_PROXY_FINISHED_EVENT)
                     .defaultFailureEvent()
 
-                    .from(UPGRADE_CCM_HEALTH_CHECK_STATE).to(UPGRADE_CCM_REMOVE_AGENT_STATE)
-                    .event(UPGRADE_CCM_HEALTH_CHECK_FINISHED_EVENT)
+                    .from(UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE).to(UPGRADE_CCM_REVERT_ALL_STATE)
+                    .event(UPGRADE_CCM_REVERT_ALL_EVENT)
                     .defaultFailureEvent()
 
                     .from(UPGRADE_CCM_REMOVE_AGENT_STATE).to(UPGRADE_CCM_DEREGISTER_AGENT_STATE)
                     .event(UPGRADE_CCM_REMOVE_AGENTS_FINISHED_EVENT)
                     .defaultFailureEvent()
 
-                    .from(UPGRADE_CCM_DEREGISTER_AGENT_STATE).to(UPGRADE_CCM_FINISHED_STATE)
+                    .from(UPGRADE_CCM_DEREGISTER_AGENT_STATE).to(UPGRADE_CCM_FINALIZE_STATE)
                     .event(UPGRADE_CCM_DEREGISTER_AGENTS_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(UPGRADE_CCM_FINALIZE_STATE).to(UPGRADE_CCM_FINISHED_STATE)
+                    .event(UPGRADE_CCM_FINALIZING_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(UPGRADE_CCM_REVERT_TUNNEL_STATE).to(UPGRADE_CCM_FINISHED_STATE)
+                    .event(UPGRADE_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(UPGRADE_CCM_REVERT_SALTSTATE_STATE).to(UPGRADE_CCM_FINISHED_STATE)
+                    .event(UPGRADE_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(UPGRADE_CCM_REVERT_ALL_STATE).to(UPGRADE_CCM_FINISHED_STATE)
+                    .event(UPGRADE_FINISHED_EVENT)
                     .defaultFailureEvent()
 
                     .from(UPGRADE_CCM_FINISHED_STATE).to(FINAL_STATE)

@@ -5,6 +5,7 @@
     - makedirs: True
     - source: salt://nginx/conf/ssl.conf
     - template: jinja
+    - backup: minion
 
 /etc/nginx/sites-enabled/ssl-locations.d/consul.conf:
   file.managed:

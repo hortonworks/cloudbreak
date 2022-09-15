@@ -1,0 +1,3 @@
+include:
+  - nginx
+  - nginx.schedule
