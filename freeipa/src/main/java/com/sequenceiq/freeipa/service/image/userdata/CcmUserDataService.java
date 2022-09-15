@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -24,8 +25,11 @@ import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 import com.sequenceiq.cloudbreak.ccm.key.CcmResourceUtil;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
+import com.sequenceiq.common.api.type.CcmV2TlsType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.CrnService;
@@ -48,6 +52,12 @@ public class CcmUserDataService {
     private FreeIpaService freeIpaService;
 
     @Inject
+    private CcmV2TlsTypeDecider ccmV2TlsTypeDecider;
+
+    @Inject
+    private CachedEnvironmentClientService environmentService;
+
+    @Inject
     private CcmParameterSupplier ccmParameterSupplier;
 
     @Inject
@@ -67,11 +77,19 @@ public class CcmUserDataService {
         } else if (stack.getTunnel().useCcmV2()) {
             ccmConnectivityParameters = getCcmV2ConnectivityParameters(stack, keyId);
         } else if (stack.getTunnel().useCcmV2Jumpgate()) {
-            ccmConnectivityParameters = getCcmV2JumpgateConnectivityParameters(stack, keyId);
+            ccmConnectivityParameters = getCcmV2JumpgateConnectivityParameters(stack, keyId, getHmacKeyOpt(stack));
         } else {
             LOGGER.debug("CCM not enabled for stack.");
         }
         return ccmConnectivityParameters;
+    }
+
+    private Optional<String> getHmacKeyOpt(Stack stack) {
+        DetailedEnvironmentResponse environment = environmentService.getByCrn(stack.getEnvironmentCrn());
+        Optional<String> hmacKeyOpt = CcmV2TlsType.ONE_WAY_TLS == ccmV2TlsTypeDecider.decide(environment)
+                ? Optional.of(UUID.randomUUID().toString())
+                : Optional.empty();
+        return hmacKeyOpt;
     }
 
     private CcmConnectivityParameters getCcmConnectivityParameters(Stack stack, String keyId) {
@@ -106,9 +124,8 @@ public class CcmUserDataService {
 
         CcmV2Parameters ccmV2Parameters = ccmV2ParameterSupplier.getCcmV2Parameters(stack.getAccountId(), Optional.of(stack.getEnvironmentCrn()),
                 generatedClusterDomain, keyId);
-        CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2Parameters);
         saveCcmV2Config(stack.getId(), ccmV2Parameters);
-        return ccmConnectivityParameters;
+        return new CcmConnectivityParameters(ccmV2Parameters);
     }
 
     private String getGatewayFqdn(Stack stack) {
@@ -126,14 +143,13 @@ public class CcmUserDataService {
         }
     }
 
-    private CcmConnectivityParameters getCcmV2JumpgateConnectivityParameters(Stack stack, String keyId) {
+    private CcmConnectivityParameters getCcmV2JumpgateConnectivityParameters(Stack stack, String keyId, Optional<String> hmacKeyOpt) {
         String generatedClusterDomain = getGatewayFqdn(stack);
 
         CcmV2JumpgateParameters ccmV2JumpgateParameters = ccmV2JumpgateParameterSupplier.getCcmV2JumpgateParameters(stack.getAccountId(),
-                Optional.of(stack.getEnvironmentCrn()), generatedClusterDomain, keyId);
-        CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2JumpgateParameters);
+                Optional.of(stack.getEnvironmentCrn()), generatedClusterDomain, keyId, hmacKeyOpt);
         saveCcmV2Config(stack.getId(), ccmV2JumpgateParameters);
-        return ccmConnectivityParameters;
+        return new CcmConnectivityParameters(ccmV2JumpgateParameters);
     }
 
 }

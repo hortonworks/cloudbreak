@@ -2418,6 +2418,38 @@ public final class ClusterConnectivityManagementV2Proto {
      */
     com.google.protobuf.ByteString
         getEnvironmentCrnBytes();
+
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 5;</code>
+     * @return Whether the aes128Parameters field is set.
+     */
+    boolean hasAes128Parameters();
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 5;</code>
+     * @return The aes128Parameters.
+     */
+    com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters getAes128Parameters();
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 5;</code>
+     */
+    com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128ParametersOrBuilder getAes128ParametersOrBuilder();
+
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 6;</code>
+     * @return Whether the aes256Parameters field is set.
+     */
+    boolean hasAes256Parameters();
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 6;</code>
+     * @return The aes256Parameters.
+     */
+    com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters getAes256Parameters();
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 6;</code>
+     */
+    com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256ParametersOrBuilder getAes256ParametersOrBuilder();
+
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentRequest.FilterOneofCase getFilterOneofCase();
   }
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.RegisterAgentRequest}
@@ -2492,6 +2524,34 @@ public final class ClusterConnectivityManagementV2Proto {
               environmentCrn_ = s;
               break;
             }
+            case 42: {
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.Builder subBuilder = null;
+              if (filterOneofCase_ == 5) {
+                subBuilder = ((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_).toBuilder();
+              }
+              filterOneof_ =
+                  input.readMessage(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_);
+                filterOneof_ = subBuilder.buildPartial();
+              }
+              filterOneofCase_ = 5;
+              break;
+            }
+            case 50: {
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.Builder subBuilder = null;
+              if (filterOneofCase_ == 6) {
+                subBuilder = ((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_).toBuilder();
+              }
+              filterOneof_ =
+                  input.readMessage(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_);
+                filterOneof_ = subBuilder.buildPartial();
+              }
+              filterOneofCase_ = 6;
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -2522,6 +2582,47 @@ public final class ClusterConnectivityManagementV2Proto {
       return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_RegisterAgentRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentRequest.class, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentRequest.Builder.class);
+    }
+
+    private int filterOneofCase_ = 0;
+    private java.lang.Object filterOneof_;
+    public enum FilterOneofCase
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
+      AES128PARAMETERS(5),
+      AES256PARAMETERS(6),
+      FILTERONEOF_NOT_SET(0);
+      private final int value;
+      private FilterOneofCase(int value) {
+        this.value = value;
+      }
+      /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static FilterOneofCase valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static FilterOneofCase forNumber(int value) {
+        switch (value) {
+          case 5: return AES128PARAMETERS;
+          case 6: return AES256PARAMETERS;
+          case 0: return FILTERONEOF_NOT_SET;
+          default: return null;
+        }
+      }
+      public int getNumber() {
+        return this.value;
+      }
+    };
+
+    public FilterOneofCase
+    getFilterOneofCase() {
+      return FilterOneofCase.forNumber(
+          filterOneofCase_);
     }
 
     public static final int ACCOUNTID_FIELD_NUMBER = 1;
@@ -2722,6 +2823,68 @@ public final class ClusterConnectivityManagementV2Proto {
       }
     }
 
+    public static final int AES128PARAMETERS_FIELD_NUMBER = 5;
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 5;</code>
+     * @return Whether the aes128Parameters field is set.
+     */
+    @java.lang.Override
+    public boolean hasAes128Parameters() {
+      return filterOneofCase_ == 5;
+    }
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 5;</code>
+     * @return The aes128Parameters.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters getAes128Parameters() {
+      if (filterOneofCase_ == 5) {
+         return (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_;
+      }
+      return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.getDefaultInstance();
+    }
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 5;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128ParametersOrBuilder getAes128ParametersOrBuilder() {
+      if (filterOneofCase_ == 5) {
+         return (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_;
+      }
+      return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.getDefaultInstance();
+    }
+
+    public static final int AES256PARAMETERS_FIELD_NUMBER = 6;
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 6;</code>
+     * @return Whether the aes256Parameters field is set.
+     */
+    @java.lang.Override
+    public boolean hasAes256Parameters() {
+      return filterOneofCase_ == 6;
+    }
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 6;</code>
+     * @return The aes256Parameters.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters getAes256Parameters() {
+      if (filterOneofCase_ == 6) {
+         return (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_;
+      }
+      return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.getDefaultInstance();
+    }
+    /**
+     * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 6;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256ParametersOrBuilder getAes256ParametersOrBuilder() {
+      if (filterOneofCase_ == 6) {
+         return (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_;
+      }
+      return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.getDefaultInstance();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -2748,6 +2911,12 @@ public final class ClusterConnectivityManagementV2Proto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, environmentCrn_);
       }
+      if (filterOneofCase_ == 5) {
+        output.writeMessage(5, (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_);
+      }
+      if (filterOneofCase_ == 6) {
+        output.writeMessage(6, (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -2768,6 +2937,14 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, environmentCrn_);
+      }
+      if (filterOneofCase_ == 5) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_);
+      }
+      if (filterOneofCase_ == 6) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -2792,6 +2969,19 @@ public final class ClusterConnectivityManagementV2Proto {
           .equals(other.getKeyId())) return false;
       if (!getEnvironmentCrn()
           .equals(other.getEnvironmentCrn())) return false;
+      if (!getFilterOneofCase().equals(other.getFilterOneofCase())) return false;
+      switch (filterOneofCase_) {
+        case 5:
+          if (!getAes128Parameters()
+              .equals(other.getAes128Parameters())) return false;
+          break;
+        case 6:
+          if (!getAes256Parameters()
+              .equals(other.getAes256Parameters())) return false;
+          break;
+        case 0:
+        default:
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -2811,6 +3001,18 @@ public final class ClusterConnectivityManagementV2Proto {
       hash = (53 * hash) + getKeyId().hashCode();
       hash = (37 * hash) + ENVIRONMENTCRN_FIELD_NUMBER;
       hash = (53 * hash) + getEnvironmentCrn().hashCode();
+      switch (filterOneofCase_) {
+        case 5:
+          hash = (37 * hash) + AES128PARAMETERS_FIELD_NUMBER;
+          hash = (53 * hash) + getAes128Parameters().hashCode();
+          break;
+        case 6:
+          hash = (37 * hash) + AES256PARAMETERS_FIELD_NUMBER;
+          hash = (53 * hash) + getAes256Parameters().hashCode();
+          break;
+        case 0:
+        default:
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2952,6 +3154,8 @@ public final class ClusterConnectivityManagementV2Proto {
 
         environmentCrn_ = "";
 
+        filterOneofCase_ = 0;
+        filterOneof_ = null;
         return this;
       }
 
@@ -2982,6 +3186,21 @@ public final class ClusterConnectivityManagementV2Proto {
         result.domainName_ = domainName_;
         result.keyId_ = keyId_;
         result.environmentCrn_ = environmentCrn_;
+        if (filterOneofCase_ == 5) {
+          if (aes128ParametersBuilder_ == null) {
+            result.filterOneof_ = filterOneof_;
+          } else {
+            result.filterOneof_ = aes128ParametersBuilder_.build();
+          }
+        }
+        if (filterOneofCase_ == 6) {
+          if (aes256ParametersBuilder_ == null) {
+            result.filterOneof_ = filterOneof_;
+          } else {
+            result.filterOneof_ = aes256ParametersBuilder_.build();
+          }
+        }
+        result.filterOneofCase_ = filterOneofCase_;
         onBuilt();
         return result;
       }
@@ -3046,6 +3265,19 @@ public final class ClusterConnectivityManagementV2Proto {
           environmentCrn_ = other.environmentCrn_;
           onChanged();
         }
+        switch (other.getFilterOneofCase()) {
+          case AES128PARAMETERS: {
+            mergeAes128Parameters(other.getAes128Parameters());
+            break;
+          }
+          case AES256PARAMETERS: {
+            mergeAes256Parameters(other.getAes256Parameters());
+            break;
+          }
+          case FILTERONEOF_NOT_SET: {
+            break;
+          }
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -3074,6 +3306,21 @@ public final class ClusterConnectivityManagementV2Proto {
         }
         return this;
       }
+      private int filterOneofCase_ = 0;
+      private java.lang.Object filterOneof_;
+      public FilterOneofCase
+          getFilterOneofCase() {
+        return FilterOneofCase.forNumber(
+            filterOneofCase_);
+      }
+
+      public Builder clearFilterOneof() {
+        filterOneofCase_ = 0;
+        filterOneof_ = null;
+        onChanged();
+        return this;
+      }
+
 
       private java.lang.Object accountId_ = "";
       /**
@@ -3493,6 +3740,288 @@ public final class ClusterConnectivityManagementV2Proto {
         onChanged();
         return this;
       }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128ParametersOrBuilder> aes128ParametersBuilder_;
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 5;</code>
+       * @return Whether the aes128Parameters field is set.
+       */
+      @java.lang.Override
+      public boolean hasAes128Parameters() {
+        return filterOneofCase_ == 5;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 5;</code>
+       * @return The aes128Parameters.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters getAes128Parameters() {
+        if (aes128ParametersBuilder_ == null) {
+          if (filterOneofCase_ == 5) {
+            return (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_;
+          }
+          return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.getDefaultInstance();
+        } else {
+          if (filterOneofCase_ == 5) {
+            return aes128ParametersBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 5;</code>
+       */
+      public Builder setAes128Parameters(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters value) {
+        if (aes128ParametersBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          filterOneof_ = value;
+          onChanged();
+        } else {
+          aes128ParametersBuilder_.setMessage(value);
+        }
+        filterOneofCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 5;</code>
+       */
+      public Builder setAes128Parameters(
+          com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.Builder builderForValue) {
+        if (aes128ParametersBuilder_ == null) {
+          filterOneof_ = builderForValue.build();
+          onChanged();
+        } else {
+          aes128ParametersBuilder_.setMessage(builderForValue.build());
+        }
+        filterOneofCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 5;</code>
+       */
+      public Builder mergeAes128Parameters(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters value) {
+        if (aes128ParametersBuilder_ == null) {
+          if (filterOneofCase_ == 5 &&
+              filterOneof_ != com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.getDefaultInstance()) {
+            filterOneof_ = com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.newBuilder((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            filterOneof_ = value;
+          }
+          onChanged();
+        } else {
+          if (filterOneofCase_ == 5) {
+            aes128ParametersBuilder_.mergeFrom(value);
+          }
+          aes128ParametersBuilder_.setMessage(value);
+        }
+        filterOneofCase_ = 5;
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 5;</code>
+       */
+      public Builder clearAes128Parameters() {
+        if (aes128ParametersBuilder_ == null) {
+          if (filterOneofCase_ == 5) {
+            filterOneofCase_ = 0;
+            filterOneof_ = null;
+            onChanged();
+          }
+        } else {
+          if (filterOneofCase_ == 5) {
+            filterOneofCase_ = 0;
+            filterOneof_ = null;
+          }
+          aes128ParametersBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 5;</code>
+       */
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.Builder getAes128ParametersBuilder() {
+        return getAes128ParametersFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 5;</code>
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128ParametersOrBuilder getAes128ParametersOrBuilder() {
+        if ((filterOneofCase_ == 5) && (aes128ParametersBuilder_ != null)) {
+          return aes128ParametersBuilder_.getMessageOrBuilder();
+        } else {
+          if (filterOneofCase_ == 5) {
+            return (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_;
+          }
+          return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES128Parameters aes128Parameters = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128ParametersOrBuilder> 
+          getAes128ParametersFieldBuilder() {
+        if (aes128ParametersBuilder_ == null) {
+          if (!(filterOneofCase_ == 5)) {
+            filterOneof_ = com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.getDefaultInstance();
+          }
+          aes128ParametersBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128ParametersOrBuilder>(
+                  (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) filterOneof_,
+                  getParentForChildren(),
+                  isClean());
+          filterOneof_ = null;
+        }
+        filterOneofCase_ = 5;
+        onChanged();;
+        return aes128ParametersBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256ParametersOrBuilder> aes256ParametersBuilder_;
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 6;</code>
+       * @return Whether the aes256Parameters field is set.
+       */
+      @java.lang.Override
+      public boolean hasAes256Parameters() {
+        return filterOneofCase_ == 6;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 6;</code>
+       * @return The aes256Parameters.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters getAes256Parameters() {
+        if (aes256ParametersBuilder_ == null) {
+          if (filterOneofCase_ == 6) {
+            return (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_;
+          }
+          return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.getDefaultInstance();
+        } else {
+          if (filterOneofCase_ == 6) {
+            return aes256ParametersBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 6;</code>
+       */
+      public Builder setAes256Parameters(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters value) {
+        if (aes256ParametersBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          filterOneof_ = value;
+          onChanged();
+        } else {
+          aes256ParametersBuilder_.setMessage(value);
+        }
+        filterOneofCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 6;</code>
+       */
+      public Builder setAes256Parameters(
+          com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.Builder builderForValue) {
+        if (aes256ParametersBuilder_ == null) {
+          filterOneof_ = builderForValue.build();
+          onChanged();
+        } else {
+          aes256ParametersBuilder_.setMessage(builderForValue.build());
+        }
+        filterOneofCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 6;</code>
+       */
+      public Builder mergeAes256Parameters(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters value) {
+        if (aes256ParametersBuilder_ == null) {
+          if (filterOneofCase_ == 6 &&
+              filterOneof_ != com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.getDefaultInstance()) {
+            filterOneof_ = com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.newBuilder((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            filterOneof_ = value;
+          }
+          onChanged();
+        } else {
+          if (filterOneofCase_ == 6) {
+            aes256ParametersBuilder_.mergeFrom(value);
+          }
+          aes256ParametersBuilder_.setMessage(value);
+        }
+        filterOneofCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 6;</code>
+       */
+      public Builder clearAes256Parameters() {
+        if (aes256ParametersBuilder_ == null) {
+          if (filterOneofCase_ == 6) {
+            filterOneofCase_ = 0;
+            filterOneof_ = null;
+            onChanged();
+          }
+        } else {
+          if (filterOneofCase_ == 6) {
+            filterOneofCase_ = 0;
+            filterOneof_ = null;
+          }
+          aes256ParametersBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 6;</code>
+       */
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.Builder getAes256ParametersBuilder() {
+        return getAes256ParametersFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 6;</code>
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256ParametersOrBuilder getAes256ParametersOrBuilder() {
+        if ((filterOneofCase_ == 6) && (aes256ParametersBuilder_ != null)) {
+          return aes256ParametersBuilder_.getMessageOrBuilder();
+        } else {
+          if (filterOneofCase_ == 6) {
+            return (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_;
+          }
+          return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.clusterconnectivitymanagementv2.AES256Parameters aes256Parameters = 6;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256ParametersOrBuilder> 
+          getAes256ParametersFieldBuilder() {
+        if (aes256ParametersBuilder_ == null) {
+          if (!(filterOneofCase_ == 6)) {
+            filterOneof_ = com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.getDefaultInstance();
+          }
+          aes256ParametersBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256ParametersOrBuilder>(
+                  (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) filterOneof_,
+                  getParentForChildren(),
+                  isClean());
+          filterOneof_ = null;
+        }
+        filterOneofCase_ = 6;
+        onChanged();;
+        return aes256ParametersBuilder_;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -3541,6 +4070,992 @@ public final class ClusterConnectivityManagementV2Proto {
 
     @java.lang.Override
     public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface AES128ParametersOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:clusterconnectivitymanagementv2.AES128Parameters)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * Protobuf type {@code clusterconnectivitymanagementv2.AES128Parameters}
+   */
+  public static final class AES128Parameters extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.AES128Parameters)
+      AES128ParametersOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use AES128Parameters.newBuilder() to construct.
+    private AES128Parameters(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AES128Parameters() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new AES128Parameters();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AES128Parameters(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_AES128Parameters_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_AES128Parameters_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.class, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) obj;
+
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code clusterconnectivitymanagementv2.AES128Parameters}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:clusterconnectivitymanagementv2.AES128Parameters)
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128ParametersOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_AES128Parameters_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_AES128Parameters_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.class, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_AES128Parameters_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters build() {
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters buildPartial() {
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters result = new com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) {
+          return mergeFrom((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters other) {
+        if (other == com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:clusterconnectivitymanagementv2.AES128Parameters)
+    }
+
+    // @@protoc_insertion_point(class_scope:clusterconnectivitymanagementv2.AES128Parameters)
+    private static final com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters();
+    }
+
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AES128Parameters>
+        PARSER = new com.google.protobuf.AbstractParser<AES128Parameters>() {
+      @java.lang.Override
+      public AES128Parameters parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AES128Parameters(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<AES128Parameters> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AES128Parameters> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES128Parameters getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface AES256ParametersOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:clusterconnectivitymanagementv2.AES256Parameters)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string hmacKey = 1;</code>
+     * @return The hmacKey.
+     */
+    java.lang.String getHmacKey();
+    /**
+     * <code>string hmacKey = 1;</code>
+     * @return The bytes for hmacKey.
+     */
+    com.google.protobuf.ByteString
+        getHmacKeyBytes();
+  }
+  /**
+   * Protobuf type {@code clusterconnectivitymanagementv2.AES256Parameters}
+   */
+  public static final class AES256Parameters extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.AES256Parameters)
+      AES256ParametersOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use AES256Parameters.newBuilder() to construct.
+    private AES256Parameters(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AES256Parameters() {
+      hmacKey_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new AES256Parameters();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AES256Parameters(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              hmacKey_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_AES256Parameters_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_AES256Parameters_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.class, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.Builder.class);
+    }
+
+    public static final int HMACKEY_FIELD_NUMBER = 1;
+    private volatile java.lang.Object hmacKey_;
+    /**
+     * <code>string hmacKey = 1;</code>
+     * @return The hmacKey.
+     */
+    @java.lang.Override
+    public java.lang.String getHmacKey() {
+      java.lang.Object ref = hmacKey_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        hmacKey_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string hmacKey = 1;</code>
+     * @return The bytes for hmacKey.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getHmacKeyBytes() {
+      java.lang.Object ref = hmacKey_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        hmacKey_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(hmacKey_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, hmacKey_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(hmacKey_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, hmacKey_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) obj;
+
+      if (!getHmacKey()
+          .equals(other.getHmacKey())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + HMACKEY_FIELD_NUMBER;
+      hash = (53 * hash) + getHmacKey().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code clusterconnectivitymanagementv2.AES256Parameters}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:clusterconnectivitymanagementv2.AES256Parameters)
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256ParametersOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_AES256Parameters_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_AES256Parameters_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.class, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        hmacKey_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.internal_static_clusterconnectivitymanagementv2_AES256Parameters_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters build() {
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters buildPartial() {
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters result = new com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters(this);
+        result.hmacKey_ = hmacKey_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) {
+          return mergeFrom((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters other) {
+        if (other == com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters.getDefaultInstance()) return this;
+        if (!other.getHmacKey().isEmpty()) {
+          hmacKey_ = other.hmacKey_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object hmacKey_ = "";
+      /**
+       * <code>string hmacKey = 1;</code>
+       * @return The hmacKey.
+       */
+      public java.lang.String getHmacKey() {
+        java.lang.Object ref = hmacKey_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          hmacKey_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string hmacKey = 1;</code>
+       * @return The bytes for hmacKey.
+       */
+      public com.google.protobuf.ByteString
+          getHmacKeyBytes() {
+        java.lang.Object ref = hmacKey_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          hmacKey_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string hmacKey = 1;</code>
+       * @param value The hmacKey to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHmacKey(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        hmacKey_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string hmacKey = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHmacKey() {
+        
+        hmacKey_ = getDefaultInstance().getHmacKey();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string hmacKey = 1;</code>
+       * @param value The bytes for hmacKey to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHmacKeyBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        hmacKey_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:clusterconnectivitymanagementv2.AES256Parameters)
+    }
+
+    // @@protoc_insertion_point(class_scope:clusterconnectivitymanagementv2.AES256Parameters)
+    private static final com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters();
+    }
+
+    public static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AES256Parameters>
+        PARSER = new com.google.protobuf.AbstractParser<AES256Parameters>() {
+      @java.lang.Override
+      public AES256Parameters parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AES256Parameters(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<AES256Parameters> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AES256Parameters> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -8210,6 +9725,50 @@ public final class ClusterConnectivityManagementV2Proto {
      */
     com.google.protobuf.ByteString
         getEncipheredAccessKeyBytes();
+
+    /**
+     * <pre>
+     * The initialisationVector used to encrypt the access key.
+     * Only available for AES256 algorithm.
+     * </pre>
+     *
+     * <code>string initialisationVector = 8 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The initialisationVector.
+     */
+    java.lang.String getInitialisationVector();
+    /**
+     * <pre>
+     * The initialisationVector used to encrypt the access key.
+     * Only available for AES256 algorithm.
+     * </pre>
+     *
+     * <code>string initialisationVector = 8 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The bytes for initialisationVector.
+     */
+    com.google.protobuf.ByteString
+        getInitialisationVectorBytes();
+
+    /**
+     * <pre>
+     * The mac calculated for the encrypted access key.
+     * Only available for AES256 algorithm.
+     * </pre>
+     *
+     * <code>string hmacForPrivateKey = 9 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The hmacForPrivateKey.
+     */
+    java.lang.String getHmacForPrivateKey();
+    /**
+     * <pre>
+     * The mac calculated for the encrypted access key.
+     * Only available for AES256 algorithm.
+     * </pre>
+     *
+     * <code>string hmacForPrivateKey = 9 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The bytes for hmacForPrivateKey.
+     */
+    com.google.protobuf.ByteString
+        getHmacForPrivateKeyBytes();
   }
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.InvertingProxyAgent}
@@ -8231,6 +9790,8 @@ public final class ClusterConnectivityManagementV2Proto {
       certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       accessKeyId_ = "";
       encipheredAccessKey_ = "";
+      initialisationVector_ = "";
+      hmacForPrivateKey_ = "";
     }
 
     @java.lang.Override
@@ -8307,6 +9868,18 @@ public final class ClusterConnectivityManagementV2Proto {
               java.lang.String s = input.readStringRequireUtf8();
 
               encipheredAccessKey_ = s;
+              break;
+            }
+            case 66: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              initialisationVector_ = s;
+              break;
+            }
+            case 74: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              hmacForPrivateKey_ = s;
               break;
             }
             default: {
@@ -8681,6 +10254,102 @@ public final class ClusterConnectivityManagementV2Proto {
       }
     }
 
+    public static final int INITIALISATIONVECTOR_FIELD_NUMBER = 8;
+    private volatile java.lang.Object initialisationVector_;
+    /**
+     * <pre>
+     * The initialisationVector used to encrypt the access key.
+     * Only available for AES256 algorithm.
+     * </pre>
+     *
+     * <code>string initialisationVector = 8 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The initialisationVector.
+     */
+    @java.lang.Override
+    public java.lang.String getInitialisationVector() {
+      java.lang.Object ref = initialisationVector_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        initialisationVector_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The initialisationVector used to encrypt the access key.
+     * Only available for AES256 algorithm.
+     * </pre>
+     *
+     * <code>string initialisationVector = 8 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The bytes for initialisationVector.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getInitialisationVectorBytes() {
+      java.lang.Object ref = initialisationVector_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        initialisationVector_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int HMACFORPRIVATEKEY_FIELD_NUMBER = 9;
+    private volatile java.lang.Object hmacForPrivateKey_;
+    /**
+     * <pre>
+     * The mac calculated for the encrypted access key.
+     * Only available for AES256 algorithm.
+     * </pre>
+     *
+     * <code>string hmacForPrivateKey = 9 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The hmacForPrivateKey.
+     */
+    @java.lang.Override
+    public java.lang.String getHmacForPrivateKey() {
+      java.lang.Object ref = hmacForPrivateKey_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        hmacForPrivateKey_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The mac calculated for the encrypted access key.
+     * Only available for AES256 algorithm.
+     * </pre>
+     *
+     * <code>string hmacForPrivateKey = 9 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The bytes for hmacForPrivateKey.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getHmacForPrivateKeyBytes() {
+      java.lang.Object ref = hmacForPrivateKey_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        hmacForPrivateKey_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -8715,6 +10384,12 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(encipheredAccessKey_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, encipheredAccessKey_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(initialisationVector_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, initialisationVector_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(hmacForPrivateKey_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, hmacForPrivateKey_);
       }
       unknownFields.writeTo(output);
     }
@@ -8751,6 +10426,12 @@ public final class ClusterConnectivityManagementV2Proto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(encipheredAccessKey_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, encipheredAccessKey_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(initialisationVector_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, initialisationVector_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(hmacForPrivateKey_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, hmacForPrivateKey_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -8780,6 +10461,10 @@ public final class ClusterConnectivityManagementV2Proto {
           .equals(other.getAccessKeyId())) return false;
       if (!getEncipheredAccessKey()
           .equals(other.getEncipheredAccessKey())) return false;
+      if (!getInitialisationVector()
+          .equals(other.getInitialisationVector())) return false;
+      if (!getHmacForPrivateKey()
+          .equals(other.getHmacForPrivateKey())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -8807,6 +10492,10 @@ public final class ClusterConnectivityManagementV2Proto {
       hash = (53 * hash) + getAccessKeyId().hashCode();
       hash = (37 * hash) + ENCIPHEREDACCESSKEY_FIELD_NUMBER;
       hash = (53 * hash) + getEncipheredAccessKey().hashCode();
+      hash = (37 * hash) + INITIALISATIONVECTOR_FIELD_NUMBER;
+      hash = (53 * hash) + getInitialisationVector().hashCode();
+      hash = (37 * hash) + HMACFORPRIVATEKEY_FIELD_NUMBER;
+      hash = (53 * hash) + getHmacForPrivateKey().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -8954,6 +10643,10 @@ public final class ClusterConnectivityManagementV2Proto {
 
         encipheredAccessKey_ = "";
 
+        initialisationVector_ = "";
+
+        hmacForPrivateKey_ = "";
+
         return this;
       }
 
@@ -8992,6 +10685,8 @@ public final class ClusterConnectivityManagementV2Proto {
         result.certificates_ = certificates_;
         result.accessKeyId_ = accessKeyId_;
         result.encipheredAccessKey_ = encipheredAccessKey_;
+        result.initialisationVector_ = initialisationVector_;
+        result.hmacForPrivateKey_ = hmacForPrivateKey_;
         onBuilt();
         return result;
       }
@@ -9072,6 +10767,14 @@ public final class ClusterConnectivityManagementV2Proto {
         }
         if (!other.getEncipheredAccessKey().isEmpty()) {
           encipheredAccessKey_ = other.encipheredAccessKey_;
+          onChanged();
+        }
+        if (!other.getInitialisationVector().isEmpty()) {
+          initialisationVector_ = other.initialisationVector_;
+          onChanged();
+        }
+        if (!other.getHmacForPrivateKey().isEmpty()) {
+          hmacForPrivateKey_ = other.hmacForPrivateKey_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -9847,6 +11550,208 @@ public final class ClusterConnectivityManagementV2Proto {
   checkByteStringIsUtf8(value);
         
         encipheredAccessKey_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object initialisationVector_ = "";
+      /**
+       * <pre>
+       * The initialisationVector used to encrypt the access key.
+       * Only available for AES256 algorithm.
+       * </pre>
+       *
+       * <code>string initialisationVector = 8 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return The initialisationVector.
+       */
+      public java.lang.String getInitialisationVector() {
+        java.lang.Object ref = initialisationVector_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          initialisationVector_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The initialisationVector used to encrypt the access key.
+       * Only available for AES256 algorithm.
+       * </pre>
+       *
+       * <code>string initialisationVector = 8 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return The bytes for initialisationVector.
+       */
+      public com.google.protobuf.ByteString
+          getInitialisationVectorBytes() {
+        java.lang.Object ref = initialisationVector_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          initialisationVector_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The initialisationVector used to encrypt the access key.
+       * Only available for AES256 algorithm.
+       * </pre>
+       *
+       * <code>string initialisationVector = 8 [(.options.FieldExtension.sensitive) = true];</code>
+       * @param value The initialisationVector to set.
+       * @return This builder for chaining.
+       */
+      public Builder setInitialisationVector(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        initialisationVector_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The initialisationVector used to encrypt the access key.
+       * Only available for AES256 algorithm.
+       * </pre>
+       *
+       * <code>string initialisationVector = 8 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearInitialisationVector() {
+        
+        initialisationVector_ = getDefaultInstance().getInitialisationVector();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The initialisationVector used to encrypt the access key.
+       * Only available for AES256 algorithm.
+       * </pre>
+       *
+       * <code>string initialisationVector = 8 [(.options.FieldExtension.sensitive) = true];</code>
+       * @param value The bytes for initialisationVector to set.
+       * @return This builder for chaining.
+       */
+      public Builder setInitialisationVectorBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        initialisationVector_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object hmacForPrivateKey_ = "";
+      /**
+       * <pre>
+       * The mac calculated for the encrypted access key.
+       * Only available for AES256 algorithm.
+       * </pre>
+       *
+       * <code>string hmacForPrivateKey = 9 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return The hmacForPrivateKey.
+       */
+      public java.lang.String getHmacForPrivateKey() {
+        java.lang.Object ref = hmacForPrivateKey_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          hmacForPrivateKey_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The mac calculated for the encrypted access key.
+       * Only available for AES256 algorithm.
+       * </pre>
+       *
+       * <code>string hmacForPrivateKey = 9 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return The bytes for hmacForPrivateKey.
+       */
+      public com.google.protobuf.ByteString
+          getHmacForPrivateKeyBytes() {
+        java.lang.Object ref = hmacForPrivateKey_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          hmacForPrivateKey_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The mac calculated for the encrypted access key.
+       * Only available for AES256 algorithm.
+       * </pre>
+       *
+       * <code>string hmacForPrivateKey = 9 [(.options.FieldExtension.sensitive) = true];</code>
+       * @param value The hmacForPrivateKey to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHmacForPrivateKey(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        hmacForPrivateKey_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The mac calculated for the encrypted access key.
+       * Only available for AES256 algorithm.
+       * </pre>
+       *
+       * <code>string hmacForPrivateKey = 9 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHmacForPrivateKey() {
+        
+        hmacForPrivateKey_ = getDefaultInstance().getHmacForPrivateKey();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The mac calculated for the encrypted access key.
+       * Only available for AES256 algorithm.
+       * </pre>
+       *
+       * <code>string hmacForPrivateKey = 9 [(.options.FieldExtension.sensitive) = true];</code>
+       * @param value The bytes for hmacForPrivateKey to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHmacForPrivateKeyBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        hmacForPrivateKey_ = value;
         onChanged();
         return this;
       }
@@ -13514,6 +15419,16 @@ public final class ClusterConnectivityManagementV2Proto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_clusterconnectivitymanagementv2_RegisterAgentRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_clusterconnectivitymanagementv2_AES128Parameters_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_clusterconnectivitymanagementv2_AES128Parameters_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_clusterconnectivitymanagementv2_AES256Parameters_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_clusterconnectivitymanagementv2_AES256Parameters_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_clusterconnectivitymanagementv2_RegisterAgentResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -13586,71 +15501,78 @@ public final class ClusterConnectivityManagementV2Proto {
       "erconnectivitymanagementv2.InvertingProx" +
       "y\"0\n\033RemoveInvertingProxyRequest\022\021\n\tacco" +
       "untId\030\001 \001(\t\"\036\n\034RemoveInvertingProxyRespo" +
-      "nse\"d\n\024RegisterAgentRequest\022\021\n\taccountId" +
-      "\030\001 \001(\t\022\022\n\ndomainName\030\002 \001(\t\022\r\n\005keyId\030\003 \001(" +
-      "\t\022\026\n\016environmentCrn\030\004 \001(\t\"j\n\025RegisterAge" +
-      "ntResponse\022Q\n\023invertingProxyAgent\030\001 \001(\0132" +
-      "4.clusterconnectivitymanagementv2.Invert" +
-      "ingProxyAgent\"*\n\026UnregisterAgentRequest\022" +
-      "\020\n\010agentCrn\030\001 \001(\t\"4\n\037GetAllAgentsCertifi" +
-      "catesRequest\022\021\n\taccountId\030\001 \001(\t\">\n GetAl" +
-      "lAgentsCertificatesResponse\022\032\n\014certifica" +
-      "tes\030\001 \003(\tB\004\210\265\030\001\"\031\n\027UnregisterAgentRespon" +
-      "se\"\355\001\n\016InvertingProxy\022F\n\006status\030\001 \001(\01626." +
-      "clusterconnectivitymanagementv2.Invertin" +
-      "gProxy.Status\022\020\n\010hostname\030\002 \001(\t\022\026\n\016cause" +
-      "OfFailure\030\003 \001(\t\022\035\n\013certificate\030\004 \001(\tB\010\210\265" +
-      "\030\001\370\265\030\001\022\033\n\rcaCertificate\030\005 \001(\tB\004\210\265\030\001\"-\n\006S" +
-      "tatus\022\014\n\010CREATING\020\000\022\t\n\005READY\020\001\022\n\n\006FAILED" +
-      "\020\002\"\326\001\n\023InvertingProxyAgent\022\020\n\010agentCrn\030\001" +
-      " \001(\t\022\"\n\024encipheredPrivateKey\030\002 \001(\tB\004\210\265\030\001" +
-      "\022\035\n\013certificate\030\003 \001(\tB\010\210\265\030\001\370\265\030\001\022\026\n\016envir" +
-      "onmentCrn\030\004 \001(\t\022\032\n\014certificates\030\005 \003(\tB\004\210" +
-      "\265\030\001\022\023\n\013accessKeyId\030\006 \001(\t\022!\n\023encipheredAc" +
-      "cessKey\030\007 \001(\tB\004\200\265\030\001\"\212\001\n\021ListAgentsReques" +
-      "t\022\020\n\010pageSize\030\001 \001(\005\022$\n\tpageToken\030\002 \001(\0132\021" +
-      ".paging.PageToken\022\023\n\taccountId\030\003 \001(\tH\000\022\030" +
-      "\n\016environmentCrn\030\004 \001(\tH\000B\016\n\014filter_oneof" +
-      "\"\204\001\n\022ListAgentsResponse\022(\n\rnextPageToken" +
-      "\030\001 \001(\0132\021.paging.PageToken\022D\n\006agents\030\002 \003(" +
-      "\01324.clusterconnectivitymanagementv2.Inve" +
-      "rtingProxyAgent\"/\n\033RotateAgentAccessKeyR" +
-      "equest\022\020\n\010agentCrn\030\001 \001(\t\"q\n\034RotateAgentA" +
-      "ccessKeyResponse\022Q\n\023invertingProxyAgent\030" +
-      "\001 \001(\01324.clusterconnectivitymanagementv2." +
-      "InvertingProxyAgent2\344\010\n\037ClusterConnectiv" +
-      "ityManagementV2\022A\n\nGetVersion\022\027.version." +
-      "VersionRequest\032\030.version.VersionResponse" +
-      "\"\000\022\244\001\n\031CreateOrGetInvertingProxy\022A.clust" +
-      "erconnectivitymanagementv2.CreateOrGetIn" +
-      "vertingProxyRequest\032B.clusterconnectivit" +
-      "ymanagementv2.CreateOrGetInvertingProxyR" +
-      "esponse\"\000\022\225\001\n\024RemoveInvertingProxy\022<.clu" +
-      "sterconnectivitymanagementv2.RemoveInver" +
-      "tingProxyRequest\032=.clusterconnectivityma" +
-      "nagementv2.RemoveInvertingProxyResponse\"" +
-      "\000\022\200\001\n\rRegisterAgent\0225.clusterconnectivit" +
-      "ymanagementv2.RegisterAgentRequest\0326.clu" +
-      "sterconnectivitymanagementv2.RegisterAge" +
-      "ntResponse\"\000\022\206\001\n\017UnregisterAgent\0227.clust" +
-      "erconnectivitymanagementv2.UnregisterAge" +
-      "ntRequest\0328.clusterconnectivitymanagemen" +
-      "tv2.UnregisterAgentResponse\"\000\022w\n\nListAge" +
-      "nts\0222.clusterconnectivitymanagementv2.Li" +
-      "stAgentsRequest\0323.clusterconnectivityman" +
-      "agementv2.ListAgentsResponse\"\000\022\241\001\n\030GetAl" +
-      "lAgentsCertificates\022@.clusterconnectivit" +
-      "ymanagementv2.GetAllAgentsCertificatesRe" +
-      "quest\032A.clusterconnectivitymanagementv2." +
-      "GetAllAgentsCertificatesResponse\"\000\022\225\001\n\024R" +
-      "otateAgentAccessKey\022<.clusterconnectivit" +
-      "ymanagementv2.RotateAgentAccessKeyReques" +
-      "t\032=.clusterconnectivitymanagementv2.Rota" +
-      "teAgentAccessKeyResponse\"\000B\203\001\n@com.cloud" +
-      "era.thunderhead.service.clusterconnectiv" +
-      "itymanagementv2B$ClusterConnectivityMana" +
-      "gementV2ProtoZ\031com/cloudera/cdp/protobuf" +
-      "b\006proto3"
+      "nse\"\222\002\n\024RegisterAgentRequest\022\021\n\taccountI" +
+      "d\030\001 \001(\t\022\022\n\ndomainName\030\002 \001(\t\022\r\n\005keyId\030\003 \001" +
+      "(\t\022\026\n\016environmentCrn\030\004 \001(\t\022M\n\020aes128Para" +
+      "meters\030\005 \001(\01321.clusterconnectivitymanage" +
+      "mentv2.AES128ParametersH\000\022M\n\020aes256Param" +
+      "eters\030\006 \001(\01321.clusterconnectivitymanagem" +
+      "entv2.AES256ParametersH\000B\016\n\014filter_oneof" +
+      "\"\022\n\020AES128Parameters\"#\n\020AES256Parameters" +
+      "\022\017\n\007hmacKey\030\001 \001(\t\"j\n\025RegisterAgentRespon" +
+      "se\022Q\n\023invertingProxyAgent\030\001 \001(\01324.cluste" +
+      "rconnectivitymanagementv2.InvertingProxy" +
+      "Agent\"*\n\026UnregisterAgentRequest\022\020\n\010agent" +
+      "Crn\030\001 \001(\t\"4\n\037GetAllAgentsCertificatesReq" +
+      "uest\022\021\n\taccountId\030\001 \001(\t\">\n GetAllAgentsC" +
+      "ertificatesResponse\022\032\n\014certificates\030\001 \003(" +
+      "\tB\004\210\265\030\001\"\031\n\027UnregisterAgentResponse\"\355\001\n\016I" +
+      "nvertingProxy\022F\n\006status\030\001 \001(\01626.clusterc" +
+      "onnectivitymanagementv2.InvertingProxy.S" +
+      "tatus\022\020\n\010hostname\030\002 \001(\t\022\026\n\016causeOfFailur" +
+      "e\030\003 \001(\t\022\035\n\013certificate\030\004 \001(\tB\010\210\265\030\001\370\265\030\001\022\033" +
+      "\n\rcaCertificate\030\005 \001(\tB\004\210\265\030\001\"-\n\006Status\022\014\n" +
+      "\010CREATING\020\000\022\t\n\005READY\020\001\022\n\n\006FAILED\020\002\"\233\002\n\023I" +
+      "nvertingProxyAgent\022\020\n\010agentCrn\030\001 \001(\t\022\"\n\024" +
+      "encipheredPrivateKey\030\002 \001(\tB\004\210\265\030\001\022\035\n\013cert" +
+      "ificate\030\003 \001(\tB\010\210\265\030\001\370\265\030\001\022\026\n\016environmentCr" +
+      "n\030\004 \001(\t\022\032\n\014certificates\030\005 \003(\tB\004\210\265\030\001\022\023\n\013a" +
+      "ccessKeyId\030\006 \001(\t\022!\n\023encipheredAccessKey\030" +
+      "\007 \001(\tB\004\200\265\030\001\022\"\n\024initialisationVector\030\010 \001(" +
+      "\tB\004\200\265\030\001\022\037\n\021hmacForPrivateKey\030\t \001(\tB\004\200\265\030\001" +
+      "\"\212\001\n\021ListAgentsRequest\022\020\n\010pageSize\030\001 \001(\005" +
+      "\022$\n\tpageToken\030\002 \001(\0132\021.paging.PageToken\022\023" +
+      "\n\taccountId\030\003 \001(\tH\000\022\030\n\016environmentCrn\030\004 " +
+      "\001(\tH\000B\016\n\014filter_oneof\"\204\001\n\022ListAgentsResp" +
+      "onse\022(\n\rnextPageToken\030\001 \001(\0132\021.paging.Pag" +
+      "eToken\022D\n\006agents\030\002 \003(\01324.clusterconnecti" +
+      "vitymanagementv2.InvertingProxyAgent\"/\n\033" +
+      "RotateAgentAccessKeyRequest\022\020\n\010agentCrn\030" +
+      "\001 \001(\t\"q\n\034RotateAgentAccessKeyResponse\022Q\n" +
+      "\023invertingProxyAgent\030\001 \001(\01324.clusterconn" +
+      "ectivitymanagementv2.InvertingProxyAgent" +
+      "2\344\010\n\037ClusterConnectivityManagementV2\022A\n\n" +
+      "GetVersion\022\027.version.VersionRequest\032\030.ve" +
+      "rsion.VersionResponse\"\000\022\244\001\n\031CreateOrGetI" +
+      "nvertingProxy\022A.clusterconnectivitymanag" +
+      "ementv2.CreateOrGetInvertingProxyRequest" +
+      "\032B.clusterconnectivitymanagementv2.Creat" +
+      "eOrGetInvertingProxyResponse\"\000\022\225\001\n\024Remov" +
+      "eInvertingProxy\022<.clusterconnectivityman" +
+      "agementv2.RemoveInvertingProxyRequest\032=." +
+      "clusterconnectivitymanagementv2.RemoveIn" +
+      "vertingProxyResponse\"\000\022\200\001\n\rRegisterAgent" +
+      "\0225.clusterconnectivitymanagementv2.Regis" +
+      "terAgentRequest\0326.clusterconnectivityman" +
+      "agementv2.RegisterAgentResponse\"\000\022\206\001\n\017Un" +
+      "registerAgent\0227.clusterconnectivitymanag" +
+      "ementv2.UnregisterAgentRequest\0328.cluster" +
+      "connectivitymanagementv2.UnregisterAgent" +
+      "Response\"\000\022w\n\nListAgents\0222.clusterconnec" +
+      "tivitymanagementv2.ListAgentsRequest\0323.c" +
+      "lusterconnectivitymanagementv2.ListAgent" +
+      "sResponse\"\000\022\241\001\n\030GetAllAgentsCertificates" +
+      "\022@.clusterconnectivitymanagementv2.GetAl" +
+      "lAgentsCertificatesRequest\032A.clusterconn" +
+      "ectivitymanagementv2.GetAllAgentsCertifi" +
+      "catesResponse\"\000\022\225\001\n\024RotateAgentAccessKey" +
+      "\022<.clusterconnectivitymanagementv2.Rotat" +
+      "eAgentAccessKeyRequest\032=.clusterconnecti" +
+      "vitymanagementv2.RotateAgentAccessKeyRes" +
+      "ponse\"\000B\203\001\n@com.cloudera.thunderhead.ser" +
+      "vice.clusterconnectivitymanagementv2B$Cl" +
+      "usterConnectivityManagementV2ProtoZ\031com/" +
+      "cloudera/cdp/protobufb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -13688,69 +15610,81 @@ public final class ClusterConnectivityManagementV2Proto {
     internal_static_clusterconnectivitymanagementv2_RegisterAgentRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_clusterconnectivitymanagementv2_RegisterAgentRequest_descriptor,
-        new java.lang.String[] { "AccountId", "DomainName", "KeyId", "EnvironmentCrn", });
-    internal_static_clusterconnectivitymanagementv2_RegisterAgentResponse_descriptor =
+        new java.lang.String[] { "AccountId", "DomainName", "KeyId", "EnvironmentCrn", "Aes128Parameters", "Aes256Parameters", "FilterOneof", });
+    internal_static_clusterconnectivitymanagementv2_AES128Parameters_descriptor =
       getDescriptor().getMessageTypes().get(5);
+    internal_static_clusterconnectivitymanagementv2_AES128Parameters_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_clusterconnectivitymanagementv2_AES128Parameters_descriptor,
+        new java.lang.String[] { });
+    internal_static_clusterconnectivitymanagementv2_AES256Parameters_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_clusterconnectivitymanagementv2_AES256Parameters_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_clusterconnectivitymanagementv2_AES256Parameters_descriptor,
+        new java.lang.String[] { "HmacKey", });
+    internal_static_clusterconnectivitymanagementv2_RegisterAgentResponse_descriptor =
+      getDescriptor().getMessageTypes().get(7);
     internal_static_clusterconnectivitymanagementv2_RegisterAgentResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_clusterconnectivitymanagementv2_RegisterAgentResponse_descriptor,
         new java.lang.String[] { "InvertingProxyAgent", });
     internal_static_clusterconnectivitymanagementv2_UnregisterAgentRequest_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_clusterconnectivitymanagementv2_UnregisterAgentRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_clusterconnectivitymanagementv2_UnregisterAgentRequest_descriptor,
         new java.lang.String[] { "AgentCrn", });
     internal_static_clusterconnectivitymanagementv2_GetAllAgentsCertificatesRequest_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(9);
     internal_static_clusterconnectivitymanagementv2_GetAllAgentsCertificatesRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_clusterconnectivitymanagementv2_GetAllAgentsCertificatesRequest_descriptor,
         new java.lang.String[] { "AccountId", });
     internal_static_clusterconnectivitymanagementv2_GetAllAgentsCertificatesResponse_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_clusterconnectivitymanagementv2_GetAllAgentsCertificatesResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_clusterconnectivitymanagementv2_GetAllAgentsCertificatesResponse_descriptor,
         new java.lang.String[] { "Certificates", });
     internal_static_clusterconnectivitymanagementv2_UnregisterAgentResponse_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_clusterconnectivitymanagementv2_UnregisterAgentResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_clusterconnectivitymanagementv2_UnregisterAgentResponse_descriptor,
         new java.lang.String[] { });
     internal_static_clusterconnectivitymanagementv2_InvertingProxy_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_clusterconnectivitymanagementv2_InvertingProxy_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_clusterconnectivitymanagementv2_InvertingProxy_descriptor,
         new java.lang.String[] { "Status", "Hostname", "CauseOfFailure", "Certificate", "CaCertificate", });
     internal_static_clusterconnectivitymanagementv2_InvertingProxyAgent_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_clusterconnectivitymanagementv2_InvertingProxyAgent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_clusterconnectivitymanagementv2_InvertingProxyAgent_descriptor,
-        new java.lang.String[] { "AgentCrn", "EncipheredPrivateKey", "Certificate", "EnvironmentCrn", "Certificates", "AccessKeyId", "EncipheredAccessKey", });
+        new java.lang.String[] { "AgentCrn", "EncipheredPrivateKey", "Certificate", "EnvironmentCrn", "Certificates", "AccessKeyId", "EncipheredAccessKey", "InitialisationVector", "HmacForPrivateKey", });
     internal_static_clusterconnectivitymanagementv2_ListAgentsRequest_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_clusterconnectivitymanagementv2_ListAgentsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_clusterconnectivitymanagementv2_ListAgentsRequest_descriptor,
         new java.lang.String[] { "PageSize", "PageToken", "AccountId", "EnvironmentCrn", "FilterOneof", });
     internal_static_clusterconnectivitymanagementv2_ListAgentsResponse_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_clusterconnectivitymanagementv2_ListAgentsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_clusterconnectivitymanagementv2_ListAgentsResponse_descriptor,
         new java.lang.String[] { "NextPageToken", "Agents", });
     internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyRequest_descriptor =
-      getDescriptor().getMessageTypes().get(14);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyRequest_descriptor,
         new java.lang.String[] { "AgentCrn", });
     internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyResponse_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_clusterconnectivitymanagementv2_RotateAgentAccessKeyResponse_descriptor,

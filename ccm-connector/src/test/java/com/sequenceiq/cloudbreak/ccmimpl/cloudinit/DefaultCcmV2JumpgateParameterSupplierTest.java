@@ -1,19 +1,22 @@
 package com.sequenceiq.cloudbreak.ccmimpl.cloudinit;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,28 +40,30 @@ class DefaultCcmV2JumpgateParameterSupplierTest {
 
     private static final String TEST_ENVIRONMENT_CRN = String.format("crn:cdp:iam:us-west-1:%s:environment:%s", TEST_ACCOUNT_ID, TEST_ENVIRONMENT_ID);
 
+    private static final String TEST_HMAC = "testHmac";
+
     @InjectMocks
     private DefaultCcmV2JumpgateParameterSupplier underTest;
 
     @Mock
     private CcmV2ManagementClient ccmV2Client;
 
-    @ParameterizedTest
-    @ValueSource(booleans = { false, true })
-    void testGetCcmV2JumpgateParameters(boolean singleWayTls) {
+    @ParameterizedTest(name = "singleWayTls = {0}, useHmac = {1}")
+    @MethodSource("parameterScenarios")
+    void testGetCcmV2JumpgateParameters(boolean singleWayTls, boolean useHmac) {
         String gatewayDomain = "test.gateway.domain";
         InvertingProxy mockInvertingProxy = InvertingProxy.newBuilder()
                 .setHostname("invertingProxyHost")
                 .setCertificate("invertingProxyCertificate")
                 .build();
-        InvertingProxyAgent mockInvertingProxyAgent = getInvertingProxyAgent(singleWayTls);
+        InvertingProxyAgent mockInvertingProxyAgent = getInvertingProxyAgent(singleWayTls, useHmac);
 
         when(ccmV2Client.awaitReadyInvertingProxyForAccount(anyString(), anyString())).thenReturn(mockInvertingProxy);
-        when(ccmV2Client.registerInvertingProxyAgent(anyString(), anyString(), any(Optional.class), anyString(), anyString()))
+        when(ccmV2Client.registerInvertingProxyAgent(anyString(), anyString(), any(Optional.class), anyString(), anyString(), any(Optional.class)))
                 .thenReturn(mockInvertingProxyAgent);
 
         CcmV2JumpgateParameters resultParameters = underTest.getCcmV2JumpgateParameters(TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), gatewayDomain,
-                Crn.fromString(TEST_CLUSTER_CRN).getResource());
+                Crn.fromString(TEST_CLUSTER_CRN).getResource(), useHmac ? Optional.of(TEST_HMAC) : Optional.empty());
         assertNotNull(resultParameters, "CCMV2 Jumpgate Parameters should not be null");
 
         assertEquals(TEST_ENVIRONMENT_CRN, resultParameters.getEnvironmentCrn(), "EnvironmentCRN should match");
@@ -66,10 +71,19 @@ class DefaultCcmV2JumpgateParameterSupplierTest {
         assertEquals("invertingProxyHost", resultParameters.getInvertingProxyHost(), "InvertingProxyHost should match");
         assertEquals("invertingProxyCertificate", resultParameters.getInvertingProxyCertificate(), "InvertingProxyCertificate should match");
         assertEquals(TEST_RESOURCE_ID, resultParameters.getAgentKeyId(), "AgentKeyId should match");
-        assertAgentCertOrMachineUser(resultParameters, singleWayTls);
+        assertAgentCertOrMachineUser(resultParameters, singleWayTls, useHmac);
     }
 
-    private void assertAgentCertOrMachineUser(CcmV2JumpgateParameters resultParameters, boolean singleWayTls) {
+    public static Stream<Arguments> parameterScenarios() {
+        return Stream.of(
+                Arguments.of(false, false),
+                Arguments.of(false, true),
+                Arguments.of(true, false),
+                Arguments.of(true, true)
+        );
+    }
+
+    private void assertAgentCertOrMachineUser(CcmV2JumpgateParameters resultParameters, boolean singleWayTls, boolean useHmac) {
         if (singleWayTls) {
             assertThat(resultParameters.getAgentCertificate())
                     .withFailMessage("AgentCertificate should be null for one-way TLS")
@@ -83,6 +97,21 @@ class DefaultCcmV2JumpgateParameterSupplierTest {
             assertEquals("invertingProxyAgentMachineUserEncipheredAccessKey",
                     resultParameters.getAgentMachineUserEncipheredAccessKey(),
                     "AgentMachineUserEncipheredAccessKey should match");
+            if (useHmac) {
+                assertEquals("iv",
+                        resultParameters.getInitialisationVector(),
+                        "AgentInitialisationVector should match");
+                assertEquals("hmacForPrivateKey",
+                        resultParameters.getHmacForPrivateKey(),
+                        "AgentMachineUserHmacForPrivateKey should match");
+            } else {
+                assertThat(resultParameters.getInitialisationVector())
+                        .withFailMessage("AgentInitialisationVector should be null when HMAC Key is not provided")
+                        .isNullOrEmpty();
+                assertThat(resultParameters.getHmacForPrivateKey())
+                        .withFailMessage("AgentMachineUserHmacForPrivateKey should be null when HMAC Key is not provided")
+                        .isNullOrEmpty();
+            }
         } else {
             assertEquals("invertingProxyAgentCertificate", resultParameters.getAgentCertificate(),
                     "AgentCertificate should match");
@@ -94,10 +123,16 @@ class DefaultCcmV2JumpgateParameterSupplierTest {
             assertThat(resultParameters.getAgentMachineUserEncipheredAccessKey())
                     .withFailMessage("AgentMachineUserEncipheredAccessKey should be null for two-way TLS")
                     .isNullOrEmpty();
+            assertThat(resultParameters.getInitialisationVector())
+                    .withFailMessage("AgentInitialisationVector should be null for two-way TLS")
+                    .isNullOrEmpty();
+            assertThat(resultParameters.getHmacForPrivateKey())
+                    .withFailMessage("AgentMachineUserHmacForPrivateKey should be null for two-way TLS")
+                    .isNullOrEmpty();
         }
     }
 
-    private InvertingProxyAgent getInvertingProxyAgent(boolean singleWayTls) {
+    private InvertingProxyAgent getInvertingProxyAgent(boolean singleWayTls, boolean useHmac) {
         InvertingProxyAgent.Builder mockInvertingProxyAgentBuilder = InvertingProxyAgent.newBuilder()
                 .setAgentCrn("invertingProxyAgentCrn")
                 .setEnvironmentCrn(TEST_ENVIRONMENT_CRN);
@@ -105,6 +140,11 @@ class DefaultCcmV2JumpgateParameterSupplierTest {
             mockInvertingProxyAgentBuilder
                     .setAccessKeyId("invertingProxyAgentMachineUserAccessKey")
                     .setEncipheredAccessKey("invertingProxyAgentMachineUserEncipheredAccessKey");
+            if (useHmac) {
+                mockInvertingProxyAgentBuilder
+                        .setHmacForPrivateKey("hmacForPrivateKey")
+                        .setInitialisationVector("iv");
+            }
         } else {
             mockInvertingProxyAgentBuilder
                     .setCertificate("invertingProxyAgentCertificate")
@@ -114,28 +154,52 @@ class DefaultCcmV2JumpgateParameterSupplierTest {
         return mockInvertingProxyAgentBuilder.build();
     }
 
-    @Test
-    void testInvertingProxyReturnsOnlyEncipheredAccessKey() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("validationScenarios")
+    void testInvertingProxyResponseValidation(String testName, String invertingProxyHost, String invertingProxyCertificate, String agentCrn,
+            String agentCert, String privateKey, String accessKey, String secretKey, String iv, Optional<String> hmacKeyOpt, String hmac, String message) {
         String gatewayDomain = "test.gateway.domain";
         InvertingProxy mockInvertingProxy = InvertingProxy.newBuilder()
-                .setHostname("invertingProxyHost")
-                .setCertificate("invertingProxyCertificate")
+                .setHostname(invertingProxyHost)
+                .setCertificate(invertingProxyCertificate)
                 .build();
         InvertingProxyAgent mockInvertingProxyAgent = InvertingProxyAgent.newBuilder()
-                .setAgentCrn("invertingProxyAgentCrn")
+                .setAgentCrn(agentCrn)
                 .setEnvironmentCrn(TEST_ENVIRONMENT_CRN)
-                .setCertificate("invertingProxyAgentCertificate")
-                .setEncipheredPrivateKey("invertingProxyAgentEncipheredKey")
-                .setEncipheredAccessKey("invertingProxyAgentMachineUserEncipheredAccessKey")
+                .setCertificate(agentCert)
+                .setEncipheredPrivateKey(privateKey)
+                .setAccessKeyId(accessKey)
+                .setEncipheredAccessKey(secretKey)
+                .setInitialisationVector(iv)
+                .setHmacForPrivateKey(hmac)
                 .build();
 
         when(ccmV2Client.awaitReadyInvertingProxyForAccount(anyString(), anyString())).thenReturn(mockInvertingProxy);
-        when(ccmV2Client.registerInvertingProxyAgent(anyString(), anyString(), any(Optional.class), anyString(), anyString()))
+        when(ccmV2Client.registerInvertingProxyAgent(anyString(), anyString(), any(Optional.class), eq(gatewayDomain), anyString(), any(Optional.class)))
                 .thenReturn(mockInvertingProxyAgent);
 
-        assertThatThrownBy(() -> underTest.getCcmV2Parameters(TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), gatewayDomain,
-                Crn.fromString(TEST_CLUSTER_CRN).getResource()))
-                .hasMessage("InvertingProxyAgent Access Key ID is not present but Enciphered Access Key is initialized. Error in inverting proxy logic.")
+        assertThatThrownBy(() -> underTest.getCcmV2JumpgateParameters(TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), gatewayDomain,
+                Crn.fromString(TEST_CLUSTER_CRN).getResource(), hmacKeyOpt))
+                .hasMessage(message)
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    public static Object[][] validationScenarios() {
+        return new Object[][] {
+            // testName                              host    hostcert     agentCrn    agentCert    agentPrivKey    accessKey    secretKey    iv     hmacKey                 hmac              errorMessage
+            { "Empty InvertingProxy hostname",       EMPTY,  "proxyCert", "agentCrn", "agentCert", "agentPrivKey", "accessKey", "secretKey", "iv",  Optional.empty(),       EMPTY,            "InvertingProxy Hostname is not initialized." },
+            { "Empty InvertingProxy cert",           "host", EMPTY,       "agentCrn", "agentCert", "agentPrivKey", "accessKey", "secretKey", "iv",  Optional.empty(),       EMPTY,            "InvertingProxy Certificate is not initialized." },
+            { "Empty InvertingProxyAgent CRN",       "host", "proxyCert", EMPTY,      "agentCert", "agentPrivKey", "accessKey", "secretKey", "iv",  Optional.empty(),       EMPTY,            "InvertingProxyAgent CRN is not initialized." },
+            { "Empty Agent Machine User Secret Key", "host", "proxyCert", "agentCrn", "agentCert", "agentPrivKey", "accessKey", EMPTY,       "iv",  Optional.empty(),       EMPTY,            "InvertingProxyAgent Access Key ID is present but Enciphered Access Key is not initialized." },
+            { "Empty Secret Key Digest",             "host", "proxyCert", "agentCrn", "agentCert", "agentPrivKey", "accessKey", "secretKey", "iv",  Optional.of("hmackey"), EMPTY,            "InvertingProxyAgent Enciphered Access Key digest is not present but HMAC key was passed. Error in inverting proxy logic." },
+            { "Empty IV",                            "host", "proxyCert", "agentCrn", "agentCert", "agentPrivKey", "accessKey", "secretKey", EMPTY, Optional.of("hmackey"), "hmac",           "InvertingProxyAgent IV is not present but HMAC key was passed. Error in inverting proxy logic." },
+            { "Empty Agent Cert",                    "host", "proxyCert", "agentCrn", EMPTY,       "agentPrivKey", EMPTY,       EMPTY,       EMPTY, Optional.empty(),       EMPTY,            "InvertingProxyAgent Certificate is not initialized." },
+            { "Empty Agent Cert Private Key",        "host", "proxyCert", "agentCrn", "agentCert", EMPTY,          EMPTY,       EMPTY,       EMPTY, Optional.empty(),       EMPTY,            "InvertingProxyAgent Enciphered Private Key is not initialized." },
+            { "Agent Access Key is not excepted",    "host", "proxyCert", "agentCrn", "agentCert", "agentPrivKey", EMPTY,       "secretKey", EMPTY, Optional.empty(),       EMPTY,            "InvertingProxyAgent Access Key ID is not present but Enciphered Access Key is initialized. Error in inverting proxy logic." }
+        };
+    }
+    // CHECKSTYLE:ON
+    // @formatter:on
 }

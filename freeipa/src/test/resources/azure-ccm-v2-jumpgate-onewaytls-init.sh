@@ -29,6 +29,9 @@ export CCM_V2_AGENT_BACKEND_ID_PREFIX="agentCrn-"
 export IS_CCM_V2_JUMPGATE_ENABLED=true
 export CCM_V2_AGENT_ACCESS_KEY_ID="agentMachineUserAccessKeyId"
 export CCM_V2_AGENT_ENCIPHERED_ACCESS_KEY="agentMachineUserEncipheredAccessKey"
+export CCM_V2_AGENT_HMAC_KEY="hmacKey"
+export CCM_V2_IV="initialisationVector"
+export CCM_V2_AGENT_HMAC_FOR_PRIVATE_KEY="hmacForPrivateKey"
 
 date >> /tmp/time.txt
 

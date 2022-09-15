@@ -81,6 +81,19 @@ message RegisterAgentRequest {
   // across the environment. Fos suce agents, we expect that environmentCrn would always be
   // supplied during registration.
   string environmentCrn = 4;
+  // Specify if aes-128 should be used for encryption or aes-256 with hmac calculation.
+  // This is done as part of supporting aes-128 encryption while also introducing aes-256 way of encryption
+  // along with calculating the MAC of the encrypted private key.
+  oneof filter_oneof {
+    AES128Parameters aes128Parameters = 5;
+    AES256Parameters aes256Parameters = 6;
+  }
+}
+
+message AES128Parameters {}
+
+message AES256Parameters {
+  string hmacKey = 1;
 }
 
 message RegisterAgentResponse {
@@ -151,6 +164,12 @@ message InvertingProxyAgent {
   // The access key is the private key for the machine user. This is an Ed25519 private key and is
   // 32 bytes encoded in base64 that should be used to sign requests.
   string encipheredAccessKey = 7 [(options.FieldExtension.sensitive) = true];
+  // The initialisationVector used to encrypt the access key.
+  // Only available for AES256 algorithm.
+  string initialisationVector = 8 [(options.FieldExtension.sensitive) = true];
+  // The mac calculated for the encrypted access key.
+  // Only available for AES256 algorithm.
+  string hmacForPrivateKey = 9 [(options.FieldExtension.sensitive) = true];
 }
 
 message ListAgentsRequest {

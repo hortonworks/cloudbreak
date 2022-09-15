@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.freeipa.flow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -40,6 +41,8 @@ class SaltConfigProviderTest {
 
     private static final String PILLAR = "pillar";
 
+    private static final String ENV_CRN = "envCrn";
+
     @Mock
     private FreeIpaConfigService freeIpaConfigService;
 
@@ -62,6 +65,7 @@ class SaltConfigProviderTest {
     public void testGetSaltConfig() throws Exception {
         Stack stack = mock(Stack.class);
         when(stack.getCcmParameters()).thenReturn(new CcmConnectivityParameters(new DefaultCcmV2JumpgateParameters()));
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         FreeIpaConfigView freeIpaConfigView = mock(FreeIpaConfigView.class);
         Map freeIpaConfigViewMap = mock(Map.class);
         when(freeIpaConfigService.createFreeIpaConfigs(any(), any())).thenReturn(freeIpaConfigView);
@@ -70,7 +74,7 @@ class SaltConfigProviderTest {
         when(telemetryConfigService.createTelemetryPillarConfig(any())).thenReturn(Map.of());
         when(proxyConfigService.createProxyPillarConfig(any())).thenReturn(Map.of());
         when(tagConfigService.createTagsPillarConfig(any())).thenReturn(Map.of());
-        when(ccmParametersConfigService.createCcmParametersPillarConfig(any(), any())).thenReturn(
+        when(ccmParametersConfigService.createCcmParametersPillarConfig(eq(ENV_CRN), any())).thenReturn(
                 Map.of(PILLAR, new SaltPillarProperties(PILLARPATH, Map.of(PILLARKEY, PILLARVALUE))));
         SaltConfig saltConfig = underTest.getSaltConfig(stack, Set.of());
 

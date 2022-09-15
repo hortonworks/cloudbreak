@@ -26,6 +26,9 @@ call_upgrade_ccm:
         - ENVIRONMENT_CRN: "{{salt['pillar.get']('ccm_jumpgate:environment_crn')}}"
         - CCM_V2_AGENT_ACCESS_KEY_ID: "{{salt['pillar.get']('ccm_jumpgate:agent_access_key_id')}}"
         - CCM_V2_AGENT_ENCIPHERED_ACCESS_KEY: "{{salt['pillar.get']('ccm_jumpgate:agent_enciphered_access_key')}}"
+        - CCM_V2_AGENT_HMAC_KEY: "{{salt['pillar.get']('ccm_jumpgate:agent_hmac_key')}}"
+        - CCM_V2_IV: "{{salt['pillar.get']('ccm_jumpgate:initialisation_vector')}}"
+        - CCM_V2_AGENT_HMAC_FOR_PRIVATE_KEY: "{{salt['pillar.get']('ccm_jumpgate:agent_hmac_for_private_key')}}"
 
 include:
   - upgradeccm.schedule

@@ -85,7 +85,7 @@ public class UserDataBuilder {
         } else {
             model.put(CcmParameterConstants.CCM_ENABLED_KEY, Boolean.FALSE);
             model.put(CcmV2ParameterConstants.CCM_V2_ENABLED_KEY, Boolean.FALSE);
-            model.put(CcmV2JumpgateParameterConstants.CCM_V2_JUMPGATE_ENABLED_KEY, Boolean.FALSE);
+            model.put(CcmV2JumpgateParameterConstants.CCMV2_JUMPGATE_ENABLED_KEY, Boolean.FALSE);
         }
     }
 

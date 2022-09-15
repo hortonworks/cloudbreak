@@ -56,7 +56,7 @@ public class SaltConfigProvider {
     private Map<String, SaltPillarProperties> getCcmPillarProperties(Stack stack) {
         CcmConnectivityParameters ccmParameters = stack.getCcmParameters();
         if (ccmParameters != null && ccmParameters.getCcmV2JumpgateParameters() != null) {
-            return ccmParametersConfigService.createCcmParametersPillarConfig(stack.getAccountId(), ccmParameters.getCcmV2JumpgateParameters());
+            return ccmParametersConfigService.createCcmParametersPillarConfig(stack.getEnvironmentCrn(), ccmParameters.getCcmV2JumpgateParameters());
         }
         return Map.of();
     }

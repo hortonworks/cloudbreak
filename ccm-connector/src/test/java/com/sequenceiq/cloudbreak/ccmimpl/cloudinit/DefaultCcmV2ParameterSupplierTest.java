@@ -58,8 +58,8 @@ class DefaultCcmV2ParameterSupplierTest {
                 Crn.fromString(TEST_CLUSTER_CRN).getResource());
         assertResult(resultParameters);
         verify(ccmV2Client).listInvertingProxyAgents(anyString(), eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)));
-        verify(ccmV2Client).registerInvertingProxyAgent(
-                anyString(), eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)), eq(TEST_GATEWAY_DOMAIN), eq(TEST_RESOURCE_ID));
+        verify(ccmV2Client).registerInvertingProxyAgent(anyString(), eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)),
+                eq(TEST_GATEWAY_DOMAIN), eq(TEST_RESOURCE_ID), eq(Optional.empty()));
         verify(ccmV2Client, never()).deregisterInvertingProxyAgent(any(), any());
     }
 
@@ -75,8 +75,8 @@ class DefaultCcmV2ParameterSupplierTest {
         assertResult(resultParameters);
 
         verify(ccmV2Client).listInvertingProxyAgents(anyString(), eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)));
-        verify(ccmV2Client).registerInvertingProxyAgent(
-                anyString(), eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)), eq(TEST_GATEWAY_DOMAIN), eq(TEST_RESOURCE_ID));
+        verify(ccmV2Client).registerInvertingProxyAgent(anyString(), eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)),
+                eq(TEST_GATEWAY_DOMAIN), eq(TEST_RESOURCE_ID), eq(Optional.empty()));
         verify(ccmV2Client).deregisterInvertingProxyAgent(any(), eq(TEST_AGENT_CRN));
     }
 
@@ -90,8 +90,8 @@ class DefaultCcmV2ParameterSupplierTest {
                 Crn.fromString(TEST_CLUSTER_CRN).getResource())).hasMessageNotContaining("internal error").isInstanceOf(CcmV2Exception.class);
 
         verify(ccmV2Client).listInvertingProxyAgents(anyString(), eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)));
-        verify(ccmV2Client, never()).registerInvertingProxyAgent(
-                anyString(), eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)), eq(TEST_GATEWAY_DOMAIN), eq(TEST_RESOURCE_ID));
+        verify(ccmV2Client, never()).registerInvertingProxyAgent(anyString(), eq(TEST_ACCOUNT_ID), eq(Optional.of(TEST_ENVIRONMENT_CRN)),
+                eq(TEST_GATEWAY_DOMAIN), eq(TEST_RESOURCE_ID), eq(Optional.empty()));
         verify(ccmV2Client, never()).deregisterInvertingProxyAgent(any(), eq(TEST_AGENT_CRN));
     }
 
@@ -107,7 +107,7 @@ class DefaultCcmV2ParameterSupplierTest {
                 .setEncipheredPrivateKey("invertingProxyAgentEncipheredKey")
                 .build();
         when(ccmV2Client.awaitReadyInvertingProxyForAccount(anyString(), anyString())).thenReturn(mockInvertingProxy);
-        lenient().when(ccmV2Client.registerInvertingProxyAgent(anyString(), anyString(), any(Optional.class), anyString(), anyString()))
+        lenient().when(ccmV2Client.registerInvertingProxyAgent(anyString(), anyString(), any(Optional.class), anyString(), anyString(), any(Optional.class)))
                 .thenReturn(mockInvertingProxyAgent);
     }
 
