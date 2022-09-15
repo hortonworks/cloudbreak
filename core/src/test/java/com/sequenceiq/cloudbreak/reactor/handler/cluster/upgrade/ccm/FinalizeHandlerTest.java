@@ -3,31 +3,28 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFailedEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmReconfigureNginxRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmReconfigureNginxResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFinalizeRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFinalizeResult;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
-class ReconfigureNginxHandlerTest {
+class FinalizeHandlerTest {
 
     private static final Long STACK_ID = 12L;
 
@@ -37,10 +34,10 @@ class ReconfigureNginxHandlerTest {
     private UpgradeCcmService upgradeCcmService;
 
     @Mock
-    private HandlerEvent<UpgradeCcmReconfigureNginxRequest> event;
+    private HandlerEvent<UpgradeCcmFinalizeRequest> event;
 
     @InjectMocks
-    private ReconfigureNginxHandler underTest;
+    private FinalizeHandler underTest;
 
     @BeforeEach
     void setUp() {
@@ -48,37 +45,34 @@ class ReconfigureNginxHandlerTest {
 
     @Test
     void selector() {
-        assertThat(underTest.selector()).isEqualTo("UPGRADECCMRECONFIGURENGINXREQUEST");
+        assertThat(underTest.selector()).isEqualTo("UPGRADECCMFINALIZEREQUEST");
     }
 
     @Test
     void doAccept() throws CloudbreakOrchestratorException {
-        ReflectionTestUtils.setField(underTest, "activationInMinutes", 5);
-        UpgradeCcmReconfigureNginxRequest request = new UpgradeCcmReconfigureNginxRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM, null);
+        UpgradeCcmFinalizeRequest request = new UpgradeCcmFinalizeRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM, null, Boolean.FALSE);
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
-        InOrder inOrder = inOrder(upgradeCcmService);
-        inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
-        inOrder.verify(upgradeCcmService).reconfigureNginx(STACK_ID);
-        assertThat(((UpgradeCcmReconfigureNginxResult) result).getRevertTime()).isNotNull();
-        assertThat(result.selector()).isEqualTo("UPGRADECCMRECONFIGURENGINXRESULT");
+        verify(upgradeCcmService).finalize(STACK_ID);
+        assertThat(result.selector()).isEqualTo("UPGRADECCMFINALIZERESULT");
+        assertThat(((UpgradeCcmFinalizeResult) result).getAgentDeletionSucceed().equals(Boolean.FALSE));
     }
 
     @Test
     void orchestrationException() throws CloudbreakOrchestratorException {
-        UpgradeCcmReconfigureNginxRequest request = new UpgradeCcmReconfigureNginxRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM, null);
+        UpgradeCcmFinalizeRequest request = new UpgradeCcmFinalizeRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM, null, Boolean.FALSE);
         when(event.getData()).thenReturn(request);
-        doThrow(new CloudbreakOrchestratorFailedException("salt error")).when(upgradeCcmService).reconfigureNginx(any());
+        doThrow(new CloudbreakOrchestratorFailedException("salt error")).when(upgradeCcmService).finalize(any());
 
         Selectable result = underTest.doAccept(event);
-        verify(upgradeCcmService).reconfigureNginx(STACK_ID);
+        verify(upgradeCcmService).finalize(STACK_ID);
         assertThat(result.selector()).isEqualTo("UPGRADECCMFAILEDEVENT");
         assertThat(result).isInstanceOf(UpgradeCcmFailedEvent.class);
         UpgradeCcmFailedEvent failedEvent = (UpgradeCcmFailedEvent) result;
         assertThat(failedEvent.getOldTunnel()).isEqualTo(Tunnel.CCM);
         assertThat(failedEvent.getResourceId()).isEqualTo(STACK_ID);
-        assertThat(failedEvent.getFailureOrigin()).isEqualTo(ReconfigureNginxHandler.class);
+        assertThat(failedEvent.getFailureOrigin()).isEqualTo(FinalizeHandler.class);
         assertThat(failedEvent.getException().getMessage()).isEqualTo("salt error");
     }
 }

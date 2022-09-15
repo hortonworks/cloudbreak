@@ -39,6 +39,10 @@ import com.sequenceiq.common.api.type.Tunnel;
 @Service
 public class UpgradeCcmService {
 
+    public static final String CCM_UPGRADE_FINISHED = "CCM upgrade finished";
+
+    public static final String CCM_UPGRADE_FINISHED_BUT = "CCM upgrade finished. Removing or deregistering previous agent has not been succeed.";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeCcmService.class);
 
     @Inject
@@ -110,6 +114,13 @@ public class UpgradeCcmService {
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_REMOVE_AGENT);
     }
 
+    public void removeAgentFailed(Long stackId) {
+        String statusReason = "Remove previous version's agent from the cluster has been failed";
+        LOGGER.debug(statusReason);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CCM_UPGRADE_IN_PROGRESS, statusReason);
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_REMOVE_AGENT_FAILED);
+    }
+
     void deregisterAgentState(Long stackId) {
         String statusReason = "Deregister previous version's agent";
         LOGGER.debug(statusReason);
@@ -117,8 +128,16 @@ public class UpgradeCcmService {
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_DEREGISTER_AGENT);
     }
 
-    public void ccmUpgradeFinished(Long stackId, Long clusterId) {
-        String statusReason = "CCM upgrade finished";
+    public void deregisterAgentFailed(Long stackId) {
+        String statusReason = "Deregister previous version's agent has been failed";
+        LOGGER.debug(statusReason);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CCM_UPGRADE_IN_PROGRESS, statusReason);
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_DEREGISTER_AGENT_FAILED);
+    }
+
+    public void ccmUpgradeFinished(Long stackId, Long clusterId, Boolean agentRemoveSucceed) {
+        String statusReason = agentRemoveSucceed ? CCM_UPGRADE_FINISHED
+                : CCM_UPGRADE_FINISHED_BUT;
         LOGGER.debug(statusReason);
         InMemoryStateStore.deleteStack(stackId);
         InMemoryStateStore.deleteCluster(clusterId);
@@ -127,7 +146,6 @@ public class UpgradeCcmService {
     }
 
     public void ccmUpgradeFailed(UpgradeCcmFailedEvent failedEvent, Long clusterId) {
-
         String statusReason = "CCM upgrade failed: " + failedEvent.getException().getMessage();
         LOGGER.debug(statusReason);
         InMemoryStateStore.deleteStack(failedEvent.getResourceId());
@@ -141,8 +159,8 @@ public class UpgradeCcmService {
         flowMessageService.fireEventAndLog(failedEvent.getResourceId(), UPDATE_FAILED.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_FAILED);
     }
 
-    public void updateTunnel(Long stackId) {
-        stackService.setTunnelByStackId(stackId, Tunnel.latestUpgradeTarget());
+    public void updateTunnel(Long stackId, Tunnel tunnel) {
+        stackService.setTunnelByStackId(stackId, tunnel);
     }
 
     public void reconfigureNginx(Long stackId) throws CloudbreakOrchestratorException {
@@ -154,12 +172,16 @@ public class UpgradeCcmService {
         healthCheck(stackId);
     }
 
-    private void registerClusterProxy(Long stackId) {
+    public void finalize(Long stackId) throws CloudbreakOrchestratorException {
+        upgradeCcmOrchestratorService.finalize(stackId);
+    }
+
+    public void registerClusterProxy(Long stackId) {
         Optional<ConfigRegistrationResponse> configRegistrationResponse = clusterProxyService.reRegisterCluster(stackId);
         configRegistrationResponse.ifPresentOrElse(c -> LOGGER.debug(c.toString()), () -> LOGGER.debug("No clusterproxy register response for {}", stackId));
     }
 
-    private void healthCheck(Long stackId) {
+    public void healthCheck(Long stackId) {
         LOGGER.info("Health check for CCM upgrade...");
         Set<String> unhealthyHosts;
         try {

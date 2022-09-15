@@ -27,7 +27,8 @@ public class UpgradeCcmFlowEventChainFactory implements FlowEventChainFactory<Up
     public FlowTriggerEventQueue createFlowTriggerEventQueue(UpgradeCcmFlowChainTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(
-                new UpgradeCcmTriggerRequest(UPGRADE_CCM_EVENT.event(), event.getResourceId(), event.getClusterId(), event.getOldTunnel(), event.accepted()));
+                new UpgradeCcmTriggerRequest(UPGRADE_CCM_EVENT.event(), event.getResourceId(), event.getClusterId(), event.getOldTunnel(),
+                        null, event.accepted()));
         flowEventChain.add(new UserDataUpdateRequest(UPDATE_USERDATA_TRIGGER_EVENT.event(), event.getResourceId(), event.getOldTunnel()));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }

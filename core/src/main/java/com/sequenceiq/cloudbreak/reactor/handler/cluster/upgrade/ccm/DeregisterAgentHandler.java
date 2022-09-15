@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmService;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmDeregisterAgentRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmDeregisterAgentResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFailedEvent;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -33,7 +33,9 @@ public class DeregisterAgentHandler extends ExceptionCatcherEventHandler<Upgrade
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmDeregisterAgentRequest> event) {
         LOGGER.error("Deregistering agent for CCM upgrade has failed", e);
-        return new UpgradeCcmFailedEvent(resourceId, event.getData().getOldTunnel(), getClass(), e);
+        upgradeCcmService.deregisterAgentFailed(resourceId);
+        return new UpgradeCcmDeregisterAgentResult(resourceId, event.getData().getClusterId(), event.getData().getOldTunnel(),
+                event.getData().getRevertTime(), Boolean.FALSE);
     }
 
     @Override
@@ -41,8 +43,9 @@ public class DeregisterAgentHandler extends ExceptionCatcherEventHandler<Upgrade
         UpgradeCcmDeregisterAgentRequest request = event.getData();
         Long stackId = request.getResourceId();
         LOGGER.info("Deregistering agent for CCM upgrade...");
-        upgradeCcmService.updateTunnel(stackId);
+        upgradeCcmService.updateTunnel(stackId, Tunnel.latestUpgradeTarget());
         upgradeCcmService.deregisterAgent(stackId, request.getOldTunnel());
-        return new UpgradeCcmDeregisterAgentResult(stackId, request.getClusterId(), request.getOldTunnel());
+        return new UpgradeCcmDeregisterAgentResult(stackId, request.getClusterId(), request.getOldTunnel(), request.getRevertTime(),
+                request.getAgentDeletionSucceed());
     }
 }

@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmService;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmDeregisterAgentRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmDeregisterAgentResult;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -45,13 +46,14 @@ class DeregisterAgentHandlerTest {
 
     @Test
     void doAccept() {
-        UpgradeCcmDeregisterAgentRequest request = new UpgradeCcmDeregisterAgentRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM);
+        UpgradeCcmDeregisterAgentRequest request = new UpgradeCcmDeregisterAgentRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM, null, Boolean.TRUE);
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
         InOrder inOrder = inOrder(upgradeCcmService);
-        inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID);
+        inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
         inOrder.verify(upgradeCcmService).deregisterAgent(STACK_ID, Tunnel.CCM);
+        assertThat(((UpgradeCcmDeregisterAgentResult) result).getAgentDeletionSucceed()).isEqualTo(Boolean.TRUE);
         assertThat(result.selector()).isEqualTo("UPGRADECCMDEREGISTERAGENTRESULT");
     }
 }
