@@ -34,6 +34,8 @@ class CcmV2ManagementClientTest {
 
     private static final String TEST_AGENT_CRN = "testAgentCrn";
 
+    private static final String TEST_HMAC_KEY = "testHmacKey";
+
     @InjectMocks
     private CcmV2ManagementClient underTest;
 
@@ -82,11 +84,11 @@ class CcmV2ManagementClientTest {
         String keyId = "keyId";
 
         InvertingProxyAgent mockAgent = InvertingProxyAgent.newBuilder().setAgentCrn("testAgentCrn").build();
-        when(grpcCcmV2Client.registerAgent(TEST_REQUEST_ID, TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), domain, keyId, TEST_USER_CRN))
-                .thenReturn(mockAgent);
+        when(grpcCcmV2Client.registerAgent(TEST_REQUEST_ID, TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), domain, keyId,
+                TEST_USER_CRN, Optional.of(TEST_HMAC_KEY))).thenReturn(mockAgent);
         InvertingProxyAgent registeredAgent =
-                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN,
-                        () -> underTest.registerInvertingProxyAgent(TEST_REQUEST_ID, TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), domain, keyId));
+                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.registerInvertingProxyAgent(
+                        TEST_REQUEST_ID, TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), domain, keyId, Optional.of(TEST_HMAC_KEY)));
         assertEquals(TEST_AGENT_CRN, registeredAgent.getAgentCrn(), "InvertingProxyAgent agentCrn  should match.");
     }
 
@@ -95,10 +97,10 @@ class CcmV2ManagementClientTest {
         String domain = "test.domain";
         String keyId = "keyId";
 
-        when(grpcCcmV2Client.registerAgent(TEST_REQUEST_ID, TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), domain, keyId, TEST_USER_CRN))
-                .thenThrow(new RuntimeException());
-        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN,
-                () -> underTest.registerInvertingProxyAgent(TEST_REQUEST_ID, TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), domain, keyId)))
+        when(grpcCcmV2Client.registerAgent(TEST_REQUEST_ID, TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), domain, keyId,
+                TEST_USER_CRN, Optional.of(TEST_HMAC_KEY))).thenThrow(new RuntimeException());
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.registerInvertingProxyAgent(
+                TEST_REQUEST_ID, TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), domain, keyId, Optional.of(TEST_HMAC_KEY))))
                 .isInstanceOf(CcmV2Exception.class);
     }
 

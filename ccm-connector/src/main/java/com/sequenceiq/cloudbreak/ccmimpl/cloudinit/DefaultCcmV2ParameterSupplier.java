@@ -34,7 +34,8 @@ public class DefaultCcmV2ParameterSupplier implements CcmV2ParameterSupplier {
     public CcmV2Parameters getCcmV2Parameters(@Nonnull String accountId, @Nonnull Optional<String> environmentCrnOpt,
         @Nonnull String clusterGatewayDomain, @Nonnull String agentKeyId) {
 
-        InvertingProxyAndAgent invertingProxyAndAgent = getInvertingProxyAndAgent(accountId, environmentCrnOpt, clusterGatewayDomain, agentKeyId);
+        InvertingProxyAndAgent invertingProxyAndAgent =
+                getInvertingProxyAndAgent(accountId, environmentCrnOpt, clusterGatewayDomain, agentKeyId, Optional.empty());
         InvertingProxy invertingProxy = invertingProxyAndAgent.getInvertingProxy();
         InvertingProxyAgent invertingProxyAgent = invertingProxyAndAgent.getInvertingProxyAgent();
 
@@ -47,14 +48,14 @@ public class DefaultCcmV2ParameterSupplier implements CcmV2ParameterSupplier {
     }
 
     protected InvertingProxyAndAgent getInvertingProxyAndAgent(@Nonnull String accountId, @Nonnull Optional<String> environmentCrnOpt,
-            @Nonnull String clusterGatewayDomain, @Nonnull String agentKeyId) {
+            @Nonnull String clusterGatewayDomain, @Nonnull String agentKeyId, @Nonnull Optional<String> hmacKeyOpt) {
         String requestId = MDCBuilder.getOrGenerateRequestId();
 
         InvertingProxy invertingProxy = ccmV2Client.awaitReadyInvertingProxyForAccount(requestId, accountId);
         unregisterExistingAgent(requestId, accountId, environmentCrnOpt, agentKeyId);
         InvertingProxyAgent invertingProxyAgent = ccmV2Client.registerInvertingProxyAgent(requestId, accountId, environmentCrnOpt,
-                clusterGatewayDomain, agentKeyId);
-        validateCcmV2ConfigResponse(invertingProxy, invertingProxyAgent);
+                clusterGatewayDomain, agentKeyId, hmacKeyOpt);
+        validateCcmV2ConfigResponse(invertingProxy, invertingProxyAgent, hmacKeyOpt);
         return new InvertingProxyAndAgent(invertingProxy, invertingProxyAgent);
     }
 
@@ -70,13 +71,19 @@ public class DefaultCcmV2ParameterSupplier implements CcmV2ParameterSupplier {
         }
     }
 
-    private void validateCcmV2ConfigResponse(InvertingProxy invertingProxy, InvertingProxyAgent invertingProxyAgent) {
+    private void validateCcmV2ConfigResponse(InvertingProxy invertingProxy, InvertingProxyAgent invertingProxyAgent, Optional<String> hmacKeyOpt) {
         checkArgument(StringUtils.isNotEmpty(invertingProxy.getHostname()), "InvertingProxy Hostname is not initialized.");
         checkArgument(StringUtils.isNotEmpty(invertingProxy.getCertificate()), "InvertingProxy Certificate is not initialized.");
-        checkArgument(StringUtils.isNotEmpty(invertingProxyAgent.getAgentCrn()), "InvertingProxyAgent Crn is not initialized.");
+        checkArgument(StringUtils.isNotEmpty(invertingProxyAgent.getAgentCrn()), "InvertingProxyAgent CRN is not initialized.");
         if (StringUtils.isNotEmpty(invertingProxyAgent.getAccessKeyId())) {
             checkArgument(StringUtils.isNotEmpty(invertingProxyAgent.getEncipheredAccessKey()),
                     "InvertingProxyAgent Access Key ID is present but Enciphered Access Key is not initialized.");
+            hmacKeyOpt.ifPresent(key -> {
+                checkArgument(StringUtils.isNotEmpty(invertingProxyAgent.getInitialisationVector()),
+                        "InvertingProxyAgent IV is not present but HMAC key was passed. Error in inverting proxy logic.");
+                checkArgument(StringUtils.isNotEmpty(invertingProxyAgent.getHmacForPrivateKey()),
+                        "InvertingProxyAgent Enciphered Access Key digest is not present but HMAC key was passed. Error in inverting proxy logic.");
+            });
         } else {
             checkArgument(StringUtils.isEmpty(invertingProxyAgent.getEncipheredAccessKey()),
                     "InvertingProxyAgent Access Key ID is not present but Enciphered Access Key is initialized. Error in inverting proxy logic.");

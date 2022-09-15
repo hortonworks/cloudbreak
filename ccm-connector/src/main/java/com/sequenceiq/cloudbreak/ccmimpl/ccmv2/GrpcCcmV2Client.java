@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Grpc;
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Grpc.ClusterConnectivityManagementV2BlockingStub;
+import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.AES256Parameters;
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyRequest;
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyResponse;
 import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy;
@@ -60,7 +61,7 @@ public class GrpcCcmV2Client {
     }
 
     public InvertingProxyAgent registerAgent(String requestId, String accountId, Optional<String> environmentCrnOpt, String domainName,
-        String keyId, String actorCrn) {
+        String keyId, String actorCrn, Optional<String> hmacKeyOpt) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             ClusterConnectivityManagementV2BlockingStub client = makeClient(channelWrapper.getChannel(), requestId, actorCrn);
             RegisterAgentRequest.Builder registerAgentRequestBuilder =  RegisterAgentRequest.newBuilder()
@@ -68,6 +69,10 @@ public class GrpcCcmV2Client {
                     .setDomainName(domainName)
                     .setKeyId(keyId);
             environmentCrnOpt.ifPresent(registerAgentRequestBuilder::setEnvironmentCrn);
+            if (hmacKeyOpt.isPresent()) {
+                AES256Parameters aes256Parameters = AES256Parameters.newBuilder().setHmacKey(hmacKeyOpt.get()).build();
+                registerAgentRequestBuilder.setAes256Parameters(aes256Parameters);
+            }
             RegisterAgentRequest registerAgentRequest = registerAgentRequestBuilder.build();
             LOGGER.debug("Calling registerAgent with params accountId: '{}', environmentCrnOpt: '{}', domainName: '{}', keyId:'{}' ",
                     accountId, environmentCrnOpt, domainName, keyId);

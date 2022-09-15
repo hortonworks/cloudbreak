@@ -68,6 +68,9 @@ export IS_CCM_V2_ENABLED=false
 export IS_CCM_V2_JUMPGATE_ENABLED=true
 export CCM_V2_AGENT_ACCESS_KEY_ID="${ccmV2AgentMachineUserAccessKeyId}"
 export CCM_V2_AGENT_ENCIPHERED_ACCESS_KEY="${ccmV2AgentMachineUserEncipheredAccessKey}"
+export CCM_V2_AGENT_HMAC_KEY="${ccmV2AgentHmacKey}"
+export CCM_V2_IV="${ccmV2AgentIv}"
+export CCM_V2_AGENT_HMAC_FOR_PRIVATE_KEY="${ccmV2AgentHmacForPrivateKey}"
 <#else>
 export IS_CCM_V2_JUMPGATE_ENABLED=false
 </#if>

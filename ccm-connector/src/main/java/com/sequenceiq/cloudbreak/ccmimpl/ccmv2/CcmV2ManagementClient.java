@@ -49,13 +49,13 @@ public class CcmV2ManagementClient {
     }
 
     public InvertingProxyAgent registerInvertingProxyAgent(String requestId, String accountId, Optional<String> environmentCrnOpt,
-        String domainName, String keyId) {
+        String domainName, String keyId, Optional<String> hmacKeyOpt) {
         return getRetryTemplate().execute(
                 retryContext -> {
                     LOGGER.debug("Registering Agent for accountId '{}', environmentCrnOpt: '{}', domainName '{}'",
                             accountId, environmentCrnOpt, domainName);
                     InvertingProxyAgent invertingProxyAgent = grpcCcmV2Client.registerAgent(requestId, accountId, environmentCrnOpt,
-                            domainName, keyId, ThreadBasedUserCrnProvider.getUserCrn());
+                            domainName, keyId, ThreadBasedUserCrnProvider.getUserCrn(), hmacKeyOpt);
                     LOGGER.debug("Registered Agent for accountId '{}', environmentCrnOpt: '{}', domainName '{}', invertingProxyAgent '{}'",
                             accountId, environmentCrnOpt, domainName, invertingProxyAgent);
                     return invertingProxyAgent;

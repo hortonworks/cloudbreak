@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.ccmimpl.cloudinit;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
@@ -21,9 +23,9 @@ public class DefaultCcmV2JumpgateParameterSupplier extends DefaultCcmV2Parameter
 
     @Override
     public CcmV2JumpgateParameters getCcmV2JumpgateParameters(@Nonnull String accountId, @Nonnull Optional<String> environmentCrnOpt,
-        @Nonnull String clusterGatewayDomain, @Nonnull String agentKeyId) {
+        @Nonnull String clusterGatewayDomain, @Nonnull String agentKeyId, @Nonnull Optional<String> hmacKeyOpt) {
 
-        InvertingProxyAndAgent invertingProxyAndAgent = getInvertingProxyAndAgent(accountId, environmentCrnOpt, clusterGatewayDomain, agentKeyId);
+        InvertingProxyAndAgent invertingProxyAndAgent = getInvertingProxyAndAgent(accountId, environmentCrnOpt, clusterGatewayDomain, agentKeyId, hmacKeyOpt);
         InvertingProxy invertingProxy = invertingProxyAndAgent.getInvertingProxy();
         InvertingProxyAgent invertingProxyAgent = invertingProxyAndAgent.getInvertingProxyAgent();
 
@@ -33,6 +35,7 @@ public class DefaultCcmV2JumpgateParameterSupplier extends DefaultCcmV2Parameter
 
         return new DefaultCcmV2JumpgateParameters(invertingProxy.getHostname(), invertingProxy.getCertificate(), invertingProxyAgent.getAgentCrn(), agentKeyId,
                 invertingProxyAgent.getEncipheredPrivateKey(), invertingProxyAgent.getCertificate(), invertingProxyAgent.getEnvironmentCrn(),
-                invertingProxyAgent.getAccessKeyId(), invertingProxyAgent.getEncipheredAccessKey());
+                invertingProxyAgent.getAccessKeyId(), invertingProxyAgent.getEncipheredAccessKey(),
+                hmacKeyOpt.orElse(EMPTY), invertingProxyAgent.getInitialisationVector(), invertingProxyAgent.getHmacForPrivateKey());
     }
 }

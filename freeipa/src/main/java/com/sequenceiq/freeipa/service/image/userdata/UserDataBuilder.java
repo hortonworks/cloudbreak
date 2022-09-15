@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityMode;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterConstants;
@@ -52,7 +51,7 @@ public class UserDataBuilder {
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     @Inject
-    private EntitlementService entitlementService;
+    private CcmV2TlsTypeDecider ccmV2TlsTypeDecider;
 
     public String buildUserData(String accountId, DetailedEnvironmentResponse environment, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters parameters, String saltBootPassword, String cbCert,
@@ -89,21 +88,22 @@ public class UserDataBuilder {
             CcmV2Parameters.addToTemplateModel(type, ccmConnectivityParameters.getCcmV2Parameters(), model);
         } else if (CcmConnectivityMode.CCMV2_JUMPGATE.equals(ccmConnectivityParameters.getConnectivityMode())) {
             CcmV2JumpgateParameters.addToTemplateModel(type, ccmConnectivityParameters.getCcmV2JumpgateParameters(), model);
-            removeIfNotEntitledOrForced(type, accountId, environment, model);
+            removeIfNotEntitledOrForced(type, environment, model);
         } else {
             model.put(CcmParameterConstants.CCM_ENABLED_KEY, Boolean.FALSE);
             model.put(CcmV2ParameterConstants.CCM_V2_ENABLED_KEY, Boolean.FALSE);
-            model.put(CcmV2JumpgateParameterConstants.CCM_V2_JUMPGATE_ENABLED_KEY, Boolean.FALSE);
+            model.put(CcmV2JumpgateParameterConstants.CCMV2_JUMPGATE_ENABLED_KEY, Boolean.FALSE);
         }
     }
 
-    private void removeIfNotEntitledOrForced(InstanceGroupType type, String accountId, DetailedEnvironmentResponse environment, Map<String, Object> model) {
+    private void removeIfNotEntitledOrForced(InstanceGroupType type, DetailedEnvironmentResponse environment, Map<String, Object> model) {
         if (isGateway(type)) {
-            if (CcmV2TlsType.TWO_WAY_TLS == environment.getCcmV2TlsType() ||
-                    environment.getCcmV2TlsType() == null && !entitlementService.ccmV2UseOneWayTls(accountId)) {
-
+            if (CcmV2TlsType.TWO_WAY_TLS == ccmV2TlsTypeDecider.decide(environment)) {
                 model.put(CcmV2ParameterConstants.CCMV2_AGENT_MACHINE_USER_ACCESS_KEY_ID, EMPTY);
                 model.put(CcmV2ParameterConstants.CCMV2_AGENT_MACHINE_USER_ENCIPHERED_ACCESS_KEY, EMPTY);
+                model.put(CcmV2JumpgateParameterConstants.CCMV2_AGENT_HMAC_KEY, EMPTY);
+                model.put(CcmV2JumpgateParameterConstants.CCMV2_AGENT_IV, EMPTY);
+                model.put(CcmV2JumpgateParameterConstants.CCMV2_AGENT_HMAC_FOR_PRIVATE_KEY, EMPTY);
             }
         }
     }

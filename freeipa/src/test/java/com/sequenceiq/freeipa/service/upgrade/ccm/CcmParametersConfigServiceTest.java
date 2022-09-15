@@ -2,6 +2,9 @@ package com.sequenceiq.freeipa.service.upgrade.ccm;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -12,15 +15,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2JumpgateParameters;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.common.api.type.CcmV2TlsType;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
+import com.sequenceiq.freeipa.service.image.userdata.CcmV2TlsTypeDecider;
 
 @ExtendWith(MockitoExtension.class)
 class CcmParametersConfigServiceTest {
-
-    private static final String ACCOUNT = "account";
 
     private static final String INVERTING_PROXY_HOST = "hostname";
 
@@ -40,23 +43,34 @@ class CcmParametersConfigServiceTest {
 
     private static final String MACHINE_USER_PRIVATE_KEY = "privateKey1";
 
+    private static final String HMAC_KEY = "hmacKey";
+
+    private static final String IV = "iv";
+
+    private static final String HMAC_PRIVATE_KEY = "hmacForPrivateKey";
+
     @Mock
-    private EntitlementService entitlementService;
+    private CcmV2TlsTypeDecider ccmV2TlsTypeDecider;
+
+    @Mock
+    private CachedEnvironmentClientService environmentService;
 
     @InjectMocks
     private CcmParametersConfigService underTest;
 
     @Test
     void testEmptyParams() {
-        Map<String, SaltPillarProperties> result = underTest.createCcmParametersPillarConfig(ACCOUNT, null);
+        Map<String, SaltPillarProperties> result = underTest.createCcmParametersPillarConfig(ENV_CRN, null);
+        verifyNoInteractions(environmentService, ccmV2TlsTypeDecider);
         assertThat(result).isEmpty();
     }
 
     @Test
     void testParamsWithOneWayTls() {
-        when(entitlementService.ccmV2UseOneWayTls(ACCOUNT)).thenReturn(true);
+        when(ccmV2TlsTypeDecider.decide(any())).thenReturn(CcmV2TlsType.ONE_WAY_TLS);
         CcmV2JumpgateParameters params = createParams();
-        Map<String, SaltPillarProperties> result = underTest.createCcmParametersPillarConfig(ACCOUNT, params);
+        Map<String, SaltPillarProperties> result = underTest.createCcmParametersPillarConfig(ENV_CRN, params);
+        verify(environmentService).getByCrn(ENV_CRN);
         assertThat(result).containsKey("ccm_jumpgate");
         Map<String, Object> properties = result.get("ccm_jumpgate").getProperties();
         assertThat(properties).containsKey("ccm_jumpgate");
@@ -72,15 +86,19 @@ class CcmParametersConfigServiceTest {
                 Map.entry("environment_crn", ENV_CRN),
                 Map.entry("agent_access_key_id", MACHINE_USER_ACCESS_KEY),
                 Map.entry("agent_enciphered_access_key", MACHINE_USER_PRIVATE_KEY),
+                Map.entry("agent_hmac_key", HMAC_KEY),
+                Map.entry("initialisation_vector", IV),
+                Map.entry("agent_hmac_for_private_key", HMAC_PRIVATE_KEY),
                 Map.entry("activation_in_minutes", 0L)
         );
     }
 
     @Test
     void testParamsWithTwoWayTls() {
-        when(entitlementService.ccmV2UseOneWayTls(ACCOUNT)).thenReturn(false);
+        when(ccmV2TlsTypeDecider.decide(any())).thenReturn(CcmV2TlsType.TWO_WAY_TLS);
         CcmV2JumpgateParameters params = createParams();
-        Map<String, SaltPillarProperties> result = underTest.createCcmParametersPillarConfig(ACCOUNT, params);
+        Map<String, SaltPillarProperties> result = underTest.createCcmParametersPillarConfig(ENV_CRN, params);
+        verify(environmentService).getByCrn(ENV_CRN);
         assertThat(result).containsKey("ccm_jumpgate");
         Map<String, Object> properties = result.get("ccm_jumpgate").getProperties();
         assertThat(properties).containsKey("ccm_jumpgate");
@@ -96,6 +114,9 @@ class CcmParametersConfigServiceTest {
                 Map.entry("environment_crn", ENV_CRN),
                 Map.entry("agent_access_key_id", EMPTY),
                 Map.entry("agent_enciphered_access_key", EMPTY),
+                Map.entry("agent_hmac_key", EMPTY),
+                Map.entry("initialisation_vector", EMPTY),
+                Map.entry("agent_hmac_for_private_key", EMPTY),
                 Map.entry("activation_in_minutes", 0L)
         );
     }
@@ -110,7 +131,10 @@ class CcmParametersConfigServiceTest {
                 AGENT_CERT,
                 ENV_CRN,
                 MACHINE_USER_ACCESS_KEY,
-                MACHINE_USER_PRIVATE_KEY
+                MACHINE_USER_PRIVATE_KEY,
+                HMAC_KEY,
+                IV,
+                HMAC_PRIVATE_KEY
         );
         return params;
     }

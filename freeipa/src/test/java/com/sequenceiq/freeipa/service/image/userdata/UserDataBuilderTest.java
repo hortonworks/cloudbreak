@@ -23,7 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2JumpgateParameters;
@@ -59,7 +58,7 @@ class UserDataBuilderTest {
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     @Mock
-    private EntitlementService entitlementService;
+    private CcmV2TlsTypeDecider ccmV2TlsTypeDecider;
 
     @InjectMocks
     private UserDataBuilder underTest;
@@ -138,23 +137,18 @@ class UserDataBuilderTest {
 
     static Stream<Arguments> tlsCases() {
         return Stream.of(
-                Arguments.of(CcmV2TlsType.ONE_WAY_TLS, false, "azure-ccm-v2-jumpgate-onewaytls-init.sh"),
-                Arguments.of(CcmV2TlsType.ONE_WAY_TLS, true, "azure-ccm-v2-jumpgate-onewaytls-init.sh"),
-                Arguments.of(CcmV2TlsType.TWO_WAY_TLS, false, "azure-ccm-v2-jumpgate-twowaytls-init.sh"),
-                Arguments.of(CcmV2TlsType.TWO_WAY_TLS, true, "azure-ccm-v2-jumpgate-twowaytls-init.sh"),
-                Arguments.of(null, false, "azure-ccm-v2-jumpgate-twowaytls-init.sh"),
-                Arguments.of(null, true, "azure-ccm-v2-jumpgate-onewaytls-init.sh")
+                Arguments.of(CcmV2TlsType.ONE_WAY_TLS, "azure-ccm-v2-jumpgate-onewaytls-init.sh"),
+                Arguments.of(CcmV2TlsType.TWO_WAY_TLS, "azure-ccm-v2-jumpgate-twowaytls-init.sh")
         );
     }
 
-    @ParameterizedTest(name = "Forced TLS mode = {0}, entitlement = {1}, filename = {2}")
+    @ParameterizedTest(name = "TLS mode = {0}, filename = {1}")
     @MethodSource("tlsCases")
     @DisplayName("test if CCM V2 Jumpgate parameters are passed the user data contains them")
-    void testBuildUserDataWithCCMV2JumpgateParams(CcmV2TlsType ccmV2TlsType,
-            boolean oneWayTlsEntitlementEnabled, String expectedContentFileName) throws IOException {
+    void testBuildUserDataWithCCMV2JumpgateParams(CcmV2TlsType ccmV2TlsType, String expectedContentFileName) throws IOException {
         CcmV2JumpgateParameters ccmV2JumpgateParameters = new DefaultCcmV2JumpgateParameters("invertingProxyHost", "invertingProxyCertificate",
                 "agentCrn", "agentKeyId", "agentEncipheredPrivateKey", "agentCertificate", "environmentCrn",
-                "agentMachineUserAccessKeyId", "agentMachineUserEncipheredAccessKey");
+                "agentMachineUserAccessKeyId", "agentMachineUserEncipheredAccessKey", "hmacKey", "initialisationVector", "hmacForPrivateKey");
         CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2JumpgateParameters);
 
         PlatformParameters platformParameters = mock(PlatformParameters.class);
@@ -162,8 +156,9 @@ class UserDataBuilderTest {
         when(scriptParams.getDiskPrefix()).thenReturn("sd");
         when(scriptParams.getStartLabel()).thenReturn(98);
         when(platformParameters.scriptParams()).thenReturn(scriptParams);
-        lenient().when(entitlementService.ccmV2UseOneWayTls(ACCOUNT_ID)).thenReturn(oneWayTlsEntitlementEnabled);
+        lenient().when(ccmV2TlsTypeDecider.decide(environment)).thenReturn(ccmV2TlsType);
         environment.setCcmV2TlsType(ccmV2TlsType);
+        environment.setAccountId(ACCOUNT_ID);
         String userData = underTest.buildUserData(ACCOUNT_ID, environment, Platform.platform("AZURE"), "priv-key".getBytes(),
                 "cloudbreak", platformParameters, "pass", "cert", ccmConnectivityParameters, null);
 
