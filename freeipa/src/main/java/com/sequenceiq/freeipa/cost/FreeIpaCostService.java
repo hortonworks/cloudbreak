@@ -17,10 +17,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaRespons
 @Service
 public class FreeIpaCostService {
 
-    private static final double MAGIC_PROVIDER_COST = 5.3;
-
-    private static final double MAGIC_CLOUDERA_COST = 1.3;
-
     @Inject
     private CarbonCalculatorService carbonCalculatorService;
 
@@ -40,7 +36,7 @@ public class FreeIpaCostService {
             realTimeCost.setEnvCrn(stack.getEnvironmentCrn());
             realTimeCost.setType("FREEIPA");
             realTimeCost.setHourlyProviderUsd(usdCalculatorService.calculateProviderCost(clusterCost));
-            realTimeCost.setHourlyClouderaUsd(usdCalculatorService.calculateClouderaCost(clusterCost));
+            realTimeCost.setHourlyClouderaUsd(usdCalculatorService.calculateClouderaCost(clusterCost, realTimeCost.getType()));
             realTimeCost.setHourlyCO2(carbonCalculatorService.getHourlyCarbonFootPrintByCrn(clusterCost));
             realTimeCost.setHourlyEnergykWh(carbonCalculatorService.getHourlyEnergyConsumptionkWhByCrn(clusterCost));
             realTimeCosts.put(stack.getCrn(), realTimeCost);

@@ -43,6 +43,7 @@ public class InstanceTypeCollectorService {
         //get list of all instancetype
         List<InstanceGroupView> instanceGroupList = instanceGroupService.getInstanceGroupViewByStackId(stackViewDelegate.get().getId());
         ClusterCostDto clusterCostDto = new ClusterCostDto();
+        clusterCostDto.setStatus(stackViewDelegate.get().getStackStatus().getStatus().name());
         String region = stackViewDelegate.get().getRegion();
         clusterCostDto.setRegion(region);
         List<InstanceGroupCostDto> instanceGroupCostDtos = new ArrayList<>();
