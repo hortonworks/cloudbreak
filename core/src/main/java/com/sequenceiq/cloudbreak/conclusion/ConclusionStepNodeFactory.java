@@ -41,7 +41,8 @@ public class ConclusionStepNodeFactory {
                 .withSuccessNode(stepNode(SaltCheckerConclusionStep.class)
                         .withSuccessNode(stepNode(NodeServicesCheckerConclusionStep.class)
                                 .withSuccessNode(stepNode(NetworkCheckerConclusionStep.class)))
-                        .withFailureNode(stepNode(VmStatusCheckerConclusionStep.class)));
+                        .withFailureNode(stepNode(VmStatusCheckerConclusionStep.class))
+                                .withSuccessNode(stepNode(NetworkCheckerConclusionStep.class)));
         return root;
     }
 }

@@ -27,7 +27,6 @@ import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinions
 import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus;
 import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -58,13 +57,14 @@ public class SaltCheckerConclusionStep extends ConclusionStep {
         RPCResponse<SaltHealthReport> saltPingResponse;
         try {
             saltPingResponse = nodeStatusService.saltPing(resourceId);
-        } catch (CloudbreakServiceException e) {
+            LOGGER.debug("Salt health report response: {}", saltPingResponse.getFirstTextMessage());
+        } catch (Exception e) {
             LOGGER.debug("Salt health report failed, fallback and check unreachable nodes, error: {}", e.getMessage());
             return checkUnreachableNodes(resourceId);
         }
         SaltHealthReport report = saltPingResponse.getResult();
         if (report == null) {
-            LOGGER.debug("Salt health report was null, fallback and check unreachable nodes.");
+            LOGGER.info("Salt health report was null, fallback and check unreachable nodes.");
             return checkUnreachableNodes(resourceId);
         }
 
@@ -100,11 +100,13 @@ public class SaltCheckerConclusionStep extends ConclusionStep {
             LOGGER.warn(details, e);
             return failed(conclusion, details);
         }
+        LOGGER.debug("All available nodes are reachable based on salt ping: {}", availableNodes);
         return succeeded();
     }
 
     private List<String> collectFailedServicesOnMaster(SaltHealthReport report) {
         SaltMasterHealth saltMasterHealth = report.getMaster();
+        LOGGER.debug("Salt master health report: {}", saltMasterHealth);
         return saltMasterHealth.getServicesList().stream()
                 .filter(serviceStatus -> HealthStatus.NOK.equals(serviceStatus.getStatus()))
                 .map(ServiceStatus::getName)
@@ -113,6 +115,7 @@ public class SaltCheckerConclusionStep extends ConclusionStep {
 
     private Map<String, String> collectUnreachableMinions(SaltHealthReport report) {
         SaltMinionsHealth saltMinionsHealth = report.getMinions();
+        LOGGER.debug("Salt minions health report: {}", saltMinionsHealth);
         return saltMinionsHealth.getPingResponsesList().stream()
                 .filter(statusDetails -> HealthStatus.NOK.equals(statusDetails.getStatus()))
                 .collect(Collectors.toMap(StatusDetails::getHost, StatusDetails::getStatusReason));

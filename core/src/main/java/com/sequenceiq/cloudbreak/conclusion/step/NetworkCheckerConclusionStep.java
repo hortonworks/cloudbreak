@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWOR
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE_DETAILS;
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_NEIGHBOUR_NOT_ACCESSIBLE;
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_NEIGHBOUR_NOT_ACCESSIBLE_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_NGINX_UNREACHABLE;
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NODE_STATUS_MONITOR_UNREACHABLE;
 
 import java.util.ArrayList;
@@ -30,6 +31,8 @@ public class NetworkCheckerConclusionStep extends ConclusionStep {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkCheckerConclusionStep.class);
 
+    private static final String NGINX_UNREACHABLE_ERROR_MESSAGE = "nginx is unreachable";
+
     @Inject
     private NodeStatusService nodeStatusService;
 
@@ -41,13 +44,18 @@ public class NetworkCheckerConclusionStep extends ConclusionStep {
         RPCResponse<NodeStatusReport> networkReport;
         try {
             networkReport = nodeStatusService.getNetworkReport(resourceId);
+            LOGGER.debug("Network report response: {}", networkReport.getFirstTextMessage());
         } catch (Exception e) {
             LOGGER.warn("Network report failed, error: {}", e.getMessage());
+            if (e.getMessage().contains(NGINX_UNREACHABLE_ERROR_MESSAGE)) {
+                String conclusion = cloudbreakMessagesService.getMessage(NETWORK_NGINX_UNREACHABLE);
+                LOGGER.warn(conclusion);
+                return failed(conclusion, e.getMessage());
+            }
             return failed(cloudbreakMessagesService.getMessage(NODE_STATUS_MONITOR_UNREACHABLE), e.getMessage());
         }
         if (networkReport.getResult() == null) {
-            String nodeStatusResult = networkReport.getFirstTextMessage();
-            LOGGER.info("Network report result was null, original message: {}", nodeStatusResult);
+            LOGGER.info("Network report result was null");
             return succeeded();
         }
 
@@ -66,6 +74,7 @@ public class NetworkCheckerConclusionStep extends ConclusionStep {
         for (NodeStatus nodeStatus : networkReport.getResult().getNodesList()) {
             NetworkDetails networkDetails = nodeStatus.getNetworkDetails();
             String host = nodeStatus.getStatusDetails().getHost();
+            LOGGER.debug("Check network report for host: {}, details: {}", host, networkDetails);
             if (networkDetails.getCcmEnabled() && HealthStatus.NOK.equals(networkDetails.getCcmAccessible())) {
                 networkFailures.add(cloudbreakMessagesService.getMessageWithArgs(NETWORK_CCM_NOT_ACCESSIBLE, host));
                 String details = cloudbreakMessagesService.getMessageWithArgs(NETWORK_CCM_NOT_ACCESSIBLE_DETAILS, networkDetails.getCcmAccessible(), host);

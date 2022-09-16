@@ -24,6 +24,8 @@ public class ConclusionMessage {
 
     public static final String SALT_MINIONS_UNREACHABLE_DETAILS = "conclusion.salt.minions.unreachable.details";
 
+    public static final String NETWORK_NGINX_UNREACHABLE = "conclusion.network.nginx.unreachable";
+
     public static final String NETWORK_CCM_NOT_ACCESSIBLE = "conclusion.network.ccm.not.accessible";
 
     public static final String NETWORK_CCM_NOT_ACCESSIBLE_DETAILS = "conclusion.network.ccm.not.accessible.details";
