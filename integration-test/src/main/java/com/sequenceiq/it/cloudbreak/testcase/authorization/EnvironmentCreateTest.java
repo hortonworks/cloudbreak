@@ -104,8 +104,9 @@ public class EnvironmentCreateTest extends AbstractMockTest {
                 .withDatahubCreator()
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .withEnvironmentUser()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
-                .given(EnvironmentTestDto.class)
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory));
+        waitForCacheTimeout();
+        testContext.given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .validate();
 

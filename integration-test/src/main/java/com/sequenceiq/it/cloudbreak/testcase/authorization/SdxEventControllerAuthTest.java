@@ -88,8 +88,9 @@ public class SdxEventControllerAuthTest extends AbstractIntegrationTest {
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentUser()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
-                .given(clouderaManager, ClouderaManagerTestDto.class)
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory));
+        waitForCacheTimeout();
+        testContext.given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
                 .withClouderaManager(clouderaManager)
                 .given(stack, StackTestDto.class).withCluster(cluster)

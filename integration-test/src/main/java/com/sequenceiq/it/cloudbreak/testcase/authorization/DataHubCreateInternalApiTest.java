@@ -123,6 +123,7 @@ public class DataHubCreateInternalApiTest extends AbstractIntegrationTest {
                 .withEnvironmentUser()
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .validate();
+        waitForCacheTimeout();
         distroXTestDto.when(distroXTestClient.get(), envCreatorB)
                 .validate();
         distroXTestDto.when(distroXTestClient.delete(), envCreatorA)

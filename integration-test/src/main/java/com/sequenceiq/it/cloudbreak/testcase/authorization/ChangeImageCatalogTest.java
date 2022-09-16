@@ -170,8 +170,9 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .given(UmsTestDto.class)
                 .assignTarget(imageCatalog3.getName())
                 .withSharedResourceUser()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
-                .given(SdxChangeImageCatalogTestDto.class)
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory));
+        waitForCacheTimeout();
+        testContext.given(SdxChangeImageCatalogTestDto.class)
                 .withImageCatalog(imageCatalog3.getName())
                 .when(sdxTestClient.changeImageCatalog())
                 .validate();
@@ -216,8 +217,9 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentAdmin()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
-                .given(SdxChangeImageCatalogTestDto.class)
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory));
+        waitForCacheTimeout();
+        testContext.given(SdxChangeImageCatalogTestDto.class)
                 .withImageCatalog(imageCatalogA.getName())
                 .whenException(sdxTestClient.changeImageCatalog(), ForbiddenException.class,
                         expectedMessage("Doesn't have 'environments/useSharedResource' right on imageCatalog .*"))
@@ -270,8 +272,9 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentAdmin()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
-                .given(DistroXChangeImageCatalogTestDto.class)
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory));
+        waitForCacheTimeout();
+        testContext.given(DistroXChangeImageCatalogTestDto.class)
                 .withImageCatalog(imageCatalog2.getName())
                 .when(distroXClient.changeImageCatalog())
                 .validate();
@@ -330,8 +333,9 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentAdmin()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
-                .given(DistroXChangeImageCatalogTestDto.class)
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory));
+        waitForCacheTimeout();
+        testContext.given(DistroXChangeImageCatalogTestDto.class)
                 .withImageCatalog(imageCatalogA.getName())
                 .whenException(distroXClient.changeImageCatalog(), ForbiddenException.class,
                         expectedMessage("Doesn't have 'environments/useSharedResource' right on imageCatalog .*"))

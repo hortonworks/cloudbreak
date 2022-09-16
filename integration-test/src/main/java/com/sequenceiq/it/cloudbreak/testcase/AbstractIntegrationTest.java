@@ -349,4 +349,11 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         }
         return cloudStorage.getRequest();
     }
+
+    protected void waitForCacheTimeout() {
+        try {
+            Thread.sleep(60000);
+        } catch (InterruptedException e) {
+        }
+    }
 }

@@ -131,8 +131,9 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .withDatahubCreator()
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .withEnvironmentUser()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
-                .given(EnvironmentTestDto.class)
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory));
+        waitForCacheTimeout();
+        testContext.given(EnvironmentTestDto.class)
                 .given(DistroXTestDto.class)
                 .withRecipe(recipe1Name)
                 .whenException(distroXClient.create(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/useSharedResource' right on" +

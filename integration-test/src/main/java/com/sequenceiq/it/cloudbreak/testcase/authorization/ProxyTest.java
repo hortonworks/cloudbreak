@@ -79,8 +79,9 @@ public class ProxyTest extends AbstractIntegrationTest {
                 .given(UmsTestDto.class)
                 .assignTargetByCrn(proxyMap.get(owner).getKey().toString())
                 .withOwner()
-                .when(umsTestClient.assignResourceRole(owner, regionAwareInternalCrnGeneratorFactory))
-                .given(ProxyTestDto.class)
+                .when(umsTestClient.assignResourceRole(owner, regionAwareInternalCrnGeneratorFactory));
+        waitForCacheTimeout();
+        testContext.given(ProxyTestDto.class)
                 .withName(proxyMap.get(owner).getValue())
                 .when(proxyTestClient.get(), RunningParameter.who(cloudbreakActor.useRealUmsUser(owner)))
                 .then((context, dto, client) -> {

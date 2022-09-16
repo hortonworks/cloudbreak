@@ -74,6 +74,8 @@ public class ImageCatalogListFilteringTest extends AbstractIntegrationTest {
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_A, regionAwareInternalCrnGeneratorFactory))
                 .validate();
 
+        waitForCacheTimeout();
+
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, imageCatalogA.getName(), imageCatalogB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, imageCatalogA.getName(), imageCatalogB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, imageCatalogA.getName(), imageCatalogB.getName());

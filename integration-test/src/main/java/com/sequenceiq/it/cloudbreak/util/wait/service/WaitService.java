@@ -3,6 +3,8 @@ package com.sequenceiq.it.cloudbreak.util.wait.service;
 import java.time.Duration;
 import java.util.Map;
 
+import javax.ws.rs.NotAuthorizedException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +31,27 @@ public class WaitService<T extends WaitObject> {
         while (!timeout && !exit) {
             LOGGER.info("Waiting round {} and elapsed time {} ms", attempts, System.currentTimeMillis() - startTime);
             try {
-                statusChecker.refresh(t);
+                try {
+                    statusChecker.refresh(t);
+                } catch (NotAuthorizedException noe) {
+                    LOGGER.error("NotAuthorizedException occurred, possibly it is an UMS communication issue, ", noe.getMessage());
+                    // a simple retry for the ugly 401 error
+                    statusChecker.refresh(t);
+                } catch (Exception e) {
+                    if (e.getCause() != null) {
+                        boolean umsError = e.getCause() instanceof NotAuthorizedException ||
+                                e.getCause().getMessage().contains("Authorization failed due to user management service call timed out.");
+                        if (umsError) {
+                            statusChecker.refresh(t);
+                        } else {
+                            throw e;
+                        }
+                    } else if (e.getMessage().contains("Authorization failed due to user management service call timed out.")) {
+                        statusChecker.refresh(t);
+                    } else {
+                        throw e;
+                    }
+                }
                 if (statusChecker.checkStatus(t)) {
                     LOGGER.debug(statusChecker.successMessage(t));
                     testContext.setStatuses(statusChecker.getStatuses(t));

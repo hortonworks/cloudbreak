@@ -75,6 +75,8 @@ public class DataHubListFilteringTest extends AbstractIntegrationTest {
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .validate();
 
+        waitForCacheTimeout();
+
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, datahubA.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, datahubA.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, datahubA.getName());
@@ -91,6 +93,8 @@ public class DataHubListFilteringTest extends AbstractIntegrationTest {
                 .withDatahubAdmin()
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .validate();
+
+        waitForCacheTimeout();
 
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, datahubA.getName(), dataHubB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, datahubA.getName(), dataHubB.getName());

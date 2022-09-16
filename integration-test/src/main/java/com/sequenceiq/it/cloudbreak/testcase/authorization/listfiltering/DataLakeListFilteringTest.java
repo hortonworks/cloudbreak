@@ -89,6 +89,8 @@ public class DataLakeListFilteringTest extends AbstractIntegrationTest {
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_A, regionAwareInternalCrnGeneratorFactory))
                 .validate();
 
+        waitForCacheTimeout();
+
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, dataLakeA.getName(), dataLakeB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, dataLakeA.getName(), dataLakeB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, dataLakeA.getName(), dataLakeB.getName());

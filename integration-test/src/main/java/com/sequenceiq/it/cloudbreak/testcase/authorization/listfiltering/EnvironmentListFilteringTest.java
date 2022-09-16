@@ -83,6 +83,8 @@ public class EnvironmentListFilteringTest extends AbstractIntegrationTest {
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_A, regionAwareInternalCrnGeneratorFactory))
                 .validate();
 
+        waitForCacheTimeout();
+
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, environmentA.getName(), environmentB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, environmentA.getName(), environmentB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, environmentA.getName(), environmentB.getName());

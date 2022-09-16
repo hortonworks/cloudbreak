@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotAuthorizedException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -357,7 +358,27 @@ public abstract class TestContext implements ApplicationContextAware {
 
     protected <T extends CloudbreakTestDto, U extends MicroserviceClient>
     T doAction(T entity, Class<? extends MicroserviceClient> clientClass, Action<T, U> action, String who) throws Exception {
-        return action.action(getTestContext(), entity, getMicroserviceClient(entity.getClass(), who));
+        try {
+            return action.action(getTestContext(), entity, getMicroserviceClient(entity.getClass(), who));
+        } catch (NotAuthorizedException noe) {
+            LOGGER.error("NotAuthorizedException occurred, possibly it is an UMS communication issue, ", noe.getMessage());
+            // a simple retry for the ugly 401 error
+            return action.action(getTestContext(), entity, getMicroserviceClient(entity.getClass(), who));
+        } catch (Exception e) {
+            if (e.getCause() != null) {
+                boolean umsError = e.getCause() instanceof NotAuthorizedException ||
+                        e.getCause().getMessage().contains("Authorization failed due to user management service call timed out.");
+                if (umsError) {
+                    return action.action(getTestContext(), entity, getMicroserviceClient(entity.getClass(), who));
+                } else {
+                    throw e;
+                }
+            } else if (e.getMessage().contains("Authorization failed due to user management service call timed out.")) {
+                return action.action(getTestContext(), entity, getMicroserviceClient(entity.getClass(), who));
+            } else {
+                throw e;
+            }
+        }
     }
 
     public <T extends CloudbreakTestDto> T then(Class<T> entityClass, Class<? extends MicroserviceClient> clientClass,

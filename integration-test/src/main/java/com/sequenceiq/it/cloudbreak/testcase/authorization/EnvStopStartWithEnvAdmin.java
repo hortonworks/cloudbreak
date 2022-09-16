@@ -121,8 +121,9 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
                 .withEnvironmentUser()
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .withEnvironmentAdmin()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_ADMIN_A, regionAwareInternalCrnGeneratorFactory))
-                .given(EnvironmentTestDto.class)
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_ADMIN_A, regionAwareInternalCrnGeneratorFactory));
+        waitForCacheTimeout();
+        testContext.given(EnvironmentTestDto.class)
                 .given(DistroXTestDto.class)
                 .when(distroXClient.create(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .await(STACK_AVAILABLE, RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))

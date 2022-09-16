@@ -68,6 +68,8 @@ public class RecipeListFilteringTest extends AbstractIntegrationTest {
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .validate();
 
+        waitForCacheTimeout();
+
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, recipeA.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, recipeA.getName(), recipeB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, recipeA.getName(), recipeB.getName());
@@ -77,6 +79,8 @@ public class RecipeListFilteringTest extends AbstractIntegrationTest {
                 .withSharedResourceUser()
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_A, regionAwareInternalCrnGeneratorFactory))
                 .validate();
+
+        waitForCacheTimeout();
 
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, recipeA.getName(), recipeB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, recipeA.getName(), recipeB.getName());

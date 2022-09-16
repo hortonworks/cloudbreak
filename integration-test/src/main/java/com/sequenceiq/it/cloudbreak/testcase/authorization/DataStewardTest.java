@@ -65,8 +65,9 @@ public class DataStewardTest extends AbstractIntegrationTest {
                 .withEnvironmentAdmin()
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_ADMIN_A, regionAwareInternalCrnGeneratorFactory))
                 .withDataSteward()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_DATA_STEWARD, regionAwareInternalCrnGeneratorFactory))
-                .given(EnvironmentTestDto.class)
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_DATA_STEWARD, regionAwareInternalCrnGeneratorFactory));
+        waitForCacheTimeout();
+        testContext.given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_DATA_STEWARD)))
                 .whenException(environmentTestClient.stop(), ForbiddenException.class, expectedMessage(
                         "Doesn't have 'environments/stopEnvironment' right on environment "

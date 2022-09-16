@@ -80,6 +80,8 @@ public class FreeIpaListFilteringTest extends AbstractMockTest {
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_A, regionAwareInternalCrnGeneratorFactory))
                 .validate();
 
+        waitForCacheTimeout();
+
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, environmentA.getCrn(), environmentB.getCrn());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, environmentA.getCrn(), environmentB.getCrn());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, environmentA.getCrn(), environmentB.getCrn());

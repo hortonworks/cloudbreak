@@ -44,8 +44,6 @@ public class AssignResourceRoleUserAction extends AbstractUmsAction<UmsTestDto> 
         } else {
             client.getDefaultClient().assignResourceRole(userCrn, resourceCrn, resourceRole,
                     regionAwareInternalCrnGeneratorFactory);
-            // wait for UmsRightsCache to expire
-            Thread.sleep(7000);
             LOGGER.info(format(" Resource role '%s' has been assigned to user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
             Log.when(LOGGER, format(" Resource role '%s' has been assigned to user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
         }

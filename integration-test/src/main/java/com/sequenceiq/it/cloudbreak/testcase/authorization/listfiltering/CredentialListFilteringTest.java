@@ -81,6 +81,8 @@ public class CredentialListFilteringTest extends AbstractIntegrationTest {
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_A, regionAwareInternalCrnGeneratorFactory))
                 .validate();
 
+        waitForCacheTimeout();
+
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, credentialA.getName(), credentialB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, credentialA.getName(), credentialB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, credentialA.getName(), credentialB.getName());
