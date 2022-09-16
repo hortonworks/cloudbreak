@@ -180,6 +180,10 @@ public enum ResourceEvent {
     ENVIRONMENT_VERTICAL_SCALE_FINISHED("environment.vertical.scale.finished"),
     ENVIRONMENT_VERTICAL_SCALE_FAILED("environment.vertical.scale.failed"),
 
+    ENVIRONMENT_PROXY_CONFIG_MODIFICATION_STARTED("environment.proxy.modification.started"),
+    ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FAILED("environment.proxy.modification.failed"),
+    ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FINISHED("environment.proxy.modification.finished"),
+
     CREDENTIAL_AZURE_INTERACTIVE_CREATED("credential.azure.interactive.created"),
     CREDENTIAL_AZURE_INTERACTIVE_STATUS("credential.azure.interactive.status"),
     CREDENTIAL_AZURE_INTERACTIVE_FAILED("credential.azure.interactive.failed"),

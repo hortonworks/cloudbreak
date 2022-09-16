@@ -49,6 +49,7 @@ import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionD
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.encryption.EnvironmentEncryptionService;
+import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
@@ -68,6 +69,7 @@ import com.sequenceiq.environment.parameters.dao.domain.GcpParameters;
 import com.sequenceiq.environment.parameters.dao.repository.AzureParametersRepository;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
+import com.sequenceiq.environment.proxy.service.ProxyConfigModificationService;
 import com.sequenceiq.environment.proxy.service.ProxyConfigService;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
@@ -116,6 +118,12 @@ class EnvironmentModificationServiceTest {
 
     @MockBean
     private ProxyConfigService proxyConfigService;
+
+    @MockBean
+    private ProxyConfigModificationService proxyConfigModificationService;
+
+    @MockBean
+    private EnvironmentReactorFlowManager environmentReactorFlowManager;
 
     @Mock
     private EnvironmentValidatorService validatorService;
@@ -861,7 +869,7 @@ class EnvironmentModificationServiceTest {
     void editProxyConfig() {
         ProxyConfig newProxyConfig = new ProxyConfig();
         newProxyConfig.setName("proxy-name");
-        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
                 .withAccountId(ACCOUNT_ID)
                 .withProxyConfig(newProxyConfig)
                 .build();
@@ -873,15 +881,20 @@ class EnvironmentModificationServiceTest {
         when(environmentService.findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID)))
                 .thenReturn(Optional.of(environment));
         when(environmentService.save(environment)).thenReturn(environment);
+        EnvironmentDto environmentDto = new EnvironmentDto();
         when(environmentDtoConverter.environmentToDto(environment))
-                .thenReturn(new EnvironmentDto());
+                .thenReturn(environmentDto);
         when(proxyConfigService.getByNameForAccountId(eq(newProxyConfig.getName()), eq(ACCOUNT_ID))).thenReturn(newProxyConfig);
+        when(proxyConfigModificationService.shouldModify(environment, newProxyConfig)).thenReturn(true);
 
-        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentEditDto);
+
 
         verify(environmentService, times(1)).findByNameAndAccountIdAndArchivedIsFalse(any(), anyString());
         verify(environmentService, times(1)).save(any());
-        verify(proxyConfigService, times(1)).modify(environment, newProxyConfig);
+        verify(proxyConfigModificationService, times(1)).shouldModify(environment, newProxyConfig);
+        verify(proxyConfigModificationService, times(1)).validateModify(environmentDto);
+        verify(environmentReactorFlowManager, times(1)).triggerEnvironmentProxyConfigModification(environmentDto, newProxyConfig);
     }
 
     @Configuration
