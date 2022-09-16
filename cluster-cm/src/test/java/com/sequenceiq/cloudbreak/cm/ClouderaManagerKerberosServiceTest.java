@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -118,7 +119,7 @@ public class ClouderaManagerKerberosServiceTest {
         when(clustersResourceApi.configureForKerberos(eq(cluster.getName()), any(ApiConfigureForKerberosArguments.class)))
                 .thenReturn(new ApiCommand().id(BigDecimal.TEN));
         when(clouderaManagerResourceApi.generateCredentialsCommand()).thenReturn(new ApiCommand().id(BigDecimal.ZERO));
-        when(clustersResourceApi.listActiveCommands(anyString(), anyString())).thenReturn(new ApiCommandList().addItemsItem(
+        when(clustersResourceApi.listActiveCommands(anyString(), anyString(), isNull())).thenReturn(new ApiCommandList().addItemsItem(
                 new ApiCommand().name("NotDeployClusterClientConfig").id(BigDecimal.valueOf(1L))));
         when(clouderaManagerCommonCommandService.getDeployClientConfigCommandId(any(), any(), any())).thenReturn(BigDecimal.valueOf(2L));
         when(kerberosDetailService.isAdJoinable(kerberosConfig)).thenReturn(Boolean.TRUE);

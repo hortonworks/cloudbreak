@@ -66,7 +66,7 @@ public class SyncApiCommandRetrieverTest {
     @Test
     public void testGetCommandId() throws ApiException, CloudbreakException {
         // GIVEN
-        given(clustersResourceApi.listActiveCommandsWithHttpInfo(anyString(), isNull()))
+        given(clustersResourceApi.listActiveCommandsWithHttpInfo(anyString(), isNull(), isNull()))
                 .willReturn(createApiCommandListResponse(NOT_FOUND_STATUS_CODE));
         given(activeCommandTableResource.getCommands(COMMAND_NAME, clustersResourceApi, emptyHeaders)).willReturn(new ArrayList<>());
         given(recentCommandTableResource.getCommands(COMMAND_NAME, clustersResourceApi, emptyHeaders)).willReturn(createSampleCommands());
@@ -74,7 +74,7 @@ public class SyncApiCommandRetrieverTest {
         Optional<BigDecimal> result = underTest.getCommandId(COMMAND_NAME, clustersResourceApi, stack);
         // THEN
         assertEquals(2L, result.get().longValue());
-        verify(clustersResourceApi, times(1)).listActiveCommandsWithHttpInfo(anyString(), isNull());
+        verify(clustersResourceApi, times(1)).listActiveCommandsWithHttpInfo(anyString(), isNull(), isNull());
         verify(activeCommandTableResource, times(1)).getCommands(COMMAND_NAME, clustersResourceApi, emptyHeaders);
         verify(recentCommandTableResource, times(1)).getCommands(COMMAND_NAME, clustersResourceApi, emptyHeaders);
     }
@@ -83,7 +83,7 @@ public class SyncApiCommandRetrieverTest {
     public void testGetCommandIdByListCommands()
             throws ApiException, CloudbreakException {
         // GIVEN
-        given(clustersResourceApi.listActiveCommandsWithHttpInfo(anyString(), isNull()))
+        given(clustersResourceApi.listActiveCommandsWithHttpInfo(anyString(), isNull(), isNull()))
                 .willReturn(createApiCommandListResponse());
         // WHEN
         Optional<BigDecimal> result = underTest.getCommandId(COMMAND_NAME, clustersResourceApi, stack);
@@ -95,7 +95,7 @@ public class SyncApiCommandRetrieverTest {
     public void testGetCommandIdByListCommandsWithSkipRunningCommands()
             throws ApiException, CloudbreakException {
         // GIVEN
-        given(clustersResourceApi.listActiveCommandsWithHttpInfo(anyString(), isNull()))
+        given(clustersResourceApi.listActiveCommandsWithHttpInfo(anyString(), isNull(), isNull()))
                 .willReturn(createApiCommandListResponse());
         given(recentCommandTableResource.getCommands(COMMAND_NAME, clustersResourceApi, emptyHeaders)).willReturn(createSampleCommands());
         // WHEN
@@ -111,7 +111,7 @@ public class SyncApiCommandRetrieverTest {
     public void testGetCommandIdByListCommandsNotFound()
             throws ApiException, CloudbreakException {
         // GIVEN
-        given(clustersResourceApi.listActiveCommandsWithHttpInfo(anyString(), isNull()))
+        given(clustersResourceApi.listActiveCommandsWithHttpInfo(anyString(), isNull(), isNull()))
                 .willReturn(createApiCommandListResponse(NOT_FOUND_STATUS_CODE));
         given(activeCommandTableResource.getCommands(COMMAND_NAME, clustersResourceApi, emptyHeaders)).willReturn(new ArrayList<>());
         given(recentCommandTableResource.getCommands(COMMAND_NAME, clustersResourceApi, emptyHeaders)).willReturn(new ArrayList<>());
