@@ -232,7 +232,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private BigDecimal deployClientConfig(ClustersResourceApi clustersResourceApi, StackDtoDelegate stack) throws ApiException, CloudbreakException {
-        List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems();
+        List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY, null).getItems();
         return deployClientConfig(clustersResourceApi, stack, commands);
     }
 
@@ -615,7 +615,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         LOGGER.debug("Services with client config staleness status: {}", notFreshClientServices.stream()
                 .map(it -> it.getName() + ": " + it.getClientConfigStalenessStatus())
                 .collect(Collectors.joining(", ")));
-        List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems();
+        List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY, null).getItems();
         deployClientConfig(clustersResourceApi, stack, commands);
         refreshServices(clustersResourceApi, forced, commands);
         LOGGER.debug("Config deployed and stale services are refreshed in Cloudera Manager.");
@@ -661,7 +661,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private int doRestartServicesIfNeeded(ClustersResourceApi clustersResourceApi, boolean waitForCommandExecutionOnly)
             throws ApiException, CloudbreakException {
-        ApiCommandList apiCommandList = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY);
+        ApiCommandList apiCommandList = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY, null);
         Optional<ApiCommand> optionalRestartCommand = apiCommandList.getItems().stream()
                 .filter(cmd -> "Restart".equals(cmd.getName())).findFirst();
         ApiCommand restartCommand = null;

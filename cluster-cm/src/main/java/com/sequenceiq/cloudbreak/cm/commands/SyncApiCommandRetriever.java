@@ -68,7 +68,7 @@ public class SyncApiCommandRetriever {
     private Optional<BigDecimal> getCommandId(String commandName, ClustersResourceApi api, StackView stack, boolean skipActiveRunningCommands)
             throws CloudbreakException, ApiException {
         ApiResponse<ApiCommandList> commandListResponse =
-                api.listActiveCommandsWithHttpInfo(stack.getName(), null);
+                api.listActiveCommandsWithHttpInfo(stack.getName(), null, null);
         Optional<BigDecimal> foundCommandId =
                 Optional.ofNullable(getCommandIdFromActiveCommands(commandName, commandListResponse, skipActiveRunningCommands));
         if (foundCommandId.isEmpty() && !skipActiveRunningCommands) {

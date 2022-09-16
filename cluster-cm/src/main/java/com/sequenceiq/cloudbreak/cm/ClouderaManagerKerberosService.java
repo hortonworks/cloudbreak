@@ -69,7 +69,7 @@ public class ClouderaManagerKerberosService {
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, configureForKerberos.getId());
             ApiCommand generateCredentials = clouderaManagerResourceApi.generateCredentialsCommand();
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, generateCredentials.getId());
-            List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems();
+            List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY, null).getItems();
             BigDecimal deployClusterConfigId = clouderaManagerCommonCommandService.getDeployClientConfigCommandId(stack, clustersResourceApi, commands);
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, deployClusterConfigId);
             modificationService.startCluster();
