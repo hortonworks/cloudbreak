@@ -40,7 +40,6 @@ import org.springframework.util.CollectionUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -72,9 +71,9 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExit
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttributeDecorator;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.NameserverPillarDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
@@ -111,12 +110,10 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
-import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -234,9 +231,6 @@ public class ClusterHostServiceRunner {
     private EntitlementService entitlementService;
 
     @Inject
-    private DatalakeService datalakeService;
-
-    @Inject
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
     @Inject
@@ -247,6 +241,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private SssdConfigProvider sssdConfigProvider;
+
+    @Inject
+    private NameserverPillarDecorator nameserverPillarDecorator;
 
     public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto, Map<String, String> candidateAddresses) {
         try {
@@ -429,7 +426,7 @@ public class ClusterHostServiceRunner {
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
-        saveCustomNameservers(stackDto, kerberosConfig, servicePillar);
+        nameserverPillarDecorator.decorateServicePillarWithNameservers(stackDto, kerberosConfig, servicePillar);
         servicePillar.putAll(createUnboundEliminationPillar(stack.getDomainDnsResolver()));
         addKerberosConfig(servicePillar, kerberosConfig);
         servicePillar.putAll(hostAttributeDecorator.createHostAttributePillars(stackDto));
@@ -684,28 +681,6 @@ public class ClusterHostServiceRunner {
     private Map<String, SaltPillarProperties> createUnboundEliminationPillar(DnsResolverType dnsResolverType) {
         return Map.of("unbound-elimination", new SaltPillarProperties("/unbound/elimination.sls", singletonMap("unbound_elimination_supported",
                 DnsResolverType.FREEIPA_FOR_ENV.equals(dnsResolverType))));
-    }
-
-    private void saveCustomNameservers(StackDto stackDto, KerberosConfig kerberosConfig, Map<String, SaltPillarProperties> servicePillar) {
-        if (kerberosConfig != null && StringUtils.isNotBlank(kerberosConfig.getDomain()) && StringUtils.isNotBlank(kerberosConfig.getNameServers())) {
-            List<String> ipList = Lists.newArrayList(kerberosConfig.getNameServers().split(","));
-            servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
-                    singletonMap("forwarder-zones", singletonMap(kerberosConfig.getDomain(), singletonMap("nameservers", ipList)))));
-        } else if (kerberosConfig == null || (kerberosConfig.getType() != KerberosType.FREEIPA && kerberosConfig.getType() != KerberosType.ACTIVE_DIRECTORY)) {
-            saveDatalakeNameservers(stackDto, servicePillar);
-        }
-    }
-
-    private void saveDatalakeNameservers(StackDto stackDto, Map<String, SaltPillarProperties> servicePillar) {
-        Optional<Stack> datalakeStackOptional = datalakeService.getDatalakeStackByDatahubStack(stackDto.getStack());
-        if (datalakeStackOptional.isPresent()) {
-            Stack dataLakeStack = datalakeStackOptional.get();
-            String datalakeDomain = dataLakeStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().get(0).getDomain();
-            List<String> ipList = dataLakeStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream().map(InstanceMetadataView::getPrivateIp)
-                    .collect(Collectors.toList());
-            servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
-                    singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
-        }
     }
 
     @SuppressWarnings("ParameterNumber")

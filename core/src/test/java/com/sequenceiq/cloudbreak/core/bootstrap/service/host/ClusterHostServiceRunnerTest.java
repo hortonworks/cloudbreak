@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.Postg
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttributeDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.NameserverPillarDecorator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -234,6 +235,9 @@ class ClusterHostServiceRunnerTest {
 
     @Mock
     private KerberosDetailService kerberosDetailService;
+
+    @Mock
+    private NameserverPillarDecorator nameserverPillarDecorator;
 
     @BeforeEach
     void setUp() {
