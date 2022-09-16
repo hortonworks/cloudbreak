@@ -150,13 +150,13 @@
     "cloud": "AWS"
   },
   {
-    "region": "West US",
+    "region": "westus",
     "location": "California",
     "co2e": 0.000322167,
     "cloud": "Azure"
   },
   {
-    "region": "West US 2",
+    "region": "westus2",
     "location": "Washington",
     "co2e": 0.000322167,
     "cloud": "Azure"
