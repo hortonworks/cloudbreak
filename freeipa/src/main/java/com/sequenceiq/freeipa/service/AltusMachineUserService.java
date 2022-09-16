@@ -201,6 +201,7 @@ public class AltusMachineUserService {
             dataBusCredential.setMachineUserName(getFluentMachineUser(stack));
             dataBusCredential.setAccessKey(altusCredential.get().getAccessKey());
             dataBusCredential.setPrivateKey(altusCredential.get().getPrivateKey() != null ? new String(altusCredential.get().getPrivateKey()) : null);
+            dataBusCredential.setAccessKeyType(cdpAccessKeyType.getValue());
             return storeCdpCredential(dataBusCredential, stack.getId(), Stack::setDatabusCredential);
         }
         return null;
@@ -211,6 +212,7 @@ public class AltusMachineUserService {
         monitoringCredential.setMachineUserName(getMonitoringMachineUser(stack));
         monitoringCredential.setAccessKey(altusCredential.getAccessKey());
         monitoringCredential.setPrivateKey(altusCredential.getPrivateKey() != null ? new String(altusCredential.getPrivateKey()) : null);
+        monitoringCredential.setAccessKeyType(cdpAccessKeyType.getValue());
         return storeCdpCredential(monitoringCredential, stack.getId(), Stack::setMonitoringCredential);
     }
 
