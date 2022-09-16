@@ -36,7 +36,7 @@ public class ClouderaCostCache {
 
     public Double getPriceByType(String instanceType) {
         Double price = priceCache.get(instanceType);
-        return price == null ? 1.0 : price;
+        return price == null ? 0.69 : price;
     }
 
     private List<ClouderaPrice> loadPriceList() throws IOException {
