@@ -97,7 +97,7 @@ public class BanzaiCache {
                 return banzaiProductResponse.getOnDemandPrice();
             }
         }
-        return 1.0;
+        return 0.67;
     }
 
     public int cpuByInstanceType(String region, String machineType) {
