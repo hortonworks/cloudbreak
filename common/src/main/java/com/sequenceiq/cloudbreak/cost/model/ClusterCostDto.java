@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cost.model;
 
 import java.util.List;
+import java.util.Locale;
 
 public class ClusterCostDto {
 
@@ -30,7 +31,7 @@ public class ClusterCostDto {
     }
 
     public void setRegion(String region) {
-        this.region = region;
+        this.region = region.toLowerCase(Locale.ROOT).replaceAll(" ", "");
     }
 
     public boolean isComputeRunning() {
