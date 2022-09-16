@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.repository.ProxyConfigRepository;
+import com.sequenceiq.environment.proxy.service.ProxyConfigModificationService;
 import com.sequenceiq.environment.proxy.service.ProxyConfigService;
 import com.sequenceiq.environment.proxy.v1.ProxyTestSource;
 
@@ -57,6 +58,9 @@ public class ProxyConfigServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private ProxyConfigModificationService proxyConfigModificationService;
 
     @InjectMocks
     private ProxyConfigService underTestProxyConfigService;

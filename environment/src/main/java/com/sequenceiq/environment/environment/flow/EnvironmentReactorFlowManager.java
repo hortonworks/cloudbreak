@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
@@ -22,6 +23,8 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEve
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateEvent;
 import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateStateSelectors;
+import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationDefaultEvent;
+import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSelectors;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
@@ -31,6 +34,7 @@ import com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmS
 import com.sequenceiq.environment.environment.flow.verticalscale.freeipa.event.EnvironmentVerticalScaleEvent;
 import com.sequenceiq.environment.environment.flow.verticalscale.freeipa.event.EnvironmentVerticalScaleStateSelectors;
 import com.sequenceiq.environment.environment.service.stack.StackService;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
@@ -144,6 +148,13 @@ public class EnvironmentReactorFlowManager {
 
         return eventSender.sendEvent(envStackConfigUpdatesEvent,
                 new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+    }
+
+    public FlowIdentifier triggerEnvironmentProxyConfigModification(EnvironmentDto environment, ProxyConfig proxyConfig) {
+        LOGGER.info("Environment proxy config modification flow triggered.");
+        EnvProxyModificationDefaultEvent envProxyModificationEvent =
+                new EnvProxyModificationDefaultEvent(EnvProxyModificationStateSelectors.MODIFY_PROXY_START_EVENT.selector(), environment, proxyConfig);
+        return eventSender.sendEvent(envProxyModificationEvent, new Event.Headers(getFlowTriggerUsercrn(ThreadBasedUserCrnProvider.getUserCrn())));
     }
 
     public FlowIdentifier triggerLoadBalancerUpdateFlow(EnvironmentDto environmentDto, Long envId, String envName, String envCrn,

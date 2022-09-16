@@ -149,7 +149,10 @@ public enum EnvironmentStatus {
     VERTICAL_SCALE_VALIDATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.VERTICAL_SCALE_VALIDATION_FAILED),
     VERTICAL_SCALE_ON_FREEIPA_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.VERTICAL_SCALE_ON_FREEIPA_IN_PROGRESS),
     VERTICAL_SCALE_ON_FREEIPA_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.VERTICAL_SCALE_ON_FREEIPA_FAILED),
-    VERTICAL_SCALE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.VERTICAL_SCALE_FAILED);
+    VERTICAL_SCALE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.VERTICAL_SCALE_FAILED),
+
+    PROXY_CONFIG_MODIFICATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.PROXY_CONFIG_MODIFICATION_IN_PROGRESS),
+    PROXY_CONFIG_MODIFICATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED);
 
     public static final Set<EnvironmentStatus> AVAILABLE_STATUSES = Set.of(
             CREATION_INITIATED,

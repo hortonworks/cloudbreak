@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.proxy.service;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
@@ -11,7 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 
-import org.apache.commons.lang3.NotImplementedException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.datahub.DatahubService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.service.sdx.SdxService;
@@ -55,7 +57,7 @@ class ProxyConfigModificationServiceTest {
     private ProxyConfigModificationService underTest;
 
     @Mock
-    private Environment environment;
+    private EnvironmentDto environment;
 
     @Mock
     private ProxyConfig proxyConfig;
@@ -75,7 +77,7 @@ class ProxyConfigModificationServiceTest {
     void modifyValidateWithoutEntitlement() {
         when(entitlementService.isEditProxyConfigEnabled(ACCOUNT_ID)).thenReturn(false);
 
-        assertThatThrownBy(() -> underTest.modify(environment, proxyConfig))
+        assertThatThrownBy(() -> underTest.validateModify(environment))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Proxy config editing is not enabled in your account");
     }
@@ -84,7 +86,7 @@ class ProxyConfigModificationServiceTest {
     void modifyValidateWithNonAvailableFreeipa() {
         setFreeipaStatus(Status.STOPPED);
 
-        assertThatThrownBy(() -> underTest.modify(environment, proxyConfig))
+        assertThatThrownBy(() -> underTest.validateModify(environment))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Proxy config editing is not supported when FreeIpa is not available");
     }
@@ -93,7 +95,7 @@ class ProxyConfigModificationServiceTest {
     void modifyValidateWithNonRunningSdx() {
         setSdxStatus(SdxClusterStatusResponse.STOPPED);
 
-        assertThatThrownBy(() -> underTest.modify(environment, proxyConfig))
+        assertThatThrownBy(() -> underTest.validateModify(environment))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Proxy config editing is not supported when Data Lake is not running");
     }
@@ -104,16 +106,75 @@ class ProxyConfigModificationServiceTest {
                 com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE,
                 com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED);
 
-        assertThatThrownBy(() -> underTest.modify(environment, proxyConfig))
+        assertThatThrownBy(() -> underTest.validateModify(environment))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Proxy config editing is not supported when not all Data Hubs are available");
     }
 
     @Test
     void modifyValidateSuccess() {
-        assertThatThrownBy(() -> underTest.modify(environment, proxyConfig))
-                .isInstanceOf(NotImplementedException.class)
-                .hasMessage("Editing the proxy configuration is not supported yet");
+        assertThatCode(() -> underTest.validateModify(environment))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void shouldNotModifyNoProxies() {
+        Environment environment = new Environment();
+        ProxyConfig newProxyConfig = new ProxyConfig();
+
+        boolean result = underTest.shouldModify(environment, newProxyConfig);
+
+        Assertions.assertFalse(result);
+    }
+
+    @Test
+    void shouldNotModifySameProxies() {
+        ProxyConfig proxyConfig = new ProxyConfig();
+        proxyConfig.setName("name");
+        Environment environment = new Environment();
+        environment.setProxyConfig(proxyConfig);
+
+        boolean result = underTest.shouldModify(environment, proxyConfig);
+
+        Assertions.assertFalse(result);
+    }
+
+    @Test
+    void shouldModifyAddProxy() {
+        ProxyConfig proxyConfig = new ProxyConfig();
+        proxyConfig.setName("name");
+        Environment environment = new Environment();
+
+        boolean result = underTest.shouldModify(environment, proxyConfig);
+
+        Assertions.assertTrue(result);
+    }
+
+    @Test
+    void shouldModifyRemoveProxy() {
+        ProxyConfig proxyConfig = new ProxyConfig();
+        proxyConfig.setName("name");
+        Environment environment = new Environment();
+        environment.setProxyConfig(proxyConfig);
+
+        boolean result = underTest.shouldModify(environment, new ProxyConfig());
+
+        Assertions.assertTrue(result);
+    }
+
+    @Test
+    void shouldModifyChangeProxy() {
+        ProxyConfig proxyConfig = new ProxyConfig();
+        proxyConfig.setName("name");
+        Environment environment = new Environment();
+        environment.setProxyConfig(proxyConfig);
+
+        ProxyConfig newProxyConfig = new ProxyConfig();
+        proxyConfig.setName("new-name");
+
+        boolean result = underTest.shouldModify(environment, newProxyConfig);
+
+        Assertions.assertTrue(result);
     }
 
     private void setFreeipaStatus(Status status) {

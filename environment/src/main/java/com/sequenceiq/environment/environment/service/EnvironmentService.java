@@ -19,9 +19,6 @@ import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.InternalServerErrorException;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
-import com.sequenceiq.environment.experience.ExperienceCluster;
-import com.sequenceiq.environment.experience.ExperienceConnectorService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +30,7 @@ import com.sequenceiq.authorization.service.CompositeAuthResourcePropertyProvide
 import com.sequenceiq.authorization.service.EnvironmentPropertyProvider;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
@@ -58,8 +56,11 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
+import com.sequenceiq.environment.experience.ExperienceCluster;
+import com.sequenceiq.environment.experience.ExperienceConnectorService;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
@@ -491,6 +492,13 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         } else {
             throw notFoundException("Environment with ID: ", environmentId.toString());
         }
+    }
+
+    public EnvironmentDto updateProxyConfig(Long environmentId, ProxyConfig proxyConfig) {
+        Environment environment = findEnvironmentByIdOrThrow(environmentId);
+        environment.setProxyConfig(proxyConfig);
+        Environment savedEnvironment = save(environment);
+        return environmentDtoConverter.environmentToDto(savedEnvironment);
     }
 
 }

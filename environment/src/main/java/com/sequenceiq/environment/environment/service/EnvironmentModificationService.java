@@ -2,7 +2,6 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import javax.ws.rs.BadRequestException;
@@ -35,6 +34,7 @@ import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionD
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.encryption.EnvironmentEncryptionService;
+import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.environment.validation.ValidationType;
@@ -51,6 +51,7 @@ import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameters.dao.repository.AzureParametersRepository;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
+import com.sequenceiq.environment.proxy.service.ProxyConfigModificationService;
 import com.sequenceiq.environment.proxy.service.ProxyConfigService;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
@@ -85,6 +86,10 @@ public class EnvironmentModificationService {
 
     private final ProxyConfigService proxyConfigService;
 
+    private final ProxyConfigModificationService proxyConfigModificationService;
+
+    private final EnvironmentReactorFlowManager environmentReactorFlowManager;
+
     public EnvironmentModificationService(
             EnvironmentDtoConverter environmentDtoConverter,
             EnvironmentService environmentService,
@@ -97,7 +102,9 @@ public class EnvironmentModificationService {
             EnvironmentEncryptionService environmentEncryptionService,
             AzureParametersRepository azureParametersRepository,
             DnsV1Endpoint dnsV1Endpoint,
-            ProxyConfigService proxyConfigService) {
+            ProxyConfigService proxyConfigService,
+            ProxyConfigModificationService proxyConfigModificationService,
+            EnvironmentReactorFlowManager environmentReactorFlowManager) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentService = environmentService;
         this.credentialService = credentialService;
@@ -110,6 +117,8 @@ public class EnvironmentModificationService {
         this.azureParametersRepository = azureParametersRepository;
         this.dnsV1Endpoint = dnsV1Endpoint;
         this.proxyConfigService = proxyConfigService;
+        this.proxyConfigModificationService = proxyConfigModificationService;
+        this.environmentReactorFlowManager = environmentReactorFlowManager;
     }
 
     public EnvironmentDto editByName(String environmentName, EnvironmentEditDto editDto) {
@@ -396,10 +405,13 @@ public class EnvironmentModificationService {
     }
 
     private void triggerEditProxyIfChanged(EnvironmentEditDto editDto, Environment env) {
-        if (editDto.getProxyConfig() != null &&
-                (env.getProxyConfig() == null || !Objects.equals(editDto.getProxyConfig().getName(), env.getProxyConfig().getName()))) {
-            ProxyConfig newProxyConfig = proxyConfigService.getByNameForAccountId(editDto.getProxyConfig().getName(), editDto.getAccountId());
-            proxyConfigService.modify(env, newProxyConfig);
+        if (editDto.getProxyConfig() != null && proxyConfigModificationService.shouldModify(env, editDto.getProxyConfig())) {
+            ProxyConfig newProxyConfig = editDto.getProxyConfig().getName() == null
+                    ? null
+                    : proxyConfigService.getByNameForAccountId(editDto.getProxyConfig().getName(), editDto.getAccountId());
+            EnvironmentDto environmentDto = environmentDtoConverter.environmentToDto(env);
+            proxyConfigModificationService.validateModify(environmentDto);
+            environmentReactorFlowManager.triggerEnvironmentProxyConfigModification(environmentDto, newProxyConfig);
         }
     }
 
