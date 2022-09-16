@@ -195,6 +195,8 @@ message NetworkDetails {
     HealthStatus archiveClouderaComAccessible = 19;
     // Availability of cloudera-service-delivery-cache.s3.amazonaws.com address.
     HealthStatus serviceDeliveryCacheS3Accessible = 20;
+    // Availability of compute monitoring remote write address.
+    HealthStatus computeMonitoringAccessible = 21;
 }
 
 // System host metrics that is collected periodically by nodestatus monitor.
