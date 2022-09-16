@@ -1,152 +1,164 @@
 [
   {
     "region": "us-east-1",
-    "country": "United States",
+    "location": "United States",
     "co2e": 0.000379069,
     "cloud": "AWS"
   },
   {
     "region": "us-east-2",
-    "country": "United States",
+    "location": "United States",
     "co2e": 0.000410608,
     "cloud": "AWS"
   },
   {
     "region": "us-west-1",
-    "country": "United States",
+    "location": "United States",
     "co2e": 0.000322167,
     "cloud": "AWS"
   },
   {
     "region": "us-west-2",
-    "country": "United States",
+    "location": "United States",
     "co2e": 0.000322167,
     "cloud": "AWS"
   },
   {
     "region": "us-gov-east-1",
-    "country": "United States",
+    "location": "United States",
     "co2e": 0.000379069,
     "cloud": "AWS"
   },
   {
     "region": "us-gov-west-1",
     "co2e": 0.000322167,
-    "country": "United States",
+    "location": "United States",
     "cloud": "AWS"
   },
   {
     "region": "af-south-1",
     "co2e": 0.0009006,
-    "country": "South Africa",
+    "location": "South Africa",
     "cloud": "AWS"
   },
   {
     "region": "ap-east-1",
-    "country": "Hong Kong",
+    "location": "Hong Kong",
     "co2e": 0.00071,
     "cloud": "AWS"
   },
   {
     "region": "ap-south-1",
-    "country": "India",
+    "location": "India",
     "co2e": 0.0007082,
     "cloud": "AWS"
   },
   {
     "region": "ap-northeast-3",
-    "country": "Japan",
+    "location": "Japan",
     "co2e": 0.0004658,
     "cloud": "AWS"
   },
   {
     "region": "ap-northeast-2",
-    "country": "South Korea",
+    "location": "South Korea",
     "co2e": 0.0004156,
     "cloud": "AWS"
   },
   {
     "region": "ap-southeast-1",
-    "country": "Singapore",
+    "location": "Singapore",
     "co2e": 0.000408,
     "cloud": "AWS"
   },
   {
     "region": "ap-southeast-2",
-    "country": "Australia",
+    "location": "Australia",
     "co2e": 0.00076,
     "cloud": "AWS"
   },
   {
     "region": "ap-northeast-1",
-    "country": "Japan",
+    "location": "Japan",
     "co2e": 0.0004658,
     "cloud": "AWS"
   },
   {
     "region": "ca-central-1",
-    "country": "Canada",
+    "location": "Canada",
     "co2e": 0.00012,
     "cloud": "AWS"
   },
   {
     "region": "cn-north-1",
-    "country": "China",
+    "location": "China",
     "co2e": 0.0005374,
     "cloud": "AWS"
   },
   {
     "region": "cn-northwest-1",
-    "country": "China",
+    "location": "China",
     "co2e": 0.0005374,
     "cloud": "AWS"
   },
   {
     "region": "eu-central-1",
-    "country": "Germany",
+    "location": "Germany",
     "co2e": 0.000311,
     "cloud": "AWS"
   },
   {
     "region": "eu-west-1",
-    "country": "Ireland",
+    "location": "Ireland",
     "co2e": 0.0002786,
     "cloud": "AWS"
   },
   {
     "region": "eu-west-2",
-    "country": "England",
+    "location": "England",
     "co2e": 0.000225,
     "cloud": "AWS"
   },
   {
     "region": "eu-south-1",
-    "country": "Italy",
+    "location": "Italy",
     "co2e": 0.0002134,
     "cloud": "AWS"
   },
   {
     "region": "eu-west-3",
-    "country": "France",
+    "location": "France",
     "co2e": 0.0000511,
     "cloud": "AWS"
   },
   {
     "region": "eu-north-1",
-    "country": "Sweden",
+    "location": "Sweden",
     "co2e": 0.0000088,
     "cloud": "AWS"
   },
   {
     "region": "me-south-1",
-    "country": "Bahrain",
+    "location": "Bahrain",
     "co2e": 0.0005059,
     "cloud": "AWS"
   },
   {
     "region": "sa-east-1",
-    "country": "Brazil",
+    "location": "Brazil",
     "co2e": 0.0000617,
     "cloud": "AWS"
+  },
+  {
+    "region": "West US",
+    "location": "California",
+    "co2e": 0.000322167,
+    "cloud": "Azure"
+  },
+  {
+    "region": "West US 2",
+    "location": "Washington",
+    "co2e": 0.000322167,
+    "cloud": "Azure"
   }
 ]
