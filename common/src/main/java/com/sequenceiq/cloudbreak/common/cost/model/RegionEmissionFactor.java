@@ -7,7 +7,7 @@ public class RegionEmissionFactor {
     // tCo2/h/kwh
     private double co2e;
 
-    private String country;
+    private String location;
 
     private String cloud;
 
@@ -27,12 +27,12 @@ public class RegionEmissionFactor {
         this.co2e = co2e;
     }
 
-    public String getCountry() {
-        return country;
+    public String getLocation() {
+        return location;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public String getCloud() {
@@ -48,7 +48,7 @@ public class RegionEmissionFactor {
         return "RegionEmissionFactor{" +
                 "region='" + region + '\'' +
                 ", co2e=" + co2e +
-                ", country='" + country + '\'' +
+                ", location='" + location + '\'' +
                 ", cloud='" + cloud + '\'' +
                 '}';
     }
