@@ -380,171 +380,171 @@
     "cost": 4.7500
   },
   {
-    "type": "D8_v3",
+    "type": "Standard_D8_v3",
     "cost": 0.1600
   },
   {
-    "type": "D16_v3",
+    "type": "Standard_D16_v3",
     "cost": 0.3200
   },
   {
-    "type": "D32_v3",
+    "type": "Standard_D32_v3",
     "cost": 0.6400
   },
   {
-    "type": "D64_v3",
+    "type": "Standard_D64_v3",
     "cost": 1.0000
   },
   {
-    "type": "D8s_v3",
+    "type": "Standard_D8s_v3",
     "cost": 0.1600
   },
   {
-    "type": "D16s_v3",
+    "type": "Standard_D16s_v3",
     "cost": 0.3200
   },
   {
-    "type": "D32s_v3",
+    "type": "Standard_D32s_v3",
     "cost": 0.6400
   },
   {
-    "type": "D64s_v3",
+    "type": "Standard_D64s_v3",
     "cost": 1.0000
   },
   {
-    "type": "D8a_v4",
+    "type": "Standard_D8a_v4",
     "cost": 0.1600
   },
   {
-    "type": "D16a_v4",
+    "type": "Standard_D16a_v4",
     "cost": 0.3200
   },
   {
-    "type": "D32a_v4",
+    "type": "Standard_D32a_v4",
     "cost": 0.6400
   },
   {
-    "type": "D64a_v4",
+    "type": "Standard_D64a_v4",
     "cost": 1.0000
   },
   {
-    "type": "D8as_v4",
+    "type": "Standard_D8as_v4",
     "cost": 0.1600
   },
   {
-    "type": "D16as_v4",
+    "type": "Standard_D16as_v4",
     "cost": 0.3200
   },
   {
-    "type": "D32as_v4",
+    "type": "Standard_D32as_v4",
     "cost": 0.6400
   },
   {
-    "type": "D64as_v4",
+    "type": "Standard_D64as_v4",
     "cost": 1.0000
   },
   {
-    "type": "D13_v2",
+    "type": "Standard_D13_v2",
     "cost": 0.2400
   },
   {
-    "type": "D14_v2",
+    "type": "Standard_D14_v2",
     "cost": 0.4800
   },
   {
-    "type": "E16_v3",
+    "type": "Standard_E16_v3",
     "cost": 0.5333
   },
   {
-    "type": "E32_v3",
+    "type": "Standard_E32_v3",
     "cost": 1.0000
   },
   {
-    "type": "E64_v3",
+    "type": "Standard_E64_v3",
     "cost": 1.0000
   },
   {
-    "type": "E16s_v3",
+    "type": "Standard_E16s_v3",
     "cost": 0.5333
   },
   {
-    "type": "E20s_v3",
+    "type": "Standard_E20s_v3",
     "cost": 0.6667
   },
   {
-    "type": "E32s_v3",
+    "type": "Standard_E32s_v3",
     "cost": 1.0000
   },
   {
-    "type": "E48s_v3",
+    "type": "Standard_E48s_v3",
     "cost": 1.0000
   },
   {
-    "type": "E64s_v3",
+    "type": "Standard_E64s_v3",
     "cost": 1.0000
   },
   {
-    "type": "E16a_v4",
+    "type": "Standard_E16a_v4",
     "cost": 0.5333
   },
   {
-    "type": "E32a_v4",
+    "type": "Standard_E32a_v4",
     "cost": 1.0000
   },
   {
-    "type": "E64a_v4",
+    "type": "Standard_E64a_v4",
     "cost": 1.0000
   },
   {
-    "type": "E64s_v4",
+    "type": "Standard_E64s_v4",
     "cost": 1.0000
   },
   {
-    "type": "E64ds_v4",
+    "type": "Standard_E64ds_v4",
     "cost": 1.0000
   },
   {
-    "type": "E4a_v4",
+    "type": "Standard_E4a_v4",
     "cost": 0.1333
   },
   {
-    "type": "F8s_v2",
+    "type": "Standard_F8s_v2",
     "cost": 0.1067
   },
   {
-    "type": "F16s_v2",
+    "type": "Standard_F16s_v2",
     "cost": 0.2133
   },
   {
-    "type": "F32s_v2",
+    "type": "Standard_F32s_v2",
     "cost": 0.4267
   },
   {
-    "type": "L16s_v2",
+    "type": "Standard_L16s_v2",
     "cost": 0.5333
   },
   {
-    "type": "L32s_v2",
+    "type": "Standard_L32s_v2",
     "cost": 1.0000
   },
   {
-    "type": "L48s_v2",
+    "type": "Standard_L48s_v2",
     "cost": 1.0000
   },
   {
-    "type": "NC6",
+    "type": "Standard_NC6",
     "cost": 0.3579
   },
   {
-    "type": "NC24r",
+    "type": "Standard_NC24r",
     "cost": 1.4317
   },
   {
-    "type": "NC6s_v3",
+    "type": "Standard_NC6s_v3",
     "cost": 1.3508
   },
   {
-    "type": "NC24s_v3",
+    "type": "Standard_NC24s_v3",
     "cost": 4.7500
   }
 ]
