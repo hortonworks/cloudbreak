@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadata;
 import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadataProvider;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 
 @Service
@@ -52,6 +53,8 @@ public class DiagnosticsFlowService {
     private static final String AWS_METADATA_SERVER_V2_SUPPORT_VERSION = "0.4.9";
 
     private static final String MULTI_CP_REGION_SUPPORT_VERSION = "0.4.12";
+
+    private static final String CLOUDERA_COM = "cloudera.com";
 
     private static final String AWS_EC2_METADATA_SERVICE_WARNING = "Could be related with unavailable instance metadata service response " +
             "from ec2 node. (region, domain)";
@@ -82,6 +85,9 @@ public class DiagnosticsFlowService {
 
     @Inject
     private OrchestratorMetadataProvider orchestratorMetadataProvider;
+
+    @Inject
+    private MonitoringConfiguration monitoringConfiguration;
 
     public void nodeStatusNetworkReport(Long stackId) {
         try {
@@ -121,6 +127,11 @@ public class DiagnosticsFlowService {
                             networkNodes, NodeStatusProto.NetworkDetails::getAzureManagementAccessible);
                     firePreFlightCheckEvents(stackId, "GCS endpoint accessibility",
                             networkNodes, NodeStatusProto.NetworkDetails::getGcsAccessible);
+                    String computeMonitoringEndpoint = getRemoteWriteUrl();
+                    if (StringUtils.isNotBlank(computeMonitoringEndpoint)) {
+                        firePreFlightCheckEvents(stackId, String.format("Compute monitoring ('%s') accessibility", computeMonitoringEndpoint),
+                                networkNodes, NodeStatusProto.NetworkDetails::getComputeMonitoringAccessible);
+                    }
                     reportNetworkCheckUsages(stackId, networkNodes, stableNetworkCheckSupported);
                 }
             }
@@ -349,5 +360,14 @@ public class DiagnosticsFlowService {
         ModuleDescriptor.Version actVersion = ModuleDescriptor.Version.parse(actualVersion);
         ModuleDescriptor.Version versionToCmp = ModuleDescriptor.Version.parse(versionToCompare);
         return actVersion.compareTo(versionToCmp) >= 0;
+    }
+
+    private String getRemoteWriteUrl() {
+        String result = null;
+        if (monitoringConfiguration != null && StringUtils.isNotBlank(monitoringConfiguration.getRemoteWriteUrl())
+                && monitoringConfiguration.getRemoteWriteUrl().contains(CLOUDERA_COM)) {
+            result = monitoringConfiguration.getRemoteWriteUrl().split(CLOUDERA_COM)[0] + CLOUDERA_COM;
+        }
+        return result;
     }
 }
