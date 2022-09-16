@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWOR
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE_DETAILS;
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_NEIGHBOUR_NOT_ACCESSIBLE;
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_NEIGHBOUR_NOT_ACCESSIBLE_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_NGINX_UNREACHABLE;
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NODE_STATUS_MONITOR_UNREACHABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -152,6 +153,20 @@ class NetworkCheckerConclusionStepTest {
         assertTrue(stepResult.isFailureFound());
         assertEquals("[neighbour error]", stepResult.getConclusion());
         assertEquals("[neighbour error details]", stepResult.getDetails());
+        assertEquals(NetworkCheckerConclusionStep.class, stepResult.getConclusionStepClass());
+        verify(nodeStatusService, times(1)).getNetworkReport(eq(1L));
+    }
+
+    @Test
+    public void checkShouldFailAndReturnConclusionIfNginxIsNotReachable() {
+        when(cloudbreakMessagesService.getMessage(eq(NETWORK_NGINX_UNREACHABLE))).thenReturn("nginx is unreachable");
+        when(nodeStatusService.getNetworkReport(eq(1L)))
+                .thenThrow(new CloudbreakServiceException("nginx is unreachable details"));
+        Conclusion stepResult = underTest.check(1L);
+
+        assertTrue(stepResult.isFailureFound());
+        assertEquals("nginx is unreachable", stepResult.getConclusion());
+        assertEquals("nginx is unreachable details", stepResult.getDetails());
         assertEquals(NetworkCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(nodeStatusService, times(1)).getNetworkReport(eq(1L));
     }

@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.Status.Family;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,8 @@ import com.sequenceiq.node.health.client.model.CdpNodeStatuses;
 public class CdpNodeStatusMonitorClient implements AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CdpNodeStatusMonitorClient.class);
+
+    private static final String NGINX_CUSTOM_HEADER = "x-response-nginx";
 
     private final Client restClient;
 
@@ -150,7 +153,10 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
             checkResponseStatus(response);
             return toRpcResponse(name, response, buildProtoFunction, skipObjectMapping);
         } catch (CdpNodeStatusMonitorClientException e) {
-            if (acceptNotFound) {
+            if (e.getStatusCode().isPresent()
+                    && e.getStatusCode().getAsInt() == Status.NOT_FOUND.getStatusCode()
+                    && acceptNotFound
+                    && BooleanUtils.isTrue(e.getNginxResponseHeaderExists())) {
                 LOGGER.debug("Get 404 from node status response for {}, but it is accepted as an empty response.", path);
                 return null;
             } else {
@@ -165,7 +171,7 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
 
     private void bufferResponseEntity(Response response) throws CdpNodeStatusMonitorClientException {
         if (!response.bufferEntity()) {
-            throw new CdpNodeStatusMonitorClientException("Unable to buffer the response from FreeIPA");
+            throw new CdpNodeStatusMonitorClientException("Unable to buffer the response from FreeIPA", response.getHeaders().containsKey(NGINX_CUSTOM_HEADER));
         }
     }
 
@@ -176,11 +182,12 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
     }
 
     private void checkResponseStatus(Response response) throws CdpNodeStatusMonitorClientException {
-        if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL &&
-                response.getStatus() != Status.SERVICE_UNAVAILABLE.getStatusCode()) {
-            String message = String.format("Invoke node status check check failed: %d", response.getStatus());
+        if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
+            boolean nginxResponseHeaderExists = response.getHeaders().containsKey(NGINX_CUSTOM_HEADER);
+            String message = String.format("Invoke node status check check failed: %d (Cluster side nginx reached: %b)",
+                    response.getStatus(), nginxResponseHeaderExists);
             LOGGER.warn("{}, reason: {}", message, response.readEntity(String.class));
-            throw new CdpNodeStatusMonitorClientException(message, response.getStatus());
+            throw new CdpNodeStatusMonitorClientException(message, response.getStatus(), nginxResponseHeaderExists);
         }
     }
 

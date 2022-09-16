@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.node.status;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -59,6 +60,9 @@ public class NodeStatusService {
             return client.nodeNetworkReport();
         } catch (CdpNodeStatusMonitorClientException e) {
             LOGGER.warn("Node network report failed", e);
+            if (BooleanUtils.isFalse(e.getNginxResponseHeaderExists())) {
+                throw new CloudbreakServiceException("Could not get network report from stack, nginx is unreachable, reason: " + e.getMessage());
+            }
             throw new CloudbreakServiceException("Could not get network report from stack, reason: " + e.getMessage());
         }
     }
