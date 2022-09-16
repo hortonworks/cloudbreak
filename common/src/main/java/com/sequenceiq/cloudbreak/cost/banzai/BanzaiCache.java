@@ -4,12 +4,14 @@ import static com.sequenceiq.cloudbreak.logger.MDCContextFilter.REQUEST_ID_HEADE
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.net.URI;
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -32,30 +34,33 @@ public class BanzaiCache {
 
     private Map<String, Map<String, BanzaiProductResponse>> cache = new HashMap<>();
 
-    private static final Set<String> REGIONS = Set.of(
-            "us-east-1",
-            "us-east-2",
-            "us-west-1",
-            "us-west-2",
-            "ca-central-1",
-            "eu-north-1",
-            "eu-west-1",
-            "eu-west-2",
-            "eu-west-3",
-            "eu-central-1",
-            "eu-south-1");
+    private static final Map<String, String> REGIONS = Stream.of(
+            new AbstractMap.SimpleEntry<>( "us-east-1", "amazon"),
+            new AbstractMap.SimpleEntry<>("us-east-2", "amazon"),
+            new AbstractMap.SimpleEntry<>("us-west-1", "amazon"),
+            new AbstractMap.SimpleEntry<>("us-west-2", "amazon"),
+            new AbstractMap.SimpleEntry<>("ca-central-1", "amazon"),
+            new AbstractMap.SimpleEntry<>( "eu-north-1", "amazon"),
+            new AbstractMap.SimpleEntry<>("eu-west-1", "amazon"),
+            new AbstractMap.SimpleEntry<>("eu-west-2", "amazon"),
+            new AbstractMap.SimpleEntry<>("eu-west-3", "amazon"),
+            new AbstractMap.SimpleEntry<>("eu-central-1", "amazon"),
+            new AbstractMap.SimpleEntry<>( "eu-south-1", "amazon"),
+            new AbstractMap.SimpleEntry<>("westus", "azure"),
+            new AbstractMap.SimpleEntry<>("westus2", "azure"))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     @PostConstruct
     public void init() {
-        for (String region : REGIONS) {
-            cache.put(region, getPrice(region));
-        }
+       for (Map.Entry<String, String> entry : REGIONS.entrySet()) {
+           cache.put(entry.getKey(), getPrice(entry.getKey(), entry.getValue()));
+       }
     }
 
-    private Map<String, BanzaiProductResponse> getPrice(String region) {
+    private Map<String, BanzaiProductResponse> getPrice(String region, String provider) {
         Client client = ClientBuilder.newClient();
 
-        WebTarget webTarget = client.target(String.format("https://alpha.dev.banzaicloud.com/cloudinfo/api/v1/providers/amazon/services/compute/regions/%s/products", region));
+        WebTarget webTarget = client.target(String.format("https://alpha.dev.banzaicloud.com/cloudinfo/api/v1/providers/%s/services/compute/regions/%s/products", provider, region));
         Invocation.Builder call = createInvocationBuilder(webTarget);
         try (Response result = executeCall(webTarget.getUri(), () -> retryableWebTarget.get(call))) {
             return responseReader.read(webTarget.getUri().toString(), result, BanzaiResponse.class)
