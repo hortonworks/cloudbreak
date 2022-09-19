@@ -44,12 +44,10 @@ class BlueprintUtilV4ControllerTest {
     void createRecommendationByCredCrnTest() {
         when(threadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
         RecommendationV4Response recommendationV4Response = new RecommendationV4Response();
-        when(blueprintService.getRecommendationByCredentialCrn(WORKSPACE_ID, BLUEPRINT_NAME, BLUEPRINT_NAME,
-                CREDENTIAL_CRN, REGION, PLATFORM_VARIANT, AVAILABILITY_ZONE,
+        when(blueprintService.getRecommendationByCredentialCrn(WORKSPACE_ID, BLUEPRINT_NAME, CREDENTIAL_CRN, REGION, PLATFORM_VARIANT, AVAILABILITY_ZONE,
                 RESOURCE_TYPE)).thenReturn(recommendationV4Response);
 
-        RecommendationV4Response result = underTest.createRecommendationByCredCrn(WORKSPACE_ID, BLUEPRINT_NAME,
-                BLUEPRINT_NAME, CREDENTIAL_CRN, REGION,
+        RecommendationV4Response result = underTest.createRecommendationByCredCrn(WORKSPACE_ID, BLUEPRINT_NAME, CREDENTIAL_CRN, REGION,
                 PLATFORM_VARIANT, AVAILABILITY_ZONE, RESOURCE_TYPE);
 
         assertThat(result).isSameAs(recommendationV4Response);

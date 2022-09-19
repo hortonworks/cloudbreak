@@ -159,10 +159,6 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         }
     }
 
-    public Optional<ClusterTemplate> getTemplateByName(String name, Long workspaceId) {
-        return clusterTemplateRepository.findByNameAndWorkspaceId(name, workspaceId);
-    }
-
     public ClusterTemplate createForLoggedInUser(ClusterTemplate resource, Long workspaceId, String accountId, String creator) {
         if (internalClusterTemplateValidator.isInternalTemplateInNotInternalTenant(entitlementService.internalTenant(accountId), resource.getFeatureState())) {
             throw new AccessDeniedException("You can not create Internal Template for an outsider organization");
