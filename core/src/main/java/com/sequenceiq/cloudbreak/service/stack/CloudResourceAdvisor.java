@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +26,8 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.google.common.io.BaseEncoding;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -44,12 +47,14 @@ import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorFactory;
@@ -90,6 +95,12 @@ public class CloudResourceAdvisor {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    @Inject
+    private TransactionService transactionService;
+
+    @Inject
+    private StackTemplateService stackTemplateService;
+
     public PlatformRecommendation createForBlueprint(Long workspaceId, String definitionName, String blueprintName, String credentialName,
             String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
         Credential credential = credentialClientService.getByName(credentialName);
@@ -120,7 +131,6 @@ public class CloudResourceAdvisor {
         LOGGER.debug("Advising resources for blueprintName: {}, provider: {} and region: {}.",
                 blueprintName, cloudPlatform, region);
         List<String> entitlements = entitlementService.getEntitlements(credential.getAccount());
-        Optional<ClusterTemplate> clusterTemplate = getClusterTemplate(definitionName, workspaceId);
         BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(workspaceId, blueprintName);
         Map<String, Set<String>> componentsByHostGroup = blueprintTextProcessor.getComponentsByHostGroup();
         componentsByHostGroup.forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName,
@@ -179,8 +189,7 @@ public class CloudResourceAdvisor {
         }
 
         Map<String, InstanceCount> instanceCounts = recommendInstanceCounts(blueprintTextProcessor);
-
-        GatewayRecommendation gateway = recommendGateway(blueprintTextProcessor, clusterTemplate);
+        GatewayRecommendation gateway = recommendGateway(blueprintTextProcessor, definitionName, workspaceId);
 
         AutoscaleRecommendation autoscale = recommendAutoscale(blueprintTextProcessor);
 
@@ -210,12 +219,58 @@ public class CloudResourceAdvisor {
         return recommendAutoscale(blueprintTextProcessor);
     }
 
-    private Optional<ClusterTemplate> getClusterTemplate(String definitionName, Long workspaceId) {
-        Optional<ClusterTemplate> templateByName = Optional.empty();
+    private Optional<String> getGroupNameFromClusterTemplate(String definitionName, Long workspaceId) {
+        Optional<String> groupResponse = Optional.empty();
         if (!Strings.isNullOrEmpty(definitionName)) {
-            templateByName = clusterTemplateService.getTemplateByName(definitionName, workspaceId);
+            try {
+                groupResponse = transactionService.required(() -> {
+                    Optional<ClusterTemplate> templateByName = clusterTemplateService.getTemplateByName(definitionName, workspaceId);
+                    Optional<String> group = Optional.empty();
+                    if (templateByName.isPresent()) {
+                        if (templateByName.get().getStackTemplate() != null) {
+                            group = getGroupNameFromCustomTemplate(templateByName, group);
+                        } else {
+                            group = getGroupNameFromDefaultTemplate(definitionName, templateByName, group);
+                        }
+                    }
+                    return group;
+                });
+            } catch (Exception e) {
+                LOGGER.error("Could not parse Default Cluster with name {}. Error: {}", definitionName, e);
+            }
         }
-        return templateByName;
+        return groupResponse;
+    }
+
+    private Optional<String> getGroupNameFromDefaultTemplate(String definitionName, Optional<ClusterTemplate> templateByName, Optional<String> group) {
+        try {
+            DefaultClusterTemplateV4Request clusterTemplateV4Request = new Json(getTemplateString(templateByName.get()))
+                    .get(DefaultClusterTemplateV4Request.class);
+            group = clusterTemplateV4Request.getDistroXTemplate().getInstanceGroups()
+                    .stream()
+                    .filter(e -> InstanceGroupType.GATEWAY.equals(e.getType()))
+                    .map(e -> e.getName())
+                    .findFirst();
+        } catch (IOException e) {
+            LOGGER.error("Could not parse Default Cluster with name {}. Error: {}", definitionName, e);
+        }
+        return group;
+    }
+
+    private Optional<String> getGroupNameFromCustomTemplate(Optional<ClusterTemplate> templateByName, Optional<String> group) {
+        Optional<Stack> stackOptional = stackTemplateService.getByIdWithLists(templateByName.get().getStackTemplate().getId());
+        if (stackOptional.isPresent()) {
+            group = stackOptional.get().getInstanceGroups()
+                    .stream()
+                    .filter(e -> InstanceGroupType.GATEWAY.equals(e.getInstanceGroupType()))
+                    .map(e -> e.getGroupName())
+                    .findFirst();
+        }
+        return group;
+    }
+
+    private String getTemplateString(ClusterTemplate clusterTemplate) {
+        return new String(BaseEncoding.base64().decode(clusterTemplate.getTemplateContent()));
     }
 
     private BlueprintTextProcessor getBlueprintTextProcessor(Blueprint blueprint) {
@@ -228,17 +283,11 @@ public class CloudResourceAdvisor {
         return getBlueprintTextProcessor(blueprint);
     }
 
-    private GatewayRecommendation recommendGateway(BlueprintTextProcessor blueprintTextProcessor, Optional<ClusterTemplate> clusterTemplate) {
+    private GatewayRecommendation recommendGateway(BlueprintTextProcessor blueprintTextProcessor, String definitionName, Long workspaceId) {
         GatewayRecommendation recommendation;
-        Optional<InstanceGroup> group = Optional.empty();
-        if (clusterTemplate.isPresent()) {
-            group = clusterTemplate.get().getStackTemplate().getInstanceGroups()
-                    .stream()
-                    .filter(e -> InstanceGroupType.GATEWAY.equals(e.getInstanceGroupType()))
-                    .findFirst();
-        }
+        Optional<String> group = getGroupNameFromClusterTemplate(definitionName, workspaceId);
         if (group.isPresent()) {
-            recommendation = new GatewayRecommendation(Set.of(group.get().getGroupName()));
+            recommendation = new GatewayRecommendation(Set.of(group.get()));
         } else {
             recommendation = blueprintTextProcessor.recommendGateway();
             if (recommendation.getHostGroups().isEmpty()) {
