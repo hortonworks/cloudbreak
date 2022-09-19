@@ -14,6 +14,7 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmService;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmReconfigureNginxRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmReconfigureNginxResult;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -51,19 +53,21 @@ class ReconfigureNginxHandlerTest {
 
     @Test
     void doAccept() throws CloudbreakOrchestratorException {
-        UpgradeCcmReconfigureNginxRequest request = new UpgradeCcmReconfigureNginxRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM);
+        ReflectionTestUtils.setField(underTest, "activationInMinutes", 5);
+        UpgradeCcmReconfigureNginxRequest request = new UpgradeCcmReconfigureNginxRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM, null);
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
         InOrder inOrder = inOrder(upgradeCcmService);
-        inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID);
+        inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
         inOrder.verify(upgradeCcmService).reconfigureNginx(STACK_ID);
+        assertThat(((UpgradeCcmReconfigureNginxResult) result).getRevertTime()).isNotNull();
         assertThat(result.selector()).isEqualTo("UPGRADECCMRECONFIGURENGINXRESULT");
     }
 
     @Test
     void orchestrationException() throws CloudbreakOrchestratorException {
-        UpgradeCcmReconfigureNginxRequest request = new UpgradeCcmReconfigureNginxRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM);
+        UpgradeCcmReconfigureNginxRequest request = new UpgradeCcmReconfigureNginxRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM, null);
         when(event.getData()).thenReturn(request);
         doThrow(new CloudbreakOrchestratorFailedException("salt error")).when(upgradeCcmService).reconfigureNginx(any());
 

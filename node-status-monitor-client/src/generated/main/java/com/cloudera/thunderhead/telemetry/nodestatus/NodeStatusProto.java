@@ -15913,6 +15913,25 @@ public final class NodeStatusProto {
      * @return The serviceDeliveryCacheS3Accessible.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getServiceDeliveryCacheS3Accessible();
+
+    /**
+     * <pre>
+     * Availability of compute monitoring remote write address.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus computeMonitoringAccessible = 21;</code>
+     * @return The enum numeric value on the wire for computeMonitoringAccessible.
+     */
+    int getComputeMonitoringAccessibleValue();
+    /**
+     * <pre>
+     * Availability of compute monitoring remote write address.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus computeMonitoringAccessible = 21;</code>
+     * @return The computeMonitoringAccessible.
+     */
+    com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getComputeMonitoringAccessible();
   }
   /**
    * <pre>
@@ -15947,6 +15966,7 @@ public final class NodeStatusProto {
       cdpTelemetryVersion_ = "";
       archiveClouderaComAccessible_ = 0;
       serviceDeliveryCacheS3Accessible_ = 0;
+      computeMonitoringAccessible_ = 0;
     }
 
     @java.lang.Override
@@ -16100,6 +16120,12 @@ public final class NodeStatusProto {
               int rawValue = input.readEnum();
 
               serviceDeliveryCacheS3Accessible_ = rawValue;
+              break;
+            }
+            case 168: {
+              int rawValue = input.readEnum();
+
+              computeMonitoringAccessible_ = rawValue;
               break;
             }
             default: {
@@ -16718,6 +16744,33 @@ public final class NodeStatusProto {
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
     }
 
+    public static final int COMPUTEMONITORINGACCESSIBLE_FIELD_NUMBER = 21;
+    private int computeMonitoringAccessible_;
+    /**
+     * <pre>
+     * Availability of compute monitoring remote write address.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus computeMonitoringAccessible = 21;</code>
+     * @return The enum numeric value on the wire for computeMonitoringAccessible.
+     */
+    @java.lang.Override public int getComputeMonitoringAccessibleValue() {
+      return computeMonitoringAccessible_;
+    }
+    /**
+     * <pre>
+     * Availability of compute monitoring remote write address.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus computeMonitoringAccessible = 21;</code>
+     * @return The computeMonitoringAccessible.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getComputeMonitoringAccessible() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(computeMonitoringAccessible_);
+      return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -16791,6 +16844,9 @@ public final class NodeStatusProto {
       }
       if (serviceDeliveryCacheS3Accessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
         output.writeEnum(20, serviceDeliveryCacheS3Accessible_);
+      }
+      if (computeMonitoringAccessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
+        output.writeEnum(21, computeMonitoringAccessible_);
       }
       unknownFields.writeTo(output);
     }
@@ -16887,6 +16943,10 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(20, serviceDeliveryCacheS3Accessible_);
       }
+      if (computeMonitoringAccessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(21, computeMonitoringAccessible_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -16930,6 +16990,7 @@ public final class NodeStatusProto {
           .equals(other.getCdpTelemetryVersion())) return false;
       if (archiveClouderaComAccessible_ != other.archiveClouderaComAccessible_) return false;
       if (serviceDeliveryCacheS3Accessible_ != other.serviceDeliveryCacheS3Accessible_) return false;
+      if (computeMonitoringAccessible_ != other.computeMonitoringAccessible_) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -16988,6 +17049,8 @@ public final class NodeStatusProto {
       hash = (53 * hash) + archiveClouderaComAccessible_;
       hash = (37 * hash) + SERVICEDELIVERYCACHES3ACCESSIBLE_FIELD_NUMBER;
       hash = (53 * hash) + serviceDeliveryCacheS3Accessible_;
+      hash = (37 * hash) + COMPUTEMONITORINGACCESSIBLE_FIELD_NUMBER;
+      hash = (53 * hash) + computeMonitoringAccessible_;
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -17165,6 +17228,8 @@ public final class NodeStatusProto {
 
         serviceDeliveryCacheS3Accessible_ = 0;
 
+        computeMonitoringAccessible_ = 0;
+
         return this;
       }
 
@@ -17220,6 +17285,7 @@ public final class NodeStatusProto {
         result.cdpTelemetryVersion_ = cdpTelemetryVersion_;
         result.archiveClouderaComAccessible_ = archiveClouderaComAccessible_;
         result.serviceDeliveryCacheS3Accessible_ = serviceDeliveryCacheS3Accessible_;
+        result.computeMonitoringAccessible_ = computeMonitoringAccessible_;
         onBuilt();
         return result;
       }
@@ -17343,6 +17409,9 @@ public final class NodeStatusProto {
         }
         if (other.serviceDeliveryCacheS3Accessible_ != 0) {
           setServiceDeliveryCacheS3AccessibleValue(other.getServiceDeliveryCacheS3AccessibleValue());
+        }
+        if (other.computeMonitoringAccessible_ != 0) {
+          setComputeMonitoringAccessibleValue(other.getComputeMonitoringAccessibleValue());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -18914,6 +18983,80 @@ public final class NodeStatusProto {
       public Builder clearServiceDeliveryCacheS3Accessible() {
         
         serviceDeliveryCacheS3Accessible_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int computeMonitoringAccessible_ = 0;
+      /**
+       * <pre>
+       * Availability of compute monitoring remote write address.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus computeMonitoringAccessible = 21;</code>
+       * @return The enum numeric value on the wire for computeMonitoringAccessible.
+       */
+      @java.lang.Override public int getComputeMonitoringAccessibleValue() {
+        return computeMonitoringAccessible_;
+      }
+      /**
+       * <pre>
+       * Availability of compute monitoring remote write address.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus computeMonitoringAccessible = 21;</code>
+       * @param value The enum numeric value on the wire for computeMonitoringAccessible to set.
+       * @return This builder for chaining.
+       */
+      public Builder setComputeMonitoringAccessibleValue(int value) {
+        
+        computeMonitoringAccessible_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Availability of compute monitoring remote write address.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus computeMonitoringAccessible = 21;</code>
+       * @return The computeMonitoringAccessible.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getComputeMonitoringAccessible() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(computeMonitoringAccessible_);
+        return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Availability of compute monitoring remote write address.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus computeMonitoringAccessible = 21;</code>
+       * @param value The computeMonitoringAccessible to set.
+       * @return This builder for chaining.
+       */
+      public Builder setComputeMonitoringAccessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        computeMonitoringAccessible_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Availability of compute monitoring remote write address.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus computeMonitoringAccessible = 21;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearComputeMonitoringAccessible() {
+        
+        computeMonitoringAccessible_ = 0;
         onChanged();
         return this;
       }
@@ -45215,7 +45358,7 @@ public final class NodeStatusProto {
       "pTelemetryVersion\030\r \001(\t\0325\n\023DatabusDetail" +
       "sEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\0323" +
       "\n\021EventDetailsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005valu" +
-      "e\030\002 \001(\t:\0028\001\"\373\006\n\016NetworkDetails\022\014\n\004host\030\001" +
+      "e\030\002 \001(\t:\0028\001\"\275\007\n\016NetworkDetails\022\014\n\004host\030\001" +
       " \001(\t\022\022\n\nccmEnabled\030\002 \001(\010\022\024\n\014dnsResolvers" +
       "\030\003 \003(\t\022\025\n\rneighbourScan\030\004 \001(\010\022\022\n\nneighbo" +
       "urs\030\005 \003(\t\022<\n\027anyNeighboursAccessible\030\006 \001" +
@@ -45237,90 +45380,92 @@ public final class NodeStatusProto {
       "n\030\022 \001(\t\022A\n\034archiveClouderaComAccessible\030" +
       "\023 \001(\0162\033.cdp.telemetry.HealthStatus\022E\n se" +
       "rviceDeliveryCacheS3Accessible\030\024 \001(\0162\033.c" +
-      "dp.telemetry.HealthStatus\"\246\002\n\rSystemMetr" +
-      "ics\022&\n\003cpu\030\001 \001(\0132\031.cdp.telemetry.CpuMetr" +
-      "ics\022(\n\004disk\030\002 \001(\0132\032.cdp.telemetry.DiskMe" +
-      "trics\022,\n\006memory\030\003 \001(\0132\034.cdp.telemetry.Me" +
-      "moryMetrics\022.\n\007network\030\004 \001(\0132\035.cdp.telem" +
-      "etry.NetworkMetrics\022\021\n\ttimestamp\030\005 \001(\003\0225" +
-      "\n\016clusterDetails\030\006 \001(\0132\035.cdp.telemetry.C" +
-      "lusterDetails\022\033\n\023cdpTelemetryVersion\030\007 \001" +
-      "(\t\"\233\001\n\017CmMetricsReport\0224\n\007metrics\030\001 \003(\0132" +
-      "#.cdp.telemetry.CmServiceMetricEvent\0225\n\016" +
-      "clusterDetails\030\002 \001(\0132\035.cdp.telemetry.Clu" +
-      "sterDetails\022\033\n\023cdpTelemetryVersion\030\003 \001(\t" +
-      "\"\252\001\n\024CmHealthChecksReport\022>\n\014healthCheck" +
-      "s\030\001 \003(\0132(.cdp.telemetry.CmServiceHealthC" +
-      "heckEvent\0225\n\016clusterDetails\030\002 \001(\0132\035.cdp." +
-      "telemetry.ClusterDetails\022\033\n\023cdpTelemetry" +
-      "Version\030\003 \001(\t\"\277\001\n\nCpuMetrics\022\r\n\005count\030\001 " +
-      "\001(\005\022\025\n\rlogical_count\030\002 \001(\005\022\020\n\010load_avg\030\003" +
-      " \003(\002\022&\n\005times\030\004 \001(\0132\027.cdp.telemetry.CpuT" +
-      "imes\022&\n\005stats\030\005 \001(\0132\027.cdp.telemetry.CpuS" +
-      "tats\022)\n\004freq\030\006 \001(\0132\033.cdp.telemetry.CpuFr" +
-      "equency\"_\n\010CpuStats\022\024\n\014ctx_switches\030\001 \001(" +
-      "\003\022\022\n\ninterrupts\030\002 \001(\003\022\027\n\017soft_interrupts" +
-      "\030\003 \001(\003\022\020\n\010syscalls\030\004 \001(\003\"D\n\010CpuTimes\022\014\n\004" +
-      "idle\030\001 \001(\001\022\014\n\004nice\030\002 \001(\001\022\016\n\006system\030\003 \001(\001" +
-      "\022\014\n\004user\030\004 \001(\001\"9\n\014CpuFrequency\022\017\n\007curren" +
-      "t\030\001 \001(\003\022\013\n\003min\030\002 \001(\003\022\013\n\003max\030\003 \001(\003\"\214\001\n\013Di" +
-      "skMetrics\0220\n\npartitions\030\001 \003(\0132\034.cdp.tele" +
-      "metry.DiskPartition\022(\n\ntop_varlog\030\002 \003(\0132" +
-      "\024.cdp.telemetry.VmLog\022!\n\002io\030\003 \001(\0132\025.cdp." +
-      "telemetry.DiskIO\"#\n\005VmLog\022\014\n\004path\030\001 \001(\t\022" +
-      "\014\n\004size\030\002 \001(\t\"\234\001\n\rDiskPartition\022\'\n\005usage" +
-      "\030\001 \001(\0132\030.cdp.telemetry.DiskUsage\022\016\n\006devi" +
-      "ce\030\002 \001(\t\022\016\n\006fstype\030\003 \001(\t\022\017\n\007maxfile\030\004 \001(" +
-      "\005\022\017\n\007maxpath\030\005 \001(\005\022\022\n\nmountpoint\030\006 \001(\t\022\014" +
-      "\n\004opts\030\007 \001(\t\"G\n\tDiskUsage\022\014\n\004free\030\001 \001(\003\022" +
-      "\r\n\005total\030\002 \001(\003\022\014\n\004used\030\003 \001(\003\022\017\n\007percent\030" +
-      "\004 \001(\001\"\201\001\n\006DiskIO\022\022\n\nread_bytes\030\001 \001(\003\022\022\n\n" +
-      "read_count\030\002 \001(\003\022\021\n\tread_time\030\003 \001(\003\022\023\n\013w" +
-      "rite_bytes\030\004 \001(\003\022\023\n\013write_count\030\005 \001(\003\022\022\n" +
-      "\nwrite_time\030\006 \001(\003\"n\n\016NetworkMetrics\0226\n\013c" +
-      "onnections\030\001 \001(\0132!.cdp.telemetry.Network" +
-      "Connections\022$\n\002io\030\002 \001(\0132\030.cdp.telemetry." +
-      "NetworkIO\"\237\001\n\tNetworkIO\022\022\n\nbytes_recv\030\001 " +
-      "\001(\003\022\022\n\nbytes_sent\030\002 \001(\003\022\016\n\006dropin\030\003 \001(\003\022" +
-      "\017\n\007dropout\030\004 \001(\003\022\r\n\005errin\030\005 \001(\003\022\016\n\006errou" +
-      "t\030\006 \001(\003\022\024\n\014packets_recv\030\007 \001(\003\022\024\n\014packets" +
-      "_sent\030\010 \001(\003\"\322\001\n\022NetworkConnections\022\016\n\006LI" +
-      "STEN\030\001 \001(\005\022\023\n\013ESTABLISHED\030\002 \001(\005\022\021\n\tTIME_" +
-      "WAIT\030\003 \001(\005\022\022\n\nCLOSE_WAIT\030\004 \001(\005\022\016\n\006CLOSED" +
-      "\030\005 \001(\005\022\020\n\010SYN_SEND\030\006 \001(\005\022\024\n\014SYN_RECEIVED" +
-      "\030\007 \001(\005\022\022\n\nFIN_WAIT_1\030\010 \001(\005\022\022\n\nFIN_WAIT_2" +
-      "\030\t \001(\005\022\020\n\010LAST_ACK\030\n \001(\005\"u\n\rMemoryMetric" +
-      "s\0224\n\016virtual_memory\030\001 \001(\0132\034.cdp.telemetr" +
-      "y.VirtualMemory\022.\n\013swap_memory\030\002 \001(\0132\031.c" +
-      "dp.telemetry.SwapMemory\"\277\001\n\rVirtualMemor" +
-      "y\022\r\n\005total\030\001 \001(\003\022\014\n\004used\030\002 \001(\003\022\014\n\004free\030\003" +
-      " \001(\003\022\017\n\007percent\030\004 \001(\001\022\021\n\tavailable\030\005 \001(\003" +
-      "\022\016\n\006active\030\006 \001(\003\022\020\n\010inactive\030\007 \001(\003\022\017\n\007bu" +
-      "ffers\030\010 \001(\003\022\016\n\006cached\030\t \001(\003\022\016\n\006shared\030\n " +
-      "\001(\003\022\014\n\004slab\030\013 \001(\003\"c\n\nSwapMemory\022\014\n\004free\030" +
-      "\001 \001(\003\022\017\n\007percent\030\002 \001(\001\022\013\n\003sin\030\003 \001(\003\022\014\n\004s" +
-      "out\030\004 \001(\003\022\r\n\005total\030\005 \001(\003\022\014\n\004used\030\006 \001(\003\"\301" +
-      "\001\n\031CmServiceHealthCheckEvent\022\023\n\013serviceN" +
-      "ame\030\001 \001(\t\022\023\n\013serviceType\030\002 \001(\t\022\014\n\004name\030\003" +
-      " \001(\t\022\r\n\005value\030\004 \001(\t\022\023\n\013explanation\030\005 \001(\t" +
-      "\022\021\n\ttimestamp\030\006 \001(\003\0225\n\016clusterDetails\030\007 " +
-      "\001(\0132\035.cdp.telemetry.ClusterDetails\"\247\001\n\024C" +
-      "mServiceMetricEvent\022\023\n\013serviceName\030\001 \001(\t" +
-      "\022\023\n\013serviceType\030\002 \001(\t\022\014\n\004name\030\003 \001(\t\022\r\n\005v" +
-      "alue\030\004 \001(\001\022\021\n\ttimestamp\030\005 \001(\003\0225\n\016cluster" +
-      "Details\030\006 \001(\0132\035.cdp.telemetry.ClusterDet" +
-      "ails\"\262\002\n\016ClusterDetails\022\013\n\003crn\030\001 \001(\t\022\014\n\004" +
-      "name\030\002 \001(\t\022\017\n\007version\030\003 \001(\t\0227\n\004type\030\004 \001(" +
-      "\0162).cdp.telemetry.ClusterDetails.Cluster" +
-      "Type\022=\n\010platform\030\005 \001(\0162+.cdp.telemetry.C" +
-      "lusterDetails.CloudPlatform\"5\n\013ClusterTy" +
-      "pe\022\013\n\007DATAHUB\020\000\022\014\n\010DATALAKE\020\001\022\013\n\007FREEIPA" +
-      "\020\002\"E\n\rCloudPlatform\022\013\n\007UNKNOWN\020\000\022\007\n\003AWS\020" +
-      "\001\022\t\n\005AZURE\020\002\022\007\n\003GCP\020\003\022\n\n\006YCLOUD\020\004*,\n\014Hea" +
-      "lthStatus\022\013\n\007UNKNOWN\020\000\022\006\n\002OK\020\001\022\007\n\003NOK\020\002B" +
-      "[\n-com.cloudera.thunderhead.telemetry.no" +
-      "destatusB\017NodeStatusProtoZ\031com/cloudera/" +
-      "cdp/protobufb\006proto3"
+      "dp.telemetry.HealthStatus\022@\n\033computeMoni" +
+      "toringAccessible\030\025 \001(\0162\033.cdp.telemetry.H" +
+      "ealthStatus\"\246\002\n\rSystemMetrics\022&\n\003cpu\030\001 \001" +
+      "(\0132\031.cdp.telemetry.CpuMetrics\022(\n\004disk\030\002 " +
+      "\001(\0132\032.cdp.telemetry.DiskMetrics\022,\n\006memor" +
+      "y\030\003 \001(\0132\034.cdp.telemetry.MemoryMetrics\022.\n" +
+      "\007network\030\004 \001(\0132\035.cdp.telemetry.NetworkMe" +
+      "trics\022\021\n\ttimestamp\030\005 \001(\003\0225\n\016clusterDetai" +
+      "ls\030\006 \001(\0132\035.cdp.telemetry.ClusterDetails\022" +
+      "\033\n\023cdpTelemetryVersion\030\007 \001(\t\"\233\001\n\017CmMetri" +
+      "csReport\0224\n\007metrics\030\001 \003(\0132#.cdp.telemetr" +
+      "y.CmServiceMetricEvent\0225\n\016clusterDetails" +
+      "\030\002 \001(\0132\035.cdp.telemetry.ClusterDetails\022\033\n" +
+      "\023cdpTelemetryVersion\030\003 \001(\t\"\252\001\n\024CmHealthC" +
+      "hecksReport\022>\n\014healthChecks\030\001 \003(\0132(.cdp." +
+      "telemetry.CmServiceHealthCheckEvent\0225\n\016c" +
+      "lusterDetails\030\002 \001(\0132\035.cdp.telemetry.Clus" +
+      "terDetails\022\033\n\023cdpTelemetryVersion\030\003 \001(\t\"" +
+      "\277\001\n\nCpuMetrics\022\r\n\005count\030\001 \001(\005\022\025\n\rlogical" +
+      "_count\030\002 \001(\005\022\020\n\010load_avg\030\003 \003(\002\022&\n\005times\030" +
+      "\004 \001(\0132\027.cdp.telemetry.CpuTimes\022&\n\005stats\030" +
+      "\005 \001(\0132\027.cdp.telemetry.CpuStats\022)\n\004freq\030\006" +
+      " \001(\0132\033.cdp.telemetry.CpuFrequency\"_\n\010Cpu" +
+      "Stats\022\024\n\014ctx_switches\030\001 \001(\003\022\022\n\ninterrupt" +
+      "s\030\002 \001(\003\022\027\n\017soft_interrupts\030\003 \001(\003\022\020\n\010sysc" +
+      "alls\030\004 \001(\003\"D\n\010CpuTimes\022\014\n\004idle\030\001 \001(\001\022\014\n\004" +
+      "nice\030\002 \001(\001\022\016\n\006system\030\003 \001(\001\022\014\n\004user\030\004 \001(\001" +
+      "\"9\n\014CpuFrequency\022\017\n\007current\030\001 \001(\003\022\013\n\003min" +
+      "\030\002 \001(\003\022\013\n\003max\030\003 \001(\003\"\214\001\n\013DiskMetrics\0220\n\np" +
+      "artitions\030\001 \003(\0132\034.cdp.telemetry.DiskPart" +
+      "ition\022(\n\ntop_varlog\030\002 \003(\0132\024.cdp.telemetr" +
+      "y.VmLog\022!\n\002io\030\003 \001(\0132\025.cdp.telemetry.Disk" +
+      "IO\"#\n\005VmLog\022\014\n\004path\030\001 \001(\t\022\014\n\004size\030\002 \001(\t\"" +
+      "\234\001\n\rDiskPartition\022\'\n\005usage\030\001 \001(\0132\030.cdp.t" +
+      "elemetry.DiskUsage\022\016\n\006device\030\002 \001(\t\022\016\n\006fs" +
+      "type\030\003 \001(\t\022\017\n\007maxfile\030\004 \001(\005\022\017\n\007maxpath\030\005" +
+      " \001(\005\022\022\n\nmountpoint\030\006 \001(\t\022\014\n\004opts\030\007 \001(\t\"G" +
+      "\n\tDiskUsage\022\014\n\004free\030\001 \001(\003\022\r\n\005total\030\002 \001(\003" +
+      "\022\014\n\004used\030\003 \001(\003\022\017\n\007percent\030\004 \001(\001\"\201\001\n\006Disk" +
+      "IO\022\022\n\nread_bytes\030\001 \001(\003\022\022\n\nread_count\030\002 \001" +
+      "(\003\022\021\n\tread_time\030\003 \001(\003\022\023\n\013write_bytes\030\004 \001" +
+      "(\003\022\023\n\013write_count\030\005 \001(\003\022\022\n\nwrite_time\030\006 " +
+      "\001(\003\"n\n\016NetworkMetrics\0226\n\013connections\030\001 \001" +
+      "(\0132!.cdp.telemetry.NetworkConnections\022$\n" +
+      "\002io\030\002 \001(\0132\030.cdp.telemetry.NetworkIO\"\237\001\n\t" +
+      "NetworkIO\022\022\n\nbytes_recv\030\001 \001(\003\022\022\n\nbytes_s" +
+      "ent\030\002 \001(\003\022\016\n\006dropin\030\003 \001(\003\022\017\n\007dropout\030\004 \001" +
+      "(\003\022\r\n\005errin\030\005 \001(\003\022\016\n\006errout\030\006 \001(\003\022\024\n\014pac" +
+      "kets_recv\030\007 \001(\003\022\024\n\014packets_sent\030\010 \001(\003\"\322\001" +
+      "\n\022NetworkConnections\022\016\n\006LISTEN\030\001 \001(\005\022\023\n\013" +
+      "ESTABLISHED\030\002 \001(\005\022\021\n\tTIME_WAIT\030\003 \001(\005\022\022\n\n" +
+      "CLOSE_WAIT\030\004 \001(\005\022\016\n\006CLOSED\030\005 \001(\005\022\020\n\010SYN_" +
+      "SEND\030\006 \001(\005\022\024\n\014SYN_RECEIVED\030\007 \001(\005\022\022\n\nFIN_" +
+      "WAIT_1\030\010 \001(\005\022\022\n\nFIN_WAIT_2\030\t \001(\005\022\020\n\010LAST" +
+      "_ACK\030\n \001(\005\"u\n\rMemoryMetrics\0224\n\016virtual_m" +
+      "emory\030\001 \001(\0132\034.cdp.telemetry.VirtualMemor" +
+      "y\022.\n\013swap_memory\030\002 \001(\0132\031.cdp.telemetry.S" +
+      "wapMemory\"\277\001\n\rVirtualMemory\022\r\n\005total\030\001 \001" +
+      "(\003\022\014\n\004used\030\002 \001(\003\022\014\n\004free\030\003 \001(\003\022\017\n\007percen" +
+      "t\030\004 \001(\001\022\021\n\tavailable\030\005 \001(\003\022\016\n\006active\030\006 \001" +
+      "(\003\022\020\n\010inactive\030\007 \001(\003\022\017\n\007buffers\030\010 \001(\003\022\016\n" +
+      "\006cached\030\t \001(\003\022\016\n\006shared\030\n \001(\003\022\014\n\004slab\030\013 " +
+      "\001(\003\"c\n\nSwapMemory\022\014\n\004free\030\001 \001(\003\022\017\n\007perce" +
+      "nt\030\002 \001(\001\022\013\n\003sin\030\003 \001(\003\022\014\n\004sout\030\004 \001(\003\022\r\n\005t" +
+      "otal\030\005 \001(\003\022\014\n\004used\030\006 \001(\003\"\301\001\n\031CmServiceHe" +
+      "althCheckEvent\022\023\n\013serviceName\030\001 \001(\t\022\023\n\013s" +
+      "erviceType\030\002 \001(\t\022\014\n\004name\030\003 \001(\t\022\r\n\005value\030" +
+      "\004 \001(\t\022\023\n\013explanation\030\005 \001(\t\022\021\n\ttimestamp\030" +
+      "\006 \001(\003\0225\n\016clusterDetails\030\007 \001(\0132\035.cdp.tele" +
+      "metry.ClusterDetails\"\247\001\n\024CmServiceMetric" +
+      "Event\022\023\n\013serviceName\030\001 \001(\t\022\023\n\013serviceTyp" +
+      "e\030\002 \001(\t\022\014\n\004name\030\003 \001(\t\022\r\n\005value\030\004 \001(\001\022\021\n\t" +
+      "timestamp\030\005 \001(\003\0225\n\016clusterDetails\030\006 \001(\0132" +
+      "\035.cdp.telemetry.ClusterDetails\"\262\002\n\016Clust" +
+      "erDetails\022\013\n\003crn\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\017\n\007" +
+      "version\030\003 \001(\t\0227\n\004type\030\004 \001(\0162).cdp.teleme" +
+      "try.ClusterDetails.ClusterType\022=\n\010platfo" +
+      "rm\030\005 \001(\0162+.cdp.telemetry.ClusterDetails." +
+      "CloudPlatform\"5\n\013ClusterType\022\013\n\007DATAHUB\020" +
+      "\000\022\014\n\010DATALAKE\020\001\022\013\n\007FREEIPA\020\002\"E\n\rCloudPla" +
+      "tform\022\013\n\007UNKNOWN\020\000\022\007\n\003AWS\020\001\022\t\n\005AZURE\020\002\022\007" +
+      "\n\003GCP\020\003\022\n\n\006YCLOUD\020\004*,\n\014HealthStatus\022\013\n\007U" +
+      "NKNOWN\020\000\022\006\n\002OK\020\001\022\007\n\003NOK\020\002B[\n-com.clouder" +
+      "a.thunderhead.telemetry.nodestatusB\017Node" +
+      "StatusProtoZ\031com/cloudera/cdp/protobufb\006" +
+      "proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -45403,7 +45548,7 @@ public final class NodeStatusProto {
     internal_static_cdp_telemetry_NetworkDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_NetworkDetails_descriptor,
-        new java.lang.String[] { "Host", "CcmEnabled", "DnsResolvers", "NeighbourScan", "Neighbours", "AnyNeighboursAccessible", "NumberOfNeighbours", "Timestamp", "CcmAccessible", "ClouderaComAccessible", "DatabusAccessible", "DatabusS3Accessible", "S3Accessible", "AdlsV2Accessible", "GcsAccessible", "StsAccessible", "AzureManagementAccessible", "CdpTelemetryVersion", "ArchiveClouderaComAccessible", "ServiceDeliveryCacheS3Accessible", });
+        new java.lang.String[] { "Host", "CcmEnabled", "DnsResolvers", "NeighbourScan", "Neighbours", "AnyNeighboursAccessible", "NumberOfNeighbours", "Timestamp", "CcmAccessible", "ClouderaComAccessible", "DatabusAccessible", "DatabusS3Accessible", "S3Accessible", "AdlsV2Accessible", "GcsAccessible", "StsAccessible", "AzureManagementAccessible", "CdpTelemetryVersion", "ArchiveClouderaComAccessible", "ServiceDeliveryCacheS3Accessible", "ComputeMonitoringAccessible", });
     internal_static_cdp_telemetry_SystemMetrics_descriptor =
       getDescriptor().getMessageTypes().get(11);
     internal_static_cdp_telemetry_SystemMetrics_fieldAccessorTable = new

@@ -52,6 +52,7 @@ public class BasicEnvironmentTests extends PreconditionGovTest {
                     .withTelemetry("telemetry")
                     .withTunnel(testContext.getTunnel())
                     .withCreateFreeIpa(Boolean.TRUE)
+                    .withOneFreeIpaNode()
                     .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
                             commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(getEnvironmentTestClient().create())

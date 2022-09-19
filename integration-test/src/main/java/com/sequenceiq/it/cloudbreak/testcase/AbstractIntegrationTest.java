@@ -292,6 +292,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                     .withTelemetry("telemetry")
                     .withTunnel(testContext.getTunnel())
                     .withCreateFreeIpa(Boolean.TRUE)
+                    .withOneFreeIpaNode()
                     .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
                             commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(environmentTestClient.create())

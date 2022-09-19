@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.UPGRADE_CCM_CHAIN_TRIGGER_EVENT;
+import static com.sequenceiq.common.api.type.Tunnel.CCM;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -35,6 +36,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -66,11 +68,13 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.DeregisterAgentHandler;
-import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.HealthCheckHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.FinalizeHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.PushSaltStateHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.ReconfigureNginxHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.RegisterClusterProxyHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.RemoveAgentHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.RevertAllHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.RevertSaltStatesHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.TunnelUpdateHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.userdata.UpdateUserDataHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.userdata.UpdateUserDataOnProviderHandler;
@@ -94,6 +98,7 @@ import com.sequenceiq.flow.repository.FlowLogRepository;
 
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
+@TestPropertySource(properties = {"cb.ccmRevertJob.activationInMinutes=0"})
 class UpgradeCcmFlowChainIntegrationTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
@@ -104,11 +109,11 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     private static final long STACK_ID = 1L;
 
-    private static final int ALL_CALLED_ONCE = 3;
+    private static final int ALL_CALLED_ONCE = 4;
 
     private static final int CALLED_TILL_UPDATE_TUNNEL = 1;
 
-    private static final int CALLED_TILL_UPDATE_USERDATA = 2;
+    private static final int CALLED_TILL_UPDATE_USERDATA = 3;
 
     @Inject
     private FlowLogRepository flowLogRepository;
@@ -217,8 +222,14 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     @Test
     public void testCcmUpgradeFlowChainWhenUpdateCcmFails() throws Exception {
-        doThrow(BadRequestException.class).when(upgradeCcmService).updateTunnel(anyLong());
+        doThrow(BadRequestException.class).when(upgradeCcmService).updateTunnel(anyLong(), eq(Tunnel.latestUpgradeTarget()));
         testFlow(CALLED_TILL_UPDATE_TUNNEL, false, false);
+    }
+
+    @Test
+    public void testCcmUpgradeFlowChainPassWhenAgentRemoveFails() throws Exception {
+        doThrow(BadRequestException.class).when(upgradeCcmService).removeAgent(anyLong(), eq(Tunnel.latestUpgradeTarget()));
+        testFlow(ALL_CALLED_ONCE, true, true);
     }
 
     @Test
@@ -237,7 +248,7 @@ class UpgradeCcmFlowChainIntegrationTest {
     }
 
     private void verifyFinishingStatCalls(boolean ccmUpgradeSuccess, boolean userDataUpdateSuccess) throws Exception {
-        verify(upgradeCcmService, times(ccmUpgradeSuccess ? 1 : 0)).ccmUpgradeFinished(eq(1L), eq(0L));
+        verify(upgradeCcmService, times(ccmUpgradeSuccess ? 1 : 0)).ccmUpgradeFinished(eq(1L), eq(0L), anyBoolean());
         verify(resourcesApi, times(userDataUpdateSuccess ? 1 : 0)).updateUserData(any(), any(), any(), eq(USER_DATA));
         verify(upgradeCcmService, times(ccmUpgradeSuccess ? 0 : 1)).ccmUpgradeFailed(any(), anyLong());
     }
@@ -247,7 +258,8 @@ class UpgradeCcmFlowChainIntegrationTest {
         Arrays.fill(expected, 0, calledOnceCount, 1);
         int i = 0;
         InOrder inOrder = Mockito.inOrder(upgradeCcmService, userDataService, resourcesApi);
-        inOrder.verify(upgradeCcmService, times(expected[i++])).updateTunnel(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).updateTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
+        inOrder.verify(upgradeCcmService, times(expected[i++])).removeAgent(STACK_ID, CCM);
         inOrder.verify(userDataService, times(expected[i++])).updateJumpgateFlagOnly(STACK_ID);
     }
 
@@ -262,7 +274,7 @@ class UpgradeCcmFlowChainIntegrationTest {
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
                 () -> reactorNotifier.notify(STACK_ID, selector,
-                        new UpgradeCcmFlowChainTriggerEvent(selector.toString(), STACK_ID, 1L, Tunnel.CCM)));
+                        new UpgradeCcmFlowChainTriggerEvent(selector.toString(), STACK_ID, 1L, CCM)));
     }
 
     private void letItFlow() {
@@ -282,13 +294,15 @@ class UpgradeCcmFlowChainIntegrationTest {
             UpgradeCcmService.class,
             CcmUpgradeFlowTriggerCondition.class,
             DeregisterAgentHandler.class,
-            HealthCheckHandler.class,
             PushSaltStateHandler.class,
             ReconfigureNginxHandler.class,
             RegisterClusterProxyHandler.class,
             RemoveAgentHandler.class,
             TunnelUpdateHandler.class,
-            FlowIntegrationTestConfig.class
+            FlowIntegrationTestConfig.class,
+            RevertSaltStatesHandler.class,
+            RevertAllHandler.class,
+            FinalizeHandler.class
     })
     static class Config {
     }

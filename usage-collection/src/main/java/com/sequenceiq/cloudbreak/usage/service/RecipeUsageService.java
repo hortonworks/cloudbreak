@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 
 @Service
@@ -70,6 +71,7 @@ public class RecipeUsageService {
                     .setRecipeCount(recipeCount)
                     .setHostGroupDetails(hostGroupDetails.orElse(""))
                     .setTypeDetails(typeDetails.orElse(""))
+                    .setAccountId(ThreadBasedUserCrnProvider.getAccountId())
                     .build());
         } catch (Exception e) {
             LOGGER.error(String.format("Couldn't send recipe related usage report about cluster creation [stack CRN: %s], because: ", stackCrn), e);
@@ -85,6 +87,7 @@ public class RecipeUsageService {
 
     private static UsageProto.CDPRecipeEvent.Builder getRecipeEventBuilder(String recipeName, String recipeCrn, String recipeType) {
         return UsageProto.CDPRecipeEvent.newBuilder()
+                .setAccountId(ThreadBasedUserCrnProvider.getAccountId())
                 .setName(recipeName)
                 .setRecipeCrn(recipeCrn)
                 .setType(getRecipeType(recipeType));
@@ -93,6 +96,7 @@ public class RecipeUsageService {
     private static UsageProto.CDPRecipeEvent.Builder getRecipeEventBuilder(String recipeName, Optional<String> recipeCrn,
             Optional<String> recipeType, String stackCrn, Optional<String> hostGroupName) {
         return UsageProto.CDPRecipeEvent.newBuilder()
+                .setAccountId(ThreadBasedUserCrnProvider.getAccountId())
                 .setName(recipeName)
                 .setRecipeCrn(recipeCrn.orElse(""))
                 .setType(getRecipeType(recipeType.orElse("")))

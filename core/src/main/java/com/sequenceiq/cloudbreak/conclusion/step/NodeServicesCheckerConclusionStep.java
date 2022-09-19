@@ -18,7 +18,6 @@ import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStat
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
 
@@ -38,13 +37,13 @@ public class NodeServicesCheckerConclusionStep extends ConclusionStep {
         RPCResponse<NodeStatusReport> servicesReport;
         try {
             servicesReport = nodeStatusService.getServicesReport(resourceId);
-        } catch (CloudbreakServiceException e) {
+            LOGGER.debug("Node services report response: {}", servicesReport.getFirstTextMessage());
+        } catch (Exception e) {
             LOGGER.warn("Node services report failed, error: {}", e.getMessage());
             return failed(cloudbreakMessagesService.getMessage(NODE_STATUS_MONITOR_UNREACHABLE), e.getMessage());
         }
         if (servicesReport.getResult() == null) {
-            String nodeStatusResult = servicesReport.getFirstTextMessage();
-            LOGGER.info("Node services report result was null, original message: {}", nodeStatusResult);
+            LOGGER.info("Node services report result was null");
             return succeeded();
         }
 
@@ -62,6 +61,7 @@ public class NodeServicesCheckerConclusionStep extends ConclusionStep {
     private Multimap<String, String> collectNodesWithUnhealthyServices(RPCResponse<NodeStatusReport> servicesReport) {
         Multimap<String, String> nodesWithUnhealthyServices = HashMultimap.create();
         for (NodeStatus nodeStatus : servicesReport.getResult().getNodesList()) {
+            LOGGER.debug("Check node services report for host: {}", nodeStatus);
             NodeStatusProto.StatusDetails statusDetails = nodeStatus.getStatusDetails();
             if (statusDetails != null && HealthStatus.NOK.equals(statusDetails.getStatus())) {
                 nodesWithUnhealthyServices.put(statusDetails.getHost(), "Unhealthy node: " + statusDetails.getStatusReason());

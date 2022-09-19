@@ -14,7 +14,6 @@ import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
@@ -22,7 +21,6 @@ import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
-import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -32,9 +30,6 @@ import reactor.bus.Event;
 public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCreationWaitRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationHandler.class);
-
-    @Inject
-    private SdxStatusService sdxStatusService;
 
     @Inject
     private SdxService sdxService;
@@ -70,7 +65,6 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
             StackV4Response stackV4Response = provisionerService.waitCloudbreakClusterCreation(sdxId, pollingConfig);
             SdxCluster sdxCluster = sdxService.getById(sdxId);
             sdxService.updateRuntimeVersionFromStackResponse(sdxCluster, stackV4Response);
-            setStackCreatedStatus(sdxId);
             response = new StackCreationSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
             LOGGER.error("Polling exited before timeout for SDX: {}. Cause: ", sdxId, userBreakException);
@@ -88,9 +82,4 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
         }
         return response;
     }
-
-    private void setStackCreatedStatus(Long datalakeId) {
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_FINISHED, "Datalake stack created", datalakeId);
-    }
-
 }

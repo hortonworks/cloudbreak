@@ -10,6 +10,7 @@ import javax.ws.rs.NotFoundException;
 public enum AuthorizationResourceAction {
     CHANGE_CREDENTIAL("environments/changeCredential", AuthorizationResourceType.ENVIRONMENT),
     EDIT_CREDENTIAL("environments/editCredential", AuthorizationResourceType.CREDENTIAL),
+    ENVIRONMENT_VERTICAL_SCALING("environments/verticalScale", AuthorizationResourceType.ENVIRONMENT),
     EDIT_ENVIRONMENT("environments/editEnvironment", AuthorizationResourceType.ENVIRONMENT),
     START_ENVIRONMENT("environments/startEnvironment", AuthorizationResourceType.ENVIRONMENT),
     STOP_ENVIRONMENT("environments/stopEnvironment", AuthorizationResourceType.ENVIRONMENT),
@@ -49,6 +50,7 @@ public enum AuthorizationResourceAction {
     STOP_DATALAKE("datalake/stopDatalake", AuthorizationResourceType.DATALAKE),
     UPGRADE_DATALAKE("datalake/upgradeDatalake", AuthorizationResourceType.DATALAKE),
     RECOVER_DATALAKE("datalake/recoverDatalake", AuthorizationResourceType.DATALAKE),
+    DATALAKE_VERTICAL_SCALING("environments/verticalScale", AuthorizationResourceType.DATALAKE),
     SYNC_COMPONENT_VERSIONS_FROM_CM_DATALAKE("datalake/syncComponentVersionsFromCm", AuthorizationResourceType.DATALAKE),
     CHANGE_IMAGE_CATALOG_DATALAKE("datalake/changeImageCatalog", AuthorizationResourceType.DATALAKE),
     ROTATE_CERT_DATALAKE("datalake/rotateAutoTlsCertDatalake", AuthorizationResourceType.DATALAKE),
@@ -58,6 +60,7 @@ public enum AuthorizationResourceAction {
     DELETE_DATAHUB("datahub/deleteDatahub", AuthorizationResourceType.DATAHUB),
     REPAIR_DATAHUB("datahub/repairDatahub", AuthorizationResourceType.DATAHUB),
     SYNC_DATAHUB("datahub/syncDatahub", AuthorizationResourceType.DATAHUB),
+    DATAHUB_VERTICAL_SCALING("environments/verticalScale", AuthorizationResourceType.DATAHUB),
     RETRY_DATAHUB_OPERATION("datahub/retryDatahubOperation", AuthorizationResourceType.DATAHUB),
     DESCRIBE_RETRYABLE_DATAHUB_OPERATION("datahub/describeRetryableDatahubOperation", AuthorizationResourceType.DATAHUB),
     START_DATAHUB("datahub/startDatahub", AuthorizationResourceType.DATAHUB),

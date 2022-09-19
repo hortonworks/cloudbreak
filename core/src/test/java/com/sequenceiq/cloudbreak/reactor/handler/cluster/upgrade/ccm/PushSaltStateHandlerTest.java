@@ -49,12 +49,12 @@ class PushSaltStateHandlerTest {
 
     @Test
     void doAccept() {
-        UpgradeCcmPushSaltStatesRequest request = new UpgradeCcmPushSaltStatesRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM);
+        UpgradeCcmPushSaltStatesRequest request = new UpgradeCcmPushSaltStatesRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM, null);
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
         InOrder inOrder = inOrder(upgradeCcmService, upgradeOrchestratorService);
-        inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID);
+        inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
         inOrder.verify(upgradeOrchestratorService).pushSaltState(STACK_ID, CLUSTER_ID);
         assertThat(result.selector()).isEqualTo("UPGRADECCMPUSHSALTSTATESRESULT");
     }

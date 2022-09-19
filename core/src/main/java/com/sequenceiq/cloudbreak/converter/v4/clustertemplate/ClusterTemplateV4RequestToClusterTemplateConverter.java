@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.v4.clustertemplate;
 
 import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -24,6 +26,8 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 
 @Component
@@ -62,6 +66,16 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter {
         }
         if (StringUtils.isEmpty(source.getDistroXTemplate().getEnvironmentName())) {
             throw new BadRequestException("The environmentName cannot be null.");
+        }
+        Set<InstanceGroupV1Request> gateways = source.getDistroXTemplate().getInstanceGroups()
+                .stream()
+                .filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getType()))
+                .collect(Collectors.toSet());
+        if (gateways.isEmpty()) {
+            throw new BadRequestException("You must specify one instance group with 'GATEWAY' type which will include the Cloudera Manager server.");
+        }
+        if (gateways.size() > 1) {
+            throw new BadRequestException("You must specify only one instance group with 'GATEWAY' type which will include the Cloudera Manager server.");
         }
         ClusterTemplate clusterTemplate = new ClusterTemplate();
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();

@@ -8,19 +8,13 @@
       {
         "refName": "core_settings",
         "serviceType": "CORE_SETTINGS",
-        "roleConfigGroups": [
+        "serviceConfigs": [
           {
-            "refName": "core_settings-STORAGEOPERATIONS-BASE",
-            "roleType": "STORAGEOPERATIONS",
-            "configs": [
-              {
-                "name": "core_defaultfs",
-                "value": ""
-              }
-            ],
-            "base": true
+            "name": "core_defaultfs",
+            "value": ""
           }
-        ]
+        ],
+        "roleConfigGroups": [ ]
       },
       {
         "refName": "zookeeper",
@@ -107,7 +101,6 @@
         "refName": "manager",
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
-          "core_settings-STORAGEOPERATIONS-BASE",
           "solr-GATEWAY-BASE"
         ]
       },

@@ -79,6 +79,7 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
         ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses(
                 runtimeVersionService.getRuntimeVersion(clusterId));
         Map<HostName, Set<HealthCheck>> hostStatuses = extendedHostStatuses.getHostsHealth();
+        LOGGER.debug("Instance statuses based on CM: {}", hostStatuses);
         Map<String, String> unhealthyHosts = hostStatuses.keySet().stream()
                 .filter(hostName -> !extendedHostStatuses.isHostHealthy(hostName))
                 .collect(Collectors.toMap(StringType::value, extendedHostStatuses::statusReasonForHost));
@@ -101,6 +102,7 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
     private Conclusion checkProviderForInstanceStatuses(Stack stack, List<InstanceMetadataView> runningInstances) {
         List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(runningInstances, stack);
         List<CloudVmInstanceStatus> instanceStatuses = stackInstanceStatusChecker.queryInstanceStatuses(stack, cloudInstances);
+        LOGGER.debug("Instance statuses based on provider: {}", instanceStatuses);
         Map<String, InstanceSyncState> instanceSyncStates = instanceStatuses.stream()
                 .collect(Collectors.toMap(i -> i.getCloudInstance().getInstanceId(), i -> InstanceSyncState.getInstanceSyncState(i.getStatus())));
         Set<String> notRunningInstances = runningInstances.stream()

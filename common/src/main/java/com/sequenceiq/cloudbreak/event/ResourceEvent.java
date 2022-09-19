@@ -3,12 +3,16 @@ package com.sequenceiq.cloudbreak.event;
 public enum ResourceEvent {
     SDX_CLUSTER_CREATED("resource.sdx.created"),
     SDX_CLUSTER_IS_RUNNING("resource.sdx.is.running"),
+    SDX_CLUSTER_REQUESTED("resource.sdx.requested"),
     SDX_CLUSTER_PROVISION_STARTED("resource.sdx.provisionstarted"),
+    SDX_CLUSTER_STACK_PROVISION_IN_PROGRESS("resource.sdx.stack_provision_in_progress"),
+    SDX_CLUSTER_STACK_PROVISION_FINISHED("resource.sdx.stack_provision_finished"),
     SDX_CLUSTER_PROVISION_FINISHED("resource.sdx.provisionfinished"),
     SDX_CLUSTER_DELETED("resource.sdx.deleted"),
     SDX_CLUSTER_DELETION_STARTED("resource.sdx.deletionstarted"),
     SDX_CLUSTER_DELETION_FINISHED("resource.sdx.deletionfinished"),
     SDX_CLUSTER_DELETION_FAILED("resource.sdx.deletionfailed"),
+    SDX_CLUSTER_STACK_DELETION_IN_PROGRESS("resource.sdx.stack_deletion_in_progress"),
     SDX_CLUSTER_DELETED_ON_PROVIDER_SIDE("resource.sdx.deletedonproviderside"),
     SDX_CLUSTER_CREATION_FAILED("resource.sdx.failed"),
     SDX_RDS_DELETION_STARTED("resource.sdx.rdsdeletionstarted"),
@@ -500,7 +504,11 @@ public enum ResourceEvent {
     CLUSTER_CCM_UPGRADE_REGISTER_CLUSTER_PROXY("cluster.ccm.upgrade.register.clusterproxy"),
     CLUSTER_CCM_UPGRADE_HEALTH_CHECK("cluster.ccm.upgrade.health.check"),
     CLUSTER_CCM_UPGRADE_REMOVE_AGENT("cluster.ccm.upgrade.remove.agent"),
+
+    CLUSTER_CCM_UPGRADE_REMOVE_AGENT_FAILED("cluster.ccm.upgrade.remove.agent.failed"),
     CLUSTER_CCM_UPGRADE_DEREGISTER_AGENT("cluster.ccm.upgrade.deregister.agent"),
+
+    CLUSTER_CCM_UPGRADE_DEREGISTER_AGENT_FAILED("cluster.ccm.upgrade.deregister.agent.failed"),
     CLUSTER_CCM_UPGRADE_FAILED("cluster.ccm.upgrade.failed"),
     CLUSTER_CCM_UPGRADE_FINISHED("cluster.ccm.upgrade.finished"),
 

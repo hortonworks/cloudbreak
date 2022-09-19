@@ -84,7 +84,7 @@ public class SdxDatabaseServerUpgradeService {
         if (!isUpgradeNeeded(targetMajorVersion, cluster)) {
             throwAlreadyOnLatestError(cluster, targetMajorVersion);
         }
-
+        cloudbreakStackService.checkUpgradeRdsByClusterNameInternal(cluster, targetMajorVersion);
         return triggerDatabaseUpgrade(cluster, targetMajorVersion);
     }
 

@@ -7,6 +7,7 @@ import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent
 import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_IN_PROGRESS_EVENT;
+import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_WAIT_UPGRADE_EVENT;
 
 import java.util.Arrays;
 import java.util.List;
@@ -89,7 +90,8 @@ public class SdxRetryService {
                 SDX_REPAIR_IN_PROGRESS_EVENT,
                 SDX_START_IN_PROGRESS_EVENT,
                 SDX_STOP_IN_PROGRESS_EVENT,
-                CERT_RENEWAL_STARTED_EVENT
+                CERT_RENEWAL_STARTED_EVENT,
+                SDX_UPGRADE_DATABASE_SERVER_WAIT_UPGRADE_EVENT
         );
     }
 }

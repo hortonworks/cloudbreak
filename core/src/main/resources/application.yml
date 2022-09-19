@@ -118,6 +118,8 @@ cb:
     GCP: 100
   enabled.linux.types: redhat6,redhat7,redhat8,centos6,centos7
   default.gateway.cidr: 0.0.0.0/0
+  ccmRevertJob:
+    activationInMinutes: 5
   publicip:
   etc.config.dir: /etc/cloudbreak
   threadpool:
@@ -874,6 +876,9 @@ cb:
         serviceRoles:
           - service: YARN
             role: NODEMANAGER
+            required: false
+          - service: IMPALA
+            role: IMPALAD
             required: false
         roles:
           - role: GATEWAY

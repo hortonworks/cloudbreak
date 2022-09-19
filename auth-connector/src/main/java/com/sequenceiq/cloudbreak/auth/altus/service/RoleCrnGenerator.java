@@ -23,42 +23,43 @@ public class RoleCrnGenerator {
     private GrpcUmsClient grpcUmsClient;
 
     public String getBuiltInDatabusRoleCrn(String accountId) {
-        return getRoleCrn("DbusUploader", accountId).toString();
+        return getRoleCrn(UmsRole.DBUS_UPLOADER, accountId).toString();
     }
 
     public String getBuiltInOwnerResourceRoleCrn(String accountId) {
-        return getResourceRoleCrn("Owner", accountId).toString();
+        return getResourceRoleCrn(UmsResourceRole.OWNER, accountId).toString();
     }
 
     public String getBuiltInEnvironmentAdminResourceRoleCrn(String accountId) {
-        return getResourceRoleCrn("EnvironmentAdmin", accountId).toString();
+        return getResourceRoleCrn(UmsResourceRole.ENVIRONMENT_ADMIN, accountId).toString();
     }
 
     public String getBuiltInEnvironmentUserResourceRoleCrn(String accountId) {
-        return getResourceRoleCrn("EnvironmentUser", accountId).toString();
+        return getResourceRoleCrn(UmsResourceRole.ENVIRONMENT_USER, accountId).toString();
     }
 
     public String getBuiltInWXMClusterAdminResourceRoleCrn(String accountId) {
-        return getResourceRoleCrn("WXMClusterAdmin", accountId).toString();
+        return getResourceRoleCrn(UmsResourceRole.WXM_CLUSTER_ADMIN, accountId).toString();
     }
 
-    public Crn getResourceRoleCrn(String resourceRoleName, String accountId) {
+    public Crn getResourceRoleCrn(UmsResourceRole umsResourceRole, String accountId) {
         Set<String> resourceRoles = grpcUmsClient.getResourceRoles(accountId);
         LOGGER.info("Resource roles in account {} are {}", accountId, Joiner.on(",").join(resourceRoles));
         return resourceRoles.stream()
                 .map(Crn::safeFromString)
-                .filter(crn -> StringUtils.equals(crn.getResource(), resourceRoleName))
+                .filter(crn -> StringUtils.equals(crn.getResource(), umsResourceRole.getResourceRoleName()))
                 .findFirst()
-                .orElseThrow(() -> new InternalServerErrorException(String.format("There is no resource role in UMS with name %s", resourceRoleName)));
+                .orElseThrow(() -> new InternalServerErrorException(
+                        String.format("There is no resource role in UMS with name %s", umsResourceRole.getResourceRoleName())));
     }
 
-    public Crn getRoleCrn(String roleName, String accountId) {
+    public Crn getRoleCrn(UmsRole umsRole, String accountId) {
         Set<String> roles = grpcUmsClient.getRoles(accountId);
         LOGGER.info("Roles in account {} are {}", accountId, Joiner.on(",").join(roles));
         return roles.stream()
                 .map(Crn::safeFromString)
-                .filter(crn -> StringUtils.equals(crn.getResource(), roleName))
+                .filter(crn -> StringUtils.equals(crn.getResource(), umsRole.getRoleName()))
                 .findFirst()
-                .orElseThrow(() -> new InternalServerErrorException(String.format("There is no role in UMS with name %s", roleName)));
+                .orElseThrow(() -> new InternalServerErrorException(String.format("There is no role in UMS with name %s", umsRole.getRoleName())));
     }
 }

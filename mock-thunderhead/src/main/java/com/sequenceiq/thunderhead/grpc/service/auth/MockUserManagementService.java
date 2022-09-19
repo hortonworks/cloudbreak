@@ -2,6 +2,7 @@ package com.sequenceiq.thunderhead.grpc.service.auth;
 
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
@@ -17,6 +18,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VARIANT_MIGRATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ENCRYPTION_AT_HOST;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
@@ -64,6 +66,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EMBEDDED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
@@ -98,7 +101,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
 import static java.util.Collections.newSetFromMap;
 import static java.util.Optional.ofNullable;
@@ -113,6 +115,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -231,6 +234,8 @@ import com.google.common.io.Resources;
 import com.google.protobuf.util.JsonFormat;
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.altus.service.UmsResourceRole;
+import com.sequenceiq.cloudbreak.auth.altus.service.UmsRole;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.util.SanitizerUtil;
@@ -476,6 +481,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.postgres.upgrade.exception.enable}")
     private boolean enablePostgresUpgradeException;
+
+    @Value("${auth.mock.postgres.upgrade.skip.attached.datahubs.check.enable}")
+    private boolean skipPostgresUpgradeAttachedDatahubsCheck;
 
     private String cbLicense;
 
@@ -1028,6 +1036,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (enableLongTimeDatalakeBackup) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_BACKUP_LONG_TIMEOUT));
         }
+        if (skipPostgresUpgradeAttachedDatahubsCheck) {
+            builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK));
+        }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
                         .setAccount(builder
@@ -1275,15 +1286,17 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void listRoles(ListRolesRequest request, StreamObserver<ListRolesResponse> responseObserver) {
         LOGGER.info("List roles for account: {}", request.getAccountId());
-        responseObserver.onNext(ListRolesResponse.newBuilder()
-                .addRole(Role.newBuilder()
-                        .setCrn("crn:altus:iam:us-west-1:altus:role:DbusUploader")
-                        .build())
-                .addRole(Role.newBuilder()
-                        .setCrn("crn:altus:iam:us-west-1:altus:role:ComputeMetricsPublisher")
-                        .build())
-                .build());
+        ListRolesResponse.Builder builder = ListRolesResponse.newBuilder();
+        Arrays.stream(UmsRole.values()).forEach(role -> builder.addRole(getRole(role)));
+        responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
+    }
+
+    private UserManagementProto.Role getRole(UmsRole role) {
+        checkNotNull(role);
+        return UserManagementProto.Role.newBuilder()
+                .setCrn("crn:altus:iam:us-west-1:altus:role:" + role.getRoleName())
+                .build();
     }
 
     /**
@@ -1419,15 +1432,17 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void listResourceRoles(UserManagementProto.ListResourceRolesRequest request,
             StreamObserver<UserManagementProto.ListResourceRolesResponse> responseObserver) {
-        responseObserver.onNext(UserManagementProto.ListResourceRolesResponse.newBuilder()
-                .addResourceRole(UserManagementProto.ResourceRole.newBuilder()
-                        .setCrn("crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin")
-                        .build())
-                .addResourceRole(UserManagementProto.ResourceRole.newBuilder()
-                        .setCrn("crn:altus:iam:us-west-1:altus:resourceRole:Owner")
-                        .build())
-                .build());
+        UserManagementProto.ListResourceRolesResponse.Builder builder = UserManagementProto.ListResourceRolesResponse.newBuilder();
+        Arrays.stream(UmsResourceRole.values()).forEach(umsResourceRole -> builder.addResourceRole(getResourceRole(umsResourceRole)));
+        responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
+    }
+
+    private UserManagementProto.ResourceRole getResourceRole(UmsResourceRole resourceRole) {
+        checkNotNull(resourceRole);
+        return UserManagementProto.ResourceRole.newBuilder()
+                .setCrn("crn:altus:iam:us-west-1:altus:resourceRole:" + resourceRole.getResourceRoleName())
+                .build();
     }
 
     private ResourceAssignee createResourceAssignee(String resourceCrn) {

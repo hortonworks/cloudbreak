@@ -215,6 +215,7 @@ public class EnvironmentTest extends AbstractMockTest {
                 .when(credentialTestClient.create())
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(true)
+                .withOneFreeIpaNode()
                 .withFreeIpaRecipe(Set.of(preCMRecipeName, preTerminationRecipeName))
                 .withFreeIpaImage(imageCatalogMockServerSetup.getFreeIpaImageCatalogUrl(), "f6e778fc-7f17-4535-9021-515351df3691")
                 .when(environmentTestClient.create())

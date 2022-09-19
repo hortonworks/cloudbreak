@@ -16,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.refresh.event.DatahubRefreshStartEvent;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -47,9 +46,6 @@ public class DatahubRefreshActionsTest {
 
     @Mock
     private SdxStatusService sdxStatusService;
-
-    @Mock
-    private EventSenderService eventSenderService;
 
     @Mock
     private FlowRegister runningFlows;

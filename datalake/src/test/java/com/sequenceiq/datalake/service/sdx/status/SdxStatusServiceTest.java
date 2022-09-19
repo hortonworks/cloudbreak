@@ -101,7 +101,7 @@ class SdxStatusServiceTest {
         DatalakeStatusEnum status = DatalakeStatusEnum.DELETED;
         ResourceEvent resourceEvent = ResourceEvent.SDX_RDS_DELETION_FINISHED;
         doNothing().when(eventSenderService).sendEventAndNotification(any(), any());
-        doNothing().when(sdxNotificationService).send(any(), any(), any());
+        doNothing().when(sdxNotificationService).send(any(), any());
 
         sdxStatusService.setStatusForDatalakeAndNotify(status, resourceEvent, "deleted", sdxCluster);
 

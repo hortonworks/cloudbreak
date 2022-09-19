@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.sdx;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -82,8 +83,10 @@ public class ProvisionerService {
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () ->
                     stackV4Endpoint.deleteInternal(0L, sdxCluster.getClusterName(), forced, initiatorUserCrn));
-            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETION_IN_PROGRESS,
-                    "Data Lake stack deletion in progress", sdxCluster);
+            sdxStatusService.setStatusForDatalakeAndNotify(
+                    DatalakeStatusEnum.STACK_DELETION_IN_PROGRESS, List.of(sdxCluster.getClusterName()),
+                    "Datalake stack deletion in progress", sdxCluster
+            );
         } catch (NotFoundException e) {
             LOGGER.info("Cannot find stack on cloudbreak side {}", sdxCluster.getClusterName());
         } catch (WebApplicationException e) {

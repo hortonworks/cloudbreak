@@ -130,7 +130,7 @@ class SdxClusterStatusCheckerJobTest {
 
         underTest.executeTracedJob(jobExecutionContext);
 
-        verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(any(), any(), anyString(), eq(sdxCluster));
+        verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(any(), any(ResourceEvent.class), anyString(), eq(sdxCluster));
     }
 
     @Test

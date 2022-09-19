@@ -6,12 +6,12 @@ import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATAL
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_RESTORE_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_RESTORE_FAILURE_HANDLED_EVENT;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.dyngr.exception.PollerStoppedException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
@@ -26,7 +27,6 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
-import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.chain.DatalakeResizeFlowEventChainFactory;
@@ -63,6 +63,8 @@ public class DatalakeRestoreActions {
 
     private static final String RESTORE_ID = "RESTORE-ID";
 
+    private static final String REASON = "REASON";
+
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
 
@@ -74,9 +76,6 @@ public class DatalakeRestoreActions {
 
     @Inject
     private SdxService sdxService;
-
-    @Inject
-    private EventSenderService eventSenderService;
 
     @Inject
     private FlowLogService flowLogService;
@@ -105,11 +104,6 @@ public class DatalakeRestoreActions {
             }
 
             @Override
-            protected void prepareExecution(DatalakeTriggerRestoreEvent payload, Map<Object, Object> variables) {
-                super.prepareExecution(payload, variables);
-            }
-
-            @Override
             protected void doExecute(SdxContext context, DatalakeTriggerRestoreEvent payload, Map<Object, Object> variables) {
                 DatalakeRestoreStatusResponse restoreStatusResponse =
                         sdxBackupRestoreService.triggerDatalakeRestore(context.getSdxId(),
@@ -117,6 +111,7 @@ public class DatalakeRestoreActions {
                                 payload.getBackupLocationOverride(),
                                 payload.getUserId(),
                                 payload.getSkipOptions());
+                variables.put(REASON, payload.getReason().name());
                 variables.put(RESTORE_ID, restoreStatusResponse.getRestoreId());
                 variables.put(BACKUP_ID, restoreStatusResponse.getBackupId());
                 variables.put(OPERATION_ID, restoreStatusResponse.getRestoreId());
@@ -199,9 +194,6 @@ public class DatalakeRestoreActions {
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RESTORE_INPROGRESS,
                         ResourceEvent.DATALAKE_RESTORE_IN_PROGRESS,
                         "Datalake restore in progress", payload.getResourceId());
-
-                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_RESTORE_IN_PROGRESS);
-
                 metricService.incrementMetricCounter(MetricType.SDX_RESTORE_REQUESTED, sdxCluster);
                 sendEvent(context, DatalakeDatabaseRestoreWaitRequest.from(context, operationId));
             }
@@ -284,9 +276,6 @@ public class DatalakeRestoreActions {
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_RESTORE_FINISHED,
                         "Datalake restore finished, Datalake is running", payload.getResourceId());
-
-                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_RESTORE_FINISHED);
-
                 metricService.incrementMetricCounter(MetricType.SDX_RESTORE_FINISHED, sdxCluster);
                 sendEvent(context, DATALAKE_DATABASE_RESTORE_FINALIZED_EVENT.event(), payload);
             }
@@ -340,10 +329,7 @@ public class DatalakeRestoreActions {
                 LOGGER.error("Datalake database restore could not be started for datalake with id: {}", payload.getResourceId(), exception);
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_RESTORE_FINISHED,
-                        "Datalake is running, Datalake restore failed", payload.getResourceId());
-
-                eventSenderService.sendEventAndNotification(sdxCluster, ResourceEvent.DATALAKE_RESTORE_FAILED,
-                        List.of(exception.getMessage()));
+                        getFailureReason(variables, exception), payload.getResourceId());
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(payload.getException());
                 metricService.incrementMetricCounter(MetricType.SDX_RESTORE_FAILED, sdxCluster);
@@ -355,5 +341,22 @@ public class DatalakeRestoreActions {
                 return null;
             }
         };
+    }
+
+    private String getFailureReason(Map<Object, Object> variables, Exception exception) {
+        StringBuilder reason = new StringBuilder();
+        if (variables.containsKey(REASON) && variables.get(REASON).equals(DatalakeRestoreFailureReason.RESTORE_ON_UPGRADE_FAILURE.name())) {
+            reason.append("Upgrade not finished correctly, datalake restore failed.");
+        } else {
+            if (exception instanceof PollerStoppedException) {
+                reason.append("Restore timed out, see the restore status using cdp-cli for more information.");
+            } else {
+                reason.append("Restore failed, returning datalake to running state.");
+            }
+        }
+        if (exception != null && StringUtils.isNotEmpty(exception.getMessage())) {
+            reason.append(" Failure message: ").append(exception.getMessage());
+        }
+        return reason.toString();
     }
 }

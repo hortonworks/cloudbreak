@@ -491,7 +491,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.ENVIRONMENT_VERTICAL_SCALING)
     public void verticalScalingByName(
             @ResourceName String name,
             @RequestObject @Valid VerticalScaleRequest updateRequest) {
@@ -499,7 +499,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ENVIRONMENT_VERTICAL_SCALING)
     public void verticalScalingByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn,
             @RequestObject @Valid VerticalScaleRequest updateRequest) {

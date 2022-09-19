@@ -64,7 +64,7 @@ public class ImpalaVolumeConfigProvider implements CmHostGroupRoleConfigProvider
                 }
 
                 if (minAttachedVolumeSize > MIN_ATTACHED_VOLUME_SIZE_TO_ENABLE_CACHE_IN_GB
-                        && volumeCount > 0) {
+                        && volumeCount >= 0) {
                     configs.add(config(IMPALA_DATACACHE_ENABLED_PARAM, "true"));
 
                     if (checkTemporaryStorage(hostGroupView, temporaryStorageVolumeCount)) {

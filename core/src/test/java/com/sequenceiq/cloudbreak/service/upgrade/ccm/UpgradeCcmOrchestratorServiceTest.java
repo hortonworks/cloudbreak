@@ -80,7 +80,7 @@ class UpgradeCcmOrchestratorServiceTest {
         underTest.reconfigureNginx(STACK_ID);
         verify(hostOrchestrator).runOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
-        assertThat(params.getState()).isEqualTo("nginx");
+        assertThat(params.getState()).isEqualTo("nginx/upgradeccm");
         assertOtherStateParams(params);
     }
 
@@ -99,6 +99,15 @@ class UpgradeCcmOrchestratorServiceTest {
         verify(hostOrchestrator).runOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
         assertThat(params.getState()).isEqualTo("upgradeccm/disable-ccmv2");
+        assertOtherStateParams(params);
+    }
+
+    @Test
+    void testFinalize() throws CloudbreakOrchestratorException {
+        underTest.finalize(STACK_ID);
+        verify(hostOrchestrator).runOrchestratorState(paramCaptor.capture());
+        OrchestratorStateParams params = paramCaptor.getValue();
+        assertThat(params.getState()).isEqualTo("nginx/finalize");
         assertOtherStateParams(params);
     }
 
