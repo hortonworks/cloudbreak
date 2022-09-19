@@ -336,7 +336,13 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         boolean hasSpotTermination = (getResponse().getInstanceGroups() == null) ? false : getResponse().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetadata().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
-        return new Clue("DistroX", auditEvents, getResponse(), hasSpotTermination);
+        return new Clue(
+                getResponse().getName(),
+                getResponse().getCrn(),
+                auditEvents,
+                List.of(),
+                getResponse(),
+                hasSpotTermination);
     }
 
     @Override

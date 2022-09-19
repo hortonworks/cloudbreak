@@ -36,6 +36,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
+import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.SdxClient;
@@ -60,6 +62,7 @@ import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
+import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
@@ -360,8 +363,8 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 getResponse().getStackV4Response().getInstanceGroups().stream()
                         .filter(instanceGroup -> MASTER.getName().equals(instanceGroup.getName()))
                         .collect(Collectors.toMap(instanceGroup -> instanceGroup.getMetadata().stream()
-                                .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
-                        instanceMetaData -> InstanceStatus.DELETED_ON_PROVIDER_SIDE)));
+                                        .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
+                                instanceMetaData -> InstanceStatus.DELETED_ON_PROVIDER_SIDE)));
         return awaitForInstance(instanceStatusMap);
     }
 
@@ -552,7 +555,19 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         boolean hasSpotTermination = getResponse().getStackV4Response() != null && getResponse().getStackV4Response().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetadata().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
-        return new Clue("SDX", auditEvents, getResponse(), hasSpotTermination);
+        List<CDPStructuredEvent> structuredEvents = List.of();
+        if (getResponse() != null && getResponse().getCrn() != null) {
+            CDPStructuredEventV1Endpoint cdpStructuredEventV1Endpoint =
+                    getTestContext().getMicroserviceClient(SdxClient.class).getDefaultClient().structuredEventsV1Endpoint();
+            structuredEvents = StructuredEventUtil.getStructuredEvents(cdpStructuredEventV1Endpoint, getResponse().getCrn());
+        }
+        return new Clue(
+                getResponse().getName(),
+                getResponse().getCrn(),
+                auditEvents,
+                structuredEvents,
+                getResponse(),
+                hasSpotTermination);
     }
 
     protected CommonClusterManagerProperties commonClusterManagerProperties() {

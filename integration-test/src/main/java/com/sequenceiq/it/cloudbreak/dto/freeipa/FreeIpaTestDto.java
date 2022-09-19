@@ -29,6 +29,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.plac
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
+import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -73,6 +75,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.FreeIpaInstanceUtil;
+import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
 
 @Prototype
 public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest, DescribeFreeIpaResponse, FreeIpaTestDto>
@@ -469,7 +472,19 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         boolean hasSpotTermination = (getResponse().getInstanceGroups() == null) ? false : getResponse().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetaData().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
-        return new Clue("FreeIpa", null, getResponse(), hasSpotTermination);
+        List<CDPStructuredEvent> structuredEvents = List.of();
+        if (getResponse() != null && getResponse().getCrn() != null) {
+            CDPStructuredEventV1Endpoint cdpStructuredEventV1Endpoint =
+                    getTestContext().getMicroserviceClient(FreeIpaClient.class).getDefaultClient().structuredEventsV1Endpoint();
+            structuredEvents = StructuredEventUtil.getStructuredEvents(cdpStructuredEventV1Endpoint, getResponse().getCrn());
+        }
+        return new Clue(
+                getResponse().getName(),
+                getResponse().getCrn(),
+                null,
+                structuredEvents,
+                getResponse(),
+                hasSpotTermination);
     }
 
     @Override
