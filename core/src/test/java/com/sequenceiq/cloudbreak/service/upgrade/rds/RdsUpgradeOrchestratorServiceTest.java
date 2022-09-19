@@ -45,6 +45,8 @@ class RdsUpgradeOrchestratorServiceTest {
 
     private static final long STACK_ID = 123L;
 
+    private static final String BACKUP_LOCATION = "location";
+
     @Mock
     private StackDtoService stackDtoService;
 
@@ -55,7 +57,7 @@ class RdsUpgradeOrchestratorServiceTest {
     private UpgradeEmbeddedDBPreparationStateParamsProvider upgradeEmbeddedDBPreparationStateParamsProvider;
 
     @Mock
-    private BackupRestoreEmbeddedDBStateParamsProvider backupRestoreEmbeddedDBStateParamsProvider;
+    private BackupRestoreDBStateParamsProvider backupRestoreDBStateParamsProvider;
 
     @Mock
     private GatewayConfigService gatewayConfigService;
@@ -97,7 +99,7 @@ class RdsUpgradeOrchestratorServiceTest {
 
     @Test
     void testBackupRdsData() throws CloudbreakOrchestratorException {
-        underTest.backupRdsData(STACK_ID);
+        underTest.backupRdsData(STACK_ID, BACKUP_LOCATION);
         verify(hostOrchestrator).runOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
         assertThat(params.getState()).isEqualTo("postgresql/upgrade/backup");

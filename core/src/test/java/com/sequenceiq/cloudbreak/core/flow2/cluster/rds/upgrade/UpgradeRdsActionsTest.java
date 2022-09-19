@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade;
 
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -11,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +29,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataBackupResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataRestoreRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataRestoreResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStopServicesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsTriggerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerResult;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -59,6 +64,30 @@ class UpgradeRdsActionsTest {
 
     @InjectMocks
     private UpgradeRdsActions upgradeRdsActions;
+
+    @Test
+    public void testShouldAddBackupLocationIfNotNull() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.stopServicesAndCm();
+        UpgradeRdsTriggerRequest triggerEvent =
+                new UpgradeRdsTriggerRequest(UpgradeRdsEvent.UPGRADE_RDS_EVENT.event(), STACK_ID, TargetMajorVersion.VERSION_11, "aLocation");
+        Map<Object, Object> variables = mockAndTriggerRdsUpgradeAction(action, triggerEvent, true);
+
+        verify(upgradeRdsService).stopServicesState(STACK_ID);
+        assertEquals("aLocation", variables.get("cloud_storage_backup_location"));
+        verifyBackupRestoreAction(UpgradeRdsStopServicesRequest.class);
+    }
+
+    @Test
+    public void testShouldNotAddBackupLocationIfItIsNull() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.stopServicesAndCm();
+        UpgradeRdsTriggerRequest triggerEvent =
+                new UpgradeRdsTriggerRequest(UpgradeRdsEvent.UPGRADE_RDS_EVENT.event(), STACK_ID, TargetMajorVersion.VERSION_11, null);
+        Map<Object, Object> variables = mockAndTriggerRdsUpgradeAction(action, triggerEvent, true);
+
+        verify(upgradeRdsService).stopServicesState(STACK_ID);
+        assertNull(variables.get("cloud_storage_backup_location"));
+        verifyBackupRestoreAction(UpgradeRdsStopServicesRequest.class);
+    }
 
     @Test
     public void testShouldBackupDataFromRds() throws Exception {
@@ -100,7 +129,7 @@ class UpgradeRdsActionsTest {
         verifyBackupRestoreAction(UpgradeRdsDataRestoreResult.class);
     }
 
-    private void mockAndTriggerRdsUpgradeAction(AbstractAction action, AbstractUpgradeRdsEvent triggerEvent,
+    private Map<Object, Object> mockAndTriggerRdsUpgradeAction(AbstractAction action, AbstractUpgradeRdsEvent triggerEvent,
             boolean shouldRunDataBackupRestore) throws Exception {
         ReflectionTestUtils.setField(action, null, runningFlows, FlowRegister.class);
         ReflectionTestUtils.setField(action, null, eventBus, EventBus.class);
@@ -110,11 +139,13 @@ class UpgradeRdsActionsTest {
         StackView stack = mock(StackView.class);
         when(stack.getId()).thenReturn(STACK_ID);
         ClusterView cluster = mock(ClusterView.class);
-        when(upgradeRdsService.shouldRunDataBackupRestore(stack, cluster)).thenReturn(shouldRunDataBackupRestore);
+        lenient().when(upgradeRdsService.shouldRunDataBackupRestore(stack, cluster)).thenReturn(shouldRunDataBackupRestore);
         UpgradeRdsContext context =  new UpgradeRdsContext(new FlowParameters(FLOW_ID, FLOW_ID, null), stack, cluster, TargetMajorVersion.VERSION_11);
 
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
-        testSupport.doExecute(context, triggerEvent, new HashMap<>());
+        Map<Object, Object> variables = new HashMap<>();
+        testSupport.doExecute(context, triggerEvent, variables);
+        return variables;
     }
 
     private void verifyBackupRestoreAction(Object expectedEvent) {

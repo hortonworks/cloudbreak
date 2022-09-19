@@ -16,9 +16,9 @@ public abstract class CloudStorageConfigGenerator<T extends CloudStorageConfig> 
     String getLocationWithoutSchemePrefixes(String input, String... schemePrefixes) {
         for (String schemePrefix : schemePrefixes) {
             if (input.startsWith(schemePrefix)) {
-                String[] splitted = input.split(schemePrefix);
-                if (splitted.length > 1) {
-                    return splitted[1];
+                String[] splitInput = input.split(schemePrefix);
+                if (splitInput.length > 1) {
+                    return splitInput[1];
                 }
             }
         }

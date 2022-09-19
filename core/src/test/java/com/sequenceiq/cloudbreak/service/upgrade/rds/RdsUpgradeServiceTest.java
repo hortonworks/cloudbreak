@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,11 +47,14 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.backup.response.BackupResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
@@ -80,6 +85,11 @@ class RdsUpgradeServiceTest {
 
     private static final String ACCOUNT_ID = "accountId";
 
+    private static final String BACKUP_LOCATION = "location";
+
+    @Mock
+    private EnvironmentClientService environmentService;
+
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
@@ -107,6 +117,15 @@ class RdsUpgradeServiceTest {
     @InjectMocks
     private RdsUpgradeService underTest;
 
+    @BeforeEach
+    void setup() {
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        BackupResponse backupResponse = new BackupResponse();
+        backupResponse.setStorageLocation(BACKUP_LOCATION);
+        environmentResponse.setBackup(backupResponse);
+        lenient().when(environmentService.getByCrn(anyString())).thenReturn(environmentResponse);
+    }
+
     @Test
     void testUpgradeRdsWithValidSetupThenSuccess() {
         Stack stack = createStack(Status.AVAILABLE);
@@ -115,12 +134,33 @@ class RdsUpgradeServiceTest {
         when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
-        when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION))).thenReturn(flowId);
+        when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION))).thenReturn(flowId);
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
         RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
 
-        verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION));
+        verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION));
+        assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
+        assertThat(response.getFlowIdentifier().getPollableId()).isEqualTo(FLOW_ID);
+    }
+
+    @Test
+    void testUpgradeRdsWithValidSetupWithoutBackupLocationThenSuccess() {
+
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        when(environmentService.getByCrn(anyString())).thenReturn(environmentResponse);
+        Stack stack = createStack(Status.AVAILABLE);
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
+        when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
+        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
+        FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
+        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(null))).thenReturn(flowId);
+        when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
+
+        RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
+
+        verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(null));
         assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
         assertThat(response.getFlowIdentifier().getPollableId()).isEqualTo(FLOW_ID);
     }
@@ -137,12 +177,12 @@ class RdsUpgradeServiceTest {
         when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
-        when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION))).thenReturn(flowId);
+        when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION))).thenReturn(flowId);
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
         RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), null);
 
-        verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION));
+        verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION));
         assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
         assertThat(response.getFlowIdentifier().getPollableId()).isEqualTo(FLOW_ID);
     }
@@ -155,12 +195,12 @@ class RdsUpgradeServiceTest {
         when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
-        when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION))).thenReturn(flowId);
+        when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION))).thenReturn(flowId);
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
         RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
 
-        verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION));
+        verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION));
         assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
         assertThat(response.getFlowIdentifier().getPollableId()).isEqualTo(FLOW_ID);
     }
@@ -268,7 +308,7 @@ class RdsUpgradeServiceTest {
         Stack stack = createStack(status);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10));
         when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
-        when(messagesService.getMessage(CLUSTER_RDS_UPGRADE_NOT_AVAILABLE.getMessage())).thenReturn(ERROR_REASON);
+        when(messagesService.getMessage(CLUSTER_RDS_UPGRADE_NOT_AVAILABLE.getMessage(), List.of(status.name()))).thenReturn(ERROR_REASON);
 
         Assertions.assertThatCode(() -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION))
                 .isInstanceOf(BadRequestException.class)

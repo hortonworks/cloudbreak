@@ -247,9 +247,9 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new UpgradePreparationChainTriggerEvent(selector, stackId, imageChangeDto, lockComponents));
     }
 
-    public FlowIdentifier triggerRdsUpgrade(Long stackId, TargetMajorVersion targetVersion) {
+    public FlowIdentifier triggerRdsUpgrade(Long stackId, TargetMajorVersion targetVersion, String backupLocation) {
         String selector = FlowChainTriggers.UPGRADE_RDS_CHAIN_TRIGGER_EVENT;
-        return reactorNotifier.notify(stackId, selector, new RdsUpgradeChainTriggerEvent(selector, stackId, targetVersion));
+        return reactorNotifier.notify(stackId, selector, new RdsUpgradeChainTriggerEvent(selector, stackId, targetVersion, backupLocation));
     }
 
     public FlowIdentifier triggerDatalakeClusterRecovery(Long stackId) {

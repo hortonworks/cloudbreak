@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -85,6 +86,11 @@ class ValidateRdsUpgradeServiceTest {
 
         verify(backupRestoreChecker).shouldRunDataBackupRestore(eq(stack), eq(cluster));
     }
+
+    @Test
+    public void testRdsUpgradeStarted() {
+        underTest.rdsUpgradeStarted(STACK_ID, TargetMajorVersion.VERSION_11);
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()), eq(ResourceEvent.CLUSTER_RDS_UPGRADE_STARTED), eq("11"));    }
 
     @Test
     public void testPushSaltStatesState() {

@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
+
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
@@ -35,7 +36,7 @@ import com.sequenceiq.cloudbreak.view.StackView;
 @Configuration
 public class UpgradeRdsActions {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeRdsActions.class);
+    private static final Object CLOUD_STORAGE_BACKUP_LOCATION = "cloud_storage_backup_location";
 
     @Inject
     private UpgradeRdsService upgradeRdsService;
@@ -45,6 +46,7 @@ public class UpgradeRdsActions {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsTriggerRequest.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsTriggerRequest payload, Map<Object, Object> variables) {
+                putIfPresent(variables, CLOUD_STORAGE_BACKUP_LOCATION, payload.getBackupLocation());
                 upgradeRdsService.stopServicesState(payload.getResourceId());
                 sendEvent(context);
             }
@@ -62,16 +64,12 @@ public class UpgradeRdsActions {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsStopServicesResult payload, Map<Object, Object> variables) {
                 if (upgradeRdsService.shouldRunDataBackupRestore(context.getStack(), context.getCluster())) {
+                    String backupLocation = Objects.toString(variables.get(CLOUD_STORAGE_BACKUP_LOCATION), null);
                     upgradeRdsService.backupRdsState(payload.getResourceId());
+                    sendEvent(context, new UpgradeRdsDataBackupRequest(context.getStackId(), context.getVersion(), backupLocation));
+                } else {
+                    sendEvent(context, new UpgradeRdsDataBackupResult(context.getStackId(), context.getVersion()));
                 }
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(UpgradeRdsContext context) {
-                return upgradeRdsService.shouldRunDataBackupRestore(context.getStack(), context.getCluster()) ?
-                        new UpgradeRdsDataBackupRequest(context.getStackId(), context.getVersion()) :
-                        new UpgradeRdsDataBackupResult(context.getStackId(), context.getVersion());
             }
         };
     }
