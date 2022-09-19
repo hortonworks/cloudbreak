@@ -72,7 +72,7 @@ public class CredentialCreateTest extends AbstractIntegrationTest {
         testContext
                 .given(CredentialTestDto.class)
                 .whenException(credentialTestClient.create(), ForbiddenException.class, expectedMessage("You have no right to perform" +
-                        " environments/createCredential in account 460c0d8f-ae8e-4dce-9cd7-2351762eb9ac"))
+                        " environments/createCredential in account .*"))
                 .validate();
     }
 }
