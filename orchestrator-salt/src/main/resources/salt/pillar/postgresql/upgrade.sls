@@ -2,6 +2,7 @@
 
 upgrade:
   backup:
+    compressed_file_name: rds_backup.tar.gz
     logfile: /var/log/postgres_upgrade_backup.log
 {%- if 'None' != configure_remote_db %}
     directory: /var/tmp/postges_upgrade_backup

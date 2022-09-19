@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -50,6 +51,12 @@ public class ValidateRdsUpgradeService {
                 getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_BACKUP_VALIDATION), ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_BACKUP_VALIDATION);
     }
 
+    void rdsUpgradeStarted(Long stackId, TargetMajorVersion version) {
+        setStatusAndNotify(stackId, UPDATE_IN_PROGRESS, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_IN_PROGRESS,
+                getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_STARTED, version.getMajorVersion()), ResourceEvent.CLUSTER_RDS_UPGRADE_STARTED,
+                version.getMajorVersion());
+    }
+
     void validateRdsUpgradeFinished(Long stackId, Long clusterId) {
         String statusReason = "Validate RDS upgrade finished";
         InMemoryStateStore.deleteStack(stackId);
@@ -65,7 +72,7 @@ public class ValidateRdsUpgradeService {
         if (Objects.nonNull(clusterId)) {
             InMemoryStateStore.deleteCluster(clusterId);
         }
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_FAILED, statusReason);
+        updateStatus(stackId, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_FAILED, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_FAILED, exception.getMessage());
     }
 
@@ -75,12 +82,27 @@ public class ValidateRdsUpgradeService {
 
     private void setStatusAndNotify(Long stackId, Status status, DetailedStackStatus detailedStackStatus, String statusReason, ResourceEvent resourceEvent) {
         LOGGER.debug(statusReason);
-        stackUpdater.updateStackStatus(stackId, detailedStackStatus, statusReason);
+        updateStatus(stackId, detailedStackStatus, statusReason);
         flowMessageService.fireEventAndLog(stackId, status.name(), resourceEvent);
+    }
+
+    private void updateStatus(Long stackId, DetailedStackStatus detailedStackStatus, String statusReason) {
+        stackUpdater.updateStackStatus(stackId, detailedStackStatus, statusReason);
+    }
+
+    private void setStatusAndNotify(Long stackId, Status status, DetailedStackStatus detailedStackStatus, String statusReason, ResourceEvent resourceEvent,
+            String... args) {
+        LOGGER.debug(statusReason);
+        updateStatus(stackId, detailedStackStatus, statusReason);
+        flowMessageService.fireEventAndLog(stackId, status.name(), resourceEvent, args);
     }
 
     private String getMessage(ResourceEvent resourceEvent) {
         return messagesService.getMessage(resourceEvent.getMessage());
+    }
+
+    private String getMessage(ResourceEvent resourceEvent, Object... args) {
+        return messagesService.getMessageWithArgs(resourceEvent.getMessage(), args);
     }
 }
 

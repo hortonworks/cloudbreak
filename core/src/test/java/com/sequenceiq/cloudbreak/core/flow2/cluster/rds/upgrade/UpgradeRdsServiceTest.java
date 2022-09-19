@@ -34,6 +34,8 @@ class UpgradeRdsServiceTest {
 
     private static final String TARGET_VERSION = "11";
 
+    private static final String BACKUP_LOCATION = "location";
+
     private static final String BACKUP_STATE = "Creating data backup, it might take a while.";
 
     private static final String RESTORE_STATE = "Restoring data from the backup, it might take a while.";
@@ -96,9 +98,9 @@ class UpgradeRdsServiceTest {
 
     @Test
     public void testBackupRds() throws CloudbreakOrchestratorException {
-        underTest.backupRds(STACK_ID);
+        underTest.backupRds(STACK_ID, BACKUP_LOCATION);
 
-        verify(rdsUpgradeOrchestratorService).backupRdsData(eq(STACK_ID));
+        verify(rdsUpgradeOrchestratorService).backupRdsData(eq(STACK_ID), eq(BACKUP_LOCATION));
     }
 
     @Test

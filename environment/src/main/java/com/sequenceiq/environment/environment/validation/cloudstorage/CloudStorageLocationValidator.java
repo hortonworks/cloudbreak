@@ -106,8 +106,8 @@ public class CloudStorageLocationValidator {
     }
 
     private Optional<FileSystemType> getBackupFileSystemType(Environment environment) {
-        if (environment.getBackup() != null) {
-            EnvironmentBackup backup = environment.getBackup();
+        EnvironmentBackup backup = environment.getBackup();
+        if (backup != null) {
             if (backup.getS3() != null) {
                 return Optional.of(backup.getS3().getType());
             }

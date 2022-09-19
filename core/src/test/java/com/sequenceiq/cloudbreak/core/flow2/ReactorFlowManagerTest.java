@@ -162,7 +162,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerStopStartStackDownscale(STACK_ID, instanceIdsByHostgroup, false);
         underTest.triggerClusterServicesRestart(STACK_ID);
         underTest.triggerClusterProxyConfigReRegistration(STACK_ID);
-        underTest.triggerRdsUpgrade(STACK_ID, TargetMajorVersion.VERSION_11);
+        underTest.triggerRdsUpgrade(STACK_ID, TargetMajorVersion.VERSION_11, null);
         underTest.triggerRotateSaltPassword(STACK_ID, RotateSaltPasswordReason.MANUAL, RotateSaltPasswordType.FALLBACK);
         underTest.triggerVerticalScale(STACK_ID, new StackVerticalScaleV4Request());
 

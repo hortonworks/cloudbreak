@@ -177,7 +177,7 @@ cb:
       rds.targetversion: VERSION_11
       rds.backuprestore:
         cloudplatforms: AZURE
-        validationratio: 0.1
+        validationratio: 0.2
 
   externaldatabase.ssl.rootcerts.path: /hadoopfs/fs1/database-cacerts/certs.pem
 

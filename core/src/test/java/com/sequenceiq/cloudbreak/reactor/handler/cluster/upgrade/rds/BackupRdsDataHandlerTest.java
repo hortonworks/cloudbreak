@@ -28,6 +28,8 @@ class BackupRdsDataHandlerTest {
 
     private static final TargetMajorVersion TARGET_MAJOR_VERSION = TargetMajorVersion.VERSION_11;
 
+    private static final String BACKUP_LOCATION = "abfs://abcd@efgh.dfs.core.windows.net";
+
     @Mock
     private UpgradeRdsService upgradeRdsService;
 
@@ -44,22 +46,22 @@ class BackupRdsDataHandlerTest {
 
     @Test
     void doAccept() throws CloudbreakOrchestratorException {
-        UpgradeRdsDataBackupRequest request = new UpgradeRdsDataBackupRequest(STACK_ID, TARGET_MAJOR_VERSION);
+        UpgradeRdsDataBackupRequest request = new UpgradeRdsDataBackupRequest(STACK_ID, TARGET_MAJOR_VERSION, BACKUP_LOCATION);
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
-        verify(upgradeRdsService).backupRds(STACK_ID);
+        verify(upgradeRdsService).backupRds(STACK_ID, BACKUP_LOCATION);
         assertThat(result.selector()).isEqualTo("UPGRADERDSDATABACKUPRESULT");
     }
 
     @Test
     void orchestrationException() throws CloudbreakOrchestratorException {
-        UpgradeRdsDataBackupRequest request = new UpgradeRdsDataBackupRequest(STACK_ID, TARGET_MAJOR_VERSION);
+        UpgradeRdsDataBackupRequest request = new UpgradeRdsDataBackupRequest(STACK_ID, TARGET_MAJOR_VERSION, BACKUP_LOCATION);
         when(event.getData()).thenReturn(request);
-        doThrow(new CloudbreakOrchestratorFailedException("salt error")).when(upgradeRdsService).backupRds(eq(STACK_ID));
+        doThrow(new CloudbreakOrchestratorFailedException("salt error")).when(upgradeRdsService).backupRds(eq(STACK_ID), eq(BACKUP_LOCATION));
 
         Selectable result = underTest.doAccept(event);
-        verify(upgradeRdsService).backupRds(STACK_ID);
+        verify(upgradeRdsService).backupRds(STACK_ID, BACKUP_LOCATION);
         assertThat(result.selector()).isEqualTo("UPGRADERDSFAILEDEVENT");
         assertThat(result).isInstanceOf(UpgradeRdsFailedEvent.class);
         UpgradeRdsFailedEvent failedEvent = (UpgradeRdsFailedEvent) result;

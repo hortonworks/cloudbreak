@@ -33,8 +33,10 @@ public class ValidateRdsUpgradeActions {
         return new AbstractValidateRdsUpgradeAction<>(ValidateRdsUpgradeTriggerRequest.class) {
             @Override
             protected void doExecute(ValidateRdsUpgradeContext context, ValidateRdsUpgradeTriggerRequest payload, Map<Object, Object> variables) {
+                Long stackId = payload.getResourceId();
+                validateRdsUpgradeService.rdsUpgradeStarted(stackId, payload.getVersion());
                 if (validateRdsUpgradeService.shouldRunDataBackupRestore(context.getStack(), context.getCluster())) {
-                    validateRdsUpgradeService.pushSaltStates(payload.getResourceId());
+                    validateRdsUpgradeService.pushSaltStates(stackId);
                 }
                 sendEvent(context);
             }
