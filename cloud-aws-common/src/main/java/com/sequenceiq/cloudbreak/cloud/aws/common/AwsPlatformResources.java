@@ -653,6 +653,7 @@ public class AwsPlatformResources implements PlatformResources {
             CloudRegions regions = regions(cloudCredential, region, filters, true);
             AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
             AmazonEc2Client ec2Client = awsClient.createEc2Client(awsCredentialView, region.getRegionName());
+
             List<String> instanceTypes = ec2Client
                     .describeInstanceTypeOfferings(getOfferingsRequest(region))
                     .getInstanceTypeOfferings()

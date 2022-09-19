@@ -211,28 +211,27 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 .getHostGroupsWithComponent(HueRoles.HUE_SERVER);
     }
 
-    public RecommendationV4Response getRecommendation(Long workspaceId, String definitionName,
-            String blueprintName, String credentialName, String region, String platformVariant,
-            String availabilityZone, CdpResourceType cdpResourceType) {
+    public RecommendationV4Response getRecommendation(Long workspaceId, String blueprintName, String credentialName,
+            String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
         if (!ObjectUtils.allNotNull(region)) {
             throw new BadRequestException("region cannot be null");
         }
-        PlatformRecommendation recommendation = cloudResourceAdvisor.createForBlueprint(workspaceId, definitionName, blueprintName,
+        PlatformRecommendation recommendation = cloudResourceAdvisor.createForBlueprint(workspaceId, blueprintName,
                 credentialName, region, platformVariant, availabilityZone, cdpResourceType);
         return platformRecommendationToPlatformRecommendationV4ResponseConverter.convert(recommendation);
     }
 
-    public RecommendationV4Response getRecommendationByCredentialCrn(Long workspaceId, String definitionName, String blueprintName, String credentialCrn,
+    public RecommendationV4Response getRecommendationByCredentialCrn(Long workspaceId, String blueprintName, String credentialCrn,
             String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
-        PlatformRecommendation recommendation = cloudResourceAdvisor.createForBlueprintByCredCrn(workspaceId, definitionName, blueprintName,
-                credentialCrn, region, platformVariant, availabilityZone, cdpResourceType);
+        PlatformRecommendation recommendation = cloudResourceAdvisor.createForBlueprintByCredCrn(workspaceId, blueprintName, credentialCrn, region,
+                platformVariant, availabilityZone, cdpResourceType);
         return platformRecommendationToPlatformRecommendationV4ResponseConverter.convert(recommendation);
     }
 
-    public RecommendationV4Response getRecommendationByEnvironmentCrn(Long workspaceId, String definitionName, String blueprintName, String environmentCrn,
+    public RecommendationV4Response getRecommendationByEnvironmentCrn(Long workspaceId, String blueprintName, String environmentCrn,
             String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
         Credential credential = credentialClientService.getByEnvironmentCrn(environmentCrn);
-        PlatformRecommendation recommendation = cloudResourceAdvisor.createForBlueprintByCred(workspaceId, definitionName, blueprintName, credential, region,
+        PlatformRecommendation recommendation = cloudResourceAdvisor.createForBlueprintByCred(workspaceId, blueprintName, credential, region,
                 platformVariant, availabilityZone, cdpResourceType);
         return platformRecommendationToPlatformRecommendationV4ResponseConverter.convert(recommendation);
     }
