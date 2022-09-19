@@ -7,7 +7,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static java.util.Objects.isNull;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -20,6 +19,8 @@ import javax.ws.rs.NotFoundException;
 
 import org.testng.util.Strings;
 
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
+import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -55,6 +56,7 @@ import com.sequenceiq.it.cloudbreak.dto.DeletableEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
+import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
 
 @Prototype
 public class EnvironmentTestDto
@@ -452,7 +454,19 @@ public class EnvironmentTestDto
         if (getResponse() == null) {
             return null;
         }
-        return new Clue("Environment", null, getResponse(), false);
+        List<CDPStructuredEvent> structuredEvents = List.of();
+        if (getResponse() != null && getResponse().getCrn() != null) {
+            CDPStructuredEventV1Endpoint cdpStructuredEventV1Endpoint =
+                    getTestContext().getMicroserviceClient(EnvironmentClient.class).getDefaultClient().structuredEventsV1Endpoint();
+            structuredEvents = StructuredEventUtil.getStructuredEvents(cdpStructuredEventV1Endpoint, getResponse().getCrn());
+        }
+        return new Clue(
+                getResponse().getName(),
+                getResponse().getCrn(),
+                null,
+                structuredEvents,
+                getResponse(),
+                false);
     }
 
     public void setLastKnownFlow(FlowIdentifier flowIdentifier) {
@@ -461,10 +475,5 @@ public class EnvironmentTestDto
         } else if (flowIdentifier.getType() == FlowType.FLOW_CHAIN) {
             setLastKnownFlowChainId(flowIdentifier.getPollableId());
         }
-    }
-
-    public EnvironmentTestDto waitingFor(Duration duration, String interruptedMessage) {
-        getTestContext().waitingFor(duration, interruptedMessage);
-        return this;
     }
 }
