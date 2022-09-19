@@ -63,6 +63,7 @@ public interface BlueprintUtilV4Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "createRecommendationForWorkspace")
     RecommendationV4Response createRecommendation(@PathParam("workspaceId") Long workspaceId,
+            @QueryParam("definitionName") String definitionName,
             @QueryParam("blueprintName") String blueprintName,
             @QueryParam("credentialName") String credentialName,
             @QueryParam("region") String region,
@@ -76,6 +77,7 @@ public interface BlueprintUtilV4Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION_BY_CRED_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "createRecommendationForWorkspaceByCredCrn")
     RecommendationV4Response createRecommendationByCredCrn(@PathParam("workspaceId") Long workspaceId,
+            @QueryParam("definitionName") String definitionName,
             @QueryParam("blueprintName") String blueprintName,
             @QueryParam("credentialCrn") String credentialCrn,
             @NotEmpty @QueryParam("region") String region,
@@ -89,6 +91,7 @@ public interface BlueprintUtilV4Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION_BY_ENV_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "createRecommendationForWorkspaceByEnvCrn")
     RecommendationV4Response createRecommendationByEnvCrn(@PathParam("workspaceId") Long workspaceId,
+            @QueryParam("definitionName") String definitionName,
             @QueryParam("blueprintName") String blueprintName,
             @QueryParam("environmentCrn") String environmentCrn,
             @NotEmpty @QueryParam("region") String region,

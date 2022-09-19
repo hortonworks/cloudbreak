@@ -48,12 +48,16 @@ import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorFactory;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Service
 public class CloudResourceAdvisor {
@@ -75,6 +79,9 @@ public class CloudResourceAdvisor {
     private CredentialClientService credentialClientService;
 
     @Inject
+    private ClusterTemplateService clusterTemplateService;
+
+    @Inject
     private EntitlementService entitlementService;
 
     @Inject
@@ -83,26 +90,29 @@ public class CloudResourceAdvisor {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public PlatformRecommendation createForBlueprint(Long workspaceId, String blueprintName, String credentialName,
+    public PlatformRecommendation createForBlueprint(Long workspaceId, String definitionName, String blueprintName, String credentialName,
             String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
         Credential credential = credentialClientService.getByName(credentialName);
-        return getPlatformRecommendationByCredential(workspaceId, blueprintName, region, platformVariant, availabilityZone, cdpResourceType, credential);
+        return getPlatformRecommendationByCredential(workspaceId, definitionName, blueprintName, region,
+                platformVariant, availabilityZone, cdpResourceType, credential);
     }
 
-    public PlatformRecommendation createForBlueprintByCredCrn(Long workspaceId, String blueprintName, String credentialCrn,
+    public PlatformRecommendation createForBlueprintByCredCrn(Long workspaceId, String definitionName, String blueprintName, String credentialCrn,
             String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
         Credential credential = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> credentialClientService.getByCrn(credentialCrn));
-        return createForBlueprintByCred(workspaceId, blueprintName, credential, region, platformVariant, availabilityZone, cdpResourceType);
+        return createForBlueprintByCred(workspaceId, definitionName, blueprintName, credential, region,
+                platformVariant, availabilityZone, cdpResourceType);
     }
 
-    public PlatformRecommendation createForBlueprintByCred(Long workspaceId, String blueprintName, Credential credential,
+    public PlatformRecommendation createForBlueprintByCred(Long workspaceId, String definitionName, String blueprintName, Credential credential,
             String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
-        return getPlatformRecommendationByCredential(workspaceId, blueprintName, region, platformVariant, availabilityZone, cdpResourceType, credential);
+        return getPlatformRecommendationByCredential(workspaceId, definitionName, blueprintName, region,
+                platformVariant, availabilityZone, cdpResourceType, credential);
     }
 
-    private PlatformRecommendation getPlatformRecommendationByCredential(Long workspaceId, String blueprintName, String region,
+    private PlatformRecommendation getPlatformRecommendationByCredential(Long workspaceId, String definitionName, String blueprintName, String region,
             String platformVariant, String availabilityZone, CdpResourceType cdpResourceType, Credential credential) {
         String cloudPlatform = credential.cloudPlatform();
         Map<String, VmType> vmTypesByHostGroup = new HashMap<>();
@@ -110,6 +120,7 @@ public class CloudResourceAdvisor {
         LOGGER.debug("Advising resources for blueprintName: {}, provider: {} and region: {}.",
                 blueprintName, cloudPlatform, region);
         List<String> entitlements = entitlementService.getEntitlements(credential.getAccount());
+        Optional<ClusterTemplate> clusterTemplate = getClusterTemplate(definitionName, workspaceId);
         BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(workspaceId, blueprintName);
         Map<String, Set<String>> componentsByHostGroup = blueprintTextProcessor.getComponentsByHostGroup();
         componentsByHostGroup.forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName,
@@ -169,7 +180,7 @@ public class CloudResourceAdvisor {
 
         Map<String, InstanceCount> instanceCounts = recommendInstanceCounts(blueprintTextProcessor);
 
-        GatewayRecommendation gateway = recommendGateway(blueprintTextProcessor);
+        GatewayRecommendation gateway = recommendGateway(blueprintTextProcessor, clusterTemplate);
 
         AutoscaleRecommendation autoscale = recommendAutoscale(blueprintTextProcessor);
 
@@ -199,6 +210,14 @@ public class CloudResourceAdvisor {
         return recommendAutoscale(blueprintTextProcessor);
     }
 
+    private Optional<ClusterTemplate> getClusterTemplate(String definitionName, Long workspaceId) {
+        Optional<ClusterTemplate> templateByName = Optional.empty();
+        if (!Strings.isNullOrEmpty(definitionName)) {
+            templateByName = clusterTemplateService.getTemplateByName(definitionName, workspaceId);
+        }
+        return templateByName;
+    }
+
     private BlueprintTextProcessor getBlueprintTextProcessor(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintText();
         return blueprintTextProcessorFactory.createBlueprintTextProcessor(blueprintText);
@@ -209,13 +228,24 @@ public class CloudResourceAdvisor {
         return getBlueprintTextProcessor(blueprint);
     }
 
-    private GatewayRecommendation recommendGateway(BlueprintTextProcessor blueprintTextProcessor) {
-        GatewayRecommendation recommendation = blueprintTextProcessor.recommendGateway();
-
-        if (recommendation.getHostGroups().isEmpty()) {
-            Set<String> gatewayGroups = filterHostGroupByPredicate(blueprintTextProcessor, this::fallbackGatewayFilter);
-            if (!gatewayGroups.isEmpty()) {
-                recommendation = new GatewayRecommendation(gatewayGroups);
+    private GatewayRecommendation recommendGateway(BlueprintTextProcessor blueprintTextProcessor, Optional<ClusterTemplate> clusterTemplate) {
+        GatewayRecommendation recommendation;
+        Optional<InstanceGroup> group = Optional.empty();
+        if (clusterTemplate.isPresent()) {
+            group = clusterTemplate.get().getStackTemplate().getInstanceGroups()
+                    .stream()
+                    .filter(e -> InstanceGroupType.GATEWAY.equals(e.getInstanceGroupType()))
+                    .findFirst();
+        }
+        if (group.isPresent()) {
+            recommendation = new GatewayRecommendation(Set.of(group.get().getGroupName()));
+        } else {
+            recommendation = blueprintTextProcessor.recommendGateway();
+            if (recommendation.getHostGroups().isEmpty()) {
+                Set<String> gatewayGroups = filterHostGroupByPredicate(blueprintTextProcessor, this::fallbackGatewayFilter);
+                if (!gatewayGroups.isEmpty()) {
+                    recommendation = new GatewayRecommendation(gatewayGroups);
+                }
             }
         }
 
