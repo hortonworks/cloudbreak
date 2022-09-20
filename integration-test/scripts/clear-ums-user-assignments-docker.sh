@@ -1,6 +1,7 @@
 #!/bin/bash -ex
 
 : ${IMAGE_NAME:=python:3}
+: ${DEFAULT_USER_PATH_IN_JSON:=".dev.default"}
 
 readonly CONTAINER_NAME=clear-ums-user-assignments
 
@@ -34,6 +35,7 @@ clear-ums-user-assignments() {
       --rm \
       --name $CONTAINER_NAME \
     	-v $WORKSPACE:/prj:rw \
+    	-e DEFAULT_USER_PATH_IN_JSON \
     	$IMAGE_NAME /bin/bash -c "set -o pipefail ; set -ex && env && cd /prj/integration-test && eval ./scripts/clear-ums-user-assignments.sh | tee clear-ums-user-assignments.log"
     	RESULT=$?
 }
