@@ -42,10 +42,9 @@ public class ClusterComponentConfigProviderTestBase {
 
     @Test
     void testCleanUpDetachedEntriesWhenThereAreOrphanedEntriesThenDeletionShouldHappen() {
-        Set<Long> ids = Set.of(1L);
-        underTest.cleanUpDetachedEntries(ids);
+        underTest.cleanUpDetachedEntries();
 
-        verify(mockClusterComponentHistoryRepository, times(1)).deleteByClusterIdIsNullOrClusterIdIsIn(ids);
+        verify(mockClusterComponentHistoryRepository, times(1)).deleteByClusterIdIsNullOrClusterIdIsIn();
         verifyNoMoreInteractions(mockClusterComponentHistoryRepository);
     }
 

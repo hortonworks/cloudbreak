@@ -33,7 +33,7 @@ public class FinalizationCleanUpService {
 
     public void detachClusterComponentRelatedAuditEntries() throws CleanUpException {
         LOGGER.debug("About to clean up detached/orphaned cluster component audit events.");
-        executeCleanUp(() -> clusterComponentConfigProvider.cleanUpDetachedEntries(clusterService.findIdsByDeletedStatus()), ClusterComponentHistory.class);
+        executeCleanUp(clusterComponentConfigProvider::cleanUpDetachedEntries, ClusterComponentHistory.class);
     }
 
     public void cleanUpStructuredEventsForStack(Long stackId) {

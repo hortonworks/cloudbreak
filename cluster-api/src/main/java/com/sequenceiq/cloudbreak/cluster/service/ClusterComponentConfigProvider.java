@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.cluster.service;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.measureAndWarnIfLong;
-import static java.util.Collections.emptySet;
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import java.io.IOException;
@@ -211,10 +209,10 @@ public class ClusterComponentConfigProvider {
         }
     }
 
-    public void cleanUpDetachedEntries(Collection<Long> idsForDeletedClusters) {
+    public void cleanUpDetachedEntries() {
         LOGGER.debug("About to delete detached {} entries if they exist.", ClusterComponentHistory.class.getSimpleName());
-        measureAndWarnIfLong(() -> clusterComponentHistoryRepository.deleteByClusterIdIsNullOrClusterIdIsIn(isEmpty(idsForDeletedClusters)
-                ? emptySet() : idsForDeletedClusters), LOGGER, "Cleaning up detached ClusterComponentHistory entries");
+        measureAndWarnIfLong(() -> clusterComponentHistoryRepository.deleteByClusterIdIsNullOrClusterIdIsIn(), LOGGER,
+                "Cleaning up detached ClusterComponentHistory entries");
     }
 
     public void deleteClusterComponents(Set<ClusterComponent> components) {

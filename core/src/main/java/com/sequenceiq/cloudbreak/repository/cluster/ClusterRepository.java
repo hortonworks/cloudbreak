@@ -37,9 +37,6 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     @Query("SELECT c FROM Cluster c WHERE c.stack IS NOT NULL AND c.stack.terminated IS NULL AND c.status IN :statuses")
     List<Cluster> findByStatuses(@Param("statuses") Collection<Status> statuses);
 
-    @Query("SELECT id FROM Cluster c WHERE c.status = 'DELETE_COMPLETED'")
-    Set<Long> findIdsByDeletedStatus();
-
     @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.stack WHERE c.workspace = null")
     Set<Cluster> findAllWithNoWorkspace();
 
