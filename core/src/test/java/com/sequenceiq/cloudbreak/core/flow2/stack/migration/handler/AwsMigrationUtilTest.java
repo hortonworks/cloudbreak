@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.amazonaws.services.cloudformation.model.AmazonCloudFormationException;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.StackResource;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
@@ -56,15 +57,27 @@ public class AwsMigrationUtilTest {
 
     @Test
     public void testAllInstancesDeletedFromCloudFormationWhenASGroupNotFound() {
+        when(cloudResource.getName()).thenReturn("stack-name");
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(Location.location(Region.region("region")));
         when(awsClient.createCloudFormationClient(any(), any())).thenReturn(amazonCloudFormationClient);
-        when(amazonCloudFormationClient.describeStackResources(any())).thenReturn(new DescribeStackResourcesResult()
-                .withStackResources(Collections.emptyList()));
+        when(amazonCloudFormationClient.describeStackResources(any())).thenThrow(new AmazonCloudFormationException("stack-name does not exist"));
         boolean actual = underTest.allInstancesDeletedFromCloudFormation(ac, cloudResource);
         Assertions.assertTrue(actual);
         verify(cfStackUtil, never()).getInstanceIds(amazonAutoScalingClient, "id1");
         verify(cfStackUtil, never()).getInstanceIds(amazonAutoScalingClient, "id2");
+    }
+
+    @Test
+    public void testAllInstancesDeletedFromCloudFormationWhenThrowAwsClientException() {
+        when(cloudResource.getName()).thenReturn("stack-name");
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(Location.location(Region.region("region")));
+        when(awsClient.createCloudFormationClient(any(), any())).thenReturn(amazonCloudFormationClient);
+        when(amazonCloudFormationClient.describeStackResources(any())).thenThrow(new AmazonCloudFormationException("something error happened"));
+        AmazonCloudFormationException actual = Assertions.assertThrows(AmazonCloudFormationException.class,
+                () -> underTest.allInstancesDeletedFromCloudFormation(ac, cloudResource));
+        Assertions.assertEquals("something error happened", actual.getErrorMessage());
     }
 
     @Test
