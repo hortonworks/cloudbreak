@@ -82,6 +82,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
@@ -94,6 +95,8 @@ import com.sequenceiq.common.api.type.ResourceType;
         "cb.max.aws.resource.name.length=200",
         "cb.gcp.stopStart.batch.size=2",
         "cb.gcp.create.batch.size=2",
+        "cb.aws.stopStart.batch.size=2",
+        "cb.aws.create.batch.size=2",
         "cb.aws.hostkey.verify=true",
         "cb.aws.spotinstances.enabled=true",
         "cb.aws.credential.cache.ttl=1"
@@ -190,6 +193,9 @@ public class AwsLaunchTest {
 
     @MockBean
     private ResourceRetriever resourceRetriever;
+
+    @Inject
+    private ResourceBuilders resourceBuilders;
 
     @Test
     public void launchStack() throws Exception {

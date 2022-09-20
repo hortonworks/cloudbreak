@@ -11,6 +11,8 @@ spring:
 
 cb:
   aws:
+    stopStart.batch.size: 10
+    create.batch.size: 8
     spotinstances.enabled: true
     disabled.instance.types:
     distrox:
