@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.assertion.datalake.RecipeTestAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.salt.SaltHighStateDurationAssertions;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -36,6 +37,9 @@ public class SdxRecipeTests extends PreconditionSdxE2ETest {
 
     @Inject
     private RecipeUtil recipeUtil;
+
+    @Inject
+    private SaltHighStateDurationAssertions saltHighStateDurationAssertions;
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
@@ -67,6 +71,7 @@ public class SdxRecipeTests extends PreconditionSdxE2ETest {
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName()), filePath, fileName, 1, null, null, sshJUtil))
+                .then(saltHighStateDurationAssertions::saltHighStateDurationLimits)
                 .when(sdxTestClient.delete())
                 .await(SdxClusterStatusResponse.DELETED)
                 .then((tc, testDto, client) -> verifyPreTerminationRecipe(tc, testDto, getBaseLocationForPreTermination(tc), preTerminationRecipeName))

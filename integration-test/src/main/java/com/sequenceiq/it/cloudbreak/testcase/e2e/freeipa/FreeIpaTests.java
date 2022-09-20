@@ -15,6 +15,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.assertion.freeipa.RecipeTestAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.salt.SaltHighStateDurationAssertions;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -44,6 +45,9 @@ public class FreeIpaTests extends AbstractE2ETest {
 
     @Inject
     private RecipeUtil recipeUtil;
+
+    @Inject
+    private SaltHighStateDurationAssertions saltHighStateDurationAssertions;
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
@@ -107,6 +111,7 @@ public class FreeIpaTests extends AbstractE2ETest {
                 .when(freeIpaTestClient.syncAll())
                 .await(OperationState.COMPLETED)
                 .given(freeIpa, FreeIpaTestDto.class)
+                .then(saltHighStateDurationAssertions::saltHighStateDurationLimits)
                 .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))
                 .await(FREEIPA_DELETE_COMPLETED)
                 .then((tc, testDto, client) -> verifyPreTerminationRecipe(tc, testDto, getBaseLocationForPreTermination(tc), preTerminationRecipeName))
