@@ -2,7 +2,8 @@
 set -ex
 
 : ${USERS_FILE:="./src/main/resources/ums-users/api-credentials.json"}
-: ${DEFAULT_USER_PATH_IN_JSON:=".dev.default"}
+: ${DEPLOYMENT:=dev}
+: ${ACCOUNT:=default}
 
 install_requirements() {
   echo "install jq"
@@ -22,8 +23,8 @@ install_requirements() {
 }
 
 get_admin_access() {
-  ACCESS_KEY=$(jq "[${DEFAULT_USER_PATH_IN_JSON}[] | select(.admin == true)][0].accessKey " -r $USERS_FILE)
-  SECRET_KEY=$(jq "[${DEFAULT_USER_PATH_IN_JSON}[] | select(.admin == true)][0].secretKey " -r $USERS_FILE)
+  ACCESS_KEY=$(jq "[.${DEPLOYMENT}.${ACCOUNT}[] | select(.admin == true)][0].accessKey " -r $USERS_FILE)
+  SECRET_KEY=$(jq "[.${DEPLOYMENT}.${ACCOUNT}[] | select(.admin == true)][0].secretKey " -r $USERS_FILE)
   ~/cdpclienv/bin/cdp configure set cdp_access_key_id "$ACCESS_KEY" --profile ums_cleanup
   ~/cdpclienv/bin/cdp configure set cdp_private_key "$SECRET_KEY" --profile ums_cleanup
   ~/cdpclienv/bin/cdp configure set cdp_endpoint_url "https://api.dps.mow-dev.cloudera.com/" --profile ums_cleanup
@@ -31,7 +32,7 @@ get_admin_access() {
 }
 
 cleanup_users() {
-  jq "${DEFAULT_USER_PATH_IN_JSON}[].crn" -r $USERS_FILE | while read userCrn; do
+  jq ".${DEPLOYMENT}.${ACCOUNT}[].crn" -r $USERS_FILE | while read userCrn; do
     echo "Clean up resource role assignments of $userCrn, if there is any."
     cleanup_user $userCrn
   done
