@@ -143,7 +143,7 @@ public class EnvironmentChildTest extends AbstractMockTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is an available child environment with a referenced available parent environment",
             when = "a delete multiple request is sent for both environments",
