@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.Set;
@@ -27,6 +28,7 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -42,8 +44,6 @@ import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.EnvironmentAware;
 import com.sequenceiq.it.cloudbreak.salt.SaltFunctionReport;
 import com.sequenceiq.it.cloudbreak.salt.SaltHighstateReport;
 import com.sequenceiq.it.cloudbreak.salt.SaltStateReport;
@@ -57,9 +57,16 @@ public class SshSaltExecutionMetricsActions extends SshJClientActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SshSaltExecutionMetricsActions.class);
 
-    public List<SaltHighstateReport> getSaltExecutionMetrics(CloudbreakTestDto testDto, MicroserviceClient client,
+    @Value("${integrationtest.outputdir:.}")
+    private String saltMetricsWorkingDirectory;
+
+    public List<SaltHighstateReport> getSaltExecutionMetrics(String environmentCrn, String resourceName, MicroserviceClient client, String serviceName) {
+        return getSaltExecutionMetrics(environmentCrn, resourceName, client, saltMetricsWorkingDirectory, serviceName);
+    }
+
+    public List<SaltHighstateReport> getSaltExecutionMetrics(String environmentCrn, String resourceName, MicroserviceClient client,
             String workingDirectoryLocation, String serviceName) {
-            String saltMasterIp = getSaltMasterIp(testDto, client, serviceName);
+            String saltMasterIp = getSaltMasterIp(environmentCrn, resourceName, client, serviceName);
         try {
             if (!saltMasterIp.isBlank()) {
                 String extractSaltMetricsCommand = getExtractSaltMetricsCommand(serviceName);
@@ -70,7 +77,7 @@ public class SshSaltExecutionMetricsActions extends SshJClientActions {
                 unzipArchive(String.format("%s/salt_execution_metrics_%s.zip", workingDirectoryLocation, serviceName), new File(workingDirectoryLocation));
                 return generateReport(workingDirectoryLocation, serviceName);
             } else {
-                throw new RuntimeException(String.format("Couldn't collect salt execution metrics for %s", testDto.getName()));
+                throw new RuntimeException(String.format("Couldn't collect salt execution metrics for %s", resourceName));
             }
         } catch (IOException e) {
             LOGGER.info("Error occurred while trying to retrieve Salt execution metrics and generating report on instance [{}]: {}",
@@ -103,29 +110,33 @@ public class SshSaltExecutionMetricsActions extends SshJClientActions {
     }
 
     private String getExtractSaltMetricsCommand(String serviceName) {
+        String commandResult = "";
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("salt/export_salt_metrics.sh");
 
         if (inputStream == null) {
             throw new IllegalArgumentException("salt/export_salt_metrics.sh could not be found");
         }
 
-        Scanner s = new Scanner(inputStream).useDelimiter("\\A");
-        String result = s.hasNext() ? s.next() : "";
-        return String.format(result, serviceName, serviceName, serviceName, serviceName, serviceName, serviceName);
+        Scanner commands = new Scanner(inputStream).useDelimiter("\\A");
+        while (commands.hasNext()) {
+            commandResult = commands.next();
+        }
+        commands.close();
+        return String.format(commandResult, serviceName, serviceName, serviceName, serviceName, serviceName, serviceName);
     }
 
-    private String getSaltMasterIp(CloudbreakTestDto testDto, MicroserviceClient client, String serviceName) {
+    private String getSaltMasterIp(String environmentCrn, String resourceName, MicroserviceClient client, String serviceName) {
         switch (serviceName) {
             case "freeipa":
-                return getFreeIpaGatewayPrivateIp(((EnvironmentAware) testDto).getEnvironmentCrn(), (FreeIpaClient) client);
+                return getFreeIpaGatewayPrivateIp(environmentCrn, (FreeIpaClient) client);
             case "sdx":
                 List<InstanceGroupV4Response> sdxInstanceGroups = ((SdxClient) client).getDefaultClient().sdxEndpoint()
-                        .getDetail(testDto.getName(), Set.of()).getStackV4Response().getInstanceGroups();
+                        .getDetail(resourceName, Set.of()).getStackV4Response().getInstanceGroups();
                 LOGGER.info("Sdx host groups found: {}", sdxInstanceGroups.toString());
                 return getGatewayPrivateIp(sdxInstanceGroups);
             case "distrox":
                 List<InstanceGroupV4Response> distroxInstanceGroups = ((CloudbreakClient) client).getDefaultClient().distroXV1Endpoint()
-                        .getByName(testDto.getName(), new HashSet<>()).getInstanceGroups();
+                        .getByName(resourceName, new HashSet<>()).getInstanceGroups();
                 LOGGER.info("DistroX instance groups found: {}", distroxInstanceGroups.toString());
                 return getGatewayPrivateIp(distroxInstanceGroups);
             default:
@@ -218,13 +229,13 @@ public class SshSaltExecutionMetricsActions extends SshJClientActions {
             Map<String, Map<String, SaltFunctionReport>> map = new ObjectMapper().readValue(jsonString, new TypeReference<>() { });
             Map<String, List<SaltStateReport>> stateReportListForInstances = new HashMap<>();
 
-            for (Map.Entry<String, Map<String, SaltFunctionReport>> host : map.entrySet()) {
+            for (Entry<String, Map<String, SaltFunctionReport>> host : map.entrySet()) {
                 List<SaltStateReport> saltStateReportList = new ArrayList<>();
                 Map<String, List<Pair<String, SaltFunctionReport>>> methodsGroupedBySls = host.getValue().entrySet().stream()
                         .map(entry -> Pair.of(entry.getKey(), entry.getValue()))
                         .collect(Collectors.groupingBy(pair -> pair.getRight().getSls()));
 
-                for (Map.Entry<String, List<Pair<String, SaltFunctionReport>>> entry : methodsGroupedBySls.entrySet()) {
+                for (Entry<String, List<Pair<String, SaltFunctionReport>>> entry : methodsGroupedBySls.entrySet()) {
                     saltStateReportList.add(new SaltStateReport(entry.getKey(),
                             entry.getValue().stream()
                                     .sorted((a, b) -> Double.compare(b.getRight().getDuration(), a.getRight().getDuration()))

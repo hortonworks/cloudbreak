@@ -29,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.salt.SaltHighStateDurationAssertions;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -105,6 +106,9 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
 
     @Inject
     private RecipeUtil recipeUtil;
+
+    @Inject
+    private SaltHighStateDurationAssertions saltHighStateDurationAssertions;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -186,6 +190,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
+                .then(saltHighStateDurationAssertions::saltHighStateDurationLimits)
                 .then(this::verifyDistroxVolumeEncryptionKey)
                 .then(this::verifyAwsEnaDriver)
                 .then(new AwsAvailabilityZoneAssertion())
@@ -271,7 +276,8 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
 
     private ResourceGroup createResourceGroupForEnvironment(TestContext testContext) {
         resourceGroupForTest = resourcePropertyProvider().getName();
-        Map<String, String> tags = Map.of("owner", testContext.getActingUserOwnerTag(), "creation-timestamp", testContext.getCreationTimestampTag());
+        Map<String, String> tags = Map.of("owner", testContext.getActingUserOwnerTag(),
+                "creation-timestamp", testContext.getCreationTimestampTag());
         return azureCloudFunctionality.createResourceGroup(resourceGroupForTest, tags);
     }
 
