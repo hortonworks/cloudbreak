@@ -19,7 +19,7 @@
               "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-16"
+          "instanceType": "e2-standard-8"
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -35,7 +35,7 @@
               "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-16"
+          "instanceType": "e2-standard-8"
         },
         "nodeCount": 1,
         "type": "CORE",
@@ -51,7 +51,7 @@
               "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-16"
+          "instanceType": "e2-standard-8"
         },
         "nodeCount": 1,
         "type": "CORE",
@@ -62,8 +62,8 @@
         "template": {
           "attachedVolumes": [
             {
-              "count": 7,
-              "size": 1000,
+              "count": 1,
+              "size": 100,
               "type": "pd-ssd"
             }
           ],
@@ -78,8 +78,8 @@
         "template": {
           "attachedVolumes": [
             {
-              "count": 7,
-              "size": 1000,
+              "count": 5,
+              "size": 500,
               "type": "pd-ssd"
             }
           ],

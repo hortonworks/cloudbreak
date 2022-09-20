@@ -28,7 +28,7 @@ public class ImpalaVolumeConfigProvider implements CmHostGroupRoleConfigProvider
 
     private static final String IMPALA_SCRATCH_DIRS_PARAM = "scratch_dirs";
 
-    private static final int MAX_IMPALA_DATA_CACHE_SIZE_IN_GB = 130;
+    private static final int MAX_IMPALA_DATA_CACHE_SIZE_IN_GB = 300;
 
     private static final int MIN_ATTACHED_VOLUME_SIZE_TO_ENABLE_CACHE_IN_GB = 0;
 
@@ -68,11 +68,10 @@ public class ImpalaVolumeConfigProvider implements CmHostGroupRoleConfigProvider
                     configs.add(config(IMPALA_DATACACHE_ENABLED_PARAM, "true"));
 
                     if (checkTemporaryStorage(hostGroupView, temporaryStorageVolumeCount)) {
-                        long temporaryStoragedataCacheCapacityInBytes = VolumeUtils
-                                .convertGBToBytes(Math.min(temporaryStorageVolumeSize / 2,
-                                        MAX_IMPALA_DATA_CACHE_SIZE_IN_GB / temporaryStorageVolumeCount));
+                        long temporaryStorageDataCacheCapacityInBytes = VolumeUtils
+                                .convertGBToBytes(temporaryStorageVolumeSize / 2);
 
-                        configs.add(config(IMPALA_DATACACHE_CAPACITY_PARAM, Long.toString(temporaryStoragedataCacheCapacityInBytes)));
+                        configs.add(config(IMPALA_DATACACHE_CAPACITY_PARAM, Long.toString(temporaryStorageDataCacheCapacityInBytes)));
 
                         configs.add(config(IMPALA_DATACACHE_DIRS_PARAM,
                                 buildEphemeralVolumePathString(temporaryStorageVolumeCount, "impala/datacache")));
