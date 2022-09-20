@@ -20,7 +20,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -53,12 +52,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 public class ComputeResourceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputeResourceService.class);
-
-    @Value("${cb.gcp.stopStart.batch.size}")
-    private Integer stopStartBatchSize;
-
-    @Value("${cb.gcp.create.batch.size}")
-    private Integer createBatchSize;
 
     @Inject
     private AsyncTaskExecutor resourceBuilderExecutor;
@@ -122,7 +115,7 @@ public class ComputeResourceService {
 
     public List<CloudResourceStatus> update(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack stack, List<CloudResource> computeResources) {
         LOGGER.info("Update compute resources.");
-        return new ResourceBuilder(ctx, auth).updateResources(stack, stack.getGroups(), computeResources);
+        return new ResourceBuilder(ctx, auth).updateResources(auth, stack, stack.getGroups(), computeResources);
     }
 
     public List<CloudVmInstanceStatus> stopInstances(ResourceBuilderContext context, AuthenticatedContext auth,
@@ -149,6 +142,7 @@ public class ComputeResourceService {
             List<CloudResource> resourceList = getResources(builder.resourceType(), resources);
             List<CloudInstance> allInstances = getCloudInstances(resourceList, instances);
 
+            Integer stopStartBatchSize = resourceBuilders.getStopStartBatchSize(auth.getCloudContext().getVariant());
             if (!allInstances.isEmpty()) {
                 LOGGER.debug("Split {} instances to {} chunks to execute the stop/start operation parallel", allInstances.size(), stopStartBatchSize);
                 AtomicInteger counter = new AtomicInteger();
@@ -297,6 +291,7 @@ public class ComputeResourceService {
             Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
             for (Group group : getOrderedCopy(groups)) {
                 List<CloudInstance> instances = group.getInstances();
+                Integer createBatchSize = resourceBuilders.getCreateBatchSize(auth.getCloudContext().getVariant());
 
                 LOGGER.debug("Split the instances to {} chunks to execute the operation in parallel", createBatchSize);
                 AtomicInteger counter = new AtomicInteger();
@@ -330,12 +325,14 @@ public class ComputeResourceService {
             return results;
         }
 
-        public List<CloudResourceStatus> updateResources(CloudStack cloudStack, Iterable<Group> groups, List<CloudResource> computeResources) {
+        public List<CloudResourceStatus> updateResources(AuthenticatedContext auth, CloudStack cloudStack, Iterable<Group> groups,
+            List<CloudResource> computeResources) {
             List<CloudResourceStatus> results = new ArrayList<>();
             Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
             for (Group group : getOrderedCopy(groups)) {
                 List<CloudInstance> instances = group.getInstances();
 
+                Integer createBatchSize = resourceBuilders.getCreateBatchSize(auth.getCloudContext().getVariant());
                 LOGGER.debug("Split the instances to {} chunks to execute the operation in parallel", createBatchSize);
                 AtomicInteger counter = new AtomicInteger();
                 Collection<List<CloudInstance>> instancesChunks = instances.stream()
