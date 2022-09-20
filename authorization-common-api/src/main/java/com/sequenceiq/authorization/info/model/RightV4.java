@@ -23,6 +23,7 @@ public enum RightV4 {
     ENV_STOP(AuthorizationResourceAction.STOP_ENVIRONMENT),
     ENV_DELETE(AuthorizationResourceAction.DELETE_ENVIRONMENT),
     ENV_DESCRIBE(AuthorizationResourceAction.DESCRIBE_ENVIRONMENT),
+    ENV_EDIT(AuthorizationResourceAction.EDIT_ENVIRONMENT),
     CHANGE_CRED(AuthorizationResourceAction.CHANGE_CREDENTIAL),
     DH_CREATE(AuthorizationResourceAction.ENVIRONMENT_CREATE_DATAHUB),
     UPDATE_AZURE_ENCRYPTION_RESOURCES(AuthorizationResourceAction.UPDATE_AZURE_ENCRYPTION_RESOURCES),
