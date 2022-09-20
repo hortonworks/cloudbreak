@@ -48,7 +48,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_E16_v3"
+          "instanceType": "Standard_E16ds_v4"
         },
         "nodeCount": 1,
         "type": "CORE",
@@ -71,7 +71,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_E16_v3"
+          "instanceType": "Standard_E16ds_v4"
         },
         "nodeCount": 2,
         "type": "CORE",

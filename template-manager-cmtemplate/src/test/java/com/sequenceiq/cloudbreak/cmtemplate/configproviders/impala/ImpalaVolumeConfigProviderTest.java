@@ -46,7 +46,7 @@ class ImpalaVolumeConfigProviderTest {
                 List.of(
                         config("scratch_dirs", "/hadoopfs/ephfs1/impala/scratch,/hadoopfs/ephfs2/impala/scratch,/hadoopfs/ephfs3/impala/scratch"),
                         config("datacache_enabled", "true"),
-                        config("datacache_capacity", "46170898432"),
+                        config("datacache_capacity", "161061273600"),
                         config("datacache_dirs", "/hadoopfs/ephfs1/impala/datacache,/hadoopfs/ephfs2/impala/datacache,/hadoopfs/ephfs3/impala/datacache")),
                 roleConfigs
         );
@@ -61,7 +61,7 @@ class ImpalaVolumeConfigProviderTest {
                 List.of(
                         config("scratch_dirs", "/hadoopfs/fs1/impala/scratch,/hadoopfs/fs2/impala/scratch,/hadoopfs/fs3/impala/scratch"),
                         config("datacache_enabled", "true"),
-                        config("datacache_capacity", "46170898432"),
+                        config("datacache_capacity", "107374182400"),
                         config("datacache_dirs", "/hadoopfs/fs1/impala/datacache,/hadoopfs/fs2/impala/datacache,/hadoopfs/fs3/impala/datacache")),
                 roleConfigs
         );
@@ -76,7 +76,7 @@ class ImpalaVolumeConfigProviderTest {
                 List.of(
                         config("scratch_dirs", "/hadoopfs/ephfs1/impala/scratch"),
                         config("datacache_enabled", "true"),
-                        config("datacache_capacity", "139586437120"),
+                        config("datacache_capacity", "161061273600"),
                         config("datacache_dirs", "/hadoopfs/ephfs1/impala/datacache")),
                 roleConfigs
         );
@@ -91,7 +91,7 @@ class ImpalaVolumeConfigProviderTest {
                 List.of(
                         config("scratch_dirs", "/hadoopfs/fs1/impala/scratch,/hadoopfs/fs2/impala/scratch,/hadoopfs/fs3/impala/scratch"),
                         config("datacache_enabled", "true"),
-                        config("datacache_capacity", "46170898432"),
+                        config("datacache_capacity", "107374182400"),
                         config("datacache_dirs", "/hadoopfs/fs1/impala/datacache,/hadoopfs/fs2/impala/datacache,/hadoopfs/fs3/impala/datacache")),
                 roleConfigs
         );
@@ -106,7 +106,7 @@ class ImpalaVolumeConfigProviderTest {
                 List.of(
                         config("scratch_dirs", "/hadoopfs/ephfs1/impala/scratch"),
                         config("datacache_enabled", "true"),
-                        config("datacache_capacity", "139586437120"),
+                        config("datacache_capacity", "161061273600"),
                         config("datacache_dirs", "/hadoopfs/ephfs1/impala/datacache")),
                 roleConfigs
         );
