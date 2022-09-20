@@ -30,15 +30,15 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
 
     Optional<Cluster> findOneByStackId(long stackId);
 
+    @Query(value = "SELECT cluster.id FROM cluster WHERE cluster.stack_id = :stackId", nativeQuery = true)
+    Optional<Long> findClusterIdByStackId(long stackId);
+
     @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.gateway LEFT JOIN FETCH c.hostGroups LEFT JOIN FETCH c.containers LEFT JOIN FETCH c.components "
             + "LEFT JOIN FETCH c.rdsConfigs WHERE c.id= :id")
     Optional<Cluster> findOneWithLists(@Param("id") Long id);
 
     @Query("SELECT c FROM Cluster c WHERE c.stack IS NOT NULL AND c.stack.terminated IS NULL AND c.status IN :statuses")
     List<Cluster> findByStatuses(@Param("statuses") Collection<Status> statuses);
-
-    @Query("SELECT id FROM Cluster c WHERE c.status = 'DELETE_COMPLETED'")
-    Set<Long> findIdsByDeletedStatus();
 
     @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.stack WHERE c.workspace = null")
     Set<Cluster> findAllWithNoWorkspace();

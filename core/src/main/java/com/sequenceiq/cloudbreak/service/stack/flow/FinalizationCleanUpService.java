@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import java.util.Optional;
+
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
@@ -31,9 +33,14 @@ public class FinalizationCleanUpService {
         this.clusterComponentConfigProvider = clusterComponentConfigProvider;
     }
 
-    public void detachClusterComponentRelatedAuditEntries() throws CleanUpException {
-        LOGGER.debug("About to clean up detached/orphaned cluster component audit events.");
-        executeCleanUp(() -> clusterComponentConfigProvider.cleanUpDetachedEntries(clusterService.findIdsByDeletedStatus()), ClusterComponentHistory.class);
+    public void detachClusterComponentRelatedAuditEntries(Long stackId) throws CleanUpException {
+        Optional<Long> clusterIdRepositryResult = clusterService.findClusterIdByStackId(stackId);
+        if (clusterIdRepositryResult.isPresent()) {
+            LOGGER.debug("About to clean up detached/orphaned cluster component audit events.");
+            executeCleanUp(() -> clusterComponentConfigProvider.cleanUpDetachedEntries(clusterIdRepositryResult.get()), ClusterComponentHistory.class);
+        } else {
+            LOGGER.debug("No cluster found with stack id [{}], therefore no {} cleanup happened.", stackId, ClusterComponentHistory.class.getSimpleName());
+        }
     }
 
     public void cleanUpStructuredEventsForStack(Long stackId) {
