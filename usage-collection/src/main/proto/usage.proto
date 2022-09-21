@@ -216,6 +216,12 @@ message Event {
     CDPRecipeEvent cdpRecipeEvent = 103;
     // A cluster (FreeIPA, Data Lake, Data Hub) creation event with recipe related details.
     CDPClusterCreationRecipeEvent cdpClusterCreationRecipeEvent = 104;
+    // A validation result for a CDP resource from the Metering Events Monitoring service.
+    CDPMEMValidationResult cdpMEMValidationResult = 105;
+    // A CDP DataFlow flow design lifecycle event was triggered
+    CDPDFFlowDesignLifecycle cdpDFFlowDesignLifecycle = 106;
+    // A CDP environment's proxy config is edited.
+    CDPEnvironmentProxyConfigEditEvent cdpEnvironmentProxyConfigEditEvent = 107;
   }
 }
 
@@ -447,6 +453,8 @@ message DatalakeBackupRestoreStatus {
     SUCCESSFUL = 1;
     // Failed result for a backup/restore operation.
     FAILED = 2;
+    // Failed validations for a backup/restore operation.
+    VALIDATION_FAILED = 3;
   }
 }
 
@@ -1233,6 +1241,8 @@ message CDPLiftieClusterStatusChanged {
   string clusterCrn = 18;
   // the customers entitlements
   repeated string entitlements = 19;
+  // the workload crn
+  string workloadCrn = 20;
 }
 
 // States of the nodes in a Liftie Cluster
@@ -1657,8 +1667,8 @@ message CDPProxyDetails {
 
 // Show services for which the customer has provided their own DNS zones
 message CDPOwnDnsZones {
-    // Whether DNS is provided for the postgres by the customer or not
-    bool postgres = 1;
+  // Whether DNS is provided for the postgres by the customer or not
+  bool postgres = 1;
 }
 
 message CDPNetworkDetails {
@@ -2044,6 +2054,44 @@ message CDPDFCatalogArtifactVersionDeleted {
   CDPDFEventSource.Value eventSource = 5;
 }
 
+// The various lifecycle actions that can be taken on flow designs.
+message CDPDFFlowDesignAction {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // A value indicating the flow design was created.
+    CREATED = 1;
+    // A value indicating the flow design was opened in the designer.
+    OPENED = 2;
+    // A value indicating the flow design was closed from the designer.
+    CLOSED = 3;
+    // A value indicating the flow design was deleted.
+    DELETED = 4;
+    // A value indicating the flow design was published to the flow catalog.
+    PUBLISHED = 5;
+  }
+}
+
+// Generated when users interact with flow designs
+message CDPDFFlowDesignLifecycle {
+  // The id of the flow design.
+  string flowDesignerId = 1;
+  // The lifecycle action taken on the flow design.
+  CDPDFFlowDesignAction.Value action = 2;
+  // The crn of the data flow service.
+  string dfServiceCrn = 3;
+  // The id of the data flow service.
+  string dfServiceId = 4;
+  // The crn of the CDP environment where the flow design was created.
+  string environmentCrn = 5;
+  // The CDP account ID of the version.
+  string accountId = 6;
+  // Username of the actor that created the flow.
+  string username = 7;
+  // Optional. Actor crn publishing the flow design to the flow catalog. Should only have a value for events coming from the control plane (CDPDFFlowDesignAction.PUBLISHED action)
+  string actorCrn = 8;
+}
+
 // The status of a CDP DataFlow service.
 message CDPDFServiceStatus {
   enum Value {
@@ -2329,6 +2377,16 @@ message CDPDFDeploymentRequested {
   string flowVersionCrn = 13;
   // Deployment name
   string deploymentName = 14;
+  // Does the deployment have custom nar configuration?
+  bool customNarConfiguration = 15;
+  // Does the deployment support inbound connections?
+  bool supportInboundConnection = 16;
+  // Is this deployment a test session?
+  bool testSession = 17;
+  // Optional identifier of the flow design. Should only ever have a value if testSession is true.
+  string flowDesignerId = 18;
+  // Username of the actor that is requesting the deployment. Since this is a workload event, actorCrn is not available.
+  string username = 19;
 }
 
 message CDPDFDeploymentStatusChanged {
@@ -2345,6 +2403,8 @@ message CDPDFDeploymentStatusChanged {
   string flowVersionCrn = 5;
   // Deployment name
   string deploymentName = 6;
+  // The id of the flow design. Either this or flowVersionCrn should be set, but not both.
+  string flowDesignerId = 7;
 }
 
 message CDPDFDeploymentPodStatus {
@@ -3396,10 +3456,10 @@ message CDPStackPatchEvent {
 // Type of stack patch event.
 message CDPStackPatchEventType {
   enum Value {
-      UNSET = 0;
-      AFFECTED = 1;
-      SUCCESS = 2;
-      FAILURE = 3;
+    UNSET = 0;
+    AFFECTED = 1;
+    SUCCESS = 2;
+    FAILURE = 3;
   }
 }
 
@@ -3551,7 +3611,7 @@ message CDPTrialAccountStatusChanged {
   // New trial details contains new trial status, new trial start time and new trial end time
   CDPTrialDetails newCdpTrialDetails = 3;
   // initiatorCrn contain the crn of caller of the request ie either trial monitoring service or admin api call
-  string initiatorCrn = 6;
+  string initiatorCrn = 4;
 }
 
 // CDP Trial Details contains trial status, trial start time and trial end time
@@ -3590,10 +3650,14 @@ message CDPTrialEnvironment {
 
 // The pattern and status for CDP Trial workloads.
 message CDPTrialWorkload {
-  // Pattern used by the trial workload.
-  CDPTrialWorkloadPattern.Value pattern = 1;
+  // Pattern used by the trial workload. Currently supported CDP trial workload patterns are CDPONE_SELF_SERVICE_EXPLORATORY_ANALYTICS, CDPONE_BI_AT_SCALE, CDPONE_REAL_TIME_OPERATIONAL_INSIGHTS, CDPONE_OPEN_DATA_LAKEHOUSE.
+  // CDPONE_SELF_SERVICE_EXPLORATORY_ANALYTICS - Indicates self-service exploratory analytics pattern for CDPOne.
+  // CDPONE_BI_AT_SCALE - Indicates business intelligence at scale pattern for CDPOne.
+  // CDPONE_REAL_TIME_OPERATIONAL_INSIGHTS - Indicates real-time operational insights pattern for CDPOne.
+  // CDPONE_OPEN_DATA_LAKEHOUSE - Indicates open data lakehouse pattern for CDPOne.
+  string pattern = 1;
   // Status of the workload deployment for the trial.
-  CDPTrialWorkloadStatus.Value status = 3;
+  CDPTrialWorkloadStatus.Value status = 2;
 }
 
 // Status options for CDP Trial Workload.
@@ -3605,20 +3669,6 @@ message CDPTrialWorkloadStatus {
     DEPLOYMENT_IN_PROGRESS = 1;
     // Indicates the CDP Trial workload was deployed and is ready for us.
     DEPLOYED = 2;
-  }
-}
-
-// Pattern options supported in CDP Trial.
-message CDPTrialWorkloadPattern {
-  enum Value {
-    // Self-service exploratory analytics pattern for CDP One.
-    CDPONE_SELF_SERVICE_EXPLORATORY_ANALYTICS = 0;
-    // Business intelligence at scale pattern for CDPOne.
-    CDPONE_BI_AT_SCALE = 1;
-    // Machine Learning discovery exploration pattern for CDPOne.
-    CDPONE_ML_DISCOVERY_EXPLORATION = 2;
-    // Real time operational insights patterns for CDPOne.
-    CDPONE_REAL_TIME_OPERATIONAL_INSIGHTS = 3;
   }
 }
 
@@ -3642,20 +3692,20 @@ message CDPVerticalScaleDetails {
 // Type of recipe
 message CDPRecipeType {
   enum Value {
-      // Indicates there is some error, type cannot be recognized
-      UNKNOWN = 0;
-      // Indicates that recipe will be executed before CM start, deprecated status
-      PRE_CLOUDERA_MANAGER_START = 1;
-      // Indicates that recipe will be executed before service starts
-      PRE_SERVICE_DEPLOYMENT = 2;
-      // Indicates that recipe will be executed before termination
-      PRE_TERMINATION = 3;
-      // Indicates that recipe will be executed after CM start, deprecated
-      POST_CLOUDERA_MANAGER_START = 4;
-      // Indicates that recipe will be executed after cluster provision
-      POST_CLUSTER_INSTALL = 5;
+    // Indicates there is some error, type cannot be recognized
+    UNKNOWN = 0;
+    // Indicates that recipe will be executed before CM start, deprecated status
+    PRE_CLOUDERA_MANAGER_START = 1;
+    // Indicates that recipe will be executed before service starts
+    PRE_SERVICE_DEPLOYMENT = 2;
+    // Indicates that recipe will be executed before termination
+    PRE_TERMINATION = 3;
+    // Indicates that recipe will be executed after CM start, deprecated
+    POST_CLOUDERA_MANAGER_START = 4;
+    // Indicates that recipe will be executed after cluster provision
+    POST_CLUSTER_INSTALL = 5;
     // Indicates that recipe will be executed after service starts
-      POST_SERVICE_DEPLOYMENT = 6;
+    POST_SERVICE_DEPLOYMENT = 6;
   }
 }
 
@@ -3707,3 +3757,81 @@ message CDPClusterCreationRecipeEvent {
   string accountId = 5;
 }
 
+// A validation result for a CDP resource from the Metering Events Monitor Service.
+// The result is generated by cross-checking usage events with Metering heartbeats.
+message CDPMEMValidationResult {
+  // CRN of the resource that was validated
+  string resourceCrn = 1;
+  // The CDP account ID.
+  string accountId = 2;
+  // The CDP service type the event is generated from.
+  ServiceType.Value serviceType = 3;
+  // The validation window starting timestamp in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 startTimestamp = 4;
+  // The validation window ending timestamp in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 endTimestamp = 5;
+  // The error message if the validation failed.
+  string error = 6;
+  // The number of nodes that were reported via usage events.
+  int32 nodeCountFromUsageEvents = 7;
+  // The number of nodes that were reported via metering heartbeats.
+  int32 nodeCountFromHeartbeats = 8;
+  // Status of validation
+  CDPMEMValidationStatus.Value status = 9;
+  // The timestamp of the most recent usage event in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 lastEventTimestamp = 10;
+  // The number of usage events received during the validation window.
+  int32 usageEventCount = 11;
+  // The timestamp for when the validation was run in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 validationTimestamp = 12;
+  // A numerical ID for the validation result.
+  uint64 validationID = 13;
+  // A string containing JSON to provide further error details.
+  string errorDetails = 14;
+  // A string containing JSON to provide further validation details.
+  string validationDetails = 15;
+}
+
+// The status for a MEM Validation result.
+message CDPMEMValidationStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // The validation passed.
+    PASSED = 1;
+    // The validation failed.
+    FAILED = 2;
+  }
+}
+
+// Event for a CDP environment's proxy config edit.
+message CDPEnvironmentProxyConfigEditEvent {
+  // CRN of the environment that the edit is requested for.
+  string environmentCrn = 1;
+  // CRN of the proxy config the edit is requested with.
+  string proxyConfigCrn = 2;
+  // CRN of the previous proxy config of the environment.
+  string previousProxyConfigCrn = 3;
+  // Result of the environment proxy config edit.
+  CDPEnvironmentProxyConfigEditResult.Value result = 4;
+  // Optional message with more details about the event.
+  string message = 5;
+}
+
+// Result of a CDP environment's proxy config edit.
+message CDPEnvironmentProxyConfigEditResult {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // The proxy edit successfully finished.
+    SUCCESS = 1;
+    // The proxy edit failed with an error while editing the environment.
+    ENVIRONMENT_FAILURE = 2;
+    // The proxy edit failed with an error while editing the freeipa of the environment.
+    FREEIPA_FAILURE = 3;
+    // The proxy edit failed with an error while editing the datalake of the environment.
+    DATALAKE_FAILURE = 4;
+    // The proxy edit failed with an error while editing a datahub of the environment.
+    DATAHUB_FAILURE = 5;
+  }
+}

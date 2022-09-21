@@ -297,6 +297,14 @@ public class UsageReportProcessor implements UsageReporter {
                 .build(), null);
     }
 
+    @Override
+    public void cdpEnvironmentProxyConfigEditEvent(UsageProto.CDPEnvironmentProxyConfigEditEvent details) {
+        checkNotNull(details);
+        usageProcessingStrategy.processUsage(eventBuilder()
+                .setCdpEnvironmentProxyConfigEditEvent(details)
+                .build(), null);
+    }
+
     private UsageProto.Event.Builder eventBuilder() {
         return UsageProto.Event.newBuilder()
                 .setId(UUID.randomUUID().toString())
