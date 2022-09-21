@@ -163,8 +163,7 @@ public class ClouderaManagerMgmtTelemetryService {
 
     public void updateServiceMonitorConfigs(final StackDtoDelegate stack, final ApiClient client,
             final Telemetry telemetry) throws ApiException {
-        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
-        if (isMonitoringSupported(stack, telemetry, accountId)) {
+        if (isMonitoringSupported(telemetry)) {
             Version cmSmonPrometheusAdapterVersion = Version.parse(CM_SMON_PROMETHEUS_ADAPTER_SUPPORT_FROM_VERSION);
             Version cmSmonVersion = Version.parse(CM_SMON_SUPPORT_FROM_VERSION);
             Version runtimeVersion = Version.parse(stack.getStackVersion());
@@ -253,10 +252,7 @@ public class ClouderaManagerMgmtTelemetryService {
                 && !StackType.DATALAKE.equals(stack.getType());
     }
 
-    private boolean isMonitoringSupported(StackDtoDelegate stack, Telemetry telemetry, String accountId) {
-        return monitoringConfiguration.isEnabled()
-                && telemetry.isMonitoringFeatureEnabled()
-                && (monitoringConfiguration.isPaasSupport() || entitlementService.isCdpSaasEnabled(accountId))
-                && StringUtils.isNotBlank(stack.getStackVersion());
+    private boolean isMonitoringSupported(Telemetry telemetry) {
+        return telemetry.isComputeMonitoringEnabled() && telemetry.isMonitoringFeatureEnabled();
     }
 }
