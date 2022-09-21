@@ -95,11 +95,16 @@ public class SendConsumptionEventHandlerTest {
         MeteringEventsProto.StorageHeartbeat heartbeat = MeteringEventsProto.StorageHeartbeat.newBuilder().build();
 
         when(awsS3ConsumptionCalculator.convertToStorageHeartbeat(any(CloudConsumption.class), eq(storageResult.getStorageInBytes()))).thenReturn(heartbeat);
-        doNothing().when(meteringEventProcessor).storageHeartbeat(heartbeat, MeteringEventsProto.ServiceType.Value.ENVIRONMENT);
+        when(awsS3ConsumptionCalculator.getMeteringServiceType()).thenReturn(MeteringEventsProto.ServiceType.Value.ENVIRONMENT);
+        when(awsS3ConsumptionCalculator.getServiceFeature()).thenReturn(MeteringEventsProto.ServiceFeature.Value.OBJECT_STORAGE);
+        doNothing().when(meteringEventProcessor).storageHeartbeat(heartbeat,
+                MeteringEventsProto.ServiceType.Value.ENVIRONMENT,
+                MeteringEventsProto.ServiceFeature.Value.OBJECT_STORAGE);
         StorageConsumptionCollectionEvent result = (StorageConsumptionCollectionEvent) underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
         verify(awsS3ConsumptionCalculator).convertToStorageHeartbeat(any(CloudConsumption.class), eq(storageResult.getStorageInBytes()));
-        verify(meteringEventProcessor).storageHeartbeat(heartbeat, MeteringEventsProto.ServiceType.Value.ENVIRONMENT);
+        verify(meteringEventProcessor).storageHeartbeat(heartbeat, MeteringEventsProto.ServiceType.Value.ENVIRONMENT,
+                MeteringEventsProto.ServiceFeature.Value.OBJECT_STORAGE);
         assertEquals(CRN, result.getResourceCrn());
         assertEquals(ID, result.getResourceId());
         assertEquals(STORAGE_CONSUMPTION_COLLECTION_FINISH_EVENT.selector(), result.selector());

@@ -6,6 +6,7 @@ public enum ConsumptionType {
 
     UNKNOWN(StorageType.UNKNOWN),
     STORAGE(StorageType.S3),
+    ELASTIC_FILESYSTEM(StorageType.EFS),
     EBS(StorageType.EBS);
 
     private final StorageType storageType;

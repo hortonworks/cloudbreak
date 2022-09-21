@@ -35,8 +35,10 @@ public class MeteringEventProcessorTest {
 
     @Test
     public void testStorageHeartbeatWithNull() {
-        assertThrows(NullPointerException.class, () -> underTest.storageHeartbeat(null, MeteringEventsProto.ServiceType.Value.ENVIRONMENT));
-        assertThrows(NullPointerException.class, () -> underTest.storageHeartbeat(MeteringEventsProto.StorageHeartbeat.newBuilder().build(), null));
+        assertThrows(NullPointerException.class, () -> underTest.storageHeartbeat(null,
+                MeteringEventsProto.ServiceType.Value.ENVIRONMENT,
+                MeteringEventsProto.ServiceFeature.Value.OBJECT_STORAGE));
+        assertThrows(NullPointerException.class, () -> underTest.storageHeartbeat(MeteringEventsProto.StorageHeartbeat.newBuilder().build(), null, null));
     }
 
     @Test
@@ -46,7 +48,7 @@ public class MeteringEventProcessorTest {
 
         MeteringEventsProto.StorageHeartbeat storageHeartbeat = MeteringEventsProto.StorageHeartbeat.newBuilder().build();
 
-        underTest.storageHeartbeat(storageHeartbeat, MeteringEventsProto.ServiceType.Value.ENVIRONMENT);
+        underTest.storageHeartbeat(storageHeartbeat, MeteringEventsProto.ServiceType.Value.ENVIRONMENT, MeteringEventsProto.ServiceFeature.Value.OBJECT_STORAGE);
 
         ArgumentCaptor<DatabusRequest> captor = ArgumentCaptor.forClass(DatabusRequest.class);
         verify(meteringDatabusRecordProcessor).processRecord(captor.capture());

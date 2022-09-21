@@ -44,7 +44,9 @@ public class MeteringEventProcessor {
         meteringDatabusRecordProcessor.processRecord(databusRequest);
     }
 
-    public void storageHeartbeat(MeteringEventsProto.StorageHeartbeat details, MeteringEventsProto.ServiceType.Value serviceType) {
+    public void storageHeartbeat(MeteringEventsProto.StorageHeartbeat details,
+        MeteringEventsProto.ServiceType.Value serviceType,
+        MeteringEventsProto.ServiceFeature.Value serviceFeature) {
         try {
             checkNotNull(details);
             checkNotNull(serviceType);
@@ -52,7 +54,7 @@ public class MeteringEventProcessor {
                     .setStorageHeartbeat(details)
                     .setServiceType(serviceType)
                     .setServiceConfiguration(MeteringEventsProto.ServiceConfiguration.newBuilder()
-                            .setServiceFeature(MeteringEventsProto.ServiceFeature.Value.OBJECT_STORAGE).build())
+                            .setServiceFeature(serviceFeature).build())
                     .build();
             processEvent(event);
             LOGGER.info("Sent binary format for the following metering event: {}", details);
