@@ -96,7 +96,9 @@ import com.sequenceiq.common.api.type.ResourceType;
         "cb.gcp.create.batch.size=2",
         "cb.aws.hostkey.verify=true",
         "cb.aws.spotinstances.enabled=true",
-        "cb.aws.credential.cache.ttl=1"
+        "cb.aws.credential.cache.ttl=1",
+        "cb.db.override.aws.fallback.enabled=true",
+        "cb.db.override.aws.fallback.targetversion=11.16"
 })
 @ActiveProfiles("component")
 public class AwsLaunchTest {
