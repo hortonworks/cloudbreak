@@ -45,8 +45,11 @@ allprojects {
     maven { url = "$cdpRepoUrl" }
     maven { url = "$repoUrl" }
   }
+
   apply plugin: 'idea'
   apply plugin: 'eclipse'
+  apply plugin: 'nebula.blacklist'
+
   group = 'com.sequenceiq'
 
   configurations {

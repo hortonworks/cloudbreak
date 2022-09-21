@@ -15,7 +15,9 @@ import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class TypedJsonUtil {
 
@@ -27,8 +29,11 @@ public class TypedJsonUtil {
             .enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY)
             .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false)
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+            .enable(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL)
             .activateDefaultTypingAsProperty(LaissezFaireSubTypeValidator.instance, DefaultTyping.JAVA_LANG_OBJECT, "@type")
             .addModule(new Jdk8Module())
+            .addModule(new JavaTimeModule())
+            .addModule(new Hibernate5Module())
             .build();
 
     private TypedJsonUtil() {

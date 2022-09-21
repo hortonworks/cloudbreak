@@ -53,7 +53,7 @@ public class FreeIpaCleanupActions {
                             new RevokeCertsResponse(payload, Collections.emptySet(), Collections.emptyMap());
                     sendEvent(context, response);
                 } else {
-                    RevokeCertsRequest request = new RevokeCertsRequest(payload, context.getStack());
+                    RevokeCertsRequest request = new RevokeCertsRequest(payload);
                     sendEvent(context, request);
                 }
             }

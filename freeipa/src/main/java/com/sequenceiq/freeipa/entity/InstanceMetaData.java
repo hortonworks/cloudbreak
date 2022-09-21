@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestrationNode;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceLifeCycle;
@@ -61,6 +62,7 @@ public class InstanceMetaData implements OrchestrationNode {
     private String instanceName;
 
     @ManyToOne
+    @JsonBackReference
     private InstanceGroup instanceGroup;
 
     @Convert(converter = InstanceLifeCycleConverter.class)

@@ -31,6 +31,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.cloudbreak.common.domain.IdAware;
@@ -91,6 +92,7 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
     private Boolean clusterProxyRegistered = Boolean.FALSE;
 
     @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private Set<InstanceGroup> instanceGroups = new HashSet<>();
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -117,6 +119,7 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
     private Network network;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @JsonManagedReference
     private StackStatus stackStatus;
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "stack")

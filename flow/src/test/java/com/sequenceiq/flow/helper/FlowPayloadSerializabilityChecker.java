@@ -21,13 +21,19 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
@@ -88,6 +94,38 @@ public class FlowPayloadSerializabilityChecker {
             }
         }
         checkParameters(clazz, constructors);
+        checkForRecursiveRelations(clazz);
+    }
+
+    private void checkForRecursiveRelations(Class<?> clazz) {
+        for (Field field : getInheritedDeclaredFields(clazz)) {
+            if (!Modifier.isStatic(field.getModifiers())) {
+                boolean oneToMany = field.getAnnotation(OneToMany.class) != null;
+                boolean oneToOne = field.getAnnotation(OneToOne.class) != null;
+                boolean noJsonIgnore = field.getAnnotation(JsonIgnore.class) == null;
+                if (noJsonIgnore && (oneToMany || oneToOne)) {
+                    checkOneToRelations(clazz, field, oneToMany);
+                }
+            }
+        }
+    }
+
+    private void checkOneToRelations(Class<?> clazz, Field field, boolean oneToMany) {
+        Class<?> otherParty = field.getType();
+        for (Field otherPartyField : getInheritedDeclaredFields(otherParty)) {
+            if (otherPartyField.getType().equals(clazz)) {
+                boolean noOtherPartyJsonIgnore = otherPartyField.getAnnotation(JsonIgnore.class) == null;
+                if (noOtherPartyJsonIgnore && (field.getAnnotation(JsonManagedReference.class) == null ||
+                        otherPartyField.getAnnotation(JsonBackReference.class) == null)) {
+
+                    validationErrors.add(decorateWitParentClasses(String.format(
+                            "Class %s has @OneTo%s relation on field [%s] to %s but no @JsonManagedReference "
+                                    + "or no @JsonBackReference on the referenced class' field [%s]. "
+                                    + "This causes infinite recursion upon serialization.",
+                            clazz.getName(), oneToMany ? "Many" : "One", field.getName(), otherParty.getName(), otherPartyField.getName())));
+                }
+            }
+        }
     }
 
     private void checkPrivateFields(Class<?> clazz) {

@@ -15,6 +15,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 public class SecurityGroup {
 
@@ -26,6 +28,7 @@ public class SecurityGroup {
     private String name;
 
     @OneToMany(mappedBy = "securityGroup", cascade = {CascadeType.REMOVE, CascadeType.PERSIST}, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference
     private Set<SecurityRule> securityRules = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
