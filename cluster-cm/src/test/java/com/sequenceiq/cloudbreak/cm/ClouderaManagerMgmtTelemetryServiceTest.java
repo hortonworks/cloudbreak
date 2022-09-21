@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.telemetry.monitoring.ExporterConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.Features;
+import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
 
@@ -283,12 +284,13 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         cluster.setCloudbreakClusterManagerMonitoringPassword("admin123");
         stack.setCluster(cluster);
         Telemetry telemetry = new Telemetry();
+        Monitoring monitoring = new Monitoring();
+        monitoring.setRemoteWriteUrl("url");
+        telemetry.setMonitoring(monitoring);
         Features features = new Features();
         features.addMonitoring(true);
         telemetry.setFeatures(features);
-        given(monitoringConfiguration.isEnabled()).willReturn(true);
         given(monitoringConfiguration.getClouderaManagerExporter()).willReturn(cmMonitoringConfiguration);
-        given(monitoringConfiguration.isPaasSupport()).willReturn(true);
         given(cmMonitoringConfiguration.getPort()).willReturn(EXPORTER_PORT);
         given(clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(apiClient)).willReturn(mgmtRoleConfigGroupsResourceApi);
         // WHEN
