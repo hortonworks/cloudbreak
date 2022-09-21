@@ -81,7 +81,7 @@ public class ConsumptionInternalV1Controller implements ConsumptionInternalEndpo
     @InternalOnly
     public void scheduleConsumptionCollection(@AccountId String accountId,
             @Valid @NotNull CloudResourceConsumptionRequest request,
-            @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER}) @NotEmpty String initiatorUserCrn) {
+            @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER}) @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
         LOGGER.info("Registering consumption collection for resource with CRN [{}] and location [{}]",
                 request.getMonitoredResourceCrn(), request.getCloudResourceId());
         scheduleCloudResourceConsumption(request, request.getConsumptionType());

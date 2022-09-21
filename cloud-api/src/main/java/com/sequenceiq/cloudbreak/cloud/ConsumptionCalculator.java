@@ -22,6 +22,9 @@ public interface ConsumptionCalculator {
 
     StorageType storageType();
 
-    CloudPlatform cloudPlatform();
+    MeteringEventsProto.ServiceType.Value getMeteringServiceType();
 
+    MeteringEventsProto.ServiceFeature.Value getServiceFeature();
+
+    CloudPlatform cloudPlatform();
 }

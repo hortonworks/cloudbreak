@@ -56,7 +56,10 @@ public class SendConsumptionEventHandler  extends AbstractStorageOperationHandle
         if (storage != null && consumptionCalculator.isPresent()) {
             MeteringEventsProto.StorageHeartbeat heartbeat = consumptionCalculator.get()
                     .convertToStorageHeartbeat(cloudConsumption, storage.getStorageInBytes());
-            meteringEventProcessor.storageHeartbeat(heartbeat, MeteringEventsProto.ServiceType.Value.ENVIRONMENT);
+            meteringEventProcessor.storageHeartbeat(heartbeat,
+                    consumptionCalculator.get().getMeteringServiceType(),
+                    consumptionCalculator.get().getServiceFeature()
+            );
             LOGGER.debug("StorageHeartbeat event was successfully sent for Consumption with CRN [{}]", resourceCrn);
 
             return StorageConsumptionCollectionEvent.builder()

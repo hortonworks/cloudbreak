@@ -19,7 +19,7 @@ public class CloudResourceConsumptionRequest extends ConsumptionBaseRequest {
     private String cloudResourceId;
 
     @NotNull
-    @ApiModelProperty(value = ConsumptionModelDescription.CONSUMPTION_TYPE, allowableValues = "UNKNOWN,STORAGE,EBS", required = true)
+    @ApiModelProperty(value = ConsumptionModelDescription.CONSUMPTION_TYPE, allowableValues = "UNKNOWN,STORAGE,EBS,ELASTIC_FILESYSTEM", required = true)
     private ConsumptionType consumptionType;
 
     public ConsumptionType getConsumptionType() {
