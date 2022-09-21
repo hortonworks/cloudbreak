@@ -39,10 +39,8 @@ public class EnvProxyModificationSaveAssociationHandler extends EventSenderAware
                     EnvProxyModificationStateSelectors.FINISH_MODIFY_PROXY_EVENT.selector(), environmentDto, eventData.getProxyConfig());
             eventSender().sendEvent(envProxyModificationEvent, event.getHeaders());
         } catch (Exception e) {
-            // we can not reach this without knowing that an environment exists with the given id, therefore the orElseThrow() should be safe
-            EnvironmentDto environmentDto = environmentService.findById(eventData.getEnvironmentDto().getId()).orElseThrow();
             EnvProxyModificationFailedEvent envProxyModificationFailedEvent = new EnvProxyModificationFailedEvent(
-                    environmentDto, EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED, e);
+                    eventData.getEnvironmentDto(), eventData.getProxyConfig(), EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED, e);
             eventSender().sendEvent(envProxyModificationFailedEvent, event.getHeaders());
         }
     }

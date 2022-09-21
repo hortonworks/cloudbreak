@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationContext;
 import com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationFailedEvent;
@@ -21,9 +23,12 @@ public class ProxyConfigModificationFailedStateAction extends AbstractEnvProxyMo
 
     private final EnvironmentStatusUpdateService environmentStatusUpdateService;
 
-    public ProxyConfigModificationFailedStateAction(EnvironmentStatusUpdateService environmentStatusUpdateService) {
+    private final UsageReporter usageReporter;
+
+    public ProxyConfigModificationFailedStateAction(EnvironmentStatusUpdateService environmentStatusUpdateService, UsageReporter usageReporter) {
         super(EnvProxyModificationFailedEvent.class);
         this.environmentStatusUpdateService = environmentStatusUpdateService;
+        this.usageReporter = usageReporter;
     }
 
     @Override
@@ -33,6 +38,19 @@ public class ProxyConfigModificationFailedStateAction extends AbstractEnvProxyMo
         environmentStatusUpdateService.updateFailedEnvironmentStatusAndNotify(context, payload, payload.getEnvironmentStatus(),
                 ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FAILED, List.of(payload.getException().getMessage()),
                 EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_FAILED_STATE);
+        reportFailure(context, payload);
+
         sendEvent(context, EnvProxyModificationStateSelectors.HANDLE_FAILED_MODIFY_PROXY_EVENT.event(), payload);
+    }
+
+    private void reportFailure(EnvProxyModificationContext context, EnvProxyModificationFailedEvent payload) {
+        UsageProto.CDPEnvironmentProxyConfigEditEvent event = UsageProto.CDPEnvironmentProxyConfigEditEvent.newBuilder()
+                .setEnvironmentCrn(payload.getResourceCrn())
+                .setProxyConfigCrn(getProxyConfigCrn(payload.getProxyConfig()))
+                .setPreviousProxyConfigCrn(getProxyConfigCrn(context.getPreviousProxyConfig()))
+                .setResult(UsageProto.CDPEnvironmentProxyConfigEditResult.Value.ENVIRONMENT_FAILURE)
+                .setMessage(payload.getException().getMessage())
+                .build();
+        usageReporter.cdpEnvironmentProxyConfigEditEvent(event);
     }
 }

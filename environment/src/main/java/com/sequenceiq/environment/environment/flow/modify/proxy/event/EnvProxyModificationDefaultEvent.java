@@ -5,11 +5,10 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.environment.flow.EnvironmentEvent;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 
-public class EnvProxyModificationDefaultEvent extends BaseFlowEvent implements EnvironmentEvent {
+public class EnvProxyModificationDefaultEvent extends BaseFlowEvent implements ProxyConfigModificationEvent {
 
     private final EnvironmentDto environmentDto;
 
@@ -30,6 +29,7 @@ public class EnvProxyModificationDefaultEvent extends BaseFlowEvent implements E
         return environmentDto;
     }
 
+    @Override
     public ProxyConfig getProxyConfig() {
         return proxyConfig;
     }

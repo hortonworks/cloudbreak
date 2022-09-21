@@ -76,9 +76,8 @@ class EnvProxyModificationSaveAssociationHandlerTest {
         underTest.accept(wrappedEvent);
 
         EnvProxyModificationFailedEvent envProxyModificationFailedEvent = new EnvProxyModificationFailedEvent(
-                environmentDto, EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED, cause);
+                environmentDto, proxyConfig, EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED, cause);
         verify(environmentService).updateProxyConfig(ENV_ID, proxyConfig);
-        verify(environmentService).findById(ENV_ID);
         verify(eventSender).sendEvent(envProxyModificationFailedEvent, wrappedEvent.getHeaders());
     }
 

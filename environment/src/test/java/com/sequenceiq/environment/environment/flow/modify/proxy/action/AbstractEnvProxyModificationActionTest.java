@@ -36,6 +36,8 @@ class AbstractEnvProxyModificationActionTest {
 
     private static final Long RESOURCE_ID = 1L;
 
+    private static final String PROXY_CRN = "proxy-crn";
+
     @Mock
     private EnvironmentService environmentService;
 
@@ -71,6 +73,7 @@ class AbstractEnvProxyModificationActionTest {
         lenient().when(environment.getId()).thenReturn(RESOURCE_ID);
         lenient().when(environment.getProxyConfig()).thenReturn(proxyConfig);
         lenient().when(environmentService.findEnvironmentByIdOrThrow(RESOURCE_ID)).thenReturn(environment);
+        lenient().when(proxyConfig.getResourceCrn()).thenReturn(PROXY_CRN);
     }
 
     @Test
@@ -106,6 +109,20 @@ class AbstractEnvProxyModificationActionTest {
                 .returns(environmentDto, EnvProxyModificationFailedEvent::getEnvironmentDto)
                 .returns(EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED, EnvProxyModificationFailedEvent::getEnvironmentStatus)
                 .returns(exception, EnvProxyModificationFailedEvent::getException);
+    }
+
+    @Test
+    void getProxyConfigCrnWithNull() {
+        String result = underTest.getProxyConfigCrn(null);
+
+        assertThat(result).isEqualTo("");
+    }
+
+    @Test
+    void getProxyConfigCrnWithValue() {
+        String result = underTest.getProxyConfigCrn(proxyConfig);
+
+        assertThat(result).isEqualTo(PROXY_CRN);
     }
 
     private static class DummyEnvProxyModificationAction extends AbstractEnvProxyModificationAction<EnvProxyModificationDefaultEvent> {

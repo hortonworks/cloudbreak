@@ -177,4 +177,11 @@ public interface UsageReporter {
      */
     void cdpClusterCreationRecipeEvent(
             UsageProto.CDPClusterCreationRecipeEvent details);
+
+    /**
+     * Reports an event for an environment's proxy config is edited
+     * @param details the event details
+     */
+    void cdpEnvironmentProxyConfigEditEvent(
+            UsageProto.CDPEnvironmentProxyConfigEditEvent details);
 }
