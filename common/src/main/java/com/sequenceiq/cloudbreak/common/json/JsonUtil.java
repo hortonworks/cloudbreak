@@ -23,7 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import net.sf.json.JSONObject;
 
@@ -41,7 +43,10 @@ public class JsonUtil {
         MAPPER.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
         MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false);
         MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        MAPPER.enable(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL);
         MAPPER.registerModule(new Jdk8Module());
+        MAPPER.registerModule(new JavaTimeModule());
+        MAPPER.registerModule(new Hibernate5Module());
     }
 
     private JsonUtil() {
@@ -115,7 +120,8 @@ public class JsonUtil {
                 }
                 return MAPPER.writeValueAsString(object);
             } catch (JsonProcessingException e) {
-                LOGGER.warn("JSON serialization went wrong in silent mode: {}", e.getMessage());
+                LOGGER.warn("JSON serialization went wrong in silent mode:", e);
+                logObject(object);
             }
         }
         return null;
@@ -191,6 +197,14 @@ public class JsonUtil {
             } catch (IOException e) {
                 LOGGER.error("Failed to deserialize with Jackson: {}", jackson, e);
             }
+        }
+    }
+
+    private static void logObject(Object object) {
+        try {
+            LOGGER.debug("Original object: {}", object);
+        } catch (Exception e) {
+            LOGGER.debug("{}.toString() has thrown an error.", object.getClass().getName(), e);
         }
     }
 }

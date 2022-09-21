@@ -9,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 public class SecurityRule {
 
@@ -24,6 +26,7 @@ public class SecurityRule {
     private Long id;
 
     @ManyToOne
+    @JsonBackReference
     private SecurityGroup securityGroup;
 
     private String cidr;

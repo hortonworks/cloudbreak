@@ -21,6 +21,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
@@ -57,9 +59,11 @@ public class InstanceGroup implements Comparable<InstanceGroup> {
     private InstanceGroupType instanceGroupType = InstanceGroupType.MASTER;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
     private Stack stack;
 
     @OneToMany(mappedBy = "instanceGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private Set<InstanceMetaData> instanceMetaData = new HashSet<>();
 
     @Convert(converter = JsonToString.class)

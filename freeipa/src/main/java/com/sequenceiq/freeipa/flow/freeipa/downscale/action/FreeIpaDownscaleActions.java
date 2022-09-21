@@ -276,7 +276,7 @@ public class FreeIpaDownscaleActions {
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackUpdater.updateStackStatus(context.getStack().getId(), getInProgressStatus(variables), "Revoking certificates");
                 CleanupEvent cleanupEvent = buildCleanupEvent(context, getDownscaleHosts(variables));
-                RevokeCertsRequest request = new RevokeCertsRequest(cleanupEvent, context.getStack());
+                RevokeCertsRequest request = new RevokeCertsRequest(cleanupEvent);
                 sendEvent(context, request);
             }
         };
