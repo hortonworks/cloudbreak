@@ -465,7 +465,6 @@ public class TestUtil {
         blueprint.setStatus(ResourceStatus.DEFAULT);
         blueprint.setTags(getEmptyJson());
         blueprint.setResourceCrn("someCrn");
-        blueprint.setCreator("someone");
         return blueprint;
     }
 

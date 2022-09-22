@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DE
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.SERVICE_MANAGED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -77,8 +76,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 @ExtendWith(MockitoExtension.class)
 class BlueprintServiceTest {
     private static final String ACCOUNT_ID = "ACCOUNT_ID";
-
-    private static final String CREATOR = "CREATOR";
 
     @Mock
     private TransactionService transactionService;
@@ -349,9 +346,8 @@ class BlueprintServiceTest {
     @Test
     void testPopulateCrnCorrectly() {
         Blueprint blueprint = new Blueprint();
-        underTest.decorateWithCrn(blueprint, ACCOUNT_ID, CREATOR);
+        underTest.decorateWithCrn(blueprint, ACCOUNT_ID);
 
-        assertThat(blueprint.getCreator(), is(CREATOR));
         assertTrue(blueprint.getResourceCrn().matches("crn:cdp:datahub:us-west-1:" + ACCOUNT_ID + ":clustertemplate:.*"));
     }
 
@@ -578,7 +574,6 @@ class BlueprintServiceTest {
         blueprint.setName(name);
         blueprint.setWorkspace(getWorkspace());
         blueprint.setStatus(status);
-        blueprint.setCreator(CREATOR);
         blueprint.setResourceCrn("someCrn");
         return blueprint;
     }

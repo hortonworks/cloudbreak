@@ -20,8 +20,6 @@ public class VmImage implements ProvisionEntity {
     @SequenceGenerator(name = "vmimage_generator", sequenceName = "vmimage_id_seq", allocationSize = 1)
     private Long id;
 
-    private String creator;
-
     private Long created = System.currentTimeMillis();
 
     @ManyToOne
@@ -40,14 +38,6 @@ public class VmImage implements ProvisionEntity {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getCreator() {
-        return creator;
-    }
-
-    public void setCreator(String creator) {
-        this.creator = creator;
     }
 
     public Long getCreated() {

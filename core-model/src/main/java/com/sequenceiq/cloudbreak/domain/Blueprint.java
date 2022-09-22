@@ -59,8 +59,6 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
 
     private String resourceCrn;
 
-    private String creator;
-
     private String stackType;
 
     private String stackVersion;
@@ -76,14 +74,6 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
-    }
-
-    public String getCreator() {
-        return creator;
-    }
-
-    public void setCreator(String creator) {
-        this.creator = creator;
     }
 
     public Json getTags() {
@@ -202,7 +192,6 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
                 ", tags=" + tags +
                 ", workspace=" + workspace +
                 ", resourceCrn='" + resourceCrn + '\'' +
-                ", creator='" + creator + '\'' +
                 ", stackType='" + stackType + '\'' +
                 ", stackVersion='" + stackVersion + '\'' +
                 ", created=" + created +

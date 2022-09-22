@@ -83,7 +83,6 @@ public class NetworkCreationRequestFactory {
                         networkDto.getServiceEndpointCreation(), environment.getCloudPlatform()))
                 .withUserName(getUserFromCrn(environment.getCreator()))
                 .withAccountId(environment.getAccountId())
-                .withCreatorCrn(environment.getCreator())
                 .withTags(environmentTagProvider.getTags(environment, environment.getNetwork().getResourceCrn()))
                 .withPrivateSubnets(cidrs.getPrivateSubnets())
                 .withPublicSubnets(cidrs.getPublicSubnets());

@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.image;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,8 +21,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -216,18 +215,16 @@ public class CustomImageCatalogServiceTest {
         when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(imageCatalogService.pureSave(imageCatalog)).thenReturn(imageCatalog);
 
-        CustomImage actual = victim.createCustomImage(WORKSPACE_ID, ACCOUNT_ID, CREATOR, IMAGE_CATALOG_NAME, expected);
+        CustomImage actual = victim.createCustomImage(WORKSPACE_ID, ACCOUNT_ID, IMAGE_CATALOG_NAME, expected);
         VmImage actualVmImage = actual.getVmImage().stream().findFirst().get();
 
         assertNotEquals(IMAGE_NAME, actual.getName());
         assertEquals(CUSTOMIZED_IMAGE_ID, actual.getCustomizedImageId());
         assertEquals(BASE_PARCEL_URL, actual.getBaseParcelUrl());
         assertEquals(ImageType.RUNTIME, actual.getImageType());
-        assertEquals(CREATOR, actual.getCreator());
         assertNotNull(actual.getResourceCrn());
         assertEquals(imageCatalog, actual.getImageCatalog());
         assertEquals(1, actual.getVmImage().size());
-        assertEquals(CREATOR, actualVmImage.getCreator());
         assertEquals(REGION, actualVmImage.getRegion());
         assertEquals(IMAGE_REFERENCE, actualVmImage.getImageReference());
         assertEquals(actual, actualVmImage.getCustomImage());
@@ -248,7 +245,7 @@ public class CustomImageCatalogServiceTest {
 
 
 
-        assertThrows(NotFoundException.class, () -> victim.createCustomImage(WORKSPACE_ID, ACCOUNT_ID, CREATOR, IMAGE_CATALOG_NAME, customImage));
+        assertThrows(NotFoundException.class, () -> victim.createCustomImage(WORKSPACE_ID, ACCOUNT_ID, IMAGE_CATALOG_NAME, customImage));
     }
 
     @Test
@@ -260,7 +257,7 @@ public class CustomImageCatalogServiceTest {
                 .when(transactionService).required(any(Supplier.class));
         when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
 
-        assertThrows(BadRequestException.class, () -> victim.createCustomImage(WORKSPACE_ID, ACCOUNT_ID, CREATOR, IMAGE_CATALOG_NAME, null));
+        assertThrows(BadRequestException.class, () -> victim.createCustomImage(WORKSPACE_ID, ACCOUNT_ID, IMAGE_CATALOG_NAME, null));
     }
 
     @Test
@@ -305,7 +302,7 @@ public class CustomImageCatalogServiceTest {
         when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(imageCatalogService.pureSave(imageCatalog)).thenReturn(imageCatalog);
 
-        CustomImage actual = victim.updateCustomImage(WORKSPACE_ID, CREATOR, IMAGE_CATALOG_NAME, updatedCustomImage);
+        CustomImage actual = victim.updateCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, updatedCustomImage);
         assertEquals(1, imageCatalog.getCustomImages().size());
         assertEquals(CUSTOMIZED_IMAGE_ID, actual.getCustomizedImageId());
         assertEquals(BASE_PARCEL_URL, actual.getBaseParcelUrl());
@@ -313,7 +310,6 @@ public class CustomImageCatalogServiceTest {
         assertEquals(1, actual.getVmImage().size());
 
         VmImage actualVmImage = actual.getVmImage().stream().findFirst().get();
-        assertEquals(CREATOR, actualVmImage.getCreator());
         assertEquals(REGION, actualVmImage.getRegion());
         assertEquals(IMAGE_REFERENCE, actualVmImage.getImageReference());
     }
@@ -334,7 +330,7 @@ public class CustomImageCatalogServiceTest {
         when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(imageCatalogService.pureSave(imageCatalog)).thenReturn(imageCatalog);
 
-        CustomImage actual = victim.updateCustomImage(WORKSPACE_ID, CREATOR, IMAGE_CATALOG_NAME, updatedCustomImage);
+        CustomImage actual = victim.updateCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, updatedCustomImage);
         assertEquals(1, imageCatalog.getCustomImages().size());
         assertEquals(CUSTOMIZED_IMAGE_ID, actual.getCustomizedImageId());
         assertEquals(BASE_PARCEL_URL, actual.getBaseParcelUrl());
@@ -342,7 +338,6 @@ public class CustomImageCatalogServiceTest {
         assertEquals(1, actual.getVmImage().size());
 
         VmImage actualVmImage = actual.getVmImage().stream().findFirst().get();
-        assertNull(actualVmImage.getCreator());
         assertEquals(REGION, actualVmImage.getRegion());
         assertEquals(IMAGE_REFERENCE, actualVmImage.getImageReference());
     }
@@ -364,7 +359,7 @@ public class CustomImageCatalogServiceTest {
         when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(imageCatalogService.pureSave(imageCatalog)).thenReturn(imageCatalog);
 
-        CustomImage actual = victim.updateCustomImage(WORKSPACE_ID, CREATOR, IMAGE_CATALOG_NAME, updatedCustomImage);
+        CustomImage actual = victim.updateCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, updatedCustomImage);
 
         assertEquals(1, imageCatalog.getCustomImages().size());
         assertEquals(CUSTOMIZED_IMAGE_ID, actual.getCustomizedImageId());
@@ -387,7 +382,7 @@ public class CustomImageCatalogServiceTest {
         when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(imageCatalogService.pureSave(imageCatalog)).thenReturn(imageCatalog);
 
-        CustomImage actual = victim.updateCustomImage(WORKSPACE_ID, CREATOR, IMAGE_CATALOG_NAME, updatedCustomImage);
+        CustomImage actual = victim.updateCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, updatedCustomImage);
         assertEquals(1, imageCatalog.getCustomImages().size());
         assertEquals(CUSTOMIZED_IMAGE_ID, actual.getCustomizedImageId());
         assertEquals(BASE_PARCEL_URL, actual.getBaseParcelUrl());
@@ -409,7 +404,7 @@ public class CustomImageCatalogServiceTest {
                 .when(transactionService).required(any(Supplier.class));
         when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
 
-        assertThrows(BadRequestException.class, () -> victim.updateCustomImage(WORKSPACE_ID, CREATOR, IMAGE_CATALOG_NAME, customImage));
+        assertThrows(BadRequestException.class, () -> victim.updateCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, customImage));
     }
 
     @Test
@@ -428,7 +423,7 @@ public class CustomImageCatalogServiceTest {
         when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(imageCatalogService.getSourceImageByImageType(savedCustomImage)).thenThrow(new CloudbreakImageCatalogException(""));
 
-        assertThrows(NotFoundException.class, () -> victim.updateCustomImage(WORKSPACE_ID, CREATOR, IMAGE_CATALOG_NAME, updatedCustomImage));
+        assertThrows(NotFoundException.class, () -> victim.updateCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, updatedCustomImage));
     }
 
     private CustomImage aCustomImage() {

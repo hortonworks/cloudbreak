@@ -22,8 +22,6 @@ public class NetworkCreationRequest {
 
     private final String userName;
 
-    private final String creatorCrn;
-
     private String accountId;
 
     private final Region region;
@@ -62,7 +60,6 @@ public class NetworkCreationRequest {
         privateSubnetEnabled = builder.privateSubnetEnabled;
         privateEndpointType = builder.privateEndpointType;
         userName = builder.userName;
-        creatorCrn = builder.creatorCrn;
         tags = builder.tags;
         accountId = builder.accountId;
     }
@@ -127,10 +124,6 @@ public class NetworkCreationRequest {
         return userName;
     }
 
-    public String getCreatorCrn() {
-        return creatorCrn;
-    }
-
     public Map<String, String> getTags() {
         return tags;
     }
@@ -169,8 +162,6 @@ public class NetworkCreationRequest {
         private boolean privateSubnetEnabled;
 
         private PrivateEndpointType privateEndpointType;
-
-        private String creatorCrn;
 
         private String accountId;
 
@@ -253,11 +244,6 @@ public class NetworkCreationRequest {
 
         public Builder withAccountId(String accountId) {
             this.accountId = accountId;
-            return this;
-        }
-
-        public Builder withCreatorCrn(String creatorCrn) {
-            this.creatorCrn = creatorCrn;
             return this;
         }
 

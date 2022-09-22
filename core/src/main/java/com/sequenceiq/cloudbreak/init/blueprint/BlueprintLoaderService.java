@@ -123,8 +123,7 @@ public class BlueprintLoaderService {
             bp.setName(diffBlueprint.getValue().getName());
             bp = setupBlueprint(bp, workspace);
             String accountId = ThreadBasedUserCrnProvider.getAccountId();
-            String creator = ThreadBasedUserCrnProvider.getUserCrn();
-            blueprintService.decorateWithCrn(bp, accountId, creator);
+            blueprintService.decorateWithCrn(bp, accountId);
             resultList.add(bp);
         }
 
