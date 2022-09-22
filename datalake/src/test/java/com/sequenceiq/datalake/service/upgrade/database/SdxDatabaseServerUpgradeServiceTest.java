@@ -1,13 +1,19 @@
 package com.sequenceiq.datalake.service.upgrade.database;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -20,8 +26,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -67,6 +77,12 @@ public class SdxDatabaseServerUpgradeServiceTest {
 
     @Mock
     private DatabaseUpgradeRuntimeValidator databaseUpgradeRuntimeValidator;
+
+    @Mock
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
+    @Mock
+    private DatabaseEngineVersionReaderService databaseEngineVersionReaderService;
 
     @InjectMocks
     private SdxDatabaseServerUpgradeService underTest;
@@ -206,6 +222,52 @@ public class SdxDatabaseServerUpgradeServiceTest {
         underTest.initUpgradeInCb(sdxCluster, targetMajorVersion);
 
         verify(cloudbreakStackService).upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion);
+    }
+
+    @Test
+    void testInitUpgradeWhenNotAlreadyUpgradedExceptionInCb() {
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        SdxCluster sdxCluster = getSdxCluster();
+        String expectedCoreMessage = "Upgrading database server is not needed as it is already on the latest version (11).";
+        when(cloudbreakMessagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED.getMessage(),
+                List.of(targetMajorVersion.getMajorVersion()))).thenReturn(expectedCoreMessage);
+        doThrow(new CloudbreakApiException("badrequest")).when(cloudbreakStackService).upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion);
+
+        Assertions.assertThatCode(() -> underTest.initUpgradeInCb(sdxCluster, targetMajorVersion)
+                )
+                .isInstanceOf(CloudbreakApiException.class)
+                .hasMessage("badrequest");
+
+        verify(cloudbreakStackService).upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion);
+        verify(cloudbreakMessagesService, times(1)).getMessage(
+                eq(ResourceEvent.CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED.getMessage()),
+                eq(List.of(targetMajorVersion.getMajorVersion())));
+        verifyNoInteractions(databaseEngineVersionReaderService);
+        verifyNoInteractions(sdxService);
+    }
+
+    @Test
+    void testInitUpgradeWhenAlreadyUpgradedExceptionInCb() {
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        SdxCluster sdxCluster = getSdxCluster();
+        String expectedCoreMessage = "Upgrading database server is not needed as it is already on the latest version (11).";
+        String mappedSdxMessage = String.format("Database server is already on the latest version for data lake %s", sdxCluster.getName());
+        when(cloudbreakMessagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED.getMessage(),
+                List.of(targetMajorVersion.getMajorVersion()))).thenReturn(expectedCoreMessage);
+        when(databaseEngineVersionReaderService.getDatabaseServerMajorVersion(sdxCluster)).thenReturn(Optional.of(MajorVersion.VERSION_11));
+
+        doThrow(new CloudbreakApiException(expectedCoreMessage)).when(cloudbreakStackService).upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.initUpgradeInCb(sdxCluster, targetMajorVersion));
+
+        assertEquals(mappedSdxMessage, exception.getMessage());
+
+        verify(cloudbreakStackService).upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion);
+        verify(cloudbreakMessagesService, times(1)).getMessage(
+                eq(ResourceEvent.CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED.getMessage()),
+                eq(List.of(targetMajorVersion.getMajorVersion())));
+        verify(databaseEngineVersionReaderService, times(1)).getDatabaseServerMajorVersion(sdxCluster);
+        verify(sdxService, times(1)).updateDatabaseEngineVersion(eq(sdxCluster.getCrn()), eq(targetMajorVersion.getMajorVersion()));
     }
 
     @Test
