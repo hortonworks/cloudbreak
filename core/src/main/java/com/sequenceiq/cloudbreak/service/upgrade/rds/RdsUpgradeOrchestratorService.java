@@ -82,21 +82,21 @@ public class RdsUpgradeOrchestratorService {
     private double backupValidationRatio;
 
     public void backupRdsData(Long stackId) throws CloudbreakOrchestratorException {
-        OrchestratorStateParams stateParams = createStateParams(stackId, BACKUP_STATE);
+        OrchestratorStateParams stateParams = createStateParams(stackId, BACKUP_STATE, true);
         stateParams.setStateParams(backupRestoreEmbeddedDBStateParamsProvider.createParamsForBackupRestore());
         LOGGER.debug("Calling backupRdsData with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
     public void restoreRdsData(Long stackId) throws CloudbreakOrchestratorException {
-        OrchestratorStateParams stateParams = createStateParams(stackId, RESTORE_STATE);
+        OrchestratorStateParams stateParams = createStateParams(stackId, RESTORE_STATE, true);
         stateParams.setStateParams(backupRestoreEmbeddedDBStateParamsProvider.createParamsForBackupRestore());
         LOGGER.debug("Calling restoreRdsData with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
     public void installPostgresPackages(Long stackId) throws CloudbreakOrchestratorException {
-        OrchestratorStateParams stateParams = createStateParams(stackId, PG11_INSTALL_STATE);
+        OrchestratorStateParams stateParams = createStateParams(stackId, PG11_INSTALL_STATE, false);
         LOGGER.debug("Calling installPostgresPackages with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
@@ -200,10 +200,6 @@ public class RdsUpgradeOrchestratorService {
             LOGGER.warn(msg);
             throw new CloudbreakOrchestratorFailedException(msg);
         }
-    }
-
-    private OrchestratorStateParams createStateParams(Long stackId, String saltState) {
-        return createStateParams(stackId, saltState, false);
     }
 
     private OrchestratorStateParams createStateParams(Long stackId, String saltState, boolean onlyOnPrimary) {
