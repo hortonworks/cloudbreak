@@ -931,6 +931,8 @@ existing-stack-patcher:
       enabled: false
       date-before: 2022-01-18
       custom-rpm-url: https://archive.cloudera.com/cp_clients/thunderhead-metering-heartbeat-application-0.1-SNAPSHOT.x86_64.rpm
+    metering-follow-inodes:
+      enabled: true
     cluster-public-endpoint:
       enabled: false
       related-stacks:
