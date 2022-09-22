@@ -5,6 +5,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import java.util.Set;
+
 import org.hibernate.envers.AuditReader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,10 +42,10 @@ public class ClusterComponentConfigProviderTestBase {
 
     @Test
     void testCleanUpDetachedEntriesWhenThereAreOrphanedEntriesThenDeletionShouldHappen() {
-        Long clusterId = 1L;
-        underTest.cleanUpDetachedEntries(clusterId);
+        Set<Long> ids = Set.of(1L);
+        underTest.cleanUpDetachedEntries(ids);
 
-        verify(mockClusterComponentHistoryRepository, times(1)).deleteByClusterId(clusterId);
+        verify(mockClusterComponentHistoryRepository, times(1)).deleteByClusterIdIsNullOrClusterIdIsIn(ids);
         verifyNoMoreInteractions(mockClusterComponentHistoryRepository);
     }
 

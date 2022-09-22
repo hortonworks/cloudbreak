@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Collection;
+
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
@@ -16,7 +18,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 public interface ClusterComponentHistoryRepository extends CrudRepository<ClusterComponentHistory, Long> {
 
     @Modifying
-    @Query(value = "DELETE FROM clustercomponent_history c WHERE c.cluster_id = :clusterId", nativeQuery = true)
-    void deleteByClusterId(@Param("clusterId") Long clusterId);
+    @Query(value = "DELETE FROM clustercomponent_history cch WHERE  cch.cluster_id IN (:clusterIds)", nativeQuery = true)
+    void deleteByClusterIdIsNullOrClusterIdIsIn(@Param("clusterIds") Collection<Long> clusterIds);
 
 }

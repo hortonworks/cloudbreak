@@ -409,13 +409,12 @@ public class ClusterService {
         return repository.findByStatuses(statuses);
     }
 
-    public Optional<Cluster> findOneByStackId(Long stackId) {
-        return repository.findOneByStackId(stackId);
+    public Set<Long> findIdsByDeletedStatus() {
+        return repository.findIdsByDeletedStatus();
     }
 
-    public Optional<Long> findClusterIdByStackId(Long stackId) {
-        LOGGER.debug("Looking for cluster ID in DB, based on stack ID [stackId: {}]", stackId);
-        return repository.findClusterIdByStackId(stackId);
+    public Optional<Cluster> findOneByStackId(Long stackId) {
+        return repository.findOneByStackId(stackId);
     }
 
     public Cluster findOneByStackIdOrNotFoundError(Long stackId) {
