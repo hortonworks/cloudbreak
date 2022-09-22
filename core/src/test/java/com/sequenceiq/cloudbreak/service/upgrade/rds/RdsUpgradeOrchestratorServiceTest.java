@@ -90,6 +90,7 @@ class RdsUpgradeOrchestratorServiceTest {
         lenient().when(stack.getId()).thenReturn(STACK_ID);
         lenient().when(stack.getCluster()).thenReturn(cluster);
         lenient().when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
+        lenient().when(gatewayConfig.getHostname()).thenReturn("fqdn1");
         lenient().when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         lenient().when(stackUtil.collectGatewayNodes(any())).thenReturn(Set.of(node1, node2));
     }
@@ -100,7 +101,7 @@ class RdsUpgradeOrchestratorServiceTest {
         verify(hostOrchestrator).runOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
         assertThat(params.getState()).isEqualTo("postgresql/upgrade/backup");
-        assertThat(params.getTargetHostNames()).hasSameElementsAs(Set.of("fqdn1", "fqdn2"));
+        assertThat(params.getTargetHostNames()).hasSameElementsAs(Set.of("fqdn1"));
         assertOtherStateParams(params);
     }
 
@@ -110,7 +111,7 @@ class RdsUpgradeOrchestratorServiceTest {
         verify(hostOrchestrator).runOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
         assertThat(params.getState()).isEqualTo("postgresql/upgrade/restore");
-        assertThat(params.getTargetHostNames()).hasSameElementsAs(Set.of("fqdn1", "fqdn2"));
+        assertThat(params.getTargetHostNames()).hasSameElementsAs(Set.of("fqdn1"));
         assertOtherStateParams(params);
     }
 
