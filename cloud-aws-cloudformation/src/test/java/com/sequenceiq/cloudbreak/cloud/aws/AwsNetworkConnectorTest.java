@@ -550,7 +550,6 @@ public class AwsNetworkConnectorTest {
                 .withPublicSubnets(subnets)
                 .withPrivateSubnetEnabled(true)
                 .withUserName("user@cloudera.com")
-                .withCreatorCrn("user-crn")
                 .build();
     }
 

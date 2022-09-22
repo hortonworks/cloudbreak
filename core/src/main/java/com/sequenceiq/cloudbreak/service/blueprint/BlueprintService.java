@@ -145,7 +145,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     public Blueprint createForLoggedInUser(Blueprint blueprint, Long workspaceId, String accountId, String creator) {
         validate(blueprint, false);
-        decorateWithCrn(blueprint, accountId, creator);
+        decorateWithCrn(blueprint, accountId);
         try {
             return transactionService.required(() -> {
                 Blueprint created = super.createForLoggedInUser(blueprint, workspaceId);
@@ -201,9 +201,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 : getByCrnAndWorkspaceIdAndAddToMdc(nameOrCrn.getCrn(), workspaceId);
     }
 
-    public void decorateWithCrn(Blueprint bp, String accountId, String creator) {
+    public void decorateWithCrn(Blueprint bp, String accountId) {
         bp.setResourceCrn(createCRN(accountId));
-        bp.setCreator(creator);
     }
 
     private Set<String> getHueHostGroups(String blueprintText) {

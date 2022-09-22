@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import com.sequenceiq.cloudbreak.converter.ImageTypeConverter;
-import com.sequenceiq.common.api.type.ImageType;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -18,8 +18,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.sequenceiq.cloudbreak.converter.ImageTypeConverter;
+import com.sequenceiq.common.api.type.ImageType;
 
 @Entity
 @Table(uniqueConstraints = {
@@ -48,8 +48,6 @@ public class CustomImage implements ProvisionEntity {
 
     @Column(nullable = false)
     private String resourceCrn;
-
-    private String creator;
 
     private Long created = System.currentTimeMillis();
 
@@ -111,14 +109,6 @@ public class CustomImage implements ProvisionEntity {
 
     public Long getCreated() {
         return created;
-    }
-
-    public String getCreator() {
-        return creator;
-    }
-
-    public void setCreator(String creator) {
-        this.creator = creator;
     }
 
     public ImageType getImageType() {

@@ -93,7 +93,7 @@ public class CustomImageCatalogService {
         }
     }
 
-    public CustomImage createCustomImage(Long workspaceId, String accountId, String creator, String imageCatalogName, CustomImage customImage) {
+    public CustomImage createCustomImage(Long workspaceId, String accountId, String imageCatalogName, CustomImage customImage) {
         String imageName = UUID.randomUUID().toString();
         LOGGER.debug(String.format("Create custom image '%s' in catalog '%s' in workspace '%d'", imageName, imageCatalogName, workspaceId));
 
@@ -101,13 +101,9 @@ public class CustomImageCatalogService {
             return transactionService.required(() -> {
                 ImageCatalog imageCatalog = getImageCatalog(workspaceId, imageCatalogName);
                 customImage.setName(imageName);
-                customImage.setCreator(creator);
                 customImage.setResourceCrn(regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.IMAGE_CATALOG, imageName, accountId));
                 customImage.setImageCatalog(imageCatalog);
-                customImage.getVmImage().stream().forEach(vmImage -> {
-                    vmImage.setCustomImage(customImage);
-                    vmImage.setCreator(creator);
-                });
+                customImage.getVmImage().stream().forEach(vmImage -> vmImage.setCustomImage(customImage));
 
                 validateSourceImage(customImage);
 
@@ -142,7 +138,7 @@ public class CustomImageCatalogService {
         }
     }
 
-    public CustomImage updateCustomImage(Long workspaceId, String creator, String imageCatalogName, CustomImage customImage) {
+    public CustomImage updateCustomImage(Long workspaceId, String imageCatalogName, CustomImage customImage) {
         LOGGER.debug(String.format("Update custom image '%s' in catalog '%s' in workspace '%d'",
                 customImage.getName(), imageCatalogName, workspaceId));
 
@@ -174,7 +170,6 @@ public class CustomImageCatalogService {
                         }
                     }
                     for (VmImage vmImage : vmImagesToSave) {
-                        vmImage.setCreator(creator);
                         vmImage.setCustomImage(savedCustomImage);
                         savedCustomImage.getVmImage().add(vmImage);
                     }

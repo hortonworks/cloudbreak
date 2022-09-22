@@ -147,10 +147,9 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
     public CustomImageCatalogV4CreateImageResponse createCustomImage(@ResourceName String name,
             @Valid CustomImageCatalogV4CreateImageRequest request, @AccountId String accountId) {
-        String creator = ThreadBasedUserCrnProvider.getUserCrn();
         CustomImage customImage = customImageCatalogV4CreateImageRequestToCustomImageConverter.convert(request);
         CustomImage savedCustomImage = customImageCatalogService
-                .createCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), accountId, creator, name, customImage);
+                .createCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), accountId, name, customImage);
 
         return customImageToCustomImageCatalogV4CreateImageResponseConverter.convert(savedCustomImage);
     }
@@ -159,11 +158,10 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
     public CustomImageCatalogV4UpdateImageResponse updateCustomImage(@ResourceName String name, String imageId,
             @Valid CustomImageCatalogV4UpdateImageRequest request, @AccountId String accountId) {
-        String creator = ThreadBasedUserCrnProvider.getUserCrn();
         CustomImage customImage = customImageCatalogV4UpdateImageRequestToCustomImageConverter.convert(request);
         customImage.setName(imageId);
         CustomImage savedCustomImage = customImageCatalogService
-                .updateCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), creator, name, customImage);
+                .updateCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), name, customImage);
 
         return customImageToCustomImageCatalogV4UpdateImageResponseConverter.convert(savedCustomImage);
     }

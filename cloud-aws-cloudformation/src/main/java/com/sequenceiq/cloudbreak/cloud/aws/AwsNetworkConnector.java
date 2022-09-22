@@ -211,8 +211,7 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
 
         cloudFormationRetryClient.createStack(createStackRequest(networkRequest.getStackName(),
                 cloudFormationTemplate,
-                networkRequest.getTags(),
-                networkRequest.getCreatorCrn()));
+                networkRequest.getTags()));
         LOGGER.debug("CloudFormation stack creation request sent with stack name: '{}' ", networkRequest.getStackName());
         return getCreatedNetworkWithPolling(networkRequest, credentialView, cloudFormationRetryClient, subnetRequests);
     }
@@ -241,7 +240,7 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
         return new CreatedCloudNetwork(networkRequest.getStackName(), vpcId, subnets);
     }
 
-    private CreateStackRequest createStackRequest(String stackName, String cloudFormationTemplate, Map<String, String> tags, String creatorUser) {
+    private CreateStackRequest createStackRequest(String stackName, String cloudFormationTemplate, Map<String, String> tags) {
         Collection<Tag> awsTags = awsTaggingService.prepareCloudformationTags(null, tags);
         return new CreateStackRequest()
                 .withStackName(stackName)

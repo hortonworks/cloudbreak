@@ -194,15 +194,13 @@ public class CustomImageCatalogV4ControllerTest {
 
         when(customImageCatalogV4CreateImageRequestToCustomImageConverter.convert(request)).thenReturn(customImage);
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
-        when(customImageCatalogService.createCustomImage(eq(WORKSPACE_ID), anyString(), eq(USER_CRN), eq(IMAGE_CATALOG_NAME), eq(customImage)))
+        when(customImageCatalogService.createCustomImage(eq(WORKSPACE_ID), anyString(), eq(IMAGE_CATALOG_NAME), eq(customImage)))
                 .thenReturn(savedCustomImage);
         when(customImageToCustomImageCatalogV4CreateImageResponseConverter.convert(savedCustomImage)).thenReturn(expected);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            CustomImageCatalogV4CreateImageResponse actual = victim.createCustomImage(IMAGE_CATALOG_NAME, request, ACCOUNT_ID);
+        CustomImageCatalogV4CreateImageResponse actual = victim.createCustomImage(IMAGE_CATALOG_NAME, request, ACCOUNT_ID);
 
-            assertEquals(expected, actual);
-        });
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -214,15 +212,13 @@ public class CustomImageCatalogV4ControllerTest {
 
         when(customImageCatalogV4UpdateImageRequestToCustomImageConverter.convert(request)).thenReturn(customImage);
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
-        when(customImageCatalogService.updateCustomImage(eq(WORKSPACE_ID), eq(USER_CRN), eq(IMAGE_CATALOG_NAME), eq(customImage)))
+        when(customImageCatalogService.updateCustomImage(eq(WORKSPACE_ID), eq(IMAGE_CATALOG_NAME), eq(customImage)))
                 .thenReturn(savedCustomImage);
         when(customImageToCustomImageCatalogV4UpdateImageResponseConverter.convert(savedCustomImage)).thenReturn(expected);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            CustomImageCatalogV4UpdateImageResponse actual = victim.updateCustomImage(IMAGE_CATALOG_NAME, IMAGE_ID, request, ACCOUNT_ID);
+        CustomImageCatalogV4UpdateImageResponse actual = victim.updateCustomImage(IMAGE_CATALOG_NAME, IMAGE_ID, request, ACCOUNT_ID);
 
-            assertEquals(expected, actual);
-        });
+        assertEquals(expected, actual);
     }
 
     @Test
