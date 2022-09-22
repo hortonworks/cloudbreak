@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.util;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 public class ArnTest {
 
@@ -25,40 +25,37 @@ public class ArnTest {
 
     private static final String ARN_HAS_INVALID_FORMAT = "ARN has invalid format.";
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Test
     public void ofCreatesFully() {
         Arn result = Arn.of(String.format("%s:%s:%s:%s:%s:%s", PREFIX, PARTITION, SERVICE, REGION, ACCOUNTID, RESOURCE));
-        Assert.assertEquals(PREFIX, result.getPrefix());
-        Assert.assertEquals(PARTITION, result.getPartition());
-        Assert.assertEquals(SERVICE, result.getService());
-        Assert.assertEquals(REGION, result.getRegion());
-        Assert.assertEquals(ACCOUNTID, result.getAccountId());
-        Assert.assertEquals(RESOURCE, result.getResource());
+        assertEquals(PREFIX, result.getPrefix());
+        assertEquals(PARTITION, result.getPartition());
+        assertEquals(SERVICE, result.getService());
+        assertEquals(REGION, result.getRegion());
+        assertEquals(ACCOUNTID, result.getAccountId());
+        assertEquals(RESOURCE, result.getResource());
     }
 
     @Test
     public void ofCreatesFullyExtraResource() {
         Arn result = Arn.of(String.format("%s:%s:%s:%s:%s:%s", PREFIX, PARTITION, SERVICE, REGION, ACCOUNTID, RESOURCE_EXTRA));
-        Assert.assertEquals(PREFIX, result.getPrefix());
-        Assert.assertEquals(PARTITION, result.getPartition());
-        Assert.assertEquals(SERVICE, result.getService());
-        Assert.assertEquals(REGION, result.getRegion());
-        Assert.assertEquals(ACCOUNTID, result.getAccountId());
-        Assert.assertEquals(RESOURCE_EXTRA, result.getResource());
+        assertEquals(PREFIX, result.getPrefix());
+        assertEquals(PARTITION, result.getPartition());
+        assertEquals(SERVICE, result.getService());
+        assertEquals(REGION, result.getRegion());
+        assertEquals(ACCOUNTID, result.getAccountId());
+        assertEquals(RESOURCE_EXTRA, result.getResource());
     }
 
     @Test
     public void ofWithEmptyPartsReturnsEmptyStrings() {
         Arn result = Arn.of(String.format("%s:%s:%s:::%s", PREFIX, PARTITION, SERVICE, RESOURCE_EXTRA));
-        Assert.assertEquals(PREFIX, result.getPrefix());
-        Assert.assertEquals(PARTITION, result.getPartition());
-        Assert.assertEquals(SERVICE, result.getService());
-        Assert.assertEquals("", result.getRegion());
-        Assert.assertEquals("", result.getAccountId());
-        Assert.assertEquals(RESOURCE_EXTRA, result.getResource());
+        assertEquals(PREFIX, result.getPrefix());
+        assertEquals(PARTITION, result.getPartition());
+        assertEquals(SERVICE, result.getService());
+        assertEquals("", result.getRegion());
+        assertEquals("", result.getAccountId());
+        assertEquals(RESOURCE_EXTRA, result.getResource());
     }
 
     @Test
@@ -88,8 +85,7 @@ public class ArnTest {
     }
 
     private void expectIllegalWithMessage(String arn, String message) {
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage(message);
-        Arn.of(arn);
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> Arn.of(arn));
+        assertEquals(message, exception.getMessage());
     }
 }

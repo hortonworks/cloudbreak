@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsClient.MAX_CLIENT_RETRIES;
-import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsClient.MAX_CONSECUTIVE_RETRIES_BEFORE_THROTTLING;
 
+import java.net.URI;
+import java.time.Instant;
 import java.util.Date;
 
 import javax.inject.Inject;
@@ -14,22 +15,25 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.retry.PredefinedRetryPolicies;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
-import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
-import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
-import com.amazonaws.services.securitytoken.model.Credentials;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.sequenceiq.cloudbreak.cloud.aws.common.cache.AwsCachingConfig;
+import com.sequenceiq.cloudbreak.cloud.aws.common.cache.AwsStsAssumeRoleCredentialsProviderCacheConfig;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
+
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.retry.RetryPolicy;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
+import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
+import software.amazon.awssdk.services.sts.model.AssumeRoleResponse;
+import software.amazon.awssdk.services.sts.model.Credentials;
 
 @Component
 public class AwsSessionCredentialClient {
@@ -57,65 +61,84 @@ public class AwsSessionCredentialClient {
 
     public AwsSessionCredentials retrieveSessionCredentials(AwsCredentialView awsCredential) {
         String externalId = awsCredential.getExternalId();
-        AssumeRoleRequest assumeRoleRequest = new AssumeRoleRequest()
-                .withDurationSeconds(DEFAULT_SESSION_CREDENTIALS_DURATION)
-                .withExternalId(StringUtils.isEmpty(externalId) ? deprecatedExternalId : externalId)
-                .withRoleArn(awsCredential.getRoleArn())
-                .withRoleSessionName(roleSessionName);
+        AssumeRoleRequest assumeRoleRequest = AssumeRoleRequest.builder()
+                .durationSeconds(DEFAULT_SESSION_CREDENTIALS_DURATION)
+                .externalId(StringUtils.isEmpty(externalId) ? deprecatedExternalId : externalId)
+                .roleArn(awsCredential.getRoleArn())
+                .roleSessionName(roleSessionName)
+                .build();
         LOGGER.debug("Trying to assume role with role arn {}", awsCredential.getRoleArn());
         return getAwsSessionCredentialsAndAssumeRole(awsCredential, assumeRoleRequest);
     }
 
     public AwsSessionCredentials retrieveSessionCredentialsWithoutExternalId(AwsCredentialView awsCredential) {
-        AssumeRoleRequest assumeRoleRequest = new AssumeRoleRequest()
-                .withDurationSeconds(DEFAULT_SESSION_CREDENTIALS_DURATION)
-                .withRoleArn(awsCredential.getRoleArn())
-                .withRoleSessionName(roleSessionName);
+        AssumeRoleRequest assumeRoleRequest = AssumeRoleRequest.builder()
+                .durationSeconds(DEFAULT_SESSION_CREDENTIALS_DURATION)
+                .roleArn(awsCredential.getRoleArn())
+                .roleSessionName(roleSessionName)
+                .build();
         LOGGER.debug("Trying to assume role with role arn {} and without external ID", awsCredential.getRoleArn());
         return getAwsSessionCredentialsAndAssumeRole(awsCredential, assumeRoleRequest);
     }
 
+    @Cacheable(value = AwsStsAssumeRoleCredentialsProviderCacheConfig.TEMPORARY_AWS_STS_ASSUMEROLE_CREDENTIALS_PROVIDER_CACHE,
+            unless = "#awsCredential.getId() == null")
+    public StsAssumeRoleCredentialsProvider createStsAssumeRoleCredentialsProvider(AwsCredentialView awsCredential) {
+        return StsAssumeRoleCredentialsProvider.builder()
+                .stsClient(awsSecurityTokenServiceClient(awsCredential))
+                .refreshRequest(AssumeRoleRequest.builder()
+                        .durationSeconds(DEFAULT_SESSION_CREDENTIALS_DURATION)
+                        .externalId(awsCredential.getExternalId())
+                        .roleArn(awsCredential.getRoleArn())
+                        .roleSessionName(roleSessionName)
+                        .build())
+                .build();
+    }
+
     private AwsSessionCredentials getAwsSessionCredentialsAndAssumeRole(AwsCredentialView awsCredential, AssumeRoleRequest assumeRoleRequest) {
         try {
-            AssumeRoleResult result = awsSecurityTokenServiceClient(awsCredential).assumeRole(assumeRoleRequest);
-            Credentials credentialsResponse = result.getCredentials();
+            AssumeRoleResponse result = awsSecurityTokenServiceClient(awsCredential).assumeRole(assumeRoleRequest);
+            Credentials credentialsResponse = result.credentials();
 
             String formattedExpirationDate = "";
-            Date expirationTime = credentialsResponse.getExpiration();
-            if (expirationTime != null) {
+            Date expirationTime = null;
+            Instant expiration = credentialsResponse.expiration();
+            if (expiration != null) {
+                expirationTime = Date.from(expiration);
                 formattedExpirationDate = new StdDateFormat().format(expirationTime);
             }
             LOGGER.debug("Assume role result credential: role arn: {}, expiration date: {}",
                     awsCredential.getRoleArn(), formattedExpirationDate);
 
             return new AwsSessionCredentials(
-                    credentialsResponse.getAccessKeyId(),
-                    credentialsResponse.getSecretAccessKey(),
-                    credentialsResponse.getSessionToken(),
-                    credentialsResponse.getExpiration());
-        } catch (SdkClientException e) {
+                    credentialsResponse.accessKeyId(),
+                    credentialsResponse.secretAccessKey(),
+                    credentialsResponse.sessionToken(),
+                    expirationTime);
+        } catch (SdkException e) {
             LOGGER.error("Unable to assume role. Check exception for details.", e);
             throw e;
         }
     }
 
-    private AWSSecurityTokenService awsSecurityTokenServiceClient(AwsCredentialView awsCredential) {
+    public StsClient awsSecurityTokenServiceClient(AwsCredentialView awsCredential) {
         String defaultZone = awsDefaultZoneProvider.getDefaultZone(awsCredential);
-        return AWSSecurityTokenServiceClientBuilder.standard()
-                .withEndpointConfiguration(getEndpointConfiguration(defaultZone))
-                .withClientConfiguration(getDefaultClientConfiguration())
-                .withCredentials(getCredential(awsCredential))
+        return StsClient.builder()
+                .region(Region.of(defaultZone))
+                .endpointOverride(getEndpointConfiguration(defaultZone))
+                .overrideConfiguration(getDefaultClientConfiguration())
+                .credentialsProvider(getCredential(awsCredential))
                 .build();
     }
 
-    private AWSCredentialsProvider getCredential(AwsCredentialView awsCredential) {
+    private AwsCredentialsProvider getCredential(AwsCredentialView awsCredential) {
         if (isLocalDev(awsCredential)) {
-            BasicAWSCredentials awsCredentials = new BasicAWSCredentials(
+            AwsCredentials awsCredentials = AwsBasicCredentials.create(
                     awsEnvironmentVariableChecker.getAwsAccessKey(awsCredential),
                     awsEnvironmentVariableChecker.getAwsSecretAccessKey(awsCredential));
-            return new AWSStaticCredentialsProvider(awsCredentials);
+            return StaticCredentialsProvider.create(awsCredentials);
         } else {
-            return DefaultAWSCredentialsProviderChain.getInstance();
+            return DefaultCredentialsProvider.create();
         }
     }
 
@@ -124,16 +147,16 @@ public class AwsSessionCredentialClient {
                 && awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(awsCredential);
     }
 
-    private ClientConfiguration getDefaultClientConfiguration() {
-        return new ClientConfiguration()
-                .withThrottledRetries(true)
-                .withMaxConsecutiveRetriesBeforeThrottling(MAX_CONSECUTIVE_RETRIES_BEFORE_THROTTLING)
-                .withRetryPolicy(PredefinedRetryPolicies.getDefaultRetryPolicyWithCustomMaxRetries(MAX_CLIENT_RETRIES));
+    private ClientOverrideConfiguration getDefaultClientConfiguration() {
+        return ClientOverrideConfiguration.builder()
+                .retryPolicy(RetryPolicy.builder()
+                        .numRetries(MAX_CLIENT_RETRIES)
+                        .build())
+                .build();
     }
 
-    private AwsClientBuilder.EndpointConfiguration getEndpointConfiguration(String defaultZone) {
-        return new AwsClientBuilder
-                .EndpointConfiguration(String.format("https://sts.%s.amazonaws.com", defaultZone), defaultZone);
+    private URI getEndpointConfiguration(String defaultZone) {
+        return URI.create(String.format("https://sts.%s.amazonaws.com", defaultZone));
     }
 
     @Override

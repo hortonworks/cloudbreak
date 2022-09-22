@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -12,11 +12,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.ec2.model.DescribeVolumesResult;
-import com.amazonaws.services.ec2.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
+import software.amazon.awssdk.services.ec2.model.Volume;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsEbsCommonServiceTest {
@@ -36,11 +37,12 @@ public class AwsEbsCommonServiceTest {
     @Test
     public void getEbsSize() {
         when(awsClient.createAccessWithMinimalRetries(any(), any())).thenReturn(ec2Client);
-        when(ec2Client.describeVolumes(any())).thenReturn(new DescribeVolumesResult()
-                .withVolumes(new Volume().withVolumeType("gp2")));
+        when(ec2Client.describeVolumes(any())).thenReturn(DescribeVolumesResponse.builder()
+                .volumes(Volume.builder().volumeType("gp2").build())
+                .build());
 
-        Optional<DescribeVolumesResult> ebsSize = underTest.getEbsSize(cloudCredential, "region", "ebs");
+        Optional<DescribeVolumesResponse> ebsSize = underTest.getEbsSize(cloudCredential, "region", "ebs");
 
-        assertEquals(ebsSize.isPresent(), true);
+        assertTrue(ebsSize.isPresent());
     }
 }

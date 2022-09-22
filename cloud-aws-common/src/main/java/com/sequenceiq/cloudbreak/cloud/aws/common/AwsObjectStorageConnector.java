@@ -5,8 +5,8 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
@@ -28,6 +28,8 @@ import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
+import software.amazon.awssdk.services.s3.model.S3Exception;
+
 @Service
 public class AwsObjectStorageConnector implements ObjectStorageConnector {
 
@@ -48,24 +50,24 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
     public ObjectStorageMetadataResponse getObjectStorageMetadata(ObjectStorageMetadataRequest request) {
         AwsCredentialView awsCredentialView = new AwsCredentialView(request.getCredential());
         try {
-            AmazonS3Client s3Client = awsClient.createS3Client(awsCredentialView);
+            AmazonS3Client s3Client = awsClient.createS3Client(awsCredentialView, request.getRegion());
             String bucketLocation = fixBucketLocation(s3Client.getBucketLocation(request.getObjectStoragePath()));
             return ObjectStorageMetadataResponse.builder()
                     .withRegion(bucketLocation)
                     .withStatus(ResponseStatus.OK)
                     .build();
-        } catch (AmazonS3Exception e) {
+        } catch (S3Exception e) {
             // HACK let's assume that if the user gets back 403 Access Denied it is because s/he does not have the s3:GetBucketLocation permission.
-            // It is also true though that if the bucket indeed exists but it is in another account or otherwise denied from the requesting user,
+            // It is also true though that if the bucket indeed exists, but it is in another account or otherwise denied from the requesting user,
             // the same error code will be returned. However, this hack is mainly for QAAS.
-            if (e.getStatusCode() != ACCESS_DENIED_ERROR_CODE) {
+            if (e.statusCode() != ACCESS_DENIED_ERROR_CODE) {
                 throw new CloudConnectorException(
                         String.format("We were not able to query S3 object storage location for %s. "
                                         + "Refer to Cloudera documentation at %s for the required setup. "
                                         + "The message from Amazon S3 was: %s.",
                                 request.getObjectStoragePath(),
                                 DocumentationLinkProvider.awsCloudStorageSetupLink(),
-                                e.getErrorMessage()),
+                                e.awsErrorDetails().errorMessage()),
                         e);
             }
             return ObjectStorageMetadataResponse.builder()
@@ -106,14 +108,14 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
 
     /**
      * AWS SDK 1.xx returns "US" as the location for the buckets that are in region 'us-east-1'. It is an SDK bug.
-     * AWS SDK 2.xx returns "" (empty string) for the same.
+     * AWS SDK 2.xx returns null or "" (empty string) for the same.
      * This function fixes these anomalies.
      *
      * @param bucketLocation bucket location returned by AWS SDK
      * @return fixed bucket location
      */
     private String fixBucketLocation(String bucketLocation) {
-        if (bucketLocation.isEmpty() || "US".equals(bucketLocation)) {
+        if (!StringUtils.hasText(bucketLocation) || "US".equals(bucketLocation)) {
             return "us-east-1";
         }
         return bucketLocation;

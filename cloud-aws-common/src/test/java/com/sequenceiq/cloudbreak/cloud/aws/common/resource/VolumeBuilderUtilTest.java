@@ -12,9 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.ec2.model.BlockDeviceMapping;
-import com.amazonaws.services.ec2.model.DescribeImagesResult;
-import com.amazonaws.services.ec2.model.EbsBlockDevice;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -22,6 +19,10 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+
+import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
+import software.amazon.awssdk.services.ec2.model.DescribeImagesResponse;
+import software.amazon.awssdk.services.ec2.model.EbsBlockDevice;
 
 @ExtendWith(MockitoExtension.class)
 public class VolumeBuilderUtilTest {
@@ -50,8 +51,8 @@ public class VolumeBuilderUtilTest {
     @Test
     public void testGetRootVolume() {
         when(ac.getParameter(AmazonEc2Client.class)).thenReturn(amazonEc2Client);
-        com.amazonaws.services.ec2.model.Image ecImage = new com.amazonaws.services.ec2.model.Image();
-        when(amazonEc2Client.describeImages(any())).thenReturn(new DescribeImagesResult().withImages(ecImage));
+        software.amazon.awssdk.services.ec2.model.Image ecImage = software.amazon.awssdk.services.ec2.model.Image.builder().build();
+        when(amazonEc2Client.describeImages(any())).thenReturn(DescribeImagesResponse.builder().images(ecImage).build());
         when(cloudStack.getImage()).thenReturn(image);
         BlockDeviceMapping actual = underTest.getRootVolume(awsInstanceView, group, cloudStack, ac);
         Assertions.assertNotNull(actual);
@@ -76,8 +77,8 @@ public class VolumeBuilderUtilTest {
         Assertions.assertNotNull(actual);
         Assertions.assertFalse(actual.isEmpty());
         BlockDeviceMapping theSingleBlockDeviceMapping = actual.get(0);
-        Assertions.assertEquals("/dev/xvdb", theSingleBlockDeviceMapping.getDeviceName());
-        Assertions.assertEquals("ephemeral0", theSingleBlockDeviceMapping.getVirtualName());
+        Assertions.assertEquals("/dev/xvdb", theSingleBlockDeviceMapping.deviceName());
+        Assertions.assertEquals("ephemeral0", theSingleBlockDeviceMapping.virtualName());
     }
 
     @Test
@@ -91,18 +92,18 @@ public class VolumeBuilderUtilTest {
         Assertions.assertFalse(actual.isEmpty());
         Assertions.assertEquals(storageCount, actual.size());
         Assertions.assertTrue(actual.stream()
-                .anyMatch(deviceMapping -> "/dev/xvdb".equals(deviceMapping.getDeviceName())
-                        && "ephemeral0".equals(deviceMapping.getVirtualName())));
+                .anyMatch(deviceMapping -> "/dev/xvdb".equals(deviceMapping.deviceName())
+                        && "ephemeral0".equals(deviceMapping.virtualName())));
         Assertions.assertTrue(actual.stream()
-                .anyMatch(deviceMapping -> "/dev/xvdz".equals(deviceMapping.getDeviceName())
-                        && "ephemeral24".equals(deviceMapping.getVirtualName())));
+                .anyMatch(deviceMapping -> "/dev/xvdz".equals(deviceMapping.deviceName())
+                        && "ephemeral24".equals(deviceMapping.virtualName())));
     }
 
     @Test
     public void testGetRootDeviceNotFoundOnAws() {
         when(cloudStack.getImage()).thenReturn(image);
         when(ac.getParameter(AmazonEc2Client.class)).thenReturn(amazonEc2Client);
-        when(amazonEc2Client.describeImages(any())).thenReturn(new DescribeImagesResult().withImages());
+        when(amazonEc2Client.describeImages(any())).thenReturn(DescribeImagesResponse.builder().build());
         CloudConnectorException actual = Assertions.assertThrows(CloudConnectorException.class, () -> underTest.getRootDeviceName(ac, cloudStack));
         Assertions.assertEquals("AMI is not available: 'null'.", actual.getMessage());
     }
@@ -111,7 +112,8 @@ public class VolumeBuilderUtilTest {
     public void testGetRootDeviceWhenImageNull() {
         when(cloudStack.getImage()).thenReturn(image);
         when(ac.getParameter(AmazonEc2Client.class)).thenReturn(amazonEc2Client);
-        when(amazonEc2Client.describeImages(any())).thenReturn(new DescribeImagesResult().withImages((com.amazonaws.services.ec2.model.Image) null));
+        when(amazonEc2Client.describeImages(any()))
+                .thenReturn(DescribeImagesResponse.builder().images((software.amazon.awssdk.services.ec2.model.Image) null).build());
         CloudConnectorException actual = Assertions.assertThrows(CloudConnectorException.class, () -> underTest.getRootDeviceName(ac, cloudStack));
         Assertions.assertEquals("Couldn't describe AMI 'null'.", actual.getMessage());
     }
@@ -124,11 +126,11 @@ public class VolumeBuilderUtilTest {
         when(awsInstanceView.getKmsKey()).thenReturn("kmsKey");
 
         EbsBlockDevice actual = underTest.getEbs(awsInstanceView, group);
-        Assertions.assertTrue(actual.getDeleteOnTermination());
-        Assertions.assertTrue(actual.getEncrypted());
-        Assertions.assertEquals("gp2", actual.getVolumeType());
-        Assertions.assertEquals(1, actual.getVolumeSize());
-        Assertions.assertEquals("kmsKey", actual.getKmsKeyId());
+        Assertions.assertTrue(actual.deleteOnTermination());
+        Assertions.assertTrue(actual.encrypted());
+        Assertions.assertEquals("gp2", actual.volumeType().toString());
+        Assertions.assertEquals(1, actual.volumeSize());
+        Assertions.assertEquals("kmsKey", actual.kmsKeyId());
     }
 
     @Test
@@ -138,10 +140,10 @@ public class VolumeBuilderUtilTest {
         when(awsInstanceView.isKmsCustom()).thenReturn(false);
 
         EbsBlockDevice actual = underTest.getEbs(awsInstanceView, group);
-        Assertions.assertTrue(actual.getDeleteOnTermination());
-        Assertions.assertNull(actual.getEncrypted());
-        Assertions.assertEquals("gp2", actual.getVolumeType());
-        Assertions.assertEquals(1, actual.getVolumeSize());
-        Assertions.assertNull(actual.getKmsKeyId());
+        Assertions.assertTrue(actual.deleteOnTermination());
+        Assertions.assertNull(actual.encrypted());
+        Assertions.assertEquals("gp2", actual.volumeType().toString());
+        Assertions.assertEquals(1, actual.volumeSize());
+        Assertions.assertNull(actual.kmsKeyId());
     }
 }

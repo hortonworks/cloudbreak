@@ -17,15 +17,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
-import com.amazonaws.services.ec2.model.DescribeKeyPairsResult;
-import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyRegisterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyUnregisterRequest;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.ec2.model.DeleteKeyPairRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsResponse;
+import software.amazon.awssdk.services.ec2.model.ImportKeyPairRequest;
 
 @ExtendWith(MockitoExtension.class)
 class AwsPublicKeyConnectorTest {
@@ -53,7 +54,7 @@ class AwsPublicKeyConnectorTest {
     @Test
     void registerExisting() {
         PublicKeyRegisterRequest request = generateRegisterRequest();
-        when(ec2client.describeKeyPairs(any())).thenReturn(new DescribeKeyPairsResult());
+        when(ec2client.describeKeyPairs(any())).thenReturn(DescribeKeyPairsResponse.builder().build());
         underTest.register(request);
         verifyNoMoreInteractions(ec2client);
     }
@@ -61,20 +62,20 @@ class AwsPublicKeyConnectorTest {
     @Test
     void registerNew() {
         PublicKeyRegisterRequest request = generateRegisterRequest();
-        when(ec2client.describeKeyPairs(any())).thenThrow(new AmazonServiceException("no such key"));
+        when(ec2client.describeKeyPairs(any())).thenThrow(AwsServiceException.builder().message("no such key").build());
         underTest.register(request);
         ArgumentCaptor<ImportKeyPairRequest> captor = ArgumentCaptor.forClass(ImportKeyPairRequest.class);
         verify(ec2client).importKeyPair(captor.capture());
         ImportKeyPairRequest result = captor.getValue();
-        assertThat(result.getKeyName()).isEqualTo(PUBLIC_KEY_ID);
-        assertThat(result.getPublicKeyMaterial()).isEqualTo(PUBLIC_KEY);
+        assertThat(result.keyName()).isEqualTo(PUBLIC_KEY_ID);
+        assertThat(result.publicKeyMaterial().asUtf8String()).isEqualTo(PUBLIC_KEY);
         verifyNoMoreInteractions(ec2client);
     }
 
     @Test
     void registerProviderException() {
         PublicKeyRegisterRequest request = generateRegisterRequest();
-        when(ec2client.describeKeyPairs(any())).thenThrow(new AmazonServiceException("no such key"));
+        when(ec2client.describeKeyPairs(any())).thenThrow(AwsServiceException.builder().message("no such key").build());
         when(ec2client.importKeyPair(any())).thenThrow(new RuntimeException(RUNTIME_EXCEPTION));
         assertThatThrownBy(() -> underTest.register(request)).isInstanceOf(CloudConnectorException.class).hasMessage(RUNTIME_EXCEPTION);
         verifyNoMoreInteractions(ec2client);
@@ -87,19 +88,19 @@ class AwsPublicKeyConnectorTest {
         ArgumentCaptor<DeleteKeyPairRequest> captor = ArgumentCaptor.forClass(DeleteKeyPairRequest.class);
         verify(ec2client).deleteKeyPair(captor.capture());
         DeleteKeyPairRequest result = captor.getValue();
-        assertThat(result.getKeyName()).isEqualTo(PUBLIC_KEY_ID);
+        assertThat(result.keyName()).isEqualTo(PUBLIC_KEY_ID);
         verifyNoMoreInteractions(ec2client);
     }
 
     @Test
     void unregisterNotFoundDoesNotThrow() {
         PublicKeyUnregisterRequest request = generateUnregisterRequest();
-        when(ec2client.deleteKeyPair(any())).thenThrow(new AmazonServiceException("no such key"));
+        when(ec2client.deleteKeyPair(any())).thenThrow(AwsServiceException.builder().message("no such key").build());
         underTest.unregister(request);
         ArgumentCaptor<DeleteKeyPairRequest> captor = ArgumentCaptor.forClass(DeleteKeyPairRequest.class);
         verify(ec2client).deleteKeyPair(captor.capture());
         DeleteKeyPairRequest result = captor.getValue();
-        assertThat(result.getKeyName()).isEqualTo(PUBLIC_KEY_ID);
+        assertThat(result.keyName()).isEqualTo(PUBLIC_KEY_ID);
         verifyNoMoreInteractions(ec2client);
     }
 

@@ -8,14 +8,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.elasticfilesystem.model.AmazonElasticFileSystemException;
-import com.amazonaws.services.elasticfilesystem.model.DescribeFileSystemsRequest;
-import com.amazonaws.services.elasticfilesystem.model.DescribeFileSystemsResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEfsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+
+import software.amazon.awssdk.services.efs.model.DescribeFileSystemsRequest;
+import software.amazon.awssdk.services.efs.model.DescribeFileSystemsResponse;
+import software.amazon.awssdk.services.efs.model.EfsException;
 
 @Service
 public class AwsEfsCommonService {
@@ -25,17 +26,16 @@ public class AwsEfsCommonService {
     @Inject
     private CommonAwsClient awsClient;
 
-    public DescribeFileSystemsResult getEfsSize(CloudCredential cloudCredential, String region, Date startTime, Date endTime, String efsId) {
+    public DescribeFileSystemsResponse getEfsSize(CloudCredential cloudCredential, String region, Date startTime, Date endTime, String efsId) {
         try {
             AwsCredentialView credentialView = new AwsCredentialView(cloudCredential);
             AmazonEfsClient elasticFileSystemClient = awsClient.createElasticFileSystemClient(credentialView, region);
-            DescribeFileSystemsRequest describeFileSystemsRequest = new DescribeFileSystemsRequest();
-            describeFileSystemsRequest.setFileSystemId(efsId);
-            DescribeFileSystemsResult describeFileSystemsResult = elasticFileSystemClient.describeFileSystems(describeFileSystemsRequest);
+            DescribeFileSystemsRequest describeFileSystemsRequest = DescribeFileSystemsRequest.builder().fileSystemId(efsId).build();
+            DescribeFileSystemsResponse describeFileSystemsResponse = elasticFileSystemClient.describeFileSystems(describeFileSystemsRequest);
             LOGGER.info("Successfully queried efs for {} and timeframe from {} to {}. Returned number of datapoints: {}",
-                    efsId, startTime, endTime, describeFileSystemsResult.getFileSystems().stream().findFirst().get().getSizeInBytes());
-            return describeFileSystemsResult;
-        } catch (AmazonElasticFileSystemException e) {
+                    efsId, startTime, endTime, describeFileSystemsResponse.fileSystems().stream().findFirst().get().sizeInBytes());
+            return describeFileSystemsResponse;
+        } catch (EfsException e) {
             String message = String.format("Cannot get size for efs %s and timeframe from %s to %s. Reason: %s",
                     efsId, startTime, endTime, e.getMessage());
             LOGGER.error(message, e);

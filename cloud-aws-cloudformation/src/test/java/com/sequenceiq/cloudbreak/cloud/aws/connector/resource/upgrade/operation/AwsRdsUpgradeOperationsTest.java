@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,14 +27,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
-import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
-import com.amazonaws.services.rds.model.ModifyDBInstanceRequest;
 import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
-import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.common.database.Version;
+
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesRequest;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
+import software.amazon.awssdk.services.rds.model.ModifyDbInstanceRequest;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsRdsUpgradeOperationsTest {
@@ -66,16 +65,16 @@ public class AwsRdsUpgradeOperationsTest {
 
     @Test
     void testDescribeRds() {
-        DescribeDBInstancesResult describeDBInstancesResult = new DescribeDBInstancesResult();
-        when(rdsClient.describeDBInstances(any())).thenReturn(describeDBInstancesResult);
+        DescribeDbInstancesResponse describeDbInstancesResponse = DescribeDbInstancesResponse.builder().build();
+        when(rdsClient.describeDBInstances(any())).thenReturn(describeDbInstancesResponse);
 
-        DescribeDBInstancesResult result = underTest.describeRds(rdsClient, DB_INSTANCE_IDENTIFIER);
+        DescribeDbInstancesResponse result = underTest.describeRds(rdsClient, DB_INSTANCE_IDENTIFIER);
 
-        assertEquals(result, describeDBInstancesResult);
-        ArgumentCaptor<DescribeDBInstancesRequest> describeDBInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(DescribeDBInstancesRequest.class);
+        assertEquals(result, describeDbInstancesResponse);
+        ArgumentCaptor<DescribeDbInstancesRequest> describeDBInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(DescribeDbInstancesRequest.class);
         verify(rdsClient).describeDBInstances(describeDBInstancesRequestArgumentCaptor.capture());
-        DescribeDBInstancesRequest request = describeDBInstancesRequestArgumentCaptor.getValue();
-        assertEquals(DB_INSTANCE_IDENTIFIER, request.getDBInstanceIdentifier());
+        DescribeDbInstancesRequest request = describeDBInstancesRequestArgumentCaptor.getValue();
+        assertEquals(DB_INSTANCE_IDENTIFIER, request.dbInstanceIdentifier());
     }
 
     @Test
@@ -115,14 +114,14 @@ public class AwsRdsUpgradeOperationsTest {
 
         underTest.upgradeRds(rdsClient, targetVersion, DB_INSTANCE_IDENTIFIER, DB_PARAMETER_GROUP_NAME);
 
-        ArgumentCaptor<ModifyDBInstanceRequest> modifyRequestCaptor = ArgumentCaptor.forClass(ModifyDBInstanceRequest.class);
+        ArgumentCaptor<ModifyDbInstanceRequest> modifyRequestCaptor = ArgumentCaptor.forClass(ModifyDbInstanceRequest.class);
         verify(rdsClient).modifyDBInstance(modifyRequestCaptor.capture());
-        ModifyDBInstanceRequest firedRequest = modifyRequestCaptor.getValue();
-        assertEquals(DB_INSTANCE_IDENTIFIER, firedRequest.getDBInstanceIdentifier());
-        assertEquals(TARGET_VERSION, firedRequest.getEngineVersion());
-        assertTrue(firedRequest.getAllowMajorVersionUpgrade());
-        assertTrue(firedRequest.getApplyImmediately());
-        assertEquals(DB_PARAMETER_GROUP_NAME, firedRequest.getDBParameterGroupName());
+        ModifyDbInstanceRequest firedRequest = modifyRequestCaptor.getValue();
+        assertEquals(DB_INSTANCE_IDENTIFIER, firedRequest.dbInstanceIdentifier());
+        assertEquals(TARGET_VERSION, firedRequest.engineVersion());
+        assertTrue(firedRequest.allowMajorVersionUpgrade());
+        assertTrue(firedRequest.applyImmediately());
+        assertEquals(DB_PARAMETER_GROUP_NAME, firedRequest.dbParameterGroupName());
     }
 
     @Test
@@ -131,14 +130,14 @@ public class AwsRdsUpgradeOperationsTest {
 
         underTest.upgradeRds(rdsClient, targetVersion, DB_INSTANCE_IDENTIFIER, null);
 
-        ArgumentCaptor<ModifyDBInstanceRequest> modifyRequestCaptor = ArgumentCaptor.forClass(ModifyDBInstanceRequest.class);
+        ArgumentCaptor<ModifyDbInstanceRequest> modifyRequestCaptor = ArgumentCaptor.forClass(ModifyDbInstanceRequest.class);
         verify(rdsClient).modifyDBInstance(modifyRequestCaptor.capture());
-        ModifyDBInstanceRequest firedRequest = modifyRequestCaptor.getValue();
-        assertEquals(DB_INSTANCE_IDENTIFIER, firedRequest.getDBInstanceIdentifier());
-        assertEquals(TARGET_VERSION, firedRequest.getEngineVersion());
-        assertTrue(firedRequest.getAllowMajorVersionUpgrade());
-        assertTrue(firedRequest.getApplyImmediately());
-        assertNull(firedRequest.getDBParameterGroupName());
+        ModifyDbInstanceRequest firedRequest = modifyRequestCaptor.getValue();
+        assertEquals(DB_INSTANCE_IDENTIFIER, firedRequest.dbInstanceIdentifier());
+        assertEquals(TARGET_VERSION, firedRequest.engineVersion());
+        assertTrue(firedRequest.allowMajorVersionUpgrade());
+        assertTrue(firedRequest.applyImmediately());
+        assertNull(firedRequest.dbParameterGroupName());
     }
 
     @Test
@@ -153,17 +152,15 @@ public class AwsRdsUpgradeOperationsTest {
 
     @Test
     void testWaitForUpgrade() {
-        AuthenticatedContext ac = mock(AuthenticatedContext.class);
-
-        underTest.waitForRdsUpgrade(ac, rdsClient, DB_INSTANCE_IDENTIFIER);
+        underTest.waitForRdsUpgrade(rdsClient, DB_INSTANCE_IDENTIFIER);
 
         InOrder inOrder = Mockito.inOrder(awsRdsUpgradeWaitOperations);
-        ArgumentCaptor<DescribeDBInstancesRequest> describeDBInstancesRequestCaptor = ArgumentCaptor.forClass(DescribeDBInstancesRequest.class);
+        ArgumentCaptor<DescribeDbInstancesRequest> describeDBInstancesRequestCaptor = ArgumentCaptor.forClass(DescribeDbInstancesRequest.class);
         inOrder.verify(awsRdsUpgradeWaitOperations).waitUntilUpgradeStarts(eq(rdsClient), describeDBInstancesRequestCaptor.capture());
-        inOrder.verify(awsRdsUpgradeWaitOperations).waitUntilUpgradeFinishes(eq(ac), eq(rdsClient), describeDBInstancesRequestCaptor.capture());
+        inOrder.verify(awsRdsUpgradeWaitOperations).waitUntilUpgradeFinishes(eq(rdsClient), describeDBInstancesRequestCaptor.capture());
 
         Set<String> dbInstanceIdentifiers = describeDBInstancesRequestCaptor.getAllValues().stream()
-                .map(DescribeDBInstancesRequest::getDBInstanceIdentifier)
+                .map(DescribeDbInstancesRequest::dbInstanceIdentifier)
                 .collect(Collectors.toSet());
         assertThat(dbInstanceIdentifiers, hasSize(1));
         assertThat(dbInstanceIdentifiers, hasItem(DB_INSTANCE_IDENTIFIER));
@@ -171,13 +168,12 @@ public class AwsRdsUpgradeOperationsTest {
 
     @Test
     void testWaitForUpgradeWhenWaitingOnUpgradeStartTimesOut() {
-        AuthenticatedContext ac = mock(AuthenticatedContext.class);
         doThrow(PollerStoppedException.class).when(awsRdsUpgradeWaitOperations).waitUntilUpgradeStarts(eq(rdsClient), any());
 
         Assertions.assertThrows(PollerStoppedException.class, () ->
-                underTest.waitForRdsUpgrade(ac, rdsClient, DB_INSTANCE_IDENTIFIER)
+                underTest.waitForRdsUpgrade(rdsClient, DB_INSTANCE_IDENTIFIER)
         );
 
-        verify(awsRdsUpgradeWaitOperations, never()).waitUntilUpgradeFinishes(any(), any(), any());
+        verify(awsRdsUpgradeWaitOperations, never()).waitUntilUpgradeFinishes(any(), any());
     }
 }

@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -46,7 +45,8 @@ public class GcpHealthCheckResourceBuilder extends AbstractGcpLoadBalancerBuilde
         for (Integer healthCheckPort : healthPorts) {
             String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), loadBalancer.getType(), healthCheckPort);
             Map<String, Object> parameters = Map.of(HCPORT, healthCheckPort);
-            resources.add(new Builder().withType(resourceType())
+            resources.add(CloudResource.builder()
+                    .withType(resourceType())
                     .withName(resourceName)
                     .withParameters(parameters)
                     .build());

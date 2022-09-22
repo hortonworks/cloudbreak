@@ -88,7 +88,7 @@ public class GcpInstanceGroupResourceBuilderTest {
 
     @Test
     public void testDeleteWhenEverythingGoesFine() throws Exception {
-        CloudResource resource = new CloudResource.Builder()
+        CloudResource resource = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -153,7 +153,7 @@ public class GcpInstanceGroupResourceBuilderTest {
 
     @Test
     public void testBuildWithItemsInGroup() throws Exception {
-        CloudResource resource = new CloudResource.Builder()
+        CloudResource resource = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -184,7 +184,7 @@ public class GcpInstanceGroupResourceBuilderTest {
 
     @Test
     public void testBuildNoPermission() throws Exception {
-        CloudResource resource = new CloudResource.Builder()
+        CloudResource resource = CloudResource.builder()
                 .withType(ResourceType.GCP_INSTANCE_GROUP)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")

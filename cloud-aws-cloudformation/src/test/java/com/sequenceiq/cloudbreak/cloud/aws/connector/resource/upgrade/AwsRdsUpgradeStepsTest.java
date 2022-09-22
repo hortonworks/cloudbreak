@@ -21,8 +21,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.rds.model.DBInstance;
-import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsRdsParameterGroupService;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeOperations;
@@ -38,6 +36,9 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.database.Version;
+
+import software.amazon.awssdk.services.rds.model.DBInstance;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsRdsUpgradeStepsTest {
@@ -81,8 +82,8 @@ public class AwsRdsUpgradeStepsTest {
 
     @Test
     void testGetRdsInfo() {
-        DescribeDBInstancesResult describeDBInstancesResult = getDescribeDBInstancesResult(true);
-        when(awsRdsUpgradeOperations.describeRds(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(describeDBInstancesResult);
+        DescribeDbInstancesResponse describeDbInstancesResponse = getDescribeDBInstancesResult(true);
+        when(awsRdsUpgradeOperations.describeRds(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(describeDbInstancesResponse);
         when(rdsInstanceStatusesToRdsStateConverter.convert(any())).thenReturn(RdsState.AVAILABLE);
 
         RdsInfo rdsInfo = underTest.getRdsInfo(rdsClient, DB_INSTANCE_IDENTIFIER);
@@ -94,8 +95,8 @@ public class AwsRdsUpgradeStepsTest {
 
     @Test
     void testGetRdsInfoWhenValidationThrows() {
-        DescribeDBInstancesResult describeDBInstancesResult = getDescribeDBInstancesResult(false);
-        when(awsRdsUpgradeOperations.describeRds(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(describeDBInstancesResult);
+        DescribeDbInstancesResponse describeDbInstancesResponse = getDescribeDBInstancesResult(false);
+        when(awsRdsUpgradeOperations.describeRds(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(describeDbInstancesResponse);
         doThrow(CloudConnectorException.class).when(awsRdsUpgradeValidatorService).validateClusterHasASingleVersion(any());
 
         Assertions.assertThrows(CloudConnectorException.class, () ->
@@ -170,25 +171,22 @@ public class AwsRdsUpgradeStepsTest {
 
     @Test
     void testWaitForUpgrade() {
-        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        underTest.waitForUpgrade(rdsClient, databaseServer);
 
-        underTest.waitForUpgrade(ac, rdsClient, databaseServer);
-
-        verify(awsRdsUpgradeOperations).waitForRdsUpgrade(ac, rdsClient, databaseServer.getServerId());
+        verify(awsRdsUpgradeOperations).waitForRdsUpgrade(rdsClient, databaseServer.getServerId());
     }
 
-    private DescribeDBInstancesResult getDescribeDBInstancesResult(boolean containsResult) {
-        DescribeDBInstancesResult describeDBInstancesResult = new DescribeDBInstancesResult();
+    private DescribeDbInstancesResponse getDescribeDBInstancesResult(boolean containsResult) {
         List<DBInstance> dbInstaces = new ArrayList<>();
         if (containsResult) {
-            DBInstance dbInstance = new DBInstance();
-            dbInstance.setDBInstanceStatus(STATUS_AVAILABLE);
-            dbInstance.setDBInstanceArn(INSTANCE_ARN);
-            dbInstance.setEngineVersion(ENGINE_VERSION);
+            DBInstance dbInstance = DBInstance.builder()
+                    .dbInstanceStatus(STATUS_AVAILABLE)
+                    .dbInstanceArn(INSTANCE_ARN)
+                    .engineVersion(ENGINE_VERSION)
+                    .build();
             dbInstaces.add(dbInstance);
         }
-        describeDBInstancesResult.setDBInstances(dbInstaces);
-        return describeDBInstancesResult;
+        return DescribeDbInstancesResponse.builder().dbInstances(dbInstaces).build();
     }
 
 }

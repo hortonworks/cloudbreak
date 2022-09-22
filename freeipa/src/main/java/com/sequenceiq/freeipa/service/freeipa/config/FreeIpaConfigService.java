@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.aws.common.endpoint.AwsEndpointProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -27,6 +26,8 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.dns.ReverseDnsZoneCalculator;
 import com.sequenceiq.freeipa.service.stack.NetworkService;
+
+import software.amazon.awssdk.services.s3.S3Client;
 
 @Service
 public class FreeIpaConfigService {
@@ -109,7 +110,7 @@ public class FreeIpaConfigService {
                 builder.withPlatform(CloudPlatform.AWS.name());
                 builder.withAwsRegion(stack.getRegion());
                 boolean govCloud = AWS_NATIVE_GOV_VARIANT.variant().getValue().equals(stack.getPlatformvariant());
-                builder.withAwsEndpoint(awsEndpointProvider.getEndpointString(AmazonS3.ENDPOINT_PREFIX, stack.getRegion(), govCloud));
+                awsEndpointProvider.setupFipsEndpointIfNecessary(S3Client.SERVICE_NAME, stack.getRegion(), govCloud).ifPresent(builder::withAwsEndpoint);
                 LOGGER.debug("Backups will be configured to use S3 storage in {} region.", stack.getRegion());
             } else if (backup.getAdlsGen2() != null) {
                 builder.withPlatform(CloudPlatform.AZURE.name())

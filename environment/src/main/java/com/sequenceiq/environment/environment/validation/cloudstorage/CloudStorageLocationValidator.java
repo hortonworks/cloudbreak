@@ -52,7 +52,8 @@ public class CloudStorageLocationValidator {
         String bucketName = getBucketName(fileSystemType, storageLocation);
         LOGGER.debug("Bucket is {} for {} location for {} environment.", bucketName, storageLocation, environment.getId());
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environment.getCredential());
-        ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName);
+        ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName,
+                environment.getLocation());
         ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () ->
@@ -98,7 +99,8 @@ public class CloudStorageLocationValidator {
         Optional<FileSystemType> fileSystemType = getBackupFileSystemType(environment);
         String bucketName = getBucketName(fileSystemType, storageLocation);
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environment.getCredential());
-        ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName);
+        ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName,
+                environment.getLocation());
         ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () ->
@@ -134,11 +136,13 @@ public class CloudStorageLocationValidator {
         return storageLocation.split("/")[0];
     }
 
-    private ObjectStorageMetadataRequest createObjectStorageMetadataRequest(String cloudPlatform, CloudCredential credential, String objectStoragePath) {
+    private ObjectStorageMetadataRequest createObjectStorageMetadataRequest(String cloudPlatform, CloudCredential credential, String objectStoragePath,
+            String regionName) {
         return ObjectStorageMetadataRequest.builder()
                 .withCloudPlatform(cloudPlatform)
                 .withCredential(credential)
                 .withObjectStoragePath(objectStoragePath)
+                .withRegion(regionName)
                 .build();
     }
 

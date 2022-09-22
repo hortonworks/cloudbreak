@@ -15,13 +15,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
-import com.amazonaws.services.identitymanagement.model.EvaluationResult;
-import com.amazonaws.services.identitymanagement.model.OrganizationsDecisionDetail;
-import com.amazonaws.services.identitymanagement.model.Role;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.Arn;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
+
+import software.amazon.awssdk.services.iam.model.EvaluationResult;
+import software.amazon.awssdk.services.iam.model.OrganizationsDecisionDetail;
+import software.amazon.awssdk.services.iam.model.Role;
 
 public abstract class AbstractAwsSimulatePolicyValidator {
 
@@ -39,13 +40,13 @@ public abstract class AbstractAwsSimulatePolicyValidator {
                 .filter(evaluationResult -> shouldCheckEvaluationResult(evaluationResult, skipOrgPolicyDecisions))
                 .peek(evaluationResult -> LOGGER.debug("Aws EvaluationResult for the failed policy simulation: {}", evaluationResult))
                 .map(evaluationResult -> {
-                    OrganizationsDecisionDetail organizationsDecisionDetail = evaluationResult.getOrganizationsDecisionDetail();
-                    if (organizationsDecisionDetail != null && !organizationsDecisionDetail.getAllowedByOrganizations()) {
-                        return String.format("%s:%s:%s", role.getArn(),
-                                evaluationResult.getEvalActionName(), evaluationResult.getEvalResourceName() + DENIED_BY_ORGANIZATION_RULE);
+                    OrganizationsDecisionDetail organizationsDecisionDetail = evaluationResult.organizationsDecisionDetail();
+                    if (organizationsDecisionDetail != null && !organizationsDecisionDetail.allowedByOrganizations()) {
+                        return String.format("%s:%s:%s", role.arn(),
+                                evaluationResult.evalActionName(), evaluationResult.evalResourceName() + DENIED_BY_ORGANIZATION_RULE);
                     } else {
-                        return String.format("%s:%s:%s", role.getArn(),
-                                evaluationResult.getEvalActionName(), evaluationResult.getEvalResourceName());
+                        return String.format("%s:%s:%s", role.arn(),
+                                evaluationResult.evalActionName(), evaluationResult.evalResourceName());
                     }
                 })
                 .collect(Collectors.toCollection(TreeSet::new));
@@ -57,26 +58,26 @@ public abstract class AbstractAwsSimulatePolicyValidator {
 
     boolean shouldSkipOrgPolicyDeny(EvaluationResult evaluationResult, boolean skipOrgPolicyDecisions) {
         return skipOrgPolicyDecisions
-                && evaluationResult.getOrganizationsDecisionDetail() != null
-                && !evaluationResult.getOrganizationsDecisionDetail().getAllowedByOrganizations();
+                && evaluationResult.organizationsDecisionDetail() != null
+                && !evaluationResult.organizationsDecisionDetail().allowedByOrganizations();
     }
 
-    SortedSet<String> getWarnings(Role role, List<EvaluationResult> evaluationResults) {
+    SortedSet<String> getWarnings(List<EvaluationResult> evaluationResults) {
         return evaluationResults.stream()
                 .filter(this::isEvaluationWarning)
                 .map(evaluationResult -> String.format("missing context values: %s",
-                        String.join(",", new HashSet<>(evaluationResult.getMissingContextValues()))))
+                        String.join(",", new HashSet<>(evaluationResult.missingContextValues()))))
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private boolean isEvaluationFailed(EvaluationResult evaluationResult) {
-        return evaluationResult.getEvalDecision().toLowerCase().contains("deny")
-                && CollectionUtils.isEmpty(evaluationResult.getMissingContextValues());
+        return evaluationResult.evalDecisionAsString().toLowerCase().contains("deny")
+                && CollectionUtils.isEmpty(evaluationResult.missingContextValues());
     }
 
     private boolean isEvaluationWarning(EvaluationResult evaluationResult) {
-        return evaluationResult.getEvalDecision().toLowerCase().contains("deny")
-                && !CollectionUtils.isEmpty(evaluationResult.getMissingContextValues());
+        return evaluationResult.evalDecisionAsString().toLowerCase().contains("deny")
+                && !CollectionUtils.isEmpty(evaluationResult.missingContextValues());
     }
 
     protected String getBackupPolicy() {

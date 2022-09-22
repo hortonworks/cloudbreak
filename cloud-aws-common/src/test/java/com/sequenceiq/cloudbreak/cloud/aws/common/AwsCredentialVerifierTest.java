@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -18,19 +18,13 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.hamcrest.CoreMatchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.identitymanagement.model.EvaluationResult;
-import com.amazonaws.services.identitymanagement.model.OrganizationsDecisionDetail;
-import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyRequest;
-import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyResult;
-import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest;
-import com.amazonaws.services.securitytoken.model.GetCallerIdentityResult;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
@@ -39,7 +33,14 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsPermissionMissing
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
-@RunWith(MockitoJUnitRunner.class)
+import software.amazon.awssdk.services.iam.model.EvaluationResult;
+import software.amazon.awssdk.services.iam.model.OrganizationsDecisionDetail;
+import software.amazon.awssdk.services.iam.model.SimulatePrincipalPolicyRequest;
+import software.amazon.awssdk.services.iam.model.SimulatePrincipalPolicyResponse;
+import software.amazon.awssdk.services.sts.model.GetCallerIdentityRequest;
+import software.amazon.awssdk.services.sts.model.GetCallerIdentityResponse;
+
+@ExtendWith(MockitoExtension.class)
 public class AwsCredentialVerifierTest {
 
     @Mock
@@ -65,29 +66,28 @@ public class AwsCredentialVerifierTest {
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonIdentityManagement);
 
         AmazonSecurityTokenServiceClient awsSecurityTokenService = mock(AmazonSecurityTokenServiceClient.class);
-        GetCallerIdentityResult getCallerIdentityResult = new GetCallerIdentityResult();
-        getCallerIdentityResult.setArn("arn");
+        GetCallerIdentityResponse getCallerIdentityResult = GetCallerIdentityResponse.builder().arn("arn").build();
         when(awsSecurityTokenService.getCallerIdentity(any(GetCallerIdentityRequest.class))).thenReturn(getCallerIdentityResult);
         when(awsClient.createSecurityTokenService(any(AwsCredentialView.class))).thenReturn(awsSecurityTokenService);
 
         ArgumentCaptor<SimulatePrincipalPolicyRequest> requestArgumentCaptor = ArgumentCaptor.forClass(SimulatePrincipalPolicyRequest.class);
         AtomicInteger i = new AtomicInteger();
         when(amazonIdentityManagement.simulatePrincipalPolicy(requestArgumentCaptor.capture())).thenAnswer(invocation -> {
-            SimulatePrincipalPolicyResult simulatePrincipalPolicyResult = new SimulatePrincipalPolicyResult();
             ArrayList<EvaluationResult> evaluationResults = new ArrayList<>();
-            evaluationResults.add(new EvaluationResult().withEvalDecision("deny")
-                    .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(true))
-                    .withEvalActionName("denied_action1_" + i).withEvalResourceName("aws:ec2"));
-            evaluationResults.add(new EvaluationResult().withEvalDecision("deny")
-                    .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(true))
-                    .withEvalActionName("denied_action2_" + i).withEvalResourceName("aws:ec2"));
-            evaluationResults.add(new EvaluationResult().withEvalDecision("deny")
-                    .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(true))
-                    .withEvalActionName("denied_action3_" + i).withEvalResourceName("aws:ec2"));
-            evaluationResults.add(new EvaluationResult().withEvalDecision("accept")
-                    .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(true))
-                    .withEvalActionName("accepted_action_" + i).withEvalResourceName("*"));
-            simulatePrincipalPolicyResult.setEvaluationResults(evaluationResults);
+            evaluationResults.add(EvaluationResult.builder().evalDecision("deny")
+                    .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(true).build())
+                    .evalActionName("denied_action1_" + i).evalResourceName("aws:ec2").build());
+            evaluationResults.add(EvaluationResult.builder().evalDecision("deny")
+                    .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(true).build())
+                    .evalActionName("denied_action2_" + i).evalResourceName("aws:ec2").build());
+            evaluationResults.add(EvaluationResult.builder().evalDecision("deny")
+                    .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(true).build())
+                    .evalActionName("denied_action3_" + i).evalResourceName("aws:ec2").build());
+            evaluationResults.add(EvaluationResult.builder().evalDecision("accept")
+                    .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(true).build())
+                    .evalActionName("accepted_action_" + i).evalResourceName("*").build());
+            SimulatePrincipalPolicyResponse simulatePrincipalPolicyResult = SimulatePrincipalPolicyResponse.builder()
+                    .evaluationResults(evaluationResults).build();
             i.getAndIncrement();
             return simulatePrincipalPolicyResult;
         });
@@ -103,10 +103,10 @@ public class AwsCredentialVerifierTest {
         }
         List<SimulatePrincipalPolicyRequest> allSimulatePrincipalPolicyRequest = requestArgumentCaptor.getAllValues();
         int simulateRequestNumber = 5;
-        assertEquals("expect if " + simulateRequestNumber + " simulate request has been sent",
-                simulateRequestNumber, allSimulatePrincipalPolicyRequest.size());
+        assertEquals(simulateRequestNumber, allSimulatePrincipalPolicyRequest.size(),
+                "expect if " + simulateRequestNumber + " simulate request has been sent");
         allSimulatePrincipalPolicyRequest.forEach(simulatePrincipalPolicyRequest ->
-                assertEquals("arn", simulatePrincipalPolicyRequest.getPolicySourceArn()));
+                assertEquals("arn", simulatePrincipalPolicyRequest.policySourceArn()));
 
     }
 
@@ -124,28 +124,28 @@ public class AwsCredentialVerifierTest {
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonIdentityManagement);
 
         AmazonSecurityTokenServiceClient awsSecurityTokenService = mock(AmazonSecurityTokenServiceClient.class);
-        GetCallerIdentityResult getCallerIdentityResult = new GetCallerIdentityResult();
-        getCallerIdentityResult.setArn("arn");
+        GetCallerIdentityResponse getCallerIdentityResult = GetCallerIdentityResponse.builder()
+                .arn("arn").build();
         when(awsSecurityTokenService.getCallerIdentity(any(GetCallerIdentityRequest.class))).thenReturn(getCallerIdentityResult);
         when(awsClient.createSecurityTokenService(any(AwsCredentialView.class))).thenReturn(awsSecurityTokenService);
 
         ArgumentCaptor<SimulatePrincipalPolicyRequest> requestArgumentCaptor = ArgumentCaptor.forClass(SimulatePrincipalPolicyRequest.class);
-        SimulatePrincipalPolicyResult simulatePrincipalPolicyResult = new SimulatePrincipalPolicyResult();
-            ArrayList<EvaluationResult> evaluationResults = new ArrayList<>();
-            evaluationResults.add(new EvaluationResult().withEvalDecision("accept")
-                    .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(true))
-                    .withEvalActionName("accepted_action1").withEvalResourceName("aws:ec2"));
-            evaluationResults.add(new EvaluationResult().withEvalDecision("accept")
-                    .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(true))
-                    .withEvalActionName("accepted_action2").withEvalResourceName("aws:ec2"));
-            evaluationResults.add(new EvaluationResult().withEvalDecision("accept")
-                    .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(true))
-                    .withEvalActionName("accepted_action3").withEvalResourceName("aws:ec2"));
-            evaluationResults.add(new EvaluationResult().withEvalDecision("accept")
-                    .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(true))
-                    .withEvalActionName("accepted_action4").withEvalResourceName("*"));
-            simulatePrincipalPolicyResult.setEvaluationResults(evaluationResults);
-            when(amazonIdentityManagement.simulatePrincipalPolicy(requestArgumentCaptor.capture())).thenReturn(simulatePrincipalPolicyResult);
+        ArrayList<EvaluationResult> evaluationResults = new ArrayList<>();
+        evaluationResults.add(EvaluationResult.builder().evalDecision("accept")
+                .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(true).build())
+                .evalActionName("accepted_action1").evalResourceName("aws:ec2").build());
+        evaluationResults.add(EvaluationResult.builder().evalDecision("accept")
+                .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(true).build())
+                .evalActionName("accepted_action2").evalResourceName("aws:ec2").build());
+        evaluationResults.add(EvaluationResult.builder().evalDecision("accept")
+                .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(true).build())
+                .evalActionName("accepted_action3").evalResourceName("aws:ec2").build());
+        evaluationResults.add(EvaluationResult.builder().evalDecision("accept")
+                .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(true).build())
+                .evalActionName("accepted_action4").evalResourceName("*").build());
+        SimulatePrincipalPolicyResponse simulatePrincipalPolicyResult = SimulatePrincipalPolicyResponse.builder()
+                .evaluationResults(evaluationResults).build();
+        when(amazonIdentityManagement.simulatePrincipalPolicy(requestArgumentCaptor.capture())).thenReturn(simulatePrincipalPolicyResult);
 
         awsCredentialVerifier.validateAws(new AwsCredentialView(cloudCredential), encodedAwsEnvPolicy);
     }
@@ -164,29 +164,29 @@ public class AwsCredentialVerifierTest {
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonIdentityManagement);
 
         AmazonSecurityTokenServiceClient awsSecurityTokenService = mock(AmazonSecurityTokenServiceClient.class);
-        GetCallerIdentityResult getCallerIdentityResult = new GetCallerIdentityResult();
-        getCallerIdentityResult.setArn("arn");
+        GetCallerIdentityResponse getCallerIdentityResult = GetCallerIdentityResponse.builder()
+                .arn("arn").build();
         when(awsSecurityTokenService.getCallerIdentity(any(GetCallerIdentityRequest.class))).thenReturn(getCallerIdentityResult);
         when(awsClient.createSecurityTokenService(any(AwsCredentialView.class))).thenReturn(awsSecurityTokenService);
 
         ArgumentCaptor<SimulatePrincipalPolicyRequest> requestArgumentCaptor = ArgumentCaptor.forClass(SimulatePrincipalPolicyRequest.class);
         AtomicInteger i = new AtomicInteger();
         when(amazonIdentityManagement.simulatePrincipalPolicy(requestArgumentCaptor.capture())).thenAnswer(invocation -> {
-            SimulatePrincipalPolicyResult simulatePrincipalPolicyResult = new SimulatePrincipalPolicyResult();
             ArrayList<EvaluationResult> evaluationResults = new ArrayList<>();
-            evaluationResults.add(new EvaluationResult().withEvalDecision("deny")
-                    .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(true))
-                    .withEvalActionName("denied_action1_" + i).withEvalResourceName("aws:ec2"));
-            evaluationResults.add(new EvaluationResult().withEvalDecision("deny")
-                    .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(false))
-                    .withEvalActionName("denied_action2_" + i).withEvalResourceName("aws:ec2"));
-            evaluationResults.add(new EvaluationResult().withEvalDecision("deny")
-                    .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(false))
-                    .withEvalActionName("denied_action3_" + i).withEvalResourceName("aws:ec2"));
-            evaluationResults.add(new EvaluationResult().withEvalDecision("accept")
-                    .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(true))
-                    .withEvalActionName("accepted_action_" + i).withEvalResourceName("*"));
-            simulatePrincipalPolicyResult.setEvaluationResults(evaluationResults);
+            evaluationResults.add(EvaluationResult.builder().evalDecision("deny")
+                    .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(true).build())
+                    .evalActionName("denied_action1_" + i).evalResourceName("aws:ec2").build());
+            evaluationResults.add(EvaluationResult.builder().evalDecision("deny")
+                    .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(false).build())
+                    .evalActionName("denied_action2_" + i).evalResourceName("aws:ec2").build());
+            evaluationResults.add(EvaluationResult.builder().evalDecision("deny")
+                    .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(false).build())
+                    .evalActionName("denied_action3_" + i).evalResourceName("aws:ec2").build());
+            evaluationResults.add(EvaluationResult.builder().evalDecision("accept")
+                    .organizationsDecisionDetail(OrganizationsDecisionDetail.builder().allowedByOrganizations(true).build())
+                    .evalActionName("accepted_action_" + i).evalResourceName("*").build());
+            SimulatePrincipalPolicyResponse simulatePrincipalPolicyResult = SimulatePrincipalPolicyResponse.builder()
+                    .evaluationResults(evaluationResults).build();
             i.getAndIncrement();
             return simulatePrincipalPolicyResult;
         });
@@ -202,10 +202,10 @@ public class AwsCredentialVerifierTest {
         }
         List<SimulatePrincipalPolicyRequest> allSimulatePrincipalPolicyRequest = requestArgumentCaptor.getAllValues();
         int simulateRequestNumber = 5;
-        assertEquals("expect if " + simulateRequestNumber + " simulate request has been sent",
-                simulateRequestNumber, allSimulatePrincipalPolicyRequest.size());
+        assertEquals(simulateRequestNumber, allSimulatePrincipalPolicyRequest.size(),
+                "expect if " + simulateRequestNumber + " simulate request has been sent");
         allSimulatePrincipalPolicyRequest.forEach(simulatePrincipalPolicyRequest ->
-                assertEquals("arn", simulatePrincipalPolicyRequest.getPolicySourceArn()));
+                assertEquals("arn", simulatePrincipalPolicyRequest.policySourceArn()));
 
     }
 
@@ -223,29 +223,29 @@ public class AwsCredentialVerifierTest {
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonIdentityManagement);
 
         AmazonSecurityTokenServiceClient awsSecurityTokenService = mock(AmazonSecurityTokenServiceClient.class);
-        GetCallerIdentityResult getCallerIdentityResult = new GetCallerIdentityResult();
-        getCallerIdentityResult.setArn("arn");
+        GetCallerIdentityResponse getCallerIdentityResult = GetCallerIdentityResponse.builder()
+                .arn("arn").build();
         when(awsSecurityTokenService.getCallerIdentity(any(GetCallerIdentityRequest.class))).thenReturn(getCallerIdentityResult);
         when(awsClient.createSecurityTokenService(any(AwsCredentialView.class))).thenReturn(awsSecurityTokenService);
 
         ArgumentCaptor<SimulatePrincipalPolicyRequest> requestArgumentCaptor = ArgumentCaptor.forClass(SimulatePrincipalPolicyRequest.class);
         AtomicInteger i = new AtomicInteger();
         when(amazonIdentityManagement.simulatePrincipalPolicy(requestArgumentCaptor.capture())).thenAnswer(invocation -> {
-            SimulatePrincipalPolicyResult simulatePrincipalPolicyResult = new SimulatePrincipalPolicyResult();
             ArrayList<EvaluationResult> evaluationResults = new ArrayList<>();
-            evaluationResults.add(new EvaluationResult().withEvalDecision("deny")
-                    .withOrganizationsDecisionDetail(null)
-                    .withEvalActionName("denied_action1_" + i).withEvalResourceName("aws:ec2"));
-            evaluationResults.add(new EvaluationResult().withEvalDecision("deny")
-                    .withOrganizationsDecisionDetail(null)
-                    .withEvalActionName("denied_action2_" + i).withEvalResourceName("aws:ec2"));
-            evaluationResults.add(new EvaluationResult().withEvalDecision("deny")
-                    .withOrganizationsDecisionDetail(null)
-                    .withEvalActionName("denied_action3_" + i).withEvalResourceName("aws:ec2"));
-            evaluationResults.add(new EvaluationResult().withEvalDecision("accept")
-                    .withOrganizationsDecisionDetail(null)
-                    .withEvalActionName("accepted_action_" + i).withEvalResourceName("*"));
-            simulatePrincipalPolicyResult.setEvaluationResults(evaluationResults);
+            evaluationResults.add(EvaluationResult.builder().evalDecision("deny")
+                    .organizationsDecisionDetail((OrganizationsDecisionDetail) null)
+                    .evalActionName("denied_action1_" + i).evalResourceName("aws:ec2").build());
+            evaluationResults.add(EvaluationResult.builder().evalDecision("deny")
+                    .organizationsDecisionDetail((OrganizationsDecisionDetail) null)
+                    .evalActionName("denied_action2_" + i).evalResourceName("aws:ec2").build());
+            evaluationResults.add(EvaluationResult.builder().evalDecision("deny")
+                    .organizationsDecisionDetail((OrganizationsDecisionDetail) null)
+                    .evalActionName("denied_action3_" + i).evalResourceName("aws:ec2").build());
+            evaluationResults.add(EvaluationResult.builder().evalDecision("accept")
+                    .organizationsDecisionDetail((OrganizationsDecisionDetail) null)
+                    .evalActionName("accepted_action_" + i).evalResourceName("*").build());
+            SimulatePrincipalPolicyResponse simulatePrincipalPolicyResult = SimulatePrincipalPolicyResponse.builder()
+                    .evaluationResults(evaluationResults).build();
             i.getAndIncrement();
             return simulatePrincipalPolicyResult;
         });
@@ -261,10 +261,10 @@ public class AwsCredentialVerifierTest {
         }
         List<SimulatePrincipalPolicyRequest> allSimulatePrincipalPolicyRequest = requestArgumentCaptor.getAllValues();
         int simulateRequestNumber = 5;
-        assertEquals("expect if " + simulateRequestNumber + " simulate request has been sent",
-                simulateRequestNumber, allSimulatePrincipalPolicyRequest.size());
+        assertEquals(simulateRequestNumber, allSimulatePrincipalPolicyRequest.size(),
+                "expect if " + simulateRequestNumber + " simulate request has been sent");
         allSimulatePrincipalPolicyRequest.forEach(simulatePrincipalPolicyRequest ->
-                assertEquals("arn", simulatePrincipalPolicyRequest.getPolicySourceArn()));
+                assertEquals("arn", simulatePrincipalPolicyRequest.policySourceArn()));
 
     }
 }

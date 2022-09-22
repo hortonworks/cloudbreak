@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.model.DescribeVolumesResult;
-import com.amazonaws.services.ec2.model.Volume;
 import com.cloudera.thunderhead.service.metering.events.MeteringEventsProto;
 import com.sequenceiq.cloudbreak.cloud.ConsumptionCalculator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsEbsCommonService;
@@ -23,6 +21,9 @@ import com.sequenceiq.cloudbreak.cloud.model.StorageSizeRequest;
 import com.sequenceiq.cloudbreak.cloud.model.StorageSizeResponse;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.StorageType;
+
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
+import software.amazon.awssdk.services.ec2.model.Volume;
 
 @Service
 public class AwsEbsConsumptionCalculator implements ConsumptionCalculator {
@@ -44,10 +45,10 @@ public class AwsEbsConsumptionCalculator implements ConsumptionCalculator {
     private AwsInstanceCommonService awsInstanceCommonService;
 
     @Override
-    public void validate(CloudConsumption cloudConsumption) throws ValidationException {
+    public void validate(CloudConsumption cloudConsumption) {
         String cloudProviderId = cloudConsumption.getStorageLocation();
         if (cloudProviderId == null || (!isEbs(cloudProviderId) && !isInstance(cloudProviderId) && !isDataHub(cloudProviderId))) {
-            throw new ValidationException(String.format("EBS id must start with 'vol-' or 'i-' or 'datahub crn' if required file system type is 'EBS'!"));
+            throw new ValidationException("EBS id must start with 'vol-' or 'i-' or 'datahub crn' if required file system type is 'EBS'!");
         }
     }
 
@@ -80,18 +81,18 @@ public class AwsEbsConsumptionCalculator implements ConsumptionCalculator {
 
     private Optional<StorageSizeResponse> getStorageSizeResponse(StorageSizeRequest request, String ebsId) {
         Optional<StorageSizeResponse> result = Optional.empty();
-        Optional<DescribeVolumesResult> describeVolumesResult = awsEbsCommonService.getEbsSize(
+        Optional<DescribeVolumesResponse> describeVolumesResponse = awsEbsCommonService.getEbsSize(
                 request.getCredential(),
                 request.getRegion().value(),
                 ebsId);
-        if (describeVolumesResult.isPresent()) {
-            Optional<Volume> volumeOptional = describeVolumesResult.get().getVolumes().stream().findFirst();
+        if (describeVolumesResponse.isPresent()) {
+            Optional<Volume> volumeOptional = describeVolumesResponse.get().volumes().stream().findFirst();
             if (volumeOptional.isPresent()) {
                 Volume volume = volumeOptional.get();
                 LOGGER.debug("Gathered Volume from EBS: {}", volume);
                 result = Optional.of(
                         StorageSizeResponse.builder()
-                                .withStorageInBytes(volume.getSize() * NO_BYTE_FROM_GB)
+                                .withStorageInBytes(volume.size() * NO_BYTE_FROM_GB)
                                 .build());
             } else {
                 String message = String.format("Unable to describe EBS volume with ID %s", request.getCloudObjectIdsString());

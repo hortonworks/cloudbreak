@@ -1,5 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.scheduler;
 
-interface CancellationCheck {
+public interface CancellationCheck {
     boolean isCancelled();
 }

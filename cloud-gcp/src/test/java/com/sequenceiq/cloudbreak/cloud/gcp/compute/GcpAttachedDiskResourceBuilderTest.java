@@ -45,7 +45,6 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -147,7 +146,8 @@ public class GcpAttachedDiskResourceBuilderTest {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
 
         context = new GcpContext(cloudContext.getName(), location, "projectId", "serviceAccountId", compute, false, 30, false);
-        List<CloudResource> networkResources = Collections.singletonList(new Builder().withType(ResourceType.GCP_NETWORK).withName("network-test").build());
+        List<CloudResource> networkResources =
+                Collections.singletonList(CloudResource.builder().withType(ResourceType.GCP_NETWORK).withName("network-test").build());
         context.addNetworkResources(networkResources);
 
         privateId = 1L;
@@ -189,7 +189,7 @@ public class GcpAttachedDiskResourceBuilderTest {
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default",
                 "default-id", new HashMap<>());
-        cloudStack = new CloudStack(Collections.emptyList(), null, image, emptyMap(), emptyMap(), null,
+        cloudStack = new CloudStack(emptyList(), null, image, emptyMap(), emptyMap(), null,
                 null, null, null, null);
 
         when(intermediateBuilderExecutor.submit(any(Callable.class))).thenAnswer(invocation -> {

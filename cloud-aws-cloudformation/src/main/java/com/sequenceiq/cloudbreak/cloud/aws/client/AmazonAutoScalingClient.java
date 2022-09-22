@@ -1,90 +1,92 @@
 package com.sequenceiq.cloudbreak.cloud.aws.client;
 
-import com.amazonaws.services.autoscaling.AmazonAutoScaling;
-import com.amazonaws.services.autoscaling.model.CreateLaunchConfigurationRequest;
-import com.amazonaws.services.autoscaling.model.CreateLaunchConfigurationResult;
-import com.amazonaws.services.autoscaling.model.DeleteLaunchConfigurationRequest;
-import com.amazonaws.services.autoscaling.model.DeleteLaunchConfigurationResult;
-import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
-import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
-import com.amazonaws.services.autoscaling.model.DescribeAutoScalingInstancesRequest;
-import com.amazonaws.services.autoscaling.model.DescribeAutoScalingInstancesResult;
-import com.amazonaws.services.autoscaling.model.DescribeLaunchConfigurationsRequest;
-import com.amazonaws.services.autoscaling.model.DescribeLaunchConfigurationsResult;
-import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest;
-import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult;
-import com.amazonaws.services.autoscaling.model.DetachInstancesRequest;
-import com.amazonaws.services.autoscaling.model.DetachInstancesResult;
-import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest;
-import com.amazonaws.services.autoscaling.model.ResumeProcessesResult;
-import com.amazonaws.services.autoscaling.model.SuspendProcessesRequest;
-import com.amazonaws.services.autoscaling.model.SuspendProcessesResult;
-import com.amazonaws.services.autoscaling.model.TerminateInstanceInAutoScalingGroupRequest;
-import com.amazonaws.services.autoscaling.model.TerminateInstanceInAutoScalingGroupResult;
-import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
-import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupResult;
-import com.amazonaws.services.autoscaling.waiters.AmazonAutoScalingWaiters;
+
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonClient;
 import com.sequenceiq.cloudbreak.service.Retry;
 
+import software.amazon.awssdk.services.autoscaling.AutoScalingClient;
+import software.amazon.awssdk.services.autoscaling.model.CreateLaunchConfigurationRequest;
+import software.amazon.awssdk.services.autoscaling.model.CreateLaunchConfigurationResponse;
+import software.amazon.awssdk.services.autoscaling.model.DeleteLaunchConfigurationRequest;
+import software.amazon.awssdk.services.autoscaling.model.DeleteLaunchConfigurationResponse;
+import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
+import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsResponse;
+import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingInstancesRequest;
+import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingInstancesResponse;
+import software.amazon.awssdk.services.autoscaling.model.DescribeLaunchConfigurationsRequest;
+import software.amazon.awssdk.services.autoscaling.model.DescribeLaunchConfigurationsResponse;
+import software.amazon.awssdk.services.autoscaling.model.DescribeScalingActivitiesRequest;
+import software.amazon.awssdk.services.autoscaling.model.DescribeScalingActivitiesResponse;
+import software.amazon.awssdk.services.autoscaling.model.DetachInstancesRequest;
+import software.amazon.awssdk.services.autoscaling.model.DetachInstancesResponse;
+import software.amazon.awssdk.services.autoscaling.model.ResumeProcessesRequest;
+import software.amazon.awssdk.services.autoscaling.model.ResumeProcessesResponse;
+import software.amazon.awssdk.services.autoscaling.model.SuspendProcessesRequest;
+import software.amazon.awssdk.services.autoscaling.model.SuspendProcessesResponse;
+import software.amazon.awssdk.services.autoscaling.model.TerminateInstanceInAutoScalingGroupRequest;
+import software.amazon.awssdk.services.autoscaling.model.TerminateInstanceInAutoScalingGroupResponse;
+import software.amazon.awssdk.services.autoscaling.model.UpdateAutoScalingGroupRequest;
+import software.amazon.awssdk.services.autoscaling.model.UpdateAutoScalingGroupResponse;
+import software.amazon.awssdk.services.autoscaling.waiters.AutoScalingWaiter;
+
 public class AmazonAutoScalingClient extends AmazonClient {
 
-    private final AmazonAutoScaling client;
+    private final AutoScalingClient client;
 
     private final Retry retry;
 
-    public AmazonAutoScalingClient(AmazonAutoScaling client, Retry retry) {
+    public AmazonAutoScalingClient(AutoScalingClient client, Retry retry) {
         this.client = client;
         this.retry = retry;
     }
 
-    public SuspendProcessesResult suspendProcesses(SuspendProcessesRequest request) {
+    public SuspendProcessesResponse suspendProcesses(SuspendProcessesRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.suspendProcesses(request));
     }
 
-    public ResumeProcessesResult resumeProcesses(ResumeProcessesRequest request) {
+    public ResumeProcessesResponse resumeProcesses(ResumeProcessesRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.resumeProcesses(request));
     }
 
-    public DescribeAutoScalingGroupsResult describeAutoScalingGroups(DescribeAutoScalingGroupsRequest request) {
+    public DescribeAutoScalingGroupsResponse describeAutoScalingGroups(DescribeAutoScalingGroupsRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.describeAutoScalingGroups(request));
     }
 
-    public UpdateAutoScalingGroupResult updateAutoScalingGroup(UpdateAutoScalingGroupRequest request) {
+    public UpdateAutoScalingGroupResponse updateAutoScalingGroup(UpdateAutoScalingGroupRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.updateAutoScalingGroup(request));
     }
 
-    public DetachInstancesResult detachInstances(DetachInstancesRequest request) {
+    public DetachInstancesResponse detachInstances(DetachInstancesRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.detachInstances(request));
     }
 
-    public DescribeAutoScalingInstancesResult describeAutoScalingInstances(DescribeAutoScalingInstancesRequest request) {
+    public DescribeAutoScalingInstancesResponse describeAutoScalingInstances(DescribeAutoScalingInstancesRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.describeAutoScalingInstances(request));
     }
 
-    public DescribeScalingActivitiesResult describeScalingActivities(DescribeScalingActivitiesRequest request) {
+    public DescribeScalingActivitiesResponse describeScalingActivities(DescribeScalingActivitiesRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.describeScalingActivities(request));
     }
 
-    public TerminateInstanceInAutoScalingGroupResult terminateInstance(TerminateInstanceInAutoScalingGroupRequest terminateInstanceInAutoScalingGroupRequest) {
+    public TerminateInstanceInAutoScalingGroupResponse terminateInstance(TerminateInstanceInAutoScalingGroupRequest terminateInstanceInAutoScalingGroupRequest) {
         return retry.testWith2SecDelayMax15Times(() ->
                 client.terminateInstanceInAutoScalingGroup(terminateInstanceInAutoScalingGroupRequest));
     }
 
-    public DescribeLaunchConfigurationsResult describeLaunchConfigurations(DescribeLaunchConfigurationsRequest launchConfigurationsRequest) {
+    public DescribeLaunchConfigurationsResponse describeLaunchConfigurations(DescribeLaunchConfigurationsRequest launchConfigurationsRequest) {
         return client.describeLaunchConfigurations(launchConfigurationsRequest);
     }
 
-    public DeleteLaunchConfigurationResult deleteLaunchConfiguration(DeleteLaunchConfigurationRequest deleteLaunchConfigurationRequest) {
+    public DeleteLaunchConfigurationResponse deleteLaunchConfiguration(DeleteLaunchConfigurationRequest deleteLaunchConfigurationRequest) {
         return client.deleteLaunchConfiguration(deleteLaunchConfigurationRequest);
     }
 
     // FIXME return actual waiter instead
-    public AmazonAutoScalingWaiters waiters() {
-        return client.waiters();
+    public AutoScalingWaiter waiters() {
+        return client.waiter();
     }
 
-    public CreateLaunchConfigurationResult createLaunchConfiguration(CreateLaunchConfigurationRequest createLaunchConfigurationRequest) {
+    public CreateLaunchConfigurationResponse createLaunchConfiguration(CreateLaunchConfigurationRequest createLaunchConfigurationRequest) {
         return client.createLaunchConfiguration(createLaunchConfigurationRequest);
     }
 }

@@ -33,21 +33,6 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.ec2.model.AmazonEC2Exception;
-import com.amazonaws.services.ec2.model.CreateVolumeRequest;
-import com.amazonaws.services.ec2.model.CreateVolumeResult;
-import com.amazonaws.services.ec2.model.DeleteVolumeRequest;
-import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
-import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
-import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
-import com.amazonaws.services.ec2.model.DescribeVolumesResult;
-import com.amazonaws.services.ec2.model.EbsInstanceBlockDeviceSpecification;
-import com.amazonaws.services.ec2.model.InstanceBlockDeviceMappingSpecification;
-import com.amazonaws.services.ec2.model.ModifyInstanceAttributeRequest;
-import com.amazonaws.services.ec2.model.ModifyInstanceAttributeResult;
-import com.amazonaws.services.ec2.model.Subnet;
-import com.amazonaws.services.ec2.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -60,7 +45,6 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
@@ -78,6 +62,22 @@ import com.sequenceiq.cloudbreak.util.DeviceNameGenerator;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AwsDiskType;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.ec2.model.CreateVolumeRequest;
+import software.amazon.awssdk.services.ec2.model.CreateVolumeResponse;
+import software.amazon.awssdk.services.ec2.model.DeleteVolumeRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
+import software.amazon.awssdk.services.ec2.model.EbsInstanceBlockDeviceSpecification;
+import software.amazon.awssdk.services.ec2.model.Ec2Exception;
+import software.amazon.awssdk.services.ec2.model.InstanceBlockDeviceMappingSpecification;
+import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeRequest;
+import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeResponse;
+import software.amazon.awssdk.services.ec2.model.Subnet;
+import software.amazon.awssdk.services.ec2.model.TagSpecification;
 
 @Component
 public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
@@ -108,14 +108,16 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     @Inject
     private ResourceRetriever resourceRetriever;
 
-    private BiFunction<Volume, Boolean, InstanceBlockDeviceMappingSpecification> toInstanceBlockDeviceMappingSpecification = (volume, flag) -> {
-        EbsInstanceBlockDeviceSpecification device = new EbsInstanceBlockDeviceSpecification()
-                .withVolumeId(volume.getId())
-                .withDeleteOnTermination(flag);
+    private final BiFunction<Volume, Boolean, InstanceBlockDeviceMappingSpecification> toInstanceBlockDeviceMappingSpecification = (volume, flag) -> {
+        EbsInstanceBlockDeviceSpecification device = EbsInstanceBlockDeviceSpecification.builder()
+                .volumeId(volume.getId())
+                .deleteOnTermination(flag)
+                .build();
 
-        return new InstanceBlockDeviceMappingSpecification()
-                .withEbs(device)
-                .withDeviceName(volume.getDevice());
+        return InstanceBlockDeviceMappingSpecification.builder()
+                .ebs(device)
+                .deviceName(volume.getDevice())
+                .build();
     };
 
     @Override
@@ -193,7 +195,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
             String targetAvailabilityZone = getAvailabilityZoneFromSubnet(auth, subnetId, availabilityZone);
             LOGGER.info("Selected availability zone for volumeset: {}, group: {}", targetAvailabilityZone, groupName);
-            return new Builder()
+            return CloudResource.builder()
                     .withPersistent(true)
                     .withType(resourceType())
                     .withName(resourceNameService.resourceName(resourceType(), stackName, groupName, privateId))
@@ -219,21 +221,21 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         } else {
             String defaultAvailabilityZone = auth.getCloudContext().getLocation().getAvailabilityZone().value();
             AmazonEc2Client amazonEC2Client = getAmazonEC2Client(auth);
-            DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest().withSubnetIds(subnetId);
-            DescribeSubnetsResult describeSubnetsResult = awsMethodExecutor
+            DescribeSubnetsRequest describeSubnetsRequest = DescribeSubnetsRequest.builder().subnetIds(subnetId).build();
+            DescribeSubnetsResponse describeSubnetsResponse = awsMethodExecutor
                     .execute(() -> amazonEC2Client.describeSubnets(describeSubnetsRequest), null);
 
-            if (describeSubnetsResult == null) {
+            if (describeSubnetsResponse == null) {
                 LOGGER.debug("Describe subnet is null, fallback to default: {}", defaultAvailabilityZone);
                 return defaultAvailabilityZone;
             } else {
-                return describeSubnetsResult.getSubnets()
+                return describeSubnetsResponse.subnets()
                         .stream()
-                        .filter(subnet -> subnetId.equals(subnet.getSubnetId()))
-                        .map(Subnet::getAvailabilityZone)
+                        .filter(subnet -> subnetId.equals(subnet.subnetId()))
+                        .map(Subnet::availabilityZone)
                         .findFirst()
                         .orElseGet(() -> {
-                            LOGGER.debug("Cannot find subnet in describe subnet result, fallback to default: {}", defaultAvailabilityZone);
+                            LOGGER.debug("Cannot find subnet in describe subnet response, fallback to default: {}", defaultAvailabilityZone);
                             return defaultAvailabilityZone;
                         });
             }
@@ -251,10 +253,10 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         List<Future<?>> futures = new ArrayList<>();
         boolean encryptedVolume = isEncryptedVolumeRequested(group);
         String volumeEncryptionKey = getVolumeEncryptionKey(group, encryptedVolume);
-        TagSpecification tagSpecification = new TagSpecification()
-                .withResourceType(com.amazonaws.services.ec2.model.ResourceType.Volume)
-                .withTags(awsTaggingService.prepareEc2Tags(cloudStack.getTags()));
-
+        TagSpecification tagSpecification = TagSpecification.builder()
+                .resourceType(software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME)
+                .tags(awsTaggingService.prepareEc2Tags(cloudStack.getTags()))
+                .build();
         List<CloudResource> requestedResources = buildableResource.stream()
                 .filter(cloudResource -> CommonStatus.REQUESTED.equals(cloudResource.getStatus()))
                 .collect(Collectors.toList());
@@ -272,9 +274,9 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                     .map(createVolumeRequest(encryptedVolume, volumeEncryptionKey, tagSpecification, volumeSet))
                     .map(requestWithUsage -> intermediateBuilderExecutor.submit(() -> {
                         CreateVolumeRequest request = requestWithUsage.getFirst();
-                        CreateVolumeResult result = client.createVolume(request);
-                        String volumeId = result.getVolume().getVolumeId();
-                        Volume volume = new Volume(volumeId, generator.next(), request.getSize(), request.getVolumeType(), requestWithUsage.getSecond());
+                        CreateVolumeResponse response = client.createVolume(request);
+                        Volume volume = new Volume(response.volumeId(), generator.next(), request.size(), request.volumeTypeAsString(),
+                                requestWithUsage.getSecond());
                         volumeSetMap.get(resource.getName()).add(volume);
                     }))
                     .collect(Collectors.toList()));
@@ -313,7 +315,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     }
 
     private Function<CloudResource, CloudResource> copyResourceWithCreatedStatus(String defaultAvailabilityZone) {
-        return resource -> new Builder()
+        return resource -> CloudResource.builder()
                 .withPersistent(true)
                 .withGroup(resource.getGroup())
                 .withType(resource.getType())
@@ -336,14 +338,15 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     private Function<Volume, Pair<CreateVolumeRequest, CloudVolumeUsageType>> createVolumeRequest(boolean encryptedVolume,
             String volumeEncryptionKey, TagSpecification tagSpecification, VolumeSetAttributes volumeSet) {
         return volume -> {
-            CreateVolumeRequest createVolumeRequest = new CreateVolumeRequest()
-                    .withAvailabilityZone(volumeSet.getAvailabilityZone())
-                    .withSize(volume.getSize())
-                    .withSnapshotId(null)
-                    .withTagSpecifications(tagSpecification)
-                    .withVolumeType(volume.getType())
-                    .withEncrypted(encryptedVolume)
-                    .withKmsKeyId(volumeEncryptionKey);
+            CreateVolumeRequest createVolumeRequest = CreateVolumeRequest.builder()
+                    .availabilityZone(volumeSet.getAvailabilityZone())
+                    .size(volume.getSize())
+                    .snapshotId(null)
+                    .tagSpecifications(tagSpecification)
+                    .volumeType(volume.getType())
+                    .encrypted(encryptedVolume)
+                    .kmsKeyId(volumeEncryptionKey)
+                    .build();
             return Pair.of(createVolumeRequest, volume.getCloudVolumeUsageType());
         };
     }
@@ -398,8 +401,8 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 for (InstanceBlockDeviceMappingSpecification specification : deletedAndDetachedDeviceMappingSpecifications) {
                     try {
                         changeDeleteOnTermination(deleteOnTermination, client, instanceId, List.of(specification));
-                    } catch (AmazonServiceException e) {
-                        LOGGER.debug("Volume '{}' is already deleted.", specification.getDeviceName());
+                    } catch (AwsServiceException e) {
+                        LOGGER.debug("Volume '{}' is already deleted.", specification.deviceName(), e);
                     }
                 }
             }
@@ -410,14 +413,15 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     private void changeDeleteOnTermination(Boolean deleteOnTermination, AmazonEc2Client client,
             String instanceId, List<InstanceBlockDeviceMappingSpecification> deviceMappingSpecifications) {
-        ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = new ModifyInstanceAttributeRequest()
-                .withInstanceId(instanceId)
-                .withBlockDeviceMappings(deviceMappingSpecifications);
-        ModifyInstanceAttributeResult modifyIdentityIdFormatResult = awsMethodExecutor.execute(
+        ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = ModifyInstanceAttributeRequest.builder()
+                .instanceId(instanceId)
+                .blockDeviceMappings(deviceMappingSpecifications)
+                .build();
+        ModifyInstanceAttributeResponse modifyIdentityIdFormatResponse = awsMethodExecutor.execute(
                 () -> client.modifyInstanceAttribute(modifyInstanceAttributeRequest), null);
-        String result = instanceId + " not found on the provider.";
-        if (modifyIdentityIdFormatResult != null) {
-            result = modifyIdentityIdFormatResult.toString();
+                String result = instanceId + " not found on the provider.";
+                if (modifyIdentityIdFormatResponse != null) {
+                    result = modifyIdentityIdFormatResponse.toString();
         }
         LOGGER.info("Delete on termination set to '{}' on instance '{}'. {}", deleteOnTermination, instanceId, result);
     }
@@ -443,7 +447,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .map(VolumeSetAttributes::getVolumes)
                 .flatMap(List::stream)
                 .map(VolumeSetAttributes.Volume::getId)
-                .map(volumeId -> new DeleteVolumeRequest().withVolumeId(volumeId))
+                .map(volumeId -> DeleteVolumeRequest.builder().volumeId(volumeId).build())
                 .forEach(request -> deleteVolumeSilentlyByDeleteVolumeRequest(client, request));
     }
 
@@ -459,14 +463,18 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         Pair<List<String>, List<CloudResource>> volumes = volumeResourceCollector.getVolumeIdsByVolumeResources(resources, resourceType(),
                 volumeSetAttributes());
 
-        DescribeVolumesRequest describeVolumesRequest = new DescribeVolumesRequest(volumes.getFirst());
-        LOGGER.debug("Going to describe volume(s) with id(s): [{}]", String.join(",", describeVolumesRequest.getVolumeIds()));
+        DescribeVolumesRequest.Builder describeVolumesRequestBuilder = DescribeVolumesRequest.builder();
+        if (!CollectionUtils.isEmpty(volumes.getFirst())) {
+            describeVolumesRequestBuilder.volumeIds(volumes.getFirst());
+        }
+        DescribeVolumesRequest describeVolumesRequest = describeVolumesRequestBuilder.build();
+        LOGGER.debug("Going to describe volume(s) with id(s): [{}]", String.join(",", describeVolumesRequest.volumeIds()));
         AtomicReference<ResourceStatus> volumeSetStatus = new AtomicReference<>();
         try {
-            DescribeVolumesResult result = client.describeVolumes(describeVolumesRequest);
-            volumeSetStatus.set(getResourceStatus(result));
-        } catch (AmazonEC2Exception e) {
-            if (!"InvalidVolume.NotFound".equals(e.getErrorCode())) {
+            DescribeVolumesResponse response = client.describeVolumes(describeVolumesRequest);
+            volumeSetStatus.set(getResourceStatus(response));
+        } catch (Ec2Exception e) {
+            if (!"InvalidVolume.NotFound".equals(e.awsErrorDetails().errorCode())) {
                 throw e;
             }
             LOGGER.info("The volume doesn't need to be deleted as it does not exist on the provider side. Reason: {}", e.getMessage());
@@ -482,22 +490,22 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         LOGGER.debug("About to delete the following volume: {}", request.toString());
         try {
             client.deleteVolume(request);
-        } catch (AmazonServiceException e) {
-            LOGGER.debug(String.format("Exception during aws volume (%s) deletion.", request.getVolumeId()), e);
+        } catch (AwsServiceException e) {
+            LOGGER.debug(String.format("Exception during aws volume (%s) deletion.", request.volumeId()), e);
         }
     }
 
-    private ResourceStatus getResourceStatus(DescribeVolumesResult result) {
+    private ResourceStatus getResourceStatus(DescribeVolumesResponse response) {
         try {
-            return result.getVolumes()
+            return response.volumes()
                     .stream()
-                    .peek(volume -> LOGGER.debug("State of volume {} is {}", volume.getVolumeId(), volume.getState()))
-                    .map(com.amazonaws.services.ec2.model.Volume::getState)
+                    .peek(volume -> LOGGER.debug("State of volume {} is {}", volume.volumeId(), volume.state()))
+                    .map(software.amazon.awssdk.services.ec2.model.Volume::stateAsString)
                     .map(toResourceStatus())
                     .reduce(ATTACHED, resourceStatusReducer());
-        } catch (AmazonEC2Exception e) {
-            LOGGER.debug("Obtaining volume status was not successful due to the following error: " + e.getErrorCode(), e);
-            return "InvalidVolume.NotFound".equals(e.getErrorCode()) ? DELETED : FAILED;
+        } catch (Ec2Exception e) {
+            LOGGER.debug("Obtaining volume status was not successful due to the following error: " + e.awsErrorDetails().errorCode(), e);
+            return "InvalidVolume.NotFound".equals(e.awsErrorDetails().errorCode()) ? DELETED : FAILED;
         }
     }
 

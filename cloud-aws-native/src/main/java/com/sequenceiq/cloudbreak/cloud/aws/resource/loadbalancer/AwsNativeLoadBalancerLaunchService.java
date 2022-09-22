@@ -19,28 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.elasticloadbalancingv2.model.Action;
-import com.amazonaws.services.elasticloadbalancingv2.model.ActionTypeEnum;
-import com.amazonaws.services.elasticloadbalancingv2.model.CreateListenerRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.CreateListenerResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.CreateLoadBalancerRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.CreateLoadBalancerResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.CreateTargetGroupRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.CreateTargetGroupResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeListenersRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeListenersResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetGroupsRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetGroupsResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.IpAddressType;
-import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancerTypeEnum;
-import com.amazonaws.services.elasticloadbalancingv2.model.ProtocolEnum;
-import com.amazonaws.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.Tag;
-import com.amazonaws.services.elasticloadbalancingv2.model.TargetDescription;
-import com.amazonaws.services.elasticloadbalancingv2.model.TargetTypeEnum;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsLoadBalancerCommonService;
@@ -65,6 +43,29 @@ import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Action;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ActionTypeEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateListenerRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateListenerResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateLoadBalancerRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateLoadBalancerResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateTargetGroupRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateTargetGroupResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeListenersRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeListenersResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.IpAddressType;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerTypeEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetDescription;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetTypeEnum;
 
 @Service
 public class AwsNativeLoadBalancerLaunchService {
@@ -155,23 +156,24 @@ public class AwsNativeLoadBalancerLaunchService {
         } else {
             Set<String> subnetIds = awsLoadBalancer.getSubnetIds();
             LOGGER.info("Creating load balancer with name '{}', subnet ids: '{}' and scheme: '{}'", loadBalancerName, String.join(",", subnetIds), scheme);
-            CreateLoadBalancerRequest request = new CreateLoadBalancerRequest()
-                    .withName(loadBalancerName)
-                    .withSubnets(subnetIds)
-                    .withScheme(scheme.awsScheme())
-                    .withType(LoadBalancerTypeEnum.Network)
-                    .withIpAddressType(IpAddressType.Ipv4)
-                    .withTags(context.getTags());
-            CreateLoadBalancerResult loadBalancerResult = createOrGetLoadBalancer(context, request);
-            loadBalancerArn = loadBalancerResult.getLoadBalancers()
+            CreateLoadBalancerRequest request = CreateLoadBalancerRequest.builder()
+                    .name(loadBalancerName)
+                    .subnets(subnetIds)
+                    .scheme(scheme.awsScheme())
+                    .type(LoadBalancerTypeEnum.NETWORK)
+                    .ipAddressType(IpAddressType.IPV4)
+                    .tags(context.getTags())
+                    .build();
+            CreateLoadBalancerResponse loadBalancerResponse = createOrGetLoadBalancer(context, request);
+            loadBalancerArn = loadBalancerResponse.loadBalancers()
                     .stream()
                     .findFirst()
                     .orElseThrow()
-                    .getLoadBalancerArn();
+                    .loadBalancerArn();
             context.setLoadBalancerArn(loadBalancerArn);
             Map<String, Object> params = Map.of(CloudResource.ATTRIBUTES,
                     Enum.valueOf(LoadBalancerTypeAttribute.class, awsLoadBalancer.getScheme().getLoadBalancerType().name()));
-            loadBalancerResource = new CloudResource.Builder()
+            loadBalancerResource = CloudResource.builder()
                     .withName(loadBalancerName)
                     .withType(ResourceType.ELASTIC_LOAD_BALANCER)
                     .withReference(loadBalancerArn)
@@ -185,20 +187,21 @@ public class AwsNativeLoadBalancerLaunchService {
         context.addResourceStatus(cloudResourceStatus);
     }
 
-    private CreateLoadBalancerResult createOrGetLoadBalancer(ResourceCreationContext context, CreateLoadBalancerRequest request) {
+    private CreateLoadBalancerResponse createOrGetLoadBalancer(ResourceCreationContext context, CreateLoadBalancerRequest request) {
         try {
             return context.getLoadBalancingClient().registerLoadBalancer(request);
-        } catch (AmazonServiceException amazonServiceException) {
-            String errorCode = amazonServiceException.getErrorCode();
+        } catch (AwsServiceException amazonServiceException) {
+            String errorCode = amazonServiceException.awsErrorDetails().errorCode();
             if (StringUtils.isNotEmpty(errorCode) && errorCode.contains(DUPLICATE_LOAD_BALANCER_NAME_ERROR_CODE)) {
-                DescribeLoadBalancersRequest describeLoadBalancersRequest = new DescribeLoadBalancersRequest().withNames(request.getName());
-                DescribeLoadBalancersResult describeLoadBalancersResult = context.getLoadBalancingClient().describeLoadBalancers(describeLoadBalancersRequest);
-                return describeLoadBalancersResult.getLoadBalancers()
+                DescribeLoadBalancersRequest describeLoadBalancersRequest = DescribeLoadBalancersRequest.builder().names(request.name()).build();
+                DescribeLoadBalancersResponse describeLoadBalancersResponse = context.getLoadBalancingClient()
+                        .describeLoadBalancers(describeLoadBalancersRequest);
+                return describeLoadBalancersResponse.loadBalancers()
                         .stream()
                         .findFirst()
-                        .map(loadBalancer -> new CreateLoadBalancerResult().withLoadBalancers(loadBalancer))
+                        .map(loadBalancer -> CreateLoadBalancerResponse.builder().loadBalancers(loadBalancer).build())
                         .orElseThrow(() -> new CloudConnectorException(
-                                String.format("Load balancer could not be created and found with name: '%s'", request.getName())));
+                                String.format("Load balancer could not be created and found with name: '%s'", request.name())));
             } else {
                 throw amazonServiceException;
             }
@@ -228,25 +231,26 @@ public class AwsNativeLoadBalancerLaunchService {
             String loadBalancerArn = context.getLoadBalancerArn();
             LOGGER.info("Creating target group for load balancer('{}') with name: '{}' port: '{}'", loadBalancerArn, targetGroupName,
                     targetGroupPort);
-            CreateTargetGroupRequest targetGroupRequest = new CreateTargetGroupRequest()
-                    .withName(targetGroupName)
-                    .withPort(targetGroupPort)
-                    .withProtocol(ProtocolEnum.TCP)
-                    .withTargetType(TargetTypeEnum.Instance)
-                    .withHealthCheckPort(targetGroup.getHealthCheckPort())
-                    .withHealthCheckIntervalSeconds(TARGET_GROUP_HEALTH_CHECK_INTERVAL_SECONDS)
-                    .withHealthyThresholdCount(HEALTHY_THRESHOLD_COUNT)
-                    .withUnhealthyThresholdCount(UNHEALTHY_THRESHOLD_COUNT)
-                    .withVpcId(awsNetworkView.getExistingVpc())
-                    .withTags(context.getTags());
-            CreateTargetGroupResult targetGroupResult = createOrGetTargetGroup(context, targetGroupRequest);
-            targetGroupArn = targetGroupResult.getTargetGroups()
+            CreateTargetGroupRequest targetGroupRequest = CreateTargetGroupRequest.builder()
+                    .name(targetGroupName)
+                    .port(targetGroupPort)
+                    .protocol(ProtocolEnum.TCP)
+                    .targetType(TargetTypeEnum.INSTANCE)
+                    .healthCheckPort(targetGroup.getHealthCheckPort())
+                    .healthCheckIntervalSeconds(TARGET_GROUP_HEALTH_CHECK_INTERVAL_SECONDS)
+                    .healthyThresholdCount(HEALTHY_THRESHOLD_COUNT)
+                    .unhealthyThresholdCount(UNHEALTHY_THRESHOLD_COUNT)
+                    .vpcId(awsNetworkView.getExistingVpc())
+                    .tags(context.getTags())
+                    .build();
+            CreateTargetGroupResponse targetGroupResponse = createOrGetTargetGroup(context, targetGroupRequest);
+            targetGroupArn = targetGroupResponse.targetGroups()
                     .stream()
                     .findFirst()
                     .orElseThrow()
-                    .getTargetGroupArn();
+                    .targetGroupArn();
             targetGroup.setArn(targetGroupArn);
-            targetGroupResource = new CloudResource.Builder()
+            targetGroupResource = CloudResource.builder()
                     .withName(targetGroupName)
                     .withType(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP)
                     .withReference(targetGroupArn)
@@ -260,20 +264,20 @@ public class AwsNativeLoadBalancerLaunchService {
         context.addResourceStatus(cloudResourceStatus);
     }
 
-    private CreateTargetGroupResult createOrGetTargetGroup(ResourceCreationContext context, CreateTargetGroupRequest targetGroupRequest) {
+    private CreateTargetGroupResponse createOrGetTargetGroup(ResourceCreationContext context, CreateTargetGroupRequest targetGroupRequest) {
         try {
             return context.getLoadBalancingClient().createTargetGroup(targetGroupRequest);
-        } catch (AmazonServiceException amazonServiceException) {
-            String errorCode = amazonServiceException.getErrorCode();
+        } catch (AwsServiceException amazonServiceException) {
+            String errorCode = amazonServiceException.awsErrorDetails().errorCode();
             if (StringUtils.isNotEmpty(errorCode) && errorCode.contains(DUPLICATE_TARGET_GROUP_NAME_ERROR_CODE)) {
-                DescribeTargetGroupsRequest describeTargetGroupsRequest = new DescribeTargetGroupsRequest().withNames(targetGroupRequest.getName());
-                DescribeTargetGroupsResult describeTargetGroupsResult = context.getLoadBalancingClient().describeTargetGroup(describeTargetGroupsRequest);
-                return describeTargetGroupsResult.getTargetGroups()
+                DescribeTargetGroupsRequest describeTargetGroupsRequest = DescribeTargetGroupsRequest.builder().names(targetGroupRequest.name()).build();
+                DescribeTargetGroupsResponse describeTargetGroupsResponse = context.getLoadBalancingClient().describeTargetGroup(describeTargetGroupsRequest);
+                return describeTargetGroupsResponse.targetGroups()
                         .stream()
                         .findFirst()
-                        .map(targetGroup -> new CreateTargetGroupResult().withTargetGroups(targetGroup))
+                        .map(targetGroup -> CreateTargetGroupResponse.builder().targetGroups(targetGroup).build())
                         .orElseThrow(() -> new CloudConnectorException(
-                                String.format("Load balancer target group could not be created and found with name: '%s'", targetGroupRequest.getName())));
+                                String.format("Load balancer target group could not be created and found with name: '%s'", targetGroupRequest.name())));
             } else {
                 throw amazonServiceException;
             }
@@ -299,23 +303,25 @@ public class AwsNativeLoadBalancerLaunchService {
             String loadBalancerArn = context.getLoadBalancerArn();
             String targetGroupArn = context.getTargetGroupArn();
             LOGGER.info("Creating listener for load balancer('{}') on target group('{}')", loadBalancerArn, targetGroupArn);
-            Action defaultAction = new Action()
-                    .withType(ActionTypeEnum.Forward)
-                    .withOrder(1)
-                    .withTargetGroupArn(targetGroupArn);
-            CreateListenerRequest listenerRequest = new CreateListenerRequest()
-                    .withLoadBalancerArn(loadBalancerArn)
-                    .withProtocol(ProtocolEnum.TCP)
-                    .withPort(listener.getPort())
-                    .withDefaultActions(defaultAction)
-                    .withTags(context.getTags());
-            CreateListenerResult registerListenerResult = createOrGetListener(context, listenerRequest);
-            String listenerArn = registerListenerResult.getListeners()
+            Action defaultAction = Action.builder()
+                    .type(ActionTypeEnum.FORWARD)
+                    .order(1)
+                    .targetGroupArn(targetGroupArn)
+                    .build();
+            CreateListenerRequest listenerRequest = CreateListenerRequest.builder()
+                    .loadBalancerArn(loadBalancerArn)
+                    .protocol(ProtocolEnum.TCP)
+                    .port(listener.getPort())
+                    .defaultActions(defaultAction)
+                    .tags(context.getTags())
+                    .build();
+            CreateListenerResponse registerListenerResponse = createOrGetListener(context, listenerRequest);
+            String listenerArn = registerListenerResponse.listeners()
                     .stream()
                     .findFirst()
                     .orElseThrow()
-                    .getListenerArn();
-            listenerResource = new CloudResource.Builder()
+                    .listenerArn();
+            listenerResource = CloudResource.builder()
                     .withName(targetGroupName)
                     .withType(ResourceType.ELASTIC_LOAD_BALANCER_LISTENER)
                     .withReference(listenerArn)
@@ -328,19 +334,19 @@ public class AwsNativeLoadBalancerLaunchService {
         context.addResourceStatus(cloudResourceStatus);
     }
 
-    private CreateListenerResult createOrGetListener(ResourceCreationContext context, CreateListenerRequest listenerRequest) {
+    private CreateListenerResponse createOrGetListener(ResourceCreationContext context, CreateListenerRequest listenerRequest) {
         try {
             return context.getLoadBalancingClient().registerListener(listenerRequest);
-        } catch (AmazonServiceException amazonServiceException) {
-            String errorCode = amazonServiceException.getErrorCode();
+        } catch (AwsServiceException amazonServiceException) {
+            String errorCode = amazonServiceException.awsErrorDetails().errorCode();
             if (StringUtils.isNotEmpty(errorCode) && errorCode.contains(DUPLICATE_LISTENER_ERROR_CODE)) {
                 String loadBalancerArn = context.getLoadBalancerArn();
-                DescribeListenersRequest describeListenersRequest = new DescribeListenersRequest().withLoadBalancerArn(loadBalancerArn);
-                DescribeListenersResult describeListenersResult = context.getLoadBalancingClient().describeListeners(describeListenersRequest);
-                return describeListenersResult.getListeners()
+                DescribeListenersRequest describeListenersRequest = DescribeListenersRequest.builder().loadBalancerArn(loadBalancerArn).build();
+                DescribeListenersResponse describeListenersResponse = context.getLoadBalancingClient().describeListeners(describeListenersRequest);
+                return describeListenersResponse.listeners()
                         .stream()
                         .findFirst()
-                        .map(listener -> new CreateListenerResult().withListeners(listener))
+                        .map(listener -> CreateListenerResponse.builder().listeners(listener).build())
                         .orElseThrow(() -> new CloudConnectorException(
                                 String.format("Load balancer listener could not be created and found with load balancer arn: '%s'", loadBalancerArn)));
             } else {
@@ -365,14 +371,16 @@ public class AwsNativeLoadBalancerLaunchService {
         Set<TargetDescription> targetDescriptions = cloudResources.stream()
                 .map(cloudResource -> {
                     String instanceId = cloudResource.getInstanceId();
-                    return new TargetDescription()
-                            .withPort(targetGroup.getPort())
-                            .withId(instanceId);
+                    return TargetDescription.builder()
+                            .port(targetGroup.getPort())
+                            .id(instanceId)
+                            .build();
                 })
                 .collect(toSet());
-        RegisterTargetsRequest registerTargetsRequest = new RegisterTargetsRequest()
-                .withTargetGroupArn(targetGroup.getArn())
-                .withTargets(targetDescriptions);
+        RegisterTargetsRequest registerTargetsRequest = RegisterTargetsRequest.builder()
+                .targetGroupArn(targetGroup.getArn())
+                .targets(targetDescriptions)
+                .build();
         LOGGER.info("Registering target group ('{}') of load balancer to instances: '{}'", targetGroup.getArn(),
                 String.join(",", targetGroup.getInstanceIds()));
         loadBalancingClient.registerTargets(registerTargetsRequest);
@@ -391,13 +399,13 @@ public class AwsNativeLoadBalancerLaunchService {
 
         private final CloudContext cloudContext;
 
+        private final List<CloudResourceStatus> resourceStatuses = new ArrayList<>();
+
         private String loadBalancerArn;
 
         private String targetGroupName;
 
         private String targetGroupArn;
-
-        private final List<CloudResourceStatus> resourceStatuses = new ArrayList<>();
 
         ResourceCreationContext(Long stackId, String stackName, Collection<Tag> tags, PersistenceNotifier persistenceNotifier,
                 AmazonElasticLoadBalancingClient loadBalancingClient, CloudContext cloudContext) {
@@ -407,6 +415,10 @@ public class AwsNativeLoadBalancerLaunchService {
             this.persistenceNotifier = persistenceNotifier;
             this.loadBalancingClient = loadBalancingClient;
             this.cloudContext = cloudContext;
+        }
+
+        public void addResourceStatus(CloudResourceStatus cloudResourceStatus) {
+            resourceStatuses.add(cloudResourceStatus);
         }
 
         public Long getStackId() {
@@ -435,10 +447,6 @@ public class AwsNativeLoadBalancerLaunchService {
 
         public List<CloudResourceStatus> getResourceStatuses() {
             return resourceStatuses;
-        }
-
-        public void addResourceStatus(CloudResourceStatus cloudResourceStatus) {
-            resourceStatuses.add(cloudResourceStatus);
         }
 
         public String getLoadBalancerArn() {

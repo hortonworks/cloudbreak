@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,16 +30,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
-import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
-import com.amazonaws.services.ec2.model.EbsInstanceBlockDevice;
-import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.InstanceBlockDeviceMapping;
-import com.amazonaws.services.ec2.model.Reservation;
-import com.amazonaws.services.ec2.model.Subnet;
-import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -72,6 +61,17 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
+import software.amazon.awssdk.services.ec2.model.EbsInstanceBlockDevice;
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceBlockDeviceMapping;
+import software.amazon.awssdk.services.ec2.model.Reservation;
+import software.amazon.awssdk.services.ec2.model.Subnet;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
+
 @ExtendWith(MockitoExtension.class)
 public class AwsMetaDataCollectorTest {
 
@@ -99,6 +99,8 @@ public class AwsMetaDataCollectorTest {
 
     private static final String AVAILABILITY_ZONE_2 = "availabilityZone2";
 
+    private final DescribeInstancesRequest describeInstancesRequestGw = DescribeInstancesRequest.builder().build();
+
     @Mock
     private AwsCloudFormationClient awsClient;
 
@@ -118,12 +120,6 @@ public class AwsMetaDataCollectorTest {
     private AmazonEc2Client amazonEC2Client;
 
     @Mock
-    private DescribeInstancesRequest describeInstancesRequestGw;
-
-    @Mock
-    private DescribeInstancesResult describeInstancesResultGw;
-
-    @Mock
     private LoadBalancerTypeConverter loadBalancerTypeConverter;
 
     @Mock
@@ -131,9 +127,6 @@ public class AwsMetaDataCollectorTest {
 
     @InjectMocks
     private AwsMetadataCollector awsMetadataCollector;
-
-    @Mock
-    private DescribeSubnetsResult describeSubnetsResult;
 
     @Captor
     private ArgumentCaptor<DescribeSubnetsRequest> describeSubnetsRequestCaptor;
@@ -150,6 +143,17 @@ public class AwsMetaDataCollectorTest {
                 "subnet-1",
                 "az1"));
 
+        DescribeInstancesResponse describeInstancesResponse = DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder()
+                        .instances(Instance.builder()
+                                .instanceId("i-1")
+                                .privateIpAddress("privateIp")
+                                .publicIpAddress("publicIp")
+                                .subnetId(SUBNET_ID_1)
+                                .build())
+                        .build())
+                .build();
+
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
 
@@ -162,17 +166,7 @@ public class AwsMetaDataCollectorTest {
 
         when(cloudFormationStackUtil.createDescribeInstancesRequest(eq(gatewayIds))).thenReturn(describeInstancesRequestGw);
 
-        when(amazonEC2Client.retryableDescribeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
-
-        Instance instance = mock(Instance.class);
-        when(instance.getInstanceId()).thenReturn("i-1");
-        when(instance.getPrivateIpAddress()).thenReturn("privateIp");
-        when(instance.getPublicIpAddress()).thenReturn("publicIp");
-        when(instance.getSubnetId()).thenReturn(SUBNET_ID_1);
-
-        List<Reservation> gatewayReservations = Collections.singletonList(getReservation(instance));
-
-        when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
+        when(amazonEC2Client.retryableDescribeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResponse);
 
         initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_1, AVAILABILITY_ZONE_1)));
 
@@ -193,22 +187,22 @@ public class AwsMetaDataCollectorTest {
         List<Subnet> subnets = subnetIdToAvailabilityZoneMap.entrySet().stream()
                 .map(entry -> initSubnet(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
-        when(amazonEC2Client.describeSubnets(any(DescribeSubnetsRequest.class))).thenReturn(describeSubnetsResult);
-        when(describeSubnetsResult.getSubnets()).thenReturn(subnets);
+        DescribeSubnetsResponse describeSubnetsResponse = DescribeSubnetsResponse.builder().subnets(subnets).build();
+        when(amazonEC2Client.describeSubnets(any(DescribeSubnetsRequest.class))).thenReturn(describeSubnetsResponse);
     }
 
     private Subnet initSubnet(String subnetId, String availabilityZone) {
-        Subnet subnet = mock(Subnet.class);
-        when(subnet.getSubnetId()).thenReturn(subnetId);
-        when(subnet.getAvailabilityZone()).thenReturn(availabilityZone);
-        return subnet;
+        return Subnet.builder()
+                .subnetId(subnetId)
+                .availabilityZone(availabilityZone)
+                .build();
     }
 
     private void verifyQueriedSubnetIds(String... subnetIdsExpected) {
         verify(amazonEC2Client).describeSubnets(describeSubnetsRequestCaptor.capture());
         DescribeSubnetsRequest describeSubnetsRequestCaptured = describeSubnetsRequestCaptor.getValue();
         assertThat(describeSubnetsRequestCaptured).isNotNull();
-        assertThat(describeSubnetsRequestCaptured.getSubnetIds()).containsOnly(subnetIdsExpected);
+        assertThat(describeSubnetsRequestCaptured.subnetIds()).containsOnly(subnetIdsExpected);
     }
 
     private void verifyResultSubnetIds(List<CloudVmMetaDataStatus> statuses, String... subnetIdsExpected) {
@@ -238,7 +232,7 @@ public class AwsMetaDataCollectorTest {
         resources.add(CloudResource.builder().withType(ResourceType.AWS_VOLUMESET).withStatus(CommonStatus.REQUESTED).withName("volume1").withGroup("worker")
                 .withParameters(Map.of("attributes",
                         volumeSetAttributes))
-                        .build());
+                .build());
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance(null,
                 new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, Map.of(FQDN, "fqdn1"), 0L,
@@ -246,6 +240,21 @@ public class AwsMetaDataCollectorTest {
                 instanceAuthentication,
                 "subnet-1",
                 "az1", Map.of(FQDN, "fqdn1")));
+
+        InstanceBlockDeviceMapping instanceBlockDeviceMapping = InstanceBlockDeviceMapping.builder()
+                .ebs(EbsInstanceBlockDevice.builder().volumeId("volid1").build()).build();
+
+        DescribeInstancesResponse describeInstancesResponse = DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder()
+                        .instances(Instance.builder()
+                                .instanceId("i-1")
+                                .privateIpAddress("privateIp1")
+                                .publicIpAddress("publicIp1")
+                                .blockDeviceMappings(instanceBlockDeviceMapping)
+                                .subnetId(SUBNET_ID_1)
+                                .build())
+                        .build())
+                .build();
 
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
@@ -259,24 +268,7 @@ public class AwsMetaDataCollectorTest {
 
         when(cloudFormationStackUtil.createDescribeInstancesRequest(eq(gatewayIds))).thenReturn(describeInstancesRequestGw);
 
-        when(amazonEC2Client.retryableDescribeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
-
-        List<Instance> instances = new ArrayList<>();
-        Instance instance = mock(Instance.class);
-        when(instance.getInstanceId()).thenReturn("i-1");
-        InstanceBlockDeviceMapping instanceBlockDeviceMapping = mock(InstanceBlockDeviceMapping.class);
-        EbsInstanceBlockDevice ebsInstanceBlockDevice = new EbsInstanceBlockDevice();
-        ebsInstanceBlockDevice.setVolumeId("volid1");
-        when(instanceBlockDeviceMapping.getEbs()).thenReturn(ebsInstanceBlockDevice);
-        when(instance.getBlockDeviceMappings()).thenReturn(List.of(instanceBlockDeviceMapping));
-        when(instance.getPrivateIpAddress()).thenReturn("privateIp1");
-        when(instance.getPublicIpAddress()).thenReturn("publicIp1");
-        when(instance.getSubnetId()).thenReturn(SUBNET_ID_1);
-        instances.add(instance);
-        Instance[] instancesArray = new Instance[instances.size()];
-        List<Reservation> gatewayReservations = Collections.singletonList(getReservation(instances.toArray(instancesArray)));
-
-        when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
+        when(amazonEC2Client.retryableDescribeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResponse);
 
         initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_1, AVAILABILITY_ZONE_1), entry(SUBNET_ID_2, AVAILABILITY_ZONE_2)));
 
@@ -312,6 +304,20 @@ public class AwsMetaDataCollectorTest {
                 "subnet-1",
                 "az1"));
 
+        List<Instance> instances = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            Instance instance = Instance.builder()
+                    .instanceId("i-" + i)
+                    .privateIpAddress("privateIp" + i)
+                    .publicIpAddress("publicIp" + i)
+                    .subnetId(i == 0 ? SUBNET_ID_1 : i == 1 ? SUBNET_ID_2 : null)
+                    .build();
+            instances.add(instance);
+        }
+
+        DescribeInstancesResponse describeInstancesResponse = DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder().instances(instances).build()).build();
+
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
 
@@ -324,21 +330,7 @@ public class AwsMetaDataCollectorTest {
 
         when(cloudFormationStackUtil.createDescribeInstancesRequest(eq(gatewayIds))).thenReturn(describeInstancesRequestGw);
 
-        when(amazonEC2Client.retryableDescribeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
-
-        List<Instance> instances = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            Instance instance = mock(Instance.class);
-            when(instance.getInstanceId()).thenReturn("i-" + i);
-            when(instance.getPrivateIpAddress()).thenReturn("privateIp" + i);
-            when(instance.getPublicIpAddress()).thenReturn("publicIp" + i);
-            when(instance.getSubnetId()).thenReturn(i == 0 ? SUBNET_ID_1 : i == 1 ? SUBNET_ID_2 : null);
-            instances.add(instance);
-        }
-        Instance[] instancesArray = new Instance[instances.size()];
-        List<Reservation> gatewayReservations = Collections.singletonList(getReservation(instances.toArray(instancesArray)));
-
-        when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
+        when(amazonEC2Client.retryableDescribeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResponse);
 
         initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_1, AVAILABILITY_ZONE_1), entry(SUBNET_ID_2, AVAILABILITY_ZONE_2)));
 
@@ -378,6 +370,24 @@ public class AwsMetaDataCollectorTest {
                 instanceAuthentication,
                 "subnet-1",
                 "az1"));
+
+        DescribeInstancesResponse describeInstancesResponse = DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder().instances(List.of(
+                                Instance.builder()
+                                        .instanceId("i-1")
+                                        .privateIpAddress("privateIp1")
+                                        .publicIpAddress("publicIp1")
+                                        .subnetId(SUBNET_ID_1)
+                                        .build(),
+                                Instance.builder()
+                                        .instanceId("i-2")
+                                        .privateIpAddress("privateIp2")
+                                        .publicIpAddress("publicIp2")
+                                        .subnetId(SUBNET_ID_1)
+                                        .build()))
+                        .build())
+                .build();
+
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
 
@@ -390,25 +400,9 @@ public class AwsMetaDataCollectorTest {
 
         when(cloudFormationStackUtil.createDescribeInstancesRequest(eq(gatewayIds))).thenReturn(describeInstancesRequestGw);
 
-        when(amazonEC2Client.retryableDescribeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
+        when(amazonEC2Client.retryableDescribeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResponse);
 
         Mockito.when(awsLifeCycleMapper.getLifeCycle(any())).thenReturn(CLOUD_INSTANCE_LIFE_CYCLE);
-
-        Instance instance1 = mock(Instance.class);
-        when(instance1.getInstanceId()).thenReturn("i-1");
-        when(instance1.getPrivateIpAddress()).thenReturn("privateIp1");
-        when(instance1.getPublicIpAddress()).thenReturn("publicIp1");
-        when(instance1.getSubnetId()).thenReturn(SUBNET_ID_1);
-
-        Instance instance2 = mock(Instance.class);
-        when(instance2.getInstanceId()).thenReturn("i-2");
-        when(instance2.getPrivateIpAddress()).thenReturn("privateIp2");
-        when(instance2.getPublicIpAddress()).thenReturn("publicIp2");
-        when(instance2.getSubnetId()).thenReturn(SUBNET_ID_1);
-
-        List<Reservation> gatewayReservations = Collections.singletonList(getReservation(instance1, instance2));
-
-        when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
 
         initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_1, AVAILABILITY_ZONE_1)));
 
@@ -439,7 +433,7 @@ public class AwsMetaDataCollectorTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstance1 = new CloudInstance(null,
                 new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId",
-                TemporaryStorage.ATTACHED_VOLUMES, 0L),
+                        TemporaryStorage.ATTACHED_VOLUMES, 0L),
                 instanceAuthentication,
                 "subnet-1",
                 "az1");
@@ -453,6 +447,21 @@ public class AwsMetaDataCollectorTest {
                 "subnet-1",
                 "az1"));
 
+        DescribeInstancesResponse describeInstancesResponse = DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder().instances(List.of(
+                                Instance.builder()
+                                        .instanceId("i-1")
+                                        .subnetId(SUBNET_ID_1)
+                                        .build(),
+                                Instance.builder()
+                                        .instanceId("i-2")
+                                        .privateIpAddress("privateIp2")
+                                        .publicIpAddress("publicIp2")
+                                        .subnetId(SUBNET_ID_2)
+                                        .build()))
+                        .build())
+                .build();
+
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);
 
@@ -465,21 +474,7 @@ public class AwsMetaDataCollectorTest {
 
         when(cloudFormationStackUtil.createDescribeInstancesRequest(eq(gatewayIds))).thenReturn(describeInstancesRequestGw);
 
-        when(amazonEC2Client.retryableDescribeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResultGw);
-
-        Instance instance1 = mock(Instance.class);
-        when(instance1.getInstanceId()).thenReturn("i-1");
-        when(instance1.getSubnetId()).thenReturn(SUBNET_ID_1);
-
-        Instance instance2 = mock(Instance.class);
-        when(instance2.getInstanceId()).thenReturn("i-2");
-        when(instance2.getPrivateIpAddress()).thenReturn("privateIp2");
-        when(instance2.getPublicIpAddress()).thenReturn("publicIp2");
-        when(instance2.getSubnetId()).thenReturn(SUBNET_ID_2);
-
-        List<Reservation> gatewayReservations = Collections.singletonList(getReservation(instance1, instance2));
-
-        when(describeInstancesResultGw.getReservations()).thenReturn(gatewayReservations);
+        when(amazonEC2Client.retryableDescribeInstances(describeInstancesRequestGw)).thenReturn(describeInstancesResponse);
 
         initSubnetsQuery(Map.ofEntries(entry(SUBNET_ID_2, AVAILABILITY_ZONE_2)));
 
@@ -573,13 +568,6 @@ public class AwsMetaDataCollectorTest {
         assertEquals(ZONE_2, metadata.iterator().next().getHostedZoneId());
     }
 
-    private Reservation getReservation(Instance... instance) {
-        List<Instance> instances = Arrays.asList(instance);
-        Reservation r = new Reservation();
-        r.setInstances(instances);
-        return r;
-    }
-
     private AuthenticatedContext authenticatedContext() {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         CloudContext context = CloudContext.Builder.builder()
@@ -598,12 +586,14 @@ public class AwsMetaDataCollectorTest {
     }
 
     private void setupMethodsForLoadBalancer(boolean canFindInternalLB) {
-        LoadBalancer internalLoadBalancer = new LoadBalancer()
-                .withDNSName(INTERNAL_LB_DNS)
-                .withCanonicalHostedZoneId(ZONE_1);
-        LoadBalancer externalLoadBalancer = new LoadBalancer()
-                .withDNSName(EXTERNAL_LB_DNS)
-                .withCanonicalHostedZoneId(ZONE_2);
+        LoadBalancer internalLoadBalancer = LoadBalancer.builder()
+                .dnsName(INTERNAL_LB_DNS)
+                .canonicalHostedZoneId(ZONE_1)
+                .build();
+        LoadBalancer externalLoadBalancer = LoadBalancer.builder()
+                .dnsName(EXTERNAL_LB_DNS)
+                .canonicalHostedZoneId(ZONE_2)
+                .build();
 
         if (canFindInternalLB) {
             when(cloudFormationStackUtil.getLoadBalancerByLogicalId(any(), eq(INTERNAL_LB_ID))).thenReturn(internalLoadBalancer);

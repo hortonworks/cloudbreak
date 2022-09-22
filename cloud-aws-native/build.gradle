@@ -27,21 +27,21 @@ dependencies {
   implementation group: 'commons-io',                    name: 'commons-io',                     version: apacheCommonsIoVersion
   implementation group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
 
-  implementation(group: 'com.amazonaws',                 name: 'aws-java-sdk-core',              version: awsSdkVersion) {
+  implementation(group: 'software.amazon.awssdk',                 name: 'core',              version: awsSdkVersion) {
     exclude group: 'commons-logging'
   }
-  implementation group: 'com.amazonaws',                 name: 'aws-java-sdk-ec2',               version: awsSdkVersion
-  implementation group: 'com.amazonaws',                 name: 'aws-java-sdk-autoscaling',       version: awsSdkVersion
-  implementation group: 'com.amazonaws',                 name: 'aws-java-sdk-dynamodb',          version: awsSdkVersion
-  implementation group: 'com.amazonaws',                 name: 'aws-java-sdk-s3',                version: awsSdkVersion
-  implementation group: 'com.amazonaws',                 name: 'aws-java-sdk-iam',               version: awsSdkVersion
-  implementation group: 'com.amazonaws',                 name: 'aws-java-sdk-kms',               version: awsSdkVersion
-  implementation group: 'com.amazonaws',                 name: 'aws-java-sdk-rds',               version: awsSdkVersion
-  implementation group: 'com.amazonaws',                 name: 'aws-java-sdk-sts',               version: awsSdkVersion
-  implementation group: 'com.amazonaws',                 name: 'aws-java-sdk-cloudwatch',        version: awsSdkVersion
-  implementation group: 'com.amazonaws',                 name: 'aws-java-sdk-elasticloadbalancingv2',  version: awsSdkVersion
-  implementation group: 'com.amazonaws',                 name: 'aws-java-sdk-efs',               version: awsSdkVersion
-  implementation group: 'com.amazonaws',                 name: 'aws-java-sdk-networkfirewall',   version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',                 name: 'ec2',               version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',                 name: 'autoscaling',       version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',                 name: 'dynamodb',          version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',                 name: 's3',                version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',                 name: 'iam',               version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',                 name: 'kms',               version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',                 name: 'rds',               version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',                 name: 'sts',               version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',                 name: 'cloudwatch',        version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',                 name: 'elasticloadbalancingv2',  version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',                 name: 'efs',               version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',                 name: 'networkfirewall',   version: awsSdkVersion
 
   implementation     group: 'com.dyngr',          name: 'polling',                        version: dyngrPollingVersion
 

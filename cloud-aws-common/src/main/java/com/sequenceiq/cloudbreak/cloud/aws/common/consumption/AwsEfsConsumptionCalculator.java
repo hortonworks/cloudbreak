@@ -10,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.elasticfilesystem.model.DescribeFileSystemsResult;
-import com.amazonaws.services.elasticfilesystem.model.FileSystemDescription;
 import com.cloudera.thunderhead.service.metering.events.MeteringEventsProto;
 import com.sequenceiq.cloudbreak.cloud.ConsumptionCalculator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsEfsCommonService;
@@ -22,6 +20,9 @@ import com.sequenceiq.cloudbreak.cloud.model.StorageSizeResponse;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.StorageType;
 import com.sequenceiq.common.model.FileSystemType;
+
+import software.amazon.awssdk.services.efs.model.DescribeFileSystemsResponse;
+import software.amazon.awssdk.services.efs.model.FileSystemDescription;
 
 @Service
 public class AwsEfsConsumptionCalculator implements ConsumptionCalculator {
@@ -47,18 +48,18 @@ public class AwsEfsConsumptionCalculator implements ConsumptionCalculator {
     }
 
     public Set<StorageSizeResponse> calculate(StorageSizeRequest request) {
-        DescribeFileSystemsResult result = awsEfsCommonService.getEfsSize(
+        DescribeFileSystemsResponse result = awsEfsCommonService.getEfsSize(
                 request.getCredential(),
                 request.getRegion().value(),
                 request.getStartTime(),
                 request.getEndTime(),
                 request.getFirstCloudObjectId());
-        Optional<FileSystemDescription> latestFileSystemDescription = result.getFileSystems().stream().findFirst();
+        Optional<FileSystemDescription> latestFileSystemDescription = result.fileSystems().stream().findFirst();
         if (latestFileSystemDescription.isPresent()) {
             FileSystemDescription fileSystemDescription = latestFileSystemDescription.get();
             LOGGER.debug("Gathered FileSystemDescription from EFS: {}", fileSystemDescription);
             StorageSizeResponse storageSizeResponse = StorageSizeResponse.builder()
-                    .withStorageInBytes(fileSystemDescription.getSizeInBytes().getValue())
+                    .withStorageInBytes(fileSystemDescription.sizeInBytes().value())
                     .build();
             return Set.of(storageSizeResponse);
         } else {

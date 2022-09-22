@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,28 +22,14 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.cloudformation.model.CreateStackRequest;
-import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.waiters.AmazonCloudFormationWaiters;
-import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
-import com.amazonaws.services.ec2.model.DescribeVpcsResult;
-import com.amazonaws.services.ec2.model.Vpc;
-import com.amazonaws.services.ec2.model.VpcCidrBlockAssociation;
-import com.amazonaws.waiters.Waiter;
-import com.amazonaws.waiters.WaiterTimedOutException;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
@@ -73,7 +59,20 @@ import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.Tunnel;
 
-@RunWith(MockitoJUnitRunner.class)
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.http.SdkHttpResponse;
+import software.amazon.awssdk.services.cloudformation.model.CreateStackRequest;
+import software.amazon.awssdk.services.cloudformation.model.DeleteStackRequest;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStacksRequest;
+import software.amazon.awssdk.services.cloudformation.waiters.CloudFormationWaiter;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
+import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.ec2.model.VpcCidrBlockAssociation;
+
+@ExtendWith(MockitoExtension.class)
 public class AwsNetworkConnectorTest {
 
     private static final String ENV_NAME = "testEnv";
@@ -87,8 +86,6 @@ public class AwsNetworkConnectorTest {
     private static final String SUBNET_ID_1 = "subnet-1";
 
     private static final String SUBNET_ID_2 = "subnet-1";
-
-    private static final String CF_TEMPLATE = "template";
 
     private static final String CREATED_VPC = "CreatedVpc";
 
@@ -108,9 +105,6 @@ public class AwsNetworkConnectorTest {
 
     private static final String ENV_CRN = "someCrn";
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @InjectMocks
     private AwsNetworkConnector underTest;
 
@@ -124,13 +118,7 @@ public class AwsNetworkConnectorTest {
     private AwsCloudFormationClient awsClient;
 
     @Mock
-    private AmazonCloudFormationWaiters cfWaiters;
-
-    @Mock
-    private Waiter<DescribeStacksRequest> creationWaiter;
-
-    @Mock
-    private Waiter<DescribeStacksRequest> deletionWaiter;
+    private CloudFormationWaiter cfWaiters;
 
     @Mock
     private AwsSubnetRequestProvider awsSubnetRequestProvider;
@@ -142,15 +130,12 @@ public class AwsNetworkConnectorTest {
     private AwsTaggingService awsTaggingService;
 
     @Mock
-    private Map<SubnetFilterStrategyType, SubnetFilterStrategy> subnetFilterStrategyMap;
-
-    @Mock
     private SubnetFilterStrategy subnetFilterStrategy;
 
     @Mock
     private Retry retryService;
 
-    @Before
+    @BeforeEach
     public void before() {
         ReflectionTestUtils.setField(underTest, "minSubnetCountInDifferentAz", 2);
         ReflectionTestUtils.setField(underTest, "maxSubnetCountInDifferentAz", 3);
@@ -186,14 +171,13 @@ public class AwsNetworkConnectorTest {
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cfClient);
 
         when(cfClient.waiters()).thenReturn(cfWaiters);
-        when(cfWaiters.stackCreateComplete()).thenReturn(creationWaiter);
         when(cfStackUtil.getOutputs(NETWORK_ID, cfClient)).thenReturn(output);
         when(awsCreatedSubnetProvider.provide(output, subnetRequestList, true)).thenReturn(createdSubnets);
 
         CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest);
 
+        verify(cfWaiters).waitUntilStackCreateComplete(eq(DescribeStacksRequest.builder().stackName(STACK_NAME).build()), any());
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
-        verify(creationWaiter, times(1)).run(any());
         verify(cfStackUtil).getOutputs(NETWORK_ID, cfClient);
         verify(awsTaggingService, never()).prepareCloudformationTags(any(), any());
         verify(cfClient, never()).createStack(any(CreateStackRequest.class));
@@ -205,8 +189,10 @@ public class AwsNetworkConnectorTest {
     public void testCreateNewNetworkWithSubnetsShouldCreateTheNetworkAndSubnets() {
         String networkCidr = "0.0.0.0/16";
         Set<NetworkSubnetRequest> subnets = Set.of(new NetworkSubnetRequest("1.1.1.1/8", PUBLIC), new NetworkSubnetRequest("1.1.1.2/8", PUBLIC));
-        AmazonServiceException amazonServiceException = new AmazonServiceException("does not exist");
-        amazonServiceException.setStatusCode(400);
+        AwsServiceException amazonServiceException = AwsServiceException.builder()
+                .awsErrorDetails(AwsErrorDetails.builder()
+                        .errorMessage("does not exist")
+                        .sdkHttpResponse(SdkHttpResponse.builder().statusCode(400).build()).build()).build();
         AmazonCloudFormationClient cfClient = mock(AmazonCloudFormationClient.class);
         when(cfClient.describeStacks(any(DescribeStacksRequest.class))).thenThrow(amazonServiceException);
         AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
@@ -219,7 +205,6 @@ public class AwsNetworkConnectorTest {
         when(awsSubnetRequestProvider.provide(ec2Client, new ArrayList<>(subnets), new ArrayList<>(subnets))).thenReturn(subnetRequestList);
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cfClient);
         when(cfClient.waiters()).thenReturn(cfWaiters);
-        when(cfWaiters.stackCreateComplete()).thenReturn(creationWaiter);
         when(cfStackUtil.getOutputs(NETWORK_ID, cfClient)).thenReturn(output);
         when(awsCreatedSubnetProvider.provide(output, subnetRequestList, true)).thenReturn(createdSubnets);
 
@@ -227,7 +212,7 @@ public class AwsNetworkConnectorTest {
 
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsNetworkCfTemplateProvider).provide(networkCreationRequest, subnetRequestList);
-        verify(creationWaiter, times(1)).run(any());
+        verify(cfWaiters).waitUntilStackCreateComplete(eq(DescribeStacksRequest.builder().stackName(STACK_NAME).build()), any());
         verify(awsTaggingService).prepareCloudformationTags(any(), any());
         verify(cfClient).createStack(any(CreateStackRequest.class));
         verify(cfStackUtil).getOutputs(NETWORK_ID, cfClient);
@@ -243,27 +228,24 @@ public class AwsNetworkConnectorTest {
                 .thenReturn(cfClient);
         when(cfClient.waiters()).thenReturn(cfWaiters);
         when(retryService.testWith2SecDelayMax15Times(any())).thenReturn(true);
-        when(cfWaiters.stackDeleteComplete()).thenReturn(deletionWaiter);
 
         underTest.deleteNetworkWithSubnets(networkDeletionRequest);
 
         verify(cfClient).deleteStack(any(DeleteStackRequest.class));
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
-        verify(deletionWaiter, times(1)).run(any());
+        verify(cfWaiters).waitUntilStackDeleteComplete(any(DescribeStacksRequest.class));
     }
 
-    @Test(expected = CloudConnectorException.class)
+    @Test
     public void testDeleteNetworkWithSubNetsShouldThrowAnExceptionWhenTheStackDeletionFailed() {
         NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest();
         AmazonCloudFormationClient cfClient = mock(AmazonCloudFormationClient.class);
-        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(networkDeletionRequest.getRegion())))
-                .thenReturn(cfClient);
+        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(networkDeletionRequest.getRegion()))).thenReturn(cfClient);
         when(cfClient.waiters()).thenReturn(cfWaiters);
         when(retryService.testWith2SecDelayMax15Times(any())).thenReturn(true);
-        when(cfWaiters.stackDeleteComplete()).thenReturn(deletionWaiter);
-        doThrow(new WaiterTimedOutException("fail")).when(deletionWaiter).run(any());
+        doThrow(SdkException.builder().message("error").build()).when(cfWaiters).waitUntilStackDeleteComplete(any(DescribeStacksRequest.class), any());
 
-        underTest.deleteNetworkWithSubnets(networkDeletionRequest);
+        assertThrows(CloudConnectorException.class, () -> underTest.deleteNetworkWithSubnets(networkDeletionRequest));
 
         verify(cfClient).deleteStack(any(DeleteStackRequest.class));
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
@@ -273,8 +255,7 @@ public class AwsNetworkConnectorTest {
     public void testDeleteNetworkWithSubNetsWhenCfStackDoesNotExist() {
         NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest();
         AmazonCloudFormationClient cfClient = mock(AmazonCloudFormationClient.class);
-        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(networkDeletionRequest.getRegion())))
-                .thenReturn(cfClient);
+        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(networkDeletionRequest.getRegion()))).thenReturn(cfClient);
         when(retryService.testWith2SecDelayMax15Times(any())).thenReturn(false);
 
         underTest.deleteNetworkWithSubnets(networkDeletionRequest);
@@ -290,10 +271,10 @@ public class AwsNetworkConnectorTest {
         Network network = new Network(null, Map.of(NetworkConstants.VPC_ID, existingVpc, "region", "us-west-2"));
         CloudCredential credential = new CloudCredential();
         AmazonEc2Client amazonEC2Client = mock(AmazonEc2Client.class);
-        DescribeVpcsResult describeVpcsResult = describeVpcsResult(cidrBlock);
+        DescribeVpcsResponse describeVpcsResult = describeVpcsResult(cidrBlock);
 
         when(awsClient.createEc2Client(any(AwsCredentialView.class), eq("us-west-2"))).thenReturn(amazonEC2Client);
-        when(amazonEC2Client.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc))).thenReturn(describeVpcsResult);
+        when(amazonEC2Client.describeVpcs(DescribeVpcsRequest.builder().vpcIds(existingVpc).build())).thenReturn(describeVpcsResult);
 
         NetworkCidr result = underTest.getNetworkCidr(network, credential);
         assertEquals(cidrBlock, result.getCidr());
@@ -307,11 +288,10 @@ public class AwsNetworkConnectorTest {
         Network network = new Network(null, Map.of(NetworkConstants.VPC_ID, existingVpc, "region", "us-west-2"));
         CloudCredential credential = new CloudCredential();
         AmazonEc2Client amazonEC2Client = mock(AmazonEc2Client.class);
-        DescribeVpcsResult describeVpcsResult = describeVpcsResult(cidrBlock, cidrBlock);
-        describeVpcsResult.getVpcs().get(0).getCidrBlockAssociationSet().add(new VpcCidrBlockAssociation().withCidrBlock(cidrBlock));
+        DescribeVpcsResponse describeVpcsResponse = describeVpcsResult(cidrBlock, cidrBlock);
 
         when(awsClient.createEc2Client(any(AwsCredentialView.class), eq("us-west-2"))).thenReturn(amazonEC2Client);
-        when(amazonEC2Client.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc))).thenReturn(describeVpcsResult);
+        when(amazonEC2Client.describeVpcs(DescribeVpcsRequest.builder().vpcIds(existingVpc).build())).thenReturn(describeVpcsResponse);
 
         NetworkCidr result = underTest.getNetworkCidr(network, credential);
         assertEquals(cidrBlock, result.getCidr());
@@ -326,15 +306,14 @@ public class AwsNetworkConnectorTest {
         Network network = new Network(null, Map.of(NetworkConstants.VPC_ID, existingVpc, "region", "us-west-2"));
         CloudCredential credential = new CloudCredential();
         AmazonEc2Client amazonEC2Client = mock(AmazonEc2Client.class);
-        DescribeVpcsResult describeVpcsResult = describeVpcsResult();
+        DescribeVpcsResponse describeVpcsResponse = describeVpcsResult();
 
         when(awsClient.createEc2Client(any(AwsCredentialView.class), eq("us-west-2"))).thenReturn(amazonEC2Client);
-        when(amazonEC2Client.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc))).thenReturn(describeVpcsResult);
+        when(amazonEC2Client.describeVpcs(DescribeVpcsRequest.builder().vpcIds(existingVpc).build())).thenReturn(describeVpcsResponse);
 
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("VPC cidr could not fetch from AWS: " + existingVpc);
+        Exception exception = assertThrows(BadRequestException.class, () -> underTest.getNetworkCidr(network, credential));
 
-        underTest.getNetworkCidr(network, credential);
+        assertEquals("VPC cidr could not fetch from AWS: " + existingVpc, exception.getMessage());
     }
 
     @Test
@@ -346,12 +325,13 @@ public class AwsNetworkConnectorTest {
         Network network = new Network(null, Map.of(NetworkConstants.VPC_ID, existingVpc, "region", "us-west-2"));
         CloudCredential credential = new CloudCredential();
         AmazonEc2Client amazonEC2Client = mock(AmazonEc2Client.class);
-        DescribeVpcsResult describeVpcsResult = describeVpcsResult(cidrBlock1, cidrBlock2);
+        DescribeVpcsResponse describeVpcsResponse = describeVpcsResult(cidrBlock1, cidrBlock2);
 
         when(awsClient.createEc2Client(any(AwsCredentialView.class), eq("us-west-2"))).thenReturn(amazonEC2Client);
-        when(amazonEC2Client.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc))).thenReturn(describeVpcsResult);
+        when(amazonEC2Client.describeVpcs(DescribeVpcsRequest.builder().vpcIds(existingVpc).build())).thenReturn(describeVpcsResponse);
 
         NetworkCidr result = underTest.getNetworkCidr(network, credential);
+
         assertEquals(cidrBlock1, result.getCidr());
         assertTrue(result.getCidrs().contains(cidrBlock1));
         assertTrue(result.getCidrs().contains(cidrBlock2));
@@ -374,9 +354,8 @@ public class AwsNetworkConnectorTest {
                 .withHa(true)
                 .build();
         SubnetSelectionResult result = underTest.chooseSubnets(cloudSubnets, subnetSelectionParameters);
-        Assert.assertTrue(result.getResult().size() == 2);
-        Assert.assertTrue(result.getResult().size() == collectUniqueAzs(result).size());
-
+        assertEquals(2, result.getResult().size());
+        assertEquals(result.getResult().size(), collectUniqueAzs(result).size());
     }
 
     @Test
@@ -397,7 +376,7 @@ public class AwsNetworkConnectorTest {
                 .build();
 
         SubnetSelectionResult result = underTest.chooseSubnets(cloudSubnets, subnetSelectionParameters);
-        Assert.assertTrue(result.hasError());
+        assertTrue(result.hasError());
     }
 
     @Test
@@ -418,12 +397,12 @@ public class AwsNetworkConnectorTest {
                 .build();
 
         SubnetSelectionResult result = underTest.chooseSubnets(cloudSubnets, subnetSelectionParameters);
-        Assert.assertTrue(result.getResult().size() == 3);
-        Assert.assertTrue(result.getResult().size() == collectUniqueAzs(result).size());
+        assertEquals(3, result.getResult().size());
+        assertEquals(result.getResult().size(), collectUniqueAzs(result).size());
     }
 
     public Set<String> collectUniqueAzs(SubnetSelectionResult result) {
-        return result.getResult().stream().map(e -> e.getAvailabilityZone()).collect(Collectors.toSet());
+        return result.getResult().stream().map(CloudSubnet::getAvailabilityZone).collect(Collectors.toSet());
     }
 
     @Test
@@ -444,7 +423,7 @@ public class AwsNetworkConnectorTest {
                 .build();
 
         SubnetSelectionResult result = underTest.chooseSubnets(cloudSubnets, subnetSelectionParameters);
-        Assert.assertTrue(result.getResult().size() == 1);
+        assertEquals(1, result.getResult().size());
     }
 
     public void prepareMock(List<CloudSubnet> cloudSubnets) {
@@ -473,7 +452,7 @@ public class AwsNetworkConnectorTest {
                 .build();
 
         SubnetSelectionResult result = underTest.chooseSubnets(cloudSubnets, subnetSelectionParameters);
-        Assert.assertTrue(result.getResult().size() == 1);
+        assertEquals(1, result.getResult().size());
     }
 
     @Test
@@ -494,7 +473,7 @@ public class AwsNetworkConnectorTest {
                 .build();
 
         SubnetSelectionResult result = underTest.chooseSubnets(cloudSubnets, subnetSelectionParameters);
-        Assert.assertTrue(result.getResult().size() == 1);
+        assertEquals(1, result.getResult().size());
     }
 
     private CloudSubnet getSubnet(String az, int index) {
@@ -502,22 +481,15 @@ public class AwsNetworkConnectorTest {
         return new CloudSubnet(nextSubnetId, "", az, "", true, false, false, PUBLIC);
     }
 
-    private DescribeVpcsResult describeVpcsResult(String... cidrBlocks) {
-        DescribeVpcsResult describeVpcsResult = new DescribeVpcsResult();
+    private DescribeVpcsResponse describeVpcsResult(String... cidrBlocks) {
         List<Vpc> vpcs = new ArrayList<>();
         for (String block : cidrBlocks) {
-            Vpc vpc = new Vpc();
-            vpc.setCidrBlock(block);
-
-            VpcCidrBlockAssociation vpcCidrBlockAssociation = new VpcCidrBlockAssociation();
-            vpcCidrBlockAssociation.setCidrBlock(block);
-
-            vpc.getCidrBlockAssociationSet().add(vpcCidrBlockAssociation);
-
+            Vpc vpc = Vpc.builder()
+                    .cidrBlock(block)
+                    .cidrBlockAssociationSet(VpcCidrBlockAssociation.builder().cidrBlock(block).build()).build();
             vpcs.add(vpc);
         }
-        describeVpcsResult.withVpcs(vpcs);
-        return describeVpcsResult;
+        return DescribeVpcsResponse.builder().vpcs(vpcs).build();
     }
 
     private NetworkDeletionRequest createNetworkDeletionRequest() {

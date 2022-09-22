@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
+import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.CancellableWaiterConfiguration.cancellableWaiterConfiguration;
+import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.handleWaiterError;
 import static com.sequenceiq.common.api.type.ResourceType.ELASTIC_LOAD_BALANCER;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
@@ -18,13 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.model.ListStackResourcesResult;
-import com.amazonaws.services.cloudformation.model.ResourceStatus;
-import com.amazonaws.services.cloudformation.model.StackResourceSummary;
-import com.amazonaws.services.cloudformation.model.ValidateTemplateResult;
-import com.amazonaws.waiters.Waiter;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
@@ -52,6 +46,14 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStacksRequest;
+import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesResponse;
+import software.amazon.awssdk.services.cloudformation.model.ResourceStatus;
+import software.amazon.awssdk.services.cloudformation.model.StackResourceSummary;
+import software.amazon.awssdk.services.cloudformation.model.ValidateTemplateResponse;
+import software.amazon.awssdk.services.cloudformation.waiters.CloudFormationWaiter;
 
 @Service
 public class AwsLoadBalancerLaunchService {
@@ -115,7 +117,7 @@ public class AwsLoadBalancerLaunchService {
             modelContext.withLoadBalancers(awsLoadBalancers);
             LOGGER.debug("Starting CloudFormation update to create load balancer and target groups.");
 
-            ListStackResourcesResult result;
+            ListStackResourcesResponse result;
             if (checkForLoadBalancerAndTargetGroupResources(cfRetryClient, cFStackName, awsLoadBalancers)) {
                 LOGGER.debug("Load balancer and target group resources already exist, skipping creation");
                 result = cfRetryClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
@@ -133,7 +135,7 @@ public class AwsLoadBalancerLaunchService {
                 result = updateCloudFormationStack(ac, stack, modelContext);
             }
 
-            ListStackResourcesResult finalResult = result;
+            ListStackResourcesResponse finalResult = result;
             awsLoadBalancers.forEach(lb -> statuses.add(createLoadBalancerStatus(ac, lb, finalResult)));
         } else {
             LOGGER.debug("No load balancers in stack");
@@ -143,73 +145,76 @@ public class AwsLoadBalancerLaunchService {
     }
 
     @VisibleForTesting
-    void setLoadBalancerMetadata(List<AwsLoadBalancer> awsLoadBalancers, ListStackResourcesResult result) {
-        List<StackResourceSummary> summaries = result.getStackResourceSummaries();
+    void setLoadBalancerMetadata(List<AwsLoadBalancer> awsLoadBalancers, ListStackResourcesResponse result) {
+        List<StackResourceSummary> summaries = result.stackResourceSummaries();
         for (AwsLoadBalancer loadBalancer : awsLoadBalancers) {
             LOGGER.debug("Processing load balancer {}", loadBalancer.getName());
             for (AwsListener listener : loadBalancer.getListeners()) {
                 LOGGER.debug("Processing listener {} and target group {}", listener.getName(), listener.getTargetGroup().getName());
                 Optional<StackResourceSummary> targetGroupSummary = summaries.stream()
-                        .filter(stackResourceSummary -> listener.getTargetGroup().getName().equals(stackResourceSummary.getLogicalResourceId()))
+                        .filter(stackResourceSummary -> listener.getTargetGroup().getName().equals(stackResourceSummary.logicalResourceId()))
                         .findFirst();
                 if (targetGroupSummary.isEmpty()) {
                     throw new CloudConnectorException(String.format("Could not create load balancer listeners: target group %s not found.",
                             listener.getTargetGroup().getName()));
                 }
-                if (StringUtils.isEmpty(targetGroupSummary.get().getPhysicalResourceId())) {
+                if (StringUtils.isEmpty(targetGroupSummary.get().physicalResourceId())) {
                     throw new CloudConnectorException(String.format("Could not create load balancer listeners: target group %s arn not found.",
                             listener.getTargetGroup().getName()));
                 }
-                listener.getTargetGroup().setArn(targetGroupSummary.get().getPhysicalResourceId());
+                listener.getTargetGroup().setArn(targetGroupSummary.get().physicalResourceId());
                 LOGGER.debug("Found arn {} for target group {}", listener.getTargetGroup().getArn(), listener.getTargetGroup().getName());
             }
             Optional<StackResourceSummary> loadBalancerSummary = summaries.stream()
-                    .filter(stackResourceSummary -> loadBalancer.getName().equals(stackResourceSummary.getLogicalResourceId()))
+                    .filter(stackResourceSummary -> loadBalancer.getName().equals(stackResourceSummary.logicalResourceId()))
                     .findFirst();
             if (loadBalancerSummary.isEmpty()) {
                 throw new CloudConnectorException(String.format("Could not create load balancer listeners: load balancer %s not found.",
                         loadBalancer.getName()));
             }
-            if (StringUtils.isEmpty(loadBalancerSummary.get().getPhysicalResourceId())) {
+            if (StringUtils.isEmpty(loadBalancerSummary.get().physicalResourceId())) {
                 throw new CloudConnectorException(String.format("Could not create load balancer listeners: load balancer %s arn not found.",
                         loadBalancer.getName()));
             }
-            loadBalancer.setArn(loadBalancerSummary.get().getPhysicalResourceId());
+            loadBalancer.setArn(loadBalancerSummary.get().physicalResourceId());
             loadBalancer.validateListenerConfigIsSet();
             LOGGER.debug("Found arn {} for load balancer {}", loadBalancer.getArn(), loadBalancer.getName());
         }
     }
 
-    private ListStackResourcesResult updateCloudFormationStack(AuthenticatedContext ac, CloudStack stack, ModelContext modelContext) {
+    private ListStackResourcesResponse updateCloudFormationStack(AuthenticatedContext ac, CloudStack stack, ModelContext modelContext) {
         String cFStackName = cfStackUtil.getCfStackName(ac);
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
 
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
-        DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
+        DescribeStacksRequest describeStacksRequest = DescribeStacksRequest.builder().stackName(cFStackName).build();
 
         String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
         LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
         try {
             cfClient.updateStack(awsStackRequestHelper.createUpdateStackRequest(ac, stack, cFStackName, cfTemplate));
-        } catch (AmazonServiceException e) {
-            if (VALIDATION_ERROR.equalsIgnoreCase(e.getErrorCode())) {
-                ValidateTemplateResult result = cfClient.validateTemplate(awsStackRequestHelper.createValidateTemplateRequest(cfTemplate));
+        } catch (AwsServiceException e) {
+            if (VALIDATION_ERROR.equalsIgnoreCase(e.awsErrorDetails().errorCode())) {
+                ValidateTemplateResponse result = cfClient.validateTemplate(awsStackRequestHelper.createValidateTemplateRequest(cfTemplate));
                 LOGGER.debug("Validation result for the CloudFormationTemplate: {}", result);
             }
             throw e;
         }
-        Waiter<DescribeStacksRequest> updateWaiter = cfClient.waiters().stackUpdateComplete();
-        StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
-        run(updateWaiter, describeStacksRequest, stackCancellationCheck, String.format("CloudFormation stack %s update failed.", cFStackName),
-                () -> awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, ResourceStatus.UPDATE_FAILED, ResourceStatus.CREATE_FAILED));
-
+        StackCancellationCheck cancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
+        try (CloudFormationWaiter waiter = cfClient.waiters()) {
+            LOGGER.debug("Waiting for CloudFormation stack {} update", cFStackName);
+            waiter.waitUntilStackUpdateComplete(describeStacksRequest, cancellableWaiterConfiguration(cancellationCheck));
+        } catch (Exception e) {
+            handleWaiterError(String.format("CloudFormation stack %s update failed.", cFStackName),
+                    () -> awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, ResourceStatus.UPDATE_FAILED, ResourceStatus.CREATE_FAILED), e);
+        }
         return cfClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
     }
 
-    private CloudResourceStatus createLoadBalancerStatus(AuthenticatedContext ac, AwsLoadBalancer loadBalancer, ListStackResourcesResult result) {
+    private CloudResourceStatus createLoadBalancerStatus(AuthenticatedContext ac, AwsLoadBalancer loadBalancer, ListStackResourcesResponse result) {
         LOGGER.debug(String.format("Checking final status of AWS load balancer %s", loadBalancer.getName()));
-        List<StackResourceSummary> summaries = result.getStackResourceSummaries();
+        List<StackResourceSummary> summaries = result.stackResourceSummaries();
         boolean createSuccess = isResourceStatusGood(summaries, loadBalancer.getName());
 
         for (AwsListener listener : loadBalancer.getListeners()) {
@@ -220,7 +225,7 @@ public class AwsLoadBalancerLaunchService {
         }
         Map<String, Object> params = Map.of(CloudResource.ATTRIBUTES,
                 Enum.valueOf(LoadBalancerTypeAttribute.class, loadBalancer.getScheme().getLoadBalancerType().name()));
-        CloudResource.Builder cloudResource = new CloudResource.Builder()
+        CloudResource.Builder cloudResource = CloudResource.builder()
             .withStatus(createSuccess ? CommonStatus.CREATED : CommonStatus.FAILED)
             .withType(ELASTIC_LOAD_BALANCER)
             .withAvailabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
@@ -234,40 +239,40 @@ public class AwsLoadBalancerLaunchService {
 
     private boolean isResourceStatusGood(List<StackResourceSummary> summaries, String name) {
         Optional<StackResourceSummary> summary = summaries.stream()
-                .filter(stackResourceSummary -> name.equals(stackResourceSummary.getLogicalResourceId()))
+                .filter(stackResourceSummary -> name.equals(stackResourceSummary.logicalResourceId()))
                 .findFirst();
 
         boolean success = true;
         if (summary.isEmpty()) {
             LOGGER.error(String.format("Could not fetch summary for AWS resource with name %s", name));
             success = false;
-        } else if (isFailedStatus(summary.get().getResourceStatus())) {
+        } else if (isFailedStatus(summary.get().resourceStatus())) {
             LOGGER.error(String.format("Resource %s creation failed. Reason: %s",
-                    name, summary.get().getResourceStatusReason()));
+                    name, summary.get().resourceStatusReason()));
             success = false;
         }
         return success;
     }
 
-    private boolean isFailedStatus(String status) {
-        return "CREATE_FAILED".equals(status) || "UPDATE_FAILED".equals(status);
+    private boolean isFailedStatus(ResourceStatus status) {
+        return ResourceStatus.CREATE_FAILED == status || ResourceStatus.UPDATE_FAILED == status;
     }
 
     @VisibleForTesting
     boolean checkForLoadBalancerAndTargetGroupResources(AmazonCloudFormationClient cfClient, String cFStackName,
             List<AwsLoadBalancer> awsLoadBalancers) {
-        ListStackResourcesResult result = cfClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
+        ListStackResourcesResponse result = cfClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
 
         boolean resourcesFound = true;
-        List<StackResourceSummary> summaries = result.getStackResourceSummaries();
+        List<StackResourceSummary> summaries = result.stackResourceSummaries();
         for (AwsLoadBalancer loadBalancer : awsLoadBalancers) {
             LOGGER.debug("Checking to see if load balancer resource {} already exists", loadBalancer.getName());
             resourcesFound = resourcesFound && summaries.stream()
-                    .anyMatch(stackResourceSummary -> loadBalancer.getName().equals(stackResourceSummary.getLogicalResourceId()));
+                    .anyMatch(stackResourceSummary -> loadBalancer.getName().equals(stackResourceSummary.logicalResourceId()));
             for (AwsListener listener : loadBalancer.getListeners()) {
                 LOGGER.debug("Checking to see if target group resource {} already exists", listener.getTargetGroup().getName());
                 resourcesFound = resourcesFound && summaries.stream()
-                        .anyMatch(stackResourceSummary -> listener.getTargetGroup().getName().equals(stackResourceSummary.getLogicalResourceId()));
+                        .anyMatch(stackResourceSummary -> listener.getTargetGroup().getName().equals(stackResourceSummary.logicalResourceId()));
             }
         }
 
@@ -277,15 +282,15 @@ public class AwsLoadBalancerLaunchService {
     @VisibleForTesting
     boolean checkForListenerResources(AmazonCloudFormationClient cfClient, String cFStackName,
             List<AwsLoadBalancer> awsLoadBalancers) {
-        ListStackResourcesResult result = cfClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
+        ListStackResourcesResponse result = cfClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
 
         boolean resourcesFound = true;
-        List<StackResourceSummary> summaries = result.getStackResourceSummaries();
+        List<StackResourceSummary> summaries = result.stackResourceSummaries();
         for (AwsLoadBalancer loadBalancer : awsLoadBalancers) {
             for (AwsListener listener : loadBalancer.getListeners()) {
                 LOGGER.debug("Checking to see if listener resource {} already exists", listener.getName());
                 resourcesFound = resourcesFound && summaries.stream()
-                        .anyMatch(stackResourceSummary -> listener.getName().equals(stackResourceSummary.getLogicalResourceId()));
+                        .anyMatch(stackResourceSummary -> listener.getName().equals(stackResourceSummary.logicalResourceId()));
             }
         }
 

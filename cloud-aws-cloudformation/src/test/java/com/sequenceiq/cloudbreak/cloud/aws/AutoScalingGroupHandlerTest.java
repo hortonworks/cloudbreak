@@ -1,33 +1,37 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
-import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
-import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
-import com.amazonaws.services.autoscaling.model.LaunchConfiguration;
-import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
-import com.amazonaws.services.cloudformation.model.StackResource;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.ResourceType;
 
+import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
+import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsResponse;
+import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
+import software.amazon.awssdk.services.autoscaling.model.UpdateAutoScalingGroupRequest;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourcesRequest;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourcesResponse;
+import software.amazon.awssdk.services.cloudformation.model.StackResource;
+
+@ExtendWith(MockitoExtension.class)
 public class AutoScalingGroupHandlerTest {
 
     @Mock
@@ -36,26 +40,22 @@ public class AutoScalingGroupHandlerTest {
     @Mock
     private AmazonCloudFormationClient cloudFormationClient;
 
-    private AutoScalingGroupHandler underTest = new AutoScalingGroupHandler();
-
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
+    @InjectMocks
+    private AutoScalingGroupHandler underTest;
 
     @Test
     public void testUpdateAutoScalingGroupWithLaunchConfiguration() {
         String autoScalingGroupName = "autoScalingGroupName";
         String launchConfigurationName = "launchConfigurationName";
-        LaunchConfiguration oldLaunchConfiguration = new LaunchConfiguration();
+        LaunchConfiguration oldLaunchConfiguration = LaunchConfiguration.builder().build();
         underTest.updateAutoScalingGroupWithLaunchConfiguration(autoScalingClient, autoScalingGroupName, oldLaunchConfiguration, launchConfigurationName);
         ArgumentCaptor<UpdateAutoScalingGroupRequest> captor = ArgumentCaptor.forClass(UpdateAutoScalingGroupRequest.class);
         verify(autoScalingClient, times(1)).updateAutoScalingGroup(captor.capture());
         UpdateAutoScalingGroupRequest request = captor.getValue();
 
         assertNotNull(request);
-        assertEquals(autoScalingGroupName, request.getAutoScalingGroupName());
-        assertEquals(launchConfigurationName, request.getLaunchConfigurationName());
+        assertEquals(autoScalingGroupName, request.autoScalingGroupName());
+        assertEquals(launchConfigurationName, request.launchConfigurationName());
     }
 
     @Test
@@ -64,32 +64,34 @@ public class AutoScalingGroupHandlerTest {
                 .withType(ResourceType.CLOUDFORMATION_STACK)
                 .withName("cf")
                 .build();
-        DescribeStackResourcesResult resourcesResult = new DescribeStackResourcesResult();
-        StackResource stackResource = new StackResource()
-                .withLogicalResourceId("logicalResourceId")
-                .withPhysicalResourceId("physicalResourceId")
-                .withResourceType("AWS::AutoScaling::AutoScalingGroup");
-        resourcesResult.getStackResources().add(stackResource);
-        resourcesResult.getStackResources().add(new StackResource().withResourceType("other"));
+        StackResource stackResource = StackResource.builder()
+                .logicalResourceId("logicalResourceId")
+                .physicalResourceId("physicalResourceId")
+                .resourceType("AWS::AutoScaling::AutoScalingGroup").build();
+        DescribeStackResourcesResponse resourcesResult = DescribeStackResourcesResponse.builder()
+                .stackResources(List.of(stackResource, StackResource.builder().resourceType("other").build()))
+                .build();
+
         when(cloudFormationClient.describeStackResources(any(DescribeStackResourcesRequest.class))).thenReturn(resourcesResult);
 
-        DescribeAutoScalingGroupsResult scalingGroupsResult = new DescribeAutoScalingGroupsResult();
-        AutoScalingGroup autoScalingGroup = new AutoScalingGroup().withAutoScalingGroupName(stackResource.getPhysicalResourceId());
-        scalingGroupsResult.getAutoScalingGroups().add(autoScalingGroup);
+        AutoScalingGroup autoScalingGroup = AutoScalingGroup.builder().autoScalingGroupName(stackResource.physicalResourceId()).build();
+        DescribeAutoScalingGroupsResponse scalingGroupsResult = DescribeAutoScalingGroupsResponse.builder()
+                .autoScalingGroups(autoScalingGroup)
+                .build();
         when(autoScalingClient.describeAutoScalingGroups(any(DescribeAutoScalingGroupsRequest.class))).thenReturn(scalingGroupsResult);
 
         Map<AutoScalingGroup, String> autoScalingGroups = underTest.getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource);
         assertEquals(1, autoScalingGroups.size());
         assertEquals(autoScalingGroup, autoScalingGroups.entrySet().stream().findFirst().get().getKey());
-        assertEquals(stackResource.getLogicalResourceId(), autoScalingGroups.entrySet().stream().findFirst().get().getValue());
+        assertEquals(stackResource.logicalResourceId(), autoScalingGroups.entrySet().stream().findFirst().get().getValue());
 
         ArgumentCaptor<DescribeStackResourcesRequest> stackResourcesRequestArgumentCaptor = ArgumentCaptor.forClass(DescribeStackResourcesRequest.class);
         verify(cloudFormationClient).describeStackResources(stackResourcesRequestArgumentCaptor.capture());
-        assertEquals(cfResource.getName(), stackResourcesRequestArgumentCaptor.getValue().getStackName());
+        assertEquals(cfResource.getName(), stackResourcesRequestArgumentCaptor.getValue().stackName());
 
         ArgumentCaptor<DescribeAutoScalingGroupsRequest> scalingGroupsRequestArgumentCaptor = ArgumentCaptor.forClass(DescribeAutoScalingGroupsRequest.class);
         verify(autoScalingClient).describeAutoScalingGroups(scalingGroupsRequestArgumentCaptor.capture());
-        assertEquals(1, scalingGroupsRequestArgumentCaptor.getValue().getAutoScalingGroupNames().size());
-        assertEquals(stackResource.getPhysicalResourceId(), scalingGroupsRequestArgumentCaptor.getValue().getAutoScalingGroupNames().get(0));
+        assertEquals(1, scalingGroupsRequestArgumentCaptor.getValue().autoScalingGroupNames().size());
+        assertEquals(stackResource.physicalResourceId(), scalingGroupsRequestArgumentCaptor.getValue().autoScalingGroupNames().get(0));
     }
 }

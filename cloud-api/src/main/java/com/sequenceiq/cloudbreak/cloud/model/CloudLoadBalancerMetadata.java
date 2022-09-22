@@ -56,6 +56,10 @@ public class CloudLoadBalancerMetadata extends DynamicModel {
         return name;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     @Override
     public String toString() {
         return "CloudLoadBalancerMetadata{" +
@@ -80,6 +84,9 @@ public class CloudLoadBalancerMetadata extends DynamicModel {
         private String name;
 
         private Map<String, Object> parameters;
+
+        private Builder() {
+        }
 
         public Builder withType(LoadBalancerType type) {
             this.type = type;

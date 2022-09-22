@@ -120,7 +120,7 @@ public class GcpForwardingRuleResourceBuilderTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("hcport", 8080);
         parameters.put("trafficport", 8080);
-        resource = new CloudResource.Builder()
+        resource = CloudResource.builder()
                 .withType(ResourceType.GCP_FORWARDING_RULE)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -129,7 +129,7 @@ public class GcpForwardingRuleResourceBuilderTest {
                 .withPersistent(true)
                 .build();
 
-        backendResource = new CloudResource.Builder()
+        backendResource = CloudResource.builder()
                 .withType(ResourceType.GCP_BACKEND_SERVICE)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -138,7 +138,7 @@ public class GcpForwardingRuleResourceBuilderTest {
                 .withPersistent(true)
                 .build();
 
-        ipResource = new CloudResource.Builder()
+        ipResource = CloudResource.builder()
                 .withType(ResourceType.GCP_RESERVED_IP)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -197,7 +197,7 @@ public class GcpForwardingRuleResourceBuilderTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("hcport", 8443);
         parameters.put("trafficports", List.of(443, 11443));
-        resource = new CloudResource.Builder()
+        resource = CloudResource.builder()
                 .withType(ResourceType.GCP_FORWARDING_RULE)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -206,7 +206,7 @@ public class GcpForwardingRuleResourceBuilderTest {
                 .withPersistent(true)
                 .build();
 
-        backendResource = new CloudResource.Builder()
+        backendResource = CloudResource.builder()
                 .withType(ResourceType.GCP_BACKEND_SERVICE)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")

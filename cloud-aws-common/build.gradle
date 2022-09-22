@@ -25,26 +25,27 @@ dependencies {
 
   implementation group: 'com.dyngr', name: 'polling', version: dyngrPollingVersion
 
-  api(group: 'com.amazonaws', name: 'aws-java-sdk-core', version: awsSdkVersion) {
+  api(group: 'software.amazon.awssdk', name: 'core', version: awsSdkVersion) {
     exclude group: 'commons-logging'
   }
-  api group: 'com.amazonaws', name: 'aws-java-sdk-ec2', version: awsSdkVersion
-  api group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: awsSdkVersion
-  api group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: awsSdkVersion
-  api group: 'com.amazonaws', name: 'aws-java-sdk-iam', version: awsSdkVersion
-  api group: 'com.amazonaws', name: 'aws-java-sdk-kms', version: awsSdkVersion
-  api group: 'com.amazonaws', name: 'aws-java-sdk-rds', version: awsSdkVersion
-  api group: 'com.amazonaws', name: 'aws-java-sdk-sts', version: awsSdkVersion
-  api group: 'com.amazonaws', name: 'aws-java-sdk-cloudwatch', version: awsSdkVersion
-  api group: 'com.amazonaws', name: 'aws-java-sdk-elasticloadbalancingv2', version: awsSdkVersion
-  api group: 'com.amazonaws', name: 'aws-java-sdk-efs', version: awsSdkVersion
-  api group: 'com.amazonaws', name: 'aws-java-sdk-ebs', version: awsSdkVersion
-  api group: 'com.amazonaws', name: 'aws-java-sdk-networkfirewall', version: awsSdkVersion
-  api group: 'com.amazonaws', name: 'aws-java-sdk-pricing', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'ec2', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'dynamodb', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 's3', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'iam', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'kms', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'rds', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'sts', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'cloudwatch', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'elasticloadbalancingv2', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'efs', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'ebs', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'networkfirewall', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'pricing', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'test-utils', version: awsSdkVersion
 
   // legacy
-  api group: 'com.amazonaws', name: 'aws-java-sdk-autoscaling', version: awsSdkVersion
-  api group: 'com.amazonaws', name: 'aws-java-sdk-cloudformation', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'autoscaling', version: awsSdkVersion
+  api group: 'software.amazon.awssdk', name: 'cloudformation', version: awsSdkVersion
 
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-migrationsupport', version: junitJupiterVersion
   testImplementation group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion

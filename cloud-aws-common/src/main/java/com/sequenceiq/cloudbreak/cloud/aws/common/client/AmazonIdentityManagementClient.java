@@ -1,42 +1,42 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
-import com.amazonaws.services.identitymanagement.model.GetInstanceProfileRequest;
-import com.amazonaws.services.identitymanagement.model.GetInstanceProfileResult;
-import com.amazonaws.services.identitymanagement.model.GetRoleRequest;
-import com.amazonaws.services.identitymanagement.model.GetRoleResult;
-import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesRequest;
-import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesResult;
-import com.amazonaws.services.identitymanagement.model.ListRolesRequest;
-import com.amazonaws.services.identitymanagement.model.ListRolesResult;
-import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyRequest;
-import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyResult;
+import software.amazon.awssdk.services.iam.IamClient;
+import software.amazon.awssdk.services.iam.model.GetInstanceProfileRequest;
+import software.amazon.awssdk.services.iam.model.GetInstanceProfileResponse;
+import software.amazon.awssdk.services.iam.model.GetRoleRequest;
+import software.amazon.awssdk.services.iam.model.GetRoleResponse;
+import software.amazon.awssdk.services.iam.model.ListInstanceProfilesRequest;
+import software.amazon.awssdk.services.iam.model.ListInstanceProfilesResponse;
+import software.amazon.awssdk.services.iam.model.ListRolesRequest;
+import software.amazon.awssdk.services.iam.model.ListRolesResponse;
+import software.amazon.awssdk.services.iam.model.SimulatePrincipalPolicyRequest;
+import software.amazon.awssdk.services.iam.model.SimulatePrincipalPolicyResponse;
 
 public class AmazonIdentityManagementClient extends AmazonClient {
 
-    private final AmazonIdentityManagement client;
+    private final IamClient client;
 
-    public AmazonIdentityManagementClient(AmazonIdentityManagement client) {
+    public AmazonIdentityManagementClient(IamClient client) {
         this.client = client;
     }
 
-    public SimulatePrincipalPolicyResult simulatePrincipalPolicy(SimulatePrincipalPolicyRequest simulatePrincipalPolicyRequest) {
+    public SimulatePrincipalPolicyResponse simulatePrincipalPolicy(SimulatePrincipalPolicyRequest simulatePrincipalPolicyRequest) {
         return client.simulatePrincipalPolicy(simulatePrincipalPolicyRequest);
     }
 
-    public GetInstanceProfileResult getInstanceProfile(GetInstanceProfileRequest instanceProfileRequest) {
+    public GetInstanceProfileResponse getInstanceProfile(GetInstanceProfileRequest instanceProfileRequest) {
         return client.getInstanceProfile(instanceProfileRequest);
     }
 
-    public GetRoleResult getRole(GetRoleRequest roleRequest) {
+    public GetRoleResponse getRole(GetRoleRequest roleRequest) {
         return client.getRole(roleRequest);
     }
 
-    public ListRolesResult listRoles(ListRolesRequest listRolesRequest) {
+    public ListRolesResponse listRoles(ListRolesRequest listRolesRequest) {
         return client.listRoles(listRolesRequest);
     }
 
-    public ListInstanceProfilesResult listInstanceProfiles(ListInstanceProfilesRequest listInstanceProfilesRequest) {
+    public ListInstanceProfilesResponse listInstanceProfiles(ListInstanceProfilesRequest listInstanceProfilesRequest) {
         return client.listInstanceProfiles(listInstanceProfilesRequest);
     }
 }

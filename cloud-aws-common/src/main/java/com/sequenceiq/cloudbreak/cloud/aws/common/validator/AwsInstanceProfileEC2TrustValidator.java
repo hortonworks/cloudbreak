@@ -9,25 +9,25 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.auth.policy.Action;
-import com.amazonaws.auth.policy.Policy;
-import com.amazonaws.auth.policy.Principal;
-import com.amazonaws.auth.policy.Principal.Services;
-import com.amazonaws.auth.policy.Statement;
-import com.amazonaws.auth.policy.actions.SecurityTokenServiceActions;
-import com.amazonaws.services.identitymanagement.model.InstanceProfile;
-import com.amazonaws.services.identitymanagement.model.Role;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.model.CloudIdentityType;
 
+import software.amazon.awssdk.core.auth.policy.Action;
+import software.amazon.awssdk.core.auth.policy.Policy;
+import software.amazon.awssdk.core.auth.policy.Principal;
+import software.amazon.awssdk.core.auth.policy.Statement;
+import software.amazon.awssdk.services.iam.model.InstanceProfile;
+import software.amazon.awssdk.services.iam.model.Role;
+
 @Component
 public class AwsInstanceProfileEC2TrustValidator {
+
     @Inject
     private AwsIamService awsIamService;
 
     public boolean isTrusted(InstanceProfile instanceProfile, CloudIdentityType cloudIdentityType, ValidationResultBuilder resultBuilder) {
-        List<Role> instanceProfileRoles = instanceProfile.getRoles();
+        List<Role> instanceProfileRoles = instanceProfile.roles();
         for (Role role : instanceProfileRoles) {
             Policy assumeRolePolicy = awsIamService.getAssumeRolePolicy(role);
             if (assumeRolePolicy != null) {
@@ -42,7 +42,7 @@ public class AwsInstanceProfileEC2TrustValidator {
         resultBuilder.error(
                 String.format("The instance profile (%s) doesn't have an EC2 trust relationship. " +
                                 getAdviceMessage(INSTANCE_PROFILE, cloudIdentityType),
-                        instanceProfile.getArn()));
+                        instanceProfile.arn()));
         return false;
     }
 
@@ -50,11 +50,11 @@ public class AwsInstanceProfileEC2TrustValidator {
         return principals
                 .stream()
                 .anyMatch(principal -> "Service".equals(principal.getProvider())
-                        && Services.AmazonEC2.getServiceId().equals(principal.getId()));
+                        && Principal.Service.AmazonEC2.getServiceId().equals(principal.getId()));
     }
 
     boolean checkAssumeRoleInActions(List<Action> actions) {
         return actions.stream().anyMatch(
-                action -> SecurityTokenServiceActions.AssumeRole.getActionName().equals(action.getActionName()));
+                action -> "sts:AssumeRole".equals(action.getActionName()));
     }
 }

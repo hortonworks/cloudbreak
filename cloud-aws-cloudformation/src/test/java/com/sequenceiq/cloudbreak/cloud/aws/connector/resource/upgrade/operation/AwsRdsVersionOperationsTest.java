@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -21,15 +20,17 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.amazonaws.services.rds.model.AmazonRDSException;
-import com.amazonaws.services.rds.model.DBEngineVersion;
-import com.amazonaws.services.rds.model.DescribeDBEngineVersionsRequest;
-import com.amazonaws.services.rds.model.DescribeDBEngineVersionsResult;
-import com.amazonaws.services.rds.model.UpgradeTarget;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
 import com.sequenceiq.cloudbreak.common.database.Version;
+
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.services.rds.model.DBEngineVersion;
+import software.amazon.awssdk.services.rds.model.DescribeDbEngineVersionsRequest;
+import software.amazon.awssdk.services.rds.model.DescribeDbEngineVersionsResponse;
+import software.amazon.awssdk.services.rds.model.RdsException;
+import software.amazon.awssdk.services.rds.model.UpgradeTarget;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsRdsVersionOperationsTest {
@@ -129,25 +130,25 @@ public class AwsRdsVersionOperationsTest {
     void testGetAllUpgradeTargets() {
         AmazonRdsClient rdsClient = mock(AmazonRdsClient.class);
         RdsEngineVersion rdsEngineVersion = new RdsEngineVersion("1.2");
-        DBEngineVersion dbEngineVersionV1 = new DBEngineVersion().withValidUpgradeTarget(
-                new UpgradeTarget().withEngineVersion("1.1"),
-                new UpgradeTarget().withEngineVersion("1.3"));
-        DBEngineVersion dbEngineVersionV2 = new DBEngineVersion().withValidUpgradeTarget(
-                new UpgradeTarget().withEngineVersion("2.1"),
-                new UpgradeTarget().withEngineVersion("2.3"));
-        DescribeDBEngineVersionsResult describeDBEngineVersionsResult = new DescribeDBEngineVersionsResult()
-                .withDBEngineVersions(dbEngineVersionV1, dbEngineVersionV2);
-        when(rdsClient.describeDBEngineVersions(any())).thenReturn(describeDBEngineVersionsResult);
+        DBEngineVersion dbEngineVersionV1 = DBEngineVersion.builder().validUpgradeTarget(
+                UpgradeTarget.builder().engineVersion("1.1").build(),
+                UpgradeTarget.builder().engineVersion("1.3").build()).build();
+        DBEngineVersion dbEngineVersionV2 = DBEngineVersion.builder().validUpgradeTarget(
+                UpgradeTarget.builder().engineVersion("2.1").build(),
+                UpgradeTarget.builder().engineVersion("2.3").build()).build();
+        DescribeDbEngineVersionsResponse describeDbEngineVersionsResponse = DescribeDbEngineVersionsResponse.builder()
+                .dbEngineVersions(dbEngineVersionV1, dbEngineVersionV2).build();
+        when(rdsClient.describeDBEngineVersions(any())).thenReturn(describeDbEngineVersionsResponse);
 
         Set<String> upgradeTargetVersions = underTest.getAllUpgradeTargetVersions(rdsClient, rdsEngineVersion);
 
         assertThat(upgradeTargetVersions).hasSize(4);
         assertThat(upgradeTargetVersions).containsOnly("1.1", "1.3", "2.1", "2.3");
-        ArgumentCaptor<DescribeDBEngineVersionsRequest> rdsEngineVersionArgumentCaptor = ArgumentCaptor.forClass(DescribeDBEngineVersionsRequest.class);
+        ArgumentCaptor<DescribeDbEngineVersionsRequest> rdsEngineVersionArgumentCaptor = ArgumentCaptor.forClass(DescribeDbEngineVersionsRequest.class);
         verify(rdsClient).describeDBEngineVersions(rdsEngineVersionArgumentCaptor.capture());
-        DescribeDBEngineVersionsRequest describeDBEngineVersionsRequest = rdsEngineVersionArgumentCaptor.getValue();
-        assertEquals("1.2", describeDBEngineVersionsRequest.getEngineVersion());
-        assertEquals("postgres", describeDBEngineVersionsRequest.getEngine());
+        DescribeDbEngineVersionsRequest describeDBEngineVersionsRequest = rdsEngineVersionArgumentCaptor.getValue();
+        assertEquals("1.2", describeDBEngineVersionsRequest.engineVersion());
+        assertEquals("postgres", describeDBEngineVersionsRequest.engine());
     }
 
     @Test
@@ -156,8 +157,8 @@ public class AwsRdsVersionOperationsTest {
         ReflectionTestUtils.setField(underTest, "fallbackTargetVersion", "11.16");
         AmazonRdsClient rdsClient = mock(AmazonRdsClient.class);
         RdsEngineVersion rdsEngineVersion = new RdsEngineVersion("1.0");
-        AmazonRDSException exception = new AmazonRDSException("error");
-        exception.setErrorCode("AccessDenied");
+        RdsException exception = (RdsException) RdsException.builder().awsErrorDetails(AwsErrorDetails.builder()
+                .errorMessage("error").errorCode("AccessDenied").build()).build();
         when(rdsClient.describeDBEngineVersions(any())).thenThrow(exception);
 
         Set<String> upgradeTargetVersions = underTest.getAllUpgradeTargetVersions(rdsClient, rdsEngineVersion);
@@ -170,15 +171,15 @@ public class AwsRdsVersionOperationsTest {
         ReflectionTestUtils.setField(underTest, "fallbackTargetVersion", "11.16");
         AmazonRdsClient rdsClient = mock(AmazonRdsClient.class);
         RdsEngineVersion rdsEngineVersion = new RdsEngineVersion("1.0");
-        AmazonRDSException exception = new AmazonRDSException("error");
-        exception.setErrorCode("Something");
+        RdsException exception = (RdsException) RdsException.builder().awsErrorDetails(AwsErrorDetails.builder()
+                .errorMessage("error").errorCode("Something").build()).build();
         when(rdsClient.describeDBEngineVersions(any())).thenThrow(exception);
 
         CloudConnectorException ex = Assertions.assertThrows(CloudConnectorException.class, () ->
                 underTest.getAllUpgradeTargetVersions(rdsClient, rdsEngineVersion));
 
         assertEquals("Exception occurred when querying valid upgrade targets: error " +
-                "(Service: null; Status Code: 0; Error Code: Something; Request ID: null; Proxy: null)", ex.getMessage());
+                "(Service: null, Status Code: 0, Request ID: null)", ex.getMessage());
     }
 
     @Test

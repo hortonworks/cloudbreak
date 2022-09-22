@@ -19,17 +19,18 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.amazonaws.services.cloudwatch.model.AmazonCloudWatchException;
-import com.amazonaws.services.cloudwatch.model.DeleteAlarmsRequest;
-import com.amazonaws.services.cloudwatch.model.DescribeAlarmsRequest;
-import com.amazonaws.services.cloudwatch.model.DescribeAlarmsResult;
-import com.amazonaws.services.cloudwatch.model.MetricAlarm;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+
+import software.amazon.awssdk.services.cloudwatch.model.CloudWatchException;
+import software.amazon.awssdk.services.cloudwatch.model.DeleteAlarmsRequest;
+import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsRequest;
+import software.amazon.awssdk.services.cloudwatch.model.DescribeAlarmsResponse;
+import software.amazon.awssdk.services.cloudwatch.model.MetricAlarm;
 
 class AwsNativeCloudWatchServiceTest {
 
@@ -59,9 +60,9 @@ class AwsNativeCloudWatchServiceTest {
         String instanceId1 = "i-1";
         String instanceId2 = "i-2";
         String instanceId3 = "i-3";
-        MetricAlarm alarm1 = mock(MetricAlarm.class);
-        MetricAlarm alarm2 = mock(MetricAlarm.class);
-        DescribeAlarmsResult describeAlarmsResult = mock(DescribeAlarmsResult.class);
+        MetricAlarm alarm1 = MetricAlarm.builder().alarmName(alarm1Name).build();
+        MetricAlarm alarm2 = MetricAlarm.builder().alarmName(alarm2Name).build();
+        DescribeAlarmsResponse describeAlarmsResponse = DescribeAlarmsResponse.builder().metricAlarms(alarm1, alarm2).build();
         AwsCredentialView credentialView = mock(AwsCredentialView.class);
         CloudStack stack = mock(CloudStack.class);
         Group group = mock(Group.class);
@@ -75,11 +76,8 @@ class AwsNativeCloudWatchServiceTest {
         when(instance2.getInstanceId()).thenReturn(instanceId2);
         when(instance3.getInstanceId()).thenReturn(instanceId3);
         when(commonAwsClient.createCloudWatchClient(eq(credentialView), eq(REGION))).thenReturn(mockAmazonCloudWatchClient);
-        when(mockAmazonCloudWatchClient.describeAlarms(any())).thenReturn(describeAlarmsResult);
+        when(mockAmazonCloudWatchClient.describeAlarms(any())).thenReturn(describeAlarmsResponse);
         // alarm 3 was already deleted
-        when(describeAlarmsResult.getMetricAlarms()).thenReturn(List.of(alarm1, alarm2));
-        when(alarm1.getAlarmName()).thenReturn(alarm1Name);
-        when(alarm2.getAlarmName()).thenReturn(alarm2Name);
 
         underTest.deleteAllCloudWatchAlarmsForSystemFailures(stack, REGION, credentialView);
 
@@ -87,10 +85,10 @@ class AwsNativeCloudWatchServiceTest {
         ArgumentCaptor<DeleteAlarmsRequest> captorDelete = ArgumentCaptor.forClass(DeleteAlarmsRequest.class);
         verify(mockAmazonCloudWatchClient, times(1)).describeAlarms(captorDescribe.capture());
         verify(mockAmazonCloudWatchClient, times(1)).deleteAlarms(captorDelete.capture());
-        assertEquals(List.of(alarm1Name, alarm2Name, alarm3Name), captorDescribe.getValue().getAlarmNames());
+        assertEquals(List.of(alarm1Name, alarm2Name, alarm3Name), captorDescribe.getValue().alarmNames());
 
         // only delete alarms that were not already deleted
-        assertEquals(List.of(alarm1Name, alarm2Name), captorDelete.getValue().getAlarmNames());
+        assertEquals(List.of(alarm1Name, alarm2Name), captorDelete.getValue().alarmNames());
     }
 
     @Test
@@ -105,22 +103,19 @@ class AwsNativeCloudWatchServiceTest {
         for (int i = 1; i <= 100; i++) {
             String alarmName = "i-" + i + "-Status-Check-Failed-System";
             alarmNames1.add(alarmName);
-            MetricAlarm alarm = mock(MetricAlarm.class);
-            when(alarm.getAlarmName()).thenReturn(alarmName);
+            MetricAlarm alarm = MetricAlarm.builder().alarmName(alarmName).build();
             alarms1.add(alarm);
         }
         for (int i = 101; i <= 200; i++) {
             String alarmName = "i-" + i + "-Status-Check-Failed-System";
             alarmNames2.add(alarmName);
-            MetricAlarm alarm = mock(MetricAlarm.class);
-            when(alarm.getAlarmName()).thenReturn(alarmName);
+            MetricAlarm alarm = MetricAlarm.builder().alarmName(alarmName).build();
             alarms2.add(alarm);
         }
         for (int i = 201; i <= 210; i++) {
             String alarmName = "i-" + i + "-Status-Check-Failed-System";
             alarmNames3.add(alarmName);
-            MetricAlarm alarm = mock(MetricAlarm.class);
-            when(alarm.getAlarmName()).thenReturn(alarmName);
+            MetricAlarm alarm = MetricAlarm.builder().alarmName(alarmName).build();
             alarms3.add(alarm);
         }
         for (int i = 1; i <= 210; i++) {
@@ -129,12 +124,9 @@ class AwsNativeCloudWatchServiceTest {
             when(cloudInstance.getInstanceId()).thenReturn(instanceId);
             cloudInstances.add(cloudInstance);
         }
-        DescribeAlarmsResult describeAlarmsResult1 = mock(DescribeAlarmsResult.class);
-        DescribeAlarmsResult describeAlarmsResult2 = mock(DescribeAlarmsResult.class);
-        DescribeAlarmsResult describeAlarmsResult3 = mock(DescribeAlarmsResult.class);
-        when(describeAlarmsResult1.getMetricAlarms()).thenReturn(alarms1);
-        when(describeAlarmsResult2.getMetricAlarms()).thenReturn(alarms2);
-        when(describeAlarmsResult3.getMetricAlarms()).thenReturn(alarms3);
+        DescribeAlarmsResponse describeAlarmsResponse1 = DescribeAlarmsResponse.builder().metricAlarms(alarms1).build();
+        DescribeAlarmsResponse describeAlarmsResponse2 = DescribeAlarmsResponse.builder().metricAlarms(alarms2).build();
+        DescribeAlarmsResponse describeAlarmsResponse3 = DescribeAlarmsResponse.builder().metricAlarms(alarms3).build();
         AwsCredentialView credentialView = mock(AwsCredentialView.class);
         CloudStack stack = mock(CloudStack.class);
         Group group = mock(Group.class);
@@ -142,7 +134,7 @@ class AwsNativeCloudWatchServiceTest {
         when(stack.getGroups()).thenReturn(groups);
         when(group.getInstances()).thenReturn(cloudInstances);
         when(commonAwsClient.createCloudWatchClient(credentialView, REGION)).thenReturn(mockAmazonCloudWatchClient);
-        when(mockAmazonCloudWatchClient.describeAlarms(any())).thenReturn(describeAlarmsResult1, describeAlarmsResult2, describeAlarmsResult3);
+        when(mockAmazonCloudWatchClient.describeAlarms(any())).thenReturn(describeAlarmsResponse1, describeAlarmsResponse2, describeAlarmsResponse3);
 
         underTest.deleteAllCloudWatchAlarmsForSystemFailures(stack, REGION, credentialView);
 
@@ -151,9 +143,9 @@ class AwsNativeCloudWatchServiceTest {
         verify(mockAmazonCloudWatchClient, times(3)).describeAlarms(captorDescribe.capture());
         verify(mockAmazonCloudWatchClient, times(3)).deleteAlarms(captorDelete.capture());
         assertEquals(List.of(alarmNames1, alarmNames2, alarmNames3),
-                captorDescribe.getAllValues().stream().map(DescribeAlarmsRequest::getAlarmNames).collect(Collectors.toList()));
+                captorDescribe.getAllValues().stream().map(DescribeAlarmsRequest::alarmNames).collect(Collectors.toList()));
         assertEquals(List.of(alarmNames1, alarmNames2, alarmNames3),
-                captorDelete.getAllValues().stream().map(DeleteAlarmsRequest::getAlarmNames).collect(Collectors.toList()));
+                captorDelete.getAllValues().stream().map(DeleteAlarmsRequest::alarmNames).collect(Collectors.toList()));
     }
 
     @Test
@@ -191,7 +183,7 @@ class AwsNativeCloudWatchServiceTest {
         when(stack.getGroups()).thenReturn(groups);
         when(group.getInstances()).thenReturn(cloudInstances);
         when(commonAwsClient.createCloudWatchClient(credentialView, REGION)).thenReturn(mockAmazonCloudWatchClient);
-        AmazonCloudWatchException exception = new AmazonCloudWatchException("No permissions to describe cloudwatch alarms");
+        CloudWatchException exception = (CloudWatchException) CloudWatchException.builder().message("No permissions to describe cloudwatch alarms").build();
         when(mockAmazonCloudWatchClient.describeAlarms(any())).thenThrow(exception);
 
         underTest.deleteAllCloudWatchAlarmsForSystemFailures(stack, REGION, credentialView);
@@ -201,9 +193,9 @@ class AwsNativeCloudWatchServiceTest {
         verify(mockAmazonCloudWatchClient, times(3)).describeAlarms(captorDescribe.capture());
         verify(mockAmazonCloudWatchClient, times(210)).deleteAlarms(captorDelete.capture());
         assertEquals(List.of(alarmNames1, alarmNames2, alarmNames3),
-                captorDescribe.getAllValues().stream().map(DescribeAlarmsRequest::getAlarmNames).collect(Collectors.toList()));
+                captorDescribe.getAllValues().stream().map(DescribeAlarmsRequest::alarmNames).collect(Collectors.toList()));
         assertEquals(deleteAlarmNames,
-                captorDelete.getAllValues().stream().map(DeleteAlarmsRequest::getAlarmNames).collect(Collectors.toList()));
+                captorDelete.getAllValues().stream().map(DeleteAlarmsRequest::alarmNames).collect(Collectors.toList()));
     }
 
     @Test
@@ -214,10 +206,10 @@ class AwsNativeCloudWatchServiceTest {
         String instanceId1 = "i-1";
         String instanceId2 = "i-2";
         String deletedInstanceId = "i-deleted";
-        MetricAlarm alarm1 = mock(MetricAlarm.class);
-        MetricAlarm alarm2 = mock(MetricAlarm.class);
-        MetricAlarm deletedInstanceAlarm = mock(MetricAlarm.class);
-        DescribeAlarmsResult describeAlarmsResult = mock(DescribeAlarmsResult.class);
+        MetricAlarm alarm1 = MetricAlarm.builder().alarmName(alarm1Name).build();
+        MetricAlarm alarm2 = MetricAlarm.builder().alarmName(alarm2Name).build();
+        MetricAlarm deletedInstanceAlarm = MetricAlarm.builder().alarmName(deletedAlarmName).build();
+        DescribeAlarmsResponse describeAlarmsResponse = DescribeAlarmsResponse.builder().metricAlarms(alarm1, alarm2, deletedInstanceAlarm).build();
         AwsCredentialView credentialView = mock(AwsCredentialView.class);
         CloudStack stack = mock(CloudStack.class);
         Group group = mock(Group.class);
@@ -234,11 +226,7 @@ class AwsNativeCloudWatchServiceTest {
         when(instance2.getInstanceId()).thenReturn(instanceId2);
         when(deletedInstance.getInstanceId()).thenReturn(deletedInstanceId);
         when(commonAwsClient.createCloudWatchClient(eq(credentialView), eq(REGION))).thenReturn(mockAmazonCloudWatchClient);
-        when(mockAmazonCloudWatchClient.describeAlarms(any())).thenReturn(describeAlarmsResult);
-        when(describeAlarmsResult.getMetricAlarms()).thenReturn(List.of(alarm1, alarm2, deletedInstanceAlarm));
-        when(alarm1.getAlarmName()).thenReturn(alarm1Name);
-        when(alarm2.getAlarmName()).thenReturn(alarm2Name);
-        when(deletedInstanceAlarm.getAlarmName()).thenReturn(deletedAlarmName);
+        when(mockAmazonCloudWatchClient.describeAlarms(any())).thenReturn(describeAlarmsResponse);
 
         underTest.deleteAllCloudWatchAlarmsForSystemFailures(stack, REGION, credentialView);
 
@@ -246,8 +234,8 @@ class AwsNativeCloudWatchServiceTest {
         ArgumentCaptor<DeleteAlarmsRequest> captorDelete = ArgumentCaptor.forClass(DeleteAlarmsRequest.class);
         verify(mockAmazonCloudWatchClient, times(1)).describeAlarms(captorDescribe.capture());
         verify(mockAmazonCloudWatchClient, times(1)).deleteAlarms(captorDelete.capture());
-        assertEquals(List.of(alarm1Name, alarm2Name, deletedAlarmName), captorDescribe.getValue().getAlarmNames());
-        assertEquals(List.of(alarm1Name, alarm2Name, deletedAlarmName), captorDelete.getValue().getAlarmNames());
+        assertEquals(List.of(alarm1Name, alarm2Name, deletedAlarmName), captorDescribe.getValue().alarmNames());
+        assertEquals(List.of(alarm1Name, alarm2Name, deletedAlarmName), captorDelete.getValue().alarmNames());
     }
 
 }

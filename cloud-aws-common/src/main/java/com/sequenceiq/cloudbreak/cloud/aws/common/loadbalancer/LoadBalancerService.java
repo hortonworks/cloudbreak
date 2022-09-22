@@ -11,14 +11,15 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.elasticloadbalancingv2.model.DeregisterTargetsRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.InvalidTargetException;
-import com.amazonaws.services.elasticloadbalancingv2.model.TargetDescription;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeregisterTargetsRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.InvalidTargetException;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetDescription;
 
 @Component
 public class LoadBalancerService {
@@ -46,11 +47,12 @@ public class LoadBalancerService {
             if (!instancesToRemove.isEmpty()) {
                 try {
                     List<TargetDescription> targetsToRemove = instancesToRemove.stream()
-                            .map(instanceId -> new TargetDescription().withId(instanceId))
+                            .map(instanceId -> TargetDescription.builder().id(instanceId).build())
                             .collect(Collectors.toList());
-                    amazonElbClient.deregisterTargets(new DeregisterTargetsRequest()
-                            .withTargetGroupArn(targetGroupArn)
-                            .withTargets(targetsToRemove));
+                    amazonElbClient.deregisterTargets(DeregisterTargetsRequest.builder()
+                            .targetGroupArn(targetGroupArn)
+                            .targets(targetsToRemove)
+                            .build());
                     LOGGER.debug("Targets deregistered: {}", targetsToRemove);
                 } catch (InvalidTargetException ignored) {
                     LOGGER.debug("no-op - we tried to remove a target that wasn't in the target group, which is fine");

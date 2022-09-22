@@ -14,18 +14,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.rds.model.DBInstance;
-import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
-import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptState;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 
+import software.amazon.awssdk.services.rds.model.DBInstance;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
+
 @ExtendWith(MockitoExtension.class)
 public class UpgradeStartWaitTaskTest {
-
-    @Mock
-    private DescribeDBInstancesRequest describeDBInstancesRequest;
 
     @Mock
     private AmazonRdsClient rdsClient;
@@ -72,14 +69,12 @@ public class UpgradeStartWaitTaskTest {
         assertEquals(AttemptState.CONTINUE, result.getState());
     }
 
-    private DescribeDBInstancesResult setupDescribeDbInstancesResult(String... instanceStates) {
-        DescribeDBInstancesResult describeDBInstancesResult = new DescribeDBInstancesResult();
+    private DescribeDbInstancesResponse setupDescribeDbInstancesResult(String... instanceStates) {
         Set<DBInstance> dbInstances = new HashSet<>();
         for (String instanceState : instanceStates) {
-            dbInstances.add(new DBInstance().withDBInstanceStatus(instanceState));
+            dbInstances.add(DBInstance.builder().dbInstanceStatus(instanceState).build());
         }
-        describeDBInstancesResult.setDBInstances(dbInstances);
-        return describeDBInstancesResult;
+        return DescribeDbInstancesResponse.builder().dbInstances(dbInstances).build();
     }
 
 }

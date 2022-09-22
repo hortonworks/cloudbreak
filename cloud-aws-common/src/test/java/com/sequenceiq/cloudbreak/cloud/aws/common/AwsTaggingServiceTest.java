@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsMapContaining.hasEntry;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -15,21 +14,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.cloudformation.model.Tag;
-import com.amazonaws.services.ec2.model.CreateTagsRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.EbsInstanceBlockDevice;
-import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.InstanceBlockDeviceMapping;
-import com.amazonaws.services.ec2.model.Reservation;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -39,7 +30,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
-@RunWith(MockitoJUnitRunner.class)
+import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.EbsInstanceBlockDevice;
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceBlockDeviceMapping;
+import software.amazon.awssdk.services.ec2.model.Reservation;
+
+@ExtendWith(MockitoExtension.class)
 public class AwsTaggingServiceTest {
 
     private static final Long WORKSPACE_ID = 1L;
@@ -58,7 +56,8 @@ public class AwsTaggingServiceTest {
     public void testWhenUserTagsDefined() {
         Map<String, String> userDefined = Maps.newHashMap();
         userDefined.put("userdefinedkey", "userdefinedvalue");
-        Collection<Tag> tags = awsTaggingService.prepareCloudformationTags(authenticatedContext(), userDefined);
+        Collection<software.amazon.awssdk.services.cloudformation.model.Tag> tags = awsTaggingService.prepareCloudformationTags(authenticatedContext(),
+                userDefined);
         assertEquals(1L, tags.size());
     }
 
@@ -67,15 +66,18 @@ public class AwsTaggingServiceTest {
         CloudResource instance = CloudResource.builder()
                 .withType(ResourceType.AWS_INSTANCE).withInstanceId(INSTANCE_ID).withName(INSTANCE_ID).withStatus(CommonStatus.CREATED).build();
 
-        DescribeInstancesResult describeResult = new DescribeInstancesResult()
-                .withReservations(new Reservation()
-                        .withInstances(new Instance()
-                                .withInstanceId(INSTANCE_ID)
-                                .withBlockDeviceMappings(new InstanceBlockDeviceMapping()
-                                        .withDeviceName("/dev/sda1")
-                                        .withEbs(new EbsInstanceBlockDevice().withVolumeId(VOLUME_ID)))
-                                .withRootDeviceName("/dev/sda1"))
-                );
+        DescribeInstancesResponse describeResult = DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder()
+                        .instances(Instance.builder()
+                                .instanceId(INSTANCE_ID)
+                                .blockDeviceMappings(InstanceBlockDeviceMapping.builder()
+                                        .deviceName("/dev/sda1")
+                                        .ebs(EbsInstanceBlockDevice.builder().volumeId(VOLUME_ID).build())
+                                        .build())
+                                .rootDeviceName("/dev/sda1")
+                                .build())
+                        .build()
+                ).build();
 
         AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         when(ec2Client.describeInstances(any())).thenReturn(describeResult);
@@ -85,17 +87,11 @@ public class AwsTaggingServiceTest {
 
         verify(ec2Client, times(1)).createTags(tagRequestCaptor.capture());
         CreateTagsRequest request = tagRequestCaptor.getValue();
-        assertEquals(1, request.getResources().size());
-        assertEquals(VOLUME_ID, request.getResources().get(0));
-        List<com.amazonaws.services.ec2.model.Tag> tags = request.getTags();
-        assertThat(tags, containsInAnyOrder(
-                hasProperty("key", Matchers.is("key1")),
-                hasProperty("key", Matchers.is("key2"))
-        ));
-        assertThat(tags, containsInAnyOrder(
-                hasProperty("value", Matchers.is("val1")),
-                hasProperty("value", Matchers.is("val2"))
-        ));
+        assertEquals(1, request.resources().size());
+        assertEquals(VOLUME_ID, request.resources().get(0));
+        List<software.amazon.awssdk.services.ec2.model.Tag> tags = request.tags();
+        assertThat(userTags, hasEntry(tags.get(0).key(), tags.get(0).value()));
+        assertThat(userTags, hasEntry(tags.get(1).key(), tags.get(1).value()));
     }
 
     @Test
@@ -103,8 +99,8 @@ public class AwsTaggingServiceTest {
         CloudResource instance = CloudResource.builder()
                 .withType(ResourceType.AWS_INSTANCE).withInstanceId(INSTANCE_ID).withName(INSTANCE_ID).withStatus(CommonStatus.CREATED).build();
 
-        DescribeInstancesResult describeResult = new DescribeInstancesResult()
-                .withReservations(new Reservation());
+        DescribeInstancesResponse describeResult = DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder().build()).build();
 
         AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         when(ec2Client.describeInstances(any())).thenReturn(describeResult);
@@ -121,12 +117,13 @@ public class AwsTaggingServiceTest {
         CloudResource instance = CloudResource.builder()
                 .withType(ResourceType.AWS_INSTANCE).withInstanceId(INSTANCE_ID).withName(INSTANCE_ID).withStatus(CommonStatus.CREATED).build();
 
-        Instance awsInstance = new Instance()
-                .withInstanceId(INSTANCE_ID)
-                .withBlockDeviceMappings(new InstanceBlockDeviceMapping()
-                        .withDeviceName("/dev/sda1")
-                        .withEbs(new EbsInstanceBlockDevice().withVolumeId(VOLUME_ID)))
-                .withRootDeviceName("/dev/sda1");
+        Instance awsInstance = Instance.builder()
+                .instanceId(INSTANCE_ID)
+                .blockDeviceMappings(InstanceBlockDeviceMapping.builder()
+                        .deviceName("/dev/sda1")
+                        .ebs(EbsInstanceBlockDevice.builder().volumeId(VOLUME_ID).build())
+                        .build())
+                .rootDeviceName("/dev/sda1").build();
 
         List<CloudResource> instanceList = new ArrayList<>(instanceCount);
         List<Instance> awsInstances = new ArrayList<>(instanceCount);
@@ -135,8 +132,9 @@ public class AwsTaggingServiceTest {
             awsInstances.add(awsInstance);
         }
 
-        DescribeInstancesResult describeResult = new DescribeInstancesResult()
-                .withReservations(new Reservation().withInstances(awsInstances));
+        DescribeInstancesResponse describeResult = DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder().instances(awsInstances).build())
+                .build();
         AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         when(ec2Client.describeInstances(any())).thenReturn(describeResult);
 
@@ -144,8 +142,8 @@ public class AwsTaggingServiceTest {
 
         verify(ec2Client, times(2)).createTags(tagRequestCaptor.capture());
         List<CreateTagsRequest> requests = tagRequestCaptor.getAllValues();
-        assertEquals(1000, requests.get(0).getResources().size());
-        assertEquals(200, requests.get(1).getResources().size());
+        assertEquals(1000, requests.get(0).resources().size());
+        assertEquals(200, requests.get(1).resources().size());
     }
 
     @Test
@@ -155,19 +153,23 @@ public class AwsTaggingServiceTest {
         CloudResource instance = CloudResource.builder()
                 .withType(ResourceType.AWS_INSTANCE).withInstanceId(INSTANCE_ID).withName(INSTANCE_ID).withStatus(CommonStatus.CREATED).build();
 
-        Instance awsInstance = new Instance()
-                .withInstanceId(INSTANCE_ID)
-                .withBlockDeviceMappings(new InstanceBlockDeviceMapping()
-                        .withDeviceName("/dev/sda1")
-                        .withEbs(new EbsInstanceBlockDevice().withVolumeId(VOLUME_ID)))
-                .withRootDeviceName("/dev/sda1");
+        Instance awsInstance = Instance.builder()
+                .instanceId(INSTANCE_ID)
+                .blockDeviceMappings(InstanceBlockDeviceMapping.builder()
+                        .deviceName("/dev/sda1")
+                        .ebs(EbsInstanceBlockDevice.builder().volumeId(VOLUME_ID).build())
+                        .build())
+                .rootDeviceName("/dev/sda1")
+                .build();
 
-        Instance awsInstanceWithInvalidRootDisk = new Instance()
-                .withInstanceId(INSTANCE_ID)
-                .withBlockDeviceMappings(new InstanceBlockDeviceMapping()
-                        .withDeviceName("/dev/sdb1")
-                        .withEbs(new EbsInstanceBlockDevice().withVolumeId(VOLUME_ID)))
-                .withRootDeviceName("/dev/sda1");
+        Instance awsInstanceWithInvalidRootDisk = Instance.builder()
+                .instanceId(INSTANCE_ID)
+                .blockDeviceMappings(InstanceBlockDeviceMapping.builder()
+                        .deviceName("/dev/sdb1")
+                        .ebs(EbsInstanceBlockDevice.builder().volumeId(VOLUME_ID).build())
+                        .build())
+                .rootDeviceName("/dev/sda1")
+                .build();
 
         List<CloudResource> instanceList = new ArrayList<>(instanceCount);
         for (int i = 0; i < instanceCount; i++) {
@@ -181,8 +183,9 @@ public class AwsTaggingServiceTest {
             awsInstances.add(awsInstanceWithInvalidRootDisk);
         }
 
-        DescribeInstancesResult describeResult = new DescribeInstancesResult()
-                .withReservations(new Reservation().withInstances(awsInstances));
+        DescribeInstancesResponse describeResult = DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder().instances(awsInstances).build())
+                .build();
         AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         when(ec2Client.describeInstances(any())).thenReturn(describeResult);
 
@@ -190,8 +193,8 @@ public class AwsTaggingServiceTest {
 
         verify(ec2Client, times(2)).createTags(tagRequestCaptor.capture());
         List<CreateTagsRequest> requests = tagRequestCaptor.getAllValues();
-        assertEquals(1000, requests.get(0).getResources().size());
-        assertEquals(100, requests.get(1).getResources().size());
+        assertEquals(1000, requests.get(0).resources().size());
+        assertEquals(100, requests.get(1).resources().size());
     }
 
     private AuthenticatedContext authenticatedContext() {

@@ -69,7 +69,7 @@ public class GcpSubnetResourceBuilderTest {
 
     @Test
     public void testDeleteWhenEverythingGoesFine() throws Exception {
-        CloudResource resource = new CloudResource.Builder()
+        CloudResource resource = CloudResource.builder()
                 .withType(ResourceType.GCP_NETWORK)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -108,7 +108,7 @@ public class GcpSubnetResourceBuilderTest {
 
     @Test
     public void testDeleteWhenExistingEverythingGoesFineShouldReturnNull() throws Exception {
-        CloudResource resource = new CloudResource.Builder()
+        CloudResource resource = CloudResource.builder()
                 .withType(ResourceType.GCP_NETWORK)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")

@@ -13,11 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.auth.policy.Policy;
-import com.amazonaws.services.identitymanagement.model.AmazonIdentityManagementException;
-import com.amazonaws.services.identitymanagement.model.EvaluationResult;
-import com.amazonaws.services.identitymanagement.model.InstanceProfile;
-import com.amazonaws.services.identitymanagement.model.Role;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
@@ -28,6 +23,12 @@ import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.model.FileSystemType;
+
+import software.amazon.awssdk.core.auth.policy.Policy;
+import software.amazon.awssdk.services.iam.model.EvaluationResult;
+import software.amazon.awssdk.services.iam.model.IamException;
+import software.amazon.awssdk.services.iam.model.InstanceProfile;
+import software.amazon.awssdk.services.iam.model.Role;
 
 @Component
 public class AwsLogRolePermissionValidator extends AbstractAwsSimulatePolicyValidator {
@@ -45,7 +46,7 @@ public class AwsLogRolePermissionValidator extends AbstractAwsSimulatePolicyVali
         if (Strings.isNullOrEmpty(logsLocationBase)) {
             return;
         }
-        Arn instanceProfileArn = Arn.of(instanceProfile.getArn());
+        Arn instanceProfileArn = Arn.of(instanceProfile.arn());
         Map<String, String> logReplacements = Map.ofEntries(
                 Map.entry("${ARN_PARTITION}", instanceProfileArn.getPartition()),
                 Map.entry("${LOGS_LOCATION_BASE}", removeProtocol(logsLocationBase)),
@@ -69,21 +70,20 @@ public class AwsLogRolePermissionValidator extends AbstractAwsSimulatePolicyVali
         if (locationBase == null) {
             return;
         }
-        List<Role> roles = instanceProfile.getRoles();
+        List<Role> roles = instanceProfile.roles();
         List<Policy> policies = Collections.singletonList(policy);
         for (Role role : roles) {
             try {
-                LOGGER.info("Permission validation on role: {} on locations {}", role.getArn(),
+                LOGGER.info("Permission validation on role: {} on locations {}", role.arn(),
                         Lists.newArrayList(getLocations(cloudFileSystem.getLocations()), locationBase));
-                policies.stream().forEach(p -> LOGGER.info("Policies being validated {}", p.toJson()));
-                List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam,
-                        role, policies);
+                policies.forEach(p -> LOGGER.info("Policies being validated {}", p.toJson()));
+                List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam, role, policies);
                 failedActions.addAll(getFailedActions(role, evaluationResults, skipOrgPolicyDecisions));
-                warnings.addAll(getWarnings(role, evaluationResults));
-            } catch (AmazonIdentityManagementException e) {
+                warnings.addAll(getWarnings(evaluationResults));
+            } catch (IamException e) {
                 // Only log the error and keep processing. Failed actions won't be added, but
                 // processing doesn't get stopped either. This can happen due to rate limiting.
-                LOGGER.error("Unable to validate role policies for role {} due to {}", role.getArn(),
+                LOGGER.error("Unable to validate role policies for role {} due to {}", role.arn(),
                         e.getMessage(), e);
             }
         }
@@ -92,7 +92,7 @@ public class AwsLogRolePermissionValidator extends AbstractAwsSimulatePolicyVali
             String validationWarningMessage = String.format("The validation of the Logger Instance Profile (%s) was not successful" +
                             " because there are missing context values (%s). This is not an issue in itself you might have an SCPs configured" +
                             " in your aws account and the system couldn't guess these extra parameters.",
-                    String.join(", ", instanceProfile.getArn()),
+                    String.join(", ", instanceProfile.arn()),
                     String.join(", ", warnings)
             );
             LOGGER.info(validationWarningMessage);
@@ -103,7 +103,7 @@ public class AwsLogRolePermissionValidator extends AbstractAwsSimulatePolicyVali
             String validationErrorMessage = String.format("Logger Instance Profile (%s) is not set up correctly. " +
                             "Please follow the official documentation on required policies for Logger Instance Profile.\n" +
                             "Missing policies:%n%s",
-                    String.join(", ", instanceProfile.getArn()),
+                    String.join(", ", instanceProfile.arn()),
                     String.join("\n", failedActions));
 
             if (validationErrorMessage.contains(AbstractAwsSimulatePolicyValidator.DENIED_BY_ORGANIZATION_RULE)) {
@@ -119,12 +119,12 @@ public class AwsLogRolePermissionValidator extends AbstractAwsSimulatePolicyVali
     }
 
     private List<String> getLocations(List<StorageLocationBase> storageLocationBases) {
-        return storageLocationBases.stream().map(storageLocationBase -> getStorageLocationBase(storageLocationBase))
+        return storageLocationBases.stream()
+                .map(this::getStorageLocationBase)
                 .collect(Collectors.toList());
     }
 
     private String getStorageLocationBase(StorageLocationBase location) {
-        return location.getValue()
-                .replace(FileSystemType.S3.getProtocol() + "://", "");
+        return location.getValue().replace(FileSystemType.S3.getProtocol() + "://", "");
     }
 }

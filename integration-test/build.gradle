@@ -119,13 +119,13 @@ dependencies {
 
   implementation group: 'xerces',              name: 'xercesImpl',            version: xerces
 
-  implementation(group: 'com.amazonaws',                 name: 'aws-java-sdk-core',              version: awsSdkVersion) {
+  implementation(group: 'software.amazon.awssdk',                 name: 'core',              version: awsSdkVersion) {
     exclude group: 'commons-logging'
   }
-  implementation group: 'com.amazonaws',                 name: 'aws-java-sdk-ec2',               version: awsSdkVersion
-  implementation group: 'com.amazonaws',                 name: 'aws-java-sdk-lambda',            version: awsSdkVersion
-  implementation group: 'com.amazonaws',                 name: 'aws-java-sdk-s3',                version: awsSdkVersion
-  implementation group: 'com.amazonaws',                 name: 'aws-java-sdk-cloudformation',    version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',                 name: 'ec2',               version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',                 name: 'lambda',            version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',                 name: 's3',                version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk',                 name: 'cloudformation',    version: awsSdkVersion
 
   implementation group: 'org.kohsuke', name: 'wordnet-random-name', version: '1.5'
   implementation group: 'com.google.code.gson',          name: 'gson',                           version: gsonVersion

@@ -13,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.ec2.model.DeleteSecurityGroupResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsResourceNameService;
@@ -30,6 +29,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.services.ec2.model.DeleteSecurityGroupResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsSecurityGroupResourceBuilderTest {
@@ -140,7 +141,7 @@ public class AwsSecurityGroupResourceBuilderTest {
                 .withParameters(Collections.emptyMap())
                 .build();
 
-        when(awsMethodExecutor.execute(any(), eq(null))).thenReturn(new DeleteSecurityGroupResult());
+        when(awsMethodExecutor.execute(any(), eq(null))).thenReturn(DeleteSecurityGroupResponse.builder().build());
 
         CloudResource actual = underTest.delete(awsContext, ac, resource, network);
 

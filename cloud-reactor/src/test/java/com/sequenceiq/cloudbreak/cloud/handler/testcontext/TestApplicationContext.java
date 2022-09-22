@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
@@ -165,7 +164,7 @@ public class TestApplicationContext {
 
     @Bean
     public CloudConnector cloudConnectors() throws Exception {
-        CloudResource resource = new Builder().withType(ResourceType.CLOUDFORMATION_STACK).withName("ref").build();
+        CloudResource resource = CloudResource.builder().withType(ResourceType.CLOUDFORMATION_STACK).withName("ref").build();
         when(cloudConnector.authentication()).thenReturn(authenticator);
         when(cloudConnector.credentials()).thenReturn(credentialConnector);
         when(credentialConnector.create(any(AuthenticatedContext.class))).thenReturn(new CloudCredentialStatus(null, CredentialStatus.CREATED));

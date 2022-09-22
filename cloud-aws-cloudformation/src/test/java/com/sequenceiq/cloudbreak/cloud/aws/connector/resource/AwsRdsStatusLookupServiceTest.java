@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,10 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import com.amazonaws.services.rds.model.DBInstance;
-import com.amazonaws.services.rds.model.DBInstanceNotFoundException;
-import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
-import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -35,6 +33,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificateType;
+
+import software.amazon.awssdk.services.rds.model.DBInstance;
+import software.amazon.awssdk.services.rds.model.DbInstanceNotFoundException;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesRequest;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -74,12 +77,6 @@ public class AwsRdsStatusLookupServiceTest {
     private AmazonRdsClient amazonRDS;
 
     @Mock
-    private DescribeDBInstancesResult describeDBInstancesResult;
-
-    @Mock
-    private DBInstance dbInstance;
-
-    @Mock
     private DatabaseStack dbStack;
 
     @Mock
@@ -100,11 +97,17 @@ public class AwsRdsStatusLookupServiceTest {
         when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
     }
 
+    private DescribeDbInstancesResponse createResponse(boolean deletionProtectionEnabled) {
+        return DescribeDbInstancesResponse.builder().dbInstances(DBInstance.builder().deletionProtection(deletionProtectionEnabled).build()).build();
+    }
+
+    private DescribeDbInstancesResponse createResponse(String dbInstanceStatus) {
+        return DescribeDbInstancesResponse.builder().dbInstances(DBInstance.builder().dbInstanceStatus(dbInstanceStatus).build()).build();
+    }
+
     @Test
     public void shouldLookupStartedExternalDatabaseStatus() {
-        when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenReturn(describeDBInstancesResult);
-        when(describeDBInstancesResult.getDBInstances()).thenReturn(List.of(dbInstance));
-        when(dbInstance.getDBInstanceStatus()).thenReturn(DB_INSTANCE_STATUS_STARTED);
+        when(amazonRDS.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenReturn(createResponse(DB_INSTANCE_STATUS_STARTED));
 
         ExternalDatabaseStatus result = victim.getStatus(authenticatedContext, dbStack);
 
@@ -113,9 +116,7 @@ public class AwsRdsStatusLookupServiceTest {
 
     @Test
     public void shouldLookupStoppedExternalDatabaseStatus() {
-        when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenReturn(describeDBInstancesResult);
-        when(describeDBInstancesResult.getDBInstances()).thenReturn(List.of(dbInstance));
-        when(dbInstance.getDBInstanceStatus()).thenReturn(DB_INSTANCE_STATUS_STOPPED);
+        when(amazonRDS.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenReturn(createResponse(DB_INSTANCE_STATUS_STOPPED));
 
         ExternalDatabaseStatus result = victim.getStatus(authenticatedContext, dbStack);
 
@@ -124,9 +125,7 @@ public class AwsRdsStatusLookupServiceTest {
 
     @Test
     public void shouldLookupUpdateInProgressExternalDatabaseStatus() {
-        when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenReturn(describeDBInstancesResult);
-        when(describeDBInstancesResult.getDBInstances()).thenReturn(List.of(dbInstance));
-        when(dbInstance.getDBInstanceStatus()).thenReturn(DB_INSTANCE_STATUS_ANY);
+        when(amazonRDS.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenReturn(createResponse(DB_INSTANCE_STATUS_ANY));
 
         ExternalDatabaseStatus result = victim.getStatus(authenticatedContext, dbStack);
 
@@ -135,7 +134,7 @@ public class AwsRdsStatusLookupServiceTest {
 
     @Test
     public void shouldReturnDeletedInCaseOfDBInstanceNotFoundException() {
-        when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenThrow(DBInstanceNotFoundException.class);
+        when(amazonRDS.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenThrow(DbInstanceNotFoundException.class);
 
         ExternalDatabaseStatus result = victim.getStatus(authenticatedContext, dbStack);
 
@@ -144,23 +143,15 @@ public class AwsRdsStatusLookupServiceTest {
 
     @Test()
     public void shouldThrowCloudConnectorExceptionInCaseOfAnyRuntimeException() {
-        when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenThrow(RuntimeException.class);
+        when(amazonRDS.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenThrow(RuntimeException.class);
 
         assertThrows(CloudConnectorException.class, () -> victim.getStatus(authenticatedContext, dbStack));
     }
 
     @Test
     public void isDeleteProtectionEnabledTest() {
-        when(describeDBInstancesResult.getDBInstances()).thenReturn(List.of(dbInstance));
-        when(dbInstance.getDeletionProtection()).thenReturn(true);
-
-        boolean result = victim.isDeleteProtectionEnabled(describeDBInstancesResult);
-        assertThat(result).isTrue();
-
-        when(dbInstance.getDeletionProtection()).thenReturn(false);
-
-        result = victim.isDeleteProtectionEnabled(describeDBInstancesResult);
-        assertThat(result).isFalse();
+        assertTrue(victim.isDeleteProtectionEnabled(createResponse(true)));
+        assertFalse(victim.isDeleteProtectionEnabled(createResponse(false)));
     }
 
     @Test
@@ -178,39 +169,40 @@ public class AwsRdsStatusLookupServiceTest {
 
     @Test
     void isDbStackExistOnProviderSideTestWhenNotNull() {
-        assertThat(victim.isDbStackExistOnProviderSide(describeDBInstancesResult)).isTrue();
+        assertTrue(victim.isDbStackExistOnProviderSide(DescribeDbInstancesResponse.builder().build()));
     }
 
     @Test
     void getDescribeDBInstancesResultForDeleteProtectionTestWhenSuccess() {
-        when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenReturn(describeDBInstancesResult);
+        DescribeDbInstancesResponse dbInstancesResponse = DescribeDbInstancesResponse.builder().build();
+        when(amazonRDS.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenReturn(dbInstancesResponse);
 
-        DescribeDBInstancesResult result = victim.getDescribeDBInstancesResultForDeleteProtection(authenticatedContext, dbStack);
+        DescribeDbInstancesResponse result = victim.getDescribeDBInstancesResponseForDeleteProtection(authenticatedContext, dbStack);
 
-        assertThat(result).isSameAs(describeDBInstancesResult);
+        assertEquals(result, dbInstancesResponse);
     }
 
     @Test
     void getDescribeDBInstancesResultForDeleteProtectionTestWhenDBInstanceNotFoundException() {
-        when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenThrow(DBInstanceNotFoundException.class);
+        when(amazonRDS.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenThrow(DbInstanceNotFoundException.class);
 
-        DescribeDBInstancesResult result = victim.getDescribeDBInstancesResultForDeleteProtection(authenticatedContext, dbStack);
+        DescribeDbInstancesResponse result = victim.getDescribeDBInstancesResponseForDeleteProtection(authenticatedContext, dbStack);
 
-        assertThat(result).isNull();
+        assertNull(result);
     }
 
     @Test
     void getDescribeDBInstancesResultForDeleteProtectionTestWhenRuntimeExceptionThenThrowCloudConnectorException() {
-        when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenThrow(RuntimeException.class);
+        when(amazonRDS.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenThrow(RuntimeException.class);
 
-        assertThrows(CloudConnectorException.class, () -> victim.getDescribeDBInstancesResultForDeleteProtection(authenticatedContext, dbStack));
+        assertThrows(CloudConnectorException.class, () -> victim.getDescribeDBInstancesResponseForDeleteProtection(authenticatedContext, dbStack));
     }
 
     @Test
     void getActiveSslRootCertificateTestWhenSuccess() {
-        when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenReturn(describeDBInstancesResult);
-        when(describeDBInstancesResult.getDBInstances()).thenReturn(List.of(dbInstance));
-        when(dbInstance.getCACertificateIdentifier()).thenReturn(CA_CERTIFICATE_IDENTIFIER);
+        DescribeDbInstancesResponse response = DescribeDbInstancesResponse.builder()
+                .dbInstances(DBInstance.builder().caCertificateIdentifier(CA_CERTIFICATE_IDENTIFIER).build()).build();
+        when(amazonRDS.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenReturn(response);
 
         CloudDatabaseServerSslCertificate result = victim.getActiveSslRootCertificate(authenticatedContext, dbStack);
 
@@ -221,7 +213,7 @@ public class AwsRdsStatusLookupServiceTest {
 
     @Test
     void getActiveSslRootCertificateTestWhenDBInstanceNotFoundException() {
-        when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenThrow(DBInstanceNotFoundException.class);
+        when(amazonRDS.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenThrow(DbInstanceNotFoundException.class);
 
         CloudDatabaseServerSslCertificate result = victim.getActiveSslRootCertificate(authenticatedContext, dbStack);
 
@@ -230,7 +222,7 @@ public class AwsRdsStatusLookupServiceTest {
 
     @Test
     void getActiveSslRootCertificateTestTestWhenRuntimeExceptionThenThrowCloudConnectorException() {
-        when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenThrow(RuntimeException.class);
+        when(amazonRDS.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenThrow(RuntimeException.class);
 
         assertThrows(CloudConnectorException.class, () -> victim.getActiveSslRootCertificate(authenticatedContext, dbStack));
     }

@@ -1,25 +1,23 @@
 package com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor;
 
-import org.springframework.stereotype.Component;
+import software.amazon.awssdk.core.waiters.WaiterAcceptor;
+import software.amazon.awssdk.core.waiters.WaiterState;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 
-import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
-import com.amazonaws.waiters.WaiterAcceptor;
-import com.amazonaws.waiters.WaiterState;
-
-@Component
-public class DescribeDbInstanceForModifySuccessAcceptor extends WaiterAcceptor<DescribeDBInstancesResult> {
+public class DescribeDbInstanceForModifySuccessAcceptor implements WaiterAcceptor<DescribeDbInstancesResponse> {
 
     @Override
-    public boolean matches(DescribeDBInstancesResult describeDBInstancesResult) {
-        return describeDBInstancesResult.getDBInstances().stream()
+    public WaiterState waiterState() {
+        return WaiterState.SUCCESS;
+    }
+
+    @Override
+    public boolean matches(DescribeDbInstancesResponse response) {
+        return response.dbInstances().stream()
                 .allMatch(instance ->
-                        "available".equals(instance.getDBInstanceStatus())
-                                || "stopped".equals(instance.getDBInstanceStatus())
+                        "available".equals(instance.dbInstanceStatus())
+                                || "stopped".equals(instance.dbInstanceStatus())
                 );
     }
 
-    @Override
-    public WaiterState getState() {
-        return WaiterState.SUCCESS;
-    }
 }

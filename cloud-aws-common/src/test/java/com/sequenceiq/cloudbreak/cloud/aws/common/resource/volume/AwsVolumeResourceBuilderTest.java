@@ -38,15 +38,6 @@ import org.mockito.quality.Strictness;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.util.Pair;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.ec2.model.AmazonEC2Exception;
-import com.amazonaws.services.ec2.model.CreateVolumeRequest;
-import com.amazonaws.services.ec2.model.CreateVolumeResult;
-import com.amazonaws.services.ec2.model.DescribeVolumesResult;
-import com.amazonaws.services.ec2.model.ModifyInstanceAttributeRequest;
-import com.amazonaws.services.ec2.model.Tag;
-import com.amazonaws.services.ec2.model.TagSpecification;
-import com.amazonaws.services.ec2.model.VolumeState;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -78,6 +69,18 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AwsDiskType;
+
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.ec2.model.CreateVolumeRequest;
+import software.amazon.awssdk.services.ec2.model.CreateVolumeResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
+import software.amazon.awssdk.services.ec2.model.Ec2Exception;
+import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeRequest;
+import software.amazon.awssdk.services.ec2.model.Tag;
+import software.amazon.awssdk.services.ec2.model.TagSpecification;
+import software.amazon.awssdk.services.ec2.model.VolumeState;
+import software.amazon.awssdk.services.ec2.model.VolumeType;
 
 @ExtendWith({MockitoExtension.class})
 class AwsVolumeResourceBuilderTest {
@@ -114,7 +117,7 @@ class AwsVolumeResourceBuilderTest {
 
     private static final Map<String, String> TAGS = Map.ofEntries(entry("key1", "value1"), entry("key2", "value2"));
 
-    private static final Collection<Tag> EC2_TAGS = List.of(new Tag("ec2_key", "ec2_value"));
+    private static final Collection<Tag> EC2_TAGS = List.of(Tag.builder().key("ec2_key").value("ec2_value").build());
 
     private static final String SNAPSHOT_ID = "snapshotId";
 
@@ -369,7 +372,7 @@ class AwsVolumeResourceBuilderTest {
         VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
         when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
                 .thenReturn(Pair.of(List.of(VOLUME_ID), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
-        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult(VolumeState.InUse));
+        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult(VolumeState.IN_USE));
         when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
         when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
         when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.TRUE);
@@ -379,7 +382,7 @@ class AwsVolumeResourceBuilderTest {
         verify(amazonEC2Client).modifyInstanceAttribute(modifyInstanceAttributeRequestCaptor.capture());
         ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = modifyInstanceAttributeRequestCaptor.getValue();
 
-        assertTrue(modifyInstanceAttributeRequest.getBlockDeviceMappings().get(0).getEbs().getDeleteOnTermination());
+        assertTrue(modifyInstanceAttributeRequest.blockDeviceMappings().get(0).ebs().deleteOnTermination());
     }
 
     @Test
@@ -390,7 +393,7 @@ class AwsVolumeResourceBuilderTest {
 
         when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
                 .thenReturn(Pair.of(List.of(VOLUME_ID), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
-        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult(VolumeState.Available));
+        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult(VolumeState.AVAILABLE));
         when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
         when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
         when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.TRUE);
@@ -400,7 +403,7 @@ class AwsVolumeResourceBuilderTest {
         verify(amazonEC2Client).modifyInstanceAttribute(modifyInstanceAttributeRequestCaptor.capture());
         ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = modifyInstanceAttributeRequestCaptor.getValue();
 
-        assertTrue(modifyInstanceAttributeRequest.getBlockDeviceMappings().get(0).getEbs().getDeleteOnTermination());
+        assertTrue(modifyInstanceAttributeRequest.blockDeviceMappings().get(0).ebs().deleteOnTermination());
     }
 
     @Test
@@ -411,8 +414,10 @@ class AwsVolumeResourceBuilderTest {
 
         when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
                 .thenReturn(Pair.of(List.of(VOLUME_ID), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
-        AmazonServiceException deleted = new AmazonEC2Exception("");
-        deleted.setErrorCode("InvalidVolume.NotFound");
+        AwsServiceException deleted = Ec2Exception.builder()
+                .message("")
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode("InvalidVolume.NotFound").build())
+                .build();
         when(amazonEC2Client.describeVolumes(any())).thenThrow(deleted);
         when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
         when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
@@ -423,7 +428,7 @@ class AwsVolumeResourceBuilderTest {
         verify(amazonEC2Client).modifyInstanceAttribute(modifyInstanceAttributeRequestCaptor.capture());
         ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = modifyInstanceAttributeRequestCaptor.getValue();
 
-        assertTrue(modifyInstanceAttributeRequest.getBlockDeviceMappings().get(0).getEbs().getDeleteOnTermination());
+        assertTrue(modifyInstanceAttributeRequest.blockDeviceMappings().get(0).ebs().deleteOnTermination());
     }
 
     @Test()
@@ -433,7 +438,7 @@ class AwsVolumeResourceBuilderTest {
         VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
         when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
                 .thenReturn(Pair.of(List.of(VOLUME_ID), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
-        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult(VolumeState.InUse));
+        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult(VolumeState.IN_USE));
         when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
         when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
         when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.FALSE);
@@ -443,7 +448,7 @@ class AwsVolumeResourceBuilderTest {
         verify(amazonEC2Client).modifyInstanceAttribute(modifyInstanceAttributeRequestCaptor.capture());
         ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = modifyInstanceAttributeRequestCaptor.getValue();
 
-        assertTrue(!modifyInstanceAttributeRequest.getBlockDeviceMappings().get(0).getEbs().getDeleteOnTermination());
+        assertTrue(!modifyInstanceAttributeRequest.blockDeviceMappings().get(0).ebs().deleteOnTermination());
     }
 
     @Test()
@@ -453,7 +458,7 @@ class AwsVolumeResourceBuilderTest {
         VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
         when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
                 .thenReturn(Pair.of(List.of(VOLUME_ID), List.of()));
-        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult(VolumeState.InUse));
+        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult(VolumeState.IN_USE));
         when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
         when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
         when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.FALSE);
@@ -509,14 +514,15 @@ class AwsVolumeResourceBuilderTest {
                 .build();
     }
 
-    private CreateVolumeResult createCreateVolumeResult() {
-        return new CreateVolumeResult().withVolume(new com.amazonaws.services.ec2.model.Volume().withVolumeId(VOLUME_ID));
+    private CreateVolumeResponse createCreateVolumeResult() {
+        return CreateVolumeResponse.builder().volumeId(VOLUME_ID).build();
     }
 
-    private DescribeVolumesResult describeVolumesResult(VolumeState state) {
-        com.amazonaws.services.ec2.model.Volume volume = new com.amazonaws.services.ec2.model.Volume();
-        volume.setState(state);
-        return new DescribeVolumesResult().withVolumes(List.of(volume));
+    private DescribeVolumesResponse describeVolumesResult(VolumeState state) {
+        software.amazon.awssdk.services.ec2.model.Volume volume = software.amazon.awssdk.services.ec2.model.Volume.builder()
+                .state(state)
+                .build();
+        return DescribeVolumesResponse.builder().volumes(List.of(volume)).build();
     }
 
     private List<VolumeSetAttributes.Volume> verifyResultAndGetVolumes(List<CloudResource> result) {
@@ -544,20 +550,20 @@ class AwsVolumeResourceBuilderTest {
         verify(amazonEC2Client).createVolume(createVolumeRequestCaptor.capture());
         CreateVolumeRequest createVolumeRequest = createVolumeRequestCaptor.getValue();
         assertThat(createVolumeRequest).isNotNull();
-        assertThat(createVolumeRequest.getAvailabilityZone()).isEqualTo(AVAILABILITY_ZONE);
-        assertThat(createVolumeRequest.getSize()).isEqualTo(VOLUME_SIZE);
-        assertThat(createVolumeRequest.getSnapshotId()).isEqualTo(expectedSnapshotId);
-        assertThat(createVolumeRequest.getVolumeType()).isEqualTo(TYPE_GP2);
-        assertThat(createVolumeRequest.getEncrypted()).isEqualTo(expectedEncrypted);
-        assertThat(createVolumeRequest.getKmsKeyId()).isEqualTo(expectedKmsKeyId);
+        assertThat(createVolumeRequest.availabilityZone()).isEqualTo(AVAILABILITY_ZONE);
+        assertThat(createVolumeRequest.size()).isEqualTo(VOLUME_SIZE);
+        assertThat(createVolumeRequest.snapshotId()).isEqualTo(expectedSnapshotId);
+        assertThat(createVolumeRequest.volumeType()).isEqualTo(VolumeType.GP2);
+        assertThat(createVolumeRequest.encrypted()).isEqualTo(expectedEncrypted);
+        assertThat(createVolumeRequest.kmsKeyId()).isEqualTo(expectedKmsKeyId);
 
-        List<TagSpecification> tagSpecifications = createVolumeRequest.getTagSpecifications();
+        List<TagSpecification> tagSpecifications = createVolumeRequest.tagSpecifications();
         assertThat(tagSpecifications).isNotNull();
         assertThat(tagSpecifications).hasSize(1);
         TagSpecification tagSpecification = tagSpecifications.get(0);
         assertThat(tagSpecification).isNotNull();
-        assertThat(tagSpecification.getResourceType()).isEqualTo(com.amazonaws.services.ec2.model.ResourceType.Volume.toString());
-        assertThat(tagSpecification.getTags()).isEqualTo(EC2_TAGS);
+        assertThat(tagSpecification.resourceType()).isEqualTo(software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME);
+        assertThat(tagSpecification.tags()).isEqualTo(EC2_TAGS);
     }
 
     private GroupNetwork createGroupNetwork() {

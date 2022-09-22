@@ -11,9 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.elasticloadbalancingv2.model.DeleteListenerRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DeleteListenerResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
@@ -25,6 +22,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteListenerRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteListenerResponse;
 
 @Service
 public class AwsNativeLoadBalancerListenerResourceBuilder extends AbstractAwsNativeComputeBuilder {
@@ -56,20 +57,20 @@ public class AwsNativeLoadBalancerListenerResourceBuilder extends AbstractAwsNat
                 resource.getReference(),
                 resource.getInstanceId());
         AmazonElasticLoadBalancingClient loadBalancingClient = context.getLoadBalancingClient();
-        DeleteListenerRequest deleteListenerRequest = new DeleteListenerRequest()
-                .withListenerArn(resource.getReference());
-        DeleteListenerResult deleteResult = null;
+        DeleteListenerRequest deleteListenerRequest = DeleteListenerRequest.builder().listenerArn(resource.getReference()).build();
+        DeleteListenerResponse deleteResponse = null;
         try {
-            deleteResult = awsMethodExecutor.execute(() -> loadBalancingClient.deleteListener(deleteListenerRequest), null);
-        } catch (AmazonServiceException awsException) {
-            if (StringUtils.isNotEmpty(awsException.getErrorCode()) && LISTENER_NOT_FOUND_ERROR_CODE.equals(awsException.getErrorCode())) {
+            deleteResponse = awsMethodExecutor.execute(() -> loadBalancingClient.deleteListener(deleteListenerRequest), null);
+        } catch (AwsServiceException awsException) {
+            if (StringUtils.isNotEmpty(awsException.awsErrorDetails().errorCode()) &&
+                    LISTENER_NOT_FOUND_ERROR_CODE.equals(awsException.awsErrorDetails().errorCode())) {
                 LOGGER.info("Listener doesn't exist with id: '{}'", resource.getReference());
             } else {
                 LOGGER.warn("Listener could not be fetched from AWS with id: '{}'", resource.getReference(), awsException);
                 throw awsException;
             }
         }
-        return deleteResult != null ? resource : null;
+        return deleteResponse != null ? resource : null;
     }
 
     @Override

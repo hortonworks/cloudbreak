@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.AmazonClientException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsConfusedDeputyException;
@@ -38,6 +37,8 @@ import com.sequenceiq.cloudbreak.cloud.response.AwsCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.experience.PolicyServiceName;
 import com.sequenceiq.common.model.CredentialType;
+
+import software.amazon.awssdk.core.exception.SdkException;
 
 @Service
 public class AwsCredentialConnector implements CredentialConnector {
@@ -189,7 +190,7 @@ public class AwsCredentialConnector implements CredentialConnector {
         try {
             credentialClient.retrieveSessionCredentials(awsCredential);
             credentialStatus = verifyCredentialsPermission(awsCredential, servicesWithPolicies);
-        } catch (AmazonClientException ae) {
+        } catch (SdkException ae) {
             String errorMessage = getErrorMessageForAwsClientException(awsCredential, ae);
             LOGGER.warn(errorMessage, ae);
             credentialStatus = new CDPServicePolicyVerificationResponses(getServiceStatus(services, errorMessage));
@@ -234,7 +235,7 @@ public class AwsCredentialConnector implements CredentialConnector {
             checkRoleIsAssumableWithoutExternalId(credentialVerificationContext, awsCredential);
             credentialStatus = verifyCredentialsPermission(cloudCredential, awsCredential, credentialStatus);
             credentialStatus = determineDefaultRegion(cloudCredential, credentialStatus);
-        } catch (AmazonClientException ae) {
+        } catch (SdkException ae) {
             String errorMessage = getErrorMessageForAwsClientException(awsCredential, ae);
             LOGGER.warn(errorMessage, ae);
             credentialStatus = new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
@@ -303,7 +304,7 @@ public class AwsCredentialConnector implements CredentialConnector {
         return credentialStatus;
     }
 
-    private String getErrorMessageForAwsClientException(AwsCredentialView awsCredential, AmazonClientException ae) {
+    private String getErrorMessageForAwsClientException(AwsCredentialView awsCredential, SdkException ae) {
         String errorMessage = String.format("Unable to verify AWS credential due to: '%s'", ae.getMessage());
         if (ae.getMessage().contains("Unable to load AWS credentials")) {
             errorMessage = String.format("Unable to load AWS credentials: please make sure that you configured your assumer %s and %s to deployer.",
@@ -324,7 +325,7 @@ public class AwsCredentialConnector implements CredentialConnector {
             if (defaultRegionChanged) {
                 credentialStatus = new CloudCredentialStatus(credentialStatus, defaultRegionChanged);
             }
-        } catch (AmazonClientException ae) {
+        } catch (SdkException ae) {
             String errorMessage = "Unable to verify AWS credentials: "
                     + "please make sure the access key and secret key is correct. "
                     + ae.getMessage();
@@ -350,7 +351,7 @@ public class AwsCredentialConnector implements CredentialConnector {
                         "or re-create the role with external id configured in the create role wizard.", roleArn);
                 LOGGER.warn(message);
                 throw new AwsConfusedDeputyException(message);
-            } catch (AmazonClientException ae) {
+            } catch (SdkException ae) {
                 if (ae.getMessage().contains(ROLE_IS_NOT_ASSUMABLE_ERROR_MESSAGE_INDICATOR)) {
                     String msg = String.format("Consider the specified role as secured. " +
                             "CDP Control Pane is not authorized to perform sts:AssumeRole on '%s' role without external Id.", roleArn);

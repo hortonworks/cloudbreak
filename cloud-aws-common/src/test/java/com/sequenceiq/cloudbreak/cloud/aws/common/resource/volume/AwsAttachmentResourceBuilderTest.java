@@ -20,8 +20,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.task.AsyncTaskExecutor;
 
-import com.amazonaws.services.ec2.model.DescribeVolumesResult;
-import com.amazonaws.services.ec2.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
@@ -37,6 +35,9 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
+import software.amazon.awssdk.services.ec2.model.Volume;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsAttachmentResourceBuilderTest {
@@ -65,8 +66,9 @@ public class AwsAttachmentResourceBuilderTest {
                 .withInstanceId("instanceid").withParameters(Map.of(ATTRIBUTES, volumeSetAttributes)).build();
         buildableResource.add(volumeResource);
         AmazonEc2Client amazonEc2Client = mock(AmazonEc2Client.class);
-        DescribeVolumesResult describeVolumesResult = new DescribeVolumesResult();
-        describeVolumesResult.setVolumes(List.of(new Volume().withVolumeId("vol1"), new Volume().withVolumeId("vol2")));
+        DescribeVolumesResponse describeVolumesResult = DescribeVolumesResponse.builder()
+                .volumes(Volume.builder().volumeId("vol1").build(), Volume.builder().volumeId("vol2").build())
+                .build();
         when(amazonEc2Client.describeVolumes(any())).thenReturn(describeVolumesResult);
         when(awsClient.createEc2Client(any(), any())).thenReturn(amazonEc2Client);
         Future future = mock(Future.class);
@@ -91,8 +93,9 @@ public class AwsAttachmentResourceBuilderTest {
                 .withInstanceId("instanceid").withParameters(Map.of(ATTRIBUTES, volumeSetAttributes)).build();
         buildableResource.add(volumeResource);
         AmazonEc2Client amazonEc2Client = mock(AmazonEc2Client.class);
-        DescribeVolumesResult describeVolumesResult = new DescribeVolumesResult();
-        describeVolumesResult.setVolumes(List.of(new Volume().withVolumeId("vol1")));
+        DescribeVolumesResponse describeVolumesResult = DescribeVolumesResponse.builder()
+                .volumes(Volume.builder().volumeId("vol1").build())
+                .build();
         when(amazonEc2Client.describeVolumes(any())).thenReturn(describeVolumesResult);
         when(awsClient.createEc2Client(any(), any())).thenReturn(amazonEc2Client);
         Future future = mock(Future.class);
@@ -105,7 +108,7 @@ public class AwsAttachmentResourceBuilderTest {
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         CloudbreakServiceException runtimeException = Assertions.assertThrows(CloudbreakServiceException.class,
                 () -> awsAttachmentResourceBuilder.build(mock(AwsContext.class), null, 1L, authenticatedContext,
-                mock(Group.class), buildableResource, null));
+                        mock(Group.class), buildableResource, null));
         assertEquals("Volume attachment were unsuccessful. " + errorMessage, runtimeException.getMessage());
     }
 

@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
@@ -98,7 +97,7 @@ public class AzureSetup implements Setup {
     @Override
     public void prerequisites(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier persistenceNotifier) {
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
-        CloudResource cloudResource = new Builder().withType(ResourceType.ARM_TEMPLATE).withName(resourceGroupName).build();
+        CloudResource cloudResource = CloudResource.builder().withType(ResourceType.ARM_TEMPLATE).withName(resourceGroupName).build();
         String region = ac.getCloudContext().getLocation().getRegion().value();
         try {
             AzureClient client = ac.getParameter(AzureClient.class);

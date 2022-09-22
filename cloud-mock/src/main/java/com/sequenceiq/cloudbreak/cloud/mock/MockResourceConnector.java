@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -111,13 +110,13 @@ public class MockResourceConnector implements ResourceConnector {
 
     private List<CloudResourceStatus> oldLaunchDbImpl(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier) {
         List<CloudResource> cloudResources = List.of(
-                new Builder()
+                CloudResource.builder()
                         .withType(ResourceType.RDS_HOSTNAME)
                         .withStatus(CommonStatus.CREATED)
                         .withName(MOCK_RDS_HOST)
                         .withPersistent(true)
                         .build(),
-                new Builder()
+                CloudResource.builder()
                         .withType(ResourceType.RDS_PORT)
                         .withStatus(CommonStatus.CREATED)
                         .withName(MOCK_RDS_PORT)
@@ -246,7 +245,7 @@ public class MockResourceConnector implements ResourceConnector {
     }
 
     private CloudResource generateResource(String name, CloudInstance cloudInstance, String instanceId, ResourceType type) {
-        CloudResource resource = new Builder()
+        CloudResource resource = CloudResource.builder()
                 .withType(type)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup(cloudInstance.getTemplate().getGroupName())

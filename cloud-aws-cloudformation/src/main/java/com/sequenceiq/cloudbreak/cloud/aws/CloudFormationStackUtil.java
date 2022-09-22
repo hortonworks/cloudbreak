@@ -19,32 +19,11 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SdkClientException;
-import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
-import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
-import com.amazonaws.services.autoscaling.model.Instance;
-import com.amazonaws.services.cloudformation.model.DescribeStackResourceRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStackResourceResult;
-import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.model.Output;
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.elasticfilesystem.model.DescribeFileSystemsRequest;
-import com.amazonaws.services.elasticfilesystem.model.DescribeFileSystemsResult;
-import com.amazonaws.services.elasticfilesystem.model.FileSystemDescription;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetHealthResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
-import com.amazonaws.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.RegisterTargetsResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.TargetDescription;
-import com.amazonaws.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
@@ -65,12 +44,34 @@ import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
+import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsResponse;
+import software.amazon.awssdk.services.autoscaling.model.Instance;
+import software.amazon.awssdk.services.autoscaling.model.LifecycleState;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourceRequest;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourceResponse;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStacksRequest;
+import software.amazon.awssdk.services.cloudformation.model.Output;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.efs.model.DescribeFileSystemsRequest;
+import software.amazon.awssdk.services.efs.model.DescribeFileSystemsResponse;
+import software.amazon.awssdk.services.efs.model.FileSystemDescription;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetDescription;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetHealthDescription;
+
 @Service
 public class CloudFormationStackUtil {
 
     private static final Logger LOGGER = getLogger(CloudFormationStackUtil.class);
-
-    private static final String INSTANCE_LIFECYCLE_IN_SERVICE = "InService";
 
     @Value("${cb.max.aws.resource.name.length:}")
     private int maxResourceNameLength;
@@ -98,18 +99,19 @@ public class CloudFormationStackUtil {
     )
     public String getAutoscalingGroupName(AuthenticatedContext ac, AmazonCloudFormationClient amazonCFClient, String instanceGroup) {
         String cFStackName = getCfStackName(ac);
-        DescribeStackResourceResult asGroupResource = amazonCFClient.describeStackResource(new DescribeStackResourceRequest()
-                .withStackName(cFStackName)
-                .withLogicalResourceId(String.format("AmbariNodes%s", instanceGroup.replaceAll("_", ""))));
-        return asGroupResource.getStackResourceDetail().getPhysicalResourceId();
+        DescribeStackResourceResponse asGroupResource = amazonCFClient.describeStackResource(DescribeStackResourceRequest.builder()
+                .stackName(cFStackName)
+                .logicalResourceId(String.format("AmbariNodes%s", instanceGroup.replaceAll("_", "")))
+                .build());
+        return asGroupResource.stackResourceDetail().physicalResourceId();
     }
 
     public Map<String, String> getOutputs(String cFStackName, AmazonCloudFormationClient client) {
-        DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
+        DescribeStacksRequest describeStacksRequest = DescribeStacksRequest.builder().stackName(cFStackName).build();
         String outputNotFound = String.format("Couldn't get Cloudformation stack's('%s') output", cFStackName);
-        List<Output> cfStackOutputs = client.describeStacks(describeStacksRequest).getStacks()
-                .stream().findFirst().orElseThrow(getCloudConnectorExceptionSupplier(outputNotFound)).getOutputs();
-        return cfStackOutputs.stream().collect(Collectors.toMap(Output::getOutputKey, Output::getOutputValue));
+        List<Output> cfStackOutputs = client.describeStacks(describeStacksRequest).stacks()
+                .stream().findFirst().orElseThrow(getCloudConnectorExceptionSupplier(outputNotFound)).outputs();
+        return cfStackOutputs.stream().collect(Collectors.toMap(Output::outputKey, Output::outputValue));
     }
 
     private Supplier<CloudConnectorException> getCloudConnectorExceptionSupplier(String msg) {
@@ -174,26 +176,26 @@ public class CloudFormationStackUtil {
     }
 
     public Map<Group, List<String>> getInstanceIdsByGroups(AmazonAutoScalingClient amazonASClient, Map<String, Group> groupNameMapping) {
-        DescribeAutoScalingGroupsResult result = amazonASClient
-                .describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(groupNameMapping.keySet()));
-        return result.getAutoScalingGroups().stream()
+        DescribeAutoScalingGroupsResponse result = amazonASClient
+                .describeAutoScalingGroups(DescribeAutoScalingGroupsRequest.builder().autoScalingGroupNames(groupNameMapping.keySet()).build());
+        return result.autoScalingGroups().stream()
                 .collect(Collectors.toMap(
-                        ag -> groupNameMapping.get(ag.getAutoScalingGroupName()),
-                        ag -> ag.getInstances().stream()
-                                .filter(instance -> INSTANCE_LIFECYCLE_IN_SERVICE.equals(instance.getLifecycleState()))
-                                .map(Instance::getInstanceId)
+                        ag -> groupNameMapping.get(ag.autoScalingGroupName()),
+                        ag -> ag.instances().stream()
+                                .filter(instance ->  LifecycleState.IN_SERVICE == instance.lifecycleState())
+                                .map(Instance::instanceId)
                                 .collect(Collectors.toList())));
     }
 
     public List<String> getInstanceIds(AmazonAutoScalingClient amazonASClient, String asGroupName) {
-        DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = amazonASClient
-                .describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(asGroupName));
+        DescribeAutoScalingGroupsResponse describeAutoScalingGroupsResponse = amazonASClient
+                .describeAutoScalingGroups(DescribeAutoScalingGroupsRequest.builder().autoScalingGroupNames(asGroupName).build());
         List<String> instanceIds = new ArrayList<>();
-        if (!describeAutoScalingGroupsResult.getAutoScalingGroups().isEmpty()
-                && describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances() != null) {
-            for (Instance instance : describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances()) {
-                if (INSTANCE_LIFECYCLE_IN_SERVICE.equals(instance.getLifecycleState())) {
-                    instanceIds.add(instance.getInstanceId());
+        if (!describeAutoScalingGroupsResponse.autoScalingGroups().isEmpty()
+                && describeAutoScalingGroupsResponse.autoScalingGroups().get(0).instances() != null) {
+            for (Instance instance : describeAutoScalingGroupsResponse.autoScalingGroups().get(0).instances()) {
+                if (LifecycleState.IN_SERVICE == instance.lifecycleState()) {
+                    instanceIds.add(instance.instanceId());
                 }
             }
         }
@@ -201,7 +203,7 @@ public class CloudFormationStackUtil {
     }
 
     public DescribeInstancesRequest createDescribeInstancesRequest(Collection<String> instanceIds) {
-        return new DescribeInstancesRequest().withInstanceIds(instanceIds);
+        return DescribeInstancesRequest.builder().instanceIds(instanceIds).build();
     }
 
     public LoadBalancer getLoadBalancerByLogicalId(AuthenticatedContext ac, String logicalId) {
@@ -211,10 +213,11 @@ public class CloudFormationStackUtil {
 
         String loadBalancerArn = getResourceArnByLogicalId(ac, logicalId, region);
 
-        DescribeLoadBalancersResult loadBalancersResult = amazonElbClient.describeLoadBalancers(new DescribeLoadBalancersRequest()
-                .withLoadBalancerArns(Collections.singletonList(loadBalancerArn)));
+        DescribeLoadBalancersResponse loadBalancersResponse = amazonElbClient.describeLoadBalancers(DescribeLoadBalancersRequest.builder()
+                .loadBalancerArns(Collections.singletonList(loadBalancerArn))
+                .build());
 
-        return loadBalancersResult.getLoadBalancers().get(0);
+        return loadBalancersResponse.loadBalancers().get(0);
     }
 
     public void addLoadBalancerTargets(AuthenticatedContext ac, CloudLoadBalancer loadBalancer, List<CloudResource> resourcesToAdd) {
@@ -231,13 +234,14 @@ public class CloudFormationStackUtil {
             String targetGroupArn = getResourceArnByLogicalId(ac, AwsTargetGroup.getTargetGroupName(entry.getKey().getTrafficPort(), scheme), region);
 
             // Use ARN to fetch a list of current targets
-            DescribeTargetHealthResult targetHealthResult = amazonElbClient.describeTargetHealth(new DescribeTargetHealthRequest()
-                    .withTargetGroupArn(targetGroupArn));
-            List<TargetDescription> targetDescriptions = targetHealthResult.getTargetHealthDescriptions().stream()
-                    .map(TargetHealthDescription::getTarget)
+            DescribeTargetHealthResponse targetHealthResponse = amazonElbClient.describeTargetHealth(DescribeTargetHealthRequest.builder()
+                    .targetGroupArn(targetGroupArn)
+                    .build());
+            List<TargetDescription> targetDescriptions = targetHealthResponse.targetHealthDescriptions().stream()
+                    .map(TargetHealthDescription::target)
                     .collect(Collectors.toList());
             Set<String> alreadyRegisteredInstanceIds = targetDescriptions.stream()
-                    .map(TargetDescription::getId)
+                    .map(TargetDescription::id)
                     .collect(Collectors.toSet());
 
             // Remove any targets that have already been registered from the list being processed
@@ -246,11 +250,12 @@ public class CloudFormationStackUtil {
             // Register any new instances
             if (!updatedInstanceIds.isEmpty()) {
                 List<TargetDescription> targetsToAdd = updatedInstanceIds.stream()
-                        .map(instanceId -> new TargetDescription().withId(instanceId))
+                        .map(instanceId -> TargetDescription.builder().id(instanceId).build())
                         .collect(Collectors.toList());
-                RegisterTargetsResult registerTargetsResult = amazonElbClient.registerTargets(new RegisterTargetsRequest()
-                        .withTargetGroupArn(targetGroupArn)
-                        .withTargets(targetsToAdd));
+                RegisterTargetsResponse registerTargetsResponse = amazonElbClient.registerTargets(RegisterTargetsRequest.builder()
+                        .targetGroupArn(targetGroupArn)
+                        .targets(targetsToAdd)
+                        .build());
             }
         }
     }
@@ -260,26 +265,27 @@ public class CloudFormationStackUtil {
         AmazonEfsClient amazonEfsClient =
                 awsClient.createElasticFileSystemClient(new AwsCredentialView(ac.getCloudCredential()), region);
 
-        DescribeFileSystemsResult efsResult = amazonEfsClient.describeFileSystems(new DescribeFileSystemsRequest()
-                .withFileSystemId(fileSystemId));
+        DescribeFileSystemsResponse efsResponse = amazonEfsClient.describeFileSystems(DescribeFileSystemsRequest.builder()
+                .fileSystemId(fileSystemId)
+                .build());
 
-        return efsResult.getFileSystems().get(0);
+        return efsResponse.fileSystems().get(0);
     }
 
     public boolean isCfStackExists(AmazonCloudFormationClient cfClient, String stackName) {
         try {
-            cfClient.describeStacks(new DescribeStacksRequest().withStackName(stackName));
+            cfClient.describeStacks(DescribeStacksRequest.builder().stackName(stackName).build());
             LOGGER.debug("CF stack exists with name: {}", stackName);
             return true;
-        } catch (AmazonServiceException e) {
-            if (e.getErrorMessage().contains(stackName + " does not exist")) {
+        } catch (AwsServiceException e) {
+            if (e.awsErrorDetails().errorMessage().contains(stackName + " does not exist")) {
                 LOGGER.debug("CF stack does not exist with name: {}", stackName);
                 return false;
-            } else if (AmazonServiceException.ErrorType.Client.equals(e.getErrorType())) {
-                LOGGER.error("Cannot describe the CF stack. {}", e.getErrorMessage(), e);
+            } else if (HttpStatus.valueOf(e.statusCode()).is4xxClientError()) {
+                LOGGER.error("Cannot describe the CF stack. {}", e.awsErrorDetails().errorMessage(), e);
                 throw e;
             }
-            throw new Retry.ActionFailedException(e.getMessage());
+            throw new Retry.ActionFailedException(e.getMessage(), e);
         }
     }
 
@@ -297,9 +303,10 @@ public class CloudFormationStackUtil {
         String cFStackName = getCfStackName(ac);
         AmazonCloudFormationClient amazonCfClient =
                 awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()), region);
-        DescribeStackResourceResult result = amazonCfClient.describeStackResource(new DescribeStackResourceRequest()
-                .withStackName(cFStackName)
-                .withLogicalResourceId(logicalId));
-        return result.getStackResourceDetail().getPhysicalResourceId();
+        DescribeStackResourceResponse result = amazonCfClient.describeStackResource(DescribeStackResourceRequest.builder()
+                .stackName(cFStackName)
+                .logicalResourceId(logicalId)
+                .build());
+        return result.stackResourceDetail().physicalResourceId();
     }
 }

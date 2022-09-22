@@ -17,12 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.waiters.AmazonCloudFormationWaiters;
-import com.amazonaws.waiters.Waiter;
-import com.amazonaws.waiters.WaiterParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
@@ -38,6 +32,13 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.service.Retry;
+
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.waiters.WaiterOverrideConfiguration;
+import software.amazon.awssdk.services.cloudformation.model.DeleteStackRequest;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStacksRequest;
+import software.amazon.awssdk.services.cloudformation.waiters.CloudFormationWaiter;
 
 public class AwsRdsTerminateServiceTest {
 
@@ -75,16 +76,10 @@ public class AwsRdsTerminateServiceTest {
     private Region region;
 
     @Mock
-    private DeleteStackRequest deleteStackRequest;
-
-    @Mock
     private AmazonCloudFormationClient amazonCloudFormationClient;
 
     @Mock
-    private AmazonCloudFormationWaiters amazonCloudFormationWaiters;
-
-    @Mock
-    private Waiter<DescribeStacksRequest> describeStacksRequestWaiter;
+    private CloudFormationWaiter amazonCloudFormationWaiters;
 
     @Mock
     private PersistenceNotifier persistenceNotifier;
@@ -97,6 +92,8 @@ public class AwsRdsTerminateServiceTest {
 
     @Mock
     private DatabaseStack databaseStack;
+
+    private final DeleteStackRequest deleteStackRequest = DeleteStackRequest.builder().build();
 
     @BeforeEach
     public void initTests() {
@@ -111,7 +108,6 @@ public class AwsRdsTerminateServiceTest {
         when(awsStackRequestHelper.createDeleteStackRequest(STACK_NAME)).thenReturn(deleteStackRequest);
         when(awsClient.createCloudFormationClient(Mockito.any(AwsCredentialView.class), Mockito.eq(REGION))).thenReturn(amazonCloudFormationClient);
         when(amazonCloudFormationClient.waiters()).thenReturn(amazonCloudFormationWaiters);
-        when(amazonCloudFormationWaiters.stackDeleteComplete()).thenReturn(describeStacksRequestWaiter);
         when(cloudContext.getId()).thenReturn(ID);
         when(databaseStack.getDatabaseServer()).thenReturn(mock(DatabaseServer.class));
     }
@@ -124,7 +120,7 @@ public class AwsRdsTerminateServiceTest {
         victim.terminate(authenticatedContext, databaseStack, false, persistenceNotifier, Collections.emptyList());
 
         verify(amazonCloudFormationClient).deleteStack(deleteStackRequest);
-        verify(describeStacksRequestWaiter).run(Mockito.any(WaiterParameters.class));
+        verify(amazonCloudFormationWaiters).waitUntilStackDeleteComplete(any(DescribeStacksRequest.class), any(WaiterOverrideConfiguration.class));
     }
 
     @Test
@@ -135,13 +131,14 @@ public class AwsRdsTerminateServiceTest {
         victim.terminate(authenticatedContext, databaseStack, false, persistenceNotifier, Collections.emptyList());
 
         verify(amazonCloudFormationClient, never()).deleteStack(deleteStackRequest);
-        verify(describeStacksRequestWaiter, never()).run(Mockito.any(WaiterParameters.class));
+        verifyNoInteractions(amazonCloudFormationWaiters);
     }
 
     @Test
     public void shouldNotCallDeleteWhenAlreadyDeleted() throws Exception {
         when(awsClient.createCloudFormationClient(Mockito.any(AwsCredentialView.class), Mockito.eq(REGION)))
-                .thenThrow(new AmazonServiceException(STACK_NAME + " does not exist"));
+                .thenThrow(AwsServiceException.builder()
+                        .awsErrorDetails(AwsErrorDetails.builder().errorMessage(STACK_NAME + " does not exist").build()).build());
 
         victim.terminate(authenticatedContext, databaseStack, false, persistenceNotifier, Collections.emptyList());
 
@@ -150,15 +147,17 @@ public class AwsRdsTerminateServiceTest {
 
     @Test
     public void shouldThrowAmazonServiceExceptionWhenDescriptionNotDoesNotExists() {
-        when(awsClient.createCloudFormationClient(Mockito.any(AwsCredentialView.class), Mockito.eq(REGION))).thenThrow(new AmazonServiceException(""));
+        when(awsClient.createCloudFormationClient(Mockito.any(AwsCredentialView.class), Mockito.eq(REGION)))
+                .thenThrow(AwsServiceException.builder().awsErrorDetails(AwsErrorDetails.builder().errorMessage("").build()).build());
 
-        Assertions.assertThrows(AmazonServiceException.class,
+        Assertions.assertThrows(AwsServiceException.class,
                 () -> victim.terminate(authenticatedContext, databaseStack, false, persistenceNotifier, Collections.emptyList()));
     }
 
     @Test
     public void shouldNotThrowAmazonServiceExceptionWhenItWasThrownAndTerminationIsForced() throws Exception {
-        when(awsClient.createCloudFormationClient(Mockito.any(AwsCredentialView.class), Mockito.eq(REGION))).thenThrow(new AmazonServiceException(""));
+        when(awsClient.createCloudFormationClient(Mockito.any(AwsCredentialView.class), Mockito.eq(REGION)))
+                .thenThrow(AwsServiceException.builder().awsErrorDetails(AwsErrorDetails.builder().errorMessage("").build()).build());
 
         victim.terminate(authenticatedContext, databaseStack, true, persistenceNotifier, Collections.emptyList());
 

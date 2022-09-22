@@ -16,18 +16,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.ec2.model.AmazonEC2Exception;
-import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupEgressRequest;
-import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest;
-import com.amazonaws.services.ec2.model.CreateSecurityGroupRequest;
-import com.amazonaws.services.ec2.model.CreateSecurityGroupResult;
-import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest;
-import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult;
-import com.amazonaws.services.ec2.model.Filter;
-import com.amazonaws.services.ec2.model.IpPermission;
-import com.amazonaws.services.ec2.model.IpRange;
-import com.amazonaws.services.ec2.model.PrefixListId;
-import com.amazonaws.services.ec2.model.SecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsNetworkService;
@@ -44,6 +32,19 @@ import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.services.ec2.model.AuthorizeSecurityGroupEgressRequest;
+import software.amazon.awssdk.services.ec2.model.AuthorizeSecurityGroupIngressRequest;
+import software.amazon.awssdk.services.ec2.model.CreateSecurityGroupRequest;
+import software.amazon.awssdk.services.ec2.model.CreateSecurityGroupResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsResponse;
+import software.amazon.awssdk.services.ec2.model.Ec2Exception;
+import software.amazon.awssdk.services.ec2.model.Filter;
+import software.amazon.awssdk.services.ec2.model.IpPermission;
+import software.amazon.awssdk.services.ec2.model.IpRange;
+import software.amazon.awssdk.services.ec2.model.PrefixListId;
+import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 
 @Component
 public class SecurityGroupBuilderUtil {
@@ -64,12 +65,13 @@ public class SecurityGroupBuilderUtil {
     public String createSecurityGroup(Network network, Group group, AmazonEc2Client amazonEc2Client,
             CloudContext context, AuthenticatedContext ac) {
         AwsNetworkView awsNetworkView = new AwsNetworkView(network);
-        CreateSecurityGroupRequest request = new CreateSecurityGroupRequest()
-                .withDescription("Allow access from web and bastion as well as outbound HTTP and HTTPS traffic")
-                .withVpcId(awsNetworkView.getExistingVpc())
-                .withGroupName(awsResourceNameService.resourceName(ResourceType.AWS_SECURITY_GROUP, context.getName(), group.getName(), context.getId()))
-                .withTagSpecifications(awsTaggingService.prepareEc2TagSpecification(group.getTags(),
-                        com.amazonaws.services.ec2.model.ResourceType.SecurityGroup));
+        CreateSecurityGroupRequest request = CreateSecurityGroupRequest.builder()
+                .description("Allow access from web and bastion as well as outbound HTTP and HTTPS traffic")
+                .vpcId(awsNetworkView.getExistingVpc())
+                .groupName(awsResourceNameService.resourceName(ResourceType.AWS_SECURITY_GROUP, context.getName(), group.getName(), context.getId()))
+                .tagSpecifications(awsTaggingService.prepareEc2TagSpecification(group.getTags(),
+                        software.amazon.awssdk.services.ec2.model.ResourceType.SECURITY_GROUP))
+                .build();
         return createOrGetSecurityGroup(amazonEc2Client, request, group, awsNetworkView, ac);
     }
 
@@ -77,22 +79,22 @@ public class SecurityGroupBuilderUtil {
             AwsNetworkView awsNetworkView, AuthenticatedContext ac) {
         String securityGroupId;
         try {
-            CreateSecurityGroupResult securityGroup = amazonEc2Client.createSecurityGroup(request);
-            LOGGER.info("Security group created successfully for group: {} and vpc: {}", request.getGroupName(), request.getVpcId());
-            ingress(group, ac, amazonEc2Client, awsNetworkView, securityGroup.getGroupId());
-            egress(amazonEc2Client, ac, awsNetworkView, securityGroup.getGroupId(), Collections.emptyList());
-            securityGroupId = securityGroup.getGroupId();
-        } catch (AmazonEC2Exception e) {
-            if (!e.getErrorCode().equals("InvalidGroup.Duplicate")) {
+            CreateSecurityGroupResponse securityGroup = amazonEc2Client.createSecurityGroup(request);
+            LOGGER.info("Security group created successfully for group: {} and vpc: {}", request.groupName(), request.vpcId());
+            ingress(group, ac, amazonEc2Client, awsNetworkView, securityGroup.groupId());
+            egress(amazonEc2Client, ac, awsNetworkView, securityGroup.groupId(), Collections.emptyList());
+            securityGroupId = securityGroup.groupId();
+        } catch (Ec2Exception e) {
+            if (!"InvalidGroup.Duplicate".equals(e.awsErrorDetails().errorCode())) {
                 throw e;
             }
-            LOGGER.debug("Security group exists with name of {} for {}, try to fetch it", request.getGroupName(), request.getVpcId());
-            SecurityGroup securityGroup = getSecurityGroup(amazonEc2Client, request.getVpcId(), request.getGroupName());
-            String groupId = securityGroup.getGroupId();
-            if (securityGroup.getIpPermissions().isEmpty()) {
+            LOGGER.debug("Security group exists with name of {} for {}, try to fetch it", request.groupName(), request.vpcId());
+            SecurityGroup securityGroup = getSecurityGroup(amazonEc2Client, request.vpcId(), request.groupName());
+            String groupId = securityGroup.groupId();
+            if (securityGroup.ipPermissions().isEmpty()) {
                 ingress(group, ac, amazonEc2Client, awsNetworkView, groupId);
             }
-            egress(amazonEc2Client, ac, awsNetworkView, securityGroup.getGroupId(), securityGroup.getIpPermissionsEgress());
+            egress(amazonEc2Client, ac, awsNetworkView, securityGroup.groupId(), securityGroup.ipPermissionsEgress());
             securityGroupId = groupId;
         }
         return securityGroupId;
@@ -119,44 +121,49 @@ public class SecurityGroupBuilderUtil {
     }
 
     private Optional<SecurityGroup> describeSecurityGroup(AmazonEc2Client amazonEc2Client, String vpcId, String groupName) {
-        DescribeSecurityGroupsRequest describeSecurityGroupsRequest = new DescribeSecurityGroupsRequest()
-                .withFilters(new Filter().withName("vpc-id").withValues(vpcId));
-        DescribeSecurityGroupsResult describeSecurityGroupsResult = amazonEc2Client.describeSecurityGroups(describeSecurityGroupsRequest);
-        return describeSecurityGroupsResult.getSecurityGroups().stream()
-                .filter(result -> result.getGroupName().equals(groupName)).findFirst();
+        DescribeSecurityGroupsRequest describeSecurityGroupsRequest = DescribeSecurityGroupsRequest.builder()
+                .filters(Filter.builder().name("vpc-id").values(vpcId).build()).build();
+        DescribeSecurityGroupsResponse describeSecurityGroupsResponse = amazonEc2Client.describeSecurityGroups(describeSecurityGroupsRequest);
+        return describeSecurityGroupsResponse.securityGroups().stream()
+                .filter(response -> response.groupName().equals(groupName)).findFirst();
     }
 
     public void ingress(Group group, AuthenticatedContext ac, AmazonEc2Client amazonEc2Client, AwsNetworkView awsNetworkView, String securityGroupId) {
         Set<IpPermission> permissions = new HashSet<>();
         for (SecurityRule rule : group.getSecurity().getRules()) {
             for (PortDefinition port : rule.getPorts()) {
-                permissions.add(new IpPermission()
-                        .withIpProtocol(rule.getProtocol())
-                        .withFromPort(Integer.parseInt(port.getFrom()))
-                        .withToPort(Integer.parseInt(port.getTo()))
-                        .withIpv4Ranges(new IpRange().withCidrIp(rule.getCidr())));
+                permissions.add(IpPermission.builder()
+                        .ipProtocol(rule.getProtocol())
+                        .fromPort(Integer.parseInt(port.getFrom()))
+                        .toPort(Integer.parseInt(port.getTo()))
+                        .ipRanges(IpRange.builder().cidrIp(rule.getCidr()).build())
+                        .build());
             }
         }
         for (String cidr : awsNetworkService.getVpcCidrs(ac, awsNetworkView)) {
-            permissions.add(new IpPermission()
-                    .withIpProtocol("icmp")
-                    .withFromPort(-1)
-                    .withToPort(-1)
-                    .withIpv4Ranges(new IpRange().withCidrIp(cidr)));
-            permissions.add(new IpPermission()
-                    .withIpProtocol("tcp")
-                    .withFromPort(0)
-                    .withToPort(TO_PORT)
-                    .withIpv4Ranges(new IpRange().withCidrIp(cidr)));
-            permissions.add(new IpPermission()
-                    .withIpProtocol("udp")
-                    .withFromPort(0)
-                    .withToPort(TO_PORT)
-                    .withIpv4Ranges(new IpRange().withCidrIp(cidr)));
+            permissions.add(IpPermission.builder()
+                    .ipProtocol("icmp")
+                    .fromPort(-1)
+                    .toPort(-1)
+                    .ipRanges(IpRange.builder().cidrIp(cidr).build())
+                    .build());
+            permissions.add(IpPermission.builder()
+                    .ipProtocol("tcp")
+                    .fromPort(0)
+                    .toPort(TO_PORT)
+                    .ipRanges(IpRange.builder().cidrIp(cidr).build())
+                    .build());
+            permissions.add(IpPermission.builder()
+                    .ipProtocol("udp")
+                    .fromPort(0)
+                    .toPort(TO_PORT)
+                    .ipRanges(IpRange.builder().cidrIp(cidr).build())
+                    .build());
         }
-        AuthorizeSecurityGroupIngressRequest reguest = new AuthorizeSecurityGroupIngressRequest()
-                .withGroupId(securityGroupId)
-                .withIpPermissions(permissions);
+        AuthorizeSecurityGroupIngressRequest reguest = AuthorizeSecurityGroupIngressRequest.builder()
+                .groupId(securityGroupId)
+                .ipPermissions(permissions)
+                .build();
         amazonEc2Client.addIngress(reguest);
         LOGGER.info("Ingress added to {}", securityGroupId);
     }
@@ -170,26 +177,28 @@ public class SecurityGroupBuilderUtil {
         if (outboundInternetTraffic == OutboundInternetTraffic.DISABLED && (!prefixListIds.isEmpty() || !vpcCidrs.isEmpty())) {
             List<IpPermission> permissions = new ArrayList<>();
             for (String existingVpcCidr : vpcCidrs) {
-                IpPermission e = new IpPermission().withIpProtocol("-1").withIpv4Ranges(new IpRange().withCidrIp(existingVpcCidr));
+                IpPermission e = IpPermission.builder().ipProtocol("-1").ipRanges(IpRange.builder().cidrIp(existingVpcCidr).build()).build();
                 if (!egress.contains(e)) {
                     permissions.add(e);
                 }
             }
             for (String prefixListId : prefixListIds) {
-                IpPermission e = new IpPermission()
-                        .withIpProtocol("-1")
-                        .withFromPort(0)
-                        .withToPort(TO_PORT)
-                        .withPrefixListIds(new PrefixListId().withPrefixListId(prefixListId));
+                IpPermission e = IpPermission.builder()
+                        .ipProtocol("-1")
+                        .fromPort(0)
+                        .toPort(TO_PORT)
+                        .prefixListIds(PrefixListId.builder().prefixListId(prefixListId).build())
+                        .build();
                 if (!egress.contains(e)) {
                     permissions.add(e);
                 }
             }
             if (!permissions.isEmpty()) {
-                AuthorizeSecurityGroupEgressRequest reguest = new AuthorizeSecurityGroupEgressRequest()
-                        .withGroupId(securityGroupId)
-                        .withIpPermissions(permissions);
-                amazonEc2Client.addEgress(reguest);
+                AuthorizeSecurityGroupEgressRequest request = AuthorizeSecurityGroupEgressRequest.builder()
+                        .groupId(securityGroupId)
+                        .ipPermissions(permissions)
+                        .build();
+                amazonEc2Client.addEgress(request);
                 LOGGER.info("Egress added to {}", securityGroupId);
             } else {
                 LOGGER.debug("No permission for egress request, skip it");

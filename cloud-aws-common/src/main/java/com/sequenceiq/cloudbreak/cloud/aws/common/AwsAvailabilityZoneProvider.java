@@ -7,12 +7,12 @@ import javax.inject.Inject;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.model.AvailabilityZone;
-import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
-import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+
+import software.amazon.awssdk.services.ec2.model.AvailabilityZone;
+import software.amazon.awssdk.services.ec2.model.DescribeAvailabilityZonesRequest;
 
 @Service
 public class AwsAvailabilityZoneProvider {
@@ -22,9 +22,8 @@ public class AwsAvailabilityZoneProvider {
 
     @Cacheable(cacheNames = "cloudResourceAzCache", key = "{ #cloudCredential?.id, #awsRegion.regionName }")
     public List<AvailabilityZone> describeAvailabilityZones(CloudCredential cloudCredential,
-            DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest, com.amazonaws.services.ec2.model.Region awsRegion) {
-        AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), awsRegion.getRegionName());
-        DescribeAvailabilityZonesResult describeAvailabilityZonesResult = ec2Client.describeAvailabilityZones(describeAvailabilityZonesRequest);
-        return describeAvailabilityZonesResult.getAvailabilityZones();
+            DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest, software.amazon.awssdk.services.ec2.model.Region awsRegion) {
+        AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), awsRegion.regionName());
+        return ec2Client.describeAvailabilityZones(describeAvailabilityZonesRequest).availabilityZones();
     }
 }

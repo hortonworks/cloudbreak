@@ -16,7 +16,6 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -66,7 +65,7 @@ public class YarnLoadBalancerLaunchService {
         }
 
         // Create an object for the new loadbalancer application and persist it in the resources table.
-        CloudResource loadBalancerApplication = new Builder().withType(YARN_LOAD_BALANCER).withName(applicationName).build();
+        CloudResource loadBalancerApplication = CloudResource.builder().withType(YARN_LOAD_BALANCER).withName(applicationName).build();
         LOGGER.debug("Persisting the new Yarn load balancer resource in the resources table.");
         persistenceNotifier.notifyAllocation(loadBalancerApplication, authenticatedContext.getCloudContext());
         return loadBalancerApplication;

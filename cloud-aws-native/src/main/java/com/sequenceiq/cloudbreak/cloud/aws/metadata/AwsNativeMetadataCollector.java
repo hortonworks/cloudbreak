@@ -21,12 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersResult;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
@@ -50,6 +44,13 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersResponse;
 
 @Service
 public class AwsNativeMetadataCollector implements MetadataCollector {
@@ -96,7 +97,7 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
 
     @Override
     public List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<LoadBalancerType> lbTypes, List<CloudResource> resources) {
-        List<CloudLoadBalancerMetadata> result = new ArrayList<>();
+        List<CloudLoadBalancerMetadata> response = new ArrayList<>();
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AwsCredentialView awsCredential = new AwsCredentialView(ac.getCloudCredential());
         LOGGER.debug("Collect AWS load balancer metadata, for cluster {}", ac.getCloudContext().getName());
@@ -112,9 +113,9 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
 
         for (CloudResource loadBalancer : loadBalancers) {
             Optional<CloudLoadBalancerMetadata> collectedLoadBalancer = collectLoadBalancerMetadata(loadBalancingClient, loadBalancer, resources);
-            collectedLoadBalancer.ifPresent(result::add);
+            collectedLoadBalancer.ifPresent(response::add);
         }
-        return result;
+        return response;
     }
 
     @Override
@@ -124,7 +125,7 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
     }
 
     private List<CloudVmMetaDataStatus> collectInstances(List<CloudInstance> vms, List<CloudResource> resources, AmazonEc2Client ec2Client) {
-        List<CloudVmMetaDataStatus> result = new ArrayList<>();
+        List<CloudVmMetaDataStatus> response = new ArrayList<>();
         Set<String> preferredInstanceIds = resources.stream()
                 .filter(resource -> ResourceType.AWS_INSTANCE.equals(resource.getType()))
                 .filter(resource -> vms.stream().anyMatch(vm -> String.valueOf(vm.getTemplate().getPrivateId()).equals(resource.getReference())))
@@ -134,7 +135,7 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
                 .filter(resource -> ResourceType.AWS_INSTANCE.equals(resource.getType()))
                 .filter(cloudResource -> cloudResource.getInstanceId() != null)
                 .collect(Collectors.toMap(CloudResource::getInstanceId, Function.identity()));
-        final AtomicInteger counter = new AtomicInteger(0);
+        AtomicInteger counter = new AtomicInteger(0);
         Map<Integer, List<String>> instanceIdBatches = preferredInstanceIds.stream()
                 .collect(Collectors.groupingBy(s -> counter.getAndIncrement() / instanceFetchMaxBatchSize, LinkedHashMap::new, Collectors.toList()));
 
@@ -142,17 +143,18 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
             List<String> instanceIdBatch = instanceIdBatchEntry.getValue();
             LOGGER.info("Collecting metadata for instances iteration {}/{}", instanceIdBatchEntry.getKey() + 1, instanceIdBatches.size());
             try {
-                result.addAll(describeInstances(vms, instanceIdBatch, resourcesByInstanceId, ec2Client));
-            } catch (AmazonServiceException serviceException) {
-                if (StringUtils.isNotEmpty(serviceException.getErrorCode()) && INSTANCE_NOT_FOUND_ERROR_CODE.equals(serviceException.getErrorCode())) {
-                    result.addAll(handleNotFoundInstancesAndDescribeOthers(vms, ec2Client, instanceIdBatch, serviceException, resourcesByInstanceId));
+                response.addAll(describeInstances(vms, instanceIdBatch, resourcesByInstanceId, ec2Client));
+            } catch (AwsServiceException serviceException) {
+                if (StringUtils.isNotEmpty(serviceException.awsErrorDetails().errorCode()) &&
+                        INSTANCE_NOT_FOUND_ERROR_CODE.equals(serviceException.awsErrorDetails().errorCode())) {
+                    response.addAll(handleNotFoundInstancesAndDescribeOthers(vms, ec2Client, instanceIdBatch, serviceException, resourcesByInstanceId));
                 } else {
                     LOGGER.warn("Collection of instance metadata failed", serviceException);
                     throw serviceException;
                 }
             }
         }
-        return result;
+        return response;
     }
 
     private CloudResource findCloudResourceByInstanceId(Map<String, CloudResource> resourcesByInstanceId, String instanceId) {
@@ -171,10 +173,10 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
     }
 
     private List<CloudVmMetaDataStatus> handleNotFoundInstancesAndDescribeOthers(List<CloudInstance> vms, AmazonEc2Client ec2Client,
-            List<String> instanceIdList, AmazonServiceException serviceException, Map<String, CloudResource> resourcesByInstanceId) {
+            List<String> instanceIdList, AwsServiceException serviceException, Map<String, CloudResource> resourcesByInstanceId) {
         LOGGER.info("One or more instances could not be found, collecting metadata for existing ones");
         int instanceIdNum = instanceIdList.size();
-        List<CloudVmMetaDataStatus> result = new ArrayList<>(instanceIdNum);
+        List<CloudVmMetaDataStatus> response = new ArrayList<>(instanceIdNum);
         List<String> existingInstanceIds = new ArrayList<>(instanceIdNum);
         instanceIdList
                 .forEach(instanceId -> {
@@ -187,51 +189,52 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
                         CloudInstance updatedInstance = new CloudInstance(connectedResource.getReference(), matchedInstance.getTemplate(),
                                 matchedInstance.getAuthentication(), matchedInstance.getSubnetId(), matchedInstance.getAvailabilityZone());
                         CloudVmInstanceStatus status = new CloudVmInstanceStatus(updatedInstance, InstanceStatus.TERMINATED);
-                        result.add(new CloudVmMetaDataStatus(status, CloudInstanceMetaData.EMPTY_METADATA));
+                        response.add(new CloudVmMetaDataStatus(status, CloudInstanceMetaData.EMPTY_METADATA));
                     }
                 });
         if (!existingInstanceIds.isEmpty()) {
             LOGGER.info("Existing instances on AWS to collect metadata for: {}/{}", existingInstanceIds.size(), instanceIdNum);
-            result.addAll(describeInstances(vms, existingInstanceIds, resourcesByInstanceId, ec2Client));
+            response.addAll(describeInstances(vms, existingInstanceIds, resourcesByInstanceId, ec2Client));
         }
-        return result;
+        return response;
     }
 
     private List<CloudVmMetaDataStatus> describeInstances(List<CloudInstance> vms, List<String> instanceIdList,
             Map<String, CloudResource> resourcesByInstanceId, AmazonEc2Client ec2Client) {
         LOGGER.info("Collecting metadata for instance IDs: '{}'", String.join(", ", instanceIdList));
-        List<CloudVmMetaDataStatus> result = new ArrayList<>();
-        DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIdList);
-        DescribeInstancesResult instancesResult = ec2Client.describeInstances(instancesRequest);
+        List<CloudVmMetaDataStatus> response = new ArrayList<>();
+        DescribeInstancesRequest instancesRequest = DescribeInstancesRequest.builder().instanceIds(instanceIdList).build();
+        DescribeInstancesResponse instancesResponse = ec2Client.describeInstances(instancesRequest);
 
-        List<Instance> instances = instancesResult.getReservations().stream()
-                .flatMap(reservation -> reservation.getInstances().stream())
+        List<Instance> instances = instancesResponse.reservations().stream()
+                .flatMap(reservation -> reservation.instances().stream())
                 .collect(Collectors.toList());
 
         for (Instance instance : instances) {
-            String instanceId = instance.getInstanceId();
+            String instanceId = instance.instanceId();
             CloudResource connectedResource = findCloudResourceByInstanceId(resourcesByInstanceId, instanceId);
             CloudInstance matchedInstance = findCloudInstanceByPrivateId(vms, connectedResource);
             CloudInstance updatedInstance = new CloudInstance(connectedResource.getInstanceId(), matchedInstance.getTemplate(),
                     matchedInstance.getAuthentication(), matchedInstance.getSubnetId(), matchedInstance.getAvailabilityZone());
             CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(
-                    instance.getPrivateIpAddress(),
-                    instance.getPublicIpAddress(),
+                    instance.privateIpAddress(),
+                    instance.publicIpAddress(),
                     awsLifeCycleMapper.getLifeCycle(instance));
             CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(updatedInstance, updatedInstance.getTemplate().getStatus());
             CloudVmMetaDataStatus newMetadataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, cloudInstanceMetaData);
-            result.add(newMetadataStatus);
+            response.add(newMetadataStatus);
         }
-        return result;
+        return response;
     }
 
     private Optional<CloudLoadBalancerMetadata> collectLoadBalancerMetadata(AmazonElasticLoadBalancingClient loadBalancingClient,
             CloudResource loadBalancer, List<CloudResource> resources) {
-        Optional<CloudLoadBalancerMetadata> result = Optional.empty();
+        Optional<CloudLoadBalancerMetadata> response = Optional.empty();
         try {
-            result = describeLoadBalancer(loadBalancer, loadBalancingClient, resources);
-        } catch (AmazonServiceException awsException) {
-            if (StringUtils.isNotEmpty(awsException.getErrorCode()) && LOAD_BALANCER_NOT_FOUND_ERROR_CODE.equals(awsException.getErrorCode())) {
+            response = describeLoadBalancer(loadBalancer, loadBalancingClient, resources);
+        } catch (AwsServiceException awsException) {
+            if (StringUtils.isNotEmpty(awsException.awsErrorDetails().errorCode()) &&
+                    LOAD_BALANCER_NOT_FOUND_ERROR_CODE.equals(awsException.awsErrorDetails().errorCode())) {
                 LOGGER.info("Load balancers with ARN '{}' could not be found due to:", loadBalancer.getReference(), awsException);
             } else {
                 LOGGER.warn("Metadata collection failed for load balancer '{}'", loadBalancer.getReference(), awsException);
@@ -241,34 +244,33 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
             LOGGER.warn("Unable to fetch metadata for load balancer '{}'", loadBalancer.getReference(), e);
             throw new CloudConnectorException("Metadata collection of load balancers failed", e);
         }
-        return result;
+        return response;
     }
 
     private Optional<CloudLoadBalancerMetadata> describeLoadBalancer(CloudResource loadBalancer, AmazonElasticLoadBalancingClient loadBalancingClient,
             List<CloudResource> resources) {
-        DescribeLoadBalancersRequest describeLoadBalancersRequest = new DescribeLoadBalancersRequest()
-                .withLoadBalancerArns(loadBalancer.getReference());
-        DescribeLoadBalancersResult describeLoadBalancersResult = loadBalancingClient.describeLoadBalancers(describeLoadBalancersRequest);
+        DescribeLoadBalancersRequest describeLoadBalancersRequest = DescribeLoadBalancersRequest.builder().loadBalancerArns(loadBalancer.getReference()).build();
+        DescribeLoadBalancersResponse describeLoadBalancersResponse = loadBalancingClient.describeLoadBalancers(describeLoadBalancersRequest);
 
-        return describeLoadBalancersResult.getLoadBalancers().stream()
+        return describeLoadBalancersResponse.loadBalancers().stream()
                 .findFirst()
                 .map(awsLb -> {
-                    LoadBalancerType type = loadBalancerTypeConverter.convert(awsLb.getScheme());
+                    LoadBalancerType type = loadBalancerTypeConverter.convert(awsLb.scheme());
                     Map<String, Object> parameters = awsNativeLbMetadataCollector.getParameters(loadBalancer.getReference(), resources);
                     LoadBalancerTypeAttribute resourceLbType = loadBalancer.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class);
                     if (type == LoadBalancerType.PRIVATE && resourceLbType == LoadBalancerTypeAttribute.GATEWAY_PRIVATE) {
                         LOGGER.debug("GATEWAY_PRIVATE LoadBalancer selected");
                         type = LoadBalancerType.GATEWAY_PRIVATE;
                     }
-                    CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+                    CloudLoadBalancerMetadata loadBalancerMetadata = CloudLoadBalancerMetadata.builder()
                             .withType(type)
-                            .withCloudDns(awsLb.getDNSName())
-                            .withHostedZoneId(awsLb.getCanonicalHostedZoneId())
-                            .withName(awsLb.getLoadBalancerName())
+                            .withCloudDns(awsLb.dnsName())
+                            .withHostedZoneId(awsLb.canonicalHostedZoneId())
+                            .withName(awsLb.loadBalancerName())
                             .withParameters(parameters)
                             .build();
-                    LOGGER.info("Saved metadata for load balancer {}: DNS {}, zone ID {}", awsLb.getLoadBalancerName(), awsLb.getDNSName(),
-                            awsLb.getCanonicalHostedZoneId());
+                    LOGGER.info("Saved metadata for load balancer {}: DNS {}, zone ID {}", awsLb.loadBalancerName(), awsLb.dnsName(),
+                            awsLb.canonicalHostedZoneId());
                     return loadBalancerMetadata;
                 });
     }

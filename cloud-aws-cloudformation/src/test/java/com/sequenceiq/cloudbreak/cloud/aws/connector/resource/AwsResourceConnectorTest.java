@@ -15,12 +15,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 
 @ExtendWith(MockitoExtension.class)
 class AwsResourceConnectorTest {
@@ -52,8 +53,8 @@ class AwsResourceConnectorTest {
         when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
 
         PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
-        DescribeDBInstancesResult describeDBInstancesResult = mock(DescribeDBInstancesResult.class);
-        when(awsRdsStatusLookupService.getDescribeDBInstancesResultForDeleteProtection(any(), any())).thenReturn(describeDBInstancesResult);
+        DescribeDbInstancesResponse describeDBInstancesResult = DescribeDbInstancesResponse.builder().build();
+        when(awsRdsStatusLookupService.getDescribeDBInstancesResponseForDeleteProtection(any(), any())).thenReturn(describeDBInstancesResult);
         when(awsRdsStatusLookupService.isDeleteProtectionEnabled(describeDBInstancesResult)).thenReturn(true);
 
         underTest.terminateDatabaseServer(authenticatedContext, dbStack,
@@ -67,8 +68,8 @@ class AwsResourceConnectorTest {
     @Test
     void terminateDatabaseServerWithOutDeleteProtectionTest() throws Exception {
         PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
-        DescribeDBInstancesResult describeDBInstancesResult = mock(DescribeDBInstancesResult.class);
-        when(awsRdsStatusLookupService.getDescribeDBInstancesResultForDeleteProtection(any(), any())).thenReturn(describeDBInstancesResult);
+        DescribeDbInstancesResponse describeDBInstancesResult = DescribeDbInstancesResponse.builder().build();
+        when(awsRdsStatusLookupService.getDescribeDBInstancesResponseForDeleteProtection(any(), any())).thenReturn(describeDBInstancesResult);
         when(awsRdsStatusLookupService.isDeleteProtectionEnabled(describeDBInstancesResult)).thenReturn(false);
 
         underTest.terminateDatabaseServer(authenticatedContext, dbStack,

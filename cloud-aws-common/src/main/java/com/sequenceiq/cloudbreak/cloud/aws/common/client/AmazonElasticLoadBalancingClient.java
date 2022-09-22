@@ -1,84 +1,84 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
-import com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancing;
-import com.amazonaws.services.elasticloadbalancingv2.model.CreateListenerRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.CreateListenerResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.CreateLoadBalancerRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.CreateLoadBalancerResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.CreateTargetGroupRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.CreateTargetGroupResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.DeleteListenerRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DeleteListenerResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.DeleteLoadBalancerRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DeleteLoadBalancerResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.DeleteTargetGroupRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DeleteTargetGroupResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.DeregisterTargetsRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DeregisterTargetsResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeListenersRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeListenersResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetGroupsRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetGroupsResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetHealthResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.RegisterTargetsResult;
+import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateListenerRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateListenerResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateLoadBalancerRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateLoadBalancerResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateTargetGroupRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateTargetGroupResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteListenerRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteListenerResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteLoadBalancerRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteLoadBalancerResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteTargetGroupRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteTargetGroupResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeregisterTargetsRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeregisterTargetsResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeListenersRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeListenersResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.RegisterTargetsResponse;
 
 public class AmazonElasticLoadBalancingClient extends AmazonClient {
 
-    private final AmazonElasticLoadBalancing client;
+    private final ElasticLoadBalancingV2Client client;
 
-    public AmazonElasticLoadBalancingClient(AmazonElasticLoadBalancing client) {
+    public AmazonElasticLoadBalancingClient(ElasticLoadBalancingV2Client client) {
         this.client = client;
     }
 
-    public DescribeLoadBalancersResult describeLoadBalancers(DescribeLoadBalancersRequest describeLoadBalancersRequest) {
+    public DescribeLoadBalancersResponse describeLoadBalancers(DescribeLoadBalancersRequest describeLoadBalancersRequest) {
         return client.describeLoadBalancers(describeLoadBalancersRequest);
     }
 
-    public DescribeTargetHealthResult describeTargetHealth(DescribeTargetHealthRequest describeTargetHealthRequest) {
+    public DescribeTargetHealthResponse describeTargetHealth(DescribeTargetHealthRequest describeTargetHealthRequest) {
         return client.describeTargetHealth(describeTargetHealthRequest);
     }
 
-    public CreateTargetGroupResult createTargetGroup(CreateTargetGroupRequest createTargetGroupRequest) {
+    public CreateTargetGroupResponse createTargetGroup(CreateTargetGroupRequest createTargetGroupRequest) {
         return client.createTargetGroup(createTargetGroupRequest);
     }
 
-    public DeleteTargetGroupResult deleteTargetGroup(DeleteTargetGroupRequest deleteTargetGroupRequest) {
+    public DeleteTargetGroupResponse deleteTargetGroup(DeleteTargetGroupRequest deleteTargetGroupRequest) {
         return client.deleteTargetGroup(deleteTargetGroupRequest);
     }
 
-    public RegisterTargetsResult registerTargets(RegisterTargetsRequest registerTargetsRequest) {
+    public RegisterTargetsResponse registerTargets(RegisterTargetsRequest registerTargetsRequest) {
         return client.registerTargets(registerTargetsRequest);
     }
 
-    public DeregisterTargetsResult deregisterTargets(DeregisterTargetsRequest deregisterTargetsRequest) {
+    public DeregisterTargetsResponse deregisterTargets(DeregisterTargetsRequest deregisterTargetsRequest) {
         return client.deregisterTargets(deregisterTargetsRequest);
     }
 
-    public CreateLoadBalancerResult registerLoadBalancer(CreateLoadBalancerRequest request) {
+    public CreateLoadBalancerResponse registerLoadBalancer(CreateLoadBalancerRequest request) {
         return client.createLoadBalancer(request);
     }
 
-    public CreateListenerResult registerListener(CreateListenerRequest request) {
+    public CreateListenerResponse registerListener(CreateListenerRequest request) {
         return client.createListener(request);
     }
 
-    public DescribeListenersResult describeListeners(DescribeListenersRequest request) {
+    public DescribeListenersResponse describeListeners(DescribeListenersRequest request) {
         return client.describeListeners(request);
     }
 
-    public DeleteListenerResult deleteListener(DeleteListenerRequest deleteListenerRequest) {
+    public DeleteListenerResponse deleteListener(DeleteListenerRequest deleteListenerRequest) {
         return client.deleteListener(deleteListenerRequest);
     }
 
-    public DeleteLoadBalancerResult deleteLoadBalancer(DeleteLoadBalancerRequest deleteListenerRequest) {
+    public DeleteLoadBalancerResponse deleteLoadBalancer(DeleteLoadBalancerRequest deleteListenerRequest) {
         return client.deleteLoadBalancer(deleteListenerRequest);
     }
 
-    public DescribeTargetGroupsResult describeTargetGroup(DescribeTargetGroupsRequest describeTargetGroupsRequest) {
+    public DescribeTargetGroupsResponse describeTargetGroup(DescribeTargetGroupsRequest describeTargetGroupsRequest) {
         return client.describeTargetGroups(describeTargetGroupsRequest);
     }
 }

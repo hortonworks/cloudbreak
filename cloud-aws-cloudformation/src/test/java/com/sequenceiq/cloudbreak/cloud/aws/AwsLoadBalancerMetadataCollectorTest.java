@@ -16,10 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.cloudformation.model.ListStackResourcesRequest;
-import com.amazonaws.services.cloudformation.model.ListStackResourcesResult;
-import com.amazonaws.services.cloudformation.model.StackResourceSummary;
-import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsListener;
@@ -33,6 +29,11 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+
+import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesRequest;
+import software.amazon.awssdk.services.cloudformation.model.ListStackResourcesResponse;
+import software.amazon.awssdk.services.cloudformation.model.StackResourceSummary;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsLoadBalancerMetadataCollectorTest {
@@ -68,20 +69,18 @@ public class AwsLoadBalancerMetadataCollectorTest {
         int numPorts = 1;
         AuthenticatedContext ac = authenticatedContext();
         LoadBalancer loadBalancer = createLoadBalancer();
-        List<StackResourceSummary> summaries = createSummaries(numPorts, true);
-        ListStackResourcesResult result = new ListStackResourcesResult();
-        result.setStackResourceSummaries(summaries);
+        ListStackResourcesResponse response = ListStackResourcesResponse.builder().stackResourceSummaries(createSummaries(numPorts, true)).build();
 
         Map<String, Object> expectedParameters = Map.of(
-            AwsLoadBalancerMetadataView.LOADBALANCER_ARN, LOAD_BALANCER_ARN,
-            AwsLoadBalancerMetadataView.LISTENER_ARN_PREFIX + 0, LISTENER_ARN + "0Internal",
-            AwsLoadBalancerMetadataView.TARGET_GROUP_ARN_PREFIX + 0, TARGET_GROUP_ARN + "0Internal"
+                AwsLoadBalancerMetadataView.LOADBALANCER_ARN, LOAD_BALANCER_ARN,
+                AwsLoadBalancerMetadataView.LISTENER_ARN_PREFIX + 0, LISTENER_ARN + "0Internal",
+                AwsLoadBalancerMetadataView.TARGET_GROUP_ARN_PREFIX + 0, TARGET_GROUP_ARN + "0Internal"
         );
 
         when(awsClient.createCloudFormationClient(any(), any())).thenReturn(cfRetryClient);
         when(cloudFormationStackUtil.getCfStackName(ac)).thenReturn("stackName");
-        when(awsStackRequestHelper.createListStackResourcesRequest(eq("stackName"))).thenReturn(new ListStackResourcesRequest());
-        when(cfRetryClient.listStackResources(any())).thenReturn(result);
+        when(awsStackRequestHelper.createListStackResourcesRequest(eq("stackName"))).thenReturn(ListStackResourcesRequest.builder().build());
+        when(cfRetryClient.listStackResources(any())).thenReturn(response);
 
         Map<String, Object> parameters = underTest.getParameters(ac, loadBalancer, AwsLoadBalancerScheme.INTERNAL);
 
@@ -93,24 +92,22 @@ public class AwsLoadBalancerMetadataCollectorTest {
         int numPorts = 3;
         AuthenticatedContext ac = authenticatedContext();
         LoadBalancer loadBalancer = createLoadBalancer();
-        List<StackResourceSummary> summaries = createSummaries(numPorts, true);
-        ListStackResourcesResult result = new ListStackResourcesResult();
-        result.setStackResourceSummaries(summaries);
+        ListStackResourcesResponse response = ListStackResourcesResponse.builder().stackResourceSummaries(createSummaries(numPorts, true)).build();
 
         Map<String, Object> expectedParameters = Map.of(
-            AwsLoadBalancerMetadataView.LOADBALANCER_ARN, LOAD_BALANCER_ARN,
-            AwsLoadBalancerMetadataView.LISTENER_ARN_PREFIX + 0, LISTENER_ARN + "0Internal",
-            AwsLoadBalancerMetadataView.TARGET_GROUP_ARN_PREFIX + 0, TARGET_GROUP_ARN + "0Internal",
-            AwsLoadBalancerMetadataView.LISTENER_ARN_PREFIX + 1, LISTENER_ARN + "1Internal",
-            AwsLoadBalancerMetadataView.TARGET_GROUP_ARN_PREFIX + 1, TARGET_GROUP_ARN + "1Internal",
-            AwsLoadBalancerMetadataView.LISTENER_ARN_PREFIX + 2, LISTENER_ARN + "2Internal",
-            AwsLoadBalancerMetadataView.TARGET_GROUP_ARN_PREFIX + 2, TARGET_GROUP_ARN + "2Internal"
+                AwsLoadBalancerMetadataView.LOADBALANCER_ARN, LOAD_BALANCER_ARN,
+                AwsLoadBalancerMetadataView.LISTENER_ARN_PREFIX + 0, LISTENER_ARN + "0Internal",
+                AwsLoadBalancerMetadataView.TARGET_GROUP_ARN_PREFIX + 0, TARGET_GROUP_ARN + "0Internal",
+                AwsLoadBalancerMetadataView.LISTENER_ARN_PREFIX + 1, LISTENER_ARN + "1Internal",
+                AwsLoadBalancerMetadataView.TARGET_GROUP_ARN_PREFIX + 1, TARGET_GROUP_ARN + "1Internal",
+                AwsLoadBalancerMetadataView.LISTENER_ARN_PREFIX + 2, LISTENER_ARN + "2Internal",
+                AwsLoadBalancerMetadataView.TARGET_GROUP_ARN_PREFIX + 2, TARGET_GROUP_ARN + "2Internal"
         );
 
         when(awsClient.createCloudFormationClient(any(), any())).thenReturn(cfRetryClient);
         when(cloudFormationStackUtil.getCfStackName(ac)).thenReturn("stackName");
-        when(awsStackRequestHelper.createListStackResourcesRequest(eq("stackName"))).thenReturn(new ListStackResourcesRequest());
-        when(cfRetryClient.listStackResources(any())).thenReturn(result);
+        when(awsStackRequestHelper.createListStackResourcesRequest(eq("stackName"))).thenReturn(ListStackResourcesRequest.builder().build());
+        when(cfRetryClient.listStackResources(any())).thenReturn(response);
 
         Map<String, Object> parameters = underTest.getParameters(ac, loadBalancer, AwsLoadBalancerScheme.INTERNAL);
 
@@ -122,9 +119,7 @@ public class AwsLoadBalancerMetadataCollectorTest {
         int numPorts = 1;
         AuthenticatedContext ac = authenticatedContext();
         LoadBalancer loadBalancer = createLoadBalancer();
-        List<StackResourceSummary> summaries = createSummaries(numPorts, false);
-        ListStackResourcesResult result = new ListStackResourcesResult();
-        result.setStackResourceSummaries(summaries);
+        ListStackResourcesResponse response = ListStackResourcesResponse.builder().stackResourceSummaries(createSummaries(numPorts, false)).build();
 
         Map<String, Object> expectedParameters = new HashMap<>();
         expectedParameters.put(AwsLoadBalancerMetadataView.LOADBALANCER_ARN, LOAD_BALANCER_ARN);
@@ -133,8 +128,8 @@ public class AwsLoadBalancerMetadataCollectorTest {
 
         when(awsClient.createCloudFormationClient(any(), any())).thenReturn(cfRetryClient);
         when(cloudFormationStackUtil.getCfStackName(ac)).thenReturn("stackName");
-        when(awsStackRequestHelper.createListStackResourcesRequest(eq("stackName"))).thenReturn(new ListStackResourcesRequest());
-        when(cfRetryClient.listStackResources(any())).thenReturn(result);
+        when(awsStackRequestHelper.createListStackResourcesRequest(eq("stackName"))).thenReturn(ListStackResourcesRequest.builder().build());
+        when(cfRetryClient.listStackResources(any())).thenReturn(response);
 
         Map<String, Object> parameters = underTest.getParameters(ac, loadBalancer, AwsLoadBalancerScheme.INTERNAL);
 
@@ -144,14 +139,14 @@ public class AwsLoadBalancerMetadataCollectorTest {
     private AuthenticatedContext authenticatedContext() {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         CloudContext context = CloudContext.Builder.builder()
-            .withId(5L)
-            .withName("name")
-            .withCrn("crn")
-            .withPlatform("platform")
-            .withVariant("variant")
-            .withLocation(location)
-            .withWorkspaceId(WORKSPACE_ID)
-            .build();
+                .withId(5L)
+                .withName("name")
+                .withCrn("crn")
+                .withPlatform("platform")
+                .withVariant("variant")
+                .withLocation(location)
+                .withWorkspaceId(WORKSPACE_ID)
+                .build();
         CloudCredential credential = new CloudCredential("crn", null, null, "acc");
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, credential);
         authenticatedContext.putParameter(AmazonEc2Client.class, amazonEC2Client);
@@ -159,28 +154,31 @@ public class AwsLoadBalancerMetadataCollectorTest {
     }
 
     private LoadBalancer createLoadBalancer() {
-        LoadBalancer loadBalancer = new LoadBalancer();
-        loadBalancer.setLoadBalancerArn(LOAD_BALANCER_ARN);
-        return loadBalancer;
+        return LoadBalancer.builder()
+                .loadBalancerArn(LOAD_BALANCER_ARN)
+                .build();
     }
 
     private List<StackResourceSummary> createSummaries(int numPorts, boolean includeTargetGroup) {
         List<StackResourceSummary> summaries = new ArrayList<>();
         for (AwsLoadBalancerScheme scheme : AwsLoadBalancerScheme.class.getEnumConstants()) {
-            StackResourceSummary lbSummary = new StackResourceSummary();
-            lbSummary.setLogicalResourceId(AwsLoadBalancer.getLoadBalancerName(scheme));
-            lbSummary.setPhysicalResourceId(LOAD_BALANCER_ARN + scheme.resourceName());
+            StackResourceSummary lbSummary = StackResourceSummary.builder()
+                    .logicalResourceId(AwsLoadBalancer.getLoadBalancerName(scheme))
+                    .physicalResourceId(LOAD_BALANCER_ARN + scheme.resourceName())
+                    .build();
             summaries.add(lbSummary);
             for (int i = 0; i < numPorts; i++) {
                 if (includeTargetGroup) {
-                    StackResourceSummary tgSummary = new StackResourceSummary();
-                    tgSummary.setLogicalResourceId(AwsTargetGroup.getTargetGroupName(i, scheme));
-                    tgSummary.setPhysicalResourceId(TARGET_GROUP_ARN + i + scheme.resourceName());
+                    StackResourceSummary tgSummary = StackResourceSummary.builder()
+                            .logicalResourceId(AwsTargetGroup.getTargetGroupName(i, scheme))
+                            .physicalResourceId(TARGET_GROUP_ARN + i + scheme.resourceName())
+                            .build();
                     summaries.add(tgSummary);
                 }
-                StackResourceSummary lSummary = new StackResourceSummary();
-                lSummary.setLogicalResourceId(AwsListener.getListenerName(i, scheme));
-                lSummary.setPhysicalResourceId(LISTENER_ARN + i + scheme.resourceName());
+                StackResourceSummary lSummary = StackResourceSummary.builder()
+                        .logicalResourceId(AwsListener.getListenerName(i, scheme))
+                        .physicalResourceId(LISTENER_ARN + i + scheme.resourceName())
+                        .build();
                 summaries.add(lSummary);
             }
         }

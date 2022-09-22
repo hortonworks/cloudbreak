@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.amazonaws.services.rds.model.ApplyMethod;
-import com.amazonaws.services.rds.model.Parameter;
+import software.amazon.awssdk.services.rds.model.ApplyMethod;
+import software.amazon.awssdk.services.rds.model.Parameter;
 
 public class AwsRdsCustomParameterSupplierTest {
 
@@ -27,10 +27,11 @@ public class AwsRdsCustomParameterSupplierTest {
     }
 
     private Parameter createParameter(String name, String value) {
-        return new Parameter()
-                .withParameterName(name)
-                .withParameterValue(value)
-                .withApplyMethod(ApplyMethod.Immediate);
+        return Parameter.builder()
+                .parameterName(name)
+                .parameterValue(value)
+                .applyMethod(ApplyMethod.IMMEDIATE)
+                .build();
 
     }
 

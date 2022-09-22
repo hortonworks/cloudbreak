@@ -19,8 +19,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.pricing.model.GetProductsRequest;
-import com.amazonaws.services.pricing.model.GetProductsResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsCredentialVerifier;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
@@ -40,6 +38,9 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+
+import software.amazon.awssdk.services.pricing.model.GetProductsRequest;
+import software.amazon.awssdk.services.pricing.model.GetProductsResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsPricingCacheTest {
@@ -163,7 +164,7 @@ public class AwsPricingCacheTest {
         return new CloudVmTypes(Map.of(REGION, Set.of(vmType)), null);
     }
 
-    private GetProductsResult getGetProductsResult() {
+    private GetProductsResponse getGetProductsResult() {
         Attributes attributes = new Attributes();
         attributes.setVcpu(69);
         attributes.setMemory("420");
@@ -173,12 +174,12 @@ public class AwsPricingCacheTest {
         OfferTerm offerTerm = new OfferTerm(Map.of("test", priceDimension), null, null, null, null);
         Terms terms = new Terms(Map.of("onDemand", offerTerm), null);
         PriceListElement priceListElement = new PriceListElement(product, null, terms, null, null);
-        GetProductsResult getProductsResult = new GetProductsResult();
+        GetProductsResponse.Builder getProductsResponseBuilder = GetProductsResponse.builder();
         try {
-            getProductsResult.setPriceList(List.of(JsonUtil.writeValueAsString(priceListElement)));
+            getProductsResponseBuilder.priceList(List.of(JsonUtil.writeValueAsString(priceListElement)));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        return getProductsResult;
+        return getProductsResponseBuilder.build();
     }
 }

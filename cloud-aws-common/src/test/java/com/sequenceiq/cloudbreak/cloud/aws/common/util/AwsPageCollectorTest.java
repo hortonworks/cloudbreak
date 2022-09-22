@@ -22,7 +22,10 @@ class AwsPageCollectorTest {
                 testToken,
                 TestCollectable::getListOfSomething,
                 TestCollectable::getToken,
-                TestToken::setToken);
+                (req, token) -> {
+                    req.setToken(token);
+                    return req;
+                });
 
         assertThat(stringList, contains("first", "second"));
     }

@@ -21,9 +21,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.elasticfilesystem.model.DescribeFileSystemsResult;
-import com.amazonaws.services.elasticfilesystem.model.FileSystemDescription;
-import com.amazonaws.services.elasticfilesystem.model.FileSystemSize;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsEfsCommonService;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudConsumption;
@@ -31,6 +28,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StorageSizeRequest;
 import com.sequenceiq.cloudbreak.cloud.model.StorageSizeResponse;
 import com.sequenceiq.common.model.FileSystemType;
+
+import software.amazon.awssdk.services.efs.model.DescribeFileSystemsResponse;
+import software.amazon.awssdk.services.efs.model.FileSystemDescription;
+import software.amazon.awssdk.services.efs.model.FileSystemSize;
 
 @ExtendWith(MockitoExtension.class)
 class AwsEfsConsumptionCalculatorTest {
@@ -63,8 +64,9 @@ class AwsEfsConsumptionCalculatorTest {
                 .withRegion(region)
                 .build();
 
-        DescribeFileSystemsResult statisticsResult = new DescribeFileSystemsResult()
-                .withFileSystems(List.of());
+        DescribeFileSystemsResponse statisticsResult = DescribeFileSystemsResponse.builder()
+                .fileSystems(List.of())
+                .build();
         when(awsEfsCommonService.getEfsSize(null, REGION_NAME, startTime, endTime, EFS_NAME)).thenReturn(statisticsResult);
 
         CloudConnectorException ex = assertThrows(CloudConnectorException.class, () -> underTest.calculate(request));
@@ -86,11 +88,13 @@ class AwsEfsConsumptionCalculatorTest {
                 .withRegion(region)
                 .build();
 
-        FileSystemDescription description = new FileSystemDescription()
-                .withCreationTime(Date.from(Instant.now()))
-                .withSizeInBytes(new FileSystemSize().withValue(42L));
-        DescribeFileSystemsResult statisticsResult = new DescribeFileSystemsResult()
-                .withFileSystems(List.of(description));
+        FileSystemDescription description = FileSystemDescription.builder()
+                .creationTime(Instant.now())
+                .sizeInBytes(FileSystemSize.builder().value(42L).build())
+                .build();
+        DescribeFileSystemsResponse statisticsResult = DescribeFileSystemsResponse.builder()
+                .fileSystems(List.of(description))
+                .build();
         when(awsEfsCommonService.getEfsSize(null, REGION_NAME, startTime, endTime, EFS_NAME)).thenReturn(statisticsResult);
 
         Set<StorageSizeResponse> result = underTest.calculate(request);
