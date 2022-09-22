@@ -1,27 +1,22 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
-import com.amazonaws.services.rds.model.ModifyDBInstanceRequest;
-import com.amazonaws.waiters.Waiter;
-import com.amazonaws.waiters.WaiterTimedOutException;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -35,6 +30,12 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.waiters.Waiter;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
+import software.amazon.awssdk.services.rds.model.ModifyDbInstanceRequest;
+
+@ExtendWith(MockitoExtension.class)
 public class AwsRdsModifyServiceTest {
 
     private static final String REGION = "region";
@@ -69,7 +70,7 @@ public class AwsRdsModifyServiceTest {
     private DatabaseServer databaseServer;
 
     @Mock
-    private Waiter<DescribeDBInstancesRequest> rdsWaiter;
+    private Waiter<DescribeDbInstancesResponse> rdsWaiter;
 
     @Mock
     private CustomAmazonWaiterProvider provider;
@@ -77,10 +78,8 @@ public class AwsRdsModifyServiceTest {
     @InjectMocks
     private AwsRdsModifyService victim;
 
-    @Before
+    @BeforeEach
     public void initTests() {
-        initMocks(this);
-
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
@@ -89,35 +88,36 @@ public class AwsRdsModifyServiceTest {
         when(awsClient.createRdsClient(any(AwsCredentialView.class), eq(REGION))).thenReturn(amazonRDS);
         when(dbStack.getDatabaseServer()).thenReturn(databaseServer);
         when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
-        when(provider.getDbInstanceModifyWaiter(any())).thenReturn(rdsWaiter);
     }
 
     @Test
-    public void shouldStopAndScheduleTask() throws InterruptedException, ExecutionException, TimeoutException {
-        ArgumentCaptor<ModifyDBInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDBInstanceRequest.class);
+    public void shouldStopAndScheduleTask() {
+        ArgumentCaptor<ModifyDbInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDbInstanceRequest.class);
         when(amazonRDS.modifyDBInstance(modifyDBInstanceRequestArgumentCaptor.capture())).thenReturn(null);
+        when(provider.getDbInstanceModifyWaiter()).thenReturn(rdsWaiter);
 
         victim.disableDeleteProtection(authenticatedContext, dbStack);
 
-        assertEquals(DB_INSTANCE_IDENTIFIER, modifyDBInstanceRequestArgumentCaptor.getValue().getDBInstanceIdentifier());
+        assertEquals(DB_INSTANCE_IDENTIFIER, modifyDBInstanceRequestArgumentCaptor.getValue().dbInstanceIdentifier());
         verify(rdsWaiter, times(1)).run(any());
     }
 
-    @Test(expected = CloudConnectorException.class)
-    public void shouldThrowCloudConnectorExceptionInCaseOfRdsClientException() throws InterruptedException, ExecutionException, TimeoutException {
-        ArgumentCaptor<ModifyDBInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDBInstanceRequest.class);
+    @Test
+    public void shouldThrowCloudConnectorExceptionInCaseOfRdsClientException() {
+        ArgumentCaptor<ModifyDbInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDbInstanceRequest.class);
 
         when(amazonRDS.modifyDBInstance(modifyDBInstanceRequestArgumentCaptor.capture())).thenThrow(new RuntimeException());
 
-        victim.disableDeleteProtection(authenticatedContext, dbStack);
+        assertThrows(CloudConnectorException.class, () -> victim.disableDeleteProtection(authenticatedContext, dbStack));
     }
 
-    @Test(expected = CloudConnectorException.class)
-    public void shouldThrowCloudConnectorExceptionInCaseOfSchedulerException() throws InterruptedException, ExecutionException, TimeoutException {
-        ArgumentCaptor<ModifyDBInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDBInstanceRequest.class);
+    @Test
+    public void shouldThrowCloudConnectorExceptionInCaseOfSchedulerException() {
+        ArgumentCaptor<ModifyDbInstanceRequest> modifyDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(ModifyDbInstanceRequest.class);
         when(amazonRDS.modifyDBInstance(modifyDBInstanceRequestArgumentCaptor.capture())).thenReturn(null);
-        doThrow(WaiterTimedOutException.class).when(rdsWaiter).run(any());
+        when(provider.getDbInstanceModifyWaiter()).thenReturn(rdsWaiter);
+        doThrow(SdkException.class).when(rdsWaiter).run(any());
 
-        victim.disableDeleteProtection(authenticatedContext, dbStack);
+        assertThrows(CloudConnectorException.class, () -> victim.disableDeleteProtection(authenticatedContext, dbStack));
     }
 }

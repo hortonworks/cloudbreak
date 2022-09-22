@@ -4,8 +4,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest;
-import com.amazonaws.services.securitytoken.model.GetCallerIdentityResult;
 import com.sequenceiq.cloudbreak.cloud.IdentityService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.Arn;
@@ -13,6 +11,8 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+
+import software.amazon.awssdk.services.sts.model.GetCallerIdentityRequest;
 
 @Service
 public class AwsIdentityService implements IdentityService {
@@ -41,7 +41,6 @@ public class AwsIdentityService implements IdentityService {
 
     private String getAccountIdUsingAccessKey(String region, AwsCredentialView awsCredentialView) {
         AmazonSecurityTokenServiceClient stsService = awsClient.createSecurityTokenService(awsCredentialView, region);
-        GetCallerIdentityResult callerIdentity = stsService.getCallerIdentity(new GetCallerIdentityRequest());
-        return callerIdentity.getAccount();
+        return stsService.getCallerIdentity(GetCallerIdentityRequest.builder().build()).account();
     }
 }

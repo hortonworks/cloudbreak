@@ -10,13 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
-import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
-import com.amazonaws.services.rds.model.ModifyDBInstanceRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
-import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.common.database.Version;
+
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesRequest;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
+import software.amazon.awssdk.services.rds.model.ModifyDbInstanceRequest;
 
 @Service
 public class AwsRdsUpgradeOperations {
@@ -32,9 +32,9 @@ public class AwsRdsUpgradeOperations {
     @Inject
     private AwsRdsUpgradeWaitOperations awsRdsUpgradeWaitOperations;
 
-    public DescribeDBInstancesResult describeRds(AmazonRdsClient rdsClient, String dbInstanceIdentifier) {
-        DescribeDBInstancesRequest describeDBInstancesRequest = new DescribeDBInstancesRequest().withDBInstanceIdentifier(dbInstanceIdentifier);
-        DescribeDBInstancesResult result = rdsClient.describeDBInstances(describeDBInstancesRequest);
+    public DescribeDbInstancesResponse describeRds(AmazonRdsClient rdsClient, String dbInstanceIdentifier) {
+        DescribeDbInstancesRequest describeDBInstancesRequest = DescribeDbInstancesRequest.builder().dbInstanceIdentifier(dbInstanceIdentifier).build();
+        DescribeDbInstancesResponse result = rdsClient.describeDBInstances(describeDBInstancesRequest);
         LOGGER.debug("Describing RDS with dbInstanceIdentifier {}, result: {}", dbInstanceIdentifier, result);
         return result;
     }
@@ -49,18 +49,19 @@ public class AwsRdsUpgradeOperations {
     }
 
     public void upgradeRds(AmazonRdsClient rdsClient, RdsEngineVersion targetVersion, String dbInstanceIdentifier, String dbParameterGroupName) {
-        ModifyDBInstanceRequest modifyDBInstanceRequest = new ModifyDBInstanceRequest()
-                .withDBInstanceIdentifier(dbInstanceIdentifier)
-                .withEngineVersion(targetVersion.getVersion())
-                .withAllowMajorVersionUpgrade(true)
-                .withApplyImmediately(true);
+        ModifyDbInstanceRequest.Builder modifyDBInstanceRequestBuilder = ModifyDbInstanceRequest.builder()
+                .dbInstanceIdentifier(dbInstanceIdentifier)
+                .engineVersion(targetVersion.getVersion())
+                .allowMajorVersionUpgrade(true)
+                .applyImmediately(true);
         if (StringUtils.isNotEmpty(dbParameterGroupName)) {
-            modifyDBInstanceRequest.withDBParameterGroupName(dbParameterGroupName);
+            modifyDBInstanceRequestBuilder.dbParameterGroupName(dbParameterGroupName);
         }
 
-        LOGGER.debug("RDS modify request to upgrade engine version to {} for DB {}, request: {}", targetVersion, dbInstanceIdentifier, modifyDBInstanceRequest);
+        LOGGER.debug("RDS modify request to upgrade engine version to {} for DB {}, request: {}", targetVersion, dbInstanceIdentifier,
+                modifyDBInstanceRequestBuilder);
         try {
-            rdsClient.modifyDBInstance(modifyDBInstanceRequest);
+            rdsClient.modifyDBInstance(modifyDBInstanceRequestBuilder.build());
         } catch (Exception ex) {
             if (ex.getMessage().contains("Cannot modify engine version because another engine version upgrade is already in progress")) {
                 LOGGER.info("The upgrade has already been started");
@@ -72,10 +73,11 @@ public class AwsRdsUpgradeOperations {
         }
     }
 
-    public void waitForRdsUpgrade(AuthenticatedContext ac, AmazonRdsClient rdsClient, String dbInstanceIdentifier) {
+    public void waitForRdsUpgrade(AmazonRdsClient rdsClient, String dbInstanceIdentifier) {
         LOGGER.debug("Waiting until RDS enters upgrading state, dbInstanceIdentifier: {}", dbInstanceIdentifier);
-        DescribeDBInstancesRequest describeDBInstancesRequest = new DescribeDBInstancesRequest().withDBInstanceIdentifier(dbInstanceIdentifier);
+        DescribeDbInstancesRequest describeDBInstancesRequest = DescribeDbInstancesRequest.builder().dbInstanceIdentifier(dbInstanceIdentifier).build();
         awsRdsUpgradeWaitOperations.waitUntilUpgradeStarts(rdsClient, describeDBInstancesRequest);
-        awsRdsUpgradeWaitOperations.waitUntilUpgradeFinishes(ac, rdsClient, describeDBInstancesRequest);
+        awsRdsUpgradeWaitOperations.waitUntilUpgradeFinishes(rdsClient, describeDBInstancesRequest);
     }
 }
+

@@ -100,7 +100,7 @@ public class GcpDatabaseServerLaunchServiceTest {
 
         when(databaseInstance.getIpAddresses()).thenReturn(List.of(ipMapping));
 
-        CloudResource rdsHostName = underTest.getRdsHostName(databaseInstance, new CloudResource.Builder(), "id-1", "az1");
+        CloudResource rdsHostName = underTest.getRdsHostName(databaseInstance, CloudResource.builder(), "id-1", "az1");
 
         Assert.assertEquals(ResourceType.RDS_HOSTNAME, rdsHostName.getType());
         Assert.assertEquals("10.0.0.0", rdsHostName.getName());

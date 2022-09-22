@@ -7,8 +7,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.cloudformation.model.Stack;
 import com.sequenceiq.it.cloudbreak.util.aws.amazonec2.action.EC2ClientActions;
+
+import software.amazon.awssdk.services.cloudformation.model.Stack;
 
 @Component
 public class AmazonEC2Util {

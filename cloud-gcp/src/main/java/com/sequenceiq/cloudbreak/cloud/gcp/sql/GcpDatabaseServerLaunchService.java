@@ -90,7 +90,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                     databasePollerService.launchDatabasePoller(ac, List.of(operationAwareCloudResource));
                     DatabaseInstance instance = sqlAdmin.instances().get(projectId, deploymentName).execute();
                     if (instance != null) {
-                        CloudResource.Builder rdsInstance = new CloudResource.Builder();
+                        CloudResource.Builder rdsInstance = CloudResource.builder();
                         String instanceName = instance.getName();
                         buildableResource.add(getRdsHostName(instance, rdsInstance, instanceName, availabilityZone));
                         User rootUser = getRootUser(stack, projectId, instanceName);
@@ -118,7 +118,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
     }
 
     public CloudResource getRdsPort(String availabilityZone) {
-        return new CloudResource.Builder()
+        return CloudResource.builder()
                 .withType(ResourceType.RDS_PORT)
                 .withName(Integer.toString(POSTGRESQL_SERVER_PORT))
                 .withAvailabilityZone(availabilityZone)

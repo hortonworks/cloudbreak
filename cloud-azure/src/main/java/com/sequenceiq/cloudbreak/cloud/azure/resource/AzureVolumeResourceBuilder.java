@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -111,7 +110,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
             String stackName = cloudContext.getName();
             String availabilityZone = getAvailabilityZone(auth, vm);
 
-            return new Builder()
+            return CloudResource.builder()
                     .withPersistent(true)
                     .withType(resourceType())
                     .withName(resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, stackCrn))
@@ -212,7 +211,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
     }
 
     private Function<CloudResource, CloudResource> copyResourceWithNewStatus(CommonStatus status) {
-        return resource -> new Builder()
+        return resource -> CloudResource.builder()
                 .withPersistent(true)
                 .withGroup(resource.getGroup())
                 .withType(resource.getType())

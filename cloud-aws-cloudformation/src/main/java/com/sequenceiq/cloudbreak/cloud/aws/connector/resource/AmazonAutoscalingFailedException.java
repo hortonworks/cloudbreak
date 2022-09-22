@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-public class AmazonAutoscalingFailed extends Exception {
+public class AmazonAutoscalingFailedException extends Exception {
 
-    public AmazonAutoscalingFailed(String message) {
+    public AmazonAutoscalingFailedException(String message) {
         super(message);
     }
 
-    public AmazonAutoscalingFailed(String message, Throwable cause) {
+    public AmazonAutoscalingFailedException(String message, Throwable cause) {
         super(message, cause);
     }
 

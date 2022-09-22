@@ -15,20 +15,21 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import com.amazonaws.services.cloudformation.model.DescribeStackEventsRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStackEventsResult;
-import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
-import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
-import com.amazonaws.services.cloudformation.model.ResourceStatus;
-import com.amazonaws.services.cloudformation.model.StackEvent;
-import com.amazonaws.services.cloudformation.model.StackResource;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsEncodedAuthorizationFailureMessageDecoder;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+
+import software.amazon.awssdk.services.cloudformation.model.DescribeStackEventsRequest;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStackEventsResponse;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourcesRequest;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStackResourcesResponse;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStacksRequest;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStacksResponse;
+import software.amazon.awssdk.services.cloudformation.model.ResourceStatus;
+import software.amazon.awssdk.services.cloudformation.model.StackEvent;
+import software.amazon.awssdk.services.cloudformation.model.StackResource;
 
 @Component
 public class AwsCloudFormationErrorMessageProvider {
@@ -55,7 +56,7 @@ public class AwsCloudFormationErrorMessageProvider {
         String stackStatusReason = getStackStatusReason(stackName, cfClient);
         List<StackEvent> cfEvents = getCfEvents(stackName, cfClient);
 
-        Set<String> resourceErrorStatusesSet = Arrays.stream(resourceErrorStatuses).map(ResourceStatus::name).collect(Collectors.toSet());
+        Set<ResourceStatus> resourceErrorStatusesSet = Arrays.stream(resourceErrorStatuses).collect(Collectors.toSet());
 
         String stackResourceStatusReasons = getStackResourceStatusReasons(credentialView, region, stackName, resourceErrorStatusesSet, cfClient);
 
@@ -71,45 +72,45 @@ public class AwsCloudFormationErrorMessageProvider {
     }
 
     private List<StackEvent> getCfEvents(String stackName, AmazonCloudFormationClient cfClient) {
-        DescribeStackEventsResult eventsResult = cfClient.describeStackEvents(new DescribeStackEventsRequest().withStackName(stackName));
-        return eventsResult.getStackEvents();
+        DescribeStackEventsResponse eventsResponse = cfClient.describeStackEvents(DescribeStackEventsRequest.builder().stackName(stackName).build());
+        return eventsResponse.stackEvents();
     }
 
-    private String getStackResourceStatusReasons(AwsCredentialView credentialView, String region, String stackName, Set<String> resourceErrorStatuses,
+    private String getStackResourceStatusReasons(AwsCredentialView credentialView, String region, String stackName, Set<ResourceStatus> resourceErrorStatuses,
             AmazonCloudFormationClient cfClient) {
-        DescribeStackResourcesRequest describeStackResourcesRequest = new DescribeStackResourcesRequest().withStackName(stackName);
-        DescribeStackResourcesResult describeStackResourcesResult = cfClient.describeStackResources(describeStackResourcesRequest);
-        String stackResourceStatusReasons = describeStackResourcesResult.getStackResources().stream()
-                .filter(stackResource -> resourceErrorStatuses.contains(stackResource.getResourceStatus()))
+        DescribeStackResourcesRequest describeStackResourcesRequest = DescribeStackResourcesRequest.builder().stackName(stackName).build();
+        DescribeStackResourcesResponse describeStackResourcesResponse = cfClient.describeStackResources(describeStackResourcesRequest);
+        String stackResourceStatusReasons = describeStackResourcesResponse.stackResources().stream()
+                .filter(stackResource -> resourceErrorStatuses.contains(stackResource.resourceStatus()))
                 .map(stackResource -> getStackResourceMessage(credentialView, region, stackResource))
                 .collect(Collectors.joining(", "));
         return stackResourceStatusReasons;
     }
 
-    private String getStackEventResourceStatus(List<StackEvent> cfEvents, Set<String> resourceErrorStatuses) {
+    private String getStackEventResourceStatus(List<StackEvent> cfEvents, Set<ResourceStatus> resourceErrorStatuses) {
         String stackResourceStatusReasons = cfEvents.stream()
-                .filter(event -> resourceErrorStatuses.contains(event.getResourceStatus()))
-                .map(StackEvent::getResourceStatusReason)
+                .filter(event -> resourceErrorStatuses.contains(event.resourceStatus()))
+                .map(StackEvent::resourceStatusReason)
                 .collect(Collectors.joining(", "));
         return stackResourceStatusReasons;
     }
 
     private String getStackStatusReason(String stackName, AmazonCloudFormationClient cfClient) {
-        DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(stackName);
-        DescribeStacksResult describeStacksResult = cfClient.describeStacks(describeStacksRequest);
-        LOGGER.debug("Cloudformation stack {} describe result: {}", stackName, describeStacksResult);
+        DescribeStacksRequest describeStacksRequest = DescribeStacksRequest.builder().stackName(stackName).build();
+        DescribeStacksResponse describeStacksResponse = cfClient.describeStacks(describeStacksRequest);
+        LOGGER.debug("Cloudformation stack {} describe result: {}", stackName, describeStacksResponse);
         String stackStatusReason = null;
-        if (!CollectionUtils.isEmpty(describeStacksResult.getStacks())) {
-            stackStatusReason = describeStacksResult.getStacks().get(0).getStackStatusReason();
+        if (!CollectionUtils.isEmpty(describeStacksResponse.stacks())) {
+            stackStatusReason = describeStacksResponse.stacks().get(0).stackStatusReason();
         }
         LOGGER.debug("Cloudformation stack {} has the error status reason: {}", stackName, stackStatusReason);
         return stackStatusReason;
     }
 
     private String getStackResourceMessage(AwsCredentialView credentialView, String region, StackResource stackResource) {
-        String resourceId = stackResource.getLogicalResourceId();
+        String resourceId = stackResource.logicalResourceId();
         String statusReason = awsEncodedAuthorizationFailureMessageDecoder
-                .decodeAuthorizationFailureMessageIfNeeded(credentialView, region, stackResource.getResourceStatusReason());
+                .decodeAuthorizationFailureMessageIfNeeded(credentialView, region, stackResource.resourceStatusReason());
         LOGGER.debug("Cloudformation resource {} has the error status reason: {}", resourceId, statusReason);
         return resourceId + ": " + statusReason;
     }

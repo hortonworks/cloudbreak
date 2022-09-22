@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -70,7 +69,7 @@ public class GcpSubnetResourceBuilder extends AbstractGcpNetworkBuilder {
             }
         }
         context.putParameter(SUBNET_NAME, resource.getName());
-        return new Builder().cloudResource(resource).withPersistent(false).build();
+        return CloudResource.builder().cloudResource(resource).withPersistent(false).build();
     }
 
     @Override

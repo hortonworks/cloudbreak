@@ -22,13 +22,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.securitytoken.model.AWSSecurityTokenServiceException;
-import com.amazonaws.services.securitytoken.model.DecodeAuthorizationMessageRequest;
-import com.amazonaws.services.securitytoken.model.DecodeAuthorizationMessageResult;
 import com.github.jknack.handlebars.internal.Files;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
+
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.services.sts.model.DecodeAuthorizationMessageRequest;
+import software.amazon.awssdk.services.sts.model.DecodeAuthorizationMessageResponse;
+import software.amazon.awssdk.services.sts.model.StsException;
 
 @ExtendWith(MockitoExtension.class)
 class AwsEncodedAuthorizationFailureMessageDecoderTest {
@@ -65,7 +67,7 @@ class AwsEncodedAuthorizationFailureMessageDecoderTest {
         lenient().when(awsClient.createSecurityTokenService(any(), eq(REGION)))
                 .thenReturn(awsSecurityTokenService);
         lenient().when(awsSecurityTokenService.decodeAuthorizationMessage(any()))
-                .thenReturn(new DecodeAuthorizationMessageResult().withDecodedMessage(decodedMessage));
+                .thenReturn(DecodeAuthorizationMessageResponse.builder().decodedMessage(decodedMessage).build());
     }
 
     @Test
@@ -88,13 +90,15 @@ class AwsEncodedAuthorizationFailureMessageDecoderTest {
         verify(awsClient).createSecurityTokenService(awsCredentialView, REGION);
         verify(awsSecurityTokenService).decodeAuthorizationMessage(requestCaptor.capture());
         DecodeAuthorizationMessageRequest request = requestCaptor.getValue();
-        assertThat(request.getEncodedMessage()).isEqualTo("encoded-message");
+        assertThat(request.encodedMessage()).isEqualTo("encoded-message");
     }
 
     @Test
     void shouldReturnMessageWithWarningWhenStsAccessIsDenied() {
-        AWSSecurityTokenServiceException exception = new AWSSecurityTokenServiceException("AccessDenied");
-        exception.setErrorCode("AccessDenied");
+        StsException exception = (StsException) StsException.builder()
+                .message("AccessDenied")
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode("AccessDenied").build())
+                .build();
         when(awsSecurityTokenService.decodeAuthorizationMessage(any()))
                 .thenThrow(exception);
 
@@ -108,7 +112,9 @@ class AwsEncodedAuthorizationFailureMessageDecoderTest {
 
     @Test
     void shouldReturnDefaultMessageWhenStsThrowsOtherException() {
-        AWSSecurityTokenServiceException exception = new AWSSecurityTokenServiceException("SomethingWentWrong");
+        StsException exception = (StsException) StsException.builder()
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode("SomethingWentWrong").build())
+                .build();
         when(awsSecurityTokenService.decodeAuthorizationMessage(any()))
                 .thenThrow(exception);
 

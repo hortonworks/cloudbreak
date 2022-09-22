@@ -1,42 +1,29 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
-import com.amazonaws.services.autoscaling.model.LaunchTemplate;
-import com.amazonaws.services.autoscaling.model.LaunchTemplateSpecification;
-import com.amazonaws.services.autoscaling.model.MixedInstancesPolicy;
-import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
-import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupResult;
-import com.amazonaws.services.cloudformation.model.GetTemplateResult;
-import com.amazonaws.services.ec2.model.CreateLaunchTemplateVersionRequest;
-import com.amazonaws.services.ec2.model.CreateLaunchTemplateVersionResult;
-import com.amazonaws.services.ec2.model.LaunchTemplateVersion;
-import com.amazonaws.services.ec2.model.ModifyLaunchTemplateRequest;
-import com.amazonaws.services.ec2.model.ModifyLaunchTemplateResult;
-import com.amazonaws.services.ec2.model.ValidationError;
-import com.amazonaws.services.ec2.model.ValidationWarning;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -47,15 +34,28 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.ResourceType;
 
+import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.LaunchTemplate;
+import software.amazon.awssdk.services.autoscaling.model.LaunchTemplateSpecification;
+import software.amazon.awssdk.services.autoscaling.model.MixedInstancesPolicy;
+import software.amazon.awssdk.services.autoscaling.model.UpdateAutoScalingGroupRequest;
+import software.amazon.awssdk.services.autoscaling.model.UpdateAutoScalingGroupResponse;
+import software.amazon.awssdk.services.ec2.model.CreateLaunchTemplateVersionRequest;
+import software.amazon.awssdk.services.ec2.model.CreateLaunchTemplateVersionResponse;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateVersion;
+import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateRequest;
+import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateResponse;
+import software.amazon.awssdk.services.ec2.model.ValidationError;
+import software.amazon.awssdk.services.ec2.model.ValidationWarning;
+
+@ExtendWith(MockitoExtension.class)
 public class AwsLaunchTemplateUpdateServiceTest {
+
     private static final Long WORKSPACE_ID = 1L;
 
     private static final String IMAGE_NAME = "imageName";
@@ -63,6 +63,8 @@ public class AwsLaunchTemplateUpdateServiceTest {
     private static final String DESCRIPTION = "description";
 
     private static final String USER_DATA = Base64.getEncoder().encodeToString("userdata".getBytes());
+
+    private static final long LAUNCH_TEMPLATE_VERSION = 1L;
 
     @Mock
     private AwsCloudFormationClient awsClient;
@@ -93,12 +95,11 @@ public class AwsLaunchTemplateUpdateServiceTest {
 
     private AuthenticatedContext ac;
 
-    @Before
+    @BeforeEach
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         Location location = Location.location(Region.region("region"));
         CloudContext context = CloudContext.Builder.builder()
-                .withId(1L)
+                .withId(LAUNCH_TEMPLATE_VERSION)
                 .withName("cloudContext")
                 .withCrn("crn")
                 .withPlatform("AWS")
@@ -108,18 +109,15 @@ public class AwsLaunchTemplateUpdateServiceTest {
                 .build();
         CloudCredential cc = new CloudCredential("crn", "cc", "account");
         ac = new AuthenticatedContext(context, cc);
-        Group group = mock(Group.class);
-        when(group.getName()).thenReturn("GroupName");
-        when(stack.getGroups()).thenReturn(List.of(group));
-        when(stack.getImage()).thenReturn(image);
-        when(image.getImageName()).thenReturn(IMAGE_NAME);
-        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), anyString())).thenReturn(cloudFormationClient);
-        when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), anyString())).thenReturn(autoScalingClient);
-        when(awsClient.createEc2Client(any(AwsCredentialView.class), anyString())).thenReturn(ec2Client);
+        lenient().when(stack.getImage()).thenReturn(image);
+        lenient().when(image.getImageName()).thenReturn(IMAGE_NAME);
+        lenient().when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), anyString())).thenReturn(cloudFormationClient);
+        lenient().when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), anyString())).thenReturn(autoScalingClient);
+        lenient().when(awsClient.createEc2Client(any(AwsCredentialView.class), anyString())).thenReturn(ec2Client);
     }
 
     @Test
-    public void shouldUpdateImage() throws IOException {
+    public void shouldUpdateImage() {
         // GIVEN
         String cfStackName = "cf";
         CloudResource cfResource = CloudResource.builder()
@@ -127,16 +125,12 @@ public class AwsLaunchTemplateUpdateServiceTest {
                 .withName(cfStackName)
                 .build();
 
-        String template = FileReaderUtils.readFileFromClasspath("json/aws-cf-template.json");
-        String cfTemplateBody = JsonUtil.minify(String.format(template, "{\"Ref\":\"AMI\"}"));
-        when(cloudFormationClient.getTemplate(any())).thenReturn(new GetTemplateResult().withTemplateBody(cfTemplateBody));
-
         Map<AutoScalingGroup, String> autoScalingGroupsResult = createAutoScalingGroupHandler();
         when(autoScalingGroupHandler.getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource.getName())).thenReturn(autoScalingGroupsResult);
-        when(ec2Client.createLaunchTemplateVersion(any(CreateLaunchTemplateVersionRequest.class))).thenReturn(new CreateLaunchTemplateVersionResult()
-                .withLaunchTemplateVersion(new LaunchTemplateVersion().withVersionNumber(1L)));
-        when(ec2Client.modifyLaunchTemplate(any(ModifyLaunchTemplateRequest.class))).thenReturn(new ModifyLaunchTemplateResult());
-        when(autoScalingClient.updateAutoScalingGroup(any(UpdateAutoScalingGroupRequest.class))).thenReturn(new UpdateAutoScalingGroupResult());
+        when(ec2Client.createLaunchTemplateVersion(any(CreateLaunchTemplateVersionRequest.class))).thenReturn(CreateLaunchTemplateVersionResponse.builder()
+                .launchTemplateVersion(LaunchTemplateVersion.builder().versionNumber(LAUNCH_TEMPLATE_VERSION).build()).build());
+        when(ec2Client.modifyLaunchTemplate(any(ModifyLaunchTemplateRequest.class))).thenReturn(ModifyLaunchTemplateResponse.builder().build());
+        when(autoScalingClient.updateAutoScalingGroup(any(UpdateAutoScalingGroupRequest.class))).thenReturn(UpdateAutoScalingGroupResponse.builder().build());
 
         // WHEN
         underTest.updateFieldsOnAllLaunchTemplate(ac, cfResource.getName(), Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName()));
@@ -144,41 +138,37 @@ public class AwsLaunchTemplateUpdateServiceTest {
         // THEN
         verify(ec2Client).createLaunchTemplateVersion(argumentCaptor.capture());
         CreateLaunchTemplateVersionRequest request = argumentCaptor.getValue();
-        Assertions.assertEquals(stack.getImage().getImageName(), request.getLaunchTemplateData().getImageId());
+        assertEquals(stack.getImage().getImageName(), request.launchTemplateData().imageId());
     }
 
     @Test
-    public void testUpdateFieldsUpdatesTheAppropriateParams() throws IOException {
+    public void testUpdateFieldsUpdatesTheAppropriateParams() {
         // GIVEN
         String cfStackName = "cf";
         CloudResource cfResource = CloudResource.builder()
                 .withType(ResourceType.CLOUDFORMATION_STACK)
                 .withName(cfStackName)
                 .build();
-
-        String template = FileReaderUtils.readFileFromClasspath("json/aws-cf-template.json");
-        String cfTemplateBody = JsonUtil.minify(String.format(template, "{\"Ref\":\"AMI\"}"));
-        when(cloudFormationClient.getTemplate(any())).thenReturn(new GetTemplateResult().withTemplateBody(cfTemplateBody));
 
         Map<AutoScalingGroup, String> autoScalingGroupsResult = createAutoScalingGroupHandler();
         when(autoScalingGroupHandler.getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource.getName())).thenReturn(autoScalingGroupsResult);
         Map<LaunchTemplateField, String> updatableFieldMap = Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName(),
                 LaunchTemplateField.DESCRIPTION, DESCRIPTION, LaunchTemplateField.USER_DATA, USER_DATA);
-        when(ec2Client.createLaunchTemplateVersion(any(CreateLaunchTemplateVersionRequest.class))).thenReturn(new CreateLaunchTemplateVersionResult()
-                .withLaunchTemplateVersion(new LaunchTemplateVersion().withVersionNumber(1L)));
+        when(ec2Client.createLaunchTemplateVersion(any(CreateLaunchTemplateVersionRequest.class))).thenReturn(CreateLaunchTemplateVersionResponse.builder()
+                .launchTemplateVersion(LaunchTemplateVersion.builder().versionNumber(LAUNCH_TEMPLATE_VERSION).build()).build());
         // WHEN
         underTest.updateFieldsOnAllLaunchTemplate(ac, cfResource.getName(), updatableFieldMap);
 
         // THEN
         verify(ec2Client).createLaunchTemplateVersion(argumentCaptor.capture());
         CreateLaunchTemplateVersionRequest request = argumentCaptor.getValue();
-        Assertions.assertEquals(stack.getImage().getImageName(), request.getLaunchTemplateData().getImageId());
-        Assertions.assertEquals(USER_DATA, request.getLaunchTemplateData().getUserData());
-        Assertions.assertEquals(DESCRIPTION, request.getVersionDescription());
+        assertEquals(stack.getImage().getImageName(), request.launchTemplateData().imageId());
+        assertEquals(USER_DATA, request.launchTemplateData().userData());
+        assertEquals(DESCRIPTION, request.versionDescription());
     }
 
     @Test
-    public void testUpdateFieldsUpdatesWithMissingParams() throws IOException {
+    public void testUpdateFieldsUpdatesWithMissingParams() {
         // GIVEN
         String cfStackName = "cf";
         CloudResource cfResource = CloudResource.builder()
@@ -186,25 +176,21 @@ public class AwsLaunchTemplateUpdateServiceTest {
                 .withName(cfStackName)
                 .build();
 
-        String template = FileReaderUtils.readFileFromClasspath("json/aws-cf-template.json");
-        String cfTemplateBody = JsonUtil.minify(String.format(template, "{\"Ref\":\"AMI\"}"));
-        when(cloudFormationClient.getTemplate(any())).thenReturn(new GetTemplateResult().withTemplateBody(cfTemplateBody));
-
         Map<AutoScalingGroup, String> autoScalingGroupsResult = createAutoScalingGroupHandler();
         when(autoScalingGroupHandler.getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource.getName())).thenReturn(autoScalingGroupsResult);
         Map<LaunchTemplateField, String> updatableFieldMap = Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName(),
                 LaunchTemplateField.DESCRIPTION, DESCRIPTION);
-        when(ec2Client.createLaunchTemplateVersion(any(CreateLaunchTemplateVersionRequest.class))).thenReturn(new CreateLaunchTemplateVersionResult()
-                .withLaunchTemplateVersion(new LaunchTemplateVersion().withVersionNumber(1L)));
+        when(ec2Client.createLaunchTemplateVersion(any(CreateLaunchTemplateVersionRequest.class))).thenReturn(CreateLaunchTemplateVersionResponse.builder()
+                .launchTemplateVersion(LaunchTemplateVersion.builder().versionNumber(LAUNCH_TEMPLATE_VERSION).build()).build());
         // WHEN
         underTest.updateFieldsOnAllLaunchTemplate(ac, cfResource.getName(), updatableFieldMap);
 
         // THEN
         verify(ec2Client).createLaunchTemplateVersion(argumentCaptor.capture());
         CreateLaunchTemplateVersionRequest request = argumentCaptor.getValue();
-        Assertions.assertEquals(stack.getImage().getImageName(), request.getLaunchTemplateData().getImageId());
-        Assertions.assertEquals(DESCRIPTION, request.getVersionDescription());
-        Assertions.assertNull(request.getLaunchTemplateData().getUserData());
+        assertEquals(stack.getImage().getImageName(), request.launchTemplateData().imageId());
+        assertEquals(DESCRIPTION, request.versionDescription());
+        assertNull(request.launchTemplateData().userData());
     }
 
     @Test
@@ -213,20 +199,14 @@ public class AwsLaunchTemplateUpdateServiceTest {
         Map<LaunchTemplateField, String> updatableFields = new HashMap<>();
         AmazonAutoScalingClient autoScalingClient = mock(AmazonAutoScalingClient.class);
         AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
-        AutoScalingGroup asgEntry = mock(AutoScalingGroup.class);
-        LaunchTemplateSpecification launchTemplateSpecification = mock(LaunchTemplateSpecification.class);
-        CreateLaunchTemplateVersionResult createLaunchTemplateVersionResult = mock(CreateLaunchTemplateVersionResult.class);
-        LaunchTemplateVersion launchTemplateVersion = mock(LaunchTemplateVersion.class);
-        ModifyLaunchTemplateResult modifyLaunchTemplateResult = mock(ModifyLaunchTemplateResult.class);
-        UpdateAutoScalingGroupResult updateAutoScalingGroupResult = mock(UpdateAutoScalingGroupResult.class);
-
-        when(asgEntry.getAutoScalingGroupName()).thenReturn("master");
-        when(launchTemplateSpecification.getLaunchTemplateId()).thenReturn("1");
-        when(launchTemplateSpecification.getLaunchTemplateName()).thenReturn("lt");
-        when(createLaunchTemplateVersionResult.getLaunchTemplateVersion()).thenReturn(launchTemplateVersion);
-        when(asgEntry.getLaunchTemplate()).thenReturn(launchTemplateSpecification);
-        when(createLaunchTemplateVersionResult.getWarning()).thenReturn(null);
-        when(launchTemplateVersion.getVersionNumber()).thenReturn(1L);
+        LaunchTemplateSpecification launchTemplateSpecification = LaunchTemplateSpecification.builder().launchTemplateId("1").launchTemplateName("lt").build();
+        LaunchTemplateVersion launchTemplateVersion = LaunchTemplateVersion.builder().versionNumber(LAUNCH_TEMPLATE_VERSION).build();
+        AutoScalingGroup asgEntry = AutoScalingGroup.builder().autoScalingGroupName("master").launchTemplate(launchTemplateSpecification).build();
+        CreateLaunchTemplateVersionResponse createLaunchTemplateVersionResult = CreateLaunchTemplateVersionResponse.builder()
+                .launchTemplateVersion(launchTemplateVersion)
+                .build();
+        ModifyLaunchTemplateResponse modifyLaunchTemplateResult = ModifyLaunchTemplateResponse.builder().build();
+        UpdateAutoScalingGroupResponse updateAutoScalingGroupResult = UpdateAutoScalingGroupResponse.builder().build();
 
         when(ec2Client.createLaunchTemplateVersion(any())).thenReturn(createLaunchTemplateVersionResult);
         when(ec2Client.modifyLaunchTemplate(any())).thenReturn(modifyLaunchTemplateResult);
@@ -241,7 +221,7 @@ public class AwsLaunchTemplateUpdateServiceTest {
     }
 
     @Test
-    public void testUpdateImageWithWrongTemplateParams() throws IOException {
+    public void testUpdateImageWithWrongTemplateParams() {
         // GIVEN
         String cfStackName = "cf";
         CloudResource cfResource = CloudResource.builder()
@@ -249,31 +229,31 @@ public class AwsLaunchTemplateUpdateServiceTest {
                 .withName(cfStackName)
                 .build();
 
-        String template = FileReaderUtils.readFileFromClasspath("json/aws-cf-template.json");
-        String cfTemplateBody = JsonUtil.minify(String.format(template, "{\"Ref\":\"AMI\"}"));
-        when(cloudFormationClient.getTemplate(any())).thenReturn(new GetTemplateResult().withTemplateBody(cfTemplateBody));
-
         Map<AutoScalingGroup, String> autoScalingGroupsResult = createAutoScalingGroupHandler();
         when(autoScalingGroupHandler.getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource.getName())).thenReturn(autoScalingGroupsResult);
-        when(ec2Client.createLaunchTemplateVersion(any(CreateLaunchTemplateVersionRequest.class))).thenReturn(new CreateLaunchTemplateVersionResult()
-                .withWarning(new ValidationWarning().withErrors(new ValidationError().withCode("1").withMessage("error"))));
+        when(ec2Client.createLaunchTemplateVersion(any(CreateLaunchTemplateVersionRequest.class)))
+                .thenReturn(CreateLaunchTemplateVersionResponse.builder()
+                        .warning(ValidationWarning.builder().errors(ValidationError.builder().code("1").message("error").build()).build()).build());
 
         // WHEN and THEN exception
-        Assert.assertThrows(CloudConnectorException.class,
+        assertThrows(CloudConnectorException.class,
                 () -> underTest.updateFieldsOnAllLaunchTemplate(ac, cfResource.getName(),
                         Map.of(LaunchTemplateField.IMAGE_ID, stack.getImage().getImageName())));
     }
 
     private Map<AutoScalingGroup, String> createAutoScalingGroupHandler() {
-        AutoScalingGroup autoScalingGroup = new AutoScalingGroup().withAutoScalingGroupName("ag").withMixedInstancesPolicy(createMixedInstancePolicy());
-        return Map.of(autoScalingGroup, autoScalingGroup.getAutoScalingGroupName());
+        AutoScalingGroup autoScalingGroup = AutoScalingGroup.builder().autoScalingGroupName("ag").mixedInstancesPolicy(createMixedInstancePolicy()).build();
+        return Map.of(autoScalingGroup, autoScalingGroup.autoScalingGroupName());
     }
 
     private MixedInstancesPolicy createMixedInstancePolicy() {
-        return new MixedInstancesPolicy().withLaunchTemplate(new LaunchTemplate().withLaunchTemplateSpecification(createLaunchTemplateSpecification()));
+        return MixedInstancesPolicy.builder()
+                .launchTemplate(LaunchTemplate.builder()
+                        .launchTemplateSpecification(createLaunchTemplateSpecification()).build())
+                .build();
     }
 
     private LaunchTemplateSpecification createLaunchTemplateSpecification() {
-        return new LaunchTemplateSpecification().withLaunchTemplateId("templateid").withVersion("1");
+        return LaunchTemplateSpecification.builder().launchTemplateId("templateid").version("1").build();
     }
 }

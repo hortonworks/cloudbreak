@@ -109,7 +109,7 @@ public class GcpHealthCheckResourceBuilderTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("hcport", 8080);
         parameters.put("trafficport", 8080);
-        CloudResource resource = new CloudResource.Builder()
+        CloudResource resource = CloudResource.builder()
                 .withType(ResourceType.GCP_HEALTH_CHECK)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")
@@ -144,7 +144,7 @@ public class GcpHealthCheckResourceBuilderTest {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("hcport", 8080);
         parameters.put("trafficport", 8080);
-        CloudResource resource = new CloudResource.Builder()
+        CloudResource resource = CloudResource.builder()
                 .withType(ResourceType.GCP_HEALTH_CHECK)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")

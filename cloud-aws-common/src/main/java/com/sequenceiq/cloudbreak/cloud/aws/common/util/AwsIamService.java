@@ -25,27 +25,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.auth.policy.Action;
-import com.amazonaws.auth.policy.Policy;
-import com.amazonaws.auth.policy.Resource;
-import com.amazonaws.auth.policy.Statement;
-import com.amazonaws.services.identitymanagement.model.AmazonIdentityManagementException;
-import com.amazonaws.services.identitymanagement.model.EvaluationResult;
-import com.amazonaws.services.identitymanagement.model.GetInstanceProfileRequest;
-import com.amazonaws.services.identitymanagement.model.GetRoleRequest;
-import com.amazonaws.services.identitymanagement.model.InstanceProfile;
-import com.amazonaws.services.identitymanagement.model.NoSuchEntityException;
-import com.amazonaws.services.identitymanagement.model.Role;
-import com.amazonaws.services.identitymanagement.model.ServiceFailureException;
-import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyRequest;
-import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAccessConfigType;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.model.CloudIdentityType;
 
+import software.amazon.awssdk.core.auth.policy.Action;
+import software.amazon.awssdk.core.auth.policy.Policy;
+import software.amazon.awssdk.core.auth.policy.Resource;
+import software.amazon.awssdk.core.auth.policy.Statement;
+import software.amazon.awssdk.services.iam.model.EvaluationResult;
+import software.amazon.awssdk.services.iam.model.GetInstanceProfileRequest;
+import software.amazon.awssdk.services.iam.model.GetRoleRequest;
+import software.amazon.awssdk.services.iam.model.IamException;
+import software.amazon.awssdk.services.iam.model.InstanceProfile;
+import software.amazon.awssdk.services.iam.model.NoSuchEntityException;
+import software.amazon.awssdk.services.iam.model.Role;
+import software.amazon.awssdk.services.iam.model.ServiceFailureException;
+import software.amazon.awssdk.services.iam.model.SimulatePrincipalPolicyRequest;
+import software.amazon.awssdk.services.iam.model.SimulatePrincipalPolicyResponse;
+
 @Service
 public class AwsIamService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsIamService.class);
 
     private static final String POLICY_BASE_LOCATION = "definitions/cdp/";
@@ -63,13 +65,14 @@ public class AwsIamService {
         InstanceProfile instanceProfile = null;
         if (instanceProfileArn != null && instanceProfileArn.contains("/")) {
             String instanceProfileName = instanceProfileArn.split("/", 2)[1];
-            GetInstanceProfileRequest instanceProfileRequest = new GetInstanceProfileRequest()
-                    .withInstanceProfileName(instanceProfileName);
+            GetInstanceProfileRequest instanceProfileRequest = GetInstanceProfileRequest.builder()
+                    .instanceProfileName(instanceProfileName)
+                    .build();
             try {
-                instanceProfile = iam.getInstanceProfile(instanceProfileRequest).getInstanceProfile();
+                instanceProfile = iam.getInstanceProfile(instanceProfileRequest).instanceProfile();
             } catch (NoSuchEntityException | ServiceFailureException e) {
-                String msg = String.format("Instance profile (%s) doesn't exists on AWS side. " +
-                        getAdviceMessage(AwsAccessConfigType.INSTANCE_PROFILE, cloudIdentityType), instanceProfileArn);
+                String msg = String.format("Instance profile (%s) doesn't exists on AWS side. %s",
+                        instanceProfileArn, getAdviceMessage(AwsAccessConfigType.INSTANCE_PROFILE, cloudIdentityType));
                 LOGGER.error(msg, e);
                 validationResultBuilder.error(msg);
             }
@@ -106,11 +109,11 @@ public class AwsIamService {
         Role role = null;
         if (roleArn != null && roleArn.contains("/")) {
             String roleName = roleArn.split("/", 2)[1];
-            GetRoleRequest roleRequest = new GetRoleRequest().withRoleName(roleName);
+            GetRoleRequest roleRequest = GetRoleRequest.builder().roleName(roleName).build();
             try {
-                role = iam.getRole(roleRequest).getRole();
+                role = iam.getRole(roleRequest).role();
             } catch (NoSuchEntityException | ServiceFailureException e) {
-                String msg = String.format("Role (%s) doesn't exists on AWS side. " + getAdviceMessage(AwsAccessConfigType.ROLE, ID_BROKER), roleArn);
+                String msg = String.format("Role (%s) doesn't exists on AWS side. %s", roleArn, getAdviceMessage(AwsAccessConfigType.ROLE, ID_BROKER));
                 LOGGER.debug(msg, e);
                 validationResultBuilder.error(msg);
             }
@@ -126,14 +129,13 @@ public class AwsIamService {
      */
     public Policy getAssumeRolePolicy(Role role) {
         Policy policy = null;
-        String assumeRolePolicyDocument = role.getAssumeRolePolicyDocument();
+        String assumeRolePolicyDocument = role.assumeRolePolicyDocument();
         if (assumeRolePolicyDocument != null) {
             try {
-                String decodedAssumeRolePolicyDocument = URLDecoder.decode(assumeRolePolicyDocument,
-                        StandardCharsets.UTF_8);
+                String decodedAssumeRolePolicyDocument = URLDecoder.decode(assumeRolePolicyDocument, StandardCharsets.UTF_8);
                 policy = Policy.fromJson(decodedAssumeRolePolicyDocument);
             } catch (IllegalArgumentException e) {
-                LOGGER.error(String.format("Unable to get policy from role (%s)", role.getArn()), e);
+                LOGGER.error(String.format("Unable to get policy from role (%s)", role.arn()), e);
             }
         }
 
@@ -220,22 +222,23 @@ public class AwsIamService {
      * Helper method that wraps simulating a principal policy
      *
      * @param iam             AmazonIdentityManagement client
-     * @param policySourceArn arn to to check against
+     * @param policySourceArn arn to check against
      * @param actionNames     actions to simulate
      * @param resourceArns    resources to simulate
      * @return List of evaluation results
+     * @throws IamException   simulate policy exception
      */
     public List<EvaluationResult> simulatePrincipalPolicy(AmazonIdentityManagementClient iam,
-            String policySourceArn, Collection<String> actionNames, Collection<String> resourceArns)
-            throws AmazonIdentityManagementException {
+            String policySourceArn, Collection<String> actionNames, Collection<String> resourceArns) {
         SimulatePrincipalPolicyRequest simulatePrincipalPolicyRequest =
-                new SimulatePrincipalPolicyRequest()
-                        .withPolicySourceArn(policySourceArn)
-                        .withActionNames(actionNames)
-                        .withResourceArns(resourceArns);
-        SimulatePrincipalPolicyResult simulatePrincipalPolicyResult =
+                SimulatePrincipalPolicyRequest.builder()
+                        .policySourceArn(policySourceArn)
+                        .actionNames(actionNames)
+                        .resourceArns(resourceArns)
+                        .build();
+        SimulatePrincipalPolicyResponse simulatePrincipalPolicyResponse =
                 iam.simulatePrincipalPolicy(simulatePrincipalPolicyRequest);
-        return simulatePrincipalPolicyResult.getEvaluationResults();
+        return simulatePrincipalPolicyResponse.evaluationResults();
     }
 
     /**
@@ -247,11 +250,11 @@ public class AwsIamService {
      * @return list of evaluation results
      */
     public List<EvaluationResult> validateRolePolicies(AmazonIdentityManagementClient iam, Role role,
-            Collection<Policy> policies) throws AmazonIdentityManagementException {
+            Collection<Policy> policies) throws IamException {
         List<EvaluationResult> evaluationResults = new ArrayList<>();
         Set<PolicySimulation> policySimulations = collectPolicySimulations(policies);
         for (PolicySimulation policySimulation : policySimulations) {
-            List<EvaluationResult> results = simulatePrincipalPolicy(iam, role.getArn(), policySimulation.getActions(), policySimulation.getResources());
+            List<EvaluationResult> results = simulatePrincipalPolicy(iam, role.arn(), policySimulation.getActions(), policySimulation.getResources());
             evaluationResults.addAll(results);
         }
         return evaluationResults;

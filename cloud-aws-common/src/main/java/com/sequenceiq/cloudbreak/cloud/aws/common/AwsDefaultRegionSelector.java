@@ -11,13 +11,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.model.AmazonEC2Exception;
-import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsDefaultRegionSelectionFailed;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+
+import software.amazon.awssdk.services.ec2.model.DescribeRegionsRequest;
+import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 
 @Service
 public class AwsDefaultRegionSelector {
@@ -73,13 +74,13 @@ public class AwsDefaultRegionSelector {
         try {
             LOGGER.debug("Describing regions on EC2 API in '{}'", region);
             AmazonEc2Client access = awsClient.createAccessWithMinimalRetries(awsCredential, region);
-            DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
+            DescribeRegionsRequest describeRegionsRequest = DescribeRegionsRequest.builder().build();
             access.describeRegions(describeRegionsRequest);
             regionIsViable = true;
-        } catch (AmazonEC2Exception ec2Exception) {
+        } catch (Ec2Exception ec2Exception) {
             String errorMessage = String.format("Unable to describe regions via using EC2 region '%s' APIs, due to: '%s'", region, ec2Exception.getMessage());
             LOGGER.debug(errorMessage, ec2Exception);
-            if (!EC2_AUTH_FAILURE_ERROR_CODE.equals(ec2Exception.getErrorCode())) {
+            if (!EC2_AUTH_FAILURE_ERROR_CODE.equals(ec2Exception.awsErrorDetails().errorCode())) {
                 throw ec2Exception;
             }
         } catch (RuntimeException e) {

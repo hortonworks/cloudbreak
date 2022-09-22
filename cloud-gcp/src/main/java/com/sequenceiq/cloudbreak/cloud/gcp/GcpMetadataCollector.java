@@ -168,7 +168,7 @@ public class GcpMetadataCollector implements MetadataCollector {
                 }
                 if (rule.isPresent() && loadBalancerTypes.contains(itemType)) {
                     Map<String, Object> params = getParams(compute, projectId, item);
-                    CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+                    CloudLoadBalancerMetadata loadBalancerMetadata = CloudLoadBalancerMetadata.builder()
                             .withType(itemType)
                             .withIp(item.getIPAddress())
                             .withName(item.getName())

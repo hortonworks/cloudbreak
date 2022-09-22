@@ -16,10 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
-import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
-import com.amazonaws.services.ec2.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -31,6 +27,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.GroupSubnet;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
+import software.amazon.awssdk.services.ec2.model.Subnet;
 
 @Component
 public class AwsGatewaySubnetMultiAzValidator implements Validator {
@@ -93,15 +94,14 @@ public class AwsGatewaySubnetMultiAzValidator implements Validator {
     private Map<String, Set<String>> fetchingSubnetsAndGroupingByAvailabilityZone(AwsCredentialView awsCredential, Set<String> subnetIds, String region) {
         String subnetIdsJoined = String.join(",", subnetIds);
         LOGGER.info("Fetching subnets('{}') for validating availability zones for gateway group", subnetIdsJoined);
-        DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest()
-                .withSubnetIds(subnetIds);
+        DescribeSubnetsRequest describeSubnetsRequest = DescribeSubnetsRequest.builder().subnetIds(subnetIds).build();
         try {
             AmazonEc2Client ec2Client = awsClient.createEc2Client(awsCredential, region);
-            DescribeSubnetsResult describeSubnetsResult = ec2Client.describeSubnets(describeSubnetsRequest);
-            return describeSubnetsResult.getSubnets()
+            DescribeSubnetsResponse describeSubnetsResponse = ec2Client.describeSubnets(describeSubnetsRequest);
+            return describeSubnetsResponse.subnets()
                     .stream()
-                    .collect(groupingBy(Subnet::getAvailabilityZone, mapping(Subnet::getSubnetId, toSet())));
-        } catch (AmazonServiceException ex) {
+                    .collect(groupingBy(Subnet::availabilityZone, mapping(Subnet::subnetId, toSet())));
+        } catch (AwsServiceException ex) {
             String msg = String.format("Failed to fetch subnets with id: '%s' during the validation of subnets per availability zone for gateway group.",
                     subnetIdsJoined);
             LOGGER.warn(msg, ex);

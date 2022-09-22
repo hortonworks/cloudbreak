@@ -1,30 +1,30 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
-import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
-import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
-import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
-import com.amazonaws.services.securitytoken.model.DecodeAuthorizationMessageRequest;
-import com.amazonaws.services.securitytoken.model.DecodeAuthorizationMessageResult;
-import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest;
-import com.amazonaws.services.securitytoken.model.GetCallerIdentityResult;
+import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
+import software.amazon.awssdk.services.sts.model.AssumeRoleResponse;
+import software.amazon.awssdk.services.sts.model.DecodeAuthorizationMessageRequest;
+import software.amazon.awssdk.services.sts.model.DecodeAuthorizationMessageResponse;
+import software.amazon.awssdk.services.sts.model.GetCallerIdentityRequest;
+import software.amazon.awssdk.services.sts.model.GetCallerIdentityResponse;
 
 public class AmazonSecurityTokenServiceClient extends AmazonClient {
 
-    private final AWSSecurityTokenService client;
+    private final StsClient client;
 
-    public AmazonSecurityTokenServiceClient(AWSSecurityTokenService client) {
+    public AmazonSecurityTokenServiceClient(StsClient client) {
         this.client = client;
     }
 
-    public GetCallerIdentityResult getCallerIdentity(GetCallerIdentityRequest getCallerIdentityRequest) {
+    public GetCallerIdentityResponse getCallerIdentity(GetCallerIdentityRequest getCallerIdentityRequest) {
         return client.getCallerIdentity(getCallerIdentityRequest);
     }
 
-    public DecodeAuthorizationMessageResult decodeAuthorizationMessage(DecodeAuthorizationMessageRequest decodeAuthorizationMessageRequest) {
+    public DecodeAuthorizationMessageResponse decodeAuthorizationMessage(DecodeAuthorizationMessageRequest decodeAuthorizationMessageRequest) {
         return client.decodeAuthorizationMessage(decodeAuthorizationMessageRequest);
     }
 
-    public AssumeRoleResult assumeRole(AssumeRoleRequest assumeRoleRequest) {
+    public AssumeRoleResponse assumeRole(AssumeRoleRequest assumeRoleRequest) {
         return client.assumeRole(assumeRoleRequest);
     }
 }

@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static com.sequenceiq.cloudbreak.common.type.TemporaryStorage.ATTACHED_VOLUMES;
 import static java.util.Collections.emptyMap;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -21,7 +23,6 @@ import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
@@ -37,9 +38,6 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.SdkClientException;
-import com.amazonaws.services.cloudformation.AmazonCloudFormation;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsDefaultZoneProvider;
@@ -78,8 +76,14 @@ import com.sequenceiq.cloudbreak.service.RetryService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.exception.RetryableException;
+import software.amazon.awssdk.services.cloudformation.CloudFormationClient;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStacksRequest;
+
 @ExtendWith(SpringExtension.class)
-    @TestPropertySource(properties = "cb.max.aws.resource.name.length=5")
+@TestPropertySource(properties = "cb.max.aws.resource.name.length=5")
 @Import(SdkClientExceptionMapper.class)
 class AwsValidatorsTest {
 
@@ -124,7 +128,7 @@ class AwsValidatorsTest {
                 .withLocation(Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az")))
                 .withAccountId("account")
                 .build();
-        CloudCredential cloudCredential = null;
+        CloudCredential cloudCredential = new CloudCredential(null, null, Map.of("accessKey", "accessKey", "secretKey", "secretKey"), null);
         when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(any(), anyString(), anyString()))
                 .thenAnswer(invocation -> invocation.getArgument(2));
         authenticatedContext = new AuthenticatedContext(context, cloudCredential);
@@ -133,13 +137,14 @@ class AwsValidatorsTest {
     @Test
     void testStackValidatorStackAlreadyExist() {
         doReturn(amazonCloudFormationClient).when(awsClient).createCloudFormationClient(any(), anyString());
-        Assertions.assertThrows(CloudConnectorException.class, () -> awsStackValidatorUnderTest.validate(authenticatedContext, null));
+        assertThrows(CloudConnectorException.class, () -> awsStackValidatorUnderTest.validate(authenticatedContext, null));
     }
 
     @Test
     void testStackValidatorStackUnexistent() {
         doReturn(amazonCloudFormationClient).when(awsClient).createCloudFormationClient(any(), anyString());
-        when(amazonCloudFormationClient.describeStacks(any())).thenThrow(new AmazonServiceException("stackName does not exist"));
+        when(amazonCloudFormationClient.describeStacks(any()))
+                .thenThrow(AwsServiceException.builder().awsErrorDetails(AwsErrorDetails.builder().errorMessage("stackName does not exist").build()).build());
         InstanceTemplate template =
                 new InstanceTemplate("noStorage", "worker", 0L, List.of(), InstanceStatus.CREATE_REQUESTED, Map.of(), 0L, "", ATTACHED_VOLUMES, 0L);
         CloudInstance instance = new CloudInstance("", template, null, "subnet-1", "az1");
@@ -151,14 +156,14 @@ class AwsValidatorsTest {
 
     @Test
     void testStackValidatorStackUseRetryClient() {
-        AmazonCloudFormation client = mock(AmazonCloudFormation.class);
+        CloudFormationClient client = mock(CloudFormationClient.class);
         doReturn(client).when(awsClient).createCloudFormation(any(), anyString());
-        when(client.describeStacks(any()))
-                .thenThrow(new SdkClientException("repeat1 Rate exceeded"))
-                .thenThrow(new SdkClientException("repeat2Request limit exceeded"))
+        when(client.describeStacks(any(DescribeStacksRequest.class)))
+                .thenThrow(RetryableException.builder().message("repeat1 Rate exceeded").build())
+                .thenThrow(RetryableException.builder().message("repeat2 Request limit exceeded").build())
                 .thenReturn(null);
-        Assertions.assertThrows(CloudConnectorException.class, () -> awsStackValidatorUnderTest.validate(authenticatedContext, null));
-        verify(client, times(3)).describeStacks(any());
+        assertThrows(CloudConnectorException.class, () -> awsStackValidatorUnderTest.validate(authenticatedContext, null));
+        verify(client, times(3)).describeStacks(any(DescribeStacksRequest.class));
     }
 
     @TestFactory
@@ -193,12 +198,12 @@ class AwsValidatorsTest {
         tests.add(DynamicTest.dynamicTest("value could start with aws", () -> testTagsWithExpectedTeBeFair(VALID, "aws1234567890")));
 
         tests.add(DynamicTest.dynamicTest("too many tags",
-                () -> Assertions.assertThrows(IllegalArgumentException.class,
+                () -> assertThrows(IllegalArgumentException.class,
                         () -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(getManyTags(51))))));
         tests.add(DynamicTest.dynamicTest("so many tags but valid",
-                () -> Assertions.assertDoesNotThrow(() -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(getManyTags(50))))));
+                () -> assertDoesNotThrow(() -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(getManyTags(50))))));
         tests.add(DynamicTest.dynamicTest("no tags at all",
-                () -> Assertions.assertDoesNotThrow(() -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(getManyTags(0))))));
+                () -> assertDoesNotThrow(() -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(getManyTags(0))))));
 
         return tests;
     }
@@ -212,13 +217,13 @@ class AwsValidatorsTest {
     private void testTagsWithExpectedException(String key, String value) {
         Map<String, String> tags = new HashMap<>();
         tags.put(key, value);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(tags)));
+        assertThrows(IllegalArgumentException.class, () -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(tags)));
     }
 
     private void testTagsWithExpectedTeBeFair(String key, String value) {
         Map<String, String> tags = new HashMap<>();
         tags.put(key, value);
-        Assertions.assertDoesNotThrow(() -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(tags)));
+        assertDoesNotThrow(() -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(tags)));
     }
 
     private Map<String, String> getManyTags(int numberOfTags) {
@@ -228,8 +233,7 @@ class AwsValidatorsTest {
     }
 
     private CloudStack getTestCloudStackWithTags(Map<String, String> tags) {
-        return new CloudStack(List.of(), null, null, Map.of(), tags,
-                "", null, null, null, null);
+        return new CloudStack(List.of(), null, null, Map.of(), tags, "", null, null, null, null);
     }
 
     private GroupNetwork createGroupNetwork() {
@@ -239,7 +243,7 @@ class AwsValidatorsTest {
     @Configuration
     @EnableRetry(proxyTargetClass = true)
     @ComponentScan(basePackages = "com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector")
-    @Import({AwsTagValidator.class,
+    @Import({ AwsTagValidator.class,
             AwsPlatformParameters.class,
             CloudbreakResourceReaderService.class,
             AwsConfig.class,

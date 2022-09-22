@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static com.amazonaws.services.cloudformation.model.Capability.CAPABILITY_IAM;
-import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
+import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.CancellableWaiterConfiguration.cancellableWaiterConfiguration;
+import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.handleWaiterError;
+import static software.amazon.awssdk.services.cloudformation.model.Capability.CAPABILITY_IAM;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,18 +20,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.cloudformation.model.CreateStackRequest;
-import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.model.OnFailure;
-import com.amazonaws.services.cloudformation.model.ResourceStatus;
-import com.amazonaws.services.cloudformation.model.Tag;
-import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
-import com.amazonaws.services.ec2.model.DescribeVpcsResult;
-import com.amazonaws.services.ec2.model.Vpc;
-import com.amazonaws.services.ec2.model.VpcCidrBlockAssociation;
-import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.DefaultNetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
@@ -58,6 +47,19 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.service.Retry;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.cloudformation.model.CreateStackRequest;
+import software.amazon.awssdk.services.cloudformation.model.DeleteStackRequest;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStacksRequest;
+import software.amazon.awssdk.services.cloudformation.model.OnFailure;
+import software.amazon.awssdk.services.cloudformation.model.ResourceStatus;
+import software.amazon.awssdk.services.cloudformation.model.Tag;
+import software.amazon.awssdk.services.cloudformation.waiters.CloudFormationWaiter;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
+import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.ec2.model.VpcCidrBlockAssociation;
 
 @Service
 public class AwsNetworkConnector implements DefaultNetworkConnector {
@@ -109,13 +111,14 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
         List<SubnetRequest> subnetRequests = getCloudSubNets(networkRequest);
         String cfStackName = networkRequest.getStackName();
         try {
-            cloudFormationClient.describeStacks(new DescribeStacksRequest().withStackName(cfStackName));
+            cloudFormationClient.describeStacks(DescribeStacksRequest.builder().stackName(cfStackName).build());
             LOGGER.warn("AWS CloudFormation stack for Network with stack name: '{}' already exists. Attaching this one to the network.", cfStackName);
             return getCreatedNetworkWithPolling(networkRequest, credentialView, cloudFormationClient, subnetRequests);
-        } catch (AmazonServiceException e) {
+        } catch (AwsServiceException e) {
             if (networkDoesNotExist(e)) {
                 LOGGER.warn("{} occurred during describe AWS CloudFormation stack for Network with stack name: '{}'. "
-                        + "Assuming the CF Stack does not exist, so creating a new one. Exception message: {}", e.getClass(), cfStackName, e.getMessage());
+                        + "Assuming the CF Stack does not exist, so creating a new one. Exception message: {}", e.getClass(), cfStackName,
+                        e.awsErrorDetails().errorMessage());
                 String cloudFormationTemplate = createTemplate(networkRequest, subnetRequests);
                 return createNewCfNetworkStack(networkRequest, credentialView, cloudFormationClient, cloudFormationTemplate, subnetRequests);
             } else {
@@ -134,22 +137,22 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
         AmazonEc2Client awsClientAccess = awsClient.createEc2Client(awsCredentialView, network.getStringParameter(AwsNetworkView.REGION));
         AwsNetworkView awsNetworkView = new AwsNetworkView(network);
         String existingVpc = awsNetworkView.getExistingVpc();
-        DescribeVpcsResult describeVpcsResult = awsClientAccess.describeVpcs(new DescribeVpcsRequest().withVpcIds(existingVpc));
+        DescribeVpcsResponse describeVpcsResponse = awsClientAccess.describeVpcs(DescribeVpcsRequest.builder().vpcIds(existingVpc).build());
         List<String> vpcCidrs = new ArrayList<>();
-        for (Vpc vpc : describeVpcsResult.getVpcs()) {
-            if (vpc.getCidrBlockAssociationSet() != null) {
-                LOGGER.info("The VPC {} has associated CIDR block so using the CIDR blocks in the VPC.", vpc.getVpcId());
-                List<String> cidrs = vpc.getCidrBlockAssociationSet()
+        for (Vpc vpc : describeVpcsResponse.vpcs()) {
+            if (vpc.cidrBlockAssociationSet() != null) {
+                LOGGER.info("The VPC {} has associated CIDR block so using the CIDR blocks in the VPC.", vpc.vpcId());
+                List<String> cidrs = vpc.cidrBlockAssociationSet()
                         .stream()
-                        .map(VpcCidrBlockAssociation::getCidrBlock)
+                        .map(VpcCidrBlockAssociation::cidrBlock)
                         .distinct()
                         .filter(e -> !vpcCidrs.contains(e))
                         .collect(Collectors.toList());
-                LOGGER.info("The VPC {} CIDRs block are {}.", vpc.getVpcId(), cidrs);
+                LOGGER.info("The VPC {} CIDRs block are {}.", vpc.vpcId(), cidrs);
                 vpcCidrs.addAll(cidrs);
             } else {
-                LOGGER.info("The VPC {} has no associated CIDR block so using the CIDR block in the VPC.", vpc.getVpcId());
-                vpcCidrs.add(vpc.getCidrBlock());
+                LOGGER.info("The VPC {} has no associated CIDR block so using the CIDR block in the VPC.", vpc.vpcId());
+                vpcCidrs.add(vpc.cidrBlock());
             }
         }
         if (vpcCidrs.isEmpty()) {
@@ -172,10 +175,6 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
         return subnetFilterStrategyMap.get(subnetSelectorStrategyType).filter(subnetMetas, maxAzCount);
     }
 
-    private int getAzCount(Collection<CloudSubnet> subnetMetas) {
-        return subnetMetas.stream().map(CloudSubnet::getAvailabilityZone).collect(Collectors.toSet()).size();
-    }
-
     @Override
     public int subnetCountInDifferentAzMin() {
         return minSubnetCountInDifferentAz;
@@ -186,8 +185,45 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
         return maxSubnetCountInDifferentAz;
     }
 
-    private boolean networkDoesNotExist(AmazonServiceException e) {
-        return e.getStatusCode() == NOT_FOUND && e.getErrorMessage().contains("does not exist");
+    @Override
+    public void deleteNetworkWithSubnets(NetworkDeletionRequest networkDeletionRequest) {
+        if (!networkDeletionRequest.isExisting()) {
+            AwsCredentialView credentialView = new AwsCredentialView(networkDeletionRequest.getCloudCredential());
+            String regionName = networkDeletionRequest.getRegion();
+            AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
+            String stackName = networkDeletionRequest.getStackName();
+            boolean exists = retryService.testWith2SecDelayMax15Times(() -> cfStackUtil.isCfStackExists(cfClient, stackName));
+            if (exists) {
+                cfClient.deleteStack(DeleteStackRequest.builder().stackName(stackName).build());
+                LOGGER.debug("CloudFormation stack deletion request sent with stack name: '{}' ", stackName);
+                DescribeStacksRequest describeStacksRequest = DescribeStacksRequest.builder().stackName(stackName).build();
+                try (CloudFormationWaiter waiter = cfClient.waiters()) {
+                    LOGGER.debug("Waiting for {} stack to delete", stackName);
+                    waiter.waitUntilStackDeleteComplete(describeStacksRequest);
+                } catch (Exception e) {
+                    handleWaiterError(String.format("Network delete failed (cloudformation: %s)", stackName),
+                            () -> awsCloudFormationErrorMessageProvider.getErrorReason(credentialView, regionName, stackName, ResourceStatus.DELETE_FAILED), e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public Platform platform() {
+        return AwsConstants.AWS_PLATFORM;
+    }
+
+    @Override
+    public Variant variant() {
+        return AwsConstants.AWS_DEFAULT_VARIANT;
+    }
+
+    private int getAzCount(Collection<CloudSubnet> subnetMetas) {
+        return subnetMetas.stream().map(CloudSubnet::getAvailabilityZone).collect(Collectors.toSet()).size();
+    }
+
+    private boolean networkDoesNotExist(AwsServiceException e) {
+        return e.awsErrorDetails().sdkHttpResponse().statusCode() == NOT_FOUND && e.awsErrorDetails().errorMessage().contains("does not exist");
     }
 
     private List<SubnetRequest> getCloudSubNets(NetworkCreationRequest networkRequest) {
@@ -220,14 +256,16 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
             AmazonCloudFormationClient cloudFormationRetryClient, List<SubnetRequest> subnetRequests) {
 
         String regionName = networkRequest.getRegion().value();
-        Waiter<DescribeStacksRequest> creationWaiter = cloudFormationRetryClient.waiters().stackCreateComplete();
         String cfStackName = networkRequest.getStackName();
-        DescribeStacksRequest stackRequestWithStackId = new DescribeStacksRequest().withStackName(cfStackName);
-        EnvironmentCancellationCheck environmentCancellationCheck = new EnvironmentCancellationCheck(networkRequest.getEnvId(), networkRequest.getEnvName());
-
-        run(creationWaiter, stackRequestWithStackId, environmentCancellationCheck,
-                String.format("Network creation failed (cloudformation stack: %s).", cfStackName),
-                () -> awsCloudFormationErrorMessageProvider.getErrorReason(credentialView, regionName, cfStackName, ResourceStatus.CREATE_FAILED));
+        DescribeStacksRequest stackRequestWithStackId = DescribeStacksRequest.builder().stackName(cfStackName).build();
+        EnvironmentCancellationCheck cancellationCheck = new EnvironmentCancellationCheck(networkRequest.getEnvId(), networkRequest.getEnvName());
+        try (CloudFormationWaiter waiter = cloudFormationRetryClient.waiters()) {
+            LOGGER.debug("Waiting for {} stack to complete", cfStackName);
+            waiter.waitUntilStackCreateComplete(stackRequestWithStackId, cancellableWaiterConfiguration(cancellationCheck));
+        } catch (Exception e) {
+            handleWaiterError(String.format("Network creation failed (cloudformation stack: %s).", cfStackName),
+                    () -> awsCloudFormationErrorMessageProvider.getErrorReason(credentialView, regionName, cfStackName, ResourceStatus.CREATE_FAILED), e);
+        }
 
         return getCreatedCloudNetwork(cloudFormationRetryClient, networkRequest, subnetRequests);
     }
@@ -242,12 +280,13 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
 
     private CreateStackRequest createStackRequest(String stackName, String cloudFormationTemplate, Map<String, String> tags) {
         Collection<Tag> awsTags = awsTaggingService.prepareCloudformationTags(null, tags);
-        return new CreateStackRequest()
-                .withStackName(stackName)
-                .withOnFailure(OnFailure.DO_NOTHING)
-                .withTemplateBody(cloudFormationTemplate)
-                .withTags(awsTags)
-                .withCapabilities(CAPABILITY_IAM);
+        return CreateStackRequest.builder()
+                .stackName(stackName)
+                .onFailure(OnFailure.DO_NOTHING)
+                .templateBody(cloudFormationTemplate)
+                .tags(awsTags)
+                .capabilities(CAPABILITY_IAM)
+                .build();
     }
 
     private String getCreatedVpc(Map<String, String> output) {
@@ -257,38 +296,6 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
             String outputKeyNotFound = "Vpc could not be found in the CloudFormation stack output.";
             throw new CloudConnectorException(outputKeyNotFound);
         }
-    }
-
-    @Override
-    public void deleteNetworkWithSubnets(NetworkDeletionRequest networkDeletionRequest) {
-        if (!networkDeletionRequest.isExisting()) {
-            AwsCredentialView credentialView = new AwsCredentialView(networkDeletionRequest.getCloudCredential());
-            String regionName = networkDeletionRequest.getRegion();
-            AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
-            String stackName = networkDeletionRequest.getStackName();
-            boolean exists = retryService.testWith2SecDelayMax15Times(() -> cfStackUtil.isCfStackExists(cfClient, stackName));
-            if (exists) {
-                DeleteStackRequest deleteStackRequest = new DeleteStackRequest();
-                deleteStackRequest.setStackName(stackName);
-                cfClient.deleteStack(deleteStackRequest);
-                Waiter<DescribeStacksRequest> deletionWaiter = cfClient.waiters().stackDeleteComplete();
-                LOGGER.debug("CloudFormation stack deletion request sent with stack name: '{}' ", stackName);
-                DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(stackName);
-                run(deletionWaiter, describeStacksRequest, null,
-                        String.format("Network delete failed (cloudformation: %s)", stackName),
-                        () -> awsCloudFormationErrorMessageProvider.getErrorReason(credentialView, regionName, stackName, ResourceStatus.DELETE_FAILED));
-            }
-        }
-    }
-
-    @Override
-    public Platform platform() {
-        return AwsConstants.AWS_PLATFORM;
-    }
-
-    @Override
-    public Variant variant() {
-        return AwsConstants.AWS_DEFAULT_VARIANT;
     }
 
 }

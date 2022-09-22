@@ -6,8 +6,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
+
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsMethodExecutorTest {
@@ -25,8 +27,10 @@ public class AwsMethodExecutorTest {
     @Test
     public void testExecuteWhenHasAmazonEc2ExceptionWithNotFoundErrorCodes() {
         boolean actual = underTest.execute(() -> {
-            AmazonEC2Exception amazonEC2Exception = new AmazonEC2Exception("");
-            amazonEC2Exception.setErrorCode("Resource.NotFound");
+            Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
+                    .message("")
+                    .awsErrorDetails(AwsErrorDetails.builder().errorCode("Resource.NotFound").build())
+                    .build();
             throw amazonEC2Exception;
         }, false);
 
@@ -35,12 +39,14 @@ public class AwsMethodExecutorTest {
 
     @Test
     public void testExecuteWhenHasAmazonEc2ExceptionWithoutNotFoundErrorCodes() {
-        AmazonEC2Exception actual = Assertions.assertThrows(AmazonEC2Exception.class, () -> underTest.execute(() -> {
-            AmazonEC2Exception amazonEC2Exception = new AmazonEC2Exception("");
-            amazonEC2Exception.setErrorCode("Resource.AnyError");
+        Ec2Exception actual = Assertions.assertThrows(Ec2Exception.class, () -> underTest.execute(() -> {
+            Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
+                    .message("")
+                    .awsErrorDetails(AwsErrorDetails.builder().errorCode("Resource.AnyError").build())
+                    .build();
             throw amazonEC2Exception;
         }, false));
 
-        Assertions.assertEquals(actual.getErrorCode(), "Resource.AnyError");
+        Assertions.assertEquals(actual.awsErrorDetails().errorCode(), "Resource.AnyError");
     }
 }

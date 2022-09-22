@@ -10,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.elasticloadbalancingv2.model.DeleteTargetGroupRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DeleteTargetGroupResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
@@ -23,6 +21,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteTargetGroupRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeleteTargetGroupResponse;
 
 @Service
 public class AwsNativeLoadBalancerTargetGroupResourceBuilder extends AbstractAwsNativeComputeBuilder {
@@ -50,10 +51,9 @@ public class AwsNativeLoadBalancerTargetGroupResourceBuilder extends AbstractAws
             throws Exception {
         LOGGER.info("Deleting load balancer's ('{}') target group with arn '{}'", resource.getReference(), resource.getInstanceId());
         AmazonElasticLoadBalancingClient loadBalancingClient = context.getLoadBalancingClient();
-        DeleteTargetGroupRequest deleteTargetGroupRequest = new DeleteTargetGroupRequest()
-                .withTargetGroupArn(resource.getReference());
-        DeleteTargetGroupResult deleteResult = awsMethodExecutor.execute(() -> loadBalancingClient.deleteTargetGroup(deleteTargetGroupRequest), null);
-        return deleteResult != null ? resource : null;
+        DeleteTargetGroupRequest deleteTargetGroupRequest = DeleteTargetGroupRequest.builder().targetGroupArn(resource.getReference()).build();
+        DeleteTargetGroupResponse deleteResponse = awsMethodExecutor.execute(() -> loadBalancingClient.deleteTargetGroup(deleteTargetGroupRequest), null);
+        return deleteResponse != null ? resource : null;
     }
 
     @Override

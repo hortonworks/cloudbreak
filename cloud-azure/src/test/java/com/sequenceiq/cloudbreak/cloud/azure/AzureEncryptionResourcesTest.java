@@ -922,14 +922,14 @@ public class AzureEncryptionResourcesTest {
 
     @Test
     public void testDeleteDiskEncryptionSetShouldDeduceValidDiskEncryptionSetNameAndCheckAndDeleteResourceGroupWhenDesResourceGroupIsCreatedByCDP() {
-        CloudResource desCloudResource = new CloudResource.Builder()
+        CloudResource desCloudResource = CloudResource.builder()
                 .withName("Des")
                 .withType(AZURE_DISK_ENCRYPTION_SET)
                 .withReference("/subscriptions/dummySubscriptionId/resourceGroups/dummy-CDP_DES-ResourceGroup/providers/" +
                         "Microsoft.Compute/diskEncryptionSets/dummyDesId")
                 .withStatus(CREATED)
                 .build();
-        CloudResource rgCloudResource = new CloudResource.Builder()
+        CloudResource rgCloudResource = CloudResource.builder()
                 .withName("dummy-CDP_DES-ResourceGroup")
                 .withType(AZURE_RESOURCE_GROUP)
                 .withReference("uniqueDummyId")
@@ -1008,7 +1008,7 @@ public class AzureEncryptionResourcesTest {
     }
 
     private List<CloudResource> getResources(String desId) {
-        CloudResource desCloudResource = new CloudResource.Builder()
+        CloudResource desCloudResource = CloudResource.builder()
                 .withName("Des")
                 .withType(AZURE_DISK_ENCRYPTION_SET)
                 .withReference(desId)

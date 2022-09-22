@@ -108,7 +108,7 @@ public class CloudFormationTemplateBuilder {
 
     private String getInstanceProfile(Group group) {
         return group.getIdentity().map(cloudFileSystemView -> {
-                    CloudS3View cloudS3View = CloudS3View.class.cast(cloudFileSystemView);
+                    CloudS3View cloudS3View = (CloudS3View) cloudFileSystemView;
                     return cloudS3View.getInstanceProfile();
                 }).orElse(null);
     }
@@ -141,16 +141,8 @@ public class CloudFormationTemplateBuilder {
     }
 
     public boolean areDedicatedInstancesRequested(CloudStack cloudStack) {
-        boolean result = false;
-        if (isDedicatedInstancesParamExistAndTrue(cloudStack)) {
-            result = true;
-        }
-        return result;
-    }
-
-    private boolean isDedicatedInstancesParamExistAndTrue(CloudStack stack) {
-        return stack.getParameters().containsKey("dedicatedInstances")
-                && Boolean.valueOf(stack.getParameters().get("dedicatedInstances"));
+        return cloudStack.getParameters().containsKey("dedicatedInstances")
+                && Boolean.parseBoolean(cloudStack.getParameters().get("dedicatedInstances"));
     }
 
     public static class RDSModelContext {

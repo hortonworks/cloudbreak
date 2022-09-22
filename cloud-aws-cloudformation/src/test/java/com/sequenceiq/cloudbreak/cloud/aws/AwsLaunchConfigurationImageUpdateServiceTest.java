@@ -11,15 +11,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
-import com.amazonaws.services.autoscaling.model.LaunchConfiguration;
-import com.amazonaws.services.cloudformation.model.GetTemplateResult;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -33,6 +31,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.common.api.type.ResourceType;
 
+import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
+import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
+
+@ExtendWith(MockitoExtension.class)
 public class AwsLaunchConfigurationImageUpdateServiceTest {
 
     private static final Long WORKSPACE_ID = 1L;
@@ -65,9 +67,8 @@ public class AwsLaunchConfigurationImageUpdateServiceTest {
 
     private AuthenticatedContext ac;
 
-    @Before
+    @BeforeEach
     public void setup() {
-        MockitoAnnotations.initMocks(this);
         Location location = Location.location(Region.region("region"));
         CloudContext context = CloudContext.Builder.builder()
                 .withId(1L)
@@ -95,12 +96,11 @@ public class AwsLaunchConfigurationImageUpdateServiceTest {
                 .build();
         String autoScalingGroupName = "autoScalingGroupName";
         Map<AutoScalingGroup, String> scalingGroupStringMap =
-                Collections.singletonMap(new AutoScalingGroup().withLaunchConfigurationName(lcName)
-                        .withAutoScalingGroupName(autoScalingGroupName), autoScalingGroupName);
-        when(cloudFormationClient.getTemplate(any())).thenReturn(new GetTemplateResult().withTemplateBody("AWS::AutoScaling::LaunchConfiguration"));
+                Collections.singletonMap(AutoScalingGroup.builder().launchConfigurationName(lcName)
+                        .autoScalingGroupName(autoScalingGroupName).build(), autoScalingGroupName);
         when(autoScalingGroupHandler.getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource))
                 .thenReturn(scalingGroupStringMap);
-        List<LaunchConfiguration> oldLaunchConfigs = Collections.singletonList(new LaunchConfiguration().withLaunchConfigurationName(lcName));
+        List<LaunchConfiguration> oldLaunchConfigs = Collections.singletonList(LaunchConfiguration.builder().launchConfigurationName(lcName).build());
         when(launchConfigurationHandler.getLaunchConfigurations(autoScalingClient, scalingGroupStringMap.keySet()))
                 .thenReturn(oldLaunchConfigs);
         String newLCName = "newLCName";

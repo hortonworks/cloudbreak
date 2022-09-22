@@ -147,6 +147,9 @@ public class CloudResource extends DynamicModel {
 
         private String availabilityZone;
 
+        private Builder() {
+        }
+
         public Builder cloudResource(CloudResource cloudResource) {
             type = cloudResource.getType();
             status = cloudResource.getStatus();

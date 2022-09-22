@@ -1,30 +1,30 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
-import com.amazonaws.services.kms.AWSKMS;
-import com.amazonaws.services.kms.model.DescribeKeyRequest;
-import com.amazonaws.services.kms.model.DescribeKeyResult;
-import com.amazonaws.services.kms.model.ListAliasesRequest;
-import com.amazonaws.services.kms.model.ListAliasesResult;
-import com.amazonaws.services.kms.model.ListKeysRequest;
-import com.amazonaws.services.kms.model.ListKeysResult;
+import software.amazon.awssdk.services.kms.KmsClient;
+import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
+import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
+import software.amazon.awssdk.services.kms.model.ListAliasesRequest;
+import software.amazon.awssdk.services.kms.model.ListAliasesResponse;
+import software.amazon.awssdk.services.kms.model.ListKeysRequest;
+import software.amazon.awssdk.services.kms.model.ListKeysResponse;
 
 public class AmazonKmsClient extends AmazonClient {
 
-    private final AWSKMS client;
+    private final KmsClient client;
 
-    public AmazonKmsClient(AWSKMS client) {
+    public AmazonKmsClient(KmsClient client) {
         this.client = client;
     }
 
-    public ListKeysResult listKeys(ListKeysRequest listKeysRequest) {
+    public ListKeysResponse listKeys(ListKeysRequest listKeysRequest) {
         return client.listKeys(listKeysRequest);
     }
 
-    public ListAliasesResult listAliases(ListAliasesRequest listAliasesRequest) {
+    public ListAliasesResponse listAliases(ListAliasesRequest listAliasesRequest) {
         return client.listAliases(listAliasesRequest);
     }
 
-    public DescribeKeyResult describeKey(DescribeKeyRequest describeKeyRequest) {
+    public DescribeKeyResponse describeKey(DescribeKeyRequest describeKeyRequest) {
         return client.describeKey(describeKeyRequest);
     }
 }

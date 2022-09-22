@@ -1,17 +1,21 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.ec2.model.Route;
-import com.amazonaws.services.ec2.model.RouteTable;
-import com.amazonaws.services.ec2.model.RouteTableAssociation;
+import software.amazon.awssdk.services.ec2.model.Route;
+import software.amazon.awssdk.services.ec2.model.RouteTable;
+import software.amazon.awssdk.services.ec2.model.RouteTableAssociation;
 
+@ExtendWith(MockitoExtension.class)
 public class AwsSubnetIgwExplorerTest {
 
     private static final String SUBNET_ID = "subnetId";
@@ -38,14 +42,11 @@ public class AwsSubnetIgwExplorerTest {
 
     @Test
     public void testWithValidIgw() {
-        RouteTable routeTable = new RouteTable().withVpcId(VPC_ID);
-        Route route = new Route();
-        route.setGatewayId(GATEWAY_ID);
-        route.setDestinationCidrBlock(OPEN_CIDR_BLOCK);
-        routeTable.setRoutes(List.of(route));
-        RouteTableAssociation routeTableAssociation = new RouteTableAssociation();
-        routeTableAssociation.setSubnetId(SUBNET_ID);
-        routeTable.setAssociations(List.of(routeTableAssociation));
+        RouteTable routeTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .routes(Route.builder().gatewayId(GATEWAY_ID).destinationCidrBlock(OPEN_CIDR_BLOCK).build())
+                .associations(RouteTableAssociation.builder().subnetId(SUBNET_ID).build())
+                .build();
 
         boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
 
@@ -54,14 +55,11 @@ public class AwsSubnetIgwExplorerTest {
 
     @Test
     public void testWithVirtualPrivateGateway() {
-        RouteTable routeTable = new RouteTable().withVpcId(VPC_ID);
-        Route route = new Route();
-        route.setGatewayId(VGW_GATEWAY_ID);
-        route.setDestinationCidrBlock(OPEN_CIDR_BLOCK);
-        routeTable.setRoutes(List.of(route));
-        RouteTableAssociation routeTableAssociation = new RouteTableAssociation();
-        routeTableAssociation.setSubnetId(SUBNET_ID);
-        routeTable.setAssociations(List.of(routeTableAssociation));
+        RouteTable routeTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .routes(Route.builder().gatewayId(VGW_GATEWAY_ID).destinationCidrBlock(OPEN_CIDR_BLOCK).build())
+                .associations(RouteTableAssociation.builder().subnetId(SUBNET_ID).build())
+                .build();
 
         boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
 
@@ -70,14 +68,11 @@ public class AwsSubnetIgwExplorerTest {
 
     @Test
     public void testWithIgwButNoAssociation() {
-        RouteTable routeTable = new RouteTable().withVpcId(VPC_ID);
-        Route route = new Route();
-        route.setGatewayId(GATEWAY_ID);
-        route.setDestinationCidrBlock(OPEN_CIDR_BLOCK);
-        routeTable.setRoutes(List.of(route));
-        RouteTableAssociation routeTableAssociation = new RouteTableAssociation();
-        routeTableAssociation.setSubnetId(DIFFERENT_SUBNET_ID);
-        routeTable.setAssociations(List.of(routeTableAssociation));
+        RouteTable routeTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .routes(Route.builder().gatewayId(GATEWAY_ID).destinationCidrBlock(OPEN_CIDR_BLOCK).build())
+                .associations(RouteTableAssociation.builder().subnetId(DIFFERENT_SUBNET_ID).build())
+                .build();
 
         boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
 
@@ -86,12 +81,10 @@ public class AwsSubnetIgwExplorerTest {
 
     @Test
     public void testWithAssociationButNoIgw() {
-        RouteTable routeTable = new RouteTable().withVpcId(VPC_ID);
-        Route route = new Route();
-        routeTable.setRoutes(List.of(route));
-        RouteTableAssociation routeTableAssociation = new RouteTableAssociation();
-        routeTableAssociation.setSubnetId(SUBNET_ID);
-        routeTable.setAssociations(List.of(routeTableAssociation));
+        RouteTable routeTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .associations(RouteTableAssociation.builder().subnetId(SUBNET_ID).build())
+                .build();
 
         boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
 
@@ -100,12 +93,10 @@ public class AwsSubnetIgwExplorerTest {
 
     @Test
     public void testWithNoAssociationAndNoIgw() {
-        RouteTable routeTable = new RouteTable().withVpcId(VPC_ID);
-        Route route = new Route();
-        routeTable.setRoutes(List.of(route));
-        RouteTableAssociation routeTableAssociation = new RouteTableAssociation();
-        routeTableAssociation.setSubnetId(DIFFERENT_SUBNET_ID);
-        routeTable.setAssociations(List.of(routeTableAssociation));
+        RouteTable routeTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .associations(RouteTableAssociation.builder().subnetId(DIFFERENT_SUBNET_ID).build())
+                .build();
 
         boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
 
@@ -114,9 +105,9 @@ public class AwsSubnetIgwExplorerTest {
 
     @Test
     public void testWithRouteButNoAssociations() {
-        RouteTable routeTable = new RouteTable().withVpcId(VPC_ID);
-        Route route = new Route();
-        routeTable.setRoutes(List.of(route));
+        RouteTable routeTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .build();
 
         boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
 
@@ -125,14 +116,11 @@ public class AwsSubnetIgwExplorerTest {
 
     @Test
     public void testWithMainRouteTableAssociationAndIgwPresentWithNotOpenCidrBlockAsDestination() {
-        RouteTable routeTable = new RouteTable().withVpcId(VPC_ID);
-        Route route = new Route()
-                .withGatewayId(GATEWAY_ID)
-                .withDestinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK);
-        routeTable.setRoutes(List.of(route));
-        RouteTableAssociation routeTableAssociation = new RouteTableAssociation()
-                .withMain(Boolean.TRUE);
-        routeTable.setAssociations(List.of(routeTableAssociation));
+        RouteTable routeTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .routes(Route.builder().gatewayId(GATEWAY_ID).destinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK).build())
+                .associations(RouteTableAssociation.builder().main(Boolean.TRUE).build())
+                .build();
 
         boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
 
@@ -141,13 +129,11 @@ public class AwsSubnetIgwExplorerTest {
 
     @Test
     public void testWithMainRouteTableAssociationAndNoIgw() {
-        RouteTable routeTable = new RouteTable().withVpcId(VPC_ID);
-        Route route = new Route()
-                .withDestinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK);
-        routeTable.setRoutes(List.of(route));
-        RouteTableAssociation routeTableAssociation = new RouteTableAssociation()
-                .withMain(Boolean.TRUE);
-        routeTable.setAssociations(List.of(routeTableAssociation));
+        RouteTable routeTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .routes(Route.builder().destinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK).build())
+                .associations(RouteTableAssociation.builder().main(Boolean.TRUE).build())
+                .build();
 
         boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
 
@@ -156,14 +142,11 @@ public class AwsSubnetIgwExplorerTest {
 
     @Test
     public void testWithMainRouteTableAssociationAndIgw() {
-        RouteTable routeTable = new RouteTable().withVpcId(VPC_ID);
-        Route route = new Route()
-                .withGatewayId(GATEWAY_ID)
-                .withDestinationCidrBlock(OPEN_CIDR_BLOCK);
-        routeTable.setRoutes(List.of(route));
-        RouteTableAssociation routeTableAssociation = new RouteTableAssociation()
-                .withMain(Boolean.TRUE);
-        routeTable.setAssociations(List.of(routeTableAssociation));
+        RouteTable routeTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .routes(Route.builder().gatewayId(GATEWAY_ID).destinationCidrBlock(OPEN_CIDR_BLOCK).build())
+                .associations(RouteTableAssociation.builder().main(Boolean.TRUE).build())
+                .build();
 
         boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(List.of(routeTable), SUBNET_ID, VPC_ID);
 
@@ -173,31 +156,25 @@ public class AwsSubnetIgwExplorerTest {
     @Test
     public void testWithMainAndCustomRouteTablesWithAssociationsAndNoIgwAttachedToThem() {
         List<RouteTable> routeTables = new ArrayList<>();
-        RouteTable mainRouteTable = new RouteTable().withVpcId(VPC_ID);
-        Route mainRoute = new Route()
-                .withDestinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK);
-        mainRouteTable.setRoutes(List.of(mainRoute));
-        RouteTableAssociation mainRouteTableAssociation = new RouteTableAssociation()
-                .withMain(Boolean.TRUE);
-        mainRouteTable.setAssociations(List.of(mainRouteTableAssociation));
+        RouteTable mainRouteTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .routes(Route.builder().destinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK).build())
+                .associations(RouteTableAssociation.builder().main(Boolean.TRUE).build())
+                .build();
         routeTables.add(mainRouteTable);
 
-        RouteTable customRouteTable = new RouteTable().withVpcId(VPC_ID);
-        Route customRoute = new Route()
-                .withDestinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK);
-        customRouteTable.setRoutes(List.of(customRoute));
-        RouteTableAssociation customRouteTableAssociation = new RouteTableAssociation()
-                .withSubnetId(SUBNET_ID);
-        customRouteTable.setAssociations(List.of(customRouteTableAssociation));
+        RouteTable customRouteTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .routes(Route.builder().destinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK).build())
+                .associations(RouteTableAssociation.builder().subnetId(SUBNET_ID).build())
+                .build();
         routeTables.add(customRouteTable);
 
-        RouteTable custom2RouteTable = new RouteTable().withVpcId(VPC_ID);
-        Route custom2Route = new Route()
-                .withDestinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK);
-        custom2RouteTable.setRoutes(List.of(custom2Route));
-        RouteTableAssociation custom2RouteTableAssociation = new RouteTableAssociation()
-                .withSubnetId(SUBNET_ID);
-        custom2RouteTable.setAssociations(List.of(custom2RouteTableAssociation));
+        RouteTable custom2RouteTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .routes(Route.builder().destinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK).build())
+                .associations(RouteTableAssociation.builder().subnetId(SUBNET_ID).build())
+                .build();
         routeTables.add(custom2RouteTable);
 
         boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(routeTables, SUBNET_ID, VPC_ID);
@@ -208,32 +185,25 @@ public class AwsSubnetIgwExplorerTest {
     @Test
     public void testWithMainAndCustomRouteTablesWithAssociationsAndIgwAttachedToMainRouteTable() {
         List<RouteTable> routeTables = new ArrayList<>();
-        RouteTable mainRouteTable = new RouteTable().withVpcId(VPC_ID);
-        Route mainRoute = new Route()
-                .withGatewayId(GATEWAY_ID)
-                .withDestinationCidrBlock(OPEN_CIDR_BLOCK);
-        mainRouteTable.setRoutes(List.of(mainRoute));
-        RouteTableAssociation mainRouteTableAssociation = new RouteTableAssociation()
-                .withMain(Boolean.TRUE);
-        mainRouteTable.setAssociations(List.of(mainRouteTableAssociation));
+        RouteTable mainRouteTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .routes(Route.builder().gatewayId(GATEWAY_ID).destinationCidrBlock(OPEN_CIDR_BLOCK).build())
+                .associations(RouteTableAssociation.builder().main(Boolean.TRUE).build())
+                .build();
         routeTables.add(mainRouteTable);
 
-        RouteTable customRouteTable = new RouteTable().withVpcId(VPC_ID);
-        Route customRoute = new Route()
-                .withDestinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK);
-        customRouteTable.setRoutes(List.of(customRoute));
-        RouteTableAssociation customRouteTableAssociation = new RouteTableAssociation()
-                .withSubnetId(SUBNET_ID);
-        customRouteTable.setAssociations(List.of(customRouteTableAssociation));
+        RouteTable customRouteTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .routes(Route.builder().destinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK).build())
+                .associations(RouteTableAssociation.builder().subnetId(SUBNET_ID).build())
+                .build();
         routeTables.add(customRouteTable);
 
-        RouteTable custom2RouteTable = new RouteTable().withVpcId(VPC_ID);
-        Route custom2Route = new Route()
-                .withDestinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK);
-        custom2RouteTable.setRoutes(List.of(custom2Route));
-        RouteTableAssociation custom2RouteTableAssociation = new RouteTableAssociation()
-                .withSubnetId(SUBNET_ID);
-        custom2RouteTable.setAssociations(List.of(custom2RouteTableAssociation));
+        RouteTable custom2RouteTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .routes(Route.builder().destinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK).build())
+                .associations(RouteTableAssociation.builder().subnetId(SUBNET_ID).build())
+                .build();
         routeTables.add(custom2RouteTable);
 
         boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(routeTables, SUBNET_ID, VPC_ID);
@@ -244,23 +214,18 @@ public class AwsSubnetIgwExplorerTest {
     @Test
     public void testWithMainAndCustomRouteTableWithAssociationsAndIgwAttachedToACustomRouteTable() {
         List<RouteTable> routeTables = new ArrayList<>();
-        RouteTable mainRouteTable = new RouteTable().withVpcId(VPC_ID);
-        Route mainRoute = new Route()
-                .withDestinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK);
-        mainRouteTable.setRoutes(List.of(mainRoute));
-        RouteTableAssociation mainRouteTableAssociation = new RouteTableAssociation()
-                .withMain(Boolean.TRUE);
-        mainRouteTable.setAssociations(List.of(mainRouteTableAssociation));
+        RouteTable mainRouteTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .routes(Route.builder().destinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK).build())
+                .associations(RouteTableAssociation.builder().main(Boolean.TRUE).build())
+                .build();
         routeTables.add(mainRouteTable);
 
-        RouteTable customRouteTable = new RouteTable().withVpcId(VPC_ID);
-        Route custom2Route = new Route()
-                .withGatewayId(GATEWAY_ID)
-                .withDestinationCidrBlock(OPEN_CIDR_BLOCK);
-        customRouteTable.setRoutes(List.of(custom2Route));
-        RouteTableAssociation custom2RouteTableAssociation = new RouteTableAssociation()
-                .withSubnetId(SUBNET_ID);
-        customRouteTable.setAssociations(List.of(custom2RouteTableAssociation));
+        RouteTable customRouteTable = RouteTable.builder()
+                .vpcId(VPC_ID)
+                .routes(Route.builder().gatewayId(GATEWAY_ID).destinationCidrBlock(OPEN_CIDR_BLOCK).build())
+                .associations(RouteTableAssociation.builder().subnetId(SUBNET_ID).build())
+                .build();
         routeTables.add(customRouteTable);
 
         boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(routeTables, SUBNET_ID, VPC_ID);

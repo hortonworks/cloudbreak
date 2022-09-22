@@ -6,15 +6,17 @@ import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.DISCOVERY_NAME
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,16 +32,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.api.services.compute.Compute;
@@ -74,7 +73,6 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
@@ -103,17 +101,17 @@ import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.FileSystemType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class GcpInstanceResourceBuilderTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
+    private static final String ENCRYPTION_KEY = "theKey";
+
     @InjectMocks
-    private final GcpInstanceResourceBuilder builder = new GcpInstanceResourceBuilder();
+    private GcpInstanceResourceBuilder builder;
 
     private long privateId;
-
-    private String privateCrn;
 
     private String instanceId;
 
@@ -165,16 +163,16 @@ public class GcpInstanceResourceBuilderTest {
     @Captor
     private ArgumentCaptor<Instance> instanceArg;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         privateId = 0L;
-        privateCrn = "crn";
+        String privateCrn = "crn";
         name = "master";
         flavor = "m1.medium";
         instanceId = "SOME_ID";
         volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1, CloudVolumeUsageType.GENERAL),
                 new Volume("/hadoop/fs2", "HDD", 1, CloudVolumeUsageType.GENERAL));
-        List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
+        List<SecurityRule> rules = singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         security = new Security(rules, emptyList());
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
@@ -191,10 +189,11 @@ public class GcpInstanceResourceBuilderTest {
         cloudCredential.putParameter("projectId", "projectId");
         String projectId = "projectId";
         String serviceAccountId = "serviceAccountId";
-        when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn(projectId);
+        lenient().when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn(projectId);
         authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
         context = new GcpContext(cloudContext.getName(), location, projectId, serviceAccountId, compute, false, 30, false);
-        List<CloudResource> networkResources = Collections.singletonList(new Builder().withType(ResourceType.GCP_NETWORK).withName("network-test").build());
+        List<CloudResource> networkResources =
+                singletonList(CloudResource.builder().withType(ResourceType.GCP_NETWORK).withName("network-test").build());
         context.addNetworkResources(networkResources);
         operation = new Operation();
         operation.setName("operation");
@@ -204,7 +203,7 @@ public class GcpInstanceResourceBuilderTest {
         ReflectionTestUtils.setField(resourceNameService, "maxResourceNameLength", 50);
         ReflectionTestUtils.setField(builder, "resourceNameService", resourceNameService);
         Network network = new Network(null);
-        cloudStack = new CloudStack(Collections.emptyList(), network, image, emptyMap(), emptyMap(), null,
+        cloudStack = new CloudStack(emptyList(), network, image, emptyMap(), emptyMap(), null,
                 null, null, null, null);
     }
 
@@ -303,7 +302,7 @@ public class GcpInstanceResourceBuilderTest {
         Group group = newGroupWithParams(ImmutableMap.of(DISCOVERY_NAME, ipaserver));
         List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
-        cloudStack = new CloudStack(Collections.singletonList(group), new Network(null), image,
+        cloudStack = new CloudStack(singletonList(group), new Network(null), image,
                 ImmutableMap.of(CLOUD_STACK_TYPE_PARAMETER, FREEIPA_STACK_TYPE), emptyMap(), null,
                 null, null, null, null);
 
@@ -357,7 +356,7 @@ public class GcpInstanceResourceBuilderTest {
         CloudGcsView cloudGcsView = new CloudGcsView(CloudIdentityType.LOG);
         cloudGcsView.setServiceAccountEmail(email);
 
-        CloudStack cloudStack = new CloudStack(Collections.emptyList(), new Network(null), image,
+        CloudStack cloudStack = new CloudStack(emptyList(), new Network(null), image,
                 emptyMap(), emptyMap(), null, null, null, null,
                 new SpiFileSystem("test", FileSystemType.GCS, List.of(cloudGcsView)));
 
@@ -406,7 +405,7 @@ public class GcpInstanceResourceBuilderTest {
                 .withName("test-master-1")
                 .withGroup(group.getName())
                 .build();
-        context.addGroupResources(group.getName(), Collections.singletonList(instanceGroup));
+        context.addGroupResources(group.getName(), singletonList(instanceGroup));
         when(compute.instanceGroups()).thenReturn(instanceGroups);
         when(instanceGroups.addInstances(anyString(), anyString(), anyString(), any())).thenReturn(addInstances);
         InstanceGroups.List list = mock(InstanceGroups.List.class);
@@ -416,7 +415,7 @@ public class GcpInstanceResourceBuilderTest {
         when(list.execute()).thenReturn(instanceGroupList);
         when(addInstances.execute()).thenReturn(addOperation);
 
-        Assert.assertThrows("Not Authorized", GcpResourceException.class,
+        assertThrows(GcpResourceException.class,
                 () -> builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, resourcesWithGroup, cloudStack));
 
         // THEN
@@ -547,7 +546,7 @@ public class GcpInstanceResourceBuilderTest {
         CloudInstance cloudInstance = newCloudInstance(params, instanceAuthentication);
         return new Group(name,
                 InstanceGroupType.CORE,
-                Collections.singletonList(cloudInstance),
+                singletonList(cloudInstance),
                 security,
                 null,
                 instanceAuthentication,
@@ -595,44 +594,39 @@ public class GcpInstanceResourceBuilderTest {
 
     @Test
     public void testInstanceEncryptionWithRawMethodEmptyKey() throws Exception {
-        String encryptionKey = "";
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
                 "keyEncryptionMethod", "RAW");
-        doTestDiskEncryption(encryptionKey, params);
+        doTestDiskEncryption(params);
     }
 
     @Test
     public void testInstanceEncryptionWithRawMethod() throws Exception {
-        String encryptionKey = "theKey";
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
-                "keyEncryptionMethod", "RAW", InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, encryptionKey);
-        doTestDiskEncryption(encryptionKey, params);
+                "keyEncryptionMethod", "RAW", InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY);
+        doTestDiskEncryption(params);
     }
 
     @Test
     public void testInstanceEncryptionWithEmptyMethod() throws Exception {
-        String encryptionKey = "";
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name());
-        doTestDiskEncryption(encryptionKey, params);
+        doTestDiskEncryption(params);
     }
 
     @Test
     public void testInstanceEncryptionWithRsaMethodEmptyKey() throws Exception {
-        String encryptionKey = "";
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
                 "keyEncryptionMethod", "RSA");
-        doTestDiskEncryption(encryptionKey, params);
+        doTestDiskEncryption(params);
     }
 
     @Test
     public void testInstanceEncryptionWithRsaMethod() throws Exception {
-        String encryptionKey = "theKey";
         ImmutableMap<String, Object> params = ImmutableMap.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
-                "keyEncryptionMethod", "RSA", InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, encryptionKey);
-        doTestDiskEncryption(encryptionKey, params);
+                "keyEncryptionMethod", "RSA", InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY);
+        doTestDiskEncryption(params);
     }
 
-    private void doTestDiskEncryption(String encryptionKey, ImmutableMap<String, Object> templateParams) throws Exception {
+    private void doTestDiskEncryption(ImmutableMap<String, Object> templateParams) throws Exception {
         Group group = newGroupWithParams(templateParams);
         CloudResource requestedDisk = CloudResource.builder()
                 .withType(ResourceType.GCP_DISK)
@@ -678,9 +672,9 @@ public class GcpInstanceResourceBuilderTest {
     public void doTestDefaultEncryption(CloudInstance cloudInstance) throws IOException {
         when(compute.instances()).thenReturn(instances);
 
-        Get get = Mockito.mock(Get.class);
+        Get get = mock(Get.class);
         when(instances.get(anyString(), anyString(), anyString())).thenReturn(get);
-        Start start = Mockito.mock(Start.class);
+        Start start = mock(Start.class);
         when(instances.start(anyString(), anyString(), anyString())).thenReturn(start);
 
         String expectedSource = "google.disk";
@@ -728,9 +722,9 @@ public class GcpInstanceResourceBuilderTest {
 
         ArgumentCaptor<InstancesStartWithEncryptionKeyRequest> requestCaptor = ArgumentCaptor.forClass(InstancesStartWithEncryptionKeyRequest.class);
 
-        Get get = Mockito.mock(Get.class);
+        Get get = mock(Get.class);
         when(instances.get(anyString(), anyString(), anyString())).thenReturn(get);
-        StartWithEncryptionKey start = Mockito.mock(StartWithEncryptionKey.class);
+        StartWithEncryptionKey start = mock(StartWithEncryptionKey.class);
         when(instances.startWithEncryptionKey(anyString(), anyString(), anyString(), requestCaptor.capture())).thenReturn(start);
 
         String expectedSource = "google.disk";
@@ -784,27 +778,27 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     @Test
-    public void testPublicKeyWhenHasEmailAtTheEndShouldCutTheEmail() throws Exception {
+    public void testPublicKeyWhenHasEmailAtTheEndShouldCutTheEmail() {
         String loginName = "cloudbreak";
         String sshKey = "ssh-rsa key cloudbreak@cloudbreak.com";
         String publicKey = builder.getPublicKey(sshKey, loginName);
-        Assert.assertEquals("cloudbreak:ssh-rsa key cloudbreak", publicKey);
+        assertEquals("cloudbreak:ssh-rsa key cloudbreak", publicKey);
     }
 
     @Test
-    public void testPublicKeyWhenHasNoEmailAtTheEndShouldCutTheEmail() throws Exception {
+    public void testPublicKeyWhenHasNoEmailAtTheEndShouldCutTheEmail() {
         String loginName = "cloudbreak";
         String sshKey = "ssh-rsa key";
         String publicKey = builder.getPublicKey(sshKey, loginName);
-        Assert.assertEquals("cloudbreak:ssh-rsa key cloudbreak", publicKey);
+        assertEquals("cloudbreak:ssh-rsa key cloudbreak", publicKey);
     }
 
     @Test
-    public void testPublicKeyWhenHasLotOfSegmentAtTheEndShouldCutTheEmail() throws Exception {
+    public void testPublicKeyWhenHasLotOfSegmentAtTheEndShouldCutTheEmail() {
         String loginName = "cloudbreak";
         String sshKey = "ssh-rsa key cloudbreak cloudbreak cloudbreak cloudbreak cloudbreak cloudbreak";
         String publicKey = builder.getPublicKey(sshKey, loginName);
-        Assert.assertEquals("cloudbreak:ssh-rsa key cloudbreak", publicKey);
+        assertEquals("cloudbreak:ssh-rsa key cloudbreak", publicKey);
     }
 
     private GroupNetwork createGroupNetwork() {

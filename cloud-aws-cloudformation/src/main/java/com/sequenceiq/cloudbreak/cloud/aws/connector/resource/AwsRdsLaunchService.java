@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static com.amazonaws.services.cloudformation.model.ResourceStatus.CREATE_FAILED;
-import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
+import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.handleWaiterError;
+import static software.amazon.awssdk.services.cloudformation.model.ResourceStatus.CREATE_FAILED;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.waiters.Waiter;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
@@ -26,19 +23,23 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.RDSMode
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CancellableWaiterConfiguration;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessageProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStacksRequest;
+import software.amazon.awssdk.services.cloudformation.waiters.CloudFormationWaiter;
 
 @Service
 public class AwsRdsLaunchService {
@@ -81,20 +82,20 @@ public class AwsRdsLaunchService {
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
-        DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
+        DescribeStacksRequest describeStacksRequest = DescribeStacksRequest.builder().stackName(cFStackName).build();
         DatabaseServer databaseServer = stack.getDatabaseServer();
         boolean useSslEnforcement = databaseServer.isUseSslEnforcement();
         try {
             cfClient.describeStacks(describeStacksRequest);
             LOGGER.debug("Stack already exists: {}", cFStackName);
-        } catch (AmazonServiceException exception) {
+        } catch (AwsServiceException exception) {
             // all subnets desired for DB subnet group are in the stack
             boolean existingSubnet = awsNetworkView.isExistingSubnet();
             LOGGER.warn("API call failed with this error:", exception);
             if (!existingSubnet) {
                 throw new CloudConnectorException("Can only create RDS instance with existing subnets", exception);
             }
-            CloudResource cloudFormationStack = new Builder()
+            CloudResource cloudFormationStack = CloudResource.builder()
                     .withType(ResourceType.CLOUDFORMATION_STACK)
                     .withName(cFStackName)
                     .withAvailabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
@@ -117,10 +118,15 @@ public class AwsRdsLaunchService {
         }
         LOGGER.debug("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, ac.getCloudContext().getId());
 
-        Waiter<DescribeStacksRequest> creationWaiter = cfClient.waiters().stackCreateComplete();
-        StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
-        run(creationWaiter, describeStacksRequest, stackCancellationCheck, String.format("RDS CloudFormation stack %s creation failed", cFStackName),
-                () -> awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, CREATE_FAILED));
+        DescribeStacksRequest request = DescribeStacksRequest.builder().stackName(cFStackName).build();
+        StackCancellationCheck cancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
+        try (CloudFormationWaiter waiter = cfClient.waiters()) {
+            LOGGER.debug("Waiting for RDS CloudFormation stack {} creation", cFStackName);
+            waiter.waitUntilStackCreateComplete(request, CancellableWaiterConfiguration.cancellableWaiterConfiguration(cancellationCheck));
+        } catch (Exception e) {
+            handleWaiterError(String.format("RDS CloudFormation stack %s creation failed", cFStackName),
+                    () -> awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, CREATE_FAILED), e);
+        }
 
         List<CloudResource> databaseResources = getCreatedOutputs(ac, stack, cFStackName, cfClient, resourceNotifier, useSslEnforcement);
         databaseResources.forEach(dbr -> resourceNotifier.notifyAllocation(dbr, ac.getCloudContext()));
@@ -139,28 +145,28 @@ public class AwsRdsLaunchService {
         Map<String, String> outputs = getCfStackOutputs(cFStackName, client);
         String availabilityZone = ac.getCloudContext().getLocation().getAvailabilityZone().value();
 
-        resources.add(new Builder()
+        resources.add(CloudResource.builder()
                 .withType(ResourceType.RDS_HOSTNAME)
                 .withName(getHostname(outputs, cFStackName))
                 .withAvailabilityZone(availabilityZone)
                 .build());
-        resources.add(new Builder()
+        resources.add(CloudResource.builder()
                 .withType(ResourceType.RDS_PORT)
                 .withName(getPort(outputs, cFStackName))
                 .withAvailabilityZone(availabilityZone)
                 .build());
-        resources.add(new Builder()
+        resources.add(CloudResource.builder()
                 .withType(ResourceType.RDS_INSTANCE)
                 .withName(getCreatedDBInstance(outputs, cFStackName))
                 .withAvailabilityZone(availabilityZone)
                 .build());
-        resources.add(new Builder()
+        resources.add(CloudResource.builder()
                 .withType(ResourceType.RDS_DB_SUBNET_GROUP)
                 .withName(getCreatedDBSubnetGroup(outputs, cFStackName))
                 .withAvailabilityZone(availabilityZone)
                 .build());
         if (useSslEnforcement) {
-            resources.add(new Builder()
+            resources.add(CloudResource.builder()
                     .withType(ResourceType.RDS_DB_PARAMETER_GROUP)
                     .withName(getCreatedDBParameterGroup(outputs, cFStackName))
                     .withAvailabilityZone(availabilityZone)
@@ -168,7 +174,7 @@ public class AwsRdsLaunchService {
         }
         // The idea here is to record the CloudFormation stack name so that we can later manipulate it.
         // This may be unnecessary, but for now this is trivial to add.
-        CloudResource cfNameResource = new Builder()
+        CloudResource cfNameResource = CloudResource.builder()
                 .withType(ResourceType.CLOUDFORMATION_STACK)
                 .withName(cFStackName)
                 .withAvailabilityZone(availabilityZone)

@@ -6,11 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.cloudformation.AmazonCloudFormation;
-import com.amazonaws.services.cloudformation.AmazonCloudFormationClientBuilder;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
+
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.cloudformation.CloudFormationClient;
 
 @Service
 public class CfClient {
@@ -22,16 +23,16 @@ public class CfClient {
     public CfClient() {
     }
 
-    public AmazonCloudFormation buildCfClient() {
+    public CloudFormationClient buildCfClient() {
         String accessKeyId = awsProperties.getCredential().getAccessKeyId();
         String secretKey = awsProperties.getCredential().getSecretKey();
         String region = awsProperties.getRegion();
 
-        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKeyId, secretKey);
+        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKeyId, secretKey);
 
-        return AmazonCloudFormationClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                .withRegion(region)
+        return CloudFormationClient.builder()
+                .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+                .region(Region.of(region))
                 .build();
     }
 }

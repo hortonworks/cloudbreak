@@ -8,16 +8,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
-import com.amazonaws.waiters.Waiter;
 import com.dyngr.exception.PollerException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
-import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.util.poller.upgrade.UpgradeStartPoller;
 import com.sequenceiq.cloudbreak.cloud.aws.util.poller.upgrade.UpgradeStartWaitTask;
-import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+
+import software.amazon.awssdk.core.waiters.Waiter;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesRequest;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 
 @Component
 public class AwsRdsUpgradeWaitOperations {
@@ -30,8 +30,8 @@ public class AwsRdsUpgradeWaitOperations {
     @Inject
     private CustomAmazonWaiterProvider customAmazonWaiterProvider;
 
-    public void waitUntilUpgradeStarts(AmazonRdsClient rdsClient, DescribeDBInstancesRequest describeDBInstancesRequest) {
-        LOGGER.debug("Starting RDS state polling until RDS start the upgrade, dbInstanceIdentifier: {}", describeDBInstancesRequest.getDBInstanceIdentifier());
+    public void waitUntilUpgradeStarts(AmazonRdsClient rdsClient, DescribeDbInstancesRequest describeDBInstancesRequest) {
+        LOGGER.debug("Starting RDS state polling until RDS start the upgrade, dbInstanceIdentifier: {}", describeDBInstancesRequest.dbInstanceIdentifier());
         UpgradeStartWaitTask upgradeStartWaitTask = new UpgradeStartWaitTask(describeDBInstancesRequest, rdsClient);
         try {
             upgradeStartPoller.waitForUpgradeToStart(upgradeStartWaitTask);
@@ -43,12 +43,10 @@ public class AwsRdsUpgradeWaitOperations {
         }
     }
 
-    public void waitUntilUpgradeFinishes(AuthenticatedContext ac, AmazonRdsClient rdsClient, DescribeDBInstancesRequest describeDBInstancesRequest) {
-        Waiter<DescribeDBInstancesRequest> rdsWaiter = customAmazonWaiterProvider.getDbInstanceModifyWaiter(rdsClient);
-        StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
+    public void waitUntilUpgradeFinishes(AmazonRdsClient rdsClient, DescribeDbInstancesRequest describeDBInstancesRequest) {
+        Waiter<DescribeDbInstancesResponse> rdsWaiter = customAmazonWaiterProvider.getDbInstanceModifyWaiter();
         LOGGER.debug("Starting waiting on RDS upgrade");
-        run(rdsWaiter, describeDBInstancesRequest, stackCancellationCheck);
+        run(() -> rdsClient.describeDBInstances(describeDBInstancesRequest), rdsWaiter);
         LOGGER.debug("Finished waiting on RDS upgrade");
     }
-
 }

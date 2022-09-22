@@ -2,12 +2,13 @@ package com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.DBInstanceStatuses.DB_STATUSES;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import com.amazonaws.services.rds.model.DBInstance;
-import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
-import com.amazonaws.waiters.WaiterState;
+import software.amazon.awssdk.core.waiters.WaiterState;
+import software.amazon.awssdk.services.rds.model.DBInstance;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 
 class DescribeDbInstanceForModifySuccessAcceptorTest {
 
@@ -21,10 +22,10 @@ class DescribeDbInstanceForModifySuccessAcceptorTest {
                         "available".equals(status1) && "stopped".equals(status2) ||
                         "stopped".equals(status1) && "available".equals(status2) ||
                         "stopped".equals(status1) && "stopped".equals(status2);
-                DBInstance dbInstance1 = new DBInstance().withDBInstanceStatus(status1);
-                DBInstance dbInstance2 = new DBInstance().withDBInstanceStatus(status2);
-                DescribeDBInstancesResult describeDBInstanceResult = new DescribeDBInstancesResult().withDBInstances(dbInstance1, dbInstance2);
-                boolean matches = underTest.matches(describeDBInstanceResult);
+                DBInstance dbInstance1 = DBInstance.builder().dbInstanceStatus(status1).build();
+                DBInstance dbInstance2 = DBInstance.builder().dbInstanceStatus(status2).build();
+                DescribeDbInstancesResponse describeDBInstanceResponse = DescribeDbInstancesResponse.builder().dbInstances(dbInstance1, dbInstance2).build();
+                boolean matches = underTest.matches(describeDBInstanceResponse);
                 assertThat(matches)
                         .withFailMessage("matches expected as '%s' but was '%s' for DB instance states '%s' and '%s'",
                                 expected, matches, status1, status2)
@@ -35,6 +36,6 @@ class DescribeDbInstanceForModifySuccessAcceptorTest {
 
     @Test
     void getState() {
-        assertThat(underTest.getState()).isEqualTo(WaiterState.SUCCESS);
+        assertEquals(WaiterState.SUCCESS, underTest.waiterState());
     }
 }

@@ -15,9 +15,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,45 +37,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.dynamodbv2.model.ListTablesRequest;
-import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
-import com.amazonaws.services.ec2.model.AvailabilityZone;
-import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
-import com.amazonaws.services.ec2.model.DescribeInstanceTypeOfferingsRequest;
-import com.amazonaws.services.ec2.model.DescribeInstanceTypeOfferingsResult;
-import com.amazonaws.services.ec2.model.DescribeInstanceTypesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstanceTypesResult;
-import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
-import com.amazonaws.services.ec2.model.DescribeRegionsResult;
-import com.amazonaws.services.ec2.model.DescribeRouteTablesResult;
-import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
-import com.amazonaws.services.ec2.model.DescribeVpcsResult;
-import com.amazonaws.services.ec2.model.DiskInfo;
-import com.amazonaws.services.ec2.model.EbsEncryptionSupport;
-import com.amazonaws.services.ec2.model.EbsInfo;
-import com.amazonaws.services.ec2.model.InstanceStorageInfo;
-import com.amazonaws.services.ec2.model.InstanceTypeInfo;
-import com.amazonaws.services.ec2.model.InstanceTypeOffering;
-import com.amazonaws.services.ec2.model.MemoryInfo;
-import com.amazonaws.services.ec2.model.Region;
-import com.amazonaws.services.ec2.model.Subnet;
-import com.amazonaws.services.ec2.model.VCpuInfo;
-import com.amazonaws.services.ec2.model.Vpc;
-import com.amazonaws.services.identitymanagement.model.InstanceProfile;
-import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesRequest;
-import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesResult;
-import com.amazonaws.services.kms.model.AliasListEntry;
-import com.amazonaws.services.kms.model.DescribeKeyRequest;
-import com.amazonaws.services.kms.model.DescribeKeyResult;
-import com.amazonaws.services.kms.model.KeyListEntry;
-import com.amazonaws.services.kms.model.KeyMetadata;
-import com.amazonaws.services.kms.model.ListAliasesRequest;
-import com.amazonaws.services.kms.model.ListAliasesResult;
-import com.amazonaws.services.kms.model.ListKeysRequest;
-import com.amazonaws.services.kms.model.ListKeysResult;
-import com.amazonaws.services.rds.model.Certificate;
-import com.amazonaws.services.rds.model.DescribeCertificatesRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonDynamoDBClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
@@ -101,6 +62,46 @@ import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCert
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificates;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTable;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
+
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.dynamodb.model.ListTablesRequest;
+import software.amazon.awssdk.services.dynamodb.model.ListTablesResponse;
+import software.amazon.awssdk.services.ec2.model.AvailabilityZone;
+import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypeOfferingsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypeOfferingsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeRegionsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeRegionsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeRouteTablesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
+import software.amazon.awssdk.services.ec2.model.DiskInfo;
+import software.amazon.awssdk.services.ec2.model.EbsEncryptionSupport;
+import software.amazon.awssdk.services.ec2.model.EbsInfo;
+import software.amazon.awssdk.services.ec2.model.InstanceStorageInfo;
+import software.amazon.awssdk.services.ec2.model.InstanceTypeInfo;
+import software.amazon.awssdk.services.ec2.model.InstanceTypeOffering;
+import software.amazon.awssdk.services.ec2.model.MemoryInfo;
+import software.amazon.awssdk.services.ec2.model.Region;
+import software.amazon.awssdk.services.ec2.model.Subnet;
+import software.amazon.awssdk.services.ec2.model.VCpuInfo;
+import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.iam.model.InstanceProfile;
+import software.amazon.awssdk.services.iam.model.ListInstanceProfilesRequest;
+import software.amazon.awssdk.services.iam.model.ListInstanceProfilesResponse;
+import software.amazon.awssdk.services.kms.model.AliasListEntry;
+import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
+import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
+import software.amazon.awssdk.services.kms.model.KeyListEntry;
+import software.amazon.awssdk.services.kms.model.KeyMetadata;
+import software.amazon.awssdk.services.kms.model.ListAliasesRequest;
+import software.amazon.awssdk.services.kms.model.ListAliasesResponse;
+import software.amazon.awssdk.services.kms.model.ListKeysRequest;
+import software.amazon.awssdk.services.kms.model.ListKeysResponse;
+import software.amazon.awssdk.services.rds.model.Certificate;
+import software.amazon.awssdk.services.rds.model.DescribeCertificatesRequest;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -141,20 +142,6 @@ public class AwsPlatformResourcesTest {
     private AwsSubnetIgwExplorer awsSubnetIgwExplorer;
 
     @Mock
-    private DescribeRegionsResult describeRegionsResult;
-
-    @Mock
-    private DescribeAvailabilityZonesResult describeAvailabilityZonesResult;
-
-    @Mock
-    private DescribeInstanceTypesResult describeInstanceTypesResult;
-
-    @Mock
-    private DescribeInstanceTypeOfferingsResult describeInstanceTypeOfferingsResult;
-
-    private List<InstanceTypeInfo> instanceTypeInfos;
-
-    @Mock
     private AmazonDynamoDBClient amazonDynamoDB;
 
     @Mock
@@ -166,31 +153,29 @@ public class AwsPlatformResourcesTest {
 
     @BeforeEach
     public void setUp() {
-        AvailabilityZone availabilityZone = new AvailabilityZone();
-        availabilityZone.setZoneName(AZ_NAME);
-        Region awsRegion = new Region();
-        awsRegion.setRegionName(REGION_NAME);
-        InstanceTypeOffering instanceTypeOffering = new InstanceTypeOffering();
-        instanceTypeOffering.setInstanceType("m5.2xlarge");
+        AvailabilityZone availabilityZone = AvailabilityZone.builder()
+                .zoneName(AZ_NAME).build();
 
-        instanceTypeInfos = new ArrayList<>();
-        instanceTypeInfos.add(getInstanceTypeInfo("m5.2xlarge"));
-        describeInstanceTypesResult.setInstanceTypes(instanceTypeInfos);
+        DescribeInstanceTypesResponse describeInstanceTypesResponse = DescribeInstanceTypesResponse.builder()
+                .instanceTypes(List.of(getInstanceTypeInfo("m5.2xlarge")))
+                .build();
+        DescribeRegionsResponse describeRegionsResponse = DescribeRegionsResponse.builder()
+                .regions(Collections.singletonList(Region.builder().regionName(REGION_NAME).build()))
+                .build();
+        DescribeInstanceTypeOfferingsResponse describeInstanceTypeOfferingsResponse = DescribeInstanceTypeOfferingsResponse.builder()
+                .instanceTypeOfferings(Collections.singletonList(InstanceTypeOffering.builder().instanceType("m5.2xlarge").build()))
+                .build();
 
         when(awsDefaultZoneProvider.getDefaultZone(any(CloudCredential.class))).thenReturn(REGION_NAME);
         when(awsClient.createEc2Client(any(AwsCredentialView.class))).thenReturn(amazonEC2Client);
         when(awsClient.createEc2Client(any(AwsCredentialView.class), any())).thenReturn(amazonEC2Client);
-        when(amazonEC2Client.describeRegions(any(DescribeRegionsRequest.class))).thenReturn(describeRegionsResult);
-        when(describeRegionsResult.getRegions()).thenReturn(Collections.singletonList(awsRegion));
+        when(amazonEC2Client.describeRegions(any(DescribeRegionsRequest.class))).thenReturn(describeRegionsResponse);
         when(awsAvailabilityZoneProvider.describeAvailabilityZones(any(), any(), any()))
                 .thenReturn(List.of(availabilityZone));
         when(amazonEC2Client.describeInstanceTypeOfferings(any(DescribeInstanceTypeOfferingsRequest.class)))
-                .thenReturn(describeInstanceTypeOfferingsResult);
+                .thenReturn(describeInstanceTypeOfferingsResponse);
         when(amazonEC2Client.describeInstanceTypes(any(DescribeInstanceTypesRequest.class)))
-                .thenReturn(describeInstanceTypesResult);
-        when(describeInstanceTypesResult.getInstanceTypes()).thenReturn(instanceTypeInfos);
-        when(describeInstanceTypeOfferingsResult.getInstanceTypeOfferings())
-                .thenReturn(Collections.singletonList(instanceTypeOffering));
+                .thenReturn(describeInstanceTypesResponse);
 
         ReflectionTestUtils.setField(underTest, "fetchMaxItems", 500);
         region = region(REGION_NAME);
@@ -208,26 +193,27 @@ public class AwsPlatformResourcesTest {
     }
 
     private InstanceTypeInfo getInstanceTypeInfo(String name) {
-        return new InstanceTypeInfo()
-                .withInstanceType(name)
-                .withInstanceStorageSupported(true)
-                .withBareMetal(false)
-                .withInstanceStorageInfo(new InstanceStorageInfo()
-                        .withDisks(new DiskInfo()
-                                .withCount(2)
-                                .withSizeInGB(600L)))
-                .withEbsInfo(new EbsInfo()
-                        .withEncryptionSupport(EbsEncryptionSupport.Supported))
-                .withVCpuInfo(new VCpuInfo()
-                        .withDefaultCores(6))
-                .withMemoryInfo(new MemoryInfo()
-                        .withSizeInMiB(1024L));
+        return InstanceTypeInfo.builder()
+                .instanceType(name)
+                .instanceStorageSupported(true)
+                .bareMetal(false)
+                .instanceStorageInfo(InstanceStorageInfo.builder()
+                        .disks(DiskInfo.builder()
+                                .count(2)
+                                .sizeInGB(600L).build())
+                        .build())
+                .ebsInfo(EbsInfo.builder()
+                        .encryptionSupport(EbsEncryptionSupport.SUPPORTED).build())
+                .vCpuInfo(VCpuInfo.builder()
+                        .defaultCores(6).build())
+                .memoryInfo(MemoryInfo.builder()
+                        .sizeInMiB(1024L).build())
+                .build();
     }
 
     @Test
     public void collectAccessConfigsWhenUserIsUnathorizedToGetInfoThenItShouldReturnEmptyList() {
-        AmazonServiceException amazonServiceException = new AmazonServiceException("unauthorized.");
-        amazonServiceException.setStatusCode(403);
+        AwsServiceException amazonServiceException = AwsServiceException.builder().message("unauthorized.").statusCode(403).build();
 
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonCFClient);
         when(amazonCFClient.listInstanceProfiles(any(ListInstanceProfilesRequest.class))).thenThrow(amazonServiceException);
@@ -239,9 +225,11 @@ public class AwsPlatformResourcesTest {
 
     @Test
     public void collectAccessConfigsWhenUserGetAmazonExceptionToGetInfoThenItShouldReturnEmptyList() {
-        AmazonServiceException amazonServiceException = new AmazonServiceException("Amazon problem.");
-        amazonServiceException.setStatusCode(404);
-        amazonServiceException.setErrorMessage("Amazon problem.");
+        AwsServiceException amazonServiceException = AwsServiceException.builder()
+                .message("Amazon problem.")
+                .statusCode(404)
+                .awsErrorDetails(AwsErrorDetails.builder().errorMessage("Amazon problem.").build())
+                .build();
 
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonCFClient);
         when(amazonCFClient.listInstanceProfiles(any(ListInstanceProfilesRequest.class))).thenThrow(amazonServiceException);
@@ -265,16 +253,16 @@ public class AwsPlatformResourcesTest {
 
     @Test
     public void collectAccessConfigsWhenWeGetBackInfoThenItShouldReturnListWithElements() {
-        ListInstanceProfilesResult listInstanceProfilesResult = new ListInstanceProfilesResult();
-
         Set<InstanceProfile> instanceProfileSet = new HashSet<>();
         instanceProfileSet.add(instanceProfile(1));
         instanceProfileSet.add(instanceProfile(2));
         instanceProfileSet.add(instanceProfile(3));
         instanceProfileSet.add(instanceProfile(4));
 
-        listInstanceProfilesResult.setInstanceProfiles(instanceProfileSet);
-        listInstanceProfilesResult.setIsTruncated(false);
+        ListInstanceProfilesResponse listInstanceProfilesResult = ListInstanceProfilesResponse.builder()
+                .instanceProfiles(instanceProfileSet)
+                .isTruncated(false)
+                .build();
 
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonCFClient);
         when(amazonCFClient.listInstanceProfiles(any(ListInstanceProfilesRequest.class))).thenReturn(listInstanceProfilesResult);
@@ -286,28 +274,21 @@ public class AwsPlatformResourcesTest {
 
     @Test
     public void collectEncryptionKeysWhenWeGetBackInfoThenItShouldReturnListWithElements() {
-        ListKeysResult listKeysResult = new ListKeysResult();
-
         Set<KeyListEntry> listEntries = new HashSet<>();
         listEntries.add(keyListEntry(1));
         listEntries.add(keyListEntry(2));
         listEntries.add(keyListEntry(3));
         listEntries.add(keyListEntry(4));
+        ListKeysResponse listKeysResult = ListKeysResponse.builder().keys(listEntries).build();
 
-        listKeysResult.setKeys(listEntries);
-
-        DescribeKeyResult describeKeyResult = new DescribeKeyResult();
-        describeKeyResult.setKeyMetadata(new KeyMetadata());
-
-        ListAliasesResult describeAliasResult = new ListAliasesResult();
+        DescribeKeyResponse describeKeyResult = DescribeKeyResponse.builder().keyMetadata(KeyMetadata.builder().build()).build();
 
         Set<AliasListEntry> aliasListEntries = new HashSet<>();
         aliasListEntries.add(aliasListEntry(1));
         aliasListEntries.add(aliasListEntry(2));
         aliasListEntries.add(aliasListEntry(3));
         aliasListEntries.add(aliasListEntry(4));
-
-        describeAliasResult.setAliases(aliasListEntries);
+        ListAliasesResponse describeAliasResult = ListAliasesResponse.builder().aliases(aliasListEntries).build();
 
         when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(awskmsClient);
         when(awskmsClient.listKeys(any(ListKeysRequest.class))).thenReturn(listKeysResult);
@@ -321,8 +302,6 @@ public class AwsPlatformResourcesTest {
 
     @Test
     public void collectEncryptionKeysWhenWeGetBackInfoThenItShouldReturnListWithPaginatedElements() {
-        ListKeysResult listKeysResultWithMarker = new ListKeysResult();
-        ListKeysResult listKeysResult = new ListKeysResult();
 
         List<KeyListEntry> listEntriesPage1 = new ArrayList<>();
         List<KeyListEntry> listEntriesPage2 = new ArrayList<>();
@@ -334,16 +313,11 @@ public class AwsPlatformResourcesTest {
             listEntriesPage2.add(keyListEntry(i));
         }
 
-        listKeysResultWithMarker.setKeys(listEntriesPage1);
-        listKeysResultWithMarker.setNextMarker("testMarker");
+        ListKeysResponse listKeysResultWithMarker = ListKeysResponse.builder().keys(listEntriesPage1).nextMarker("testMarker").build();
+        ListKeysResponse listKeysResult = ListKeysResponse.builder().keys(listEntriesPage2).build();
 
-        listKeysResult.setKeys(listEntriesPage2);
+        DescribeKeyResponse describeKeyResult = DescribeKeyResponse.builder().keyMetadata(KeyMetadata.builder().build()).build();
 
-        DescribeKeyResult describeKeyResult = new DescribeKeyResult();
-        describeKeyResult.setKeyMetadata(new KeyMetadata());
-
-        ListAliasesResult listAliasesResultWithMarker = new ListAliasesResult();
-        ListAliasesResult listAliasesResult = new ListAliasesResult();
 
         List<AliasListEntry> aliasListEntriesPage1 = new ArrayList<>();
         List<AliasListEntry> aliasListEntriesPage2 = new ArrayList<>();
@@ -355,10 +329,8 @@ public class AwsPlatformResourcesTest {
             aliasListEntriesPage2.add(aliasListEntry(i));
         }
 
-        listAliasesResultWithMarker.setAliases(aliasListEntriesPage1);
-        listAliasesResultWithMarker.setNextMarker("testMarker");
-
-        listAliasesResult.setAliases(aliasListEntriesPage2);
+        ListAliasesResponse listAliasesResultWithMarker = ListAliasesResponse.builder().aliases(aliasListEntriesPage1).nextMarker("testMarker").build();
+        ListAliasesResponse listAliasesResult = ListAliasesResponse.builder().aliases(aliasListEntriesPage2).build();
 
         when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(awskmsClient);
         when(awskmsClient.listKeys(any(ListKeysRequest.class))).thenReturn(listKeysResultWithMarker, listKeysResult);
@@ -407,35 +379,35 @@ public class AwsPlatformResourcesTest {
     }
 
     private InstanceProfile instanceProfile(int i) {
-        InstanceProfile instanceProfile = new InstanceProfile();
-        instanceProfile.setArn(String.format("arn-%s", i));
-        instanceProfile.setCreateDate(new Date());
-        instanceProfile.setInstanceProfileId(String.format("profilId-%s", i));
-        instanceProfile.setInstanceProfileName(String.format("profilName-%s", i));
-        return instanceProfile;
+        return InstanceProfile.builder()
+                .arn(String.format("arn-%s", i))
+                .createDate(Instant.now())
+                .instanceProfileId(String.format("profilId-%s", i))
+                .instanceProfileName(String.format("profilName-%s", i))
+                .build();
     }
 
     private KeyListEntry keyListEntry(int i) {
-        KeyListEntry keyListEntry = new KeyListEntry();
-        keyListEntry.setKeyArn(String.format("key-%s", i));
-        keyListEntry.setKeyId(String.format("%s", i));
-        return keyListEntry;
+        return KeyListEntry.builder()
+                .keyArn(String.format("key-%s", i))
+                .keyId(String.format("%s", i))
+                .build();
     }
 
     private AliasListEntry aliasListEntry(int i) {
-        AliasListEntry aliasListEntry = new AliasListEntry();
-        aliasListEntry.setAliasArn(String.format("key-%s", i));
-        aliasListEntry.setAliasName(String.format("%s", i));
-        aliasListEntry.setTargetKeyId(String.format("%s", i));
-        return aliasListEntry;
+        return AliasListEntry.builder()
+                .aliasArn(String.format("key-%s", i))
+                .aliasName(String.format("%s", i))
+                .targetKeyId(String.format("%s", i))
+                .build();
     }
 
     @Test
     public void noSqlTables() {
         when(awsClient.createDynamoDbClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonDynamoDB);
         when(amazonDynamoDB.listTables(any(ListTablesRequest.class))).thenReturn(
-                new ListTablesResult().withTableNames("a", "b").withLastEvaluatedTableName("b"),
-                new ListTablesResult().withTableNames("c", "d")
+                ListTablesResponse.builder().tableNames("a", "b").lastEvaluatedTableName("b").build(),
+                ListTablesResponse.builder().tableNames("c", "d").build()
         );
 
         CloudNoSqlTables cloudNoSqlTables = underTest.noSqlTables(cloudCredential, region("region"), null);
@@ -448,13 +420,13 @@ public class AwsPlatformResourcesTest {
 
     @Test
     public void networksSubnetsShouldBeFilteredByEnabledRegions() {
-        DescribeRouteTablesResult routeTables = new DescribeRouteTablesResult();
+        DescribeRouteTablesResponse routeTables = DescribeRouteTablesResponse.builder().build();
         when(amazonEC2Client.describeRouteTables(any())).thenReturn(routeTables);
-        DescribeVpcsResult vpcs = new DescribeVpcsResult().withVpcs(new Vpc());
+        DescribeVpcsResponse vpcs = DescribeVpcsResponse.builder().vpcs(Vpc.builder().build()).build();
         when(amazonEC2Client.describeVpcs(any())).thenReturn(vpcs);
-        DescribeSubnetsResult subnets = new DescribeSubnetsResult();
-        String availabilityZone = "not-enabled-az";
-        subnets.setSubnets(List.of(new Subnet().withAvailabilityZone(availabilityZone).withMapPublicIpOnLaunch(true)));
+        DescribeSubnetsResponse subnets = DescribeSubnetsResponse.builder()
+                .subnets(List.of(Subnet.builder().availabilityZone("not-enabled-az").mapPublicIpOnLaunch(true).build()))
+                .build();
         when(amazonEC2Client.describeSubnets(any())).thenReturn(subnets);
         CloudNetworks cloudNetworks = underTest.networks(cloudCredential, region, Map.of());
 
@@ -476,25 +448,23 @@ public class AwsPlatformResourcesTest {
     }
 
     private void setUpRegions() {
-        DescribeRegionsResult regions = new DescribeRegionsResult().withRegions(
-                new Region().withRegionName(NOT_ENABLED_REGION_NAME),
-                new Region().withRegionName(REGION_NAME));
+        DescribeRegionsResponse regions = DescribeRegionsResponse.builder().regions(
+                Region.builder().regionName(NOT_ENABLED_REGION_NAME).build(),
+                Region.builder().regionName(REGION_NAME).build()).build();
         when(amazonEC2Client.describeRegions(any())).thenReturn(regions);
         when(awsDefaultZoneProvider.getDefaultZone(any(CloudCredential.class))).thenReturn(REGION_NAME);
         when(awsAvailabilityZoneProvider.describeAvailabilityZones(any(), any(), any())).thenReturn(List.of(
-                new AvailabilityZone().withZoneName(NOT_ENABLED_AZ_NAME),
-                new AvailabilityZone().withZoneName(AZ_NAME)));
+                AvailabilityZone.builder().zoneName(NOT_ENABLED_AZ_NAME).build(),
+                AvailabilityZone.builder().zoneName(AZ_NAME).build()));
     }
 
     @Test
     public void virtualMachinesShouldBeFilteredByEnabledAvailabilityZones() {
         setUpRegions();
-        instanceTypeInfos.add(getInstanceTypeInfo("vm1"));
-        instanceTypeInfos.add(getInstanceTypeInfo("vm2"));
-        describeInstanceTypesResult.setInstanceTypes(instanceTypeInfos);
+        DescribeInstanceTypesResponse describeInstanceTypesResponse = DescribeInstanceTypesResponse.builder()
+                .instanceTypes(List.of(getInstanceTypeInfo("vm1"), getInstanceTypeInfo("vm2"))).build();
         when(amazonEC2Client.describeInstanceTypes(any(DescribeInstanceTypesRequest.class)))
-                .thenReturn(describeInstanceTypesResult);
-        when(describeInstanceTypesResult.getInstanceTypes()).thenReturn(instanceTypeInfos);
+                .thenReturn(describeInstanceTypesResponse);
 
         ReflectionTestUtils.setField(underTest, "defaultVmTypes", Map.of(
                 region, vmType("vm1"),
@@ -512,36 +482,32 @@ public class AwsPlatformResourcesTest {
 
     @Test
     public void testEncryptionWhenNoEbsInfoShouldReturnFalse() {
-        InstanceTypeInfo instanceTypeInfo = new InstanceTypeInfo();
+        InstanceTypeInfo instanceTypeInfo = InstanceTypeInfo.builder().build();
         boolean encryptionSupported = underTest.getEncryptionSupported(instanceTypeInfo);
         assertFalse(encryptionSupported);
     }
 
     @Test
     public void testEncryptionWhenEncryptionSupportedNotPresentedShouldReturnFalse() {
-        InstanceTypeInfo instanceTypeInfo = new InstanceTypeInfo();
-        EbsInfo ebsInfo = new EbsInfo();
-        instanceTypeInfo.setEbsInfo(ebsInfo);
+        InstanceTypeInfo instanceTypeInfo = InstanceTypeInfo.builder()
+                .ebsInfo(EbsInfo.builder().build())
+                .build();
         boolean encryptionSupported = underTest.getEncryptionSupported(instanceTypeInfo);
         assertFalse(encryptionSupported);
     }
 
     @Test
     public void testEncryptionWhenEncryptionSupportedWithSupportedValuePresentedShouldReturnTrue() {
-        InstanceTypeInfo instanceTypeInfo = new InstanceTypeInfo();
-        EbsInfo ebsInfo = new EbsInfo();
-        ebsInfo.setEncryptionSupport("supported");
-        instanceTypeInfo.setEbsInfo(ebsInfo);
+        InstanceTypeInfo instanceTypeInfo = InstanceTypeInfo.builder()
+                .ebsInfo(EbsInfo.builder().encryptionSupport("supported").build()).build();
         boolean encryptionSupported = underTest.getEncryptionSupported(instanceTypeInfo);
         assertTrue(encryptionSupported);
     }
 
     @Test
     public void testEncryptionWhenEncryptionSupportedWithNotSupportedValuePresentedShouldReturnFalse() {
-        InstanceTypeInfo instanceTypeInfo = new InstanceTypeInfo();
-        EbsInfo ebsInfo = new EbsInfo();
-        ebsInfo.setEncryptionSupport("nonsupported");
-        instanceTypeInfo.setEbsInfo(ebsInfo);
+        InstanceTypeInfo instanceTypeInfo = InstanceTypeInfo.builder()
+                .ebsInfo(EbsInfo.builder().encryptionSupport("nonsupported").build()).build();
         boolean encryptionSupported = underTest.getEncryptionSupported(instanceTypeInfo);
         assertFalse(encryptionSupported);
     }
@@ -558,10 +524,8 @@ public class AwsPlatformResourcesTest {
 
     @Test
     void databaseServerGeneralSslRootCertificatesTestWhenSuccess() {
-        Certificate certificate1 = mock(Certificate.class);
-        when(certificate1.getCertificateIdentifier()).thenReturn("cert1");
-        Certificate certificate2 = mock(Certificate.class);
-        when(certificate2.getCertificateIdentifier()).thenReturn("cert2");
+        Certificate certificate1 = Certificate.builder().certificateIdentifier("cert1").build();
+        Certificate certificate2 = Certificate.builder().certificateIdentifier("cert2").build();
 
         AmazonRdsClient amazonRdsClient = mock(AmazonRdsClient.class);
         when(amazonRdsClient.describeCertificates(any(DescribeCertificatesRequest.class))).thenReturn(List.of(certificate1, certificate2));

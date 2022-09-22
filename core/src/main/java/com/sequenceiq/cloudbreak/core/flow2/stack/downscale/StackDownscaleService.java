@@ -21,8 +21,8 @@ import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import com.amazonaws.util.StringUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
@@ -135,7 +135,7 @@ public class StackDownscaleService {
     private void fillDiscoveryFQDNInVolumeSetIfEmpty(List<InstanceMetadataView> removableInstances, List<String> removableInstanceIds, Resource volumeSet,
         VolumeSetAttributes volumeSetAttributes) {
         if (removableInstanceIds.contains(volumeSet.getInstanceId())
-                && StringUtils.isNullOrEmpty(volumeSetAttributes.getDiscoveryFQDN())) {
+                && !StringUtils.hasText(volumeSetAttributes.getDiscoveryFQDN())) {
             Optional<InstanceMetadataView> metaData = removableInstances.stream()
                     .filter(instanceMetaData -> volumeSet.getInstanceId().equals(instanceMetaData.getInstanceId()))
                     .findFirst();

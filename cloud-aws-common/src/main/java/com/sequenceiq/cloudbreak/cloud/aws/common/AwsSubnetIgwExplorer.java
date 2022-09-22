@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.ec2.model.Route;
-import com.amazonaws.services.ec2.model.RouteTable;
+import software.amazon.awssdk.services.ec2.model.Route;
+import software.amazon.awssdk.services.ec2.model.RouteTable;
 
 @Component
 public class AwsSubnetIgwExplorer {
@@ -37,7 +37,7 @@ public class AwsSubnetIgwExplorer {
 
     private Optional<RouteTable> getRouteTableForSubnet(List<RouteTable> tableList, String subnetId, String vpcId) {
         List<RouteTable> routeTables = tableList.stream()
-                .filter(rt -> rt.getVpcId().equalsIgnoreCase(vpcId))
+                .filter(rt -> rt.vpcId().equalsIgnoreCase(vpcId))
                 .collect(Collectors.toList());
         LOGGER.debug("Route tables for VPC '{}' (current subnet is '{}'): '{}'", vpcId, subnetId, routeTables);
 
@@ -54,22 +54,22 @@ public class AwsSubnetIgwExplorer {
 
     private Optional<RouteTable> getExplicitRouteTable(List<RouteTable> routeTables, String subnetId) {
         return routeTables.stream()
-                .filter(rt -> rt.getAssociations().stream().anyMatch(rta -> subnetId.equalsIgnoreCase(rta.getSubnetId())))
+                .filter(rt -> rt.associations().stream().anyMatch(rta -> subnetId.equalsIgnoreCase(rta.subnetId())))
                 .findFirst();
     }
 
     private Optional<RouteTable> getImplicitRouteTable(List<RouteTable> routeTables) {
         return routeTables.stream()
-                .filter(rt -> rt.getAssociations().stream().anyMatch(rta -> StringUtils.isEmpty(rta.getSubnetId()) && rta.isMain()))
+                .filter(rt -> rt.associations().stream().anyMatch(rta -> StringUtils.isEmpty(rta.subnetId()) && rta.main()))
                 .findFirst();
     }
 
     private Optional<Route> getRouteWithInternetGateway(Optional<RouteTable> routeTable) {
         return routeTable.stream()
-                .flatMap(rt -> rt.getRoutes().stream())
-                .filter(route -> StringUtils.isNotEmpty(route.getGatewayId()) &&
-                        route.getGatewayId().startsWith(IGW_PREFIX) &&
-                        OPEN_CIDR_BLOCK.equals(route.getDestinationCidrBlock()))
+                .flatMap(rt -> rt.routes().stream())
+                .filter(route -> StringUtils.isNotEmpty(route.gatewayId()) &&
+                        route.gatewayId().startsWith(IGW_PREFIX) &&
+                        OPEN_CIDR_BLOCK.equals(route.destinationCidrBlock()))
                 .findFirst();
     }
 }

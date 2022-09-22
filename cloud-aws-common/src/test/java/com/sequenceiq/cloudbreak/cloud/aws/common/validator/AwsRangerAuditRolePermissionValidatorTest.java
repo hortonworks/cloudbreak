@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.auth.policy.Policy;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
 import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
@@ -27,6 +26,8 @@ import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.common.model.FileSystemType;
+
+import software.amazon.awssdk.core.auth.policy.Policy;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsRangerAuditRolePermissionValidatorTest extends AwsIDBrokerMappedRolePermissionValidatorTest {

@@ -1,28 +1,30 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.model.DeleteTableResult;
-import com.amazonaws.services.dynamodbv2.model.DescribeTableResult;
-import com.amazonaws.services.dynamodbv2.model.ListTablesRequest;
-import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.DeleteTableRequest;
+import software.amazon.awssdk.services.dynamodb.model.DeleteTableResponse;
+import software.amazon.awssdk.services.dynamodb.model.DescribeTableRequest;
+import software.amazon.awssdk.services.dynamodb.model.DescribeTableResponse;
+import software.amazon.awssdk.services.dynamodb.model.ListTablesRequest;
+import software.amazon.awssdk.services.dynamodb.model.ListTablesResponse;
 
 public class AmazonDynamoDBClient extends AmazonClient {
 
-    private final AmazonDynamoDB client;
+    private final DynamoDbClient client;
 
-    public AmazonDynamoDBClient(AmazonDynamoDB client) {
+    public AmazonDynamoDBClient(DynamoDbClient client) {
         this.client = client;
     }
 
-    public DescribeTableResult describeTable(String tableName) {
-        return client.describeTable(tableName);
+    public DescribeTableResponse describeTable(String tableName) {
+        return client.describeTable(DescribeTableRequest.builder().tableName(tableName).build());
     }
 
-    public DeleteTableResult deleteTable(String tableName) {
-        return client.deleteTable(tableName);
+    public DeleteTableResponse deleteTable(String tableName) {
+        return client.deleteTable(DeleteTableRequest.builder().tableName(tableName).build());
     }
 
-    public ListTablesResult listTables(ListTablesRequest listTablesRequest) {
+    public ListTablesResponse listTables(ListTablesRequest listTablesRequest) {
         return client.listTables(listTablesRequest);
     }
 }

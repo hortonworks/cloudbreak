@@ -23,12 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
-import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.Subnet;
-import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -56,6 +50,13 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsRequest;
+import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.Subnet;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 
 @Service
 public class AwsMetadataCollector implements MetadataCollector {
@@ -116,7 +117,7 @@ public class AwsMetadataCollector implements MetadataCollector {
         Multimap<String, Instance> instancesOnAWSForGroup = ArrayListMultimap.create();
         for (String group : instanceGroupMap.keySet()) {
             List<Instance> instancesForGroup = collectInstancesForGroup(ac, amazonASClient, amazonEC2Client, amazonCFClient, group);
-            LOGGER.info("Collected instances for group of {}: {}", group, instancesForGroup.stream().map(Instance::getInstanceId).collect(joining(",")));
+            LOGGER.info("Collected instances for group of {}: {}", group, instancesForGroup.stream().map(Instance::instanceId).collect(joining(",")));
             instancesOnAWSForGroup.putAll(group, instancesForGroup);
             subnetIds.addAll(getSubnetIdsForInstances(instancesForGroup));
         }
@@ -137,14 +138,14 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     private Collection<String> getSubnetIdsForInstances(List<Instance> instances) {
         return instances.stream()
-                .map(Instance::getSubnetId)
+                .map(Instance::subnetId)
                 .collect(toSet());
     }
 
     private Map<String, String> buildSubnetIdToAvailabilityZoneMap(Set<String> subnetIds, AmazonEc2Client amazonEC2Client) {
-        List<Subnet> subnets = amazonEC2Client.describeSubnets(new DescribeSubnetsRequest().withSubnetIds(subnetIds)).getSubnets();
+        List<Subnet> subnets = amazonEC2Client.describeSubnets(DescribeSubnetsRequest.builder().subnetIds(subnetIds).build()).subnets();
         return subnets.stream()
-                .collect(toMap(Subnet::getSubnetId, Subnet::getAvailabilityZone));
+                .collect(toMap(Subnet::subnetId, Subnet::availabilityZone));
     }
 
     private Multimap<String, Instance> getUnknownInstancesForGroup(List<String> knownInstanceIdList, Multimap<String, Instance> instancesOnAWSForGroup) {
@@ -154,12 +155,12 @@ public class AwsMetadataCollector implements MetadataCollector {
         for (String group : instancesOnAWSForGroup.keySet()) {
             Collection<Instance> instances = instancesOnAWSForGroup.get(group);
             List<Instance> unknownInstances = instances.stream().filter(instance ->
-                    !knownInstanceIdList.contains(instance.getInstanceId()))
+                    !knownInstanceIdList.contains(instance.instanceId()))
                     .collect(toList());
             unknownInstancesForGroup.putAll(group, unknownInstances);
         }
         LOGGER.info("Collected unknown instances from AWS: {}",
-                unknownInstancesForGroup.values().stream().map(Instance::getInstanceId).collect(joining(",")));
+                unknownInstancesForGroup.values().stream().map(Instance::instanceId).collect(joining(",")));
         return unknownInstancesForGroup;
     }
 
@@ -170,9 +171,9 @@ public class AwsMetadataCollector implements MetadataCollector {
         Collection<Instance> unknownInstancesForGroup = unknownMap.get(groupName);
         if (!unknownInstancesForGroup.isEmpty()) {
             LOGGER.info("Unknown instances from AWS for group {}: {}", groupName,
-                    unknownInstancesForGroup.stream().map(Instance::getInstanceId).collect(joining(",")));
+                    unknownInstancesForGroup.stream().map(Instance::instanceId).collect(joining(",")));
             Instance selectedInstance = findInstanceByFQDNIfFQDNDefinedInCloudInstance(cloudInstance, groupName, resources, unknownInstancesForGroup);
-            CloudInstance newCloudInstance = new CloudInstance(selectedInstance.getInstanceId(),
+            CloudInstance newCloudInstance = new CloudInstance(selectedInstance.instanceId(),
                     cloudInstance.getTemplate(),
                     cloudInstance.getAuthentication(),
                     cloudInstance.getSubnetId(),
@@ -180,8 +181,8 @@ public class AwsMetadataCollector implements MetadataCollector {
                     cloudInstance.getParameters());
             addCloudInstanceNetworkParameters(newCloudInstance, selectedInstance, subnetIdToAvailabilityZoneMap);
             CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(
-                    selectedInstance.getPrivateIpAddress(),
-                    selectedInstance.getPublicIpAddress(),
+                    selectedInstance.privateIpAddress(),
+                    selectedInstance.publicIpAddress(),
                     awsLifeCycleMapper.getLifeCycle(selectedInstance));
             LOGGER.info("New CloudInstance: {}", newCloudInstance);
             LOGGER.info("Cloud instance metadata: {}", cloudInstanceMetaData);
@@ -225,28 +226,28 @@ public class AwsMetadataCollector implements MetadataCollector {
                         return new IllegalStateException(String.format(
                                 "Error occured while tried to identify new instance in %s group from AWS. New instances on AWS are %s.",
                                 groupName,
-                                unknownInstancesForGroup.stream().map(Instance::getInstanceId).collect(joining(", "))));
+                                unknownInstancesForGroup.stream().map(Instance::instanceId).collect(joining(", "))));
                     } else {
                         return new IllegalStateException(String.format(
                                 "Error occured while tried to identify instance from AWS for %s host. "
                                         + "Couldn't find the instance based on existing volumes or couldn't pick a new one based on unknown volumes. "
                                         + "New instances on AWS are %s.",
                                 instanceFQDN,
-                                unknownInstancesForGroup.stream().map(Instance::getInstanceId).collect(joining(", "))
+                                unknownInstancesForGroup.stream().map(Instance::instanceId).collect(joining(", "))
                         ));
                     }
                 });
     }
 
     private Optional<Instance> findInstanceByVolumes(Collection<Instance> unknownInstancesForGroup, List<String> volumes) {
-        return unknownInstancesForGroup.stream().filter(instance -> instance.getBlockDeviceMappings().stream()
-                .anyMatch(instanceBlockDeviceMapping -> volumes.contains(instanceBlockDeviceMapping.getEbs().getVolumeId())))
+        return unknownInstancesForGroup.stream().filter(instance -> instance.blockDeviceMappings().stream()
+                .anyMatch(instanceBlockDeviceMapping -> volumes.contains(instanceBlockDeviceMapping.ebs().volumeId())))
                 .findFirst();
     }
 
     private Optional<Instance> getInstancesWithoutKnownVolumes(Collection<Instance> unknownInstancesForGroup, List<String> allKnownVolumes) {
-        return unknownInstancesForGroup.stream().filter(instance -> instance.getBlockDeviceMappings().stream()
-                .noneMatch(instanceBlockDeviceMapping -> allKnownVolumes.contains(instanceBlockDeviceMapping.getEbs().getVolumeId())))
+        return unknownInstancesForGroup.stream().filter(instance -> instance.blockDeviceMappings().stream()
+                .noneMatch(instanceBlockDeviceMapping -> allKnownVolumes.contains(instanceBlockDeviceMapping.ebs().volumeId())))
                 .findFirst();
     }
 
@@ -281,7 +282,7 @@ public class AwsMetadataCollector implements MetadataCollector {
     }
 
     private void addCloudInstanceNetworkParameters(CloudInstance cloudInstance, Instance instance, Map<String, String> subnetIdToAvailabilityZoneMap) {
-        String subnetId = instance.getSubnetId();
+        String subnetId = instance.subnetId();
         cloudInstance.putParameter(SUBNET_ID, subnetId);
         cloudInstance.setSubnetId(subnetId);
         String availabilityZone = subnetIdToAvailabilityZoneMap.get(subnetId);
@@ -294,13 +295,13 @@ public class AwsMetadataCollector implements MetadataCollector {
         List<Instance> instanceList = instancesOnAWSForGroup.entries().stream().map(Entry::getValue).collect(toList());
         instanceList.stream()
                 .filter(instance ->
-                        cloudInstance.getInstanceId().equals(instance.getInstanceId()))
+                        cloudInstance.getInstanceId().equals(instance.instanceId()))
                 .findAny()
                 .ifPresent(instance -> {
                     addCloudInstanceNetworkParameters(cloudInstance, instance, subnetIdToAvailabilityZoneMap);
                     CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(
-                            instance.getPrivateIpAddress(),
-                            instance.getPublicIpAddress(),
+                            instance.privateIpAddress(),
+                            instance.publicIpAddress(),
                             awsLifeCycleMapper.getLifeCycle(instance));
                     CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstance, cloudInstance.getTemplate().getStatus());
                     CloudVmMetaDataStatus newMetadataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, cloudInstanceMetaData);
@@ -325,10 +326,10 @@ public class AwsMetadataCollector implements MetadataCollector {
         List<String> instanceIds = cloudFormationStackUtil.getInstanceIds(amazonASClient, asGroupName);
 
         DescribeInstancesRequest instancesRequest = cloudFormationStackUtil.createDescribeInstancesRequest(instanceIds);
-        DescribeInstancesResult instancesResult = amazonEC2Client.retryableDescribeInstances(instancesRequest);
+        DescribeInstancesResponse instancesResponse = amazonEC2Client.retryableDescribeInstances(instancesRequest);
 
-        return instancesResult.getReservations().stream()
-                .flatMap(reservation -> reservation.getInstances().stream())
+        return instancesResponse.reservations().stream()
+                .flatMap(reservation -> reservation.instances().stream())
                 .collect(toList());
     }
 
@@ -347,16 +348,16 @@ public class AwsMetadataCollector implements MetadataCollector {
                 LOGGER.debug("Parsing all listener and target group information for load balancer {}", loadBalancerName);
                 Map<String, Object> parameters = awsLoadBalancerMetadataCollector.getParameters(ac, loadBalancer, scheme);
 
-                CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+                CloudLoadBalancerMetadata loadBalancerMetadata = CloudLoadBalancerMetadata.builder()
                     .withType(type)
-                    .withCloudDns(loadBalancer.getDNSName())
-                    .withHostedZoneId(loadBalancer.getCanonicalHostedZoneId())
+                    .withCloudDns(loadBalancer.dnsName())
+                    .withHostedZoneId(loadBalancer.canonicalHostedZoneId())
                     .withName(loadBalancerName)
                     .withParameters(parameters)
                     .build();
                 cloudLoadBalancerMetadata.add(loadBalancerMetadata);
-                LOGGER.debug("Saved metadata for load balancer {}: DNS {}, zone id {}", loadBalancerName, loadBalancer.getDNSName(),
-                    loadBalancer.getCanonicalHostedZoneId());
+                LOGGER.debug("Saved metadata for load balancer {}: DNS {}, zone id {}", loadBalancerName, loadBalancer.dnsName(),
+                    loadBalancer.canonicalHostedZoneId());
             } catch (RuntimeException e) {
                 LOGGER.debug("Unable to find metadata for load balancer " + loadBalancerName, e);
             }

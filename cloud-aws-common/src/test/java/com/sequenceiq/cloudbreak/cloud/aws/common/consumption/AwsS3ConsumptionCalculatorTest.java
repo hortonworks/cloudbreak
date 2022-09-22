@@ -21,8 +21,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.cloudwatch.model.Datapoint;
-import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsCloudWatchCommonService;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudConsumption;
@@ -30,6 +28,9 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StorageSizeRequest;
 import com.sequenceiq.cloudbreak.cloud.model.StorageSizeResponse;
 import com.sequenceiq.common.model.FileSystemType;
+
+import software.amazon.awssdk.services.cloudwatch.model.Datapoint;
+import software.amazon.awssdk.services.cloudwatch.model.GetMetricStatisticsResponse;
 
 @ExtendWith(MockitoExtension.class)
 class AwsS3ConsumptionCalculatorTest {
@@ -62,8 +63,8 @@ class AwsS3ConsumptionCalculatorTest {
                 .withRegion(region)
                 .build();
 
-        GetMetricStatisticsResult statisticsResult = new GetMetricStatisticsResult()
-                .withDatapoints(List.of());
+        GetMetricStatisticsResponse statisticsResult = GetMetricStatisticsResponse.builder()
+                .datapoints(List.of()).build();
         when(cloudWatchCommonService.getBucketSize(null, REGION_NAME, startTime, endTime, BUCKET_NAME)).thenReturn(statisticsResult);
 
         CloudConnectorException ex = assertThrows(CloudConnectorException.class, () -> underTest.calculate(request));
@@ -85,11 +86,11 @@ class AwsS3ConsumptionCalculatorTest {
                 .withRegion(region)
                 .build();
 
-        Datapoint datapoint = new Datapoint()
-                .withTimestamp(Date.from(Instant.now()))
-                .withMaximum(42.0);
-        GetMetricStatisticsResult statisticsResult = new GetMetricStatisticsResult()
-                .withDatapoints(List.of(datapoint));
+        Datapoint datapoint = Datapoint.builder()
+                .timestamp(Instant.now())
+                .maximum(42.0).build();
+        GetMetricStatisticsResponse statisticsResult = GetMetricStatisticsResponse.builder()
+                .datapoints(List.of(datapoint)).build();
         when(cloudWatchCommonService.getBucketSize(null, REGION_NAME, startTime, endTime, BUCKET_NAME)).thenReturn(statisticsResult);
 
         Set<StorageSizeResponse> result = underTest.calculate(request);
@@ -111,17 +112,17 @@ class AwsS3ConsumptionCalculatorTest {
                 .build();
 
         Instant latestTimestamp = Instant.now();
-        Datapoint latestDatapoint = new Datapoint()
-                .withTimestamp(Date.from(latestTimestamp))
-                .withMaximum(42.0);
-        Datapoint earlierDatapoint = new Datapoint()
-                .withTimestamp(Date.from(latestTimestamp.minus(1, ChronoUnit.DAYS)))
-                .withMaximum(21.0);
-        Datapoint earliestDatapoint = new Datapoint()
-                .withTimestamp(Date.from(latestTimestamp.minus(2, ChronoUnit.DAYS)))
-                .withMaximum(10.5);
-        GetMetricStatisticsResult statisticsResult = new GetMetricStatisticsResult()
-                .withDatapoints(List.of(latestDatapoint, earlierDatapoint, earliestDatapoint));
+        Datapoint latestDatapoint = Datapoint.builder()
+                .timestamp(latestTimestamp)
+                .maximum(42.0).build();
+        Datapoint earlierDatapoint = Datapoint.builder()
+                .timestamp(latestTimestamp.minus(1, ChronoUnit.DAYS))
+                .maximum(21.0).build();
+        Datapoint earliestDatapoint = Datapoint.builder()
+                .timestamp(latestTimestamp.minus(2, ChronoUnit.DAYS))
+                .maximum(10.5).build();
+        GetMetricStatisticsResponse statisticsResult = GetMetricStatisticsResponse.builder()
+                .datapoints(List.of(latestDatapoint, earlierDatapoint, earliestDatapoint)).build();
         when(cloudWatchCommonService.getBucketSize(null, REGION_NAME, startTime, endTime, BUCKET_NAME)).thenReturn(statisticsResult);
 
         Set<StorageSizeResponse> result = underTest.calculate(request);

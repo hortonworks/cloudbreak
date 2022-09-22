@@ -11,17 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.ec2.model.DescribeInternetGatewaysRequest;
-import com.amazonaws.services.ec2.model.DescribeInternetGatewaysResult;
-import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
-import com.amazonaws.services.ec2.model.DescribeKeyPairsResult;
-import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
-import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
-import com.amazonaws.services.ec2.model.InternetGateway;
-import com.amazonaws.services.ec2.model.InternetGatewayAttachment;
-import com.amazonaws.services.ec2.model.Subnet;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -47,7 +36,20 @@ import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.services.ec2.model.DescribeInternetGatewaysRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInternetGatewaysResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
+import software.amazon.awssdk.services.ec2.model.InternetGateway;
+import software.amazon.awssdk.services.ec2.model.InternetGatewayAttachment;
+import software.amazon.awssdk.services.ec2.model.Subnet;
+
 public abstract class AwsSetup implements Setup {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsSetup.class);
 
     private static final String IGW_DOES_NOT_EXIST_MSG = "The given internet gateway '%s' does not exist or belongs to a different region.";
@@ -102,9 +104,9 @@ public abstract class AwsSetup implements Setup {
                 AmazonEc2Client amazonEC2Client = new AuthenticatedContextView(ac).getAmazonEC2Client();
                 validateExistingIGW(awsNetworkView, amazonEC2Client);
                 validateExistingSubnet(awsNetworkView, amazonEC2Client);
-            } catch (AmazonServiceException e) {
-                throw new CloudConnectorException(e.getErrorMessage());
-            } catch (AmazonClientException e) {
+            } catch (AwsServiceException e) {
+                throw new CloudConnectorException(e.awsErrorDetails().errorMessage());
+            } catch (SdkClientException e) {
                 throw new CloudConnectorException(e.getMessage());
             }
 
@@ -150,14 +152,15 @@ public abstract class AwsSetup implements Setup {
 
     private void validateExistingSubnet(AwsNetworkView awsNetworkView, AmazonEc2Client amazonEC2Client) {
         if (awsNetworkView.isExistingSubnet()) {
-            DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
-            describeSubnetsRequest.withSubnetIds(awsNetworkView.getSubnetList());
-            DescribeSubnetsResult describeSubnetsResult = amazonEC2Client.describeSubnets(describeSubnetsRequest);
-            if (describeSubnetsResult.getSubnets().size() < awsNetworkView.getSubnetList().size()) {
+            DescribeSubnetsRequest describeSubnetsRequest = DescribeSubnetsRequest.builder()
+                    .subnetIds(awsNetworkView.getSubnetList())
+                    .build();
+            DescribeSubnetsResponse describeSubnetsResponse = amazonEC2Client.describeSubnets(describeSubnetsRequest);
+            if (describeSubnetsResponse.subnets().size() < awsNetworkView.getSubnetList().size()) {
                 throw new CloudConnectorException(String.format(SUBNET_DOES_NOT_EXIST_MSG, awsNetworkView.getExistingSubnet()));
             } else {
-                for (Subnet subnet : describeSubnetsResult.getSubnets()) {
-                    String vpcId = subnet.getVpcId();
+                for (Subnet subnet : describeSubnetsResponse.subnets()) {
+                    String vpcId = subnet.vpcId();
                     if (vpcId != null && !vpcId.equals(awsNetworkView.getExistingVpc())) {
                         throw new CloudConnectorException(String.format(SUBNETVPC_DOES_NOT_EXIST_MSG, awsNetworkView.getExistingSubnet(),
                                 awsNetworkView.getExistingVpc()));
@@ -169,15 +172,16 @@ public abstract class AwsSetup implements Setup {
 
     private void validateExistingIGW(AwsNetworkView awsNetworkView, AmazonEc2Client amazonEC2Client) {
         if (awsNetworkView.isExistingIGW()) {
-            DescribeInternetGatewaysRequest describeInternetGatewaysRequest = new DescribeInternetGatewaysRequest();
-            describeInternetGatewaysRequest.withInternetGatewayIds(awsNetworkView.getExistingIgw());
-            DescribeInternetGatewaysResult describeInternetGatewaysResult = amazonEC2Client.describeInternetGateways(describeInternetGatewaysRequest);
-            if (describeInternetGatewaysResult.getInternetGateways().size() < 1) {
+            DescribeInternetGatewaysRequest describeInternetGatewaysRequest = DescribeInternetGatewaysRequest.builder()
+                    .internetGatewayIds(awsNetworkView.getExistingIgw())
+                    .build();
+            DescribeInternetGatewaysResponse describeInternetGatewaysResponse = amazonEC2Client.describeInternetGateways(describeInternetGatewaysRequest);
+            if (describeInternetGatewaysResponse.internetGateways().size() < 1) {
                 throw new CloudConnectorException(String.format(IGW_DOES_NOT_EXIST_MSG, awsNetworkView.getExistingIgw()));
             } else {
-                InternetGateway internetGateway = describeInternetGatewaysResult.getInternetGateways().get(0);
-                InternetGatewayAttachment attachment = internetGateway.getAttachments().get(0);
-                if (attachment != null && !attachment.getVpcId().equals(awsNetworkView.getExistingVpc())) {
+                InternetGateway internetGateway = describeInternetGatewaysResponse.internetGateways().get(0);
+                InternetGatewayAttachment attachment = internetGateway.attachments().get(0);
+                if (attachment != null && !attachment.vpcId().equals(awsNetworkView.getExistingVpc())) {
                     throw new CloudConnectorException(String.format(IGWVPC_DOES_NOT_EXIST_MSG, awsNetworkView.getExistingIgw(),
                             awsNetworkView.getExistingVpc()));
                 }
@@ -202,8 +206,10 @@ public abstract class AwsSetup implements Setup {
             boolean keyPairIsPresentOnEC2 = false;
             try {
                 AmazonEc2Client client = new AuthenticatedContextView(ac).getAmazonEC2Client();
-                DescribeKeyPairsResult describeKeyPairsResult = client.describeKeyPairs(new DescribeKeyPairsRequest().withKeyNames(keyPairName));
-                keyPairIsPresentOnEC2 = describeKeyPairsResult.getKeyPairs().stream().findFirst().isPresent();
+                DescribeKeyPairsResponse describeKeyPairsResponse = client.describeKeyPairs(DescribeKeyPairsRequest.builder()
+                        .keyNames(keyPairName)
+                        .build());
+                keyPairIsPresentOnEC2 = describeKeyPairsResponse.keyPairs().stream().findFirst().isPresent();
             } catch (RuntimeException e) {
                 String errorMessage = String.format("Failed to get the key pair [name: '%s'] from EC2 [roleArn:'%s'], detailed message: %s.",
                         keyPairName, credentialView.getRoleArn(), e.getMessage());

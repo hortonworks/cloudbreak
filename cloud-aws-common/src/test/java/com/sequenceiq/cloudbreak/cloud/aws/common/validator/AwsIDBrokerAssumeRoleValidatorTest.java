@@ -15,16 +15,17 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.identitymanagement.model.EvaluationResult;
-import com.amazonaws.services.identitymanagement.model.InstanceProfile;
-import com.amazonaws.services.identitymanagement.model.PolicyEvaluationDecisionType;
-import com.amazonaws.services.identitymanagement.model.Role;
-import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyRequest;
-import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+
+import software.amazon.awssdk.services.iam.model.EvaluationResult;
+import software.amazon.awssdk.services.iam.model.InstanceProfile;
+import software.amazon.awssdk.services.iam.model.PolicyEvaluationDecisionType;
+import software.amazon.awssdk.services.iam.model.Role;
+import software.amazon.awssdk.services.iam.model.SimulatePrincipalPolicyRequest;
+import software.amazon.awssdk.services.iam.model.SimulatePrincipalPolicyResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsIDBrokerAssumeRoleValidatorTest {
@@ -39,37 +40,36 @@ public class AwsIDBrokerAssumeRoleValidatorTest {
 
     @Test
     public void checkCanAssumeRoles() {
-        Role instanceProfileRole = new Role();
-        InstanceProfile instanceProfile = new InstanceProfile().withRoles(instanceProfileRole);
+        Role instanceProfileRole = Role.builder().build();
+        InstanceProfile instanceProfile = InstanceProfile.builder().roles(instanceProfileRole).build();
 
-        Role role = new Role().withArn("roleArn");
+        Role role = Role.builder().arn("roleArn").build();
         Collection<Role> roles = Collections.singletonList(role);
 
-        EvaluationResult evalResult = new EvaluationResult()
-                .withEvalDecision(PolicyEvaluationDecisionType.Allowed)
-                .withEvalResourceName(role.getArn());
-        when(iam.simulatePrincipalPolicy(any(SimulatePrincipalPolicyRequest.class)))
-                .thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(evalResult));
+        EvaluationResult evalResult = EvaluationResult.builder()
+                .evalDecision(PolicyEvaluationDecisionType.ALLOWED)
+                .evalResourceName(role.arn()).build();
+        when(iam.simulatePrincipalPolicy(any()))
+                .thenReturn(SimulatePrincipalPolicyResponse.builder().evaluationResults(evalResult).build());
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        assertThat(awsIDBrokerAssumeRoleValidator.canAssumeRoles(iam, instanceProfile, roles,
-                validationResultBuilder)).isTrue();
+        assertThat(awsIDBrokerAssumeRoleValidator.canAssumeRoles(iam, instanceProfile, roles, validationResultBuilder)).isTrue();
         assertThat(validationResultBuilder.build().hasError()).isFalse();
     }
 
     @Test
     public void checkCannotAssumeRoles() {
-        Role instanceProfileRole = new Role();
-        InstanceProfile instanceProfile = new InstanceProfile().withArn("instanceProfileArn")
-                .withRoles(instanceProfileRole);
+        Role instanceProfileRole = Role.builder().build();
+        InstanceProfile instanceProfile = InstanceProfile.builder().arn("instanceProfileArn")
+                .roles(instanceProfileRole).build();
 
-        Role role = new Role().withArn("roleArn");
+        Role role = Role.builder().arn("roleArn").build();
         Collection<Role> roles = Collections.singletonList(role);
 
-        EvaluationResult evalResult = new EvaluationResult()
-                .withEvalDecision(PolicyEvaluationDecisionType.ImplicitDeny);
+        EvaluationResult evalResult = EvaluationResult.builder()
+                .evalDecision(PolicyEvaluationDecisionType.IMPLICIT_DENY).build();
         when(iam.simulatePrincipalPolicy(any(SimulatePrincipalPolicyRequest.class)))
-                .thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(evalResult));
+                .thenReturn(SimulatePrincipalPolicyResponse.builder().evaluationResults(evalResult).build());
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         assertThat(awsIDBrokerAssumeRoleValidator.canAssumeRoles(iam, instanceProfile, roles,
@@ -79,28 +79,28 @@ public class AwsIDBrokerAssumeRoleValidatorTest {
         assertThat(validationResult.getErrors()).isEqualTo(Collections.singletonList(
                 String.format("Data Access Instance profile (%s) doesn't have permissions to assume the role(s): %s. " +
                                 "Please check if you've used the correct Instance profile when setting up Data Access.",
-                        instanceProfile.getArn(), Collections.singletonList(role.getArn()))));
+                        instanceProfile.arn(), Collections.singletonList(role.arn()))));
     }
 
     @Test
     public void checkCannotAssumeOneOfTheRoles() {
-        Role instanceProfileRole = new Role();
-        InstanceProfile instanceProfile = new InstanceProfile().withArn("instanceProfileArn")
-                .withRoles(instanceProfileRole);
+        Role instanceProfileRole = Role.builder().build();
+        InstanceProfile instanceProfile = InstanceProfile.builder().arn("instanceProfileArn")
+                .roles(instanceProfileRole).build();
 
-        Role role1 = new Role().withArn("role1Arn");
-        Role role2 = new Role().withArn("role2Arn");
+        Role role1 = Role.builder().arn("role1Arn").build();
+        Role role2 = Role.builder().arn("role2Arn").build();
         Collection<Role> roles = Arrays.asList(role1, role2);
 
-        EvaluationResult evalResult1 = new EvaluationResult()
-                .withEvalDecision(PolicyEvaluationDecisionType.Allowed)
-                .withEvalResourceName(role1.getArn());
-        EvaluationResult evalResult2 = new EvaluationResult()
-                .withEvalDecision(PolicyEvaluationDecisionType.ImplicitDeny)
-                .withEvalResourceName(role2.getArn());
+        EvaluationResult evalResult1 = EvaluationResult.builder()
+                .evalDecision(PolicyEvaluationDecisionType.ALLOWED)
+                .evalResourceName(role1.arn()).build();
+        EvaluationResult evalResult2 = EvaluationResult.builder()
+                .evalDecision(PolicyEvaluationDecisionType.IMPLICIT_DENY)
+                .evalResourceName(role2.arn()).build();
         when(iam.simulatePrincipalPolicy(any(SimulatePrincipalPolicyRequest.class)))
-                .thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(evalResult1))
-                .thenReturn(new SimulatePrincipalPolicyResult().withEvaluationResults(evalResult2));
+                .thenReturn(SimulatePrincipalPolicyResponse.builder().evaluationResults(evalResult1).build())
+                .thenReturn(SimulatePrincipalPolicyResponse.builder().evaluationResults(evalResult2).build());
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         assertThat(awsIDBrokerAssumeRoleValidator.canAssumeRoles(iam, instanceProfile, roles,
@@ -110,6 +110,6 @@ public class AwsIDBrokerAssumeRoleValidatorTest {
         assertThat(validationResult.getErrors()).isEqualTo(Collections.singletonList(
                 String.format("Data Access Instance profile (%s) doesn't have permissions to assume the role(s): %s. " +
                                 "Please check if you've used the correct Instance profile when setting up Data Access.",
-                        instanceProfile.getArn(), Collections.singletonList(role2.getArn()))));
+                        instanceProfile.arn(), Collections.singletonList(role2.arn()))));
     }
 }

@@ -6,9 +6,10 @@ import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.SdkClientException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
+
+import software.amazon.awssdk.core.exception.SdkClientException;
 
 @Aspect
 public class AmazonClientExceptionHandler {

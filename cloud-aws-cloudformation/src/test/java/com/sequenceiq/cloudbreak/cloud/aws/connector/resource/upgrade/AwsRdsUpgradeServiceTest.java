@@ -93,8 +93,8 @@ public class AwsRdsUpgradeServiceTest {
     @Test
     void testUpgrade() {
         RdsInfo rdsInfo = new RdsInfo(RdsState.AVAILABLE, null, null);
-        List<CloudResource> resources = List.of(new CloudResource.Builder().withType(ResourceType.RDS_DB_PARAMETER_GROUP).withName("resource1").build(),
-                new CloudResource.Builder().withType(ResourceType.RDS_DB_PARAMETER_GROUP).withName("resource2").build());
+        List<CloudResource> resources = List.of(CloudResource.builder().withType(ResourceType.RDS_DB_PARAMETER_GROUP).withName("resource1").build(),
+                CloudResource.builder().withType(ResourceType.RDS_DB_PARAMETER_GROUP).withName("resource2").build());
         when(awsRdsUpgradeSteps.getRdsInfo(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(rdsInfo);
         when(awsRdsUpgradeValidatorService.isRdsMajorVersionSmallerThanTarget(rdsInfo, targetMajorVersion)).thenReturn(true);
         when(awsRdsParameterGroupService.removeFormerParamGroups(any(AmazonRdsClient.class), eq(databaseServer), eq(List.of())))
@@ -104,7 +104,7 @@ public class AwsRdsUpgradeServiceTest {
         InOrder inOrder = Mockito.inOrder(awsRdsUpgradeValidatorService, awsRdsUpgradeSteps);
         inOrder.verify(awsRdsUpgradeValidatorService).validateRdsIsAvailableOrUpgrading(rdsInfo);
         inOrder.verify(awsRdsUpgradeSteps).upgradeRds(ac, rdsClient, databaseServer, rdsInfo, targetMajorVersion);
-        inOrder.verify(awsRdsUpgradeSteps).waitForUpgrade(ac, rdsClient, databaseServer);
+        inOrder.verify(awsRdsUpgradeSteps).waitForUpgrade(rdsClient, databaseServer);
         verify(persistenceNotifier, times(1)).notifyDeletions(resources, cloudContext);
     }
 
@@ -118,7 +118,7 @@ public class AwsRdsUpgradeServiceTest {
 
         InOrder inOrder = Mockito.inOrder(awsRdsUpgradeValidatorService, awsRdsUpgradeSteps);
         inOrder.verify(awsRdsUpgradeValidatorService).validateRdsIsAvailableOrUpgrading(rdsInfo);
-        inOrder.verify(awsRdsUpgradeSteps).waitForUpgrade(ac, rdsClient, databaseServer);
+        inOrder.verify(awsRdsUpgradeSteps).waitForUpgrade(rdsClient, databaseServer);
         verify(awsRdsUpgradeSteps, never()).upgradeRds(ac, rdsClient, databaseServer, rdsInfo, targetMajorVersion);
     }
 
@@ -134,7 +134,7 @@ public class AwsRdsUpgradeServiceTest {
         );
 
         verify(awsRdsUpgradeSteps, never()).upgradeRds(ac, rdsClient, databaseServer, rdsInfo, targetMajorVersion);
-        verify(awsRdsUpgradeSteps, never()).waitForUpgrade(ac, rdsClient, databaseServer);
+        verify(awsRdsUpgradeSteps, never()).waitForUpgrade(rdsClient, databaseServer);
     }
 
     @Test
@@ -151,7 +151,7 @@ public class AwsRdsUpgradeServiceTest {
         InOrder inOrder = Mockito.inOrder(awsRdsUpgradeValidatorService, awsRdsUpgradeSteps);
         inOrder.verify(awsRdsUpgradeValidatorService).validateRdsIsAvailableOrUpgrading(rdsInfo);
         inOrder.verify(awsRdsUpgradeSteps).upgradeRds(ac, rdsClient, databaseServer, rdsInfo, targetMajorVersion);
-        verify(awsRdsUpgradeSteps, never()).waitForUpgrade(ac, rdsClient, databaseServer);
+        verify(awsRdsUpgradeSteps, never()).waitForUpgrade(rdsClient, databaseServer);
     }
 
     @Test
@@ -163,7 +163,7 @@ public class AwsRdsUpgradeServiceTest {
         underTest.upgrade(ac, databaseStack, targetMajorVersion, persistenceNotifier, List.of());
 
         verify(awsRdsUpgradeSteps, never()).upgradeRds(ac, rdsClient, databaseServer, rdsInfo, targetMajorVersion);
-        verify(awsRdsUpgradeSteps, never()).waitForUpgrade(ac, rdsClient, databaseServer);
+        verify(awsRdsUpgradeSteps, never()).waitForUpgrade(rdsClient, databaseServer);
     }
 
     private void setupAuthenticatedContext() {

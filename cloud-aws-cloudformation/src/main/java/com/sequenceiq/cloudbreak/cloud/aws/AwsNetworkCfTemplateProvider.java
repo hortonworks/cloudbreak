@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.ec2.model.ServiceDetail;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -32,6 +31,7 @@ import com.sequenceiq.common.model.PrivateEndpointType;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import software.amazon.awssdk.services.ec2.model.ServiceDetail;
 
 @Component
 public class AwsNetworkCfTemplateProvider {
@@ -105,10 +105,10 @@ public class AwsNetworkCfTemplateProvider {
         Map<String, SubnetRequest> subnetByZoneMap = createPublicSubnetByZoneMap(subnets);
         List<AwsServiceEndpointView> interfaceServceEndpoints = new ArrayList<>();
         for (ServiceDetail serviceDetail : serviceDetails) {
-            List<SubnetRequest> subnetRequests = serviceDetail.getAvailabilityZones().stream()
-                    .filter(az -> subnetByZoneMap.containsKey(az)).map(az -> subnetByZoneMap.get(az)).collect(Collectors.toList());
+            List<SubnetRequest> subnetRequests = serviceDetail.availabilityZones().stream()
+                    .filter(subnetByZoneMap::containsKey).map(subnetByZoneMap::get).collect(Collectors.toList());
             if (!subnetRequests.isEmpty()) {
-                interfaceServceEndpoints.add(new AwsServiceEndpointView(endpointNameMappings.get(serviceDetail.getServiceName()), subnetRequests));
+                interfaceServceEndpoints.add(new AwsServiceEndpointView(endpointNameMappings.get(serviceDetail.serviceName()), subnetRequests));
             }
         }
         return interfaceServceEndpoints;
@@ -123,8 +123,8 @@ public class AwsNetworkCfTemplateProvider {
     private List<ServiceDetail> describeVpcServiceDetails(NetworkCreationRequest networkCreationRequest, Map<String, String> endpointNameMappings) {
         AwsCredentialView awsCredential = new AwsCredentialView(networkCreationRequest.getCloudCredential());
         AmazonEc2Client awsClientAccess = awsClient.createEc2Client(awsCredential, networkCreationRequest.getRegion().value());
-        return awsClientAccess.describeVpcEndpointServices().getServiceDetails().stream()
-                .filter(sd -> endpointNameMappings.containsKey(sd.getServiceName())).collect(Collectors.toList());
+        return awsClientAccess.describeVpcEndpointServices().serviceDetails().stream()
+                .filter(sd -> endpointNameMappings.containsKey(sd.serviceName())).collect(Collectors.toList());
     }
 
     private boolean privateSubnetEnabled(NetworkCreationRequest networkRequest, List<SubnetRequest> subnetRequestList) {

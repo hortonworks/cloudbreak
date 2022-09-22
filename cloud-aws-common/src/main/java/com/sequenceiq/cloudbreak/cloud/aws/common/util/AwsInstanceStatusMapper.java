@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.util;
 
-import com.amazonaws.services.ec2.model.InstanceState;
-import com.amazonaws.services.ec2.model.StateReason;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+
+import software.amazon.awssdk.services.ec2.model.InstanceState;
+import software.amazon.awssdk.services.ec2.model.StateReason;
 
 public class AwsInstanceStatusMapper {
 
@@ -10,17 +11,17 @@ public class AwsInstanceStatusMapper {
     }
 
     public static InstanceStatus getInstanceStatusByAwsStatus(String status) {
-        return getInstanceStatusByAwsStateAndReason(new InstanceState().withName(status), null);
+        return getInstanceStatusByAwsStateAndReason(InstanceState.builder().name(status.toLowerCase()).build(), null);
     }
 
     public static InstanceStatus getInstanceStatusByAwsStateAndReason(InstanceState state, StateReason stateReason) {
-        switch (state.getName().toLowerCase()) {
+        switch (state.nameAsString().toLowerCase()) {
             case "stopped":
                 return InstanceStatus.STOPPED;
             case "running":
                 return InstanceStatus.STARTED;
             case "terminated":
-                return stateReason != null && "Server.SpotInstanceTermination".equals(stateReason.getCode())
+                return stateReason != null && "Server.SpotInstanceTermination".equals(stateReason.code())
                         ? InstanceStatus.TERMINATED_BY_PROVIDER
                         : InstanceStatus.TERMINATED;
             default:

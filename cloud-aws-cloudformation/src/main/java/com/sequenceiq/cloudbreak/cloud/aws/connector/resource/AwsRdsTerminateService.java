@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.BackoffCancellablePollingStrategy.getBackoffCancellablePollingStrategy;
+import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.CancellableWaiterConfiguration.cancellableWaiterConfiguration;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -13,11 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.waiters.Waiter;
-import com.amazonaws.waiters.WaiterParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
@@ -33,6 +28,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.service.Retry;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.cloudformation.model.DeleteStackRequest;
+import software.amazon.awssdk.services.cloudformation.model.DescribeStacksRequest;
+import software.amazon.awssdk.services.cloudformation.waiters.CloudFormationWaiter;
 
 @Service
 public class AwsRdsTerminateService {
@@ -64,7 +64,7 @@ public class AwsRdsTerminateService {
      * @param persistenceNotifier notifies Resources table of resource deletion
      * @param resources           list of resources tracked in DB
      * @return list of affected cloud resources (not yet implemented)
-     * @throws AmazonServiceException  if the search for the stack fails
+     * @throws AwsServiceException     if the search for the stack fails
      * @throws ExecutionException      if stack deletion fails (and force is false)
      * @throws TimeoutException        if stack deletion times out
      * @throws InterruptedException    if the wait for stack deletion is interrupted
@@ -83,7 +83,7 @@ public class AwsRdsTerminateService {
                     credentialView,
                     regionName
             );
-        } catch (AmazonServiceException e) {
+        } catch (AwsServiceException e) {
             return getAmazonServiceException(force, cFStackName, e);
         } catch (Exception ex) {
             Exception runtimeException = getRuntimeException(force, cFStackName, ex);
@@ -114,8 +114,8 @@ public class AwsRdsTerminateService {
         }
     }
 
-    public List<CloudResourceStatus> getAmazonServiceException(boolean force, String cFStackName, AmazonServiceException e) {
-        if (!e.getErrorMessage().contains(cFStackName + " does not exist") && !force) {
+    public List<CloudResourceStatus> getAmazonServiceException(boolean force, String cFStackName, AwsServiceException e) {
+        if (!e.awsErrorDetails().errorMessage().contains(cFStackName + " does not exist") && !force) {
             throw e;
         }
         LOGGER.warn("Stack " + cFStackName + " does not exist, assuming that it has already been deleted");
@@ -123,25 +123,17 @@ public class AwsRdsTerminateService {
         return List.of();
     }
 
-    private void initiateCFTemplateDeletion(
-            AuthenticatedContext ac,
-            String cFStackName,
-            AwsCredentialView credentialView,
-            String regionName
-    ) {
+    private void initiateCFTemplateDeletion(AuthenticatedContext ac, String cFStackName, AwsCredentialView credentialView, String regionName) {
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
         boolean exists = retryService.testWith2SecDelayMax15Times(() -> cfStackUtil.isCfStackExists(cfClient, cFStackName));
         if (exists) {
             DeleteStackRequest deleteStackRequest = awsStackRequestHelper.createDeleteStackRequest(cFStackName);
             cfClient.deleteStack(deleteStackRequest);
             LOGGER.debug("CloudFormation stack deletion request sent with stack name: '{}' for stack: '{}'", cFStackName, ac.getCloudContext().getId());
-
-            Waiter<DescribeStacksRequest> stackDeleteCompleteWaiter = cfClient.waiters().stackDeleteComplete();
-            StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
-            DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
-            WaiterParameters<DescribeStacksRequest> describeStacksRequestWaiterParameters = new WaiterParameters<>(describeStacksRequest)
-                    .withPollingStrategy(getBackoffCancellablePollingStrategy(stackCancellationCheck));
-            stackDeleteCompleteWaiter.run(describeStacksRequestWaiterParameters);
+            try (CloudFormationWaiter waiter = cfClient.waiters()) {
+                DescribeStacksRequest request = DescribeStacksRequest.builder().stackName(cFStackName).build();
+                waiter.waitUntilStackDeleteComplete(request, cancellableWaiterConfiguration(new StackCancellationCheck(ac.getCloudContext().getId())));
+            }
         }
     }
 }

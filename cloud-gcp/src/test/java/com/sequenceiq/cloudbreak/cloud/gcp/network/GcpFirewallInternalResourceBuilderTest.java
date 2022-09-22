@@ -41,7 +41,7 @@ public class GcpFirewallInternalResourceBuilderTest {
 
     @Test
     public void testDeleteWhenEverythingGoesFine() throws Exception {
-        CloudResource resource = new CloudResource.Builder()
+        CloudResource resource = CloudResource.builder()
                 .withType(ResourceType.GCP_FIREWALL_INTERNAL)
                 .withStatus(CommonStatus.CREATED)
                 .withGroup("master")

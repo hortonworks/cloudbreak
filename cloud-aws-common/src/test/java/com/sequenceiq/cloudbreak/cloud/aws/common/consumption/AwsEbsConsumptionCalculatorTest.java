@@ -22,14 +22,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.ec2.model.DescribeVolumesResult;
-import com.amazonaws.services.ec2.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsEbsCommonService;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudConsumption;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StorageSizeRequest;
 import com.sequenceiq.cloudbreak.cloud.model.StorageSizeResponse;
+
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
+import software.amazon.awssdk.services.ec2.model.Volume;
 
 @ExtendWith(MockitoExtension.class)
 class AwsEbsConsumptionCalculatorTest {
@@ -64,8 +65,8 @@ class AwsEbsConsumptionCalculatorTest {
                 .withRegion(region)
                 .build();
 
-        DescribeVolumesResult statisticsResult = new DescribeVolumesResult()
-                .withVolumes(List.of());
+        DescribeVolumesResponse statisticsResult = DescribeVolumesResponse.builder()
+                .volumes(List.of()).build();
         when(awsEbsCommonService.getEbsSize(null, REGION_NAME, VOLUME_NAME))
                 .thenReturn(Optional.ofNullable(statisticsResult));
 
@@ -88,10 +89,10 @@ class AwsEbsConsumptionCalculatorTest {
                 .withRegion(region)
                 .build();
 
-        Volume description = new Volume()
-                .withSize(500);
-        DescribeVolumesResult statisticsResult = new DescribeVolumesResult()
-                .withVolumes(List.of(description));
+        Volume description = Volume.builder()
+                .size(500).build();
+        DescribeVolumesResponse statisticsResult = DescribeVolumesResponse.builder()
+                .volumes(List.of(description)).build();
         when(awsEbsCommonService.getEbsSize(null, REGION_NAME, VOLUME_NAME))
                 .thenReturn(Optional.ofNullable(statisticsResult));
 
@@ -113,14 +114,14 @@ class AwsEbsConsumptionCalculatorTest {
                 .withRegion(region)
                 .build();
 
-        Volume latestDatapoint = new Volume()
-                .withSize(42);
-        Volume earlierDatapoint = new Volume()
-                .withSize(12);
-        Volume earliestDatapoint = new Volume()
-                .withSize(22);
-        DescribeVolumesResult statisticsResult = new DescribeVolumesResult()
-                .withVolumes(List.of(latestDatapoint, earlierDatapoint, earliestDatapoint));
+        Volume latestDatapoint = Volume.builder()
+                .size(42).build();
+        Volume earlierDatapoint = Volume.builder()
+                .size(12).build();
+        Volume earliestDatapoint = Volume.builder()
+                .size(22).build();
+        DescribeVolumesResponse statisticsResult = DescribeVolumesResponse.builder()
+                .volumes(List.of(latestDatapoint, earlierDatapoint, earliestDatapoint)).build();
         when(awsEbsCommonService.getEbsSize(null, REGION_NAME, VOLUME_NAME))
                 .thenReturn(Optional.ofNullable(statisticsResult));
 

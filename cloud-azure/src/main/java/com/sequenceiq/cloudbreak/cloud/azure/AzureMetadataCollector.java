@@ -184,7 +184,7 @@ public class AzureMetadataCollector implements MetadataCollector {
             AuthenticatedContext ac, String resourceGroup, String loadBalancerNameAlias, String loadBalancerName, LoadBalancerType type, Optional<String> ip) {
         if (ip.isPresent()) {
             Map<String, Object> parameters = azureLbMetadataCollector.getParameters(ac, resourceGroup, loadBalancerName);
-            CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+            CloudLoadBalancerMetadata loadBalancerMetadata = CloudLoadBalancerMetadata.builder()
                 .withType(type)
                 .withIp(ip.get())
                 .withName(loadBalancerNameAlias)

@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedExcep
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -87,7 +86,7 @@ public class YarnResourceConnector implements ResourceConnector {
             yarnApplicationCreationService.createApplication(yarnClient, createApplicationRequest);
         }
 
-        CloudResource yarnApplication = new Builder().withType(YARN_APPLICATION).withName(applicationName).build();
+        CloudResource yarnApplication = CloudResource.builder().withType(YARN_APPLICATION).withName(applicationName).build();
         persistenceNotifier.notifyAllocation(yarnApplication, authenticatedContext.getCloudContext());
         return check(authenticatedContext, Collections.singletonList(yarnApplication));
     }

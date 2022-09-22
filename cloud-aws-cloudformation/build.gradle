@@ -30,8 +30,8 @@ dependencies {
   implementation group: 'commons-io', name: 'commons-io', version: apacheCommonsIoVersion
   implementation group: 'commons-codec', name: 'commons-codec', version: commonsCodecVersion
 
-  implementation group: 'com.amazonaws', name: 'aws-java-sdk-autoscaling', version: awsSdkVersion
-  implementation group: 'com.amazonaws', name: 'aws-java-sdk-cloudformation', version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk', name: 'autoscaling', version: awsSdkVersion
+  implementation group: 'software.amazon.awssdk', name: 'cloudformation', version: awsSdkVersion
 
   implementation group: 'org.freemarker', name: 'freemarker', version: freemarkerVersion
   implementation group: 'commons-net', name: 'commons-net', version: '3.9.0'

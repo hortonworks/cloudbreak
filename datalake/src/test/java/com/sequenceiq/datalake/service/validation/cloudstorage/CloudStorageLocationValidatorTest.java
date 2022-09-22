@@ -85,6 +85,7 @@ public class CloudStorageLocationValidatorTest {
                 .withCloudPlatform(CLOUD_PLATFORM)
                 .withCredential(CLOUD_CREDENTIAL)
                 .withObjectStoragePath(BUCKET_NAME)
+                .withRegion(ENV_REGION)
                 .build();
         ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withRegion(ENV_REGION).withStatus(ResponseStatus.OK).build();
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
@@ -102,6 +103,7 @@ public class CloudStorageLocationValidatorTest {
                 .withCloudPlatform(CLOUD_PLATFORM)
                 .withCredential(CLOUD_CREDENTIAL)
                 .withObjectStoragePath(BUCKET_NAME)
+                .withRegion(ENV_REGION)
                 .build();
         ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withRegion(ENV_REGION).withStatus(ResponseStatus.OK).build();
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
@@ -119,6 +121,7 @@ public class CloudStorageLocationValidatorTest {
                 .withCloudPlatform(CLOUD_PLATFORM)
                 .withCredential(CLOUD_CREDENTIAL)
                 .withObjectStoragePath(BUCKET_NAME)
+                .withRegion(ENV_REGION)
                 .build();
         ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withRegion(ENV_REGION).withStatus(ResponseStatus.OK).build();
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
@@ -136,6 +139,7 @@ public class CloudStorageLocationValidatorTest {
                 .withCloudPlatform(CLOUD_PLATFORM)
                 .withCredential(CLOUD_CREDENTIAL)
                 .withObjectStoragePath(BUCKET_NAME)
+                .withRegion(ENV_REGION)
                 .build();
         ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withStatus(ResponseStatus.ACCESS_DENIED).build();
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
@@ -153,6 +157,7 @@ public class CloudStorageLocationValidatorTest {
                 .withCloudPlatform(CLOUD_PLATFORM)
                 .withCredential(CLOUD_CREDENTIAL)
                 .withObjectStoragePath(BUCKET_NAME)
+                .withRegion(ENV_REGION)
                 .build();
         ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withRegion(OTHER_REGION).withStatus(ResponseStatus.OK).build();
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);

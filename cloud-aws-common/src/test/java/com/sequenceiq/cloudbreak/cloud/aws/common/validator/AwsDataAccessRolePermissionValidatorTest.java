@@ -23,10 +23,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.auth.policy.Policy;
-import com.amazonaws.services.identitymanagement.model.EvaluationResult;
-import com.amazonaws.services.identitymanagement.model.OrganizationsDecisionDetail;
-import com.amazonaws.services.identitymanagement.model.Role;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
@@ -41,6 +37,11 @@ import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.common.model.FileSystemType;
+
+import software.amazon.awssdk.core.auth.policy.Policy;
+import software.amazon.awssdk.services.iam.model.EvaluationResult;
+import software.amazon.awssdk.services.iam.model.OrganizationsDecisionDetail;
+import software.amazon.awssdk.services.iam.model.Role;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsDataAccessRolePermissionValidatorTest extends AwsIDBrokerMappedRolePermissionValidatorTest {
@@ -262,10 +263,10 @@ public class AwsDataAccessRolePermissionValidatorTest extends AwsIDBrokerMappedR
         cloudFileSystem.setAccountMapping(new AccountMappingBase());
         ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
         when(awsIamService.getValidRoles(eq(amazonIdentityManagementClient), any(), any()))
-                .thenReturn(Set.of(new Role().withArn("arn:aws:iam::123456890:role/role")));
+                .thenReturn(Set.of(Role.builder().arn("arn:aws:iam::123456890:role/role").build()));
         when(awsIamService.validateRolePolicies(eq(amazonIdentityManagementClient), any(), any())).thenReturn(
-                List.of(new EvaluationResult().withOrganizationsDecisionDetail(
-                        new OrganizationsDecisionDetail().withAllowedByOrganizations(false)).withEvalDecision("deny")));
+                List.of(EvaluationResult.builder().organizationsDecisionDetail(
+                        OrganizationsDecisionDetail.builder().allowedByOrganizations(false).build()).evalDecision("deny").build()));
         getValidator().validate(amazonIdentityManagementClient, cloudFileSystem, null, "accountId", BackupOperationType.NONE,
                 resultBuilder, false);
 

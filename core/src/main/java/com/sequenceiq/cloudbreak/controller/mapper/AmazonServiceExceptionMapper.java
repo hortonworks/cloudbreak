@@ -4,19 +4,20 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.AmazonServiceException;
 import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+
 @Component
-public class AmazonServiceExceptionMapper extends BaseExceptionMapper<AmazonServiceException> {
+public class AmazonServiceExceptionMapper extends BaseExceptionMapper<AwsServiceException> {
 
     @Override
-    public Status getResponseStatus(AmazonServiceException exception) {
-        return Status.fromStatusCode(exception.getStatusCode());
+    public Status getResponseStatus(AwsServiceException exception) {
+        return Status.fromStatusCode(exception.awsErrorDetails().sdkHttpResponse().statusCode());
     }
 
     @Override
-    public Class<AmazonServiceException> getExceptionType() {
-        return AmazonServiceException.class;
+    public Class<AwsServiceException> getExceptionType() {
+        return AwsServiceException.class;
     }
 }

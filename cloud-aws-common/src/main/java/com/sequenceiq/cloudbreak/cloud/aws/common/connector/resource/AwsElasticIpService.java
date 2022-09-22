@@ -11,14 +11,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.model.Address;
-import com.amazonaws.services.ec2.model.AssociateAddressRequest;
-import com.amazonaws.services.ec2.model.AssociateAddressResult;
-import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
-import com.amazonaws.services.ec2.model.DescribeAddressesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+
+import software.amazon.awssdk.services.ec2.model.Address;
+import software.amazon.awssdk.services.ec2.model.AssociateAddressRequest;
+import software.amazon.awssdk.services.ec2.model.AssociateAddressResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeAddressesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeAddressesResponse;
 
 @Service
 public class AwsElasticIpService {
@@ -32,9 +33,9 @@ public class AwsElasticIpService {
                 .collect(Collectors.toList());
     }
 
-    public List<AssociateAddressResult> associateElasticIpsToInstances(AmazonEc2Client amazonEC2Client, List<String> eipAllocationIds,
+    public List<AssociateAddressResponse> associateElasticIpsToInstances(AmazonEc2Client amazonEC2Client, List<String> eipAllocationIds,
             List<String> instanceIds) {
-        List<AssociateAddressResult> ret = new ArrayList<>();
+        List<AssociateAddressResponse> ret = new ArrayList<>();
         if (eipAllocationIds.size() == instanceIds.size()) {
             for (int i = 0; i < eipAllocationIds.size(); i++) {
                 ret.add(associateElasticIpToInstance(amazonEC2Client, eipAllocationIds.get(i), instanceIds.get(i)));
@@ -45,11 +46,12 @@ public class AwsElasticIpService {
         return ret;
     }
 
-    private AssociateAddressResult associateElasticIpToInstance(AmazonEc2Client amazonEC2Client, String eipAllocationId, String instanceId) {
+    private AssociateAddressResponse associateElasticIpToInstance(AmazonEc2Client amazonEC2Client, String eipAllocationId, String instanceId) {
         LOGGER.debug("{} eip associated to {}", eipAllocationId, instanceId);
-        AssociateAddressRequest associateAddressRequest = new AssociateAddressRequest()
-                .withAllocationId(eipAllocationId)
-                .withInstanceId(instanceId);
+        AssociateAddressRequest associateAddressRequest = AssociateAddressRequest.builder()
+                .allocationId(eipAllocationId)
+                .instanceId(instanceId)
+                .build();
         return amazonEC2Client.associateAddress(associateAddressRequest);
     }
 
@@ -65,9 +67,9 @@ public class AwsElasticIpService {
     }
 
     public List<String> getFreeIps(Collection<String> eips, AmazonEc2Client amazonEC2Client) {
-        DescribeAddressesResult addresses = amazonEC2Client.describeAddresses(new DescribeAddressesRequest().withAllocationIds(eips));
-        return addresses.getAddresses().stream().filter(address -> address.getInstanceId() == null)
-                .map(Address::getAllocationId).collect(Collectors.toList());
+        DescribeAddressesResponse addresses = amazonEC2Client.describeAddresses(DescribeAddressesRequest.builder().allocationIds(eips).build());
+        return addresses.addresses().stream().filter(address -> address.instanceId() == null)
+                .map(Address::allocationId).collect(Collectors.toList());
     }
 
 }

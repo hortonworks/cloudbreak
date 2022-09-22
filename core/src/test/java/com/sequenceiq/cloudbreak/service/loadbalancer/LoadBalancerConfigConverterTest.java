@@ -73,7 +73,7 @@ public class LoadBalancerConfigConverterTest {
 
     @Test
     public void testConvertAwsLoadBalancer() {
-        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = CloudLoadBalancerMetadata.builder()
             .withParameters(createAwsParams(0))
             .build();
 
@@ -85,7 +85,7 @@ public class LoadBalancerConfigConverterTest {
 
     @Test
     public void testConvertAwsTargetGroup() {
-        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = CloudLoadBalancerMetadata.builder()
             .withParameters(createAwsParams(1))
             .build();
         TargetGroup targetGroup = new TargetGroup();
@@ -106,7 +106,7 @@ public class LoadBalancerConfigConverterTest {
 
     @Test
     public void testConvertAwsTargetGroupExtraPortsInMetadata() {
-        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = CloudLoadBalancerMetadata.builder()
             .withParameters(createAwsParams(3))
             .build();
         TargetGroup targetGroup = new TargetGroup();
@@ -125,7 +125,7 @@ public class LoadBalancerConfigConverterTest {
 
     @Test
     public void testConvertAwsTargetGroupMissingPortInMetadata() {
-        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = CloudLoadBalancerMetadata.builder()
             .withParameters(createAwsParams(1))
             .build();
         TargetGroup targetGroup = new TargetGroup();
@@ -150,7 +150,7 @@ public class LoadBalancerConfigConverterTest {
 
     @Test
     public void testConvertAzureLoadBalancer() {
-        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = CloudLoadBalancerMetadata.builder()
                 .withParameters(createAzureParams(0))
                 .build();
 
@@ -162,7 +162,7 @@ public class LoadBalancerConfigConverterTest {
 
     @Test
     public void testConvertAzureTargetGroup() {
-        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = CloudLoadBalancerMetadata.builder()
                 .withParameters(createAzureParams(1))
                 .build();
         TargetGroup targetGroup = new TargetGroup();
@@ -185,7 +185,7 @@ public class LoadBalancerConfigConverterTest {
     public void testConvertAzureTargetGroupMissingAvailabilitySetInMetadata() {
         Map<String, Object> azureParams = createAzureParams(1);
         azureParams.put(AzureLoadBalancerMetadataView.getAvailabilitySetParam(PORT2), null);
-        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = CloudLoadBalancerMetadata.builder()
                 .withParameters(azureParams)
                 .build();
         TargetGroup targetGroup = new TargetGroup();
@@ -210,7 +210,7 @@ public class LoadBalancerConfigConverterTest {
 
     @Test
     public void testConvertGcpLoadBalancer() {
-        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = CloudLoadBalancerMetadata.builder()
                 .withParameters(creatGcpParams(0))
                 .build();
         LoadBalancerConfigDbWrapper cloudLoadBalancerConfigDbWrapper = underTest.convertLoadBalancer(GCP, cloudLoadBalancerMetadata);
@@ -222,7 +222,7 @@ public class LoadBalancerConfigConverterTest {
 
     @Test
     public void testConvertGcpTargetGroup() {
-        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+        CloudLoadBalancerMetadata cloudLoadBalancerMetadata = CloudLoadBalancerMetadata.builder()
                 .withParameters(creatGcpParams(1))
                 .build();
 

@@ -15,14 +15,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.auth.policy.Policy;
-import com.amazonaws.auth.policy.Resource;
-import com.amazonaws.auth.policy.Statement;
-import com.amazonaws.auth.policy.internal.JsonPolicyWriter;
-import com.amazonaws.services.pricing.model.Filter;
-import com.amazonaws.services.pricing.model.FilterType;
-import com.amazonaws.services.pricing.model.GetProductsRequest;
-import com.amazonaws.services.pricing.model.GetProductsResult;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.cloud.PricingCache;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsCredentialVerifier;
@@ -43,6 +35,16 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.CdpResourceType;
+
+import software.amazon.awssdk.core.auth.policy.Action;
+import software.amazon.awssdk.core.auth.policy.Policy;
+import software.amazon.awssdk.core.auth.policy.Resource;
+import software.amazon.awssdk.core.auth.policy.Statement;
+import software.amazon.awssdk.core.auth.policy.internal.JsonPolicyWriter;
+import software.amazon.awssdk.services.pricing.model.Filter;
+import software.amazon.awssdk.services.pricing.model.FilterType;
+import software.amazon.awssdk.services.pricing.model.GetProductsRequest;
+import software.amazon.awssdk.services.pricing.model.GetProductsResponse;
 
 @Service("awsPricingCache")
 public class AwsPricingCache implements PricingCache {
@@ -121,8 +123,8 @@ public class AwsPricingCache implements PricingCache {
 
     private Optional<PriceListElement> getPriceList(String region, String instanceType, CloudCredential cloudCredential) {
         try {
-            GetProductsResult productsResult = getProducts(region, instanceType, cloudCredential);
-            Optional<String> priceListString = productsResult.getPriceList().stream().findFirst();
+            GetProductsResponse productsResult = getProducts(region, instanceType, cloudCredential);
+            Optional<String> priceListString = productsResult.priceList().stream().findFirst();
             if (priceListString.isPresent()) {
                 PriceListElement priceListElement = JsonUtil.readValue(priceListString.get(), PriceListElement.class);
                 LOGGER.info("Found {} on demand terms in price list retrieved for region '{}' and instance type '{}': {}",
@@ -140,18 +142,19 @@ public class AwsPricingCache implements PricingCache {
         }
     }
 
-    private GetProductsResult getProducts(String region, String instanceType, CloudCredential cloudCredential) throws AwsPermissionMissingException {
+    private GetProductsResponse getProducts(String region, String instanceType, CloudCredential cloudCredential) throws AwsPermissionMissingException {
         awsCredentialVerifier.validateAws(new AwsCredentialView(cloudCredential), GET_PRODUCTS_ENCODED_POLICY_STRING);
-        GetProductsRequest productsRequest = new GetProductsRequest()
-                .withServiceCode("AmazonEC2")
-                .withFormatVersion("aws_v1")
-                .withFilters(
-                        new Filter().withType(FilterType.TERM_MATCH).withField("regionCode").withValue(region),
-                        new Filter().withType(FilterType.TERM_MATCH).withField("instanceType").withValue(instanceType),
-                        new Filter().withType(FilterType.TERM_MATCH).withField("operatingSystem").withValue("Linux"),
-                        new Filter().withType(FilterType.TERM_MATCH).withField("preInstalledSw").withValue("NA"),
-                        new Filter().withType(FilterType.TERM_MATCH).withField("capacitystatus").withValue("Used"),
-                        new Filter().withType(FilterType.TERM_MATCH).withField("tenancy").withValue("Shared"));
+        GetProductsRequest productsRequest = GetProductsRequest.builder()
+                .serviceCode("AmazonEC2")
+                .formatVersion("aws_v1")
+                .filters(
+                        Filter.builder().type(FilterType.TERM_MATCH).field("regionCode").value(region).build(),
+                        Filter.builder().type(FilterType.TERM_MATCH).field("instanceType").value(instanceType).build(),
+                        Filter.builder().type(FilterType.TERM_MATCH).field("operatingSystem").value("Linux").build(),
+                        Filter.builder().type(FilterType.TERM_MATCH).field("preInstalledSw").value("NA").build(),
+                        Filter.builder().type(FilterType.TERM_MATCH).field("capacitystatus").value("Used").build(),
+                        Filter.builder().type(FilterType.TERM_MATCH).field("tenancy").value("Shared").build())
+                .build();
         AmazonPricingClient pricingClient = awsClient.createPricingClient(new AwsCredentialView(cloudCredential), PRICING_API_ENDPOINT_REGION);
         return pricingClient.getProducts(productsRequest);
     }
@@ -159,8 +162,8 @@ public class AwsPricingCache implements PricingCache {
     private static String getPolicyBase64String() {
         Policy policy = new Policy();
         Statement statement = new Statement(Statement.Effect.Allow)
-                .withResources(new Resource("*"))
-                .withActions(() -> "pricing:GetProducts");
+                .withResources(new Resource("*")).withActions()
+                .withActions(new Action("pricing:GetProducts"));
         policy.setStatements(List.of(statement));
         String policyString = new JsonPolicyWriter().writePolicyToString(policy);
         return Base64.getEncoder().encodeToString(policyString.getBytes());

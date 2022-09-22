@@ -21,14 +21,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.ec2.model.AmazonEC2Exception;
-import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
-import com.amazonaws.services.ec2.model.DescribeRegionsResult;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsDefaultRegionSelectionFailed;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.services.ec2.model.DescribeRegionsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeRegionsResponse;
+import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 
 @ExtendWith(MockitoExtension.class)
 class AwsDefaultRegionSelectorTest {
@@ -71,9 +73,10 @@ class AwsDefaultRegionSelectorTest {
     @Test
     void testDetermineDefaultRegionWhenGlobalDefaultRegionDescribeFailsWithAwsClientException() {
         when(awsClient.createAccessWithMinimalRetries(any(AwsCredentialView.class), eq(GLOBAL_DEFAULT_ZONE))).thenReturn(ec2Client);
-        when(ec2Client.describeRegions(any(DescribeRegionsRequest.class))).thenThrow(new AmazonEC2Exception("SomethingBadHappened"));
+        when(ec2Client.describeRegions(any(DescribeRegionsRequest.class)))
+                .thenThrow(Ec2Exception.builder().awsErrorDetails(AwsErrorDetails.builder().errorCode("SomethingBadHappened").build()).build());
 
-        assertThrows(AmazonEC2Exception.class, () -> underTest.determineDefaultRegion(new CloudCredential()));
+        assertThrows(Ec2Exception.class, () -> underTest.determineDefaultRegion(new CloudCredential()));
 
         verify(awsClient, times(1)).createAccessWithMinimalRetries(any(AwsCredentialView.class), eq(GLOBAL_DEFAULT_ZONE));
         verify(ec2Client, times(1)).describeRegions(any(DescribeRegionsRequest.class));
@@ -92,8 +95,11 @@ class AwsDefaultRegionSelectorTest {
 
     @Test
     void testDetermineDefaultRegionWhenGlobalDefaultRegionDescribeFailsWithAuthExceptionAndNoAdditionalRegionsAreConfigured() {
-        AmazonEC2Exception amazonEC2Exception = new AmazonEC2Exception("SomethingBadHappened");
-        amazonEC2Exception.setErrorCode(EC2_AUTH_FAILURE_ERROR_CODE);
+        Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
+                .message("SomethingBadHappened")
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(EC2_AUTH_FAILURE_ERROR_CODE).build())
+                .build();
+
         when(ec2Client.describeRegions(any(DescribeRegionsRequest.class))).thenThrow(amazonEC2Exception);
         when(awsClient.createAccessWithMinimalRetries(any(AwsCredentialView.class), eq(GLOBAL_DEFAULT_ZONE))).thenReturn(ec2Client);
         when(platformResources.getEnabledRegions()).thenReturn(null);
@@ -107,9 +113,11 @@ class AwsDefaultRegionSelectorTest {
 
     @Test
     void testDetermineDefaultRegionWhenGlobalDefaultRegionIsNotViableAndOneOfTheAdditionalRegionsIsViable() {
-        AmazonEC2Exception amazonEC2Exception = new AmazonEC2Exception("SomethingBadHappened");
-        amazonEC2Exception.setErrorCode(EC2_AUTH_FAILURE_ERROR_CODE);
-        when(ec2Client.describeRegions(any(DescribeRegionsRequest.class))).thenReturn(new DescribeRegionsResult());
+        Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
+                .message("SomethingBadHappened")
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(EC2_AUTH_FAILURE_ERROR_CODE).build())
+                .build();
+        when(ec2Client.describeRegions(any(DescribeRegionsRequest.class))).thenReturn(DescribeRegionsResponse.builder().build());
         when(awsClient.createAccessWithMinimalRetries(any(AwsCredentialView.class), any()))
                 .thenThrow(amazonEC2Exception)
                 .thenThrow(amazonEC2Exception)
@@ -128,8 +136,10 @@ class AwsDefaultRegionSelectorTest {
     @Test
     void testDetermineDefaultRegionWhenGlobalDefaultRegionIsNotViableAndNoneOfTheAdditionalRegionsIsViable() {
         when(awsClient.createAccessWithMinimalRetries(any(AwsCredentialView.class), any())).thenReturn(ec2Client);
-        AmazonEC2Exception amazonEC2Exception = new AmazonEC2Exception("SomethingBadHappened");
-        amazonEC2Exception.setErrorCode(EC2_AUTH_FAILURE_ERROR_CODE);
+        Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
+                .message("SomethingBadHappened")
+                .awsErrorDetails(AwsErrorDetails.builder().errorCode(EC2_AUTH_FAILURE_ERROR_CODE).build())
+                        .build();
         when(ec2Client.describeRegions(any(DescribeRegionsRequest.class))).thenThrow(amazonEC2Exception);
 
         AwsDefaultRegionSelectionFailed exception = assertThrows(AwsDefaultRegionSelectionFailed.class,

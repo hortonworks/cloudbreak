@@ -1,28 +1,25 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
-import com.amazonaws.services.rds.model.StartDBInstanceRequest;
-import com.amazonaws.services.rds.waiters.AmazonRDSWaiters;
-import com.amazonaws.waiters.Waiter;
-import com.amazonaws.waiters.WaiterTimedOutException;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -35,13 +32,18 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.waiters.WaiterOverrideConfiguration;
+import software.amazon.awssdk.services.rds.model.DescribeDbInstancesRequest;
+import software.amazon.awssdk.services.rds.model.StartDbInstanceRequest;
+import software.amazon.awssdk.services.rds.waiters.RdsWaiter;
+
+@ExtendWith(MockitoExtension.class)
 public class AwsRdsStartServiceTest {
 
     private static final String REGION = "region";
 
     private static final String DB_INSTANCE_IDENTIFIER = "dbInstance";
-
-    private static final String SUCCESS_STATUS = "available";
 
     @Mock
     private AwsCloudFormationClient awsClient;
@@ -71,18 +73,13 @@ public class AwsRdsStartServiceTest {
     private DatabaseServer databaseServer;
 
     @Mock
-    private Waiter<DescribeDBInstancesRequest> rdsWaiter;
-
-    @Mock
-    private AmazonRDSWaiters waiters;
+    private RdsWaiter waiters;
 
     @InjectMocks
     private AwsRdsStartService victim;
 
-    @Before
+    @BeforeEach
     public void initTests() {
-        initMocks(this);
-
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
@@ -91,36 +88,36 @@ public class AwsRdsStartServiceTest {
         when(awsClient.createRdsClient(any(AwsCredentialView.class), eq(REGION))).thenReturn(amazonRDS);
         when(dbStack.getDatabaseServer()).thenReturn(databaseServer);
         when(databaseServer.getServerId()).thenReturn(DB_INSTANCE_IDENTIFIER);
-        when(amazonRDS.waiters()).thenReturn(waiters);
-        when(waiters.dBInstanceAvailable()).thenReturn(rdsWaiter);
     }
 
     @Test
     public void shouldStartAndScheduleTask() throws InterruptedException, ExecutionException, TimeoutException {
-        ArgumentCaptor<StartDBInstanceRequest> startDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(StartDBInstanceRequest.class);
+        ArgumentCaptor<StartDbInstanceRequest> startDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(StartDbInstanceRequest.class);
         when(amazonRDS.startDBInstance(startDBInstanceRequestArgumentCaptor.capture())).thenReturn(null);
+        when(amazonRDS.waiters()).thenReturn(waiters);
 
         victim.start(authenticatedContext, dbStack);
 
-        assertEquals(DB_INSTANCE_IDENTIFIER, startDBInstanceRequestArgumentCaptor.getValue().getDBInstanceIdentifier());
-        verify(rdsWaiter, times(1)).run(any());
+        assertEquals(DB_INSTANCE_IDENTIFIER, startDBInstanceRequestArgumentCaptor.getValue().dbInstanceIdentifier());
+        verify(waiters, times(1)).waitUntilDBInstanceAvailable(any(DescribeDbInstancesRequest.class), any(WaiterOverrideConfiguration.class));
     }
 
-    @Test(expected = CloudConnectorException.class)
-    public void shouldThrowCloudConnectorExceptionInCaseOfRdsClientException() throws InterruptedException, ExecutionException, TimeoutException {
-        ArgumentCaptor<StartDBInstanceRequest> startDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(StartDBInstanceRequest.class);
+    @Test
+    public void shouldThrowCloudConnectorExceptionInCaseOfRdsClientException() {
+        ArgumentCaptor<StartDbInstanceRequest> startDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(StartDbInstanceRequest.class);
 
         when(amazonRDS.startDBInstance(startDBInstanceRequestArgumentCaptor.capture())).thenThrow(new RuntimeException());
 
-        victim.start(authenticatedContext, dbStack);
+        assertThrows(CloudConnectorException.class, () -> victim.start(authenticatedContext, dbStack));
     }
 
-    @Test(expected = CloudConnectorException.class)
-    public void shouldThrowCloudConnectorExceptionInCaseOfSchedulerException() throws InterruptedException, ExecutionException, TimeoutException {
-        ArgumentCaptor<StartDBInstanceRequest> startDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(StartDBInstanceRequest.class);
+    @Test
+    public void shouldThrowCloudConnectorExceptionInCaseOfSchedulerException() {
+        ArgumentCaptor<StartDbInstanceRequest> startDBInstanceRequestArgumentCaptor = ArgumentCaptor.forClass(StartDbInstanceRequest.class);
         when(amazonRDS.startDBInstance(startDBInstanceRequestArgumentCaptor.capture())).thenReturn(null);
-        doThrow(WaiterTimedOutException.class).when(rdsWaiter).run(any());
+        when(amazonRDS.waiters()).thenReturn(waiters);
+        doThrow(SdkException.class).when(waiters).waitUntilDBInstanceAvailable(any(DescribeDbInstancesRequest.class), any(WaiterOverrideConfiguration.class));
 
-        victim.start(authenticatedContext, dbStack);
+        assertThrows(CloudConnectorException.class, () -> victim.start(authenticatedContext, dbStack));
     }
 }

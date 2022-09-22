@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,18 +17,19 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.rds.AmazonRDS;
-import com.amazonaws.services.rds.model.Certificate;
-import com.amazonaws.services.rds.model.CreateDBParameterGroupRequest;
-import com.amazonaws.services.rds.model.DBParameterGroupNotFoundException;
-import com.amazonaws.services.rds.model.DeleteDBParameterGroupRequest;
-import com.amazonaws.services.rds.model.DescribeCertificatesRequest;
-import com.amazonaws.services.rds.model.DescribeCertificatesResult;
-import com.amazonaws.services.rds.model.InvalidDBParameterGroupStateException;
-import com.amazonaws.services.rds.model.ModifyDBParameterGroupRequest;
-import com.amazonaws.services.rds.model.Parameter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+
+import software.amazon.awssdk.services.rds.RdsClient;
+import software.amazon.awssdk.services.rds.model.Certificate;
+import software.amazon.awssdk.services.rds.model.CreateDbParameterGroupRequest;
+import software.amazon.awssdk.services.rds.model.DbParameterGroupNotFoundException;
+import software.amazon.awssdk.services.rds.model.DeleteDbParameterGroupRequest;
+import software.amazon.awssdk.services.rds.model.DescribeCertificatesRequest;
+import software.amazon.awssdk.services.rds.model.DescribeCertificatesResponse;
+import software.amazon.awssdk.services.rds.model.InvalidDbParameterGroupStateException;
+import software.amazon.awssdk.services.rds.model.ModifyDbParameterGroupRequest;
+import software.amazon.awssdk.services.rds.model.Parameter;
 
 @ExtendWith(MockitoExtension.class)
 class AmazonRdsClientTest {
@@ -45,7 +45,7 @@ class AmazonRdsClientTest {
     private static final String DATABASE_SERVER_ID = "databaseServerId";
 
     @Mock
-    private AmazonRDS client;
+    private RdsClient client;
 
     @Spy
     private AwsPageCollector awsPageCollector;
@@ -55,13 +55,14 @@ class AmazonRdsClientTest {
 
     @Test
     void describeCertificatesTestSimple() {
-        DescribeCertificatesRequest describeCertificatesRequest = mock(DescribeCertificatesRequest.class);
+        DescribeCertificatesRequest describeCertificatesRequest = DescribeCertificatesRequest.builder().build();
 
-        DescribeCertificatesResult describeCertificatesResult = mock(DescribeCertificatesResult.class);
-        Certificate cert1 = mock(Certificate.class);
-        Certificate cert2 = mock(Certificate.class);
-        when(describeCertificatesResult.getMarker()).thenReturn(null);
-        when(describeCertificatesResult.getCertificates()).thenReturn(List.of(cert1, cert2));
+        Certificate cert1 = Certificate.builder().build();
+        Certificate cert2 = Certificate.builder().build();
+        DescribeCertificatesResponse describeCertificatesResult = DescribeCertificatesResponse.builder()
+                .marker(null)
+                .certificates(cert1, cert2)
+                .build();
 
         when(client.describeCertificates(describeCertificatesRequest)).thenReturn(describeCertificatesResult);
 
@@ -73,17 +74,19 @@ class AmazonRdsClientTest {
 
     @Test
     void describeCertificatesTestWithPaging() {
-        DescribeCertificatesRequest describeCertificatesRequest = mock(DescribeCertificatesRequest.class);
+        DescribeCertificatesRequest describeCertificatesRequest = DescribeCertificatesRequest.builder().marker(MARKER).build();
 
-        DescribeCertificatesResult describeCertificatesResult1 = mock(DescribeCertificatesResult.class);
-        Certificate cert1 = mock(Certificate.class);
-        when(describeCertificatesResult1.getMarker()).thenReturn(MARKER);
-        when(describeCertificatesResult1.getCertificates()).thenReturn(List.of(cert1));
+        Certificate cert1 = Certificate.builder().build();
+        DescribeCertificatesResponse describeCertificatesResult1 = DescribeCertificatesResponse.builder()
+                .marker(MARKER)
+                .certificates(cert1)
+                .build();
 
-        DescribeCertificatesResult describeCertificatesResult2 = mock(DescribeCertificatesResult.class);
-        Certificate cert2 = mock(Certificate.class);
-        when(describeCertificatesResult2.getMarker()).thenReturn(null);
-        when(describeCertificatesResult2.getCertificates()).thenReturn(List.of(cert2));
+        Certificate cert2 = Certificate.builder().build();
+        DescribeCertificatesResponse describeCertificatesResult2 = DescribeCertificatesResponse.builder()
+                .marker(null)
+                .certificates(cert2)
+                .build();
 
         when(client.describeCertificates(describeCertificatesRequest)).thenReturn(describeCertificatesResult1, describeCertificatesResult2);
 
@@ -97,44 +100,45 @@ class AmazonRdsClientTest {
     void testCreateParameterGroup() {
         underTest.createParameterGroup(DB_PARAMETER_GROUP_FAMILY, DB_PARAMETER_GROUP_NAME, DATABASE_SERVER_ID);
 
-        ArgumentCaptor<CreateDBParameterGroupRequest> requestArgumentCaptor = ArgumentCaptor.forClass(CreateDBParameterGroupRequest.class);
+        ArgumentCaptor<CreateDbParameterGroupRequest> requestArgumentCaptor = ArgumentCaptor.forClass(CreateDbParameterGroupRequest.class);
         verify(client).createDBParameterGroup(requestArgumentCaptor.capture());
-        CreateDBParameterGroupRequest request = requestArgumentCaptor.getValue();
-        assertEquals(DB_PARAMETER_GROUP_FAMILY, request.getDBParameterGroupFamily());
-        assertEquals(DB_PARAMETER_GROUP_NAME, request.getDBParameterGroupName());
+        CreateDbParameterGroupRequest request = requestArgumentCaptor.getValue();
+        assertEquals(DB_PARAMETER_GROUP_FAMILY, request.dbParameterGroupFamily());
+        assertEquals(DB_PARAMETER_GROUP_NAME, request.dbParameterGroupName());
     }
 
     @Test
     void testChangeParameterGroupEntries() {
-        Parameter parameter = new Parameter();
+        Parameter parameter = Parameter.builder().build();
 
         underTest.changeParameterInGroup(DB_INSTANCE_IDENTIFIER, List.of(parameter));
 
-        ArgumentCaptor<ModifyDBParameterGroupRequest> modifyRequestCaptor = ArgumentCaptor.forClass(ModifyDBParameterGroupRequest.class);
+        ArgumentCaptor<ModifyDbParameterGroupRequest> modifyRequestCaptor = ArgumentCaptor.forClass(ModifyDbParameterGroupRequest.class);
         verify(client).modifyDBParameterGroup(modifyRequestCaptor.capture());
-        ModifyDBParameterGroupRequest request = modifyRequestCaptor.getValue();
-        assertEquals(parameter, request.getParameters().get(0));
-        assertEquals(DB_INSTANCE_IDENTIFIER, request.getDBParameterGroupName());
+        ModifyDbParameterGroupRequest request = modifyRequestCaptor.getValue();
+        assertEquals(parameter, request.parameters().get(0));
+        assertEquals(DB_INSTANCE_IDENTIFIER, request.dbParameterGroupName());
     }
 
     @Test
     void testDeleteParameterGroup() {
         underTest.deleteParameterGroup("paramGroup");
-        ArgumentCaptor<DeleteDBParameterGroupRequest> requestCaptor = ArgumentCaptor.forClass(DeleteDBParameterGroupRequest.class);
+        ArgumentCaptor<DeleteDbParameterGroupRequest> requestCaptor = ArgumentCaptor.forClass(DeleteDbParameterGroupRequest.class);
         verify(client).deleteDBParameterGroup(requestCaptor.capture());
-        assertEquals("paramGroup", requestCaptor.getValue().getDBParameterGroupName());
+        assertEquals("paramGroup", requestCaptor.getValue().dbParameterGroupName());
     }
 
     @Test
     void testDeleteParameterGroupWhenNotFound() {
-        when(client.deleteDBParameterGroup(any(DeleteDBParameterGroupRequest.class))).thenThrow(new DBParameterGroupNotFoundException("errorMsg"));
+        when(client.deleteDBParameterGroup(any(DeleteDbParameterGroupRequest.class)))
+                .thenThrow(DbParameterGroupNotFoundException.builder().message("errorMsg").build());
         underTest.deleteParameterGroup("paramGroup");
     }
 
     @Test
     void testDeleteParameterGroupWhenInvalidDBParameterGroupState() {
-        InvalidDBParameterGroupStateException invalidGroupStateException = new InvalidDBParameterGroupStateException("errorMsg");
-        when(client.deleteDBParameterGroup(any(DeleteDBParameterGroupRequest.class))).thenThrow(invalidGroupStateException);
+        InvalidDbParameterGroupStateException invalidGroupStateException = InvalidDbParameterGroupStateException.builder().message("errorMsg").build();
+        when(client.deleteDBParameterGroup(any(DeleteDbParameterGroupRequest.class))).thenThrow(invalidGroupStateException);
         CloudConnectorException actualException = assertThrows(CloudConnectorException.class, () -> underTest.deleteParameterGroup("paramGroup"));
         assertEquals(invalidGroupStateException, actualException.getCause());
     }

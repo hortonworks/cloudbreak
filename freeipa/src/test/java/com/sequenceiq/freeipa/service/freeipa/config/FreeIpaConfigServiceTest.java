@@ -130,7 +130,7 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfig.getHostname()).thenReturn(HOSTNAME);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(proxyConfigDtoService.getByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
-        when(awsEndpointProvider.getEndpointString(anyString(), anyString(), anyBoolean())).thenReturn("s3");
+        when(awsEndpointProvider.setupFipsEndpointIfNecessary(anyString(), anyString(), anyBoolean())).thenReturn(Optional.of("s3"));
 
         Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
         Map<String, String> expectedHost = Map.of("ip", PRIVATE_IP, "fqdn", HOSTNAME);

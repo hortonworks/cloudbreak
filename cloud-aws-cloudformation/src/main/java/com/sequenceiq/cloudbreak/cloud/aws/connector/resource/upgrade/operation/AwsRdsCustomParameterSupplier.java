@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.rds.model.ApplyMethod;
-import com.amazonaws.services.rds.model.Parameter;
+import software.amazon.awssdk.services.rds.model.ApplyMethod;
+import software.amazon.awssdk.services.rds.model.Parameter;
 
 @Component
 public class AwsRdsCustomParameterSupplier {
@@ -19,10 +19,10 @@ public class AwsRdsCustomParameterSupplier {
     }
 
     private Parameter createForceSslParameter() {
-        return new Parameter()
-                .withParameterName(RDS_FORCE_SSL_PARAMETER_NAME)
-                .withParameterValue(RDS_FORCE_SSL_PARAMETER_ON)
-                .withApplyMethod(ApplyMethod.Immediate);
+        return Parameter.builder()
+                .parameterName(RDS_FORCE_SSL_PARAMETER_NAME)
+                .parameterValue(RDS_FORCE_SSL_PARAMETER_ON)
+                .applyMethod(ApplyMethod.IMMEDIATE)
+                .build();
     }
-
 }

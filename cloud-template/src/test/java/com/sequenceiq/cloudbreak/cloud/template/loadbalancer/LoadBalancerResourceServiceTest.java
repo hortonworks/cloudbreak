@@ -93,7 +93,7 @@ public class LoadBalancerResourceServiceTest {
         String serviceAccountId = "serviceAccountId";
         authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
         context = new ResourceBuilderContext(cloudContext.getName(), location, 30, false);
-        List<CloudResource> networkResources = Collections.singletonList(new CloudResource.Builder()
+        List<CloudResource> networkResources = Collections.singletonList(CloudResource.builder()
                 .withType(ResourceType.GCP_NETWORK).withName("network-test").build());
         context.addNetworkResources(networkResources);
         Network network = new Network(null);

@@ -19,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import com.amazonaws.AmazonServiceException;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -36,6 +35,8 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 
 @ExtendWith(MockitoExtension.class)
 class EncryptionKeyArnValidatorTest {
@@ -137,10 +138,11 @@ class EncryptionKeyArnValidatorTest {
         String validKey =  "arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
         EnvironmentDto environmentDto = createEnvironmentDto(validKey);
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
-        AmazonServiceException amazonServiceException = new AmazonServiceException("An unexpected error occurred while trying to fetch the KMS keys from AWS");
+        AwsServiceException amazonServiceException = AwsServiceException.builder()
+                .message("An unexpected error occurred while trying to fetch the KMS keys from AWS").build();
         when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
         when(retryService.testWith2SecDelayMax15Times(any(Supplier.class))).thenThrow(amazonServiceException);
-        assertThrows(AmazonServiceException.class, () -> underTest.validate(environmentValidationDto));
+        assertThrows(AwsServiceException.class, () -> underTest.validate(environmentValidationDto));
     }
 
     @Test

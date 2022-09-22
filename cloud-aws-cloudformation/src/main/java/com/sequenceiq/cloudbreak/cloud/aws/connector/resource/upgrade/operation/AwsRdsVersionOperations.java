@@ -16,15 +16,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.rds.model.AmazonRDSException;
-import com.amazonaws.services.rds.model.DescribeDBEngineVersionsRequest;
-import com.amazonaws.services.rds.model.DescribeDBEngineVersionsResult;
-import com.amazonaws.services.rds.model.UpgradeTarget;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
 import com.sequenceiq.cloudbreak.common.database.Version;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
+
+import software.amazon.awssdk.services.rds.model.DescribeDbEngineVersionsRequest;
+import software.amazon.awssdk.services.rds.model.DescribeDbEngineVersionsResponse;
+import software.amazon.awssdk.services.rds.model.RdsException;
+import software.amazon.awssdk.services.rds.model.UpgradeTarget;
 
 @Service
 public class AwsRdsVersionOperations {
@@ -94,20 +95,21 @@ public class AwsRdsVersionOperations {
     }
 
     public Set<String> getAllUpgradeTargetVersions(AmazonRdsClient rdsClient, RdsEngineVersion dbVersion) {
-        DescribeDBEngineVersionsRequest describeDBEngineVersionsRequest = new DescribeDBEngineVersionsRequest();
-        describeDBEngineVersionsRequest.setEngine("postgres");
-        describeDBEngineVersionsRequest.setEngineVersion(dbVersion.getVersion());
+        DescribeDbEngineVersionsRequest describeDBEngineVersionsRequest = DescribeDbEngineVersionsRequest.builder()
+                .engine("postgres")
+                .engineVersion(dbVersion.getVersion())
+                .build();
         try {
-            DescribeDBEngineVersionsResult result = rdsClient.describeDBEngineVersions(describeDBEngineVersionsRequest);
+            DescribeDbEngineVersionsResponse result = rdsClient.describeDBEngineVersions(describeDBEngineVersionsRequest);
             LOGGER.debug("Filtering DB upgrade targets for current version {}, results are: {}", dbVersion, result);
-            Set<String> validUpgradeTargets = result.getDBEngineVersions().stream()
-                    .flatMap(ver -> ver.getValidUpgradeTarget().stream())
-                    .map(UpgradeTarget::getEngineVersion)
+            Set<String> validUpgradeTargets = result.dbEngineVersions().stream()
+                    .flatMap(ver -> ver.validUpgradeTarget().stream())
+                    .map(UpgradeTarget::engineVersion)
                     .collect(Collectors.toSet());
             LOGGER.debug("The following valid AWS RDS upgrade targets were found: {}", validUpgradeTargets);
             return validUpgradeTargets;
-        } catch (AmazonRDSException e) {
-            if (ACCESS_DENIED.equals(e.getErrorCode()) && fallbackTargetVersionEnabled) {
+        } catch (RdsException e) {
+            if (ACCESS_DENIED.equals(e.awsErrorDetails().errorCode()) && fallbackTargetVersionEnabled) {
                 Set<String> validFallbackUpgradeTarget = Set.of(fallbackTargetVersion);
                 LOGGER.debug("Could not query valid upgrade targets because user is not authorized to perform rds:DescribeDBEngineVersions action. " +
                         "Using fallback upgrade target version: {}.", validFallbackUpgradeTarget);

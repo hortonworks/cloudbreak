@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.amazonaws.services.networkfirewall.model.FirewallStatus;
-import com.amazonaws.services.networkfirewall.model.SyncState;
+import software.amazon.awssdk.services.networkfirewall.model.FirewallStatus;
+import software.amazon.awssdk.services.networkfirewall.model.SyncState;
 
 public class AwsFirewall {
 
@@ -26,6 +26,6 @@ public class AwsFirewall {
     }
 
     public List<SyncState> getAllSyncStates() {
-        return new ArrayList<>(firewallStatus.getSyncStates().values());
+        return new ArrayList<>(firewallStatus.syncStates().values());
     }
 }

@@ -14,25 +14,13 @@ import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
-import com.amazonaws.services.elasticfilesystem.model.AmazonElasticFileSystemException;
-import com.amazonaws.services.elasticfilesystem.model.CreateFileSystemRequest;
-import com.amazonaws.services.elasticfilesystem.model.CreateFileSystemResult;
-import com.amazonaws.services.elasticfilesystem.model.DeleteFileSystemRequest;
-import com.amazonaws.services.elasticfilesystem.model.DeleteMountTargetRequest;
-import com.amazonaws.services.elasticfilesystem.model.DescribeFileSystemsRequest;
-import com.amazonaws.services.elasticfilesystem.model.DescribeFileSystemsResult;
-import com.amazonaws.services.elasticfilesystem.model.DescribeMountTargetsRequest;
-import com.amazonaws.services.elasticfilesystem.model.DescribeMountTargetsResult;
-import com.amazonaws.services.elasticfilesystem.model.FileSystemDescription;
-import com.amazonaws.services.elasticfilesystem.model.MountTargetDescription;
-import com.amazonaws.services.elasticfilesystem.model.Tag;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEfsClient;
@@ -46,9 +34,22 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.LifeCycleState;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.services.efs.model.CreateFileSystemRequest;
+import software.amazon.awssdk.services.efs.model.CreateFileSystemResponse;
+import software.amazon.awssdk.services.efs.model.DeleteFileSystemRequest;
+import software.amazon.awssdk.services.efs.model.DeleteMountTargetRequest;
+import software.amazon.awssdk.services.efs.model.DescribeFileSystemsRequest;
+import software.amazon.awssdk.services.efs.model.DescribeFileSystemsResponse;
+import software.amazon.awssdk.services.efs.model.DescribeMountTargetsRequest;
+import software.amazon.awssdk.services.efs.model.DescribeMountTargetsResponse;
+import software.amazon.awssdk.services.efs.model.EfsException;
+import software.amazon.awssdk.services.efs.model.FileSystemDescription;
+import software.amazon.awssdk.services.efs.model.LifeCycleState;
+import software.amazon.awssdk.services.efs.model.MountTargetDescription;
+import software.amazon.awssdk.services.efs.model.Tag;
 
 @Component
 public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
@@ -63,6 +64,9 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Inject
     private CommonAwsClient awsClient;
+
+    @Inject
+    private LifeCycleStateToResourceStatusConverter lifeCycleStateToResourceStatusConverter;
 
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -88,22 +92,19 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
         AmazonEfsClient client = getAmazonEfsClient(auth);
         Map<String, CloudEfsAttributes> efsSetMap = Collections.synchronizedMap(new HashMap<>());
 
-        List<Future<?>> futures = new ArrayList<>();
         List<CloudResource> requestedResources = buildableResource.stream()
                 .filter(cloudResource -> CommonStatus.REQUESTED.equals(cloudResource.getStatus()))
                 .collect(Collectors.toList());
 
         LOGGER.debug("Start creating EFS for stack: '{}' group: '{}'", auth.getCloudContext().getName(), group.getName());
 
-        futures.addAll(
-                requestedResources.stream()
-                        .map(requestedResource -> creatEfsRequest(requestedResource, cloudStack, efsSetMap))
-                        .map(request -> intermediateBuilderExecutor.submit(() -> {
-                            CreateFileSystemResult result = client.createFileSystem(request);
-                            CloudEfsAttributes resultAttributes = getResultEfsAttributes(request, result, efsSetMap);
-                            efsSetMap.put(resultAttributes.getName(), resultAttributes);
-                        }))
-                        .collect(Collectors.toList()));
+        List<Future<?>> futures = requestedResources.stream()
+                .map(requestedResource -> creatEfsRequest(requestedResource, cloudStack, efsSetMap))
+                .map(request -> intermediateBuilderExecutor.submit(() -> {
+                    CreateFileSystemResponse result = client.createFileSystem(request);
+                    CloudEfsAttributes resultAttributes = getResponseEfsAttributes(request, result, efsSetMap);
+                    efsSetMap.put(resultAttributes.getName(), resultAttributes);
+                })).collect(Collectors.toList());
 
         LOGGER.debug("Waiting for EFS creation requests");
         for (Future<?> future : futures) {
@@ -146,35 +147,35 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
         CloudEfsAttributes efsAttributes = resource.getParameter(CloudResource.ATTRIBUTES, CloudEfsAttributes.class);
         String efsId = efsAttributes.getFileSystemId();
 
-        DescribeFileSystemsRequest request = new DescribeFileSystemsRequest().withFileSystemId(efsId);
-        DescribeFileSystemsResult result = client.describeFileSystems(request);
-        List<FileSystemDescription> efsDescriptions = result.getFileSystems();
+        DescribeFileSystemsRequest request = DescribeFileSystemsRequest.builder().fileSystemId(efsId).build();
+        DescribeFileSystemsResponse result = client.describeFileSystems(request);
+        List<FileSystemDescription> efsDescriptions = result.fileSystems();
 
         for (FileSystemDescription efsDescription : efsDescriptions) {
-            LifeCycleState efsLifeCycleState = LifeCycleState.fromValue(efsDescription.getLifeCycleState());
+            LifeCycleState efsLifeCycleState = efsDescription.lifeCycleState();
 
             if (LifeCycleState.DELETED.equals(efsLifeCycleState) || LifeCycleState.DELETING.equals(efsLifeCycleState)) {
                 LOGGER.debug("The given AWS EFS's [name: {}] lifecycle state was [{}] hence we are going to skip any delete operation over this resource",
-                        efsDescription.getName(), efsLifeCycleState);
+                        efsDescription.name(), efsLifeCycleState);
                 continue;
             }
 
-            if (efsDescription.getNumberOfMountTargets() > 0) {
-                DescribeMountTargetsRequest mtRequest = new DescribeMountTargetsRequest().withFileSystemId(efsId);
-                DescribeMountTargetsResult mtResult = client.describeMountTargets(mtRequest);
-                List<MountTargetDescription> mountTargetDescriptionList = mtResult.getMountTargets();
+            if (efsDescription.numberOfMountTargets() > 0) {
+                DescribeMountTargetsRequest mtRequest = DescribeMountTargetsRequest.builder().fileSystemId(efsId).build();
+                DescribeMountTargetsResponse mtResponse = client.describeMountTargets(mtRequest);
+                List<MountTargetDescription> mountTargetDescriptionList = mtResponse.mountTargets();
 
                 // Only delete the mount targets.
                 for (MountTargetDescription mtDescription : mountTargetDescriptionList) {
-                    DeleteMountTargetRequest mtDelRequest = new DeleteMountTargetRequest().withMountTargetId(mtDescription.getMountTargetId());
-                    LOGGER.debug("About to delete AWS EFS mount target that has the following id: {}", mtDescription.getMountTargetId());
+                    DeleteMountTargetRequest mtDelRequest = DeleteMountTargetRequest.builder().mountTargetId(mtDescription.mountTargetId()).build();
+                    LOGGER.debug("About to delete AWS EFS mount target that has the following id: {}", mtDescription.mountTargetId());
                     client.deleteMountTarget(mtDelRequest);
                 }
 
                 // TODO: delete the security groups in the future
             }
 
-            DeleteFileSystemRequest efsDelRequest = new DeleteFileSystemRequest().withFileSystemId(efsId);
+            DeleteFileSystemRequest efsDelRequest = DeleteFileSystemRequest.builder().fileSystemId(efsId).build();
             client.deleteFileSystem(efsDelRequest);
         }
 
@@ -196,8 +197,8 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
             String efsId = efsAttributes.getFileSystemId();
             efsIds.add(efsId);
 
-            DescribeFileSystemsRequest request = new DescribeFileSystemsRequest().withFileSystemId(efsId);
-            DescribeFileSystemsResult result = client.describeFileSystems(request);
+            DescribeFileSystemsRequest request = DescribeFileSystemsRequest.builder().fileSystemId(efsId).build();
+            DescribeFileSystemsResponse result = client.describeFileSystems(request);
             List<CloudResourceStatus> efsStatusList = getResourceStatus(efsResource, efsId, result);
             cloudResourceStatusList.addAll(efsStatusList);
         }
@@ -230,23 +231,23 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
         efsAttributes.setTags(cloudStack.getTags());
         Collection<Tag> awsTags = awsTaggingService.prepareEfsTags(efsAttributes.getTags());
 
-        CreateFileSystemRequest createFileSystemRequest = new CreateFileSystemRequest()
-                .withCreationToken(efsAttributes.getCreationToken())
-                .withTags(awsTags)
-                .withPerformanceMode(efsAttributes.getPerformanceMode())
-                .withThroughputMode(efsAttributes.getThroughputMode())
-                .withProvisionedThroughputInMibps(efsAttributes.getProvisionedThroughputInMibps())
-                .withEncrypted(efsAttributes.getEncrypted());
+        CreateFileSystemRequest.Builder createFileSystemRequestBuilder = CreateFileSystemRequest.builder()
+                .creationToken(efsAttributes.getCreationToken())
+                .tags(awsTags)
+                .performanceMode(efsAttributes.getPerformanceMode())
+                .throughputMode(efsAttributes.getThroughputMode())
+                .provisionedThroughputInMibps(efsAttributes.getProvisionedThroughputInMibps())
+                .encrypted(efsAttributes.getEncrypted());
 
         if (!StringUtils.isEmpty(efsAttributes.getKmsKeyId())) {
-            createFileSystemRequest.withKmsKeyId(efsAttributes.getKmsKeyId());
+            createFileSystemRequestBuilder.kmsKeyId(efsAttributes.getKmsKeyId());
         }
 
-        return createFileSystemRequest;
+        return createFileSystemRequestBuilder.build();
     }
 
     private Function<CloudResource, CloudResource> copyResourceWithCreatedStatus() {
-        return resource -> new CloudResource.Builder()
+        return resource -> CloudResource.builder()
                 .withPersistent(true)
                 .withGroup(resource.getGroup())
                 .withType(resource.getType())
@@ -256,43 +257,43 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
                 .build();
     }
 
-    private CloudEfsAttributes getResultEfsAttributes(CreateFileSystemRequest request, CreateFileSystemResult result, Map<String,
+    private CloudEfsAttributes getResponseEfsAttributes(CreateFileSystemRequest request, CreateFileSystemResponse result, Map<String,
             CloudEfsAttributes> efsSetMap) {
-        CloudEfsAttributes oriEfsAttributes = efsSetMap.getOrDefault(result.getName(), null);
-        CloudEfsAttributes resultEfsAttributes = null;
+        CloudEfsAttributes oriEfsAttributes = efsSetMap.getOrDefault(result.name(), null);
+        CloudEfsAttributes resultEfsAttributes;
 
         if (oriEfsAttributes != null) {
             resultEfsAttributes = new CloudEfsAttributes(oriEfsAttributes);
         } else {
-            Map<String, String> efsTags = awsTaggingService.convertAwsEfsTags(request.getTags());
+            Map<String, String> efsTags = awsTaggingService.convertAwsEfsTags(request.tags());
             resultEfsAttributes = new CloudEfsAttributes.Builder()
-                    .withName(result.getName())
-                    .withCreationToken(request.getCreationToken())
+                    .withName(result.name())
+                    .withCreationToken(request.creationToken())
                     .withTags(efsTags)
-                    .withPerformanceMode(request.getPerformanceMode())
-                    .withThroughputMode(request.getThroughputMode())
-                    .withProvisionedThroughputInMibps(request.getProvisionedThroughputInMibps())
-                    .withEncrypted(request.getEncrypted())
+                    .withPerformanceMode(request.performanceModeAsString())
+                    .withThroughputMode(request.throughputModeAsString())
+                    .withProvisionedThroughputInMibps(request.provisionedThroughputInMibps())
+                    .withEncrypted(request.encrypted())
                     .build();
         }
 
-        resultEfsAttributes.setFileSystemId(result.getFileSystemId());
-        resultEfsAttributes.setFileState(LifeCycleState.fromValue(result.getLifeCycleState()));
+        resultEfsAttributes.setFileSystemId(result.fileSystemId());
+        resultEfsAttributes.setFileState(result.lifeCycleState().name());
 
         return resultEfsAttributes;
     }
 
-    private List<CloudResourceStatus> getResourceStatus(CloudResource efsResource, String efsId, DescribeFileSystemsResult result) {
+    private List<CloudResourceStatus> getResourceStatus(CloudResource efsResource, String efsId, DescribeFileSystemsResponse result) {
         try {
-            return result.getFileSystems().stream()
-                    .peek(efsDescription -> LOGGER.debug("State of EFS {} is {}", efsDescription.getFileSystemId(), efsDescription.getLifeCycleState()))
-                    .map(efsDescription -> efsDescription.getLifeCycleState())
-                    .map(efsLifeCycleState -> LifeCycleState.fromValue(efsLifeCycleState).toResourceStatus())
+            return result.fileSystems().stream()
+                    .peek(efsDescription -> LOGGER.debug("State of EFS {} is {}", efsDescription.fileSystemId(), efsDescription.lifeCycleState()))
+                    .map(FileSystemDescription::lifeCycleState)
+                    .map(lifeCycleStateToResourceStatusConverter::convert)
                     .map(efsStatus -> new CloudResourceStatus(efsResource, efsStatus))
                     .collect(Collectors.toList());
-        } catch (AmazonElasticFileSystemException e) {
+        } catch (EfsException e) {
             LOGGER.warn("Cannot get resource status. EFS {} throws exception {}", efsId, e);
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
     }
 }

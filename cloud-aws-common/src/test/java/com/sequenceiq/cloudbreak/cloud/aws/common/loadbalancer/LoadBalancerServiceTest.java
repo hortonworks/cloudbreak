@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.elasticloadbalancingv2.model.DeregisterTargetsRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -30,6 +29,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeregisterTargetsRequest;
 
 @ExtendWith(MockitoExtension.class)
 public class LoadBalancerServiceTest {
@@ -87,7 +88,7 @@ public class LoadBalancerServiceTest {
         verify(amazonElbClient).deregisterTargets(argumentCaptor.capture());
 
         DeregisterTargetsRequest deregisterTargetsRequest = argumentCaptor.getValue();
-        Assertions.assertEquals("targetArn", deregisterTargetsRequest.getTargetGroupArn());
-        Assertions.assertEquals("instanceId", deregisterTargetsRequest.getTargets().get(0).getId());
+        Assertions.assertEquals("targetArn", deregisterTargetsRequest.targetGroupArn());
+        Assertions.assertEquals("instanceId", deregisterTargetsRequest.targets().get(0).id());
     }
 }

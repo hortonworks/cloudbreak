@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -13,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonS3Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsCloudWatchCommonService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -23,6 +23,9 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadata
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.services.s3.model.S3Exception;
+
 @ExtendWith(MockitoExtension.class)
 public class AwsObjectStorageConnectorTest {
 
@@ -31,8 +34,6 @@ public class AwsObjectStorageConnectorTest {
     private static final String REGION_NAME = "bucket-location";
 
     private static final String ERROR_MESSAGE = "errormessage";
-
-    private static final double DOUBLE_ASSERT_EPSILON = 0.001;
 
     @Mock
     private CommonAwsClient awsClient;
@@ -48,9 +49,9 @@ public class AwsObjectStorageConnectorTest {
 
     @Test
     public void getObjectStorageMetadata() {
-        when(awsClient.createS3Client(any(AwsCredentialView.class))).thenReturn(s3Client);
+        when(awsClient.createS3Client(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(s3Client);
         when(s3Client.getBucketLocation(BUCKET_NAME)).thenReturn(REGION_NAME);
-        ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder().withObjectStoragePath(BUCKET_NAME).build();
+        ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder().withObjectStoragePath(BUCKET_NAME).withRegion(REGION_NAME).build();
         ObjectStorageMetadataResponse result = underTest.getObjectStorageMetadata(request);
         verify(s3Client).getBucketLocation(BUCKET_NAME);
         assertEquals(REGION_NAME, result.getRegion());
@@ -59,11 +60,13 @@ public class AwsObjectStorageConnectorTest {
 
     @Test
     public void getObjectStorageMetadataAccessDenied() {
-        when(awsClient.createS3Client(any(AwsCredentialView.class))).thenReturn(s3Client);
-        AmazonS3Exception exception = new AmazonS3Exception(ERROR_MESSAGE);
-        exception.setStatusCode(403);
+        when(awsClient.createS3Client(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(s3Client);
+        S3Exception exception = (S3Exception) S3Exception.builder()
+                .message(ERROR_MESSAGE)
+                .statusCode(403)
+                .build();
         when(s3Client.getBucketLocation(BUCKET_NAME)).thenThrow(exception);
-        ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder().withObjectStoragePath(BUCKET_NAME).build();
+        ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder().withObjectStoragePath(BUCKET_NAME).withRegion(REGION_NAME).build();
         ObjectStorageMetadataResponse result = underTest.getObjectStorageMetadata(request);
         verify(s3Client).getBucketLocation(BUCKET_NAME);
         assertNull(result.getRegion());
@@ -72,10 +75,13 @@ public class AwsObjectStorageConnectorTest {
 
     @Test
     public void getObjectStorageMetadataThrows() {
-        when(awsClient.createS3Client(any(AwsCredentialView.class))).thenReturn(s3Client);
-        AmazonS3Exception exception = new AmazonS3Exception(ERROR_MESSAGE);
+        when(awsClient.createS3Client(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(s3Client);
+        S3Exception exception = (S3Exception) S3Exception.builder()
+                .statusCode(500)
+                .awsErrorDetails(AwsErrorDetails.builder().errorMessage(ERROR_MESSAGE).build())
+                .build();
         when(s3Client.getBucketLocation(BUCKET_NAME)).thenThrow(exception);
-        ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder().withObjectStoragePath(BUCKET_NAME).build();
+        ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder().withObjectStoragePath(BUCKET_NAME).withRegion(REGION_NAME).build();
         CloudConnectorException ex = assertThrows(CloudConnectorException.class, () -> underTest.getObjectStorageMetadata(request));
         assertEquals(String.format("We were not able to query S3 object storage location for %s. "
                         + "Refer to Cloudera documentation at %s for the required setup. "

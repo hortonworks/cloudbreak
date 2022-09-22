@@ -10,7 +10,6 @@ import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.common.api.type.ResourceType;
 
 public abstract class AbstractGcpBaseResourceChecker {
@@ -26,7 +25,7 @@ public abstract class AbstractGcpBaseResourceChecker {
     }
 
     protected CloudResource createNamedResource(ResourceType type, String name, String zone) {
-        return new Builder()
+        return CloudResource.builder()
                 .withType(type)
                 .withName(name)
                 .withAvailabilityZone(zone)

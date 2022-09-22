@@ -241,8 +241,8 @@ public class AzureResourceConnectorTest {
     public void testUpgradeDatabaseServer() {
         DatabaseStack databaseStack = mock(DatabaseStack.class);
         PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
-        CloudResource resource1 = new CloudResource.Builder().withType(ResourceType.AZURE_DATABASE).withName("resource1").build();
-        CloudResource resource2 = new CloudResource.Builder().withType(ResourceType.AZURE_PRIVATE_ENDPOINT).withName("resource2").build();
+        CloudResource resource1 = CloudResource.builder().withType(ResourceType.AZURE_DATABASE).withName("resource1").build();
+        CloudResource resource2 = CloudResource.builder().withType(ResourceType.AZURE_PRIVATE_ENDPOINT).withName("resource2").build();
 
         underTest.upgradeDatabaseServer(ac, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11, List.of(resource1, resource2));
         verify(azureDatabaseResourceService, times(1))

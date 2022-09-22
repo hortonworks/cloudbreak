@@ -2,184 +2,185 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
 
-import com.amazonaws.services.ec2.AmazonEC2;
-import com.amazonaws.services.ec2.model.AllocateAddressRequest;
-import com.amazonaws.services.ec2.model.AllocateAddressResult;
-import com.amazonaws.services.ec2.model.AmazonEC2Exception;
-import com.amazonaws.services.ec2.model.AssociateAddressRequest;
-import com.amazonaws.services.ec2.model.AssociateAddressResult;
-import com.amazonaws.services.ec2.model.AttachVolumeRequest;
-import com.amazonaws.services.ec2.model.AttachVolumeResult;
-import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupEgressRequest;
-import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupEgressResult;
-import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest;
-import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressResult;
-import com.amazonaws.services.ec2.model.CreateLaunchTemplateVersionRequest;
-import com.amazonaws.services.ec2.model.CreateLaunchTemplateVersionResult;
-import com.amazonaws.services.ec2.model.CreateSecurityGroupRequest;
-import com.amazonaws.services.ec2.model.CreateSecurityGroupResult;
-import com.amazonaws.services.ec2.model.CreateTagsRequest;
-import com.amazonaws.services.ec2.model.CreateTagsResult;
-import com.amazonaws.services.ec2.model.CreateVolumeRequest;
-import com.amazonaws.services.ec2.model.CreateVolumeResult;
-import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
-import com.amazonaws.services.ec2.model.DeleteKeyPairResult;
-import com.amazonaws.services.ec2.model.DeleteSecurityGroupRequest;
-import com.amazonaws.services.ec2.model.DeleteSecurityGroupResult;
-import com.amazonaws.services.ec2.model.DeleteVolumeRequest;
-import com.amazonaws.services.ec2.model.DeleteVolumeResult;
-import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
-import com.amazonaws.services.ec2.model.DescribeAddressesResult;
-import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
-import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
-import com.amazonaws.services.ec2.model.DescribeImagesRequest;
-import com.amazonaws.services.ec2.model.DescribeImagesResult;
-import com.amazonaws.services.ec2.model.DescribeInstanceTypeOfferingsRequest;
-import com.amazonaws.services.ec2.model.DescribeInstanceTypeOfferingsResult;
-import com.amazonaws.services.ec2.model.DescribeInstanceTypesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstanceTypesResult;
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.DescribeInternetGatewaysRequest;
-import com.amazonaws.services.ec2.model.DescribeInternetGatewaysResult;
-import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
-import com.amazonaws.services.ec2.model.DescribeKeyPairsResult;
-import com.amazonaws.services.ec2.model.DescribePrefixListsResult;
-import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
-import com.amazonaws.services.ec2.model.DescribeRegionsResult;
-import com.amazonaws.services.ec2.model.DescribeRouteTablesRequest;
-import com.amazonaws.services.ec2.model.DescribeRouteTablesResult;
-import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest;
-import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult;
-import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
-import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
-import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
-import com.amazonaws.services.ec2.model.DescribeVolumesResult;
-import com.amazonaws.services.ec2.model.DescribeVpcEndpointServicesResult;
-import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
-import com.amazonaws.services.ec2.model.DescribeVpcsResult;
-import com.amazonaws.services.ec2.model.DisassociateAddressRequest;
-import com.amazonaws.services.ec2.model.DisassociateAddressResult;
-import com.amazonaws.services.ec2.model.GetConsoleOutputRequest;
-import com.amazonaws.services.ec2.model.GetConsoleOutputResult;
-import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
-import com.amazonaws.services.ec2.model.ImportKeyPairResult;
-import com.amazonaws.services.ec2.model.ModifyInstanceAttributeRequest;
-import com.amazonaws.services.ec2.model.ModifyInstanceAttributeResult;
-import com.amazonaws.services.ec2.model.ModifyLaunchTemplateRequest;
-import com.amazonaws.services.ec2.model.ModifyLaunchTemplateResult;
-import com.amazonaws.services.ec2.model.ReleaseAddressRequest;
-import com.amazonaws.services.ec2.model.ReleaseAddressResult;
-import com.amazonaws.services.ec2.model.RunInstancesRequest;
-import com.amazonaws.services.ec2.model.RunInstancesResult;
-import com.amazonaws.services.ec2.model.StartInstancesRequest;
-import com.amazonaws.services.ec2.model.StartInstancesResult;
-import com.amazonaws.services.ec2.model.StopInstancesRequest;
-import com.amazonaws.services.ec2.model.StopInstancesResult;
-import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
-import com.amazonaws.services.ec2.model.TerminateInstancesResult;
-import com.amazonaws.services.ec2.waiters.AmazonEC2Waiters;
 import com.sequenceiq.cloudbreak.service.Retry;
+
+import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.ec2.model.AllocateAddressRequest;
+import software.amazon.awssdk.services.ec2.model.AllocateAddressResponse;
+import software.amazon.awssdk.services.ec2.model.AssociateAddressRequest;
+import software.amazon.awssdk.services.ec2.model.AssociateAddressResponse;
+import software.amazon.awssdk.services.ec2.model.AttachVolumeRequest;
+import software.amazon.awssdk.services.ec2.model.AttachVolumeResponse;
+import software.amazon.awssdk.services.ec2.model.AuthorizeSecurityGroupEgressRequest;
+import software.amazon.awssdk.services.ec2.model.AuthorizeSecurityGroupEgressResponse;
+import software.amazon.awssdk.services.ec2.model.AuthorizeSecurityGroupIngressRequest;
+import software.amazon.awssdk.services.ec2.model.AuthorizeSecurityGroupIngressResponse;
+import software.amazon.awssdk.services.ec2.model.CreateLaunchTemplateVersionRequest;
+import software.amazon.awssdk.services.ec2.model.CreateLaunchTemplateVersionResponse;
+import software.amazon.awssdk.services.ec2.model.CreateSecurityGroupRequest;
+import software.amazon.awssdk.services.ec2.model.CreateSecurityGroupResponse;
+import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
+import software.amazon.awssdk.services.ec2.model.CreateTagsResponse;
+import software.amazon.awssdk.services.ec2.model.CreateVolumeRequest;
+import software.amazon.awssdk.services.ec2.model.CreateVolumeResponse;
+import software.amazon.awssdk.services.ec2.model.DeleteKeyPairRequest;
+import software.amazon.awssdk.services.ec2.model.DeleteKeyPairResponse;
+import software.amazon.awssdk.services.ec2.model.DeleteSecurityGroupRequest;
+import software.amazon.awssdk.services.ec2.model.DeleteSecurityGroupResponse;
+import software.amazon.awssdk.services.ec2.model.DeleteVolumeRequest;
+import software.amazon.awssdk.services.ec2.model.DeleteVolumeResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeAddressesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeAddressesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeAvailabilityZonesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeAvailabilityZonesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeImagesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeImagesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypeOfferingsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypeOfferingsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeInternetGatewaysRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeInternetGatewaysResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeKeyPairsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribePrefixListsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeRegionsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeRegionsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeRouteTablesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeRouteTablesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcEndpointServicesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
+import software.amazon.awssdk.services.ec2.model.DisassociateAddressRequest;
+import software.amazon.awssdk.services.ec2.model.DisassociateAddressResponse;
+import software.amazon.awssdk.services.ec2.model.Ec2Exception;
+import software.amazon.awssdk.services.ec2.model.GetConsoleOutputRequest;
+import software.amazon.awssdk.services.ec2.model.GetConsoleOutputResponse;
+import software.amazon.awssdk.services.ec2.model.ImportKeyPairRequest;
+import software.amazon.awssdk.services.ec2.model.ImportKeyPairResponse;
+import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeRequest;
+import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeResponse;
+import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateRequest;
+import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateResponse;
+import software.amazon.awssdk.services.ec2.model.ReleaseAddressRequest;
+import software.amazon.awssdk.services.ec2.model.ReleaseAddressResponse;
+import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.StartInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.StartInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.StopInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.StopInstancesResponse;
+import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest;
+import software.amazon.awssdk.services.ec2.model.TerminateInstancesResponse;
+import software.amazon.awssdk.services.ec2.waiters.Ec2Waiter;
 
 public class AmazonEc2Client extends AmazonClient {
 
-    private final AmazonEC2 client;
+    private final Ec2Client client;
 
     private final Retry retry;
 
-    public AmazonEc2Client(AmazonEC2 client, Retry retry) {
+    public AmazonEc2Client(Ec2Client client, Retry retry) {
         this.client = client;
         this.retry = retry;
     }
 
-    public CreateVolumeResult createVolume(CreateVolumeRequest request) {
+    public CreateVolumeResponse createVolume(CreateVolumeRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.createVolume(request));
     }
 
-    public DescribeSubnetsResult describeSubnets(DescribeSubnetsRequest request) {
+    public DescribeSubnetsResponse describeSubnets(DescribeSubnetsRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.describeSubnets(request));
     }
 
-    public ModifyInstanceAttributeResult modifyInstanceAttribute(ModifyInstanceAttributeRequest request) {
+    public ModifyInstanceAttributeResponse modifyInstanceAttribute(ModifyInstanceAttributeRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.modifyInstanceAttribute(request));
     }
 
-    public DeleteVolumeResult deleteVolume(DeleteVolumeRequest request) {
+    public DeleteVolumeResponse deleteVolume(DeleteVolumeRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.deleteVolume(request));
     }
 
-    public DescribeVolumesResult describeVolumes(DescribeVolumesRequest request) {
+    public DescribeVolumesResponse describeVolumes(DescribeVolumesRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.describeVolumes(request));
     }
 
-    public AttachVolumeResult attachVolume(AttachVolumeRequest request) {
+    public AttachVolumeResponse attachVolume(AttachVolumeRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.attachVolume(request));
     }
 
-    public DescribeRegionsResult describeRegions(DescribeRegionsRequest describeRegionsRequest) {
+    public DescribeRegionsResponse describeRegions(DescribeRegionsRequest describeRegionsRequest) {
         return client.describeRegions(describeRegionsRequest);
     }
 
-    public DescribeRouteTablesResult describeRouteTables() {
+    public DescribeRouteTablesResponse describeRouteTables() {
         return client.describeRouteTables();
     }
 
-    public DescribeVpcsResult describeVpcs(DescribeVpcsRequest describeVpcsRequest) {
+    public DescribeVpcsResponse describeVpcs(DescribeVpcsRequest describeVpcsRequest) {
         return client.describeVpcs(describeVpcsRequest);
     }
 
-    public DescribeKeyPairsResult describeKeyPairs(DescribeKeyPairsRequest describeKeyPairsRequest) {
+    public DescribeKeyPairsResponse describeKeyPairs(DescribeKeyPairsRequest describeKeyPairsRequest) {
         return client.describeKeyPairs(describeKeyPairsRequest);
     }
 
-    public DescribeSecurityGroupsResult describeSecurityGroups(DescribeSecurityGroupsRequest describeSecurityGroupsRequest) {
+    public DescribeSecurityGroupsResponse describeSecurityGroups(DescribeSecurityGroupsRequest describeSecurityGroupsRequest) {
         return client.describeSecurityGroups(describeSecurityGroupsRequest);
     }
 
-    public DescribeAvailabilityZonesResult describeAvailabilityZones(DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest) {
+    public DescribeAvailabilityZonesResponse describeAvailabilityZones(DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest) {
         return client.describeAvailabilityZones(describeAvailabilityZonesRequest);
     }
 
-    public DescribeInternetGatewaysResult describeInternetGateways(DescribeInternetGatewaysRequest describeInternetGatewaysRequest) {
+    public DescribeInternetGatewaysResponse describeInternetGateways(DescribeInternetGatewaysRequest describeInternetGatewaysRequest) {
         return client.describeInternetGateways(describeInternetGatewaysRequest);
     }
 
     // FIXME return specific waiter instead
-    public AmazonEC2Waiters waiters() {
-        return client.waiters();
+    public Ec2Waiter waiters() {
+        return client.waiter();
     }
 
-    public TerminateInstancesResult terminateInstances(TerminateInstancesRequest terminateInstancesRequest) {
+    public TerminateInstancesResponse terminateInstances(TerminateInstancesRequest terminateInstancesRequest) {
         return client.terminateInstances(terminateInstancesRequest);
     }
 
-    public DescribeAddressesResult describeAddresses(DescribeAddressesRequest describeAddressesRequest) {
+    public DescribeAddressesResponse describeAddresses(DescribeAddressesRequest describeAddressesRequest) {
         return client.describeAddresses(describeAddressesRequest);
     }
 
-    public AssociateAddressResult associateAddress(AssociateAddressRequest associateAddressRequest) {
+    public AssociateAddressResponse associateAddress(AssociateAddressRequest associateAddressRequest) {
         return client.associateAddress(associateAddressRequest);
     }
 
-    public ImportKeyPairResult importKeyPair(ImportKeyPairRequest importKeyPairRequest) {
+    public ImportKeyPairResponse importKeyPair(ImportKeyPairRequest importKeyPairRequest) {
         return client.importKeyPair(importKeyPairRequest);
     }
 
-    public DescribePrefixListsResult describePrefixLists() {
+    public DescribePrefixListsResponse describePrefixLists() {
         return client.describePrefixLists();
     }
 
-    public DescribeRouteTablesResult describeRouteTables(DescribeRouteTablesRequest describeRouteTablesRequest) {
+    public DescribeRouteTablesResponse describeRouteTables(DescribeRouteTablesRequest describeRouteTablesRequest) {
         return client.describeRouteTables(describeRouteTablesRequest);
     }
 
-    public DescribeInstancesResult retryableDescribeInstances(DescribeInstancesRequest describeInstancesRequest) {
+    public DescribeInstancesResponse retryableDescribeInstances(DescribeInstancesRequest describeInstancesRequest) {
         return retry.testWith1SecDelayMax5TimesMaxDelay5MinutesMultiplier5(() -> {
             try {
                 return client.describeInstances(describeInstancesRequest);
-            } catch (AmazonEC2Exception e) {
-                if (e.getErrorCode().equalsIgnoreCase(INSTANCE_NOT_FOUND_ERROR_CODE)) {
-                    throw new Retry.ActionFailedException("The requested instances are not found on AWS side: " + describeInstancesRequest.getInstanceIds(), e);
+            } catch (Ec2Exception e) {
+                if (e.awsErrorDetails().errorCode().equalsIgnoreCase(INSTANCE_NOT_FOUND_ERROR_CODE)) {
+                    throw new Retry.ActionFailedException("The requested instances are not found on AWS side: " + describeInstancesRequest.instanceIds(), e);
                 } else {
                     throw e;
                 }
@@ -187,91 +188,91 @@ public class AmazonEc2Client extends AmazonClient {
         });
     }
 
-    public DescribeInstancesResult describeInstances(DescribeInstancesRequest describeInstancesRequest) {
+    public DescribeInstancesResponse describeInstances(DescribeInstancesRequest describeInstancesRequest) {
         return client.describeInstances(describeInstancesRequest);
     }
 
-    public CreateTagsResult createTags(CreateTagsRequest createTagsRequest) {
+    public CreateTagsResponse createTags(CreateTagsRequest createTagsRequest) {
         return client.createTags(createTagsRequest);
     }
 
-    public DescribeVpcEndpointServicesResult describeVpcEndpointServices() {
+    public DescribeVpcEndpointServicesResponse describeVpcEndpointServices() {
         return client.describeVpcEndpointServices();
     }
 
-    public DescribeAvailabilityZonesResult describeAvailabilityZones() {
+    public DescribeAvailabilityZonesResponse describeAvailabilityZones() {
         return client.describeAvailabilityZones();
     }
 
-    public DeleteKeyPairResult deleteKeyPair(DeleteKeyPairRequest deleteKeyPairRequest) {
+    public DeleteKeyPairResponse deleteKeyPair(DeleteKeyPairRequest deleteKeyPairRequest) {
         return client.deleteKeyPair(deleteKeyPairRequest);
     }
 
-    public GetConsoleOutputResult getConsoleOutput(GetConsoleOutputRequest getConsoleOutputRequest) {
+    public GetConsoleOutputResponse getConsoleOutput(GetConsoleOutputRequest getConsoleOutputRequest) {
         return client.getConsoleOutput(getConsoleOutputRequest);
     }
 
-    public StopInstancesResult stopInstances(StopInstancesRequest stopInstancesRequest) {
+    public StopInstancesResponse stopInstances(StopInstancesRequest stopInstancesRequest) {
         return client.stopInstances(stopInstancesRequest);
     }
 
-    public StartInstancesResult startInstances(StartInstancesRequest startInstancesRequest) {
+    public StartInstancesResponse startInstances(StartInstancesRequest startInstancesRequest) {
         return client.startInstances(startInstancesRequest);
     }
 
-    public DescribeImagesResult describeImages(DescribeImagesRequest describeImagesRequest) {
+    public DescribeImagesResponse describeImages(DescribeImagesRequest describeImagesRequest) {
         return client.describeImages(describeImagesRequest);
     }
 
-    public DescribeInstanceTypeOfferingsResult describeInstanceTypeOfferings(DescribeInstanceTypeOfferingsRequest request) {
+    public DescribeInstanceTypeOfferingsResponse describeInstanceTypeOfferings(DescribeInstanceTypeOfferingsRequest request) {
         return client.describeInstanceTypeOfferings(request);
     }
 
-    public DescribeInstanceTypesResult describeInstanceTypes(DescribeInstanceTypesRequest request) {
+    public DescribeInstanceTypesResponse describeInstanceTypes(DescribeInstanceTypesRequest request) {
         return client.describeInstanceTypes(request);
     }
 
-    public CreateSecurityGroupResult createSecurityGroup(CreateSecurityGroupRequest request) {
+    public CreateSecurityGroupResponse createSecurityGroup(CreateSecurityGroupRequest request) {
         return client.createSecurityGroup(request);
     }
 
-    public AuthorizeSecurityGroupIngressResult addIngress(AuthorizeSecurityGroupIngressRequest reguest) {
+    public AuthorizeSecurityGroupIngressResponse addIngress(AuthorizeSecurityGroupIngressRequest reguest) {
         return client.authorizeSecurityGroupIngress(reguest);
     }
 
-    public AuthorizeSecurityGroupEgressResult addEgress(AuthorizeSecurityGroupEgressRequest reguest) {
+    public AuthorizeSecurityGroupEgressResponse addEgress(AuthorizeSecurityGroupEgressRequest reguest) {
         return client.authorizeSecurityGroupEgress(reguest);
     }
 
-    public AllocateAddressResult allocateAddress(AllocateAddressRequest reguest) {
+    public AllocateAddressResponse allocateAddress(AllocateAddressRequest reguest) {
         return client.allocateAddress(reguest);
     }
 
-    public ReleaseAddressResult releaseAddress(ReleaseAddressRequest reguest) {
+    public ReleaseAddressResponse releaseAddress(ReleaseAddressRequest reguest) {
         return client.releaseAddress(reguest);
     }
 
-    public DisassociateAddressResult disassociateAddress(DisassociateAddressRequest reguest) {
+    public DisassociateAddressResponse disassociateAddress(DisassociateAddressRequest reguest) {
         return client.disassociateAddress(reguest);
     }
 
-    public RunInstancesResult createInstance(RunInstancesRequest request) {
+    public RunInstancesResponse createInstance(RunInstancesRequest request) {
         return client.runInstances(request);
     }
 
-    public TerminateInstancesResult deleteInstance(TerminateInstancesRequest request) {
+    public TerminateInstancesResponse deleteInstance(TerminateInstancesRequest request) {
         return client.terminateInstances(request);
     }
 
-    public DeleteSecurityGroupResult deleteSecurityGroup(DeleteSecurityGroupRequest request) {
+    public DeleteSecurityGroupResponse deleteSecurityGroup(DeleteSecurityGroupRequest request) {
         return client.deleteSecurityGroup(request);
     }
 
-    public CreateLaunchTemplateVersionResult createLaunchTemplateVersion(CreateLaunchTemplateVersionRequest request) {
+    public CreateLaunchTemplateVersionResponse createLaunchTemplateVersion(CreateLaunchTemplateVersionRequest request) {
         return client.createLaunchTemplateVersion(request);
     }
 
-    public ModifyLaunchTemplateResult modifyLaunchTemplate(ModifyLaunchTemplateRequest request) {
+    public ModifyLaunchTemplateResponse modifyLaunchTemplate(ModifyLaunchTemplateRequest request) {
         return client.modifyLaunchTemplate(request);
     }
 }
