@@ -302,13 +302,13 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     public SdxTestDto withRecipes(Set<String> recipeNames, String hostGroup) {
         Set<SdxRecipe> sdxRecipes = getRequest().getRecipes();
         Set<SdxRecipe> newRecipes = new HashSet<>();
-        SdxRecipe sdxRecipe = new SdxRecipe();
 
-        recipeNames.forEach(recipeName -> {
+        for (String recipeName : recipeNames) {
+            SdxRecipe sdxRecipe = new SdxRecipe();
             sdxRecipe.setName(recipeName);
             sdxRecipe.setHostGroup(hostGroup);
             newRecipes.add(sdxRecipe);
-        });
+        }
 
         if (CollectionUtils.isEmpty(sdxRecipes)) {
             getRequest().setRecipes(newRecipes);
