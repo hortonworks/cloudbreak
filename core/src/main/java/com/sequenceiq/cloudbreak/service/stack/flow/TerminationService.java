@@ -113,7 +113,7 @@ public class TerminationService {
         LOGGER.debug("About to clean up leftover DB entries.");
         try {
             cleanUpService.cleanUpStructuredEventsForStack(stackId);
-            cleanUpService.detachClusterComponentRelatedAuditEntries();
+            cleanUpService.detachClusterComponentRelatedAuditEntries(stackId);
             cleanUpService.cleanUpStructuredEventsForAccount(Crn.safeFromString(resourceCrn).getAccountId());
         } catch (Exception e) {
             LOGGER.warn("Unable to clean up resources due to: " + e.getMessage(), e);
