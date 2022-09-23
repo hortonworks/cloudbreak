@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.saas.client.sdx;
 
-import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
-
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto;
@@ -14,11 +13,14 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.saas.client.sdx.config.SdxSaasChannelConfig;
 
-import io.grpc.ManagedChannelBuilder;
 import io.opentracing.Tracer;
 
 @Component
 public class GrpcSdxSaasClient {
+
+    @Qualifier("sdxSaasManagedChannelWrapper")
+    @Inject
+    private ManagedChannelWrapper channelWrapper;
 
     @Inject
     private SdxSaasChannelConfig sdxSaasChannelConfig;
@@ -29,8 +31,9 @@ public class GrpcSdxSaasClient {
     @Inject
     private Tracer tracer;
 
-    public static GrpcSdxSaasClient createClient(SdxSaasChannelConfig sdxSaasChannelConfig, Tracer tracer) {
+    public static GrpcSdxSaasClient createClient(ManagedChannelWrapper channelWrapper, SdxSaasChannelConfig sdxSaasChannelConfig, Tracer tracer) {
         GrpcSdxSaasClient client = new GrpcSdxSaasClient();
+        client.channelWrapper = Preconditions.checkNotNull(channelWrapper, "channelWrapper should not be null.");
         client.sdxSaasChannelConfig = Preconditions.checkNotNull(sdxSaasChannelConfig, "sdxSaasChannelConfig should not be null.");
         client.tracer = Preconditions.checkNotNull(tracer, "tracer should not be null.");
         return client;
@@ -53,14 +56,6 @@ public class GrpcSdxSaasClient {
     }
 
     SdxSaasClient makeClient() {
-        return new SdxSaasClient(makeWrapper().getChannel(), tracer, regionAwareInternalCrnGeneratorFactory);
-    }
-
-    private ManagedChannelWrapper makeWrapper() {
-        return new ManagedChannelWrapper(
-                ManagedChannelBuilder.forAddress(sdxSaasChannelConfig.getEndpoint(), sdxSaasChannelConfig.getPort())
-                        .usePlaintext()
-                        .maxInboundMessageSize(DEFAULT_MAX_MESSAGE_SIZE)
-                        .build());
+        return new SdxSaasClient(channelWrapper.getChannel(), tracer, regionAwareInternalCrnGeneratorFactory);
     }
 }
