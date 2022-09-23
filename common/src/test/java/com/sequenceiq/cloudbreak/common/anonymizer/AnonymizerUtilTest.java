@@ -273,4 +273,21 @@ public class AnonymizerUtilTest {
                 ";path=/ipa;httponly;secure;, X-Frame-Options: DENY, Content-Security-Policy: frame-ancestors 'none', Cache-Control: no-cache]";
         Assert.assertEquals(expectedData, anonymize(testData));
     }
+
+    @Test
+    public void testAnonymizerWhenSecretKeyEscaped() {
+        String testData = "{\"credential\":{\"id\":8384,\"name\":\"test-cloudbreak-app\",\"description\":null," +
+                "\"archived\":false,\"cloudPlatform\":\"AZURE\"," +
+                "\"attributes\":\"{\\\"aws\\\":null,\\\"azure\\\":{\\\"subscriptionId\\\":\\\"alma\\\"," +
+                "\\\"tenantId\\\":\\\"tenant\\\",\\\"appBased\\\":{\\\"accessKey\\\":\\\"alma\\\"," +
+                "\\\"secretKey\\\":\\\"topSeCrET\\\"}},\\\"gcp\\\":null,\\\"yarn\\\":null,\\\"mock\\\":null," +
+                "\\\"govCloud\\\":false}\"}}";
+        String expectedData = "{\"credential\":{\"id\":8384,\"name\":\"test-cloudbreak-app\",\"description\":null," +
+                "\"archived\":false," +
+                "\"cloudPlatform\":\"AZURE\",\"attributes\":\"{\\\"aws\\\":null,\\\"azure\\\":{\\\"subscriptionId\\\":" +
+                "\\\"alma\\\",\\\"tenantId\\\":\\\"tenant\\\"," +
+                "\\\"appBased\\\":{\\\"accessKey\\\":\\\"alma\\\",\\\"secretKey\\\":\\\"****\"}}," +
+                "\\\"gcp\\\":null,\\\"yarn\\\":null,\\\"mock\\\":null,\\\"govCloud\\\":false}\"}}";
+        Assert.assertEquals(expectedData, anonymize(testData));
+    }
 }
