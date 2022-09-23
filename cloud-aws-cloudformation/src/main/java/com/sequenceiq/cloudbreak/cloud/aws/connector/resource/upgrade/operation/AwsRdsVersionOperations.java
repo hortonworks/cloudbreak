@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.rds.model.AmazonRDSException;
@@ -34,7 +35,15 @@ public class AwsRdsVersionOperations {
 
     private static final String POSTGRES = "postgres";
 
+    private static final String ACCESS_DENIED = "AccessDenied";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsRdsVersionOperations.class);
+
+    @Value("${cb.db.override.aws.fallback.enabled}")
+    private boolean fallbackTargetVersionEnabled;
+
+    @Value("${cb.db.override.aws.fallback.targetversion}")
+    private String fallbackTargetVersion;
 
     public String getDBParameterGroupFamily(DatabaseEngine engine, String engineVersion) {
         LOGGER.debug("Getting the DB parameter group family for engine {} and version {}", engine, engineVersion);
@@ -98,8 +107,15 @@ public class AwsRdsVersionOperations {
             LOGGER.debug("The following valid AWS RDS upgrade targets were found: {}", validUpgradeTargets);
             return validUpgradeTargets;
         } catch (AmazonRDSException e) {
-            String message = getErrorMessage(e.getErrorMessage());
-            throw new CloudConnectorException(message, e);
+            if (ACCESS_DENIED.equals(e.getErrorCode()) && fallbackTargetVersionEnabled) {
+                Set<String> validFallbackUpgradeTarget = Set.of(fallbackTargetVersion);
+                LOGGER.debug("Could not query valid upgrade targets because user is not authorized to perform rds:DescribeDBEngineVersions action. " +
+                        "Using fallback upgrade target version: {}.", validFallbackUpgradeTarget);
+                return validFallbackUpgradeTarget;
+            } else {
+                String message = getErrorMessage(e.getMessage());
+                throw new CloudConnectorException(message, e);
+            }
         } catch (Exception e) {
             String message = getErrorMessage(e.getMessage());
             throw new CloudConnectorException(message, e);

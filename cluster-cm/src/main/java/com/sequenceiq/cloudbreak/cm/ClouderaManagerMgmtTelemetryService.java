@@ -163,8 +163,7 @@ public class ClouderaManagerMgmtTelemetryService {
 
     public void updateServiceMonitorConfigs(final StackDtoDelegate stack, final ApiClient client,
             final Telemetry telemetry) throws ApiException {
-        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
-        if (isMonitoringSupported(stack, telemetry, accountId)) {
+        if (isMonitoringSupported(telemetry)) {
             MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(client);
             ApiConfigList serviecMonitorConfigList = mgmtRoleConfigGroupsResourceApi.readConfig(
                     String.format(MGMT_CONFIG_GROUP_NAME_PATTERN, SERVICE_MONITOR), "FULL");
@@ -259,10 +258,7 @@ public class ClouderaManagerMgmtTelemetryService {
                 && !StackType.DATALAKE.equals(stack.getType());
     }
 
-    private boolean isMonitoringSupported(StackDtoDelegate stack, Telemetry telemetry, String accountId) {
-        return monitoringConfiguration.isEnabled()
-                && telemetry.isMonitoringFeatureEnabled()
-                && (monitoringConfiguration.isPaasSupport() || entitlementService.isCdpSaasEnabled(accountId))
-                && StringUtils.isNotBlank(stack.getStackVersion());
+    private boolean isMonitoringSupported(Telemetry telemetry) {
+        return telemetry.isComputeMonitoringEnabled() && telemetry.isMonitoringFeatureEnabled();
     }
 }

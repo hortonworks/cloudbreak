@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeOptions;
 import com.sequenceiq.freeipa.entity.ImageEntity;
@@ -178,7 +179,8 @@ public class UpgradeCcmService {
         Stack stack = stackService.getStackById(stackId);
         LOGGER.info("Running health check for {}", stack.getName());
         HealthDetailsFreeIpaResponse healthDetails = healthService.getHealthDetails(stack.getEnvironmentCrn(), stack.getAccountId());
-        if (healthDetails.getNodeHealthDetails().stream().anyMatch(hd -> !hd.getStatus().isAvailable())) {
+        if (healthDetails.getStatus() != Status.AVAILABLE) {
+            LOGGER.info("FreeIPA stack {} ({}) is not AVAILABLE. Details: {}", stack.getName(), stack.getResourceCrn(), healthDetails);
             throw new CloudbreakServiceException("One or more FreeIPA instance is not available. Need to roll back CCM upgrade to previous version.");
         }
     }
