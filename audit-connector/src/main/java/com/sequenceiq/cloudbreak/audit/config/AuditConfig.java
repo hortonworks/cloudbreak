@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.audit.config;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,7 +21,10 @@ import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.audit.converter.AttemptAuditEventResultBuilderUpdater;
 import com.sequenceiq.cloudbreak.audit.converter.AuditEventBuilderUpdater;
+import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.structuredevent.conf.StructuredEventEnablementConfig;
+
+import io.grpc.ManagedChannelBuilder;
 
 @Configuration
 public class AuditConfig {
@@ -108,4 +112,16 @@ public class AuditConfig {
         return result;
     }
 
+    @Bean
+    public ManagedChannelWrapper auditManagedChannelWrapper() {
+        return newManagedChannelWrapper(host, port);
+    }
+
+    public static ManagedChannelWrapper newManagedChannelWrapper(String host, int port) {
+        return new ManagedChannelWrapper(
+                ManagedChannelBuilder.forAddress(host, port)
+                        .usePlaintext()
+                        .maxInboundMessageSize(DEFAULT_MAX_MESSAGE_SIZE)
+                        .build());
+    }
 }
