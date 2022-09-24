@@ -19,7 +19,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import com.amazonaws.services.rds.model.AmazonRDSException;
 import com.amazonaws.services.rds.model.DBEngineVersion;
 import com.amazonaws.services.rds.model.DescribeDBEngineVersionsRequest;
 import com.amazonaws.services.rds.model.DescribeDBEngineVersionsResult;
@@ -149,14 +151,47 @@ public class AwsRdsVersionOperationsTest {
     }
 
     @Test
-    void testGetAllUpgradeTargetsWhenRdsClientThrows() {
+    void testGetAllUpgradeTargetsWhenDescribeDBEngineVersionsAccessDenied() {
+        ReflectionTestUtils.setField(underTest, "fallbackTargetVersionEnabled", true);
+        ReflectionTestUtils.setField(underTest, "fallbackTargetVersion", "11.16");
         AmazonRdsClient rdsClient = mock(AmazonRdsClient.class);
         RdsEngineVersion rdsEngineVersion = new RdsEngineVersion("1.0");
-        when(rdsClient.describeDBEngineVersions(any())).thenThrow(RuntimeException.class);
+        AmazonRDSException exception = new AmazonRDSException("error");
+        exception.setErrorCode("AccessDenied");
+        when(rdsClient.describeDBEngineVersions(any())).thenThrow(exception);
 
-        Assertions.assertThrows(CloudConnectorException.class, () ->
-                underTest.getAllUpgradeTargetVersions(rdsClient, rdsEngineVersion)
-        );
+        Set<String> upgradeTargetVersions = underTest.getAllUpgradeTargetVersions(rdsClient, rdsEngineVersion);
+        assertEquals(Set.of("11.16"), upgradeTargetVersions);
+    }
+
+    @Test
+    void testGetAllUpgradeTargetsWhenRdsClientThrowsOtherAmazonRDSException() {
+        ReflectionTestUtils.setField(underTest, "fallbackTargetVersionEnabled", true);
+        ReflectionTestUtils.setField(underTest, "fallbackTargetVersion", "11.16");
+        AmazonRdsClient rdsClient = mock(AmazonRdsClient.class);
+        RdsEngineVersion rdsEngineVersion = new RdsEngineVersion("1.0");
+        AmazonRDSException exception = new AmazonRDSException("error");
+        exception.setErrorCode("Something");
+        when(rdsClient.describeDBEngineVersions(any())).thenThrow(exception);
+
+        CloudConnectorException ex = Assertions.assertThrows(CloudConnectorException.class, () ->
+                underTest.getAllUpgradeTargetVersions(rdsClient, rdsEngineVersion));
+
+        assertEquals("Exception occurred when querying valid upgrade targets: error " +
+                "(Service: null; Status Code: 0; Error Code: Something; Request ID: null; Proxy: null)", ex.getMessage());
+    }
+
+    @Test
+    void testGetAllUpgradeTargetsWhenRdsClientThrowsOtherException() {
+        AmazonRdsClient rdsClient = mock(AmazonRdsClient.class);
+        RdsEngineVersion rdsEngineVersion = new RdsEngineVersion("1.0");
+        RuntimeException exception = new RuntimeException("error");
+        when(rdsClient.describeDBEngineVersions(any())).thenThrow(exception);
+
+        CloudConnectorException ex = Assertions.assertThrows(CloudConnectorException.class, () ->
+                underTest.getAllUpgradeTargetVersions(rdsClient, rdsEngineVersion));
+
+        assertEquals("Exception occurred when querying valid upgrade targets: error", ex.getMessage());
     }
 
     @Test
