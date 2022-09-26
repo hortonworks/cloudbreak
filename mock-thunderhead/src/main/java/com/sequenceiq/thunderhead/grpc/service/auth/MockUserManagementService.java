@@ -432,7 +432,7 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.cm.sync.command.poller.enable}")
     private boolean cmSyncCommandPollerEnabled;
 
-    @Value("${auth.mock.conclusion.checker.send.user.event.enable}")
+    @Value("${auth.mock.conclusion.checker.send.user.event.enable:true}")
     private boolean conclusionCheckerSendUserEvent;
 
     @Value("${auth.mock.datahub.nodestatus.check.enable}")
