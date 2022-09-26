@@ -56,6 +56,12 @@ class CmVersionQueryServiceTest {
 
     private static final String OTHER_BUILD_NUMBER = "2000";
 
+    private static final String LOWER_BUILD_NUMBER = "26761258";
+
+    private static final String HIGHER_BUILD_NUMBER = "32005272";
+
+    private static final String C_VERSION = "7.4.1";
+
     @Mock
     private HostOrchestrator hostOrchestrator;
 
@@ -105,7 +111,7 @@ class CmVersionQueryServiceTest {
 
         Assertions.assertEquals("1", packageInfo.getVersion());
         Assertions.assertEquals("1000", packageInfo.getBuildNumber());
-        Assertions.assertEquals("1-1000", packageInfo.getFullVersion());
+        Assertions.assertEquals("1-1000", packageInfo.getFullVersionPrettyPrinted());
     }
 
     @Test
@@ -135,6 +141,22 @@ class CmVersionQueryServiceTest {
 
         Assertions.assertEquals(packageInfo.getVersion(), OTHER_VERSION);
         Assertions.assertEquals(packageInfo.getBuildNumber(), OTHER_BUILD_NUMBER);
+    }
+
+    @Test
+    void testWhenServerHasMultiplePackageVersionsDifferingInBuildOnlyThenValidateConsistencyShouldPassAndChooseLatestVersion() {
+        Map<String, List<PackageInfo>> hostPackageMap = Maps.newHashMap();
+        hostPackageMap.put(HOST_2, List.of(
+                getPackageInfo(CLOUDERA_MANAGER_SERVER, C_VERSION, LOWER_BUILD_NUMBER),
+                getPackageInfo(CLOUDERA_MANAGER_AGENT, C_VERSION, HIGHER_BUILD_NUMBER)));
+        hostPackageMap.put(HOST_1, List.of(
+                getPackageInfo(CLOUDERA_MANAGER_SERVER, C_VERSION, HIGHER_BUILD_NUMBER),
+                getPackageInfo(CLOUDERA_MANAGER_AGENT, C_VERSION, HIGHER_BUILD_NUMBER)));
+
+        PackageInfo packageInfo = underTest.checkCmPackageInfoConsistency(hostPackageMap);
+
+        Assertions.assertEquals(C_VERSION, packageInfo.getVersion());
+        Assertions.assertEquals(HIGHER_BUILD_NUMBER, packageInfo.getBuildNumber());
     }
 
     @Test

@@ -60,7 +60,7 @@ public class CmServerQueryService {
         try {
             Map<String, List<PackageInfo>> packageVersions = cmVersionQueryService.queryCmPackageInfo(stack);
             PackageInfo cmPackageInfo = cmVersionQueryService.checkCmPackageInfoConsistency(packageVersions);
-            String version = cmPackageInfo.getFullVersion();
+            String version = cmPackageInfo.getFullVersionPrettyPrinted();
             LOGGER.debug("Reading CM version info, found version: {}", version);
             return Optional.of(version);
         } catch (CloudbreakOrchestratorFailedException e) {

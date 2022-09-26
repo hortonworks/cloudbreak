@@ -83,7 +83,7 @@ public class CmVersionQueryService {
 
     private PackageInfo getPackageInfoWithLatestVersion(Set<PackageInfo> distinctPackageInfos) {
         return distinctPackageInfos.stream()
-                .max((p1, p2) -> new VersionComparator().compare(p1::getVersion, p2::getVersion))
+                .max((p1, p2) -> new VersionComparator().compare(p1::getFullVersion, p2::getFullVersion))
                 .get();
     }
 
