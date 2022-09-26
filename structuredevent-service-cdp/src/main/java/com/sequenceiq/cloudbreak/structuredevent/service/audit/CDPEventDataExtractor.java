@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.structuredevent.service.audit;
 import com.sequenceiq.cloudbreak.audit.model.AuditEventName;
 import com.sequenceiq.cloudbreak.audit.model.EventData;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 
 public interface CDPEventDataExtractor<T extends CDPStructuredEvent> {
@@ -30,4 +31,8 @@ public interface CDPEventDataExtractor<T extends CDPStructuredEvent> {
     String sourceIp(T structuredEvent);
 
     boolean shouldAudit(CDPStructuredEvent structuredEvent);
+
+    default String requestId(T structuredEvent) {
+        return MDCUtils.getRequestId().orElse(null);
+    }
 }

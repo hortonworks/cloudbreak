@@ -1,11 +1,16 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest.filter;
 
+import static com.sequenceiq.cloudbreak.structuredevent.filter.CDPJaxRsFilterPropertyKeys.REQUEST_DETAILS;
+import static com.sequenceiq.cloudbreak.structuredevent.filter.CDPJaxRsFilterPropertyKeys.REQUEST_TIME;
+import static com.sequenceiq.cloudbreak.structuredevent.filter.CDPJaxRsFilterPropertyKeys.RESPONSE_DETAILS;
+import static com.sequenceiq.cloudbreak.structuredevent.filter.CDPJaxRsFilterPropertyKeys.RESPONSE_LOGGING_STREAM;
+
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Priority;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -23,7 +28,11 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
+import com.sequenceiq.cloudbreak.structuredevent.filter.CDPJaxRsFilterOrder;
 import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser;
+import com.sequenceiq.cloudbreak.structuredevent.util.LoggingStream;
+import com.sequenceiq.cloudbreak.structuredevent.util.RestFilterPropertyUtil;
+import com.sequenceiq.cloudbreak.structuredevent.util.RestFilterRequestBodyLogger;
 
 /**
  * Inspects all requests to a service and determines if it should mark the request or response up with additional Structured Event metadata.
@@ -35,26 +44,19 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser
  * To use this class, it should be registered in an {@code EndpointConfig}.
  */
 @Component
+@Priority(CDPJaxRsFilterOrder.CDP_STRUCTURED_EVENT_FILTER_ORDER)
 public class CDPStructuredEventFilter implements WriterInterceptor, ContainerRequestFilter, ContainerResponseFilter {
 
     private static final String LOGGING_ENABLED_PROPERTY = "structuredevent.loggingEnabled";
 
-    private static final String LOGGINGSTREAM_PROPERTY = "structuredevent.entityLogger";
-
     private static final String REST_PARAMS = "REST_PARAMS";
-
-    private static final String REQUEST_TIME = "REQUEST_TIME";
-
-    private static final String REQUEST_DETAILS = "REQUEST_DETAIS";
-
-    private static final String RESPONSE_DETAILS = "RESPONSE_DETAIS";
 
     @Value("${cdp.structuredevent.rest.contentlogging}")
     private Boolean contentLogging;
 
     //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
     @Autowired
-    private RestEventFilterRelatedObjectFactory restEventFilterRelatedObjectFactory;
+    private CdpOperationDetailsFactory restEventFilterRelatedObjectFactory;
 
     //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
     @Autowired
@@ -77,10 +79,10 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
         if (loggingEnabled) {
             requestContext.setProperty(REQUEST_TIME, System.currentTimeMillis());
             StringBuilder body = new StringBuilder();
-            requestContext.setEntityStream(structuredEventFilterUtil.logInboundEntity(body, requestContext.getEntityStream(),
-                    MessageUtils.getCharset(requestContext.getMediaType())));
+            requestContext.setEntityStream(RestFilterRequestBodyLogger.logInboundEntity(body, requestContext.getEntityStream(),
+                    MessageUtils.getCharset(requestContext.getMediaType()), contentLogging));
             requestContext.setProperty(REST_PARAMS, getRequestUrlParameters(requestContext));
-            requestContext.setProperty(REQUEST_DETAILS, restEventFilterRelatedObjectFactory.createRequestDetails(requestContext, body.toString()));
+            requestContext.setProperty(REQUEST_DETAILS, RestFilterPropertyUtil.createRequestDetails(requestContext, body.toString()));
         }
     }
 
@@ -96,12 +98,10 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         if (BooleanUtils.isTrue((Boolean) requestContext.getProperty(LOGGING_ENABLED_PROPERTY))) {
-            RestResponseDetails restResponse = restEventFilterRelatedObjectFactory.createResponseDetails(responseContext);
+            RestResponseDetails restResponse = RestFilterPropertyUtil.createResponseDetails(responseContext);
             if (responseContext.hasEntity()) {
-                OutputStream stream = new LoggingStream(responseContext.getEntityStream(), contentLogging);
-                responseContext.setEntityStream(stream);
-                requestContext.setProperty(LOGGINGSTREAM_PROPERTY, stream);
-                requestContext.setProperty(RESPONSE_DETAILS, restResponse);
+                RestFilterPropertyUtil.extractAndSetResponseEntityStreamIfAbsent(requestContext, responseContext, contentLogging);
+                RestFilterPropertyUtil.setPropertyIfAbsent(requestContext, RESPONSE_DETAILS, restResponse);
             } else {
                 Long requestTime = (Long) requestContext.getProperty(REQUEST_TIME);
                 RestRequestDetails restRequest = (RestRequestDetails) requestContext.getProperty(REQUEST_DETAILS);
@@ -123,7 +123,7 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
         Long requestTime = (Long) context.getProperty(REQUEST_TIME);
         RestRequestDetails restRequest = (RestRequestDetails) context.getProperty(REQUEST_DETAILS);
         RestResponseDetails restResponse = (RestResponseDetails) context.getProperty(RESPONSE_DETAILS);
-        String responseBody = ((LoggingStream) context.getProperty(LOGGINGSTREAM_PROPERTY)).getStringBuilder(
+        String responseBody = ((LoggingStream) context.getProperty(RESPONSE_LOGGING_STREAM)).getStringBuilder(
                 MessageUtils.getCharset(context.getMediaType())).toString();
         Map<String, String> restParams = (Map<String, String>) context.getProperty(REST_PARAMS);
         if (restParams == null) {

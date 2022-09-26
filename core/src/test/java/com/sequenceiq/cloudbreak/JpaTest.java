@@ -29,7 +29,9 @@ import org.springframework.data.repository.support.Repositories;
         "com.sequenceiq.cloudbreak.workspace.repository",
         "com.sequenceiq.cloudbreak.workspace.model",
         "com.sequenceiq.flow.domain",
-        "com.sequenceiq.cloudbreak.ha.domain"
+        "com.sequenceiq.cloudbreak.ha.domain",
+        "com.sequenceiq.cloudbreak.structuredevent.repository",
+        "com.sequenceiq.cloudbreak.structuredevent.domain"
 })
 @DataJpaTest(properties = {
         "spring.jpa.properties.hibernate.session_factory.statement_inspector=com.sequenceiq.cloudbreak.SqlStatementInspector"})
@@ -77,6 +79,8 @@ public class JpaTest {
             case "Set":
             case "Collection":
                 return Set.of();
+            case "List":
+                return List.of();
             case "Long":
             case "long":
             case "Serializable":

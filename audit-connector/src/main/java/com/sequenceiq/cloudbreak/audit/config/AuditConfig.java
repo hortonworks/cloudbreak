@@ -36,6 +36,9 @@ public class AuditConfig {
     @Value("${altus.audit.endpoint:}")
     private String endpoint;
 
+    @Value("${altus.audit.client.grpc.timeout.sec:45}")
+    private long grpcTimeoutSec;
+
     private String host;
 
     private int port;
@@ -88,6 +91,10 @@ public class AuditConfig {
 
     public boolean isConfigured() {
         return StringUtils.isNotBlank(endpoint);
+    }
+
+    public long getGrpcTimeoutSec() {
+        return grpcTimeoutSec;
     }
 
     @Bean

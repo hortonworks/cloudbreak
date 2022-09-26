@@ -15,7 +15,7 @@ import reactor.bus.EventBus;
 @Component
 public class CDPAsyncKafkaStructuredEventSender implements CDPStructuredEventSenderService {
 
-    public static final String KAFKA_EVENT_LOG_MESSAGE = "KAFKA_EVENT_LOG_MESSAGE";
+    public static final String KAFKA_EVENT_LOG_MESSAGE = "CDP_KAFKA_EVENT_LOG_MESSAGE";
 
     @Inject
     private StructuredEventEnablementConfig structuredEventEnablementConfig;

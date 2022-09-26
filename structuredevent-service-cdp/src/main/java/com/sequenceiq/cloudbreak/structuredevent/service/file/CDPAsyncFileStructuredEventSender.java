@@ -15,7 +15,7 @@ import reactor.bus.EventBus;
 @Component
 public class CDPAsyncFileStructuredEventSender implements CDPStructuredEventSenderService {
 
-    public static final String SAVE_STRUCTURED_EVENT_TO_FILE = "SAVE_STRUCTURED_EVENT_TO_FILE";
+    public static final String SAVE_STRUCTURED_EVENT_TO_FILE = "CDP_SAVE_STRUCTURED_EVENT_TO_FILE";
 
     @Inject
     private StructuredEventEnablementConfig structuredEventEnablementConfig;
