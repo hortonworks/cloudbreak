@@ -62,7 +62,7 @@ public class FreeIpaPermissionService {
     private void waitForPermissionToReplicate(List<FreeIpaClient> clientForAllInstances, String permission) {
         if (!clientForAllInstances.isEmpty()) {
             LOGGER.info("Start polling if [{}] permission is replicated to all instances", permission);
-            poller.runPoller(pollingInterval, pollingDelay,
+            poller.runPollerDontStopOnException(pollingInterval, pollingDelay,
                     new FreeIpaPermissionReplicatedPoller(clientForAllInstances, HOST_ENROLLMENT_PRIVILEGE, permission));
         } else {
             LOGGER.info("Polling is skipped for non HA FreeIPA deployment");
