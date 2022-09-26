@@ -52,6 +52,14 @@ public class PackageInfo {
         if (Objects.isNull(buildNumber)) {
             return this.version;
         } else {
+            return String.format("%s.%s", this.version, this.buildNumber);
+        }
+    }
+
+    public String getFullVersionPrettyPrinted() {
+        if (Objects.isNull(buildNumber)) {
+            return this.version;
+        } else {
             return String.format("%s-%s", this.version, this.buildNumber);
         }
     }
