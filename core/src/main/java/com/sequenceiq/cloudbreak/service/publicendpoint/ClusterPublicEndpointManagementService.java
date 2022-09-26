@@ -36,11 +36,8 @@ public class ClusterPublicEndpointManagementService {
     }
 
     public boolean provisionLoadBalancer(StackDtoDelegate stack) {
-        if (!gatewayPublicEndpointManagementService.renewCertificate(stack)) {
-            LOGGER.warn("Certificate was not updated with load balancer SAN in PEM service.");
-        } else {
-            LOGGER.info("Certificated updated with load balancer SAN in PEM service.");
-        }
+        gatewayPublicEndpointManagementService.renewCertificate(stack);
+        LOGGER.info("Certificate updated with load balancer SAN in PEM service.");
         return gatewayPublicEndpointManagementService.updateDnsEntryForLoadBalancers(stack);
     }
 
@@ -73,12 +70,10 @@ public class ClusterPublicEndpointManagementService {
         return StringUtils.isNoneEmpty(result);
     }
 
-    public boolean renewCertificate(StackDtoDelegate stack) {
-        boolean result = false;
+    public void renewCertificate(StackDtoDelegate stack) {
         if (gatewayPublicEndpointManagementService.isCertRenewalTriggerable(stack.getStack())) {
-            result = gatewayPublicEndpointManagementService.renewCertificate(stack);
+            gatewayPublicEndpointManagementService.renewCertificate(stack);
         }
-        return result;
     }
 
     public void start(StackDtoDelegate stack) {
