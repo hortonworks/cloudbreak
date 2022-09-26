@@ -51,6 +51,16 @@ public interface EnvironmentPlatformResourceEndpoint {
             @QueryParam("resourceType") CdpResourceType resourceType);
 
     @GET
+    @Path("machine_types_for_vertical_scaling")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OpEnvDescription.GET_VERTICAL_SCALE_RECOMMENDATION, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
+            nickname = "getVmTypesForVerticalScaling")
+    PlatformVmtypesResponse getVmTypesForVerticalScaling(
+            @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
+            @QueryParam("instanceType") String instanceType,
+            @QueryParam("resourceType") CdpResourceType resourceType);
+
+    @GET
     @Path("regions")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OpEnvDescription.GET_REGIONS_BY_ENVIRONMENT, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
@@ -58,6 +60,9 @@ public class VerticalScalingValidatorServiceTest {
 
     @Mock
     private CredentialService credentialService;
+
+    @Mock
+    private VerticalScaleInstanceProvider verticalScaleInstanceProvider;
 
     @InjectMocks
     private VerticalScalingValidatorService underTest;
@@ -183,6 +188,8 @@ public class VerticalScalingValidatorServiceTest {
         when(credentialService.getCredentialByEnvCrn(anyString())).thenReturn(credential);
         when(credentialToExtendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
         when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
+        doThrow(new BadRequestException("The current instancetype m3.xlarge has more Memory then the requested m2.xlarge."))
+                .when(verticalScaleInstanceProvider).validInstanceTypeForVerticalScaling(any(), any());
 
         VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
         InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
@@ -237,6 +244,8 @@ public class VerticalScalingValidatorServiceTest {
         when(credentialService.getCredentialByEnvCrn(anyString())).thenReturn(credential);
         when(credentialToExtendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
         when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
+        doThrow(new BadRequestException("The current instancetype m3.xlarge has more CPU then the requested m2.xlarge."))
+                .when(verticalScaleInstanceProvider).validInstanceTypeForVerticalScaling(any(), any());
 
         VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
         InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
@@ -291,6 +300,8 @@ public class VerticalScalingValidatorServiceTest {
         when(credentialService.getCredentialByEnvCrn(anyString())).thenReturn(credential);
         when(credentialToExtendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
         when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
+        doThrow(new BadRequestException("The current instancetype m3.xlarge has more Ephemeral Disk then the requested m2.xlarge."))
+                .when(verticalScaleInstanceProvider).validInstanceTypeForVerticalScaling(any(), any());
 
         VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
         InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
@@ -345,6 +356,8 @@ public class VerticalScalingValidatorServiceTest {
         when(credentialService.getCredentialByEnvCrn(anyString())).thenReturn(credential);
         when(credentialToExtendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
         when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
+        doThrow(new BadRequestException("The current instancetype m3.xlarge has more Auto Attached Disk then the requested m2.xlarge."))
+                .when(verticalScaleInstanceProvider).validInstanceTypeForVerticalScaling(any(), any());
 
         VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
         InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
