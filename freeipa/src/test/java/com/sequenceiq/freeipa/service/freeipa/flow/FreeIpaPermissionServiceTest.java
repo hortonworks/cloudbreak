@@ -110,7 +110,7 @@ class FreeIpaPermissionServiceTest {
         underTest.setPermissions(stack, freeIpaClient);
 
         ArgumentCaptor<FreeIpaPermissionReplicatedPoller> replicatedPollerArgumentCaptor = ArgumentCaptor.forClass(FreeIpaPermissionReplicatedPoller.class);
-        verify(poller, times(3)).runPoller(eq(POLLING_INTERVAL), eq(POLLING_DELAY), replicatedPollerArgumentCaptor.capture());
+        verify(poller, times(3)).runPollerDontStopOnException(eq(POLLING_INTERVAL), eq(POLLING_DELAY), replicatedPollerArgumentCaptor.capture());
         verify(freeIpaClient).addPermissionsToPrivilege(HOST_ENROLLMENT_PRIVILEGE, List.of(ADD_HOSTS_PERMISSION));
         verify(freeIpaClient).addPermissionsToPrivilege(HOST_ENROLLMENT_PRIVILEGE, List.of(REMOVE_HOSTS_PERMISSION));
         verify(freeIpaClient).addPermissionsToPrivilege(HOST_ENROLLMENT_PRIVILEGE, List.of(REMOVE_SERVICES_PERMISSION));
