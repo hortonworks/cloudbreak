@@ -227,10 +227,22 @@ public class DBStackToDatabaseStackConverter {
     }
 
     private String getEncryptionKeyResourceGroupNameFromEnv(DetailedEnvironmentResponse environment) {
-        return Optional.ofNullable(environment)
+        /* There would not be a case where both encryptionKeyResourceGroupName and azure Resource group is null.
+        *  If multiple azure resource groups then encryptionKeyResourceGroupName is mandatorily required to enable encryption with CMK.
+        *  This is already checked during environment start as part of azureEncryptionResources.
+        *  At least one of --resource-group-name or --encryption-key-resource-group-name should be specified.
+        * */
+        String encryptionKeyResourceGroupNameFromEnv = Optional.ofNullable(environment)
                 .map(DetailedEnvironmentResponse::getAzure)
                 .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
                 .map(AzureResourceEncryptionParameters::getEncryptionKeyResourceGroupName).orElse(null);
+        if (encryptionKeyResourceGroupNameFromEnv == null) {
+            encryptionKeyResourceGroupNameFromEnv = Optional.ofNullable(environment)
+                    .map(DetailedEnvironmentResponse::getAzure)
+                    .map(AzureEnvironmentParameters::getResourceGroup)
+                    .map(AzureResourceGroup::getName).orElse(null);
+        }
+        return encryptionKeyResourceGroupNameFromEnv;
     }
 
     private Optional<String> getEncryptionKeyArnFromEnv(DetailedEnvironmentResponse environment) {

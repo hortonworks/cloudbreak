@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceRetriever;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -100,6 +102,9 @@ class AzureDatabaseResourceServiceTest {
 
     @Mock
     private AzureCloudResourceService azureCloudResourceService;
+
+    @Mock
+    private Retry retryService;
 
     @InjectMocks
     private AzureDatabaseResourceService victim;
@@ -164,6 +169,34 @@ class AzureDatabaseResourceServiceTest {
         assertEquals(DELETED, resourceStatuses.get(0).getStatus());
         verify(azureUtils).deleteResourceGroup(any(), eq(RESOURCE_GROUP_NAME), eq(false));
         verify(azureUtils, never()).deleteDatabaseServer(any(), anyString(), anyBoolean());
+        verify(persistenceNotifier).notifyDeletion(any(), any());
+    }
+
+    @Test
+    void shouldReturnDeletedDbServerAndDeleteAccessPolicyWhenTerminateDatabaseServerAndSingleResourceGroup() {
+        PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
+        DatabaseStack databaseStack = mock(DatabaseStack.class);
+        Map<String, Object> params = new HashMap<>();
+        params.put("keyVaultUrl", "dummyKeyVaultUrl");
+        params.put("keyVaultResourceGroupName", "dummyKeyVaultResourceGroupName");
+        when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withParams(params).build());
+        when(client.getServicePrincipalForResourceById(RESOURCE_REFERENCE)).thenReturn("dummyPrincipalId");
+        when(client.getVaultNameFromEncryptionKeyUrl("dummyKeyVaultUrl")).thenReturn("dummyVaultName");
+        when(client.keyVaultExists("dummyKeyVaultResourceGroupName", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        when(azureResourceGroupMetadataProvider.getResourceGroupUsage(any(DatabaseStack.class))).thenReturn(ResourceGroupUsage.SINGLE);
+        when(azureUtils.deleteDatabaseServer(any(), anyString(), anyBoolean())).thenReturn(Optional.empty());
+        List<CloudResource> cloudResources = List.of(buildResource(AZURE_DATABASE));
+        initRetry();
+
+        List<CloudResourceStatus> resourceStatuses = victim.terminateDatabaseServer(ac, databaseStack, cloudResources, false, persistenceNotifier);
+
+        assertEquals(1, resourceStatuses.size());
+        assertEquals(AZURE_DATABASE, resourceStatuses.get(0).getCloudResource().getType());
+        assertEquals(DELETED, resourceStatuses.get(0).getStatus());
+        verify(azureUtils).deleteDatabaseServer(any(), eq(RESOURCE_REFERENCE), anyBoolean());
+        verify(client).removeKeyVaultAccessPolicyForServicePrincipal("dummyKeyVaultResourceGroupName",
+                "dummyVaultName", "dummyPrincipalId");
+        verify(client, never()).deleteResourceGroup(anyString());
         verify(persistenceNotifier).notifyDeletion(any(), any());
     }
 
@@ -324,5 +357,9 @@ class AzureDatabaseResourceServiceTest {
                 .withUseSslEnforcement(true)
                 .withParams(map)
                 .build();
+    }
+
+    private void initRetry() {
+        when(retryService.testWith2SecDelayMax15Times(any(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
     }
 }
