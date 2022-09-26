@@ -34,7 +34,7 @@ else
     log "$PASSWORD_FILE is missing, unable to generate privateKey.pem"
   else
     log "Generate privateKey.pem by $KEY_FILE and $PASSWORD_FILE"
-    openssl rsa -in $KEY_FILE -passin file:$PASSWORD_FILE -text > $$PRIVATE_CERT_PEM_FILE
+    openssl rsa -in $KEY_FILE -passin file:$PASSWORD_FILE -text > $PRIVATE_CERT_PEM_FILE
   fi
 
   CRT_FILE=/var/lib/ipa/certs/httpd.crt
