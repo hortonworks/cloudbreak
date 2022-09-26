@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.TERMINATED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.ZOMBIE;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,6 +70,9 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public Map<String, String> actualStatuses() {
+        if (instanceGroups == null) {
+            return Collections.emptyMap();
+        }
         return getInstanceMetaDatas().stream()
                 .collect(Collectors.toMap(InstanceMetaDataV4Response::getInstanceId,
                         instanceMetaData -> instanceMetaData.getInstanceStatus().name()));

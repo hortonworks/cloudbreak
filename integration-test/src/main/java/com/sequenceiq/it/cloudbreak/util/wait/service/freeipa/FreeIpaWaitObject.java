@@ -4,6 +4,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CR
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_FAILED;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -67,6 +68,9 @@ public class FreeIpaWaitObject implements WaitObject {
 
     @Override
     public Map<String, String> actualStatuses() {
+        if (freeIpa == null || freeIpa.getStatus() == null) {
+            return Collections.emptyMap();
+        }
         return Map.of(STATUS, freeIpa.getStatus().name());
     }
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.util.wait.service.freeipa;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,6 +32,9 @@ public class FreeIpaUserSyncWaitObject extends FreeIpaWaitObject {
 
     @Override
     public Map<String, String> actualStatuses() {
+        if (environmentUserSyncState == null || environmentUserSyncState.getState() == null) {
+            return Collections.emptyMap();
+        }
         return Map.of(STATUS, environmentUserSyncState.getState().name());
     }
 

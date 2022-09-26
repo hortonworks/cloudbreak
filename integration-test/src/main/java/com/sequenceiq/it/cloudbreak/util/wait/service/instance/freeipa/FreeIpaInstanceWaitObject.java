@@ -7,6 +7,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.TERMINATED;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,6 +59,9 @@ public class FreeIpaInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public Map<String, String> actualStatuses() {
+        if (instanceGroups == null) {
+            return Collections.emptyMap();
+        }
         return getInstanceMetaDatas().stream()
                 .collect(Collectors.toMap(InstanceMetaDataResponse::getInstanceId,
                         instanceMetaData -> instanceMetaData.getInstanceStatus().name()));
