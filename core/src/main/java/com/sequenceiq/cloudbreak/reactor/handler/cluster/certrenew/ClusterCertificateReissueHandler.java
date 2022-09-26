@@ -48,26 +48,20 @@ public class ClusterCertificateReissueHandler implements EventHandler<ClusterCer
         LOGGER.debug("Reissue certificate for stack 'id:{}'", stackId);
         Selectable response;
         try {
-            boolean certReissued = reissueCertificate(stackId);
-            if (certReissued) {
-                LOGGER.info("Certificate of the cluster has been reissued successfully.");
-                response = new ClusterCertificateReissueSuccess(stackId);
-            } else {
-                LOGGER.warn("The certificate of the cluster could not be reissued via PEM service.");
-                response = new ClusterCertificateRenewFailed(stackId,
-                        new IllegalStateException("The certificate of the cluster could not be reissued."));
-            }
+            reissueCertificate(stackId);
+            LOGGER.info("Certificate of the cluster has been reissued successfully.");
+            response = new ClusterCertificateReissueSuccess(stackId);
         } catch (Exception ex) {
-            LOGGER.warn("Reissue of certificate has been failed for cluster", ex);
+            LOGGER.warn("The certificate of the cluster could not be reissued via PEM service.", ex);
             response = new ClusterCertificateRenewFailed(stackId, ex);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }
 
-    private boolean reissueCertificate(Long stackId) throws TransactionService.TransactionExecutionException {
-        return transactionService.required(() -> {
-                    Stack stack = stackService.getById(stackId);
-                    return clusterPublicEndpointManagementService.renewCertificate(stack);
-                });
+    private void reissueCertificate(Long stackId) throws TransactionService.TransactionExecutionException {
+        transactionService.required(() -> {
+            Stack stack = stackService.getById(stackId);
+            clusterPublicEndpointManagementService.renewCertificate(stack);
+        });
     }
 }
