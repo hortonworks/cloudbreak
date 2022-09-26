@@ -219,4 +219,16 @@ class AzureClientTest {
         Assert.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "dummy"));
     }
 
+    @Test
+    void getVaultNameFromEncryptionKeyUrlTestPass() {
+        String vaultName = underTest.getVaultNameFromEncryptionKeyUrl("https://dummyvaultName.vault.azure.net/keys/dummykeyName/dummykeyVersion");
+        assertThat(vaultName).isEqualTo("dummyvaultName");
+    }
+
+    @Test
+    void getVaultNameFromEncryptionKeyUrlTestFails() {
+        String vaultName = underTest.getVaultNameFromEncryptionKeyUrl("wrongKeyUrl");
+        assertThat(vaultName).isNull();
+    }
+
 }

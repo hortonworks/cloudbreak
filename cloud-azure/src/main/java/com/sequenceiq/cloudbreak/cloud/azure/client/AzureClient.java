@@ -22,6 +22,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -123,6 +125,8 @@ public class AzureClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureClient.class);
 
     private static final int MAX_AZURE_MANAGED_DISK_SIZE_WITH_CACHE = 4095;
+
+    private static final Pattern ENCRYPTION_KEY_URL_VAULT_NAME = Pattern.compile("https://([^.]+)\\.vault.*");
 
     private final Azure azure;
 
@@ -857,6 +861,10 @@ public class AzureClient {
         handleAuthException(() -> azure.genericResources().deleteById(id));
     }
 
+    public String getServicePrincipalForResourceById(String referenceId) {
+        return handleAuthException(() -> azure.genericResources().getById(referenceId).inner().identity().principalId());
+    }
+
     public PagedList<PrivateZone> getPrivateDnsZoneList() {
         PagedList<PrivateZone> privateDnsZones = privatednsManager.privateZones().list();
         privateDnsZones.loadAll();
@@ -1040,7 +1048,7 @@ public class AzureClient {
         return false;
     }
 
-    public void removeKeyVaultAccessPolicyFromServicePrincipal(String resourceGroupName, String vaultName, String principalObjectId) {
+    public void removeKeyVaultAccessPolicyForServicePrincipal(String resourceGroupName, String vaultName, String principalObjectId) {
         handleAuthException(() -> {
             azure.vaults()
                     .getByResourceGroup(resourceGroupName, vaultName)
@@ -1062,6 +1070,14 @@ public class AzureClient {
 
     public Optional<String> getAccessToken() {
         return azureClientCredentials.getAccessToken();
+    }
+
+    public String getVaultNameFromEncryptionKeyUrl(String encryptionKeyUrl) {
+        Matcher matcher = ENCRYPTION_KEY_URL_VAULT_NAME.matcher(encryptionKeyUrl);
+        if (matcher.matches()) {
+            return matcher.group(1);
+        }
+        return null;
     }
 
 }

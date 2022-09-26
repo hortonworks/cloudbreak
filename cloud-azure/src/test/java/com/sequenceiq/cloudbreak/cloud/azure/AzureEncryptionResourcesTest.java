@@ -231,6 +231,8 @@ public class AzureEncryptionResourcesTest {
         when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureClient.keyVaultExists("dummyResourceGroup", "dummyVaultName")).thenReturn(Boolean.FALSE);
+        when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
+                .thenReturn("dummyVaultName");
         initExceptionConversion();
 
         verifyException(IllegalArgumentException.class, () -> underTest.createDiskEncryptionSet(requestedSet),
@@ -255,6 +257,8 @@ public class AzureEncryptionResourcesTest {
         when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureClient.keyVaultExists("dummyResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
+                .thenReturn("dummyVaultName");
         initExceptionConversion();
         when(azureClient.getCurrentSubscription()).thenReturn(subscription);
 
@@ -296,6 +300,8 @@ public class AzureEncryptionResourcesTest {
         when(azureClient.getCurrentSubscription()).thenReturn(subscription);
         when(azureClient.getDiskEncryptionSetByName(any(String.class), any(String.class))).thenReturn(des);
         when(azureClient.keyVaultExists("dummyResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
+                .thenReturn("dummyVaultName");
         when(azureClient.checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
                 .thenReturn(true);
         initRetry();
@@ -396,6 +402,8 @@ public class AzureEncryptionResourcesTest {
         when(diskEncryptionSetCreationPoller.startPolling(eq(authenticatedContext), any(DiskEncryptionSetCreationCheckerContext.class), eq(desInitial)))
                 .thenReturn(desAfterPolling);
         when(azureClient.keyVaultExists("dummyResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
+                .thenReturn("dummyVaultName");
 
         CreatedDiskEncryptionSet createdDes = underTest.createDiskEncryptionSet(requestedSet);
 
@@ -444,6 +452,8 @@ public class AzureEncryptionResourcesTest {
         when(azureClient.createDiskEncryptionSet(any(String.class), any(String.class), any(String.class),
                 any(String.class), any(String.class), any(Map.class))).thenReturn(des);
         when(azureClient.keyVaultExists("dummyResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
+                .thenReturn("dummyVaultName");
         when(azureClient.checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
                 .thenReturn(true);
         initRetry();
@@ -495,6 +505,8 @@ public class AzureEncryptionResourcesTest {
         when(azureClient.createDiskEncryptionSet(any(String.class), any(String.class), any(String.class),
                 any(String.class), any(String.class), any(Map.class))).thenReturn(des);
         when(azureClient.keyVaultExists("dummyResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
+                .thenReturn("dummyVaultName");
         initRetry();
         // Return the same DES instance to simulate that the poller checker task instantly completed
         when(diskEncryptionSetCreationPoller.startPolling(eq(authenticatedContext), any(DiskEncryptionSetCreationCheckerContext.class), eq(des)))
@@ -543,6 +555,8 @@ public class AzureEncryptionResourcesTest {
         when(azureClient.createDiskEncryptionSet(any(String.class), any(String.class), any(String.class),
                 any(String.class), any(String.class), any(Map.class))).thenReturn(des);
         when(azureClient.keyVaultExists("dummyResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
+                .thenReturn("dummyVaultName");
         when(azureClient.checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
                 .thenReturn(false);
         initRetry();
@@ -598,6 +612,8 @@ public class AzureEncryptionResourcesTest {
         when(diskEncryptionSetCreationPoller.startPolling(eq(authenticatedContext), any(DiskEncryptionSetCreationCheckerContext.class), eq(des)))
                 .thenReturn(des);
         when(azureClient.keyVaultExists("dummyVaultResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
+                .thenReturn("dummyVaultName");
         CreatedDiskEncryptionSet createdDes = underTest.createDiskEncryptionSet(requestedSet);
 
         assertEquals(createdDes.getDiskEncryptionSetLocation(), "dummyRegion");
@@ -619,6 +635,8 @@ public class AzureEncryptionResourcesTest {
                 .build();
         when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
+                .thenReturn("dummyVaultName");
         initExceptionConversion();
 
         verifyException(IllegalArgumentException.class, () -> underTest.createDiskEncryptionSet(requestedSet),
@@ -657,6 +675,8 @@ public class AzureEncryptionResourcesTest {
         when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureClient.getCurrentSubscription()).thenReturn(subscription);
+        when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
+                .thenReturn("dummyVaultName");
         when(azureClient.getDiskEncryptionSetByName(any(String.class), any(String.class))).thenReturn(null);
         when(azureUtils.generateResourceGroupNameByNameAndId(any(String.class), any(String.class))).thenReturn("envName-CDP_DES-uniqueId");
         when(azureClient.resourceGroupExists(eq("envName-CDP_DES-uniqueId"))).thenReturn(Boolean.FALSE);
@@ -780,12 +800,14 @@ public class AzureEncryptionResourcesTest {
         when(azureClient.getDiskEncryptionSetByName(any(), any())).thenReturn(des);
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureClient.keyVaultExists("dummyResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
+                .thenReturn("dummyVaultName");
         initRetry();
 
         underTest.deleteDiskEncryptionSet(deletionRequest);
 
         verify(azureClient).deleteDiskEncryptionSet("dummyResourceGroup", "dummyDesId");
-        verify(azureClient).removeKeyVaultAccessPolicyFromServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(azureClient).removeKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
         verify(persistenceNotifier).notifyDeletion(deletionRequest.getCloudResources().iterator().next(), deletionRequest.getCloudContext());
     }
 
@@ -812,12 +834,14 @@ public class AzureEncryptionResourcesTest {
         when(azureClient.getDiskEncryptionSetByName(any(), any())).thenReturn(des);
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureClient.keyVaultExists("dummyVaultResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
+                .thenReturn("dummyVaultName");
         initRetry();
 
         underTest.deleteDiskEncryptionSet(deletionRequest);
 
         verify(azureClient).deleteDiskEncryptionSet("dummyDesResourceGroup", "dummyDesId");
-        verify(azureClient).removeKeyVaultAccessPolicyFromServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(azureClient).removeKeyVaultAccessPolicyForServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
         verify(persistenceNotifier).notifyDeletion(deletionRequest.getCloudResources().iterator().next(), deletionRequest.getCloudContext());
     }
 
@@ -843,6 +867,8 @@ public class AzureEncryptionResourcesTest {
                 .withLocation("dummyRegion");
         when(azureClient.getDiskEncryptionSetByName(any(), any())).thenReturn(des);
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
+                .thenReturn("dummyVaultName");
         initRetry();
         initExceptionConversion();
         initActionFailedExceptionConversion();
@@ -933,12 +959,14 @@ public class AzureEncryptionResourcesTest {
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureClient.resourceGroupExists(eq("dummy-CDP_DES-ResourceGroup"))).thenReturn(Boolean.TRUE);
         when(azureClient.keyVaultExists("dummyVaultResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
+                .thenReturn("dummyVaultName");
         initRetry();
 
         underTest.deleteDiskEncryptionSet(deletionRequest);
 
         verify(azureClient).deleteDiskEncryptionSet("dummy-CDP_DES-ResourceGroup", "dummyDesId");
-        verify(azureClient).removeKeyVaultAccessPolicyFromServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(azureClient).removeKeyVaultAccessPolicyForServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
         verify(azureClient).deleteResourceGroup("dummy-CDP_DES-ResourceGroup");
         verify(persistenceNotifier).notifyDeletion(deletionRequest.getCloudResources().get(0), deletionRequest.getCloudContext());
         verify(persistenceNotifier).notifyDeletion(deletionRequest.getCloudResources().get(1), deletionRequest.getCloudContext());
@@ -967,13 +995,15 @@ public class AzureEncryptionResourcesTest {
         when(azureClient.getDiskEncryptionSetByName(any(), any())).thenReturn(des);
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureClient.keyVaultExists("dummyVaultResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        when(azureClient.getVaultNameFromEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion"))
+                .thenReturn("dummyVaultName");
         initRetry();
 
         underTest.deleteDiskEncryptionSet(deletionRequest);
 
         verify(azureClient).deleteDiskEncryptionSet("dummyResourceGroup", "dummyDesId");
         verify(azureClient, never()).deleteResourceGroup("dummyResourceGroup");
-        verify(azureClient).removeKeyVaultAccessPolicyFromServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(azureClient).removeKeyVaultAccessPolicyForServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
         verify(persistenceNotifier).notifyDeletion(deletionRequest.getCloudResources().get(0), deletionRequest.getCloudContext());
     }
 

@@ -205,7 +205,41 @@ public class DBStackToDatabaseStackConverterTest {
     }
 
     @Test
-    public void testConversionAzureWithAzureEncryptionResourcesPresent() {
+    public void testConversionAzureWithAzureEncryptionResourcesPresentAndNoEncryptionKeyRG() {
+        Network network = new Network();
+        network.setAttributes(new Json(NETWORK_ATTRIBUTES));
+        dbStack.setNetwork(network);
+        dbStack.setCloudPlatform(CLOUD_PLATFORM);
+        dbStack.setParameters(new HashMap<>());
+        DatabaseServer server = new DatabaseServer();
+        server.setDatabaseVendor(DatabaseVendor.POSTGRES);
+        server.setAttributes(new Json(DATABASE_SERVER_ATTRIBUTES));
+        dbStack.setDatabaseServer(server);
+        dbStack.setTags(new Json(STACK_TAGS));
+        dbStack.setTemplate("template");
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCloudPlatform(CLOUD_PLATFORM);
+        environmentResponse.setAzure(AzureEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
+                        .withEncryptionKeyUrl(KEY_URL)
+                        .build())
+                .withAzureResourceGroup(AzureResourceGroup.builder()
+                        .withName(RESOURCE_GROUP)
+                        .withResourceGroupUsage(ResourceGroupUsage.SINGLE)
+                        .build())
+                .build());
+        when(environmentService.getByCrn(anyString())).thenReturn(environmentResponse);
+
+        DatabaseStack convertedStack = underTest.convert(dbStack);
+
+        Map<String, Object> parameters = convertedStack.getDatabaseServer().getParameters();
+        assertThat(parameters.get(ENCRYPTION_KEY_URL).toString()).isEqualTo(KEY_URL);
+        assertThat(parameters.get(ENCRYPTION_KEY_RESOURCE_GROUP_NAME).toString()).isEqualTo(RESOURCE_GROUP);
+        assertThat(parameters.size()).isEqualTo(6);
+    }
+
+    @Test
+    public void testConversionAzureWithAzureEncryptionResourcesPresentAndEncryptionKeyRG() {
         Network network = new Network();
         network.setAttributes(new Json(NETWORK_ATTRIBUTES));
         dbStack.setNetwork(network);

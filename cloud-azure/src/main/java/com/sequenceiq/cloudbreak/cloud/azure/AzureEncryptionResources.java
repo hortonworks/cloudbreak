@@ -46,8 +46,6 @@ public class AzureEncryptionResources implements EncryptionResources {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureEncryptionResources.class);
 
-    private static final Pattern ENCRYPTION_KEY_URL_VAULT_NAME = Pattern.compile("https://([^.]+)\\.vault.*");
-
     private static final Pattern DISK_ENCRYPTION_SET_NAME = Pattern.compile(".*diskEncryptionSets/([^.]+)");
 
     @Inject
@@ -82,15 +80,13 @@ public class AzureEncryptionResources implements EncryptionResources {
     @Override
     public CreatedDiskEncryptionSet createDiskEncryptionSet(DiskEncryptionSetCreationRequest diskEncryptionSetCreationRequest) {
         try {
-            String vaultName;
+
             AuthenticatedContext authenticatedContext = azureClientService.createAuthenticatedContext(diskEncryptionSetCreationRequest.getCloudContext(),
                     diskEncryptionSetCreationRequest.getCloudCredential());
             AzureClient azureClient = authenticatedContext.getParameter(AzureClient.class);
 
-            Matcher matcher = ENCRYPTION_KEY_URL_VAULT_NAME.matcher(diskEncryptionSetCreationRequest.getEncryptionKeyUrl());
-            if (matcher.matches()) {
-                vaultName = matcher.group(1);
-            } else {
+            String vaultName = azureClient.getVaultNameFromEncryptionKeyUrl(diskEncryptionSetCreationRequest.getEncryptionKeyUrl());
+            if (vaultName == null) {
                 throw new IllegalArgumentException("vaultName cannot be fetched from encryptionKeyUrl. encryptionKeyUrl should be of format - " +
                         "'https://<vaultName>.vault.azure.net/keys/<keyName>/<keyVersion>'");
             }
@@ -309,15 +305,12 @@ public class AzureEncryptionResources implements EncryptionResources {
 
     private void removeKeyVaultAccessPolicyFromDiskEncryptionSetServicePrincipal(AzureClient azureClient, String desResourceGroupName, String desName,
             String encryptionKeyUrl, String desPrincipalObjectId, String sourceVaultId) {
-        String vaultName;
         String vaultResourceGroupName;
-        Matcher matcher = ENCRYPTION_KEY_URL_VAULT_NAME.matcher(encryptionKeyUrl);
-        if (matcher.matches()) {
-            vaultName = matcher.group(1);
-        } else {
+        String vaultName = azureClient.getVaultNameFromEncryptionKeyUrl(encryptionKeyUrl);
+        if (vaultName == null) {
             throw new IllegalArgumentException(String.format("Failed to deduce vault name from given encryption key URL \"%s\"", encryptionKeyUrl));
         }
-        matcher = RESOURCE_GROUP_NAME.matcher(sourceVaultId);
+        Matcher matcher = RESOURCE_GROUP_NAME.matcher(sourceVaultId);
         if (matcher.matches()) {
             vaultResourceGroupName = matcher.group(1);
         } else {
@@ -335,7 +328,7 @@ public class AzureEncryptionResources implements EncryptionResources {
             retryService.testWith2SecDelayMax15Times(() -> {
                 try {
                     LOGGER.info("Removing {}.", description);
-                    azureClient.removeKeyVaultAccessPolicyFromServicePrincipal(vaultResourceGroupName, vaultName, desPrincipalObjectId);
+                    azureClient.removeKeyVaultAccessPolicyForServicePrincipal(vaultResourceGroupName, vaultName, desPrincipalObjectId);
                     LOGGER.info("Removed {}.", description);
                     return true;
                 } catch (Exception e) {

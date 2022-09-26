@@ -16,6 +16,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
@@ -42,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceRetriever;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -75,6 +78,10 @@ public class AzureDatabaseResourceService {
 
     @Inject
     private PersistenceRetriever persistenceRetriever;
+
+    @Inject
+    @Qualifier("DefaultRetryService")
+    private Retry retryService;
 
     public List<CloudResourceStatus> buildDatabaseResourcesForLaunch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier persistenceNotifier) {
         CloudContext cloudContext = ac.getCloudContext();
@@ -148,9 +155,16 @@ public class AzureDatabaseResourceService {
             List<CloudResource> resources, boolean force, PersistenceNotifier persistenceNotifier) {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
-
+        String keyVaultUrl = null;
+        String keyVaultResourceGroupName = null;
+        Map<String, Object> dbStackParams = Optional.ofNullable(stack.getDatabaseServer())
+                .map(DatabaseServer::getParameters).orElse(null);
+        if (dbStackParams != null && dbStackParams.containsKey("keyVaultUrl")) {
+            keyVaultUrl = (String) dbStackParams.get("keyVaultUrl");
+            keyVaultResourceGroupName = (String) dbStackParams.getOrDefault("keyVaultResourceGroupName", null);
+        }
         return (azureResourceGroupMetadataProvider.getResourceGroupUsage(stack) != ResourceGroupUsage.MULTIPLE)
-                ? deleteResources(resources, cloudContext, force, client, persistenceNotifier)
+                ? deleteResources(resources, cloudContext, force, client, persistenceNotifier, keyVaultUrl, keyVaultResourceGroupName)
                 : deleteResourceGroup(resources, cloudContext, force, client, persistenceNotifier, stack);
     }
 
@@ -180,7 +194,6 @@ public class AzureDatabaseResourceService {
         if (errorMessage.isEmpty()) {
             deleteResources(resources, cloudContext, persistenceNotifier);
         }
-
         return Lists.newArrayList(new CloudResourceStatus(CloudResource.builder()
                 .withType(AZURE_RESOURCE_GROUP)
                 .withName(resourceGroupName)
@@ -188,7 +201,7 @@ public class AzureDatabaseResourceService {
     }
 
     private List<CloudResourceStatus> deleteResources(List<CloudResource> resources, CloudContext cloudContext, boolean force,
-            AzureClient client, PersistenceNotifier persistenceNotifier) {
+            AzureClient client, PersistenceNotifier persistenceNotifier, String keyVaultUrl, String keyVaultResourceGroupName) {
 
         // TODO simplify after final form of template is reached
 
@@ -198,13 +211,43 @@ public class AzureDatabaseResourceService {
         azureGenericResources.forEach(cr -> persistenceNotifier.notifyDeletion(cr, cloudContext));
 
         return findResources(resources, List.of(AZURE_DATABASE)).stream()
-                .map(r -> deleteDatabaseServerAndNotify(r, cloudContext, client, persistenceNotifier, force))
+                .map(r -> deleteDatabaseServerAndNotify(r, cloudContext, client, persistenceNotifier, force, keyVaultUrl, keyVaultResourceGroupName))
                 .collect(Collectors.toList());
     }
 
     private CloudResourceStatus deleteDatabaseServerAndNotify(
-            CloudResource cloudResource, CloudContext cloudContext, AzureClient client, PersistenceNotifier persistenceNotifier, boolean force) {
+            CloudResource cloudResource, CloudContext cloudContext, AzureClient client, PersistenceNotifier persistenceNotifier, boolean force,
+            String keyVaultUrl, String keyVaultResourceGroupName) {
         LOGGER.debug("Deleting postgres server {}", cloudResource.getReference());
+        if (keyVaultUrl != null && keyVaultResourceGroupName != null) {
+            String dbPrincipalId = client.getServicePrincipalForResourceById(cloudResource.getReference());
+            String vaultName = client.getVaultNameFromEncryptionKeyUrl(keyVaultUrl);
+            if (vaultName != null) {
+                // Check for the existence of keyVault user has specified before removing Database access permissions from this keyVault.
+                if (!client.keyVaultExists(keyVaultResourceGroupName, vaultName)) {
+                    LOGGER.warn(String.format("Vault with name \"%s\" either does not exist/has been deleted or user does not have permissions to access it.",
+                            vaultName));
+                } else {
+                    String description = String.format("access to Key Vault \"%s\" in Resource Group \"%s\" for Service Principal having object ID \"%s\" " +
+                                    "associated with Database.", vaultName, keyVaultResourceGroupName, dbPrincipalId);
+                    retryService.testWith2SecDelayMax15Times(() -> {
+                        try {
+                            LOGGER.info("Removing {}.", description);
+                            client.removeKeyVaultAccessPolicyForServicePrincipal(keyVaultResourceGroupName, vaultName, dbPrincipalId);
+                            LOGGER.info("Removed {}.", description);
+                            return true;
+                        } catch (Exception e) {
+                            throw azureUtils.convertToActionFailedExceptionCausedByCloudConnectorException(e, "Removing " + description);
+                        }
+                    });
+                }
+            } else {
+                LOGGER.warn("vaultName cannot be fetched from encryptionKeyUrl - {}. Access policy for the database cannot be removed " +
+                        "from the vault.", keyVaultUrl);
+            }
+        } else {
+            LOGGER.info("Database is not encrypted with CMK.");
+        }
         azureUtils.deleteDatabaseServer(client, cloudResource.getReference(), force);
         persistenceNotifier.notifyDeletion(cloudResource, cloudContext);
         return new CloudResourceStatus(CloudResource.builder()
