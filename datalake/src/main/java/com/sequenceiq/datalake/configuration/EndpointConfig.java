@@ -16,6 +16,7 @@ import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
 import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPStructuredEventV1Controller;
+import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPRestAuditFilter;
 import com.sequenceiq.datalake.controller.SdxEventController;
 import com.sequenceiq.datalake.controller.diagnostics.DiagnosticsController;
 import com.sequenceiq.datalake.controller.mapper.WebApplicaitonExceptionMapper;
@@ -115,6 +116,8 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerEndpoints() {
+        register(CDPRestAuditFilter.class);
+
         CONTROLLERS.forEach(this::register);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);

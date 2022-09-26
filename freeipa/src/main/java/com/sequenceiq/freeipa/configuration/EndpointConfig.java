@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPStructuredEventV1Controller;
+import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPRestAuditFilter;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPStructuredEventFilter;
 import com.sequenceiq.flow.controller.FlowPublicController;
 import com.sequenceiq.freeipa.api.FreeIpaApi;
@@ -82,9 +83,6 @@ public class EndpointConfig extends ResourceConfig {
 
     @PostConstruct
     private void init() {
-        if (auditEnabled) {
-            register(CDPStructuredEventFilter.class);
-        }
         registerEndpoints();
         registerExceptionMappers();
         register(serverTracingDynamicFeature);
@@ -117,6 +115,10 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerEndpoints() {
+        register(CDPRestAuditFilter.class);
+        if (auditEnabled) {
+            register(CDPStructuredEventFilter.class);
+        }
         CONTROLLERS.forEach(this::register);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);

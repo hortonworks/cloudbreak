@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.audit.extractor;
 
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser.RESOURCE_CRN;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser.RESOURCE_NAME;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -19,6 +23,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
+import com.sequenceiq.cloudbreak.structuredevent.rest.CDPRestCommonService;
 import com.sequenceiq.cloudbreak.structuredevent.service.audit.CDPEventDataExtractor;
 import com.sequenceiq.cloudbreak.structuredevent.service.audit.auditeventname.rest.CDPRestResourceAuditEventConverter;
 
@@ -33,8 +38,15 @@ public class RestCDPEventDataExtractor implements CDPEventDataExtractor<CDPStruc
     @Inject
     private Map<String, CDPRestResourceAuditEventConverter> resourceAuditEventConverters;
 
+    @Inject
+    private CDPRestCommonService restCommonService;
+
     @Override
     public EventData eventData(CDPStructuredRestCallEvent structuredEvent) {
+        return eventData(structuredEvent, Boolean.TRUE);
+    }
+
+    public EventData eventData(CDPStructuredRestCallEvent structuredEvent, boolean validateResourceRelatedConverterExistence) {
         RestRequestDetails restRequest = structuredEvent.getRestCall().getRestRequest();
         boolean mutating = Set.of("POST", "PUT", "DELETE").contains(restRequest.getMethod());
         String userAgent = restRequest.getHeaders().get("user-agent");
@@ -47,6 +59,15 @@ public class RestCDPEventDataExtractor implements CDPEventDataExtractor<CDPStruc
             LOGGER.info("Determine request params with {}", restResourceAuditEventConverter);
             Map<String, String> params = restResourceAuditEventConverter.requestParameters(structuredEvent);
             requestParameters.putAll(params);
+        } else if (!validateResourceRelatedConverterExistence) {
+            LOGGER.debug("No domain specific data extractor exists, determining request params with {}", CDPRestCommonService.class);
+            try {
+                Map<String, String> params = restCommonService.collectCrnAndNameIfPresent(structuredEvent.getRestCall(), structuredEvent.getOperation(),
+                        new HashMap<>(), RESOURCE_NAME, RESOURCE_CRN);
+                requestParameters.putAll(params);
+            } catch (UnsupportedOperationException unsupportedOperationExc) {
+                LOGGER.info("Can't determine resource name or CRN, creating audit entry without them original error: {}", unsupportedOperationExc.getMessage());
+            }
         }
         return ApiRequestData.builder()
                 .withApiVersion(cbVersion)
@@ -96,6 +117,12 @@ public class RestCDPEventDataExtractor implements CDPEventDataExtractor<CDPStruc
             return restResourceAuditEventConverter != null && restResourceAuditEventConverter.shouldAudit(event);
         }
         return false;
+    }
+
+    @Override
+    public String requestId(CDPStructuredRestCallEvent structuredEvent) {
+        return Optional.ofNullable(structuredEvent.getRestCall().getRestRequest().getRequestId())
+                .orElse(CDPEventDataExtractor.super.requestId(structuredEvent));
     }
 
     private AuditEventName determineEventName(CDPStructuredRestCallEvent structuredEvent) {

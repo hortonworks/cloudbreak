@@ -15,18 +15,18 @@ import java.util.Map;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
 import com.sequenceiq.cloudbreak.structuredevent.rest.CDPRestCommonService;
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPDefaultStructuredEventClient;
+import com.sequenceiq.cloudbreak.structuredevent.util.LoggingStream;
+import com.sequenceiq.cloudbreak.structuredevent.util.RestFilterRequestBodyLogger;
 
 @ExtendWith(MockitoExtension.class)
 public class StructuredEventFilterUtilTest {
@@ -44,12 +44,7 @@ public class StructuredEventFilterUtilTest {
     private RepositoryBasedDataCollector dataCollector;
 
     @Mock
-    private RestEventFilterRelatedObjectFactory restEventFilterRelatedObjectFactory;
-
-    @BeforeEach
-    public void setup() {
-        ReflectionTestUtils.setField(underTest, "contentLogging", true);
-    }
+    private CdpOperationDetailsFactory cdpOperationDetailsFactory;
 
     @Test
     public void testLogInboundEntityWhenMarkSupportedAndContentLongerThenMax() throws IOException {
@@ -59,7 +54,7 @@ public class StructuredEventFilterUtilTest {
         ByteArrayInputStream bais = new ByteArrayInputStream(generatedString.getBytes());
 
         StringBuilder sb = new StringBuilder();
-        InputStream actual = underTest.logInboundEntity(sb, bais, Charset.defaultCharset());
+        InputStream actual = RestFilterRequestBodyLogger.logInboundEntity(sb, bais, Charset.defaultCharset(), true);
 
         Assertions.assertEquals(bais, actual);
         Assertions.assertTrue(sb.toString().endsWith("...more...\n"));
@@ -79,7 +74,7 @@ public class StructuredEventFilterUtilTest {
         };
 
         StringBuilder sb = new StringBuilder();
-        InputStream actual = underTest.logInboundEntity(sb, inputStream, Charset.defaultCharset());
+        InputStream actual = RestFilterRequestBodyLogger.logInboundEntity(sb, inputStream, Charset.defaultCharset(), true);
 
         Assertions.assertNotEquals(inputStream, actual);
         Assertions.assertTrue(sb.toString().endsWith("...more...\n"));
@@ -93,7 +88,7 @@ public class StructuredEventFilterUtilTest {
         ByteArrayInputStream bais = new ByteArrayInputStream(generatedString.getBytes());
 
         StringBuilder sb = new StringBuilder();
-        InputStream actual = underTest.logInboundEntity(sb, bais, Charset.defaultCharset());
+        InputStream actual = RestFilterRequestBodyLogger.logInboundEntity(sb, bais, Charset.defaultCharset(), true);
 
         Assertions.assertEquals(bais, actual);
         Assertions.assertFalse(sb.toString().endsWith("...more...\n"));
