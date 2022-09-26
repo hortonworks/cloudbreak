@@ -7,20 +7,10 @@
     - template: jinja
     - backup: minion
 
-/etc/nginx/sites-enabled/ssl-locations.d/consul.conf:
-  file.managed:
-    - makedirs: True
-    - source: salt://nginx/conf/ssl-locations.d/consul.conf
-
 /etc/nginx/sites-enabled/ssl-locations.d/knox.conf:
   file.managed:
     - makedirs: True
     - source: salt://nginx/conf/ssl-locations.d/knox.conf
-
-/etc/nginx/sites-enabled/ssl-locations.d/prometheus.conf:
-  file.managed:
-    - makedirs: True
-    - source: salt://nginx/conf/ssl-locations.d/prometheus.conf
 
 /etc/nginx/sites-enabled/ssl-locations.d/nodestatus.conf:
   file.managed:
