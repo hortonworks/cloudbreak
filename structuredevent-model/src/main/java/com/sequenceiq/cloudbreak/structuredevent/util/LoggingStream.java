@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.structuredevent.rest.filter;
+package com.sequenceiq.cloudbreak.structuredevent.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FilterOutputStream;
@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-class LoggingStream extends FilterOutputStream {
+public class LoggingStream extends FilterOutputStream {
 
     public static final int MAX_CONTENT_LENGTH = 65535;
 
@@ -14,12 +14,12 @@ class LoggingStream extends FilterOutputStream {
 
     private final Boolean contentLogging;
 
-    LoggingStream(OutputStream inner, Boolean contentLogging) {
+    public LoggingStream(OutputStream inner, Boolean contentLogging) {
         super(inner);
         this.contentLogging = contentLogging;
     }
 
-    StringBuffer getStringBuilder(Charset charset) {
+    public StringBuffer getStringBuilder(Charset charset) {
         StringBuffer b = new StringBuffer();
         if (contentLogging) {
             byte[] entity = baos.toByteArray();

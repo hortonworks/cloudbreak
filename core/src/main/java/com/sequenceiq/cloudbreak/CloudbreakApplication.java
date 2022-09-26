@@ -7,16 +7,20 @@ import org.springframework.boot.actuate.autoconfigure.metrics.web.servlet.WebMvc
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 
+import com.sequenceiq.cloudbreak.structuredevent.service.CDPFlowStructuredEventHandler;
+
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableAsync
 @EnableSwagger2
-@ComponentScan(basePackages = "com.sequenceiq")
+@ComponentScan(basePackages = "com.sequenceiq",
+        excludeFilters = { @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = CDPFlowStructuredEventHandler.class) })
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableJpaAuditing
 @EnableJpaRepositories(basePackages = "com.sequenceiq", repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)

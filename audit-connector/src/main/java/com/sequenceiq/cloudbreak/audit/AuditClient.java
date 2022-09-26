@@ -105,8 +105,11 @@ public class AuditClient {
     private AuditBlockingStub newStub(ManagedChannel channel, String requestId, String actorCrn) {
         checkNotNull(requestId, "requestId should not be null.");
         return AuditGrpc.newBlockingStub(channel)
-                .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
-                        new AltusMetadataInterceptor(requestId, actorCrn));
+                .withInterceptors(
+                        GrpcUtil.getTimeoutInterceptor(auditConfig.getGrpcTimeoutSec()),
+                        GrpcUtil.getTracingInterceptor(tracer),
+                        new AltusMetadataInterceptor(requestId, actorCrn)
+                );
     }
 
     public List<AuditProto.CdpAuditEvent> listEvents(ListAuditEvent listAuditEvent) {

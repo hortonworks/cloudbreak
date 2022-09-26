@@ -4,8 +4,6 @@ import static com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint.CR
 import static com.sequenceiq.cloudbreak.logger.MDCContextFilter.REQUEST_ID_HEADER;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-import java.util.UUID;
-
 import javax.inject.Inject;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
@@ -14,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
 public class InvocationBuilderProvider {
@@ -26,7 +25,7 @@ public class InvocationBuilderProvider {
                 .request()
                 .accept(APPLICATION_JSON)
                 .header(CRN_HEADER, ThreadBasedUserCrnProvider.getUserCrn())
-                .header(REQUEST_ID_HEADER, UUID.randomUUID().toString());
+                .header(REQUEST_ID_HEADER, MDCBuilder.getOrGenerateRequestId());
     }
 
     public Invocation.Builder createInvocationBuilderForInternalActor(WebTarget webTarget) {
@@ -34,7 +33,7 @@ public class InvocationBuilderProvider {
                 .request()
                 .accept(APPLICATION_JSON)
                 .header(CRN_HEADER, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString())
-                .header(REQUEST_ID_HEADER, UUID.randomUUID().toString());
+                .header(REQUEST_ID_HEADER, MDCBuilder.getOrGenerateRequestId());
     }
 
 }

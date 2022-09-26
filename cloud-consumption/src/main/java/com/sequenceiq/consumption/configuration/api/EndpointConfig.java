@@ -85,11 +85,11 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerEndpoints() {
-        CONTROLLERS.forEach(this::register);
-
         if (auditEnabled) {
             register(CDPStructuredEventFilter.class);
         }
+
+        CONTROLLERS.forEach(this::register);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);

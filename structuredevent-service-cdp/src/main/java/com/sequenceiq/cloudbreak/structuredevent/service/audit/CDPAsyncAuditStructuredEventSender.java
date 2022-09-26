@@ -20,7 +20,7 @@ import reactor.bus.EventBus;
 @Component
 public class CDPAsyncAuditStructuredEventSender implements CDPStructuredEventSenderService {
 
-    public static final String AUDIT_EVENT_LOG_MESSAGE = "AUDIT_EVENT_LOG_MESSAGE";
+    public static final String AUDIT_EVENT_LOG_MESSAGE = "CDP_AUDIT_EVENT_LOG_MESSAGE";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPAsyncAuditStructuredEventSender.class);
 

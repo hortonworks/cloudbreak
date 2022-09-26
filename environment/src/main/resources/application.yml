@@ -211,7 +211,7 @@ cb:
 
 spring:
   application:
-    name: EnvironmentService
+    name: EnvironmentsService
   freemarker:
     template-loader-path: file:/etc/cloudbreak,classpath:/
     prefer-file-system-access: false
