@@ -18,6 +18,7 @@ import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.START_FAILED
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.STOP_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.SYNC_FAILED;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -62,6 +63,9 @@ public class DatalakeWaitObject implements WaitObject {
 
     @Override
     public Map<String, String> actualStatuses() {
+        if (sdxResponse == null || sdxResponse.getStatus() == null) {
+            return Collections.emptyMap();
+        }
         return Map.of(STATUS, sdxResponse.getStatus().name());
     }
 

@@ -11,6 +11,7 @@ import static com.sequenceiq.redbeams.api.model.common.Status.START_FAILED;
 import static com.sequenceiq.redbeams.api.model.common.Status.STOP_FAILED;
 import static com.sequenceiq.redbeams.api.model.common.Status.UPDATE_FAILED;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -59,6 +60,9 @@ public class RedbeamsWaitObject implements WaitObject {
 
     @Override
     public Map<String, String> actualStatuses() {
+        if (databaseServerV4Response == null || databaseServerV4Response.getStatus() == null) {
+            return Collections.emptyMap();
+        }
         return Map.of(STATUS, databaseServerV4Response.getStatus().name());
     }
 

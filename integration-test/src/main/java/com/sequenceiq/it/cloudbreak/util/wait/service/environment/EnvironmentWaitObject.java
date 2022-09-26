@@ -4,6 +4,7 @@ import static com.sequenceiq.environment.api.v1.environment.model.response.Envir
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.CREATE_FAILED;
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.DELETE_FAILED;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,6 +61,9 @@ public class EnvironmentWaitObject implements WaitObject {
 
     @Override
     public Map<String, String> actualStatuses() {
+        if (environment == null || environment.getEnvironmentStatus() == null) {
+            return Collections.emptyMap();
+        }
         return Map.of(STATUS, environment.getEnvironmentStatus().name());
     }
 
