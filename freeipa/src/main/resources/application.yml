@@ -177,6 +177,19 @@ spring:
     maxActive: 30
   lifecycle:
     timeout-per-shutdown-phase: 60s
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 400
+        order_inserts: true
+        order_updates: true
+
+logging.level.org.hibernate:
+  SQL: DEBUG
+  type.descriptor.sql.BasicBinder: TRACE
 
 rest:
   debug: false
@@ -300,6 +313,7 @@ cb:
       enabled: true
       contentlogging: true
 
+
 cluster:
   monitoring:
     enabled: true
@@ -337,3 +351,4 @@ crn:
 authdistributor:
   host: localhost
   port: 8982
+

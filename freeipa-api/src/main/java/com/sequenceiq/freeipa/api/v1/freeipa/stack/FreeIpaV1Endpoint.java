@@ -302,8 +302,8 @@ public interface FreeIpaV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = GET_RECOMMENDATION,  produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "getRecommendationV1")
     FreeIpaRecommendationResponse getRecommendation(
-            @ValidCrn(resource = CrnResourceDescriptor.CREDENTIAL) @QueryParam("credentialCrn") @NotEmpty String credentialCrn,
-            @QueryParam("region") @NotEmpty String region,
+            @ValidCrn(resource = CrnResourceDescriptor.CREDENTIAL) @QueryParam("credentialCrn") String credentialCrn,
+            @QueryParam("region")  String region,
             @QueryParam("availabilityZone") String availabilityZone);
 
     @PUT

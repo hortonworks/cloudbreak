@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -10,6 +11,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.envers.AuditReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -27,8 +29,10 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.VmTypeResponse;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.instance.VmTypeToVmTypeResponseConverter;
 import com.sequenceiq.freeipa.dto.Credential;
+import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceTypeProvider;
 
 @Service
@@ -54,11 +58,20 @@ public class FreeIpaRecommendationService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private AuditReader auditReader;
+
+    @Inject
+    private ImageService imageService;
+
     public FreeIpaRecommendationResponse getRecommendation(String credentialCrn, String region, String availabilityZone) {
-        Credential credential = credentialService.getCredentialByCredCrn(credentialCrn);
-        String defaultInstanceType = defaultInstanceTypeProvider.getForPlatform(credential.getCloudPlatform());
-        Set<VmTypeResponse> availableVmTypes = getAvailableVmTypes(region, availabilityZone, credential, defaultInstanceType);
-        return new FreeIpaRecommendationResponse(availableVmTypes, defaultInstanceType);
+                List<Number> revisions = auditReader.getRevisions(ImageEntity.class, 300L);
+                LOGGER.debug("revisions are: {}", revisions);
+//        Credential credential = credentialService.getCredentialByCredCrn(credentialCrn);
+//        String defaultInstanceType = defaultInstanceTypeProvider.getForPlatform(credential.getCloudPlatform());
+//        Set<VmTypeResponse> availableVmTypes = getAvailableVmTypes(region, availabilityZone, credential, defaultInstanceType);
+//        return new FreeIpaRecommendationResponse(availableVmTypes, defaultInstanceType);
+        return null;
     }
 
     private Set<VmTypeResponse> getAvailableVmTypes(String region, String availabilityZone, Credential credential, String defaultInstanceType) {

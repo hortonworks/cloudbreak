@@ -97,6 +97,7 @@ public class DatabaseConfig {
         if (nodeConfig.isNodeIdSpecified()) {
             config.addDataSourceProperty("ApplicationName", nodeConfig.getId());
         }
+//        config.addDataSourceProperty("socketTimeout", "30");
         config.setDriverClassName("io.opentracing.contrib.jdbc.TracingDriver");
         config.setJdbcUrl(String.format("jdbc:tracing:postgresql://%s/%s?currentSchema=%s&traceWithActiveSpanOnly=true", databaseAddress, dbName, dbSchemaName));
         config.setUsername(dbUser);
