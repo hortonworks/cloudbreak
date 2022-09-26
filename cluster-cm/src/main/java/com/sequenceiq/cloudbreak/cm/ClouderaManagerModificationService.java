@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.cloudera.api.swagger.BatchResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
@@ -827,7 +828,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
         try {
             LOGGER.debug("Stopping all Cloudera Runtime services");
-
             ExtendedPollingResult extendedPollingResult = clouderaManagerPollingServiceProvider.checkCmStatus(stack, apiClient);
             if (extendedPollingResult.isSuccess()) {
                 stopWithRunningCm(disableKnoxAutorestart, cluster, clustersResourceApi);
@@ -971,15 +971,19 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         String clusterName = cluster.getName();
         LOGGER.debug("Starting all services for cluster.");
         configService.enableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, apiClient, stack.getName());
-        eventService
-                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_STARTING);
+        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_STARTING);
         Collection<ApiService> apiServices = readServices(stack);
-        boolean anyServiceNotStarted = apiServices.stream()
-                .anyMatch(service -> !ApiServiceState.STARTED.equals(service.getServiceState())
+        Set<ApiService> notStartedServices = apiServices.stream()
+                .filter(service -> !ApiServiceState.STARTED.equals(service.getServiceState())
                         && !ApiServiceState.STARTING.equals(service.getServiceState())
-                        && !ApiServiceState.NA.equals(service.getServiceState()));
+                        && !ApiServiceState.NA.equals(service.getServiceState()))
+                .collect(Collectors.toSet());
         ApiCommand apiCommand = null;
-        if (anyServiceNotStarted) {
+        if (!notStartedServices.isEmpty()) {
+            LOGGER.debug("Starting cluster because the following services are not running: {}", notStartedServices.stream()
+                    .map(ApiService::getName)
+                    .filter(StringUtils::hasText)
+                    .collect(Collectors.toSet()));
             apiCommand = apiInstance.startCommand(clusterName);
             ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, apiClient, apiCommand.getId());
             handlePollingResult(pollingResult, "Cluster was terminated while waiting for Cloudera Runtime services to start",

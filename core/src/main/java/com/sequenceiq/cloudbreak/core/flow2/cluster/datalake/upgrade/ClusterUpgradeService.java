@@ -109,11 +109,6 @@ public class ClusterUpgradeService {
         }
     }
 
-    public boolean isClusterRuntimeUpgradeNeeded(Image currentImage, Image targetImage) {
-        return isUpdateNeeded(NullUtil.getIfNotNull(currentImage.getStackDetails(), ImageStackDetails::getStackBuildNumber),
-                NullUtil.getIfNotNull(targetImage.getStackDetails(), ImageStackDetails::getStackBuildNumber));
-    }
-
     private boolean isUpdateNeeded(String currentBuildNumber, String targetBuildNumber) {
         if (StringUtils.isEmpty(currentBuildNumber) || StringUtils.isEmpty(targetBuildNumber)) {
             return true;
