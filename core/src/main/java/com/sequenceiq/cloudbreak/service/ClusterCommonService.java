@@ -154,7 +154,7 @@ public class ClusterCommonService {
         MDCBuilder.buildMdcContext(stack);
         FlowIdentifier flowIdentifier;
         if (stackVerticalScaleV4Request != null) {
-            flowIdentifier = verticalScalingOnStack(stackId, stack, stackVerticalScaleV4Request);
+            flowIdentifier = clusterOperationService.verticalScale(stackId, stackVerticalScaleV4Request);
         } else {
             LOGGER.info("Invalid cluster update request received. Stack id: {}", stackId);
             throw new BadRequestException("Invalid update cluster request!");
@@ -212,15 +212,6 @@ public class ClusterCommonService {
         LOGGER.debug("Cluster username password update request received. Stack id: {}, name: {}, username: {}",
                 stack.getId(), stack.getName(), userNamePasswordJson.getUserName());
         return clusterOperationService.updateUserNamePassword(stack.getId(), userNamePasswordJson);
-    }
-
-    private FlowIdentifier verticalScalingOnStack(Long stackId, StackDto stack, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
-        if (!stack.isStackInStopPhase()) {
-            throw new BadRequestException(String.format(
-                    "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
-                    stack.getStatus()));
-        }
-        return clusterOperationService.verticalScale(stackId, stackVerticalScaleV4Request);
     }
 
     public FlowIdentifier setMaintenanceMode(StackView stack, MaintenanceModeStatus maintenanceMode) {

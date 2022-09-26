@@ -1,34 +1,30 @@
-package com.sequenceiq.freeipa.service.stack;
+package com.sequenceiq.cloudbreak.service;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
 import com.sequenceiq.common.api.type.CdpResourceType;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
-import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
-import com.sequenceiq.freeipa.dto.Credential;
-import com.sequenceiq.freeipa.entity.InstanceGroup;
-import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.CredentialService;
 
 @Service
 public class VerticalScalingValidatorService {
-
-    @Value("${freeipa.verticalScalingSupported}")
-    private Set<String> verticalScalingSupported;
 
     @Inject
     private CloudParameterService cloudParameterService;
@@ -37,35 +33,39 @@ public class VerticalScalingValidatorService {
     private CredentialToExtendedCloudCredentialConverter credentialToExtendedCloudCredentialConverter;
 
     @Inject
-    private CredentialService credentialService;
+    private CredentialClientService credentialService;
 
     @Inject
     private VerticalScaleInstanceProvider verticalScaleInstanceProvider;
 
-    public void validateStatus(Stack stack) {
-        if (!stack.isStopped()) {
-            throw new BadRequestException("Vertical scaling currently only available for FreeIPA when it is stopped");
+    @Inject
+    private CloudParameterCache cloudParameterCache;
+
+    public void validateProvider(Stack stack) {
+        if (!cloudParameterCache.isVerticalScalingSupported(stack.getCloudPlatform())) {
+            throw new BadRequestException(String.format("Vertical scaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
         }
     }
 
-    public void validateRequest(Stack stack, VerticalScaleRequest verticalScaleV4Request) {
-        if (!verticalScalingSupported.contains(stack.getCloudPlatform())) {
-            throw new BadRequestException(String.format("Vertical scaling is not supported on %s cloud platform", stack.getCloudPlatform()));
-        }
+    public void validateRequest(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request) {
         if (verticalScaleV4Request.getTemplate() == null) {
-            throw new BadRequestException(String.format("Define an exiting instancetype to vertically scale the %s FreeIpa.", stack.getCloudPlatform()));
+            throw new BadRequestException(String.format("Define an exiting instancetype to vertically scale the %s Data Hubs.", stack.getCloudPlatform()));
         }
         if (verticalScaleV4Request.getTemplate().getInstanceType() == null) {
-            throw new BadRequestException(String.format("Define an exiting instancetype to vertically scale the %s FreeIpa.", stack.getCloudPlatform()));
-        } else {
-            validateInstanceType(stack, verticalScaleV4Request);
+            throw new BadRequestException(String.format("Define an exiting instancetype to vertically scale the %s Data Hubs.", stack.getCloudPlatform()));
         }
         if (anyAttachedVolumePropertyDefinedInVerticalScalingRequest(verticalScaleV4Request)) {
-            throw new BadRequestException(String.format("Only instance type modification is supported on %s FreeIpa.", stack.getCloudPlatform()));
+            throw new BadRequestException(String.format("Only instance type modification is supported on %s Data Hubs.", stack.getCloudPlatform()));
         }
     }
 
-    private void validateInstanceType(Stack stack, VerticalScaleRequest verticalScaleV4Request) {
+    public void validateStatus(Stack stack) {
+        if (!stack.isStopped()) {
+            throw new BadRequestException("Vertical scaling currently only available for Clusters when it is stopped");
+        }
+    }
+
+    public void validateInstanceType(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request) {
         String group = verticalScaleV4Request.getGroup();
         Optional<InstanceGroup> instanceGroupOptional = stack.getInstanceGroups()
                 .stream()
@@ -75,12 +75,12 @@ public class VerticalScalingValidatorService {
         if (instanceGroupOptional.isPresent()) {
             String availabilityZone = stack.getAvailabilityZone();
             String currentInstanceType = instanceGroupOptional.get().getTemplate().getInstanceType();
-            Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
+            Credential credential = credentialService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
             CloudVmTypes allVmTypes = cloudParameterService.getVmTypesV2(
                     cloudCredential,
                     stack.getRegion(),
-                    stack.getPlatformvariant(),
+                    stack.getPlatformVariant(),
                     CdpResourceType.DEFAULT,
                     Maps.newHashMap());
             verticalScaleInstanceProvider.validInstanceTypeForVerticalScaling(
@@ -88,7 +88,7 @@ public class VerticalScalingValidatorService {
                     getInstance(availabilityZone, requestedInstanceType, allVmTypes)
             );
         } else {
-            throw new BadRequestException(String.format("Define a group which exists in FreeIpa. It can be [%s].",
+            throw new BadRequestException(String.format("Define a group which exists in Cluster. It can be [%s].",
                     stack.getInstanceGroups()
                             .stream()
                             .map(e -> e.getGroupName())
@@ -97,15 +97,17 @@ public class VerticalScalingValidatorService {
         }
     }
 
+    private boolean anyAttachedVolumePropertyDefinedInVerticalScalingRequest(StackVerticalScaleV4Request verticalScaleV4Request) {
+        return verticalScaleV4Request.getTemplate().getEphemeralVolume() != null
+                || verticalScaleV4Request.getTemplate().getRootVolume() != null
+                || (verticalScaleV4Request.getTemplate().getAttachedVolumes() != null && !verticalScaleV4Request.getTemplate().getAttachedVolumes().isEmpty())
+                || verticalScaleV4Request.getTemplate().getTemporaryStorage() != null;
+    }
+
     private Optional<VmType> getInstance(String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes) {
         return allVmTypes.getCloudVmResponses().get(availabilityZone)
                 .stream()
                 .filter(e -> e.getValue().equals(currentInstanceType))
                 .findFirst();
-    }
-
-    private boolean anyAttachedVolumePropertyDefinedInVerticalScalingRequest(VerticalScaleRequest verticalScaleV4Request) {
-        return verticalScaleV4Request.getTemplate().getAttachedVolumes() != null
-                && !verticalScaleV4Request.getTemplate().getAttachedVolumes().isEmpty();
     }
 }

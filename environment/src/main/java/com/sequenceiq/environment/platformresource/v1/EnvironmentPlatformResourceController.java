@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.dns.CloudPrivateDnsZones;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
+import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.api.v1.platformresource.EnvironmentPlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
@@ -47,6 +48,8 @@ import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSecurity
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSshKeysResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.RegionResponse;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 import com.sequenceiq.environment.platformresource.v1.converter.CloudAccessConfigsToPlatformAccessConfigsV1ResponseConverter;
@@ -99,6 +102,12 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
     @Inject
     private CloudNoSqlTablesToPlatformNoSqlTablesV1ResponseConverter cloudNoSqlTablesToPlatformNoSqlTablesV1ResponseConverter;
 
+    @Inject
+    private VerticalScaleInstanceProvider verticalScaleInstanceProvider;
+
+    @Inject
+    private EnvironmentService environmentService;
+
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public PlatformVmtypesResponse getVmTypesByCredential(
@@ -122,6 +131,29 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
         PlatformVmtypesResponse response = cloudVmTypesToPlatformVmTypesV1ResponseConverter.convert(cloudVmTypes);
         LOGGER.info("Resp /platform_resources/machine_types, request: {}, cloudVmTypes: {}, response: {}", request, cloudVmTypes, response);
+        return response;
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public PlatformVmtypesResponse getVmTypesForVerticalScaling(
+            @ResourceCrn String environmentCrn,
+            String instanceType,
+            CdpResourceType cdpResourceType) {
+        String accountId = getAccountId();
+        validateEnvironmentCrnPattern(environmentCrn);
+        EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(environmentCrn, accountId);
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironmentForVerticalScaling(
+                accountId,
+                environmentCrn,
+                environmentDto.getRegions().stream().findFirst().get().getName(),
+                cdpResourceType);
+        LOGGER.debug("Get /platform_resources/machine_types_for_vertical_scaling, request: {}", request);
+        CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
+        cloudVmTypes = verticalScaleInstanceProvider.listInstanceTypes(null, instanceType, cloudVmTypes);
+        PlatformVmtypesResponse response = cloudVmTypesToPlatformVmTypesV1ResponseConverter.convert(cloudVmTypes);
+        LOGGER.debug("Resp /platform_resources/machine_types_for_vertical_scaling, request: {}, cloudVmTypes: {}, response: {}",
+                request, cloudVmTypes, response);
         return response;
     }
 

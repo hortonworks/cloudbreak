@@ -46,6 +46,7 @@ public class PlatformResourceModelDescription {
         public static final String GET_SECURITYGROUPS = "retrieve securitygroups properties by environment";
         public static final String GET_SSHKEYS = "retrieve sshkeys properties by environment";
         public static final String GET_VMTYPES_BY_CREDENTIAL = "retrieve vmtype properties by environment";
+        public static final String GET_VERTICAL_SCALE_RECOMMENDATION = "get vertical scale recommendation";
         public static final String GET_GATEWAYS = "retrieve gateways with properties by environment";
         public static final String GET_IPPOOLS = "retrieve ip pools with properties by environment";
         public static final String GET_ACCESSCONFIGS = "retrieve access configs with properties by environment";

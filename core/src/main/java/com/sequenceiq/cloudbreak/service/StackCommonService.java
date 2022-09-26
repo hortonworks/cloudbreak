@@ -144,6 +144,9 @@ public class StackCommonService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
+    @Inject
+    private VerticalScalingValidatorService verticalScalingValidatorService;
+
     public StackV4Response createInWorkspace(StackV4Request stackRequest, User user, Workspace workspace, boolean distroxRequest) {
         return stackCreatorService.createStack(user, workspace, stackRequest, distroxRequest);
     }
@@ -290,11 +293,12 @@ public class StackCommonService {
     }
 
     public FlowIdentifier putVerticalScalingInWorkspace(NameOrCrn nameOrCrn, String accountId, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
-        StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
-        MDCBuilder.buildMdcContext(stack);
-        stackVerticalScaleV4Request.setStackId(stack.getId());
+        StackView stackView = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
+        Stack stack = stackService.getByIdWithLists(stackView.getId());
+        MDCBuilder.buildMdcContext(stackView);
+        stackVerticalScaleV4Request.setStackId(stackView.getId());
         validateVerticalScalingRequest(stack, stackVerticalScaleV4Request);
-        return clusterCommonService.putVerticalScaling(stack.getResourceCrn(), stackVerticalScaleV4Request);
+        return clusterCommonService.putVerticalScaling(stackView.getResourceCrn(), stackVerticalScaleV4Request);
     }
 
     private void validateScalingRequest(StackView stack, Integer scalingAdjustment) {
@@ -307,26 +311,11 @@ public class StackCommonService {
         nodeCountLimitValidator.validateScale(stack.getId(), scalingAdjustment, Crn.safeFromString(stack.getResourceCrn()).getAccountId());
     }
 
-    private void validateVerticalScalingRequest(StackView stack, StackVerticalScaleV4Request verticalScaleV4Request) {
-        if (!cloudParameterCache.isVerticalScalingSupported(stack.getCloudPlatform())) {
-            throw new BadRequestException(String.format("Vertical scaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
-        }
-        if (verticalScaleV4Request.getTemplate() == null) {
-            throw new BadRequestException(String.format("Define an exiting instancetype to vertically scale the %s Data Hubs.", stack.getCloudPlatform()));
-        }
-        if (verticalScaleV4Request.getTemplate().getInstanceType() == null) {
-            throw new BadRequestException(String.format("Define an exiting instancetype to vertically scale the %s Data Hubs.", stack.getCloudPlatform()));
-        }
-        if (anyAttachedVolumePropertyDefinedInVerticalScalingRequest(verticalScaleV4Request)) {
-            throw new BadRequestException(String.format("Only instance type modification is supported on %s Data Hubs.", stack.getCloudPlatform()));
-        }
-    }
-
-    private boolean anyAttachedVolumePropertyDefinedInVerticalScalingRequest(StackVerticalScaleV4Request verticalScaleV4Request) {
-        return verticalScaleV4Request.getTemplate().getEphemeralVolume() != null
-                || verticalScaleV4Request.getTemplate().getRootVolume() != null
-                || (verticalScaleV4Request.getTemplate().getAttachedVolumes() != null && !verticalScaleV4Request.getTemplate().getAttachedVolumes().isEmpty())
-                || verticalScaleV4Request.getTemplate().getTemporaryStorage() != null;
+    private void validateVerticalScalingRequest(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request) {
+        verticalScalingValidatorService.validateProvider(stack);
+        verticalScalingValidatorService.validateRequest(stack, verticalScaleV4Request);
+        verticalScalingValidatorService.validateStatus(stack);
+        verticalScalingValidatorService.validateInstanceType(stack, verticalScaleV4Request);
     }
 
     public void deleteWithKerberosInWorkspace(NameOrCrn nameOrCrn, String accountId, boolean forced) {

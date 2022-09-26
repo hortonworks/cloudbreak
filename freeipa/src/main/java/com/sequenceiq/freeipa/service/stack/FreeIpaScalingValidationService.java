@@ -43,7 +43,7 @@ public class FreeIpaScalingValidationService {
 
     public void validateStackForVerticalUpscale(Stack stack, VerticalScaleRequest request) {
         verticalScalingValidatorService.validateStatus(stack);
-        //verticalScalingValidatorService.validateRequest(stack, request);
+        verticalScalingValidatorService.validateRequest(stack, request);
     }
 
     public void validateStackForDownscale(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath) {

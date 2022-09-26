@@ -72,7 +72,7 @@ public class CoreVerticalScaleActions {
             @Override
             protected void doExecute(ClusterViewContext ctx, CoreVerticalScalingTriggerEvent payload, Map<Object, Object> variables) {
                 StackVerticalScaleV4Request stackVerticalScaleV4Request = payload.getRequest();
-                coreVerticalScaleService.verticalScale(ctx.getStackId());
+                coreVerticalScaleService.verticalScale(ctx.getStackId(), stackVerticalScaleV4Request);
                 StackDto stack = stackDtoService.getById(payload.getResourceId());
                 Set<Resource> resources = stack.getResources();
                 List<CloudResource> cloudResources =
@@ -108,7 +108,7 @@ public class CoreVerticalScaleActions {
             @Override
             protected void doExecute(ClusterViewContext context, CoreVerticalScaleResult payload, Map<Object, Object> variables) {
                 coreVerticalScaleService.updateTemplateWithVerticalScaleInformation(context.getStackId(), payload.getStackVerticalScaleV4Request());
-                coreVerticalScaleService.finishVerticalScale(context.getStackId());
+                coreVerticalScaleService.finishVerticalScale(context.getStackId(), payload.getStackVerticalScaleV4Request());
                 sendEvent(context);
             }
 
@@ -125,7 +125,10 @@ public class CoreVerticalScaleActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Exception during vertical scaling!: {}", payload.getException().getMessage());
-                flowMessageService.fireEventAndLog(payload.getResourceId(), UPDATE_FAILED.name(), CLUSTER_VERTICALSCALED_FAILED);
+                flowMessageService.fireEventAndLog(payload.getResourceId(),
+                        UPDATE_FAILED.name(),
+                        CLUSTER_VERTICALSCALED_FAILED,
+                        payload.getException().getMessage());
                 sendEvent(context);
             }
 

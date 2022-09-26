@@ -10,6 +10,7 @@ dependencies {
     implementation project(":authorization-common")
     implementation project(":environment-api")
     implementation project(":secret-engine")
+    implementation project(":cloud-api")
 
     testImplementation project(":common-model")
     testImplementation project(":auth-connector")

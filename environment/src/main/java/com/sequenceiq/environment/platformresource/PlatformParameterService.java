@@ -209,7 +209,6 @@ public class PlatformParameterService {
                 CdpResourceType.DEFAULT);
     }
 
-    //CHECKSTYLE:OFF
     public PlatformResourceRequest getPlatformResourceRequestByEnvironment(
             String accountId,
             String environmentCrn,
@@ -219,7 +218,6 @@ public class PlatformParameterService {
             String sharedProjectId,
             AccessConfigTypeQueryParam accessConfigType,
             CdpResourceType cdpResourceType) {
-        //CHECKSTYLE:ON
         String credentialCrn = credentialService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId, ENVIRONMENT).getResourceCrn();
         return getPlatformResourceRequest(
                 accountId,
@@ -234,7 +232,25 @@ public class PlatformParameterService {
                 cdpResourceType);
     }
 
-    //CHECKSTYLE:OFF
+    public PlatformResourceRequest getPlatformResourceRequestByEnvironmentForVerticalScaling(
+            String accountId,
+            String environmentCrn,
+            String region,
+            CdpResourceType cdpResourceType) {
+        Credential credential = credentialService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId, ENVIRONMENT);
+        return getPlatformResourceRequest(
+                accountId,
+                null,
+                credential.getResourceCrn(),
+                region,
+                credential.getCloudPlatform(),
+                null,
+                null,
+                new HashMap<>(),
+                null,
+                cdpResourceType == null ? CdpResourceType.DEFAULT : cdpResourceType);
+    }
+
     public PlatformResourceRequest getPlatformResourceRequest(
             String accountId,
             String credentialName,
@@ -246,7 +262,6 @@ public class PlatformParameterService {
             Map<String, String> filter,
             AccessConfigTypeQueryParam accessConfigType,
             CdpResourceType cdpResourceType) {
-        //CHECKSTYLE:ON
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
 
         if (!Strings.isNullOrEmpty(credentialName)) {
