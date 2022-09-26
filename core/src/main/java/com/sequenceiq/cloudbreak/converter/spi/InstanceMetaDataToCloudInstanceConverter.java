@@ -13,8 +13,11 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -34,6 +37,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 
 @Component
 public class InstanceMetaDataToCloudInstanceConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMetaDataToCloudInstanceConverter.class);
 
     @Inject
     private StackToCloudStackConverter stackToCloudStackConverter;
@@ -61,9 +66,21 @@ public class InstanceMetaDataToCloudInstanceConverter {
     public List<CloudInstance> convert(Collection<InstanceMetadataView> instanceMetadataViews, StackView stack) {
         List<CloudInstance> cloudInstances = new ArrayList<>();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
+        logConvertDetails(environment.getCloudPlatform(), String.format("Converting to cloudInstances based on input param instanceDataViews: %s",
+                Joiner.on(",").join(instanceMetadataViews.stream()
+                                .map(imd -> String.format("[name: %s, instance group name: %s]", imd.getInstanceName(), imd.getInstanceGroupName()))
+                                .collect(Collectors.toSet()))));
         Set<String> instanceGroupNames = instanceMetadataViews.stream().map(im -> im.getInstanceGroupName()).collect(Collectors.toSet());
+        logConvertDetails(environment.getCloudPlatform(),
+                String.format("InstanceGroup names has been collected based on input param instanceMetadataViews, result: %s",
+                        Joiner.on(",").join(instanceGroupNames)));
         List<InstanceGroupView> instanceGroupViews = instanceGroupService
                 .findAllInstanceGroupViewByStackIdAndGroupName(stack.getId(), instanceGroupNames);
+        logConvertDetails(environment.getCloudPlatform(),
+                String.format("InstanceGroupViews has been collected based on previously collected group names: %s",
+                        Joiner.on(",").join(instanceGroupViews.stream()
+                                .map(ig -> String.format("[name: %s, type: %s]", ig.getGroupName(), ig.getInstanceGroupType()))
+                                .collect(Collectors.toSet()))));
         for (InstanceMetadataView instanceMetadataView : instanceMetadataViews) {
             InstanceGroupView instanceGroupView = instanceGroupViews.stream()
                     .filter(ig -> ig.getGroupName().equals(instanceMetadataView.getInstanceGroupName()))
@@ -134,6 +151,13 @@ public class InstanceMetaDataToCloudInstanceConverter {
                 return InstanceStatus.TERMINATED_BY_PROVIDER;
             default:
                 return InstanceStatus.UNKNOWN;
+        }
+    }
+
+    // we need logs to investigate CB-18662, which seems GCP related, so filtering for GCP environments to avoid overgeneration of logs
+    private void logConvertDetails(String cloudPlatform, String message) {
+        if (cloudPlatform != null && CloudPlatform.GCP.equals(CloudPlatform.valueOf(cloudPlatform))) {
+            LOGGER.debug(message);
         }
     }
 
