@@ -48,7 +48,7 @@ public class UpgradePreconditionServiceTest {
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(dataHubStack1, dataHubStack2, dataHubStack3));
         Stack stack = new Stack();
 
-        String actualRunning = underTest.checkForRunningAttachedClusters(stackViewV4Responses, stack);
+        String actualRunning = underTest.checkForRunningAttachedClusters(stackViewV4Responses, stack, null);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
 
         assertEquals("There are attached Data Hub clusters in incorrect state: stack-1. Please stop those to be able to perform the upgrade.",
@@ -56,6 +56,22 @@ public class UpgradePreconditionServiceTest {
         assertEquals("", actualNonUpgradeable);
 
         verify(spotInstanceUsageCondition).isStackRunsOnSpotInstances(stack);
+    }
+
+    @Test
+    public void testCheckForRunningAttachedClustersShouldNotReturnErrorMessageWhenThereAreClustersInNotProperStateAndTheSkipValidationFlagIsTrue() {
+        StackViewV4Response dataHubStack1 = createStackResponse(Status.AVAILABLE, "stack-1", "stack-crn-1");
+        dataHubStack1.setCluster(createClusterResponse(Status.AVAILABLE, BlueprintBasedUpgradeOption.UPGRADE_ENABLED));
+        StackViewV4Response dataHubStack2 = createStackResponse(Status.DELETE_COMPLETED, "stack-2", "stack-crn-2");
+        dataHubStack2.setCluster(createClusterResponse(Status.DELETE_COMPLETED, BlueprintBasedUpgradeOption.UPGRADE_ENABLED));
+        StackViewV4Response dataHubStack3 = createStackResponse(Status.STOPPED, "stack-3", "stack-crn-2");
+        dataHubStack3.setCluster(createClusterResponse(Status.DELETE_COMPLETED, BlueprintBasedUpgradeOption.UPGRADE_ENABLED));
+        StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(dataHubStack1, dataHubStack2, dataHubStack3));
+        Stack stack = new Stack();
+
+        String actualRunning = underTest.checkForRunningAttachedClusters(stackViewV4Responses, stack, Boolean.TRUE);
+
+        assertEquals("", actualRunning);
     }
 
     @Test
@@ -69,7 +85,7 @@ public class UpgradePreconditionServiceTest {
 
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(dataHubStack1, dataHubStack2, dataHubStack3));
 
-        String actualRunning = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new Stack());
+        String actualRunning = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new Stack(), null);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
 
         assertEquals("", actualRunning);
@@ -90,7 +106,7 @@ public class UpgradePreconditionServiceTest {
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(dataHubStack1, dataHubStack2, dataHubStack3));
         when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.EPHEMERAL_VOLUMES);
 
-        String actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new Stack());
+        String actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new Stack(), Boolean.FALSE);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
 
         assertEquals("", actual);
@@ -112,7 +128,7 @@ public class UpgradePreconditionServiceTest {
         when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.NONE);
         when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(true);
 
-        String actualRunning = underTest.checkForRunningAttachedClusters(stackViewV4Responses, stack);
+        String actualRunning = underTest.checkForRunningAttachedClusters(stackViewV4Responses, stack, Boolean.FALSE);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
 
         assertEquals("", actualRunning);
@@ -130,7 +146,7 @@ public class UpgradePreconditionServiceTest {
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(dataHubStack1, dataHubStack2));
         Stack stack = new Stack();
 
-        String actualRunning = underTest.checkForRunningAttachedClusters(stackViewV4Responses, stack);
+        String actualRunning = underTest.checkForRunningAttachedClusters(stackViewV4Responses, stack, Boolean.FALSE);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
 
         assertEquals("There are attached Data Hub clusters that are non-upgradeable: stack-2. Please delete those to be able to perform the upgrade.",
@@ -148,7 +164,7 @@ public class UpgradePreconditionServiceTest {
         dataHubStack3.setCluster(createClusterResponse(Status.STOPPED, BlueprintBasedUpgradeOption.UPGRADE_ENABLED));
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(dataHubStack1, dataHubStack2, dataHubStack3));
 
-        String actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new Stack());
+        String actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new Stack(), Boolean.FALSE);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
 
         assertEquals("", actual);
@@ -167,7 +183,7 @@ public class UpgradePreconditionServiceTest {
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(dataHubStack1, dataHubStack2, dataHubStack3));
         Stack stack = new Stack();
 
-        String actualRunning = underTest.checkForRunningAttachedClusters(stackViewV4Responses, stack);
+        String actualRunning = underTest.checkForRunningAttachedClusters(stackViewV4Responses, stack, Boolean.FALSE);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
 
         assertEquals("There are attached Data Hub clusters in incorrect state: stack-1. Please stop those to be able to perform the upgrade.",
@@ -182,7 +198,7 @@ public class UpgradePreconditionServiceTest {
     public void testDataHubsNotAttached() {
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of());
 
-        String actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new Stack());
+        String actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new Stack(), Boolean.FALSE);
         String actualNonUpgradeable = underTest.checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
 
         assertEquals("", actual);

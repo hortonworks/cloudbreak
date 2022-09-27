@@ -146,7 +146,7 @@ class StackUpgradeOperationsTest {
 
     @Test
     void throwsBadRequestIfClusterHasMoreNodesThanTheLimit() {
-        UpgradeV4Request request = createUpgradeRequest(true);
+        UpgradeV4Request request = createUpgradeRequest(true, null);
         StackInstanceCount stackInstanceCount = mock(StackInstanceCount.class);
         when(stackInstanceCount.getInstanceCount()).thenReturn(201);
         when(limitConfiguration.getUpgradeNodeCountLimit(any())).thenReturn(200);
@@ -162,7 +162,7 @@ class StackUpgradeOperationsTest {
     @Test
     void testCheckForClusterUpgradeShouldReturnUpgradeCandidatesWhenTheUpgradeIsRuntimeUpgradeAndTheStackTypeIsWorkloadAndReplaceVmDisabled() {
         Stack stack = createStack(StackType.WORKLOAD);
-        UpgradeV4Request request = createUpgradeRequest(null);
+        UpgradeV4Request request = createUpgradeRequest(null, null);
         UpgradeV4Response upgradeResponse = new UpgradeV4Response();
         upgradeResponse.setUpgradeCandidates(List.of(new ImageInfoV4Response()));
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
@@ -186,7 +186,7 @@ class StackUpgradeOperationsTest {
     @Test
     void testCheckForClusterUpgradeShouldReturnUpgradeCandidatesWhenTheUpgradeIsRuntimeUpgradeAndTheStackTypeIsWorkloadAndReplaceVmEnabled() {
         Stack stack = createStack(StackType.WORKLOAD);
-        UpgradeV4Request request = createUpgradeRequest(true);
+        UpgradeV4Request request = createUpgradeRequest(true, null);
         UpgradeV4Response upgradeResponse = createUpgradeResponse();
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
         when(upgradeService.isOsUpgrade(request)).thenReturn(false);
@@ -216,7 +216,7 @@ class StackUpgradeOperationsTest {
     void testCheckForClusterUpgradeShouldReturnUpgradeCandidatesWhenTheUpgradeIsRuntimeUpgradeAndTheStackTypeIsDataLakeAndReplaceVmEnabled() {
         Stack stack = createStack(StackType.DATALAKE);
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses();
-        UpgradeV4Request request = createUpgradeRequest(null);
+        UpgradeV4Request request = createUpgradeRequest(null, true);
         UpgradeV4Response upgradeResponse = createUpgradeResponse();
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
         when(upgradeService.isOsUpgrade(request)).thenReturn(false);
@@ -239,7 +239,7 @@ class StackUpgradeOperationsTest {
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponse, request, true);
         verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
         verify(stackOperations).listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any());
-        verify(upgradePreconditionService).checkForRunningAttachedClusters(stackViewV4Responses, stack);
+        verify(upgradePreconditionService).checkForRunningAttachedClusters(stackViewV4Responses, stack, request.isSkipDataHubValidation());
         verify(upgradePreconditionService).checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
         verifyNoInteractions(clusterDBValidationService);
     }
@@ -247,7 +247,7 @@ class StackUpgradeOperationsTest {
     @Test
     void testCheckForClusterUpgradeShouldReturnUpgradeCandidatesWhenTheUpgradeIsRuntimeUpgradeAndTheStackTypeIsDataLakeAndReplaceVmEnabledAndPrepare() {
         Stack stack = createStack(StackType.DATALAKE);
-        UpgradeV4Request request = createUpgradeRequest(null);
+        UpgradeV4Request request = createUpgradeRequest(null, null);
         request.setInternalUpgradeSettings(new InternalUpgradeSettings(false, false, false, true));
         UpgradeV4Response upgradeResponse = createUpgradeResponse();
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
@@ -277,7 +277,7 @@ class StackUpgradeOperationsTest {
     void testCheckForClusterUpgradeShouldReturnCompositeErrorWhenBothAttachedDataHubValidationsFail() {
         Stack stack = createStack(StackType.DATALAKE);
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses();
-        UpgradeV4Request request = createUpgradeRequest(null);
+        UpgradeV4Request request = createUpgradeRequest(null, true);
         UpgradeV4Response upgradeResponseToReturn = createUpgradeResponse();
         UpgradeV4Response expectedResponse = createUpgradeResponse();
         expectedResponse.setReason("There are attached Data Hub clusters that are non-upgradeable There are attached Data Hub clusters in incorrect state");
@@ -291,7 +291,7 @@ class StackUpgradeOperationsTest {
                 .thenReturn(upgradeResponseToReturn);
         when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
         when(stackOperations.listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any())).thenReturn(stackViewV4Responses);
-        when(upgradePreconditionService.checkForRunningAttachedClusters(stackViewV4Responses, stack))
+        when(upgradePreconditionService.checkForRunningAttachedClusters(stackViewV4Responses, stack, request.isSkipDataHubValidation()))
                 .thenReturn("There are attached Data Hub clusters in incorrect state");
         when(upgradePreconditionService.checkForNonUpgradeableAttachedClusters(stackViewV4Responses))
                 .thenReturn("There are attached Data Hub clusters that are non-upgradeable");
@@ -307,7 +307,7 @@ class StackUpgradeOperationsTest {
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponseToReturn, request, true);
         verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
         verify(stackOperations).listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any());
-        verify(upgradePreconditionService).checkForRunningAttachedClusters(stackViewV4Responses, stack);
+        verify(upgradePreconditionService).checkForRunningAttachedClusters(stackViewV4Responses, stack, request.isSkipDataHubValidation());
         verify(upgradePreconditionService).checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
         verifyNoInteractions(clusterDBValidationService);
     }
@@ -316,7 +316,7 @@ class StackUpgradeOperationsTest {
     void testCheckForClusterUpgradeShouldNotValidateUpgradeableDataHubsWhenDataHubUpgradeEntitlementIsGranted() {
         Stack stack = createStack(StackType.DATALAKE);
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses();
-        UpgradeV4Request request = createUpgradeRequest(null);
+        UpgradeV4Request request = createUpgradeRequest(null, null);
         UpgradeV4Response upgradeResponseToReturn = createUpgradeResponse();
         UpgradeV4Response expectedResponse = createUpgradeResponse();
         expectedResponse.setReason("There are attached Data Hub clusters in incorrect state");
@@ -331,7 +331,7 @@ class StackUpgradeOperationsTest {
         when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
         when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
         when(stackOperations.listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any())).thenReturn(stackViewV4Responses);
-        when(upgradePreconditionService.checkForRunningAttachedClusters(stackViewV4Responses, stack))
+        when(upgradePreconditionService.checkForRunningAttachedClusters(stackViewV4Responses, stack, request.isSkipDataHubValidation()))
                 .thenReturn("There are attached Data Hub clusters in incorrect state");
 
         UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, WORKSPACE_ID, request);
@@ -345,7 +345,7 @@ class StackUpgradeOperationsTest {
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponseToReturn, request, true);
         verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
         verify(stackOperations).listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any());
-        verify(upgradePreconditionService).checkForRunningAttachedClusters(stackViewV4Responses, stack);
+        verify(upgradePreconditionService).checkForRunningAttachedClusters(stackViewV4Responses, stack, request.isSkipDataHubValidation());
         verify(upgradePreconditionService, times(0)).checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
         verifyNoInteractions(clusterDBValidationService);
     }
@@ -366,9 +366,10 @@ class StackUpgradeOperationsTest {
         return upgradeResponse;
     }
 
-    private UpgradeV4Request createUpgradeRequest(Boolean replaceVm) {
+    private UpgradeV4Request createUpgradeRequest(Boolean replaceVm, Boolean skipDataHubValidation) {
         UpgradeV4Request upgradeRequest = new UpgradeV4Request();
         upgradeRequest.setReplaceVms(replaceVm);
+        upgradeRequest.setSkipDataHubValidation(skipDataHubValidation);
         upgradeRequest.setInternalUpgradeSettings(new InternalUpgradeSettings(true, true, true));
         return upgradeRequest;
     }

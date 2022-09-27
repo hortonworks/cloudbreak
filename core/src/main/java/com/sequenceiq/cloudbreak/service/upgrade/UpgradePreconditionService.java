@@ -32,9 +32,9 @@ public class UpgradePreconditionService {
     @Inject
     private StackStopRestrictionService stackStopRestrictionService;
 
-    public String checkForRunningAttachedClusters(StackViewV4Responses stackViewV4Responses, Stack stack) {
+    public String checkForRunningAttachedClusters(StackViewV4Responses stackViewV4Responses, Stack stack, Boolean skipDataHubValidation) {
         String notStoppedAttachedClusters = getNotStoppedAttachedClusters(stackViewV4Responses, stack);
-        if (!notStoppedAttachedClusters.isEmpty()) {
+        if (!Boolean.TRUE.equals(skipDataHubValidation) && !notStoppedAttachedClusters.isEmpty()) {
             return String.format("There are attached Data Hub clusters in incorrect state: %s. "
                     + "Please stop those to be able to perform the upgrade.", notStoppedAttachedClusters);
         }
