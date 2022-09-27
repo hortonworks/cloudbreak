@@ -15,6 +15,12 @@ public class Poller<V> {
                 .stopIfException(true)
                 .stopAfterDelay(durationInMinutes, TimeUnit.MINUTES)
                 .run(attemptMaker);
+    }
 
+    public void runPollerDontStopOnException(long sleepTimeInSeconds, long durationInMinutes, AttemptMaker<V> attemptMaker) {
+        Polling.waitPeriodly(sleepTimeInSeconds, TimeUnit.SECONDS)
+                .stopIfException(false)
+                .stopAfterDelay(durationInMinutes, TimeUnit.MINUTES)
+                .run(attemptMaker);
     }
 }
