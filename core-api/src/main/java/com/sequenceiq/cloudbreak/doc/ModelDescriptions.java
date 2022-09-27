@@ -15,7 +15,9 @@ public class ModelDescriptions {
     public static final String CREATED = "creation time of the resource in long";
     public static final String AMBARI_SERVER = "ambari server address";
     public static final String WORKSPACE_OF_THE_RESOURCE = "workspace of the resource";
-    public static final String CREATOR = "the creator of the resource";
+    public static final String CREATOR = "the creator of the resource - Deprecated: data owner of any user in UMS, " +
+            "creator should not be stored and used anywhere, since user of creator can leave the given company and can become invalid, " +
+            "usage of it can be error prone";
     public static final String CRN = "the unique crn of the resource";
     public static final String CRNS = "the unique crns of the resource";
     public static final String USER_ID = "User ID in the new authorization model";

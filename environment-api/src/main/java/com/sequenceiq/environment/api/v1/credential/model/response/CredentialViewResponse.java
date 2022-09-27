@@ -21,7 +21,12 @@ public class CredentialViewResponse implements Serializable {
     @ApiModelProperty(ModelDescriptions.CRN)
     private String crn;
 
-    @ApiModelProperty(CredentialModelDescription.CREATOR)
+    /**
+     * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+     * and can become invalid, usage of it can be error prone
+     */
+    @Deprecated
+    @ApiModelProperty(ModelDescriptions.CREATOR)
     private String creator;
 
     @ApiModelProperty(value = CredentialModelDescription.CLOUD_PLATFORM, required = true)
@@ -54,10 +59,20 @@ public class CredentialViewResponse implements Serializable {
         this.crn = crn;
     }
 
+    /**
+     * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+     * and can become invalid, usage of it can be error prone
+     */
+    @Deprecated
     public String getCreator() {
         return creator;
     }
 
+    /**
+     * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+     * and can become invalid, usage of it can be error prone
+     */
+    @Deprecated
     public void setCreator(String creator) {
         this.creator = creator;
     }

@@ -25,7 +25,6 @@ public class ProxyConfigDescription {
     public static final String NAME = "Name of the proxy configuration resource";
     public static final String USERNAME = "Username to use for basic authentication";
     public static final String PASSWORD = "Password to use for basic authentication";
-    public static final String CREATOR = "crn of the creator";
     public static final String GET_BY_ENVIRONMENT_CRN = "get proxyconfig by environment crn";
 
     private ProxyConfigDescription() {

@@ -59,6 +59,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String description;
 
+        /**
+         * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+         * and can become invalid, usage of it can be error prone
+         */
+        @Deprecated
         private String creator;
 
         private boolean createFreeIpa;
@@ -149,6 +154,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        /**
+         * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+         * and can become invalid, usage of it can be error prone
+         */
+        @Deprecated
         public Builder withCreator(String creator) {
             this.creator = creator;
             return this;

@@ -12,6 +12,11 @@ public class Credential implements Serializable {
 
     private final String crn;
 
+    /**
+     * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+     * and can become invalid, usage of it can be error prone
+     */
+    @Deprecated
     private final String creator;
 
     private final String account;
@@ -69,6 +74,11 @@ public class Credential implements Serializable {
         return new Builder();
     }
 
+    /**
+     * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+     * and can become invalid, usage of it can be error prone
+     */
+    @Deprecated
     public String getCreator() {
         return creator;
     }
@@ -105,6 +115,11 @@ public class Credential implements Serializable {
 
         private String cloudPlatform;
 
+        /**
+         * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+         * and can become invalid, usage of it can be error prone
+         */
+        @Deprecated
         private String creator;
 
         private String account;
@@ -126,6 +141,11 @@ public class Credential implements Serializable {
             return this;
         }
 
+        /**
+         * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+         * and can become invalid, usage of it can be error prone
+         */
+        @Deprecated
         public Builder creator(String creator) {
             this.creator = creator;
             return this;

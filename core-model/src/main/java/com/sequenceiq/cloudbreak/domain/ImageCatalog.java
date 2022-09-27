@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,9 +18,6 @@ import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
@@ -50,6 +50,11 @@ public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "imageCatalog", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CustomImage> customImages = new HashSet<>();
 
+    /**
+     * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+     * and can become invalid, usage of it can be error prone
+     */
+    @Deprecated
     private String creator;
 
     private Long created = System.currentTimeMillis();
@@ -66,10 +71,20 @@ public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
         this.resourceCrn = resourceCrn;
     }
 
+    /**
+     * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+     * and can become invalid, usage of it can be error prone
+     */
+    @Deprecated
     public String getCreator() {
         return creator;
     }
 
+    /**
+     * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+     * and can become invalid, usage of it can be error prone
+     */
+    @Deprecated
     public void setCreator(String creator) {
         this.creator = creator;
     }
