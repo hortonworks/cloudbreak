@@ -2,10 +2,13 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponse;
 import com.sequenceiq.it.cloudbreak.assertion.CBAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.audit.BlueprintAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
@@ -40,6 +43,8 @@ public class CmTemplateBlueprintTest extends BlueprintTestBase {
                 .withBlueprint(super.getValidCMTemplateText())
                 .when(blueprintTestClient.createV4(), key(blueprintName))
                 .then((tc, entity, cc) -> checkBlueprintNameMatches(entity, blueprintName))
+                .when(blueprintTestClient.listV4())
+                .then((tc, entity, cc) -> checkBlueprintLastUpdatedNotNull(entity))
                 .when(blueprintTestClient.deleteV4())
                 .then(blueprintAuditGrpcServiceAssertion::create)
                 .then(blueprintAuditGrpcServiceAssertion::delete)
@@ -51,4 +56,9 @@ public class CmTemplateBlueprintTest extends BlueprintTestBase {
         return entity;
     }
 
+    private BlueprintTestDto checkBlueprintLastUpdatedNotNull(BlueprintTestDto entity) {
+        Optional<BlueprintV4ViewResponse> bpResponse =  entity.getViewResponses().stream().findFirst();
+        CBAssertion.assertTrue(bpResponse.isPresent() && bpResponse.get().getLastUpdated() > 0);
+        return entity;
+    }
 }

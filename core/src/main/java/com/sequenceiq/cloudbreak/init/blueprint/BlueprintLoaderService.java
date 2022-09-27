@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DE
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT_DELETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -174,6 +175,7 @@ public class BlueprintLoaderService {
         blueprintFromDatabase.setStackType(newBlueprint.getStackType());
         blueprintFromDatabase.setStackVersion(newBlueprint.getStackVersion());
         blueprintFromDatabase.setBlueprintUpgradeOption(getBlueprintUpgradeOption(newBlueprint));
+        blueprintFromDatabase.setLastUpdated(Instant.now().toEpochMilli());
         return blueprintFromDatabase;
     }
 

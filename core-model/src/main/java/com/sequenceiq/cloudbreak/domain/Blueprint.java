@@ -65,6 +65,8 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
 
     private Long created = System.currentTimeMillis();
 
+    private Long lastUpdated = System.currentTimeMillis();
+
     @Convert(converter = BlueprintUpgradeOptionConverter.class)
     private BlueprintUpgradeOption blueprintUpgradeOption;
 
@@ -180,6 +182,14 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
         this.blueprintUpgradeOption = blueprintUpgradeOption;
     }
 
+    public Long getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(Long lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
     @Override
     public String toString() {
         return "Blueprint{" +
@@ -196,6 +206,7 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
                 ", stackVersion='" + stackVersion + '\'' +
                 ", created=" + created +
                 ", blueprintUpgradeOption=" + blueprintUpgradeOption +
+                ", lastUpdated=" + lastUpdated +
                 '}';
     }
 }

@@ -360,6 +360,7 @@ class BlueprintServiceTest {
         Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true);
         assertEquals(3, result.size());
         assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).containsAll(Set.of("bp1", "bp2", "bp3")));
+        assertEquals(123456789L, result.stream().map(BlueprintView::getLastUpdated).findFirst().get());
     }
 
     @Test
@@ -584,6 +585,7 @@ class BlueprintServiceTest {
         blueprint.setWorkspace(getWorkspace());
         blueprint.setStatus(status);
         blueprint.setResourceCrn("someCrn");
+        blueprint.setLastUpdated(123456789L);
         if (sdxReady != null) {
             blueprint.setTags(Json.silent(Map.of("shared_services_ready", sdxReady)));
         }
