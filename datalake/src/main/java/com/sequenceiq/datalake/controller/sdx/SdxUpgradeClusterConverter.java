@@ -33,6 +33,7 @@ public class SdxUpgradeClusterConverter {
             upgradeV4Request.setShowAvailableImages(UpgradeShowAvailableImages.valueOf(sdxUpgradeRequest.getShowAvailableImages().name()));
         }
         upgradeV4Request.setReplaceVms(Optional.ofNullable(sdxUpgradeRequest.getReplaceVms()).orElse(SdxUpgradeReplaceVms.ENABLED).getBooleanValue());
+        upgradeV4Request.setSkipDataHubValidation(sdxUpgradeRequest.getSkipDataHubValidation());
         return upgradeV4Request;
     }
 }

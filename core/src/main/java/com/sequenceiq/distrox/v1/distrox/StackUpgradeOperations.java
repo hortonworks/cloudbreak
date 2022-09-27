@@ -124,13 +124,14 @@ public class StackUpgradeOperations {
         if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
             clusterUpgradeAvailabilityService.filterUpgradeOptions(accountId, upgradeResponse, request, stack.isDatalake());
         }
-        validateAttachedDataHubsForDataLake(accountId, workspaceId, stack, upgradeResponse, request.getInternalUpgradeSettings());
+        validateAttachedDataHubsForDataLake(accountId, workspaceId, stack, upgradeResponse, request);
         LOGGER.debug("Upgrade response after validations: {}", upgradeResponse);
         return upgradeResponse;
     }
 
     private void validateAttachedDataHubsForDataLake(String accountId, Long workspaceId, Stack stack, UpgradeV4Response upgradeResponse,
-            InternalUpgradeSettings internalUpgradeSettings) {
+            UpgradeV4Request request) {
+        InternalUpgradeSettings internalUpgradeSettings = request.getInternalUpgradeSettings();
         if (entitlementService.runtimeUpgradeEnabled(accountId) && StackType.DATALAKE == stack.getType()
                 && (internalUpgradeSettings == null || !internalUpgradeSettings.isUpgradePreparation())) {
             LOGGER.info("Checking that the attached DataHubs of the Data lake are both in stopped state and upgradeable only in case if "
@@ -140,7 +141,8 @@ public class StackUpgradeOperations {
             if (!entitlementService.datahubRuntimeUpgradeEnabled(accountId)) {
                 upgradeResponse.appendReason(upgradePreconditionService.checkForNonUpgradeableAttachedClusters(stackViewV4Responses));
             }
-            upgradeResponse.appendReason(upgradePreconditionService.checkForRunningAttachedClusters(stackViewV4Responses, stack));
+            upgradeResponse.appendReason(upgradePreconditionService.checkForRunningAttachedClusters(stackViewV4Responses, stack, request.
+                    isSkipDataHubValidation()));
         }
     }
 

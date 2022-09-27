@@ -30,6 +30,9 @@ public class SdxUpgradeRequest {
     @ApiModelProperty(ModelDescriptions.SKIP_BACKUP)
     private Boolean skipBackup;
 
+    @ApiModelProperty(ModelDescriptions.SKIP_DATAHUB_VALIDATION)
+    private Boolean skipDataHubValidation;
+
     @ApiModelProperty(ModelDescriptions.SKIP_ATLAS)
     private boolean skipAtlasMetadata;
 
@@ -87,6 +90,14 @@ public class SdxUpgradeRequest {
 
     public void setSkipBackup(Boolean skipBackup) {
         this.skipBackup = skipBackup;
+    }
+
+    public Boolean getSkipDataHubValidation() {
+        return skipDataHubValidation;
+    }
+
+    public void setSkipDataHubValidation(Boolean skipDataHubValidation) {
+        this.skipDataHubValidation = skipDataHubValidation;
     }
 
     public SdxUpgradeShowAvailableImages getShowAvailableImages() {
@@ -168,6 +179,7 @@ public class SdxUpgradeRequest {
                 ", dryRun=" + dryRun +
                 ", skipBackup=" + skipBackup +
                 ", replaceVms=" + replaceVms +
+                ", skipDataHubValidation=" + skipDataHubValidation +
                 '}';
     }
 }

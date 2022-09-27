@@ -31,6 +31,9 @@ public class UpgradeV4Request {
 
     private Boolean replaceVms = Boolean.TRUE;
 
+    @ApiModelProperty(UpgradeModelDescription.SKIP_DATAHUB_VALIDATION)
+    private Boolean skipDataHubValidation;
+
     @ApiModelProperty(UpgradeModelDescription.SHOW_AVAILABLE_IMAGES)
     private UpgradeShowAvailableImages showAvailableImages = UpgradeShowAvailableImages.DO_NOT_SHOW;
 
@@ -97,6 +100,14 @@ public class UpgradeV4Request {
         this.replaceVms = replaceVms;
     }
 
+    public Boolean isSkipDataHubValidation() {
+        return skipDataHubValidation;
+    }
+
+    public void setSkipDataHubValidation(Boolean skipDataHubValidation) {
+        this.skipDataHubValidation = skipDataHubValidation;
+    }
+
     public boolean isEmpty() {
         return isUnspecifiedUpgradeType() &&
                 !Boolean.TRUE.equals(dryRun) &&
@@ -134,6 +145,7 @@ public class UpgradeV4Request {
                 .add("lockComponents=" + lockComponents)
                 .add("dryRun=" + dryRun)
                 .add("replaceVms=" + replaceVms)
+                .add("skipDataHubValidation=" + skipDataHubValidation)
                 .add("showAvailableImages=" + showAvailableImages)
                 .add("internalUpgradeSettings=" + internalUpgradeSettings)
                 .toString();
