@@ -24,6 +24,11 @@ public class EnvironmentCreationDto {
 
     private final String accountId;
 
+    /**
+     * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+     * and can become invalid, usage of it can be error prone
+     */
+    @Deprecated
     private final String creator;
 
     private final LocationDto location;
@@ -121,6 +126,11 @@ public class EnvironmentCreationDto {
         return accountId;
     }
 
+    /**
+     * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+     * and can become invalid, usage of it can be error prone
+     */
+    @Deprecated
     public String getCreator() {
         return creator;
     }
@@ -201,6 +211,11 @@ public class EnvironmentCreationDto {
 
         private String accountId;
 
+        /**
+         * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+         * and can become invalid, usage of it can be error prone
+         */
+        @Deprecated
         private String creator;
 
         private LocationDto location;
@@ -260,6 +275,11 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        /**
+         * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+         * and can become invalid, usage of it can be error prone
+         */
+        @Deprecated
         public Builder withCreator(String creator) {
             this.creator = creator;
             return this;

@@ -2,6 +2,7 @@ package com.sequenceiq.environment.api.v1.proxy.model.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.proxy.ProxyConfigDescription;
 import com.sequenceiq.environment.api.v1.proxy.model.ProxyBase;
 
@@ -15,7 +16,12 @@ public class ProxyViewResponse extends ProxyBase {
     @ApiModelProperty(ProxyConfigDescription.PROXY_CONFIG_ID)
     private String crn;
 
-    @ApiModelProperty(ProxyConfigDescription.CREATOR)
+    /**
+     * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+     * and can become invalid, usage of it can be error prone
+     */
+    @Deprecated
+    @ApiModelProperty(ModelDescriptions.CREATOR)
     private String creator;
 
     public String getCrn() {
@@ -26,10 +32,20 @@ public class ProxyViewResponse extends ProxyBase {
         this.crn = crn;
     }
 
+    /**
+     * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+     * and can become invalid, usage of it can be error prone
+     */
+    @Deprecated
     public String getCreator() {
         return creator;
     }
 
+    /**
+     * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+     * and can become invalid, usage of it can be error prone
+     */
+    @Deprecated
     public void setCreator(String creator) {
         this.creator = creator;
     }

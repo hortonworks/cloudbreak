@@ -52,6 +52,11 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
     private String statusReason;
 
+    /**
+     * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+     * and can become invalid, usage of it can be error prone
+     */
+    @Deprecated
     private String creator;
 
     private FreeIpaCreationDto freeIpaCreation;
@@ -215,10 +220,20 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         this.status = status;
     }
 
+    /**
+     * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+     * and can become invalid, usage of it can be error prone
+     */
+    @Deprecated
     public String getCreator() {
         return creator;
     }
 
+    /**
+     * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+     * and can become invalid, usage of it can be error prone
+     */
+    @Deprecated
     public void setCreator(String creator) {
         this.creator = creator;
     }
@@ -413,6 +428,11 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
         private EnvironmentStatus environmentStatus;
 
+        /**
+         * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+         * and can become invalid, usage of it can be error prone
+         */
+        @Deprecated
         private String creator;
 
         private String statusReason;
@@ -513,6 +533,11 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             return (B) this;
         }
 
+        /**
+         * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
+         * and can become invalid, usage of it can be error prone
+         */
+        @Deprecated
         public B withCreator(String creator) {
             this.creator = creator;
             return (B) this;
