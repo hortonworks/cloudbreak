@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -20,10 +21,13 @@ import java.util.Set;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -41,6 +45,9 @@ import com.sequenceiq.environment.experience.policy.response.ExperiencePolicyRes
 class CommonExperienceConnectorServiceTest {
 
     private static final String COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG = "Unable to resolve the experience's response!";
+
+    private static final String NOT_SUCCESSFUL_EXPERIENCE_DELETE_MESSAGE = "We are unable to delete connected experience(s), please retry or check " +
+            "your experiences manually.";
 
     private static final String TEST_XP_BASE_PATH = "someExperienceBasePath";
 
@@ -87,7 +94,7 @@ class CommonExperienceConnectorServiceTest {
 
         when(mockWebTarget.getUri()).thenReturn(TEST_URI);
         lenient().when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
-        lenient().when(mockStatusType.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);
+        lenient().when(mockStatusType.getFamily()).thenReturn(Family.SUCCESSFUL);
         lenient().when(mockResponse.getStatusInfo()).thenReturn(mockStatusType);
     }
 
@@ -393,6 +400,20 @@ class CommonExperienceConnectorServiceTest {
         assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, expectedException.getMessage());
 
         verify(mockCommonExperienceResponseReader, never()).read(any(), any(), any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Family.class, names = "SUCCESSFUL", mode = EXCLUDE)
+    void testWhenDeletionReturnsWithNotSuccessfulStatusThenExceptionShouldCome(Family family) {
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockStatusType.getFamily()).thenReturn(family);
+        when(mockResponse.getStatusInfo()).thenReturn(mockStatusType);
+        when(mockRetryableWebTarget.delete(any())).thenReturn(mockResponse);
+
+        ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
+                () -> underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN, false));
+
+        assertEquals(NOT_SUCCESSFUL_EXPERIENCE_DELETE_MESSAGE, expectedException.getMessage());
     }
 
     private CpInternalEnvironmentResponse createCpInternalEnvironmentResponse() {

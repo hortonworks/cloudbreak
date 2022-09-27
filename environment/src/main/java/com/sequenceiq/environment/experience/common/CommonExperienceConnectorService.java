@@ -104,7 +104,9 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
 
     private void throwExceptionIfResultIsUnsuccessful(Response response) {
         if (!response.getStatusInfo().getFamily().equals(SUCCESSFUL)) {
-            throw new ExperienceOperationFailedException("Something has happened during the delete execution!");
+            LOGGER.info("Experience deletion result was not {} but {} with the reason of: {}",
+                    SUCCESSFUL.name(), response.getStatusInfo().getFamily().name(), response.getStatusInfo().getReasonPhrase());
+            throw new ExperienceOperationFailedException("We are unable to delete connected experience(s), please retry or check your experiences manually.");
         }
     }
 
