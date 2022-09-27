@@ -46,7 +46,8 @@ public class SaltHighStateDurationAssertions {
         Map<String, Double> fetchedFreeIpaSaltDurations = fetchSaltDurations("freeipa");
         List<SaltHighstateReport> freeIpaSaltHighstateReports = saltMetrics.getSaltExecutionMetrics(freeIpaTestDto.getEnvironmentCrn(),
                 freeIpaTestDto.getName(), freeIpaClient, "freeipa");
-        validateSaltStatesTotalDurations(freeIpaSaltHighstateReports, fetchedFreeIpaSaltDurations);
+        Table<String, String, Double> saltStatesTotalDurations = validateSaltStatesTotalDurations(freeIpaSaltHighstateReports, fetchedFreeIpaSaltDurations);
+        saltMetrics.writeSaltStatesTotalDurationsReportsToFiles(testContext, "freeipa", saltStatesTotalDurations);
         return freeIpaTestDto;
     }
 
@@ -54,7 +55,8 @@ public class SaltHighStateDurationAssertions {
         Map<String, Double> fetchedSdxSaltDurations = fetchSaltDurations("sdx");
         List<SaltHighstateReport> sdxSaltHighstateReports = saltMetrics.getSaltExecutionMetrics(sdxTestDto.getResponse().getEnvironmentCrn(),
                 sdxTestDto.getName(), sdxClient, "sdx");
-        validateSaltStatesTotalDurations(sdxSaltHighstateReports, fetchedSdxSaltDurations);
+        Table<String, String, Double> saltStatesTotalDurations = validateSaltStatesTotalDurations(sdxSaltHighstateReports, fetchedSdxSaltDurations);
+        saltMetrics.writeSaltStatesTotalDurationsReportsToFiles(testContext, "sdx", saltStatesTotalDurations);
         return sdxTestDto;
     }
 
@@ -62,7 +64,8 @@ public class SaltHighStateDurationAssertions {
         Map<String, Double> fetchedDistroxSaltDurations = fetchSaltDurations("distrox");
         List<SaltHighstateReport> distroxSaltHighstateReports = saltMetrics.getSaltExecutionMetrics(distroXTestDto.getResponse().getEnvironmentCrn(),
                 distroXTestDto.getName(), cloudbreakClient, "distrox");
-        validateSaltStatesTotalDurations(distroxSaltHighstateReports, fetchedDistroxSaltDurations);
+        Table<String, String, Double> saltStatesTotalDurations = validateSaltStatesTotalDurations(distroxSaltHighstateReports, fetchedDistroxSaltDurations);
+        saltMetrics.writeSaltStatesTotalDurationsReportsToFiles(testContext, "distrox", saltStatesTotalDurations);
         return distroXTestDto;
     }
 
@@ -92,7 +95,8 @@ public class SaltHighStateDurationAssertions {
         }
     }
 
-    private void validateSaltStatesTotalDurations(List<SaltHighstateReport> saltHighstateReports, Map<String, Double> fetchedSaltDurations) {
+    private Table<String, String, Double> validateSaltStatesTotalDurations(List<SaltHighstateReport> saltHighstateReports,
+            Map<String, Double> fetchedSaltDurations) {
         Table<String, String, Double> saltStatesTotalDurations = Tables.synchronizedTable(HashBasedTable.create());
         LOGGER.info("Number of Salt High State reports: {}", saltHighstateReports.size());
         for (SaltHighstateReport saltHighstateReport : saltHighstateReports) {
@@ -120,5 +124,6 @@ public class SaltHighStateDurationAssertions {
             }
         }
         LOGGER.info("Total durations for Salt states by job: {}", saltStatesTotalDurations);
+        return saltStatesTotalDurations;
     }
 }

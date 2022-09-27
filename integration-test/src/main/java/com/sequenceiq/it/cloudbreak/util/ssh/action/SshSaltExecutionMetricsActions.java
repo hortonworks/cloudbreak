@@ -3,9 +3,11 @@ package com.sequenceiq.it.cloudbreak.util.ssh.action;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY_PRIMARY;
 import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -33,6 +35,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Table;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
@@ -83,6 +86,20 @@ public class SshSaltExecutionMetricsActions extends SshJClientActions {
             LOGGER.info("Error occurred while trying to retrieve Salt execution metrics and generating report on instance [{}]: {}",
                     saltMasterIp, e.getMessage());
             throw new RuntimeException(e);
+        }
+    }
+
+    public void writeSaltStatesTotalDurationsReportsToFiles(TestContext testContext, String serviceName,
+            Table<String, String, Double> saltStatesTotalDurations) {
+        String fileName = String.format("salt_states_totalduration_report_%s_%s.log", serviceName,
+                testContext.getTestMethodName().orElse(DEFAULT_TEST_METHOD_NAME));
+        File outputDirectory = new File(saltMetricsWorkingDirectory);
+        String filePath = outputDirectory.getPath() + System.getProperty("file.separator") + fileName;
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            writer.write(saltStatesTotalDurations.toString());
+            LOGGER.info("Log file for Salt States Totalduration report has been created successfully at: {}", filePath);
+        } catch (IOException e) {
+            LOGGER.error("Cannot create log file for Salt States Totalduration report!", e);
         }
     }
 
