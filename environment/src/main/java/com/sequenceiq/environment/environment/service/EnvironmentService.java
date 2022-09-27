@@ -180,16 +180,23 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     }
 
     public Map<String, Set<String>> collectExperiences(NameOrCrn environmentNameOrCrn) {
+        LOGGER.debug("Collecting of connected experience(s) has been requested for environment: {}", environmentNameOrCrn.getNameOrCrn());
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Map<String, Set<String>> xps = new HashMap<>();
         EnvironmentDto environment;
+        LOGGER.debug("Attempting to fetch {} based on {} for account: {}", EnvironmentDto.class.getSimpleName(), environmentNameOrCrn.hasName()
+                ? "name: " + environmentNameOrCrn.getName() : "crn: " + environmentNameOrCrn.getCrn(), accountId);
         if (environmentNameOrCrn.hasName()) {
             environment = getByNameAndAccountId(environmentNameOrCrn.getName(), accountId);
         } else {
             environment = getByCrnAndAccountId(environmentNameOrCrn.getCrn(), accountId);
         }
+        LOGGER.debug("About to collect connected experiences for environment: {}", environment.getName());
         Set<ExperienceCluster> connectedExperiences = experienceConnectorService.getConnectedExperiences(fromEnvironmentDto(environment));
+        LOGGER.debug(connectedExperiences.isEmpty() ? "No experience found for environment: " + environment.getName()
+                : connectedExperiences.size() + " experience(s) found for environment: " + environment.getName());
         Set<String> experienceTypes = connectedExperiences.stream().map(ExperienceCluster::getPublicName).collect(Collectors.toSet());
+        LOGGER.debug("The following experiences are depending on the environment [{}]: {}", environment.getName(), String.join(",", experienceTypes));
         for (String experienceType : experienceTypes) {
             Set<String> clusters = connectedExperiences.stream().filter(experienceCluster -> experienceType.equals(experienceCluster.getPublicName()))
                     .map(experienceCluster -> experienceCluster.getName())
