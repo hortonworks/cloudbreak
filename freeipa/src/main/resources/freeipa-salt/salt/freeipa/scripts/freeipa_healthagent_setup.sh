@@ -26,3 +26,12 @@ else
   log "Unable to track any kind of httpd certificate."
   exit 1
 fi
+
+#
+# Create dirsrv- file if does not exist. It happens in case of RHEL8
+#
+DIRSRV_FILE=/etc/sysconfig/dirsrv-$(cat /srv/pillar/freeipa/init.sls | grep -v json | jq -r '.freeipa.realm' | tr . -)
+if [ ! -f "$DIRSRV_FILE" ]; then
+  log "$DIRSRV_FILE is missing. Create it with empty content as freeipa-healthagent depends on the file name to check dirsrv service instance."
+  echo > $DIRSRV_FILE
+fi
