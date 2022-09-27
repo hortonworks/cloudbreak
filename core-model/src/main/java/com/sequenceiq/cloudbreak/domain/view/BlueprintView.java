@@ -37,6 +37,8 @@ public class BlueprintView extends CompactView {
     @Convert(converter = BlueprintUpgradeOptionConverter.class)
     private BlueprintUpgradeOption blueprintUpgradeOption;
 
+    private Long lastUpdated;
+
     public String getStackType() {
         return stackType;
     }
@@ -101,6 +103,14 @@ public class BlueprintView extends CompactView {
         this.blueprintUpgradeOption = blueprintUpgradeOption;
     }
 
+    public Long getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(Long lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
     @Override
     public String toString() {
         return "BlueprintView{" +
@@ -112,6 +122,7 @@ public class BlueprintView extends CompactView {
                 ", tags=" + tags +
                 ", created=" + created +
                 ", blueprintUpgradeOption=" + blueprintUpgradeOption +
+                ", lastUpdated=" + lastUpdated +
                 "} " + super.toString();
     }
 }

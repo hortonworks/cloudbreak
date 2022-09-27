@@ -73,4 +73,6 @@ public interface StackListItem {
     DatabaseAvailabilityType getExternalDatabaseCreationType();
 
     String getExternalDatabaseEngineVersion();
+
+    Long getLastUpdated();
 }

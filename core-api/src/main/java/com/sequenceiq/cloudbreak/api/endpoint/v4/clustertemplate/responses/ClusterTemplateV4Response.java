@@ -35,6 +35,8 @@ public class ClusterTemplateV4Response extends ClusterTemplateV4Base {
 
     private Long created;
 
+    private Long lastUpdated;
+
     private FeatureState featureState;
 
     @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.NODE_COUNT)
@@ -136,5 +138,13 @@ public class ClusterTemplateV4Response extends ClusterTemplateV4Base {
 
     public void setCrn(String crn) {
         this.crn = crn;
+    }
+
+    public Long getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(Long lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 }

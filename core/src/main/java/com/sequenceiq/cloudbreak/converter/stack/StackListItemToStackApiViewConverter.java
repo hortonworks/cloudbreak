@@ -79,6 +79,7 @@ public class StackListItemToStackApiViewConverter {
         blueprintResponse.setStatus(item.getBlueprintStatus());
         blueprintResponse.setTags(item.getBlueprintTags());
         blueprintResponse.setBlueprintUpgradeOption(item.getBlueprintUpgradeOption());
+        blueprintResponse.setLastUpdated(item.getLastUpdated());
         return blueprintResponse;
     }
 }

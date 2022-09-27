@@ -46,6 +46,8 @@ public class ClusterTemplateViewV4Response extends CompactViewV4Response {
 
     private Long created;
 
+    private Long lastUpdated;
+
     private FeatureState featureState;
 
     public FeatureState getFeatureState() {
@@ -134,5 +136,13 @@ public class ClusterTemplateViewV4Response extends CompactViewV4Response {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public Long getLastupdated() {
+        return lastUpdated;
+    }
+
+    public void setLastupdated(Long lastupdated) {
+        this.lastUpdated = lastupdated;
     }
 }

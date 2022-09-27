@@ -37,6 +37,8 @@ public class BlueprintV4ViewResponse extends CompactViewV4Response {
 
     private Long created;
 
+    private Long lastUpdated;
+
     @NotNull
     @Size(max = 100, min = 1, message = "The length of the blueprint's name has to be in range of 1 to 100 and should not contain semicolon "
             + "and percentage character.")
@@ -99,5 +101,13 @@ public class BlueprintV4ViewResponse extends CompactViewV4Response {
 
     public void setUpgradeable(BlueprintBasedUpgradeOption upgradeable) {
         this.upgradeable = upgradeable;
+    }
+
+    public Long getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(Long lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 }

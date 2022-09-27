@@ -23,6 +23,7 @@ public class BlueprintViewToBlueprintV4ViewResponseConverter {
         blueprintV4ViewResponse.setCrn(entity.getResourceCrn());
         blueprintV4ViewResponse.setCreated(entity.getCreated());
         blueprintV4ViewResponse.setUpgradeable(getBlueprintBasedUpgradeOption(entity));
+        blueprintV4ViewResponse.setLastUpdated(entity.getLastUpdated());
         return blueprintV4ViewResponse;
     }
 
