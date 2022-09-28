@@ -130,29 +130,28 @@ public class GcpClientActions extends GcpClient {
     public void deleteHostGroupInstances(List<String> instanceIds) {
         LOGGER.info("Deleting instances: '{}'", String.join(", ", instanceIds));
         Compute compute = buildCompute();
-        Operation.Error operationError = new Operation.Error();
         for (String instanceId : instanceIds) {
             try {
-                Operation deleteOperationResponse = compute
+                Operation deleteOperation = compute
                         .instances()
                         .delete(getProjectId(), gcpProperties.getAvailabilityZone(), instanceId)
                         .execute();
-                Log.log(LOGGER, format(" Gcp instance [%s] state is [%s] with message: %s", instanceId, deleteOperationResponse.getStatus(),
-                        deleteOperationResponse.getStatusMessage()));
+                Log.log(LOGGER, format(" Gcp instance [%s] state is [%s] with message: %s", instanceId, deleteOperation.getStatus(),
+                        deleteOperation.getStatusMessage()));
                 try {
-                    operationError = waitForComplete(compute, deleteOperationResponse, getProjectId(), TIMEOUT);
+                    deleteOperation = waitForComplete(compute, deleteOperation, getProjectId(), TIMEOUT);
                 } catch (Exception e) {
-                    String defaultErrorMessageForInstanceDeletion = getDefaultErrorMessageForInstanceDeletion(instanceId, deleteOperationResponse);
-                    if (operationError != null) {
-                        LOGGER.warn("Waiting for GCP instance delete was resulting in error: {}", operationError.getErrors());
+                    String defaultErrorMessageForInstanceDeletion = getDefaultErrorMessageForInstanceDeletion(instanceId, deleteOperation);
+                    if (deleteOperation != null && deleteOperation.getError() != null) {
+                        LOGGER.warn("Waiting for GCP instance delete was resulting in error: {}", deleteOperation.getError().getErrors());
                     }
                     LOGGER.error(defaultErrorMessageForInstanceDeletion, e);
                     throw new TestFailException(defaultErrorMessageForInstanceDeletion, e);
                 }
-                if ("DONE".equals(deleteOperationResponse.getStatus())) {
+                if ("DONE".equals(deleteOperation.getStatus())) {
                     Log.log(LOGGER, format(" Gcp Instance: %s state is DELETED ", instanceId));
                 } else {
-                    String defaultErrorMessageForInstanceDeletion = getDefaultErrorMessageForInstanceDeletion(instanceId, deleteOperationResponse);
+                    String defaultErrorMessageForInstanceDeletion = getDefaultErrorMessageForInstanceDeletion(instanceId, deleteOperation);
                     LOGGER.error(defaultErrorMessageForInstanceDeletion);
                     throw new TestFailException(defaultErrorMessageForInstanceDeletion);
                 }
@@ -174,48 +173,56 @@ public class GcpClientActions extends GcpClient {
         throw new TestFailException(errorMessage, e);
     }
 
-    private String getDefaultErrorMessageForInstanceDeletion(String instanceId, Operation deleteOperationResponse) {
-        return format(" Gcp Instance [%s] deletion was not successful, actual state of deletion is: %s, status message: %s",
-                instanceId, deleteOperationResponse.getStatus(), deleteOperationResponse.getStatusMessage());
+    private String getDefaultErrorMessageForInstanceDeletion(String instanceId, Operation deleteOperation) {
+        if (deleteOperation != null) {
+            return format(" Gcp Instance [%s] deletion was not successful, actual state of deletion is: %s, status message: %s",
+                    instanceId, deleteOperation.getStatus(), deleteOperation.getStatusMessage());
+        } else {
+            return format(" Gcp Instance [%s] deletion was not successful, delete operation is null.", instanceId);
+        }
+    }
+
+    private String getDefaultErrorMessageForInstanceStop(String instanceId, Operation stopOperation) {
+        if (stopOperation != null) {
+            return format(" Gcp Instance [%s] stop was not successful, actual state of stop is: %s, status message: %s",
+                    instanceId, stopOperation.getStatus(), stopOperation.getStatusMessage());
+        } else {
+            return format(" Gcp Instance [%s] stop was not successful, stop operation is null.", instanceId);
+        }
     }
 
     public void stopHostGroupInstances(List<String> instanceIds) {
         LOGGER.info("Stopping instances: '{}'", String.join(", ", instanceIds));
         Compute compute = buildCompute();
-        Operation stopInstanceResponse = new Operation();
-        Operation.Error operationError = new Operation.Error();
+        Operation stopInstanceOperation = new Operation();
         for (String instanceId : instanceIds) {
             try {
-                stopInstanceResponse = compute
+                stopInstanceOperation = compute
                         .instances()
                         .stop(getProjectId(), gcpProperties.getAvailabilityZone(), instanceId)
                         .execute();
-                Log.log(LOGGER, format(" Gcp instance [%s] state is [%s] with message: %s", instanceId, stopInstanceResponse.getStatus(),
-                        stopInstanceResponse.getStatusMessage()));
-                operationError = waitForComplete(compute, stopInstanceResponse, getProjectId(), TIMEOUT);
-            } catch (IOException e) {
-                LOGGER.warn(format("Failed to stop the GCP instance: '%s'", instanceId), e);
+                Log.log(LOGGER, format(" Gcp instance [%s] state is [%s] with message: %s", instanceId, stopInstanceOperation.getStatus(),
+                        stopInstanceOperation.getStatusMessage()));
+                stopInstanceOperation = waitForComplete(compute, stopInstanceOperation, getProjectId(), TIMEOUT);
             } catch (Exception e) {
-                if (operationError != null) {
-                    LOGGER.warn("Waiting for GCP instance delete was resulting in error: {}", operationError.getErrors());
+                String defaultErrorMessageForInstanceStop = getDefaultErrorMessageForInstanceStop(instanceId, stopInstanceOperation);
+                if (stopInstanceOperation != null && stopInstanceOperation.getError() != null) {
+                    LOGGER.error("Waiting for GCP instance stop was resulting in error: {}", stopInstanceOperation.getError().getErrors());
                 }
-                LOGGER.warn(format("Failed to wait for the STOPPED state on GCP instance: '%s'", instanceId), e);
+                LOGGER.error(format("Failed to wait for the STOPPED state on GCP instance: '%s'", instanceId), e);
+                throw new TestFailException(defaultErrorMessageForInstanceStop);
             }
-            if ("DONE".equals(stopInstanceResponse.getStatus())) {
+            if ("DONE".equals(stopInstanceOperation.getStatus())) {
                 Log.log(LOGGER, format(" Gcp Instance: %s state is STOPPED ", instanceId));
             } else {
-                LOGGER.error("Gcp Instance: {} stop has not been successful. So the actual state is: {} with message: {}",
-                        instanceId, stopInstanceResponse.getStatus(), stopInstanceResponse.getStatusMessage());
-                throw new TestFailException(" Gcp Instance: " + instanceId
-                        + " stop has not been successful, because of the actual state is: "
-                        + stopInstanceResponse.getStatus()
-                        + " with message: "
-                        + stopInstanceResponse.getStatusMessage());
+                String defaultErrorMessageForInstanceStop = getDefaultErrorMessageForInstanceStop(instanceId, stopInstanceOperation);
+                LOGGER.error(defaultErrorMessageForInstanceStop);
+                throw new TestFailException(defaultErrorMessageForInstanceStop);
             }
         }
     }
 
-    public static Operation.Error waitForComplete(Compute compute, Operation operation, String projectId, long timeout) throws Exception {
+    public static Operation waitForComplete(Compute compute, Operation operation, String projectId, long timeout) throws Exception {
         String operationDetails = "";
         long elapsed = 0;
         long start = System.currentTimeMillis();
@@ -250,7 +257,7 @@ public class GcpClientActions extends GcpClient {
         }
         LOGGER.info("Waiting for operation: [{}] with details: {} have been done. Elapsed rounds [{}] and time [{}] ms.", opId, operationDetails, attemps,
                 elapsed);
-        return operation == null ? null : operation.getError();
+        return operation;
     }
 
     public URI getBaseLocationUri() {
