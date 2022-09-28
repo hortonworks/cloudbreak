@@ -2,7 +2,6 @@ package com.sequenceiq.datalake.flow.dr.restore.event;
 
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_EVENT;
 
-import java.util.Collections;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -21,7 +20,7 @@ public class DatalakeDatabaseRestoreStartEvent extends DatalakeDatabaseDrStartBa
 
     public DatalakeDatabaseRestoreStartEvent(String selector, Long sdxId, String userId,
             String backupId, String restoreId, String backupLocation) {
-        super(selector, sdxId, userId, SdxOperationType.RESTORE, Collections.emptyList());
+        super(selector, sdxId, userId, SdxOperationType.RESTORE);
         this.backupId = backupId;
         this.restoreId = restoreId;
         this.backupLocation = backupLocation;
@@ -36,7 +35,7 @@ public class DatalakeDatabaseRestoreStartEvent extends DatalakeDatabaseDrStartBa
             @JsonProperty("backupId") String backupId,
             @JsonProperty("restoreId") String restoreId,
             @JsonProperty("backupLocation") String backupLocation) {
-        super(selector, sdxId, userId, drStatus, Collections.emptyList());
+        super(selector, sdxId, userId, drStatus);
         this.backupId = backupId;
         this.restoreId = restoreId;
         this.backupLocation = backupLocation;

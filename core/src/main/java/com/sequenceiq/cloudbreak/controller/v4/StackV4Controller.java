@@ -439,19 +439,19 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
-    public BackupV4Response backupDatabaseByName(Long workspaceId, String name, String backupLocation, String backupId, List<String> skipDatabaseNames,
+    public BackupV4Response backupDatabaseByName(Long workspaceId, String name, String backupLocation, String backupId,
             @AccountId String accountId) {
         FlowIdentifier flowIdentifier = stackOperations.backupClusterDatabase(NameOrCrn.ofName(name),
-                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, true, skipDatabaseNames);
+                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, true);
         return new BackupV4Response(flowIdentifier);
     }
 
     @Override
     @InternalOnly
     public BackupV4Response backupDatabaseByNameInternal(Long workspaceId, String name, String backupId, String backupLocation,
-            boolean closeConnections, List<String> skipDatabaseNames, @InitiatorUserCrn String initiatorUserCrn) {
+            boolean closeConnections, @InitiatorUserCrn String initiatorUserCrn) {
         FlowIdentifier flowIdentifier = stackOperations.backupClusterDatabase(NameOrCrn.ofName(name),
-                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, closeConnections, skipDatabaseNames);
+                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, closeConnections);
         return new BackupV4Response(flowIdentifier);
     }
 

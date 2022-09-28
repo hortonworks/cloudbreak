@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
@@ -19,10 +16,12 @@ public class BackupRestoreEvent extends StackEvent {
 
     private final boolean closeConnections;
 
-    private final List<String> skipDatabaseNames;
-
     public BackupRestoreEvent(Long stackId, String backupLocation, String backupId) {
         this (null, stackId, backupLocation, backupId);
+    }
+
+    public BackupRestoreEvent(Long stackId, String backupLocation, String backupId, boolean closeConnections) {
+        this(null, stackId, backupLocation, backupId, closeConnections);
     }
 
     public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId) {
@@ -30,23 +29,20 @@ public class BackupRestoreEvent extends StackEvent {
         this.backupLocation = backupLocation;
         this.backupId = backupId;
         this.closeConnections = true;
-        this.skipDatabaseNames = Collections.emptyList();
     }
 
-    public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId, boolean closeConnections, List<String> skipDatabaseNames) {
+    public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId, boolean closeConnections) {
         super(selector, stackId);
         this.backupLocation = backupLocation;
         this.backupId = backupId;
         this.closeConnections = closeConnections;
-        this.skipDatabaseNames = skipDatabaseNames;
     }
 
-    public BackupRestoreEvent(String selector, Long stackId, Promise<AcceptResult> accepted, String backupLocation, String backupId, boolean closeConnections) {
+    public BackupRestoreEvent(String selector, Long stackId, Promise<AcceptResult> accepted, String backupLocation, String backupId) {
         super(selector, stackId, accepted);
         this.backupLocation = backupLocation;
         this.backupId = backupId;
-        this.closeConnections = closeConnections;
-        this.skipDatabaseNames = Collections.emptyList();
+        this.closeConnections = true;
     }
 
     @JsonCreator
@@ -56,13 +52,11 @@ public class BackupRestoreEvent extends StackEvent {
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("backupLocation") String backupLocation,
             @JsonProperty("backupId") String backupId,
-            @JsonProperty("closeConnections") boolean closeConnections,
-            @JsonProperty("skipDatabaseNames") List<String> skipDatabaseNames) {
+            @JsonProperty("closeConnections") boolean closeConnections) {
         super(selector, stackId, accepted);
         this.backupLocation = backupLocation;
         this.backupId = backupId;
         this.closeConnections = closeConnections;
-        this.skipDatabaseNames = skipDatabaseNames;
     }
 
     public String getBackupLocation() {
@@ -75,9 +69,5 @@ public class BackupRestoreEvent extends StackEvent {
 
     public boolean isCloseConnections() {
         return closeConnections;
-    }
-
-    public List<String> getSkipDatabaseNames() {
-        return skipDatabaseNames;
     }
 }

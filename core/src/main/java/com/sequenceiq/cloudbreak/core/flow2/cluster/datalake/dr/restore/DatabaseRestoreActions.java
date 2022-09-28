@@ -2,16 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.restore;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.restore.DatabaseRestoreEvent.DATABASE_RESTORE_FAIL_HANDLED_EVENT;
 
-import java.util.Map;
-import java.util.Optional;
-
-import javax.inject.Inject;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
-import org.springframework.statemachine.action.Action;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.AbstractBackupRestoreActions;
@@ -26,6 +16,16 @@ import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
+
+import java.util.Map;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.StateContext;
+import org.springframework.statemachine.action.Action;
 
 @Configuration
 public class DatabaseRestoreActions {
@@ -81,7 +81,7 @@ public class DatabaseRestoreActions {
                     DatabaseRestoreFailedEvent payload) {
                 Flow flow = getFlow(flowParameters.getFlowId());
                 flow.setFlowFailed(payload.getException());
-                return BackupRestoreContext.from(flowParameters, payload, null, null, true, payload.getSkipDatabaseNames());
+                return BackupRestoreContext.from(flowParameters, payload, null, null, true);
             }
 
             @Override

@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.controller.sdx;
 
-import java.util.Collections;
-
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Controller;
@@ -46,7 +44,6 @@ public class SdxBackupController implements SdxBackupEndpoint {
             backupRequest.setBackupId(backupId);
             backupRequest.setBackupLocation(backupLocation);
             backupRequest.setCloseConnections(true);
-            backupRequest.setSkipDatabaseNames(Collections.emptyList());
             return sdxBackupRestoreService.triggerDatabaseBackup(sdxCluster, backupRequest);
         }
     }

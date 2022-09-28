@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -44,12 +42,11 @@ public class DatabaseBackupRestoreService {
         }
     }
 
-    public FlowIdentifier backupDatabase(Long workspaceId, NameOrCrn nameOrCrn, String location, String backupId,
-            boolean closeConnections, List<String> skipDatabaseNames) {
+    public FlowIdentifier backupDatabase(Long workspaceId, NameOrCrn nameOrCrn, String location, String backupId, boolean closeConnections) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Initiating database backup flow for stack {}", stack.getId());
-        return flowManager.triggerDatalakeDatabaseBackup(stack.getId(), location, backupId, closeConnections, skipDatabaseNames);
+        return flowManager.triggerDatalakeDatabaseBackup(stack.getId(), location, backupId, closeConnections);
     }
 
     public FlowIdentifier restoreDatabase(Long workspaceId, NameOrCrn nameOrCrn, String location, String backupId) {

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr;
 
-import java.util.List;
-
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -16,21 +14,24 @@ public class BackupRestoreContext extends CommonContext {
 
     private final boolean closeConnections;
 
-    private final List<String> skipDatabaseNames;
-
-    public BackupRestoreContext(FlowParameters flowParameters, StackEvent event, String backupLocation, String backupId,
-            boolean closeConnections, List<String> skipDatabaseNames) {
+    public BackupRestoreContext(FlowParameters flowParameters, StackEvent event, String backupLocation, String backupId, boolean closeConnections) {
         super(flowParameters);
         this.stackId = event.getResourceId();
         this.backupLocation = backupLocation;
         this.backupId = backupId;
         this.closeConnections = closeConnections;
-        this.skipDatabaseNames = skipDatabaseNames;
     }
 
-    public static BackupRestoreContext from(FlowParameters flowParameters, StackEvent event, String backupLocation, String backupId,
-            boolean closeConnections, List<String> skipDatabaseNames) {
-        return new BackupRestoreContext(flowParameters, event, backupLocation, backupId, closeConnections, skipDatabaseNames);
+    public BackupRestoreContext(FlowParameters flowParameters, Long stackId, String backupLocation, String backupId) {
+        super(flowParameters);
+        this.stackId = stackId;
+        this.backupLocation = backupLocation;
+        this.backupId = backupId;
+        this.closeConnections = true;
+    }
+
+    public static BackupRestoreContext from(FlowParameters flowParameters, StackEvent event, String backupLocation, String backupId, boolean closeConnections) {
+        return new BackupRestoreContext(flowParameters, event, backupLocation, backupId, closeConnections);
     }
 
     public Long getStackId() {
@@ -47,9 +48,5 @@ public class BackupRestoreContext extends CommonContext {
 
     public boolean getCloseConnections() {
         return closeConnections;
-    }
-
-    public List<String> getSkipDatabaseNames() {
-        return skipDatabaseNames;
     }
 }

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
-import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -14,9 +13,12 @@ import reactor.rx.Promise;
 
 public class DatabaseBackupTriggerEvent extends BackupRestoreEvent {
 
-    public DatabaseBackupTriggerEvent(String selector, Long stackId, String backupLocation, String backupId,
-            boolean closeConnections, List<String> skipDatabaseNames) {
-        super(selector, stackId, backupLocation, backupId, closeConnections, skipDatabaseNames);
+    public DatabaseBackupTriggerEvent(String selector, Long stackId, String backupLocation, String backupId, boolean closeConnections) {
+        super(selector, stackId, backupLocation, backupId, closeConnections);
+    }
+
+    public DatabaseBackupTriggerEvent(String selector, Long stackId, String backupLocation, String backupId) {
+        super(selector, stackId, backupLocation, backupId);
     }
 
     @JsonCreator
@@ -26,9 +28,8 @@ public class DatabaseBackupTriggerEvent extends BackupRestoreEvent {
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("backupLocation") String backupLocation,
             @JsonProperty("backupId") String backupId,
-            @JsonProperty("closeConnections") boolean closeConnections,
-            @JsonProperty("skipDatabaseNames") List<String> skipDatabaseNames) {
-        super(event, resourceId, accepted, backupLocation, backupId, closeConnections, skipDatabaseNames);
+            @JsonProperty("closeConnections") boolean closeConnections) {
+        super(event, resourceId, accepted, backupLocation, backupId, closeConnections);
     }
 
     @Override
