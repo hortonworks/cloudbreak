@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.upgrade.rds;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -125,7 +124,7 @@ public class RdsUpgradeOrchestratorService {
                 throw new CloudbreakOrchestratorFailedException(msg);
             }
         } else {
-            String msg = "Space validation on attached db volume failed.";
+            String msg = "Space validation on attached db volume failed";
             LOGGER.warn(msg);
             throw new CloudbreakOrchestratorFailedException(msg);
         }
@@ -147,10 +146,8 @@ public class RdsUpgradeOrchestratorService {
             LOGGER.info("Root volume has enough free space ({}MB) for database backup ({}MB).",
                     rootVolumeFreeSpaceMb.intValue(), estimatedBackupSizeMb.intValue());
         } else {
-            String msg = String.format("Root volume does not have enough free space (%sMB) for database backup (%sMB).",
-                    rootVolumeFreeSpaceMb.intValue(), estimatedBackupSizeMb.intValue());
-            LOGGER.warn(msg);
-            throw new CloudbreakOrchestratorFailedException(msg);
+            logErrorAndThrow(String.format("Root volume does not have enough free space (%sMB) for database backup (%sMB)",
+                    rootVolumeFreeSpaceMb.intValue(), estimatedBackupSizeMb.intValue()));
         }
     }
 
@@ -158,37 +155,38 @@ public class RdsUpgradeOrchestratorService {
         OrchestratorStateParams stateParams = createStateParams(stackId, GET_EXTERNAL_DB_SIZE, true);
         List<Map<String, JsonNode>> result = hostOrchestrator.applyOrchestratorState(stateParams);
         if (CollectionUtils.isEmpty(result) || 1 != result.size()) {
-            String msg = "Salt state checking database size did not return any results.";
-            LOGGER.warn(msg);
-            throw new CloudbreakOrchestratorFailedException(msg);
+            logErrorAndThrow("Orchestrator engine checking database size did not return any results");
         }
 
-        Map<String, String> databaseSizeMap = result.get(0).entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> {
-            JsonNode responseJson = entry.getValue();
-            Iterable<String> fieldNames = responseJson::fieldNames;
-            String fieldName = StreamSupport
-                    .stream(fieldNames.spliterator(), false)
-                    .filter(name -> name.startsWith("cmd_|-get_external_db_size_"))
-                    .findFirst()
-                    .orElse("");
-            return Optional.ofNullable(responseJson.get(fieldName))
-                    .map(cmdNode -> cmdNode.get("changes"))
-                    .map(changesNode -> changesNode.get("stdout"))
-                    .map(JsonNode::textValue)
-                    .orElse("");
-        }));
-
-        Optional<String> databaseSize = Optional.ofNullable(databaseSizeMap.get(stateParams.getPrimaryGatewayConfig().getHostname()));
-        if (databaseSize.isPresent() && !databaseSize.get().isEmpty()) {
-            return Double.parseDouble(databaseSize.get()) / BYTE_TO_MB;
-        } else {
-            String msg = "Could not determine database size.";
-            LOGGER.warn(msg);
-            throw new CloudbreakOrchestratorFailedException(msg);
+        JsonNode primaryGwResult = result.get(0).get(stateParams.getPrimaryGatewayConfig().getHostname());
+        if (primaryGwResult == null) {
+            logErrorAndThrow("Orchestrator engine checking database size did not return any results on the primary gateway");
         }
+
+        Iterable<String> fieldNames = primaryGwResult::fieldNames;
+        String fieldName = StreamSupport
+                .stream(fieldNames.spliterator(), false)
+                .filter(name -> name.startsWith("cmd_|-get_external_db_size_"))
+                .findFirst()
+                .orElse("");
+
+        JsonNode dbSizeCommandOutput = primaryGwResult.get(fieldName);
+        if (dbSizeCommandOutput == null || dbSizeCommandOutput.get("changes") == null) {
+            logErrorAndThrow("Orchestrator engine could not run database size checking");
+        }
+
+        JsonNode stdErr = dbSizeCommandOutput.get("changes").get("stderr");
+        if (stdErr != null && !stdErr.textValue().isEmpty()) {
+            logErrorAndThrow(String.format("Could not determine database size, because of the following error: %s", stdErr.textValue()));
+        }
+        JsonNode dbSize = dbSizeCommandOutput.get("changes").get("stdout");
+        if (dbSize == null || dbSize.textValue().isEmpty()) {
+            logErrorAndThrow("Could not determine database size, because orchestration engine did not have return value");
+        }
+        return Double.parseDouble(dbSize.textValue()) / BYTE_TO_MB;
     }
 
-    private Double getRootVolumeFreeSpace(Long stackId) throws CloudbreakOrchestratorFailedException {
+    private Double getRootVolumeFreeSpace(Long stackId) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = createStateParams(stackId, null, true);
         Map<String, String> rootVolumeFreeSpaceMap = hostOrchestrator.runCommandOnHosts(List.of(stateParams.getPrimaryGatewayConfig()),
                 stateParams.getTargetHostNames(), "df -k / | awk '{print $4}' | tail -n 1");
@@ -196,7 +194,7 @@ public class RdsUpgradeOrchestratorService {
         if (rootVolumeFreeSpace.isPresent() && !rootVolumeFreeSpace.get().isEmpty()) {
             return Double.parseDouble(rootVolumeFreeSpace.get()) / KB_TO_MB;
         } else {
-            String msg = "Could not get free space size on root volume from primary gateway.";
+            String msg = "Could not get free space size on root volume from primary gateway";
             LOGGER.warn(msg);
             throw new CloudbreakOrchestratorFailedException(msg);
         }
@@ -225,5 +223,10 @@ public class RdsUpgradeOrchestratorService {
         stateParams.setStateRetryParams(retryParams);
         stateParams.setExitCriteriaModel(new ClusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
         return stateParams;
+    }
+
+    private void logErrorAndThrow(String errorMessage) throws CloudbreakOrchestratorFailedException {
+        LOGGER.warn(errorMessage);
+        throw new CloudbreakOrchestratorFailedException(errorMessage);
     }
 }
