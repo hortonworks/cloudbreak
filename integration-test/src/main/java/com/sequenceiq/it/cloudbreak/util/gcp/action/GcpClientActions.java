@@ -223,7 +223,6 @@ public class GcpClientActions extends GcpClient {
     }
 
     public static Operation waitForComplete(Compute compute, Operation operation, String projectId, long timeout) throws Exception {
-        String operationDetails = "";
         long elapsed = 0;
         long start = System.currentTimeMillis();
         int attemps = 0;
@@ -233,16 +232,22 @@ public class GcpClientActions extends GcpClient {
             zone = bits[bits.length - 1];
         }
         String status = operation.getStatus();
+        String statusMessage = operation.getStatusMessage();
         String opId = operation.getName();
+        String operationDetails;
         while (operation != null && !"DONE".equals(status)) {
             Thread.sleep(POLLING_INTERVAL);
             elapsed = System.currentTimeMillis() - start;
             operationDetails = operation.getDescription();
+            statusMessage = operation.getStatusMessage();
             if (elapsed >= timeout) {
-                LOGGER.error("Timed out waiting for operation: [{}] with details: {} to complete!", opId, operationDetails);
-                throw new TestFailException("Timed out waiting for operation: [" + opId + "] with details: " + operationDetails + " to complete!");
+                LOGGER.error("Waiting for operation: [{}] timed out! | Actual details {} | Actual status {}::{}",
+                        opId, operationDetails, status, statusMessage);
+                throw new TestFailException(format("Waiting for operation: [%s] timed out! | Actual details %s | Actual status %s::%s",
+                        opId, operationDetails, status, statusMessage));
             }
-            LOGGER.info("Waiting for operation: [{}] with details: {} - elapsed rounds [{}] and time [{}] ms", opId, operationDetails, attemps, elapsed);
+            LOGGER.info("Waiting for operation: [{}] have been done | Actual status {}::{} | Elapsed rounds {} and time {} ms.",
+                    opId, status, statusMessage, attemps, elapsed);
             if (zone != null) {
                 Get get = compute.zoneOperations().get(projectId, zone, opId);
                 operation = get.execute();
@@ -255,8 +260,8 @@ public class GcpClientActions extends GcpClient {
             }
             attemps++;
         }
-        LOGGER.info("Waiting for operation: [{}] with details: {} have been done. Elapsed rounds [{}] and time [{}] ms.", opId, operationDetails, attemps,
-                elapsed);
+        LOGGER.info("Waiting for operation: [{}] have been done | Actual status {}::{} | Elapsed rounds {} and time {} ms.",
+                opId, status, statusMessage, attemps, elapsed);
         return operation;
     }
 
