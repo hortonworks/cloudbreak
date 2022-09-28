@@ -1,16 +1,6 @@
 package com.sequenceiq.cloudbreak.domain.view;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_START_FINISHED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_START_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_STOP_FINISHED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQUESTED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -109,41 +99,12 @@ public class StackView extends CompactView {
         return stackStatus != null ? stackStatus.getStatus() : null;
     }
 
-    public boolean isDeleteCompleted() {
-        return DELETE_COMPLETED.equals(getStatus());
-    }
-
-    public boolean isDeleteInProgress() {
-        return DELETE_IN_PROGRESS.equals(getStatus());
-    }
-
-    public boolean isExternalDatabaseStopped() {
-        return EXTERNAL_DATABASE_STOP_FINISHED.equals(getStatus());
-    }
-
     public Integer getGatewayPort() {
         return gatewayPort;
     }
 
     public Long getCreated() {
         return created;
-    }
-
-    public boolean isStackInDeletionPhase() {
-        return DELETE_COMPLETED.equals(getStatus()) || DELETE_IN_PROGRESS.equals(getStatus());
-    }
-
-    public boolean isCreateInProgress() {
-        return CREATE_IN_PROGRESS.equals(getStatus());
-    }
-
-    public boolean isStartInProgress() {
-        return START_IN_PROGRESS.equals(getStatus()) || START_REQUESTED.equals(getStatus())
-                || EXTERNAL_DATABASE_START_IN_PROGRESS.equals(getStatus()) || EXTERNAL_DATABASE_START_FINISHED.equals(getStatus());
-    }
-
-    public boolean isStopInProgress() {
-        return STOP_IN_PROGRESS.equals(getStatus()) || STOP_REQUESTED.equals(getStatus());
     }
 
     public String getResourceCrn() {

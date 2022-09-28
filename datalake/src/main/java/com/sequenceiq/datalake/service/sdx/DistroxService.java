@@ -85,7 +85,10 @@ public class DistroxService {
 
     public void stopAttachedDistrox(String envCrn) {
         Collection<StackViewV4Response> attachedDistroXClusters = getAttachedDistroXClusters(envCrn);
-        ArrayList<String> pollingCrn = attachedDistroXClusters.stream().map(StackViewV4Response::getCrn).collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<String> pollingCrn = attachedDistroXClusters.stream()
+                .filter(stack -> Status.STOPPED != stack.getStatus())
+                .map(StackViewV4Response::getCrn)
+                .collect(Collectors.toCollection(ArrayList::new));
         if (!pollingCrn.isEmpty()) {
             distroXV1Endpoint.putStopByCrns(pollingCrn);
             Polling.stopAfterAttempt(attempt)

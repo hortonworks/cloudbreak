@@ -5,9 +5,12 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_START_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_START_FINISHED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_START_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_STOP_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_STOP_FINISHED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_FAILED;
@@ -150,7 +153,7 @@ public interface StackView extends MdcContextInfoProvider {
     }
 
     default boolean isStopInProgress() {
-        return STOP_IN_PROGRESS.equals(getStatus()) || STOP_REQUESTED.equals(getStatus());
+        return STOP_IN_PROGRESS.equals(getStatus()) || STOP_REQUESTED.equals(getStatus()) || EXTERNAL_DATABASE_STOP_IN_PROGRESS.equals(getStatus());
     }
 
     default boolean isExternalDatabaseStopped() {
@@ -184,16 +187,20 @@ public interface StackView extends MdcContextInfoProvider {
         return CREATE_IN_PROGRESS.equals(status)
                 || UPDATE_IN_PROGRESS.equals(status)
                 || STOP_IN_PROGRESS.equals(status)
+                || EXTERNAL_DATABASE_STOP_IN_PROGRESS.equals(status)
                 || START_IN_PROGRESS.equals(status)
+                || EXTERNAL_DATABASE_START_IN_PROGRESS.equals(status)
                 || DELETE_IN_PROGRESS.equals(status);
     }
 
     default boolean isReadyForStart() {
-        return STOPPED.equals(getStatus()) || START_REQUESTED.equals(getStatus()) || START_IN_PROGRESS.equals(getStatus());
+        return STOPPED.equals(getStatus()) || START_REQUESTED.equals(getStatus()) || START_IN_PROGRESS.equals(getStatus())
+                || EXTERNAL_DATABASE_STOP_FINISHED.equals(getStatus()) || EXTERNAL_DATABASE_START_FINISHED.equals(getStatus());
     }
 
     default boolean isStartFailed() {
-        return START_FAILED.equals(getStatus());
+        return START_FAILED.equals(getStatus())
+                || EXTERNAL_DATABASE_START_FAILED.equals(getStatus());
     }
 
     default boolean hasNodeFailure() {
@@ -231,7 +238,8 @@ public interface StackView extends MdcContextInfoProvider {
     }
 
     default boolean isStopFailed() {
-        return STOP_FAILED.equals(getStatus());
+        return STOP_FAILED.equals(getStatus())
+                || EXTERNAL_DATABASE_STOP_FAILED.equals(getStatus());
     }
 
     @Override

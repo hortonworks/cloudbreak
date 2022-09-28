@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -46,6 +47,7 @@ public class StackUpdaterTest {
     @Test
     public void skipStackStatusUpdateWhenActualStatusEqualsNewStatus() {
         Stack stack = TestUtil.stack();
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
 
         DetailedStackStatus newStatus = DetailedStackStatus.AVAILABLE;
         when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
