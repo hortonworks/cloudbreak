@@ -144,7 +144,7 @@ class RdsUpgradeOrchestratorServiceTest {
         when(gatewayConfig.getHostname()).thenReturn("fqdn1");
         CloudbreakOrchestratorException actualException = Assertions.assertThrows(CloudbreakOrchestratorException.class,
                 () -> underTest.validateDbDirectorySpace(STACK_ID));
-        assertThat(actualException).hasMessageStartingWith("Space validation on attached db volume failed.");
+        assertThat(actualException).hasMessageStartingWith("Space validation on attached db volume failed");
     }
 
     @Test
@@ -154,7 +154,7 @@ class RdsUpgradeOrchestratorServiceTest {
                 .thenReturn(Map.of("fqdn1", "1024000"));
         when(gatewayConfig.getHostname()).thenReturn("fqdn1");
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonNode = mapper.readTree("{\"cmd_|-get_external_db_size_test\":{\"changes\":{\"stdout\":\"104857600\"}}}");
+        JsonNode jsonNode = mapper.readTree("{\"cmd_|-get_external_db_size_test\":{\"changes\":{\"stdout\":\"104857600\",\"stderr\":\"\"}}}");
         when(hostOrchestrator.applyOrchestratorState(any())).thenReturn(List.of(Map.of("fqdn1", jsonNode)));
 
         underTest.validateDbBackupSpace(STACK_ID);
@@ -174,13 +174,13 @@ class RdsUpgradeOrchestratorServiceTest {
                 .thenReturn(Map.of("fqdn1", "1024000"));
         when(gatewayConfig.getHostname()).thenReturn("fqdn1");
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonNode = mapper.readTree("{\"cmd_|-get_external_db_size_test\":{\"changes\":{\"stdout\":\"20971520000\"}}}");
+        JsonNode jsonNode = mapper.readTree("{\"cmd_|-get_external_db_size_test\":{\"changes\":{\"stdout\":\"20971520000\",\"stderr\":\"\"}}}");
         when(hostOrchestrator.applyOrchestratorState(any())).thenReturn(List.of(Map.of("fqdn1", jsonNode)));
 
         CloudbreakOrchestratorException ex = Assertions.assertThrows(CloudbreakOrchestratorException.class,
                 () -> underTest.validateDbBackupSpace(STACK_ID));
 
-        Assertions.assertEquals("Root volume does not have enough free space (1000MB) for database backup (2000MB).", ex.getMessage());
+        Assertions.assertEquals("Root volume does not have enough free space (1000MB) for database backup (2000MB)", ex.getMessage());
         verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k / | awk '{print $4}' | tail -n 1"));
         verify(hostOrchestrator).applyOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
@@ -198,7 +198,7 @@ class RdsUpgradeOrchestratorServiceTest {
         CloudbreakOrchestratorException ex = Assertions.assertThrows(CloudbreakOrchestratorException.class,
                 () -> underTest.validateDbBackupSpace(STACK_ID));
 
-        Assertions.assertEquals("Could not get free space size on root volume from primary gateway.", ex.getMessage());
+        Assertions.assertEquals("Could not get free space size on root volume from primary gateway", ex.getMessage());
         verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k / | awk '{print $4}' | tail -n 1"));
     }
 
@@ -212,7 +212,28 @@ class RdsUpgradeOrchestratorServiceTest {
         CloudbreakOrchestratorException ex = Assertions.assertThrows(CloudbreakOrchestratorException.class,
                 () -> underTest.validateDbBackupSpace(STACK_ID));
 
-        Assertions.assertEquals("Salt state checking database size did not return any results.", ex.getMessage());
+        Assertions.assertEquals("Orchestrator engine checking database size did not return any results", ex.getMessage());
+        verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k / | awk '{print $4}' | tail -n 1"));
+        verify(hostOrchestrator).applyOrchestratorState(paramCaptor.capture());
+        OrchestratorStateParams params = paramCaptor.getValue();
+        assertThat(params.getState()).isEqualTo("postgresql/upgrade/external-db-size");
+        assertThat(params.getTargetHostNames()).hasSameElementsAs(Set.of("fqdn1"));
+        assertOtherStateParams(params);
+    }
+
+    @Test
+    void testValidateDbBackupSpaceCheckingDbSizeScriptErrorOutput() throws CloudbreakOrchestratorException, JsonProcessingException {
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k / | awk '{print $4}' | tail -n 1")))
+                .thenReturn(Map.of("fqdn1", "1000"));
+        when(gatewayConfig.getHostname()).thenReturn("fqdn1");
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode jsonNode = mapper.readTree("{\"cmd_|-get_external_db_size_test\":{\"changes\":{\"stderr\":\"error\"}}}");
+        when(hostOrchestrator.applyOrchestratorState(any())).thenReturn(List.of(Map.of("fqdn1", jsonNode)));
+
+        CloudbreakOrchestratorException ex = Assertions.assertThrows(CloudbreakOrchestratorException.class,
+                () -> underTest.validateDbBackupSpace(STACK_ID));
+
+        Assertions.assertEquals("Could not determine database size, because of the following error: error", ex.getMessage());
         verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k / | awk '{print $4}' | tail -n 1"));
         verify(hostOrchestrator).applyOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
@@ -233,7 +254,7 @@ class RdsUpgradeOrchestratorServiceTest {
         CloudbreakOrchestratorException ex = Assertions.assertThrows(CloudbreakOrchestratorException.class,
                 () -> underTest.validateDbBackupSpace(STACK_ID));
 
-        Assertions.assertEquals("Could not determine database size.", ex.getMessage());
+        Assertions.assertEquals("Could not determine database size, because orchestration engine did not have return value", ex.getMessage());
         verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k / | awk '{print $4}' | tail -n 1"));
         verify(hostOrchestrator).applyOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
