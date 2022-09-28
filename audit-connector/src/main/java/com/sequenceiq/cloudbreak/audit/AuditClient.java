@@ -3,16 +3,14 @@ package com.sequenceiq.cloudbreak.audit;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import static com.sequenceiq.cloudbreak.util.UuidUtil.uuidSupplier;
+import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -35,6 +33,7 @@ import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import io.opentracing.Tracer;
 
 @Component
@@ -52,10 +51,6 @@ public class AuditClient {
 
     private final Tracer tracer;
 
-    @Qualifier("auditManagedChannelWrapper")
-    @Inject
-    private ManagedChannelWrapper channelWrapper;
-
     public AuditClient(AuditConfig auditConfig, AuditEventToGrpcAuditEventConverter auditEventConverter,
             AttemptAuditEventResultToGrpcAttemptAuditEventResultConverter resultConverter, ActorUtil actorUtil, Tracer tracer) {
         this.auditConfig = auditConfig;
@@ -67,30 +62,49 @@ public class AuditClient {
 
     @Retryable(value = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 5000))
     public void createAuditEvent(AuditEvent auditEvent) {
-        String actorCrn = actorUtil.getActorCrn(auditEvent.getActor());
-        LOGGER.info("Audit log entry will be created: {}", auditEvent);
-        AuditProto.AuditEvent protoAuditEvent = auditEventConverter.convert(auditEvent);
-        newStub(channelWrapper.getChannel(), protoAuditEvent.getRequestId(), actorCrn)
-                .createAuditEvent(CreateAuditEventRequest.newBuilder()
-                        .setAuditEvent(protoAuditEvent)
-                        .build());
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            String actorCrn = actorUtil.getActorCrn(auditEvent.getActor());
+            LOGGER.info("Audit log entry will be created: {}", auditEvent);
+            AuditProto.AuditEvent protoAuditEvent = auditEventConverter.convert(auditEvent);
+            newStub(channelWrapper.getChannel(), protoAuditEvent.getRequestId(), actorCrn)
+                    .createAuditEvent(CreateAuditEventRequest.newBuilder()
+                            .setAuditEvent(protoAuditEvent)
+                            .build());
+        }
     }
 
     public void createAttemptAuditEvent(AuditEvent auditEvent) {
-        String actorCrn = actorUtil.getActorCrn(auditEvent.getActor());
-        AuditProto.AuditEvent protoAuditEvent = auditEventConverter.convert(auditEvent);
-        newStub(channelWrapper.getChannel(), protoAuditEvent.getRequestId(), actorCrn)
-                .createAttemptAuditEvent(CreateAttemptAuditEventRequest.newBuilder()
-                        .setAuditEvent(protoAuditEvent)
-                        .build());
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            String actorCrn = actorUtil.getActorCrn(auditEvent.getActor());
+            AuditProto.AuditEvent protoAuditEvent = auditEventConverter.convert(auditEvent);
+            newStub(channelWrapper.getChannel(), protoAuditEvent.getRequestId(), actorCrn)
+                    .createAttemptAuditEvent(CreateAttemptAuditEventRequest.newBuilder()
+                            .setAuditEvent(protoAuditEvent)
+                            .build());
+        }
     }
 
     public void updateAttemptAuditEventWithResult(AttemptAuditEventResult attemptAuditEventResult) {
-        String requestId = Optional.ofNullable(attemptAuditEventResult.getRequestId()).orElseGet(uuidSupplier());
-        AuditProto.AttemptAuditEventResult protoAttemptAuditEventResult = resultConverter.convert(attemptAuditEventResult);
-        newStub(channelWrapper.getChannel(), requestId, attemptAuditEventResult.getActorCrn())
-                .updateAttemptAuditEventWithResult(UpdateAttemptAuditEventWithResultRequest.newBuilder()
-                        .setResult(protoAttemptAuditEventResult)
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            String requestId = Optional.ofNullable(attemptAuditEventResult.getRequestId()).orElseGet(uuidSupplier());
+            AuditProto.AttemptAuditEventResult protoAttemptAuditEventResult = resultConverter.convert(attemptAuditEventResult);
+            newStub(channelWrapper.getChannel(), requestId, attemptAuditEventResult.getActorCrn())
+                    .updateAttemptAuditEventWithResult(UpdateAttemptAuditEventWithResultRequest.newBuilder()
+                            .setResult(protoAttemptAuditEventResult)
+                            .build());
+        }
+    }
+
+    /**
+     * Creates Managed Channel wrapper from endpoint address
+     *
+     * @return the wrapper object
+     */
+    private ManagedChannelWrapper makeWrapper() {
+        return new ManagedChannelWrapper(
+                ManagedChannelBuilder.forAddress(auditConfig.getHost(), auditConfig.getPort())
+                        .usePlaintext()
+                        .maxInboundMessageSize(DEFAULT_MAX_MESSAGE_SIZE)
                         .build());
     }
 
@@ -110,17 +124,19 @@ public class AuditClient {
     }
 
     public List<AuditProto.CdpAuditEvent> listEvents(ListAuditEvent listAuditEvent) {
-        String actorCrn = actorUtil.getActorCrn(listAuditEvent.getActor());
-        AuditProto.ListEventsRequest.Builder builder = AuditProto.ListEventsRequest.newBuilder();
-        doIfNotNull(listAuditEvent.getEventSource(), eventSource -> builder.setEventSource(eventSource.getName()));
-        doIfNotNull(listAuditEvent.getAccountId(), builder::setAccountId);
-        doIfNotNull(listAuditEvent.getRequestId(), builder::setRequestId);
-        doIfNotNull(listAuditEvent.getFromTimestamp(), builder::setFromTimestamp);
-        doIfNotNull(listAuditEvent.getToTimestamp(), builder::setToTimestamp);
-        doIfNotNull(listAuditEvent.getPageSize(), builder::setPageSize);
-        doIfNotNull(listAuditEvent.getPageToken(), builder::setPageToken);
-        AuditProto.ListEventsResponse listEventsResponse = newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
-                .listEvents(builder.build());
-        return listEventsResponse.getAuditEventList();
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            String actorCrn = actorUtil.getActorCrn(listAuditEvent.getActor());
+            AuditProto.ListEventsRequest.Builder builder = AuditProto.ListEventsRequest.newBuilder();
+            doIfNotNull(listAuditEvent.getEventSource(), eventSource -> builder.setEventSource(eventSource.getName()));
+            doIfNotNull(listAuditEvent.getAccountId(), builder::setAccountId);
+            doIfNotNull(listAuditEvent.getRequestId(), builder::setRequestId);
+            doIfNotNull(listAuditEvent.getFromTimestamp(), builder::setFromTimestamp);
+            doIfNotNull(listAuditEvent.getToTimestamp(), builder::setToTimestamp);
+            doIfNotNull(listAuditEvent.getPageSize(), builder::setPageSize);
+            doIfNotNull(listAuditEvent.getPageToken(), builder::setPageToken);
+            AuditProto.ListEventsResponse listEventsResponse = newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                    .listEvents(builder.build());
+            return listEventsResponse.getAuditEventList();
+        }
     }
 }
