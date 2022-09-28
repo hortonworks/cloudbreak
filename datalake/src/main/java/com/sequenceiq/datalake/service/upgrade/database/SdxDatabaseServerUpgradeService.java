@@ -4,6 +4,8 @@ import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_DATABASE_SERVER_REQUESTED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.RUNNING;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -16,7 +18,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -60,6 +65,9 @@ public class SdxDatabaseServerUpgradeService {
 
     @Inject
     private DatabaseUpgradeRuntimeValidator databaseUpgradeRuntimeValidator;
+
+    @Inject
+    private CloudbreakMessagesService cloudbreakMessagesService;
 
     public SdxUpgradeDatabaseServerResponse upgrade(NameOrCrn sdxNameOrCrn, TargetMajorVersion requestedTargetMajorVersion) {
         LOGGER.debug("Upgrade database server called for {} with target major version {}", sdxNameOrCrn, requestedTargetMajorVersion);
@@ -106,7 +114,23 @@ public class SdxDatabaseServerUpgradeService {
 
     public void initUpgradeInCb(SdxCluster sdxCluster, TargetMajorVersion targetMajorVersion) {
         LOGGER.debug("Calling database server upgrade on stack endpoint for CRN {} for datalake {}", sdxCluster.getStackCrn(), sdxCluster.getName());
-        cloudbreakStackService.upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion);
+        try {
+            cloudbreakStackService.upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion);
+        } catch (CloudbreakApiException exception) {
+            handleIfAlreadyUpgradedOrThrow(sdxCluster, targetMajorVersion, exception);
+        }
+    }
+
+    private void handleIfAlreadyUpgradedOrThrow(SdxCluster sdxCluster, TargetMajorVersion targetMajorVersion, CloudbreakApiException exception) {
+        String message = exception.getMessage();
+        String alreadyUpgradedMessage = cloudbreakMessagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED.getMessage(),
+                List.of(targetMajorVersion.getMajorVersion()));
+        if (message.contains(alreadyUpgradedMessage)) {
+            updateDatabaseServerEngineVersion(sdxCluster);
+            throwAlreadyOnLatestError(sdxCluster, targetMajorVersion);
+        } else {
+            throw exception;
+        }
     }
 
     public void waitDatabaseUpgradeInCb(SdxCluster sdxCluster, PollingConfig pollingConfig) {

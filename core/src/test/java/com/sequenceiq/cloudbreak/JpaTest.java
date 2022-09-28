@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -41,9 +42,9 @@ public class JpaTest {
 
     @TestFactory
     public Collection<DynamicTest> dynamicTestsForRepositorySelectCount() {
-        ArrayList<DynamicTest> tests = new ArrayList<>();
+        List<DynamicTest> tests = new ArrayList<>();
         Repositories repositories = new Repositories(applicationContext);
-        for (Class domainType : repositories) {
+        for (Class<?> domainType : repositories) {
             Class<?> repoInterface = repositories.getRepositoryInformationFor(domainType).get().getRepositoryInterface();
             Object repositoryInstance = repositories.getRepositoryFor(domainType).get();
             Method[] methods = repoInterface.getDeclaredMethods();
@@ -62,7 +63,7 @@ public class JpaTest {
     private Object[] methodArgs(Method method) {
         Object[] arguments = new Object[method.getParameterCount()];
         int i = 0;
-        for (Class type : method.getParameterTypes()) {
+        for (Class<?> type : method.getParameterTypes()) {
             arguments[i] = getSampleInstances(type.getSimpleName());
             i++;
         }
