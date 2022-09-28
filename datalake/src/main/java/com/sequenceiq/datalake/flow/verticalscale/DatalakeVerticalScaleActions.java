@@ -35,20 +35,24 @@ public class DatalakeVerticalScaleActions {
         return new AbstractDatalakeVerticalScaleAction<>(DatalakeVerticalScaleEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DatalakeVerticalScaleEvent payload, Map<Object, Object> variables) {
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_VALIDATION_IN_PROGRESS,
-                                "Vertical scaling validation is in progress on the Data Lake.", payload.getResourceId());
+                sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_VALIDATION_IN_PROGRESS,
+                                String.format("Validation of vertical scale is in progress for group of %s with instance type of %s on the Data Lake.",
+                                        payload.getVerticalScaleRequest().getGroup(), payload.getVerticalScaleRequest().getTemplate().getInstanceType()),
+                        payload.getResourceId());
                 sendEvent(context, VERTICAL_SCALING_DATALAKE_VALIDATION_HANDLER.selector(), payload);
             }
         };
     }
 
     @Bean(name = "VERTICAL_SCALING_DATALAKE_STATE")
-    public Action<?, ?> verticalScaleInFreeIpaAction() {
+    public Action<?, ?> verticalScaleInDatalakeAction() {
         return new AbstractDatalakeVerticalScaleAction<>(DatalakeVerticalScaleEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DatalakeVerticalScaleEvent payload, Map<Object, Object> variables) {
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS,
-                        "Vertical scaling is in progress on the Data Lake.", payload.getResourceId());
+                sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS,
+                        String.format("Vertical scaling is in progress for group of %s with instance type of %s on the Data Lake.",
+                                payload.getVerticalScaleRequest().getGroup(), payload.getVerticalScaleRequest().getTemplate().getInstanceType()),
+                        payload.getResourceId());
                 sendEvent(context, VERTICAL_SCALING_DATALAKE_HANDLER.selector(), payload);
             }
         };
@@ -59,8 +63,8 @@ public class DatalakeVerticalScaleActions {
         return new AbstractDatalakeVerticalScaleAction<>(DatalakeVerticalScaleEvent.class) {
             @Override
             protected void doExecute(CommonContext context, DatalakeVerticalScaleEvent payload, Map<Object, Object> variables) {
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED,
-                        "Vertical scaling finished on the Data Lake.", payload.getResourceId());
+                sdxStatusService.setStatusForDatalakeAndNotifyWithStatusReason(DatalakeStatusEnum.STOPPED,
+                        "Vertical scale has finished on the Data Lake.", payload.getResourceId());
                 sendEvent(context, FINALIZE_VERTICAL_SCALING_DATALAKE_EVENT.selector(), payload);
             }
         };

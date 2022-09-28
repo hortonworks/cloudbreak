@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventTyp
 import static java.lang.String.format;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -16,12 +17,12 @@ import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationEvent;
-import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPDefaultStructuredEventClient;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
@@ -72,21 +73,25 @@ public class EventSenderService {
         sendEventAndNotification(sdxCluster, resourceEvent, new HashSet<>());
     }
 
-    public void sendEventAndNotification(SdxCluster sdxCluster, ResourceEvent resourceEvent,
-            Collection<?> messageArgs) {
+    public void sendEventAndNotification(SdxCluster sdxCluster, ResourceEvent resourceEvent, Collection<?> messageArgs) {
 
         SdxClusterDto sdxClusterToDto = sdxClusterDtoConverter.sdxClusterToDto(sdxCluster);
-        sendEventAndNotificationWithPayload(sdxClusterToDto, resourceEvent, sdxClusterToDto, messageArgs);
+        sendEventAndNotificationWithPayload(sdxClusterToDto, resourceEvent, sdxClusterToDto, messageArgs, null);
+    }
+
+    public void sendEventAndNotificationWithMessage(SdxCluster sdxCluster, ResourceEvent resourceEvent, String message) {
+        SdxClusterDto sdxClusterToDto = sdxClusterDtoConverter.sdxClusterToDto(sdxCluster);
+        sendEventAndNotificationWithPayload(sdxClusterToDto, resourceEvent, sdxClusterToDto, Collections.emptyList(), message);
     }
 
     public void sendEventAndNotificationWithPayload(AccountAwareResource resource, ResourceEvent resourceEvent, Object payload,
-            Collection<?> messageArgs) {
-        CDPStructuredNotificationEvent cdpStructuredEvent = getStructuredEvent(resource, resourceEvent, payload, messageArgs);
+            Collection<?> messageArgs, String message) {
+        CDPStructuredNotificationEvent cdpStructuredEvent = getStructuredEvent(resource, resourceEvent, payload, messageArgs, message);
         cdpDefaultStructuredEventClient.sendStructuredEvent(cdpStructuredEvent);
     }
 
     private CDPStructuredNotificationEvent getStructuredEvent(AccountAwareResource resource, ResourceEvent resourceEvent, Object payload,
-            Collection<?> messageArgs) {
+            Collection<?> messageArgs, String message) {
         String resourceType = resource.getClass().getSimpleName().toLowerCase();
         String resourceCrn = resource.getResourceCrn();
         CDPOperationDetails operationDetails = new CDPOperationDetails(
@@ -103,8 +108,11 @@ public class EventSenderService {
                 resourceCrn,
                 resourceEvent.name());
         CDPStructuredNotificationDetails notificationDetails = getNotificationDetails(resourceEvent, resourceCrn, resourceType, payload);
-        String message = cloudbreakMessagesService.getMessage(resourceEvent.getMessage(), messageArgs);
-        return new CDPStructuredNotificationEvent(operationDetails, notificationDetails, resourceEvent.name(), message);
+        String eventMessage = message;
+        if (message == null) {
+            eventMessage = cloudbreakMessagesService.getMessage(resourceEvent.getMessage(), messageArgs);
+        }
+        return new CDPStructuredNotificationEvent(operationDetails, notificationDetails, resourceEvent.name(), eventMessage);
     }
 
     private CDPStructuredNotificationDetails getNotificationDetails(ResourceEvent resourceEvent, String resourceCrn, String resourceType,

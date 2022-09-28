@@ -85,6 +85,7 @@ public class VerticalScaleService {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
 
         try {
+            LOGGER.debug("Vertical scale starts in group of {} with instanceType: {}", request.getGroup(), request.getTemplate().getInstanceType());
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () ->
@@ -105,6 +106,7 @@ public class VerticalScaleService {
 
     public StackV4Response waitCloudbreakClusterVerticalScale(Long id, PollingConfig pollingConfig) {
         SdxCluster sdxCluster = sdxService.getById(id);
+        LOGGER.debug("Waiting for vertical scale flow");
         cloudbreakPoller.pollCreateUntilVerticalScaleDone(sdxCluster, pollingConfig);
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
