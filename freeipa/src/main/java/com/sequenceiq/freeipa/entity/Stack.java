@@ -502,7 +502,7 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         if (ccmParameters != null && ccmParameters.getRaw() != null) {
             return JsonUtil.readValueOpt(ccmParameters.getRaw(), CcmConnectivityParameters.class).orElse(null);
         }
-        return null;
+        return new CcmConnectivityParameters();
     }
 
     public void setCcmParameters(CcmConnectivityParameters ccmParameters) {

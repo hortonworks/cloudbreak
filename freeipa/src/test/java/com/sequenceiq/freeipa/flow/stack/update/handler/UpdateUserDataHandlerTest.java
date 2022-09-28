@@ -94,4 +94,12 @@ class UpdateUserDataHandlerTest {
         verifyNoInteractions(userDataService);
         verify(eventBus).notify(eq(UPDATE_USERDATA_FAILED_EVENT.event()), any(Event.class));
     }
+
+    @Test
+    void tunnelNull() {
+        when(userDataUpdateRequest.getOldTunnel()).thenReturn(null);
+        underTest.accept(event);
+        verify(userDataService).regenerateUserData(STACK_ID);
+        verify(eventBus).notify(eq(EventSelectorUtil.selector(UserDataUpdateSuccess.class)), any(Event.class));
+    }
 }

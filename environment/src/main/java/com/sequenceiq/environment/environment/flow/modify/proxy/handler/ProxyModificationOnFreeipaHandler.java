@@ -1,46 +1,50 @@
 package com.sequenceiq.environment.environment.flow.modify.proxy.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.environment.EnvironmentStatus;
-import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationDefaultEvent;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationFailedEvent;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationHandlerSelectors;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors;
-import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
 import reactor.bus.Event;
 
 @Component
-public class EnvProxyModificationSaveAssociationHandler extends EventSenderAwareHandler<EnvProxyModificationDefaultEvent> {
+public class ProxyModificationOnFreeipaHandler extends EventSenderAwareHandler<EnvProxyModificationDefaultEvent> {
 
-    private final EnvironmentService environmentService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyModificationOnFreeipaHandler.class);
 
-    public EnvProxyModificationSaveAssociationHandler(EventSender eventSender, EnvironmentService environmentService) {
+    private final FreeIpaPollerService freeIpaPollerService;
+
+    protected ProxyModificationOnFreeipaHandler(EventSender eventSender, FreeIpaPollerService freeIpaPollerService) {
         super(eventSender);
-        this.environmentService = environmentService;
+        this.freeIpaPollerService = freeIpaPollerService;
     }
 
     @Override
     public String selector() {
-        return EnvProxyModificationHandlerSelectors.SAVE_NEW_PROXY_ASSOCIATION_HANDLER_EVENT.selector();
+        return EnvProxyModificationHandlerSelectors.TRACK_FREEIPA_PROXY_MODIFICATION_EVENT.selector();
     }
 
     @Override
     public void accept(Event<EnvProxyModificationDefaultEvent> event) {
         EnvProxyModificationDefaultEvent eventData = event.getData();
         try {
-            EnvironmentDto environmentDto = environmentService.updateProxyConfig(eventData.getEnvironmentDto().getId(), eventData.getProxyConfig());
+            LOGGER.info("Starting and waiting for freeipa modify proxy config");
+            freeIpaPollerService.waitForModifyProxyConfig(eventData.getResourceId(), eventData.getResourceCrn());
 
             EnvProxyModificationDefaultEvent envProxyModificationEvent = new EnvProxyModificationDefaultEvent(
-                    EnvProxyModificationStateSelectors.MODIFY_PROXY_FREEIPA_EVENT.selector(), environmentDto, eventData.getProxyConfig());
+                    EnvProxyModificationStateSelectors.FINISH_MODIFY_PROXY_EVENT.selector(), eventData.getEnvironmentDto(), eventData.getProxyConfig());
             eventSender().sendEvent(envProxyModificationEvent, event.getHeaders());
         } catch (Exception e) {
             EnvProxyModificationFailedEvent envProxyModificationFailedEvent = new EnvProxyModificationFailedEvent(
-                    eventData.getEnvironmentDto(), eventData.getProxyConfig(), EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED, e);
+                    eventData.getEnvironmentDto(), eventData.getProxyConfig(), EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_FREEIPA_FAILED, e);
             eventSender().sendEvent(envProxyModificationFailedEvent, event.getHeaders());
         }
     }
