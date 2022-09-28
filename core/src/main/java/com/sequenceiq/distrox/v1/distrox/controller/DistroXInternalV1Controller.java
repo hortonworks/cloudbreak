@@ -5,9 +5,10 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.RequestObject;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -30,8 +31,8 @@ public class DistroXInternalV1Controller implements DistroXInternalV1Endpoint {
     private StackOperationService stackOperationService;
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
-    public StackViewV4Response getByCrn(@TenantAwareParam String crn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    public StackViewV4Response getByCrn(@ResourceCrn @TenantAwareParam String crn) {
         return stackOperations.getForInternalCrn(NameOrCrn.ofCrn(crn), StackType.WORKLOAD);
     }
 

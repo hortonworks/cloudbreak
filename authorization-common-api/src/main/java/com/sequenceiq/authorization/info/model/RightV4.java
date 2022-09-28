@@ -44,14 +44,7 @@ public enum RightV4 {
     SDX_RETRY(AuthorizationResourceAction.RETRY_DATALAKE_OPERATION),
     SDX_DESCRIBE(AuthorizationResourceAction.DESCRIBE_DATALAKE),
     SDX_RESIZE(AuthorizationResourceAction.RESIZE_DATALAKE),
-    SDX_REFRESH_RECIPES(AuthorizationResourceAction.REFRESH_RECIPES_DATALAKE),
-    // legacy
-    DISTROX_READ(AuthorizationResourceAction.DATAHUB_READ),
-    DISTROX_WRITE(AuthorizationResourceAction.DATAHUB_WRITE),
-    SDX_READ(AuthorizationResourceAction.DATALAKE_READ),
-    SDX_WRITE(AuthorizationResourceAction.DATALAKE_WRITE),
-    ENVIRONMENT_READ(AuthorizationResourceAction.ENVIRONMENT_READ),
-    ENVIRONMENT_WRITE(AuthorizationResourceAction.ENVIRONMENT_WRITE);
+    SDX_REFRESH_RECIPES(AuthorizationResourceAction.REFRESH_RECIPES_DATALAKE);
 
     private static final Map<AuthorizationResourceAction, RightV4> BY_ACTION = Stream.of(RightV4.values())
             .collect(Collectors.toUnmodifiableMap(RightV4::getAction, Function.identity()));
@@ -79,7 +72,7 @@ public enum RightV4 {
         try {
             return RightV4.valueOf(string);
         } catch (Exception e) {
-            return ENVIRONMENT_READ;
+            return ENV_DESCRIBE;
         }
     }
 }
