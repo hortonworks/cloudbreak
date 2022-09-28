@@ -38,6 +38,7 @@ dependencies {
   api group: 'com.amazonaws', name: 'aws-java-sdk-cloudwatch', version: awsSdkVersion
   api group: 'com.amazonaws', name: 'aws-java-sdk-elasticloadbalancingv2', version: awsSdkVersion
   api group: 'com.amazonaws', name: 'aws-java-sdk-efs', version: awsSdkVersion
+  api group: 'com.amazonaws', name: 'aws-java-sdk-ebs', version: awsSdkVersion
   api group: 'com.amazonaws', name: 'aws-java-sdk-networkfirewall', version: awsSdkVersion
 
   // legacy
