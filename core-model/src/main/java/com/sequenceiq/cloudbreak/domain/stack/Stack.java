@@ -5,7 +5,12 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_START_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_START_FINISHED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_START_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_STOP_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_STOP_FINISHED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
@@ -94,7 +99,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.Tunnel;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "workspace_id", "name", "resourceCrn" }))
 public class Stack implements ProvisionEntity, WorkspaceAwareResource, OrchestratorAware, StackView, StackDtoDelegate, IdAware {
 
     @Id
@@ -625,15 +630,18 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     }
 
     public boolean isStopFailed() {
-        return STOP_FAILED.equals(getStatus());
+        return STOP_FAILED.equals(getStatus())
+                || EXTERNAL_DATABASE_STOP_FAILED.equals(getStatus());
     }
 
     public boolean isStackInStopPhase() {
-        return STOP_IN_PROGRESS.equals(getStatus()) || STOPPED.equals(getStatus());
+        return STOP_IN_PROGRESS.equals(getStatus()) || STOPPED.equals(getStatus())
+                || EXTERNAL_DATABASE_STOP_IN_PROGRESS.equals(getStatus()) || EXTERNAL_DATABASE_STOP_FINISHED.equals(getStatus());
     }
 
     public boolean isStartFailed() {
-        return START_FAILED.equals(getStatus());
+        return START_FAILED.equals(getStatus())
+                || EXTERNAL_DATABASE_START_FAILED.equals(getStatus());
     }
 
     public Map<String, String> getParameters() {
@@ -764,7 +772,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     }
 
     public boolean isStartInProgress() {
-        return START_IN_PROGRESS.equals(getStatus()) || START_REQUESTED.equals(getStatus());
+        return START_IN_PROGRESS.equals(getStatus()) || START_REQUESTED.equals(getStatus())
+                || EXTERNAL_DATABASE_START_IN_PROGRESS.equals(getStatus()) || EXTERNAL_DATABASE_START_FINISHED.equals(getStatus());
     }
 
     public boolean isRequested() {
@@ -789,7 +798,9 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return CREATE_IN_PROGRESS.equals(status)
                 || UPDATE_IN_PROGRESS.equals(status)
                 || STOP_IN_PROGRESS.equals(status)
+                || EXTERNAL_DATABASE_STOP_IN_PROGRESS.equals(status)
                 || START_IN_PROGRESS.equals(status)
+                || EXTERNAL_DATABASE_START_IN_PROGRESS.equals(status)
                 || DELETE_IN_PROGRESS.equals(status);
     }
 
@@ -798,11 +809,12 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     }
 
     public boolean isStopInProgress() {
-        return STOP_IN_PROGRESS.equals(getStatus()) || STOP_REQUESTED.equals(getStatus());
+        return STOP_IN_PROGRESS.equals(getStatus()) || STOP_REQUESTED.equals(getStatus()) || EXTERNAL_DATABASE_STOP_IN_PROGRESS.equals(getStatus());
     }
 
     public boolean isReadyForStart() {
-        return STOPPED.equals(getStatus()) || START_REQUESTED.equals(getStatus()) || START_IN_PROGRESS.equals(getStatus());
+        return STOPPED.equals(getStatus()) || START_REQUESTED.equals(getStatus()) || START_IN_PROGRESS.equals(getStatus())
+                || EXTERNAL_DATABASE_STOP_FINISHED.equals(getStatus()) || EXTERNAL_DATABASE_START_FINISHED.equals(getStatus());
     }
 
     public boolean isMultipleGateway() {

@@ -111,7 +111,7 @@ class StopExternalDatabaseHandlerTest {
         verify(stackUpdaterService).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_STOP_IN_PROGRESS),
                 eq(ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_COMMANCED), eq("External database stop in progress"));
 
-        verify(stackUpdaterService, never()).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_STOP_FINISHED),
+        verify(stackUpdaterService, never()).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.STOPPED),
                 eq(ResourceEvent.CLUSTER_EXTERNAL_DATABASE_CREATION_FINISHED), anyString());
 
         ArgumentCaptor<Event<StopExternalDatabaseFailed>> eventCaptor = ArgumentCaptor.forClass(Event.class);
@@ -138,7 +138,8 @@ class StopExternalDatabaseHandlerTest {
         underTest.accept(event);
 
         verify(stopService, never()).stopDatabase(any(), any(), eq(environment));
-        verify(stackUpdaterService, never()).updateStatus(any(), any(), any(), any());
+        verify(stackUpdaterService).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.STOPPED),
+                eq(ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED), any());
         verify(eventBus).notify(eq("StopExternalDatabaseResult"), any(Event.class));
     }
 
@@ -158,7 +159,8 @@ class StopExternalDatabaseHandlerTest {
         underTest.accept(event);
 
         verify(stopService, never()).stopDatabase(any(), any(), eq(environment));
-        verify(stackUpdaterService, never()).updateStatus(any(), any(), any(), any());
+        verify(stackUpdaterService).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.STOPPED),
+                eq(ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED), any());
         verify(eventBus).notify(eq("StopExternalDatabaseResult"), any(Event.class));
     }
 
@@ -180,7 +182,7 @@ class StopExternalDatabaseHandlerTest {
         underTest.accept(event);
 
         verify(stopService, never()).stopDatabase(any(), any(), eq(environment));
-        verify(stackUpdaterService, never()).updateStatus(any(), any(), any(), any());
+        verify(stackUpdaterService).updateStatus(any(), any(), any(), any());
         verify(eventBus).notify(eq("StopExternalDatabaseResult"), any(Event.class));
     }
 
@@ -206,8 +208,8 @@ class StopExternalDatabaseHandlerTest {
         verify(stackUpdaterService).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_STOP_IN_PROGRESS),
                 eq(ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_COMMANCED), eq("External database stop in progress"));
 
-        verify(stackUpdaterService).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_STOP_FINISHED),
-                eq(ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED), eq("External database stop finished"));
+        verify(stackUpdaterService).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.STOPPED),
+                eq(ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED), eq("External database stop finished successfully"));
 
         ArgumentCaptor<Event<StopExternalDatabaseResult>> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(eq("StopExternalDatabaseResult"), eventCaptor.capture());
