@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation;
 
+import static com.sequenceiq.cloudbreak.common.database.TargetMajorVersion.VERSION_11;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation.ValidateRdsUpgradeEvent.VALIDATE_RDS_UPGRADE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.AbstractValidateRdsUpgradeEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeBackupValidationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeBackupValidationResult;
@@ -44,6 +46,8 @@ class ValidateRdsUpgradeActionsTest {
 
     private static final String FLOW_ID = "flow_id_1";
 
+    private static final TargetMajorVersion TARGET_MAJOR_VERSION = VERSION_11;
+
     @Mock
     private ValidateRdsUpgradeService validateRdsUpgradeService;
 
@@ -62,7 +66,8 @@ class ValidateRdsUpgradeActionsTest {
     @Test
     public void testShouldPushSaltStates() throws Exception {
         AbstractAction action = (AbstractAction) underTest.pushSaltStates();
-        ValidateRdsUpgradeTriggerRequest triggerEvent = new ValidateRdsUpgradeTriggerRequest(VALIDATE_RDS_UPGRADE_EVENT.event(), STACK_ID, new Promise<>());
+        ValidateRdsUpgradeTriggerRequest triggerEvent =
+                new ValidateRdsUpgradeTriggerRequest(VALIDATE_RDS_UPGRADE_EVENT.event(), STACK_ID, TARGET_MAJOR_VERSION, new Promise<>());
         mockAndTriggerRdsUpgradeAction(action, triggerEvent, true);
 
         verify(validateRdsUpgradeService).pushSaltStates(STACK_ID);
@@ -72,7 +77,8 @@ class ValidateRdsUpgradeActionsTest {
     @Test
     public void testShouldNotPushSaltStates() throws Exception {
         AbstractAction action = (AbstractAction) underTest.pushSaltStates();
-        ValidateRdsUpgradeTriggerRequest triggerEvent = new ValidateRdsUpgradeTriggerRequest(VALIDATE_RDS_UPGRADE_EVENT.event(), STACK_ID, new Promise<>());
+        ValidateRdsUpgradeTriggerRequest triggerEvent =
+                new ValidateRdsUpgradeTriggerRequest(VALIDATE_RDS_UPGRADE_EVENT.event(), STACK_ID, TARGET_MAJOR_VERSION, new Promise<>());
         mockAndTriggerRdsUpgradeAction(action, triggerEvent, false);
 
         verify(validateRdsUpgradeService, never()).pushSaltStates(STACK_ID);

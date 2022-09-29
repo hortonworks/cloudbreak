@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -42,9 +43,11 @@ public class BackupRdsDataHandler extends ExceptionCatcherEventHandler<UpgradeRd
     public Selectable doAccept(HandlerEvent<UpgradeRdsDataBackupRequest> event) {
         UpgradeRdsDataBackupRequest request = event.getData();
         Long stackId = request.getResourceId();
-        LOGGER.info("Starting backup for RDS upgrade...");
+        String backupLocation = request.getBackupLocation();
+        LOGGER.info("Starting backup for RDS upgrade {}...",
+                StringUtils.isNotBlank(backupLocation) ? "and uploading to storage location " + backupLocation :  "");
         try {
-            upgradeRdsService.backupRds(stackId);
+            upgradeRdsService.backupRds(stackId, backupLocation);
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.warn("RDS backup failed due to {}", e.getMessage());
             return new UpgradeRdsFailedEvent(stackId, e, DetailedStackStatus.AVAILABLE);

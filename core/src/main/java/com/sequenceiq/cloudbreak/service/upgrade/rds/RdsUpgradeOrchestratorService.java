@@ -67,7 +67,7 @@ public class RdsUpgradeOrchestratorService {
     private UpgradeEmbeddedDBPreparationStateParamsProvider upgradeEmbeddedDBPreparationStateParamsProvider;
 
     @Inject
-    private BackupRestoreEmbeddedDBStateParamsProvider backupRestoreEmbeddedDBStateParamsProvider;
+    private BackupRestoreDBStateParamsProvider backupRestoreDBStateParamsProvider;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -81,16 +81,16 @@ public class RdsUpgradeOrchestratorService {
     @Value("${cb.db.env.upgrade.rds.backuprestore.validationratio}")
     private double backupValidationRatio;
 
-    public void backupRdsData(Long stackId) throws CloudbreakOrchestratorException {
+    public void backupRdsData(Long stackId, String backupLocation) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = createStateParams(stackId, BACKUP_STATE, true);
-        stateParams.setStateParams(backupRestoreEmbeddedDBStateParamsProvider.createParamsForBackupRestore());
+        stateParams.setStateParams(backupRestoreDBStateParamsProvider.createParamsForBackupRestore(backupLocation));
         LOGGER.debug("Calling backupRdsData with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
     public void restoreRdsData(Long stackId) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = createStateParams(stackId, RESTORE_STATE, true);
-        stateParams.setStateParams(backupRestoreEmbeddedDBStateParamsProvider.createParamsForBackupRestore());
+        stateParams.setStateParams(backupRestoreDBStateParamsProvider.createParamsForBackupRestore(null));
         LOGGER.debug("Calling restoreRdsData with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }

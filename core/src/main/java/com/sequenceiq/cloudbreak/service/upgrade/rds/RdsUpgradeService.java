@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RDS_UPGRADE_
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RDS_UPGRADE_NOT_AVAILABLE;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,10 +33,12 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
@@ -60,6 +63,9 @@ public class RdsUpgradeService {
 
     @Inject
     private CloudbreakMessagesService messagesService;
+
+    @Inject
+    private EnvironmentClientService environmentService;
 
     @Value("${cb.db.env.upgrade.rds.targetversion}")
     private TargetMajorVersion defaultTargetMajorVersion;
@@ -87,13 +93,9 @@ public class RdsUpgradeService {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("RDS upgrade has been initiated for stack {} to version {}, request version was {}",
                 nameOrCrn.getNameOrCrn(), calculatedVersion, targetMajorVersion);
-        return validateAndTrigger(nameOrCrn, stack, calculatedVersion, accountId);
-    }
-
-    private RdsUpgradeV4Response validateAndTrigger(NameOrCrn nameOrCrn, StackView stack, TargetMajorVersion targetMajorVersion, String accountId) {
-        validate(nameOrCrn, stack, targetMajorVersion, accountId);
-        LOGGER.info("External database for stack {} will be upgraded to version {}", stack.getName(), targetMajorVersion.getMajorVersion());
-        return triggerRdsUpgradeFlow(stack, targetMajorVersion);
+        validate(nameOrCrn, stack, calculatedVersion, accountId);
+        LOGGER.info("External database for stack {} will be upgraded to version {}", stack.getName(), calculatedVersion.getMajorVersion());
+        return triggerRdsUpgradeFlow(stack, calculatedVersion, getBackupLocation(stack.getEnvironmentCrn()));
     }
 
     private void validate(NameOrCrn nameOrCrn, StackView stack, TargetMajorVersion targetMajorVersion, String accountId) {
@@ -131,9 +133,10 @@ public class RdsUpgradeService {
     }
 
     private void validateStackStatus(StackView stack) {
-        if (!stack.getStatus().isAvailable() && Status.EXTERNAL_DATABASE_UPGRADE_FAILED != stack.getStatus()) {
+        Status stackStatus = stack.getStatus();
+        if (!stackStatus.isAvailable() && Status.EXTERNAL_DATABASE_UPGRADE_FAILED != stackStatus) {
             LOGGER.warn("Stack {} is not available for RDS upgrade", stack.getName());
-            throw new BadRequestException(getMessage(CLUSTER_RDS_UPGRADE_NOT_AVAILABLE));
+            throw new BadRequestException(getMessage(CLUSTER_RDS_UPGRADE_NOT_AVAILABLE, List.of(stackStatus.name())));
         }
     }
 
@@ -155,13 +158,20 @@ public class RdsUpgradeService {
         }
     }
 
-    private RdsUpgradeV4Response triggerRdsUpgradeFlow(StackView stack, TargetMajorVersion targetMajorVersion) {
-        FlowIdentifier triggeredFlowId = reactorFlowManager.triggerRdsUpgrade(stack.getId(), targetMajorVersion);
-        return new RdsUpgradeV4Response(triggeredFlowId, targetMajorVersion);
+    private String getBackupLocation(String environmentCrn) {
+        DetailedEnvironmentResponse environment = environmentService.getByCrn(environmentCrn);
+        String backupStorageLocation = environment.getBackupLocation();
+        boolean hasBackupLocation = Objects.nonNull(backupStorageLocation);
+        LOGGER.debug("Backup location for CRN {} has {} been found {}",
+                environmentCrn,
+                hasBackupLocation ? "" : "NOT",
+                hasBackupLocation ? backupStorageLocation : "");
+        return backupStorageLocation;
     }
 
-    private String getMessage(ResourceEvent resourceEvent) {
-        return messagesService.getMessage(resourceEvent.getMessage());
+    private RdsUpgradeV4Response triggerRdsUpgradeFlow(StackView stack, TargetMajorVersion targetMajorVersion, String backupLocation) {
+        FlowIdentifier triggeredFlowId = reactorFlowManager.triggerRdsUpgrade(stack.getId(), targetMajorVersion, backupLocation);
+        return new RdsUpgradeV4Response(triggeredFlowId, targetMajorVersion);
     }
 
     private String getMessage(ResourceEvent resourceEvent, List<String> args) {

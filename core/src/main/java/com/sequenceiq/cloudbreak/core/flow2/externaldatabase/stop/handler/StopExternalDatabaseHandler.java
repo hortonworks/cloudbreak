@@ -79,14 +79,17 @@ public class StopExternalDatabaseHandler extends ExceptionCatcherEventHandler<St
         try {
             if (StackType.WORKLOAD != stack.getType()) {
                 LOGGER.debug("External database stop in Cloudbreak service is required for WORKLOAD stacks only.");
+                updateStackToStopped(stack, "External database stop is not required in this flow");
                 result = new StopExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_STOPPED_EVENT.event(),
                         stack.getName(), null);
             } else if (externalDatabase.isEmbedded()) {
                 LOGGER.info("External database for stack {} is not requested. Stop is not possible.", stack.getName());
+                updateStackToStopped(stack, "External database was not requested, stop is not possible");
                 result = new StopExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_STOPPED_EVENT.event(),
                         stack.getName(), null);
             } else if (!externalDatabaseConfig.isExternalDatabasePauseSupportedFor(CloudPlatform.valueOf(environment.getCloudPlatform()))) {
                 LOGGER.debug("External database pause is not supported for '{}' cloud platform.", environment.getCloudPlatform());
+                updateStackToStopped(stack, "External database stop is not supported by the cloud platform");
                 result = new StopExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_STOPPED_EVENT.event(),
                         stack.getName(), null);
             } else {
@@ -95,10 +98,7 @@ public class StopExternalDatabaseHandler extends ExceptionCatcherEventHandler<St
                 stackUpdaterService.updateStatus(stack.getId(), DetailedStackStatus.EXTERNAL_DATABASE_STOP_IN_PROGRESS,
                         ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_COMMANCED, "External database stop in progress");
                 stopService.stopDatabase(stack.getCluster(), externalDatabase, environment);
-                LOGGER.debug("Updating stack {} status from {} to {}",
-                        stack.getName(), stack.getStatus().name(), DetailedStackStatus.EXTERNAL_DATABASE_STOP_FINISHED.name());
-                stackUpdaterService.updateStatus(stack.getId(), DetailedStackStatus.EXTERNAL_DATABASE_STOP_FINISHED,
-                        ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED, "External database stop finished");
+                updateStackToStopped(stack, "External database stop finished successfully");
                 result = new StopExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_STOPPED_EVENT.event(),
                         stack.getName(), stack.getCluster().getDatabaseServerCrn());
             }
@@ -113,6 +113,13 @@ public class StopExternalDatabaseHandler extends ExceptionCatcherEventHandler<St
             result = stopFailedEvent(stack, e);
         }
         return result;
+    }
+
+    private void updateStackToStopped(Stack stack, String statusReason) {
+        LOGGER.debug("Updating stack {} status from {} to {}",
+                stack.getName(), stack.getStatus().name(), DetailedStackStatus.STOPPED.name());
+        stackUpdaterService.updateStatus(stack.getId(), DetailedStackStatus.STOPPED,
+                ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED, statusReason);
     }
 
     private Selectable stopFailedEvent(Stack stack, Exception e) {

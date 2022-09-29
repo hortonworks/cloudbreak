@@ -31,9 +31,9 @@ public class UpgradeRdsFlowEventChainFactory implements FlowEventChainFactory<Rd
         LOGGER.debug("Creating flow trigger event queue for RDS upgrade with event {}", event);
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new ValidateRdsUpgradeTriggerRequest(ValidateRdsUpgradeEvent.VALIDATE_RDS_UPGRADE_EVENT.event(),
-                event.getResourceId(), event.accepted()));
+                event.getResourceId(), event.getVersion(), event.accepted()));
         flowEventChain.add(new UpgradeRdsTriggerRequest(UpgradeRdsEvent.UPGRADE_RDS_EVENT.event(),
-                event.getResourceId(), event.getVersion()));
+                event.getResourceId(), event.getVersion(), event.getBackupLocation()));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

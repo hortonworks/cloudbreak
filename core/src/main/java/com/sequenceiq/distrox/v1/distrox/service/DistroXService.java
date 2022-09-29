@@ -75,7 +75,7 @@ public class DistroXService {
         }
         Set<Pair<String, StatusCheckResult>> sdxCrnsWithAvailability = platformAwareSdxConnector.listSdxCrnsWithAvailability(environment.getName(),
                 environment.getCrn(), sdxCrns);
-        if (!sdxCrnsWithAvailability.stream().map(Pair::getValue).allMatch(statusCheckResult -> StatusCheckResult.AVAILABLE.equals(statusCheckResult))) {
+        if (!sdxCrnsWithAvailability.stream().map(Pair::getValue).allMatch(StatusCheckResult.AVAILABLE::equals)) {
             throw new BadRequestException("Data Lake stacks of environment should be available.");
         }
     }

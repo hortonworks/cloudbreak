@@ -81,6 +81,37 @@ backup_database_for_service() {
 
 }
 
+move_backup_to_cloud () {
+
+  BACKUP_LOCATION={{salt['pillar.get']('postgres:upgrade:backup_location')}}
+  ABFS_FILE_SYSTEM={{salt['pillar.get']('postgres:upgrade:abfs_file_system')}}
+  ABFS_FILE_SYSTEM_FOLDER={{salt['pillar.get']('postgres:upgrade:abfs_file_system_folder')}}
+  ABFS_ACCOUNT_NAME={{salt['pillar.get']('postgres:upgrade:abfs_account_name')}}
+  CLUSTER_NAME={{salt['pillar.get']('cluster:name')}}
+
+  [ -z "$BACKUP_LOCATION" ] && doLog "WARN BACKUP_LOCATION variable is not defined, skipping the cloud storage upload!" && return 1
+
+  BACKUPS_DIR="$1"
+  LOCAL_BACKUP_FILE_NAME={{salt['pillar.get']('upgrade:backup:compressed_file_name')}}
+  doLog "INFO attempting backup upload to: ${BACKUP_LOCATION}, compressing to file ${LOCAL_BACKUP_FILE_NAME}"
+
+  tar -czvf "$LOCAL_BACKUP_FILE_NAME" "${BACKUPS_DIR}"
+  doLog "INFO Compressed file size is $(du -h $LOCAL_BACKUP_FILE_NAME)"
+  TARGET_LOCATION="${ABFS_FILE_SYSTEM_FOLDER}/rds_backup/${CLUSTER_NAME}/"
+
+  doLog "INFO Detected ABFS configs: Account=$ABFS_ACCOUNT_NAME, Container=$ABFS_FILE_SYSTEM, BasePath=$ABFS_FILE_SYSTEM_FOLDER"
+  cdp-telemetry storage abfs upload --file "$LOCAL_BACKUP_FILE_NAME" --location "${TARGET_LOCATION}" --account "${ABFS_ACCOUNT_NAME}" --container "${ABFS_FILE_SYSTEM}"
+  local ABFS_UPLOAD_RESULT="$?"
+  if [[ "$ABFS_UPLOAD_RESULT" == "0" ]]; then
+    doLog "INFO ABFS upload COMPLETED: Account=$ABFS_ACCOUNT_NAME, Container=$ABFS_FILE_SYSTEM, Path=${TARGET_LOCATION}${LOCAL_BACKUP_FILE_NAME}"
+  else
+    errorExit "ABFS upload FAILED: Account=$ABFS_ACCOUNT_NAME, Container=$ABFS_FILE_SYSTEM, Path=${TARGET_LOCATION}${LOCAL_BACKUP_FILE_NAME}"
+  fi
+
+  rm -f ${LOCAL_BACKUP_FILE_NAME}
+  doLog "INFO Completed upload to ${BACKUP_LOCATION}"
+}
+
 run_backup() {
   BACKUPS_DIR="{{salt['pillar.get']('upgrade:backup:directory')}}"
   [ -z "$BACKUPS_DIR" ] && errorExit "BACKUPS_DIR variable is not defined, check the pillar values!"
@@ -94,7 +125,7 @@ run_backup() {
   backup_database_for_service {{ service }}
   {% endif %}
   {% endfor %}
-
+  move_backup_to_cloud $DATE_DIR
 }
 
 doLog "INFO Starting backup"

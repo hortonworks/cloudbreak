@@ -5,6 +5,7 @@ import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.RUNNING;
 
 import java.util.List;
+import java.util.Collections;
 
 import javax.inject.Inject;
 
@@ -168,7 +169,8 @@ public class SdxDatabaseServerUpgradeService {
 
     private SdxUpgradeDatabaseServerResponse triggerDatabaseUpgrade(SdxCluster cluster, TargetMajorVersion targetMajorVersion) {
         LOGGER.debug("Triggering database server upgrade");
-        sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_DATABASE_SERVER_REQUESTED, "Database server upgrade requested",
+        sdxStatusService.setStatusForDatalakeAndNotify(DATALAKE_UPGRADE_DATABASE_SERVER_REQUESTED,
+                Collections.singleton(targetMajorVersion.getMajorVersion()), "Database server upgrade requested",
                 cluster.getId());
         FlowIdentifier flowIdentifier = reactorFlowManager.triggerDatabaseServerUpgradeFlow(cluster, targetMajorVersion);
         LOGGER.info("RDS database server upgrade has been initiated for stack {}", cluster.getName());
