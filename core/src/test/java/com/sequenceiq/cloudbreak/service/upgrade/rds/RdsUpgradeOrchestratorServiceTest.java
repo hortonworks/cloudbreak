@@ -36,6 +36,8 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -74,8 +76,14 @@ class RdsUpgradeOrchestratorServiceTest {
     @Mock
     private Cluster cluster;
 
+    @Mock
+    private UpgradeRdsBackupRestoreStateParamsProvider upgradeRdsBackupRestoreStateParamsProvider;
+
     @Captor
     private ArgumentCaptor<OrchestratorStateParams> paramCaptor;
+
+    @Captor
+    private ArgumentCaptor<SaltConfig> saltConfigParamCaptor;
 
     @InjectMocks
     private RdsUpgradeOrchestratorService underTest;
@@ -150,27 +158,42 @@ class RdsUpgradeOrchestratorServiceTest {
     @Test
     void testValidateDbBackupSpace() throws CloudbreakOrchestratorException, JsonProcessingException {
         initGlobalPrivateFields();
-        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k / | awk '{print $4}' | tail -n 1")))
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
+                eq("ls -d /hadoopfs/fs* /var /dbfs | xargs -I % rm -rf %/tmp/postgres_upgrade_backup")))
+                .thenReturn(Map.of());
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
+                eq("df | grep /hadoopfs/fs | awk '{print $4\" \"$6}' | sort -nr | head -n 1 | awk '{print $2}'")))
+                .thenReturn(Map.of("fqdn1", "/hadoopfs/fs1"));
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k /hadoopfs/fs1 | awk '{print $4}' | tail -n 1")))
                 .thenReturn(Map.of("fqdn1", "1024000"));
         when(gatewayConfig.getHostname()).thenReturn("fqdn1");
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonNode = mapper.readTree("{\"cmd_|-get_external_db_size_test\":{\"changes\":{\"stdout\":\"104857600\",\"stderr\":\"\"}}}");
         when(hostOrchestrator.applyOrchestratorState(any())).thenReturn(List.of(Map.of("fqdn1", jsonNode)));
+        Map<String, SaltPillarProperties> pillarParams = Map.of("fqdn1", new SaltPillarProperties("path", Map.of()));
+        when(upgradeRdsBackupRestoreStateParamsProvider.createParamsForRdsBackupRestore(stack, "/hadoopfs/fs1")).thenReturn(pillarParams);
+        underTest.determineDbBackupLocation(STACK_ID);
 
-        underTest.validateDbBackupSpace(STACK_ID);
-
-        verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k / | awk '{print $4}' | tail -n 1"));
+        verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k /hadoopfs/fs1 | awk '{print $4}' | tail -n 1"));
         verify(hostOrchestrator).applyOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
         assertThat(params.getState()).isEqualTo("postgresql/upgrade/external-db-size");
         assertThat(params.getTargetHostNames()).hasSameElementsAs(Set.of("fqdn1"));
         assertOtherStateParams(params);
+        verify(hostOrchestrator).saveCustomPillars(saltConfigParamCaptor.capture(), any(), any());
+        assertThat(saltConfigParamCaptor.getValue().getServicePillarConfig()).isEqualTo(pillarParams);
     }
 
     @Test
     void testValidateDbBackupSpaceNotEnoughSpace() throws CloudbreakOrchestratorException, JsonProcessingException {
         initGlobalPrivateFields();
-        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k / | awk '{print $4}' | tail -n 1")))
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
+                eq("ls -d /hadoopfs/fs* /var /dbfs | xargs -I % rm -rf %/tmp/postgres_upgrade_backup")))
+                .thenReturn(Map.of());
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
+                eq("df | grep /hadoopfs/fs | awk '{print $4\" \"$6}' | sort -nr | head -n 1 | awk '{print $2}'")))
+                .thenReturn(Map.of("fqdn1", "/hadoopfs/fs1"));
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k /hadoopfs/fs1 | awk '{print $4}' | tail -n 1")))
                 .thenReturn(Map.of("fqdn1", "1024000"));
         when(gatewayConfig.getHostname()).thenReturn("fqdn1");
         ObjectMapper mapper = new ObjectMapper();
@@ -178,42 +201,53 @@ class RdsUpgradeOrchestratorServiceTest {
         when(hostOrchestrator.applyOrchestratorState(any())).thenReturn(List.of(Map.of("fqdn1", jsonNode)));
 
         CloudbreakOrchestratorException ex = Assertions.assertThrows(CloudbreakOrchestratorException.class,
-                () -> underTest.validateDbBackupSpace(STACK_ID));
+                () -> underTest.determineDbBackupLocation(STACK_ID));
 
-        Assertions.assertEquals("Root volume does not have enough free space (1000MB) for database backup (2000MB)", ex.getMessage());
-        verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k / | awk '{print $4}' | tail -n 1"));
+        Assertions.assertEquals("/hadoopfs/fs1 volume does not have enough free space (1000MB) for database backup (2000MB).", ex.getMessage());
+        verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k /hadoopfs/fs1 | awk '{print $4}' | tail -n 1"));
         verify(hostOrchestrator).applyOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
         assertThat(params.getState()).isEqualTo("postgresql/upgrade/external-db-size");
         assertThat(params.getTargetHostNames()).hasSameElementsAs(Set.of("fqdn1"));
-        assertOtherStateParams(params);
     }
 
     @Test
     void testValidateDbBackupSpaceCouldNotGetRootVolumeFreeSpaceNoOutput() throws CloudbreakOrchestratorException {
-        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k / | awk '{print $4}' | tail -n 1")))
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
+                eq("ls -d /hadoopfs/fs* /var /dbfs | xargs -I % rm -rf %/tmp/postgres_upgrade_backup")))
+                .thenReturn(Map.of());
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
+                eq("df | grep /hadoopfs/fs | awk '{print $4\" \"$6}' | sort -nr | head -n 1 | awk '{print $2}'")))
+                .thenReturn(Map.of("fqdn1", "/hadoopfs/fs1"));
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k /hadoopfs/fs1 | awk '{print $4}' | tail -n 1")))
                 .thenReturn(Map.of("fqdn1", ""));
         when(gatewayConfig.getHostname()).thenReturn("fqdn1");
 
         CloudbreakOrchestratorException ex = Assertions.assertThrows(CloudbreakOrchestratorException.class,
-                () -> underTest.validateDbBackupSpace(STACK_ID));
+                () -> underTest.determineDbBackupLocation(STACK_ID));
 
         Assertions.assertEquals("Could not get free space size on root volume from primary gateway", ex.getMessage());
-        verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k / | awk '{print $4}' | tail -n 1"));
+        verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k /hadoopfs/fs1 | awk '{print $4}' | tail -n 1"));
     }
 
     @Test
     void testValidateDbBackupSpaceCheckingDbSizeNoResult() throws CloudbreakOrchestratorException {
-        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k / | awk '{print $4}' | tail -n 1")))
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
+                eq("ls -d /hadoopfs/fs* /var /dbfs | xargs -I % rm -rf %/tmp/postgres_upgrade_backup")))
+                .thenReturn(Map.of());
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
+                eq("df | grep /hadoopfs/fs | awk '{print $4\" \"$6}' | sort -nr | head -n 1 | awk '{print $2}'")))
+                .thenReturn(Map.of("fqdn1", "/hadoopfs/fs1"));
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k /hadoopfs/fs1 | awk '{print $4}' | tail -n 1")))
                 .thenReturn(Map.of("fqdn1", "1000"));
         when(gatewayConfig.getHostname()).thenReturn("fqdn1");
         when(hostOrchestrator.applyOrchestratorState(any())).thenReturn(List.of());
 
         CloudbreakOrchestratorException ex = Assertions.assertThrows(CloudbreakOrchestratorException.class,
-                () -> underTest.validateDbBackupSpace(STACK_ID));
+                () -> underTest.determineDbBackupLocation(STACK_ID));
 
         Assertions.assertEquals("Orchestrator engine checking database size did not return any results", ex.getMessage());
-        verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k / | awk '{print $4}' | tail -n 1"));
+        verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k /hadoopfs/fs1 | awk '{print $4}' | tail -n 1"));
         verify(hostOrchestrator).applyOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
         assertThat(params.getState()).isEqualTo("postgresql/upgrade/external-db-size");
@@ -223,7 +257,13 @@ class RdsUpgradeOrchestratorServiceTest {
 
     @Test
     void testValidateDbBackupSpaceCheckingDbSizeScriptErrorOutput() throws CloudbreakOrchestratorException, JsonProcessingException {
-        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k / | awk '{print $4}' | tail -n 1")))
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
+                eq("ls -d /hadoopfs/fs* /var /dbfs | xargs -I % rm -rf %/tmp/postgres_upgrade_backup")))
+                .thenReturn(Map.of());
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
+                eq("df | grep /hadoopfs/fs | awk '{print $4\" \"$6}' | sort -nr | head -n 1 | awk '{print $2}'")))
+                .thenReturn(Map.of("fqdn1", "/hadoopfs/fs1"));
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k /hadoopfs/fs1 | awk '{print $4}' | tail -n 1")))
                 .thenReturn(Map.of("fqdn1", "1000"));
         when(gatewayConfig.getHostname()).thenReturn("fqdn1");
         ObjectMapper mapper = new ObjectMapper();
@@ -231,10 +271,10 @@ class RdsUpgradeOrchestratorServiceTest {
         when(hostOrchestrator.applyOrchestratorState(any())).thenReturn(List.of(Map.of("fqdn1", jsonNode)));
 
         CloudbreakOrchestratorException ex = Assertions.assertThrows(CloudbreakOrchestratorException.class,
-                () -> underTest.validateDbBackupSpace(STACK_ID));
+                () -> underTest.determineDbBackupLocation(STACK_ID));
 
         Assertions.assertEquals("Could not determine database size, because of the following error: error", ex.getMessage());
-        verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k / | awk '{print $4}' | tail -n 1"));
+        verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k /hadoopfs/fs1 | awk '{print $4}' | tail -n 1"));
         verify(hostOrchestrator).applyOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
         assertThat(params.getState()).isEqualTo("postgresql/upgrade/external-db-size");
@@ -244,7 +284,13 @@ class RdsUpgradeOrchestratorServiceTest {
 
     @Test
     void testValidateDbBackupSpaceCheckingDbSizeScriptNoOutput() throws CloudbreakOrchestratorException, JsonProcessingException {
-        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k / | awk '{print $4}' | tail -n 1")))
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
+                eq("ls -d /hadoopfs/fs* /var /dbfs | xargs -I % rm -rf %/tmp/postgres_upgrade_backup")))
+                .thenReturn(Map.of());
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(),
+                eq("df | grep /hadoopfs/fs | awk '{print $4\" \"$6}' | sort -nr | head -n 1 | awk '{print $2}'")))
+                .thenReturn(Map.of("fqdn1", "/hadoopfs/fs1"));
+        when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k /hadoopfs/fs1 | awk '{print $4}' | tail -n 1")))
                 .thenReturn(Map.of("fqdn1", "1000"));
         when(gatewayConfig.getHostname()).thenReturn("fqdn1");
         ObjectMapper mapper = new ObjectMapper();
@@ -252,10 +298,10 @@ class RdsUpgradeOrchestratorServiceTest {
         when(hostOrchestrator.applyOrchestratorState(any())).thenReturn(List.of(Map.of("fqdn1", jsonNode)));
 
         CloudbreakOrchestratorException ex = Assertions.assertThrows(CloudbreakOrchestratorException.class,
-                () -> underTest.validateDbBackupSpace(STACK_ID));
+                () -> underTest.determineDbBackupLocation(STACK_ID));
 
         Assertions.assertEquals("Could not determine database size, because orchestration engine did not have return value", ex.getMessage());
-        verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k / | awk '{print $4}' | tail -n 1"));
+        verify(hostOrchestrator).runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("fqdn1")), eq("df -k /hadoopfs/fs1 | awk '{print $4}' | tail -n 1"));
         verify(hostOrchestrator).applyOrchestratorState(paramCaptor.capture());
         OrchestratorStateParams params = paramCaptor.getValue();
         assertThat(params.getState()).isEqualTo("postgresql/upgrade/external-db-size");

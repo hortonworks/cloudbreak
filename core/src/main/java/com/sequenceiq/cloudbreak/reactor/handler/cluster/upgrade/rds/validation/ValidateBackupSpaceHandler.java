@@ -34,7 +34,7 @@ public class ValidateBackupSpaceHandler extends ExceptionCatcherEventHandler<Val
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ValidateRdsUpgradeBackupValidationRequest> event) {
-        LOGGER.error("Validation of backup for RDS upgrade has failed", e);
+        LOGGER.error("Determination of backup location and validation of backup for RDS upgrade has failed", e);
         return new ValidateRdsUpgradeFailedEvent(resourceId, e, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_FAILED);
     }
 
@@ -43,11 +43,11 @@ public class ValidateBackupSpaceHandler extends ExceptionCatcherEventHandler<Val
         ValidateRdsUpgradeBackupValidationRequest request = event.getData();
         Long stackId = request.getResourceId();
         try {
-            LOGGER.info("Validating if there is enough space for RDS backup");
-            rdsUpgradeOrchestratorService.validateDbBackupSpace(stackId);
+            LOGGER.info("Determining backup location and validating if there is enough space for RDS backup");
+            rdsUpgradeOrchestratorService.determineDbBackupLocation(stackId);
             return new ValidateRdsUpgradeBackupValidationResult(stackId);
         } catch (CloudbreakOrchestratorException e) {
-            LOGGER.warn("Validating if there is enough space for RDS backup has failed.", e);
+            LOGGER.warn("Determining backup location and validating if there is enough space for RDS backup has failed.", e);
             return new ValidateRdsUpgradeFailedEvent(stackId, e, DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_FAILED);
         }
     }
