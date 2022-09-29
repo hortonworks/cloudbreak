@@ -1,17 +1,10 @@
 package com.sequenceiq.cloudbreak.datalakedr.config;
 
-import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
-
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
-
-import io.grpc.ManagedChannelBuilder;
 
 @Configuration
 public class DatalakeDrConfig {
@@ -60,18 +53,5 @@ public class DatalakeDrConfig {
 
     public boolean isConfigured() {
         return enabled && StringUtils.isNotBlank(endpoint);
-    }
-
-    @Bean
-    public ManagedChannelWrapper datalakeDrManagedChannelWrapper() {
-        return newManagedChannelWrapper(host, port);
-    }
-
-    public static ManagedChannelWrapper newManagedChannelWrapper(String host, int port) {
-        return new ManagedChannelWrapper(
-                ManagedChannelBuilder.forAddress(host, port)
-                        .usePlaintext()
-                        .maxInboundMessageSize(DEFAULT_MAX_MESSAGE_SIZE)
-                        .build());
     }
 }
