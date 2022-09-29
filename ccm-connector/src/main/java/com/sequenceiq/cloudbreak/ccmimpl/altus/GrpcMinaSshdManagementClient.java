@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.ccmimpl.altus;
 
+import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
+
 import java.time.Clock;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -14,7 +16,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto;
@@ -22,10 +23,12 @@ import com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementPro
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.ccm.exception.CcmException;
 import com.sequenceiq.cloudbreak.ccmimpl.altus.config.MinaSshdManagementClientConfig;
+import com.sequenceiq.cloudbreak.ccmimpl.altus.config.MinaSshdManagementConfig;
 import com.sequenceiq.cloudbreak.ccmimpl.util.RetryUtil;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import io.opentracing.Tracer;
 
 @Component
@@ -37,9 +40,8 @@ public class GrpcMinaSshdManagementClient {
     @Autowired(required = false)
     Clock clock = Clock.systemUTC();
 
-    @Qualifier("minaSshdManagementManagedChannelWrapper")
     @Inject
-    private ManagedChannelWrapper channelWrapper;
+    private MinaSshdManagementConfig minaSshdManagementConfig;
 
     @Inject
     private MinaSshdManagementClientConfig minaSshdManagementClientConfig;
@@ -61,27 +63,29 @@ public class GrpcMinaSshdManagementClient {
     public MinaSshdService acquireMinaSshdServiceAndWaitUntilReady(String requestId, String actorCrn, String accountId)
             throws InterruptedException, CcmException {
 
-        MinaSshdManagementClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            MinaSshdManagementClient client = makeClient(channelWrapper.getChannel(), actorCrn);
 
-        ZonedDateTime waitUntilTime = ZonedDateTime.now(clock).plus(minaSshdManagementClientConfig.getTimeoutMs(), ChronoUnit.MILLIS);
-        int pollingIntervalMillis = minaSshdManagementClientConfig.getPollingIntervalMs();
+            ZonedDateTime waitUntilTime = ZonedDateTime.now(clock).plus(minaSshdManagementClientConfig.getTimeoutMs(), ChronoUnit.MILLIS);
+            int pollingIntervalMillis = minaSshdManagementClientConfig.getPollingIntervalMs();
 
-        String actionDescription = "acquire MinaSSHD service for accountId " + accountId;
-        Supplier<CcmException> timeoutExceptionSupplier = () -> new CcmException(String.format("Timed out while trying to %s", actionDescription), true);
+            String actionDescription = "acquire MinaSSHD service for accountId " + accountId;
+            Supplier<CcmException> timeoutExceptionSupplier = () -> new CcmException(String.format("Timed out while trying to %s", actionDescription), true);
 
-        // First call acquireMinaSshdService, with retries in case of transient failures.
-        MinaSshdService initialService = RetryUtil.performWithRetries(
-                () -> client.acquireMinaSshdService(requestId, accountId),
-                actionDescription, waitUntilTime, pollingIntervalMillis, CcmException.class, timeoutExceptionSupplier,
-                LOGGER);
+            // First call acquireMinaSshdService, with retries in case of transient failures.
+            MinaSshdService initialService = RetryUtil.performWithRetries(
+                    () -> client.acquireMinaSshdService(requestId, accountId),
+                    actionDescription, waitUntilTime, pollingIntervalMillis, CcmException.class, timeoutExceptionSupplier,
+                    LOGGER);
 
-        // If the minasshd service was pre-existing, it is in the initial call result
-        return getValidMinaSshdService(actionDescription, initialService)
-                // Otherwise, poll until the minasshd service is in a final state (STARTED or FAILED) or we time out
-                .orElse(awaitValidMinaSshdService(
-                        () -> client.listMinaSshdServices(requestId, accountId, Collections.singletonList(initialService.getMinaSshdServiceId())),
-                        actionDescription, waitUntilTime, pollingIntervalMillis, timeoutExceptionSupplier)
-                        .orElseThrow(() -> new CcmException(String.format("Failed while trying to %s", actionDescription), false)));
+            // If the minasshd service was pre-existing, it is in the initial call result
+            return getValidMinaSshdService(actionDescription, initialService)
+                    // Otherwise, poll until the minasshd service is in a final state (STARTED or FAILED) or we time out
+                    .orElse(awaitValidMinaSshdService(
+                            () -> client.listMinaSshdServices(requestId, accountId, Collections.singletonList(initialService.getMinaSshdServiceId())),
+                            actionDescription, waitUntilTime, pollingIntervalMillis, timeoutExceptionSupplier)
+                            .orElseThrow(() -> new CcmException(String.format("Failed while trying to %s", actionDescription), false)));
+        }
     }
 
     /**
@@ -183,28 +187,30 @@ public class GrpcMinaSshdManagementClient {
      */
     public MinaSshdManagementProto.GenerateAndRegisterSshTunnelingKeyPairResponse generateAndRegisterSshTunnelingKeyPair(
             String requestId, String actorCrn, String accountId, String minaSshdServiceId, String keyId) throws CcmException, InterruptedException {
-        MinaSshdManagementClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            MinaSshdManagementClient client = makeClient(channelWrapper.getChannel(), actorCrn);
 
-        ZonedDateTime waitUntilTime = ZonedDateTime.now(clock).plus(minaSshdManagementClientConfig.getTimeoutMs(), ChronoUnit.MILLIS);
-        int pollingIntervalMillis = minaSshdManagementClientConfig.getPollingIntervalMs();
+            ZonedDateTime waitUntilTime = ZonedDateTime.now(clock).plus(minaSshdManagementClientConfig.getTimeoutMs(), ChronoUnit.MILLIS);
+            int pollingIntervalMillis = minaSshdManagementClientConfig.getPollingIntervalMs();
 
-        String actionDescription = "generate tunneling key pair for accountId " + accountId;
-        Supplier<CcmException> timeoutExceptionSupplier = () -> new CcmException(String.format("Timed out while trying to %s", actionDescription), true);
+            String actionDescription = "generate tunneling key pair for accountId " + accountId;
+            Supplier<CcmException> timeoutExceptionSupplier = () -> new CcmException(String.format("Timed out while trying to %s", actionDescription), true);
 
-        return RetryUtil.performWithRetries(
-                () -> client.generateAndRegisterSshTunnelingKeyPair(requestId, accountId, minaSshdServiceId, keyId), actionDescription,
-                waitUntilTime, pollingIntervalMillis,
-                CcmException.class, timeoutExceptionSupplier,
-                LOGGER);
+            return RetryUtil.performWithRetries(
+                    () -> client.generateAndRegisterSshTunnelingKeyPair(requestId, accountId, minaSshdServiceId, keyId), actionDescription,
+                    waitUntilTime, pollingIntervalMillis,
+                    CcmException.class, timeoutExceptionSupplier,
+                    LOGGER);
+        }
     }
 
     /**
      * Wraps call to unregisterSshTunnelingKey, with retries to tolerate transient failures.
      *
-     * @param requestId         the request ID for the request
-     * @param actorCrn          the actor CRN
-     * @param accountId         the account ID
-     * @param keyId             the key ID
+     * @param requestId the request ID for the request
+     * @param actorCrn  the actor CRN
+     * @param accountId the account ID
+     * @param keyId     the key ID
      * @param minaSshdServiceId minaSshdServiceId
      * @return the response
      * @throws CcmException         if an exception occurs
@@ -212,19 +218,29 @@ public class GrpcMinaSshdManagementClient {
      */
     public MinaSshdManagementProto.UnregisterSshTunnelingKeyResponse unregisterSshTunnelingKey(
             String requestId, String actorCrn, String accountId, String keyId, String minaSshdServiceId) throws CcmException, InterruptedException {
-        MinaSshdManagementClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            MinaSshdManagementClient client = makeClient(channelWrapper.getChannel(), actorCrn);
 
-        ZonedDateTime waitUntilTime = ZonedDateTime.now(clock).plus(minaSshdManagementClientConfig.getTimeoutMs(), ChronoUnit.MILLIS);
-        int pollingIntervalMillis = minaSshdManagementClientConfig.getPollingIntervalMs();
+            ZonedDateTime waitUntilTime = ZonedDateTime.now(clock).plus(minaSshdManagementClientConfig.getTimeoutMs(), ChronoUnit.MILLIS);
+            int pollingIntervalMillis = minaSshdManagementClientConfig.getPollingIntervalMs();
 
-        String actionDescription = "deregister tunneling key " + keyId;
-        Supplier<CcmException> timeoutExceptionSupplier = () -> new CcmException(String.format("Timed out while trying to %s", actionDescription), true);
+            String actionDescription = "deregister tunneling key " + keyId;
+            Supplier<CcmException> timeoutExceptionSupplier = () -> new CcmException(String.format("Timed out while trying to %s", actionDescription), true);
 
-        return RetryUtil.performWithRetries(
-                () -> client.unregisterSshTunnelingKey(requestId, minaSshdServiceId, keyId), actionDescription,
-                waitUntilTime, pollingIntervalMillis,
-                CcmException.class, timeoutExceptionSupplier,
-                LOGGER);
+            return RetryUtil.performWithRetries(
+                    () -> client.unregisterSshTunnelingKey(requestId, minaSshdServiceId, keyId), actionDescription,
+                    waitUntilTime, pollingIntervalMillis,
+                    CcmException.class, timeoutExceptionSupplier,
+                    LOGGER);
+        }
+    }
+
+    private ManagedChannelWrapper makeWrapper() {
+        return new ManagedChannelWrapper(
+                ManagedChannelBuilder.forAddress(minaSshdManagementConfig.getEndpoint(), minaSshdManagementConfig.getPort())
+                        .usePlaintext()
+                        .maxInboundMessageSize(DEFAULT_MAX_MESSAGE_SIZE)
+                        .build());
     }
 
     private MinaSshdManagementClient makeClient(ManagedChannel channel, String actorCrn) {
