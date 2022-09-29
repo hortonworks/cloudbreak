@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.periscope.api.model.ClusterState;
@@ -26,11 +27,18 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterStatusSyncHandler.class);
 
+    private static final String YARN_SERVICE = "yarn";
+
+    private static final String RESOURCEMANAGER_HEALTH_CHECK = "YARN_RESOURCEMANAGERS_HEALTH";
+
     @Inject
     private ClusterService clusterService;
 
     @Inject
     private CloudbreakCommunicator cloudbreakCommunicator;
+
+    @Inject
+    private ClouderaManagerCommunicator cmCommunicator;
 
     @Inject
     private AltusMachineUserService altusMachineUserService;
@@ -57,7 +65,8 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         }
 
         LOGGER.info("Computed clusterAvailable: {}", clusterAvailable);
-        LOGGER.info("Analysing CBCluster Status '{}' for Cluster '{}. Available(Determined)={}' ", statusResponse, cluster.getStackCrn(), clusterAvailable);
+        LOGGER.info("Analysing CBCluster StackResponse '{}' for Cluster '{}. Available(Determined)={}' ", statusResponse, cluster.getStackCrn(),
+                clusterAvailable);
 
         updateClusterState(cluster, statusResponse, clusterAvailable);
     }
@@ -72,9 +81,14 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
             LOGGER.info("Updated cluster '{}' to Running, CB Stack Status '{}', CB Cluster Status '{}'.",
                     cluster.getStackCrn(), statusResponse.getStatus(), statusResponse.getClusterStatus());
         } else if (!clusterAvailable && RUNNING.equals(cluster.getState())) {
-            clusterService.setState(cluster.getId(), ClusterState.SUSPENDED);
-            LOGGER.info("Suspended cluster '{}', CB Stack Status '{}', CB Cluster Status '{}'",
-                    cluster.getStackCrn(), statusResponse.getStatus(), statusResponse.getClusterStatus());
+            if (!yarnResourceManagerAndClusterManagerHealthy(cluster)) {
+                clusterService.setState(cluster.getId(), ClusterState.SUSPENDED);
+                LOGGER.info("Suspended cluster '{}', CB Stack Status '{}', CB Cluster Status '{}'",
+                        cluster.getStackCrn(), statusResponse.getStatus(), statusResponse.getClusterStatus());
+            } else {
+                LOGGER.info("Cluster '{}' is not available, but YARN-RM and CM are healthy, skipping request to suspend it. CB Stack Status '{}', " +
+                                "CB Cluster Status '{}'", cluster.getStackCrn(), statusResponse.getStatus(), statusResponse.getClusterStatus());
+            }
         } else if (RUNNING.equals(cluster.getState()) && (cluster.getMachineUserCrn() == null || cluster.getEnvironmentCrn() == null)) {
             populateEnvironmentAndMachineUserIfNotPresent(cluster);
         }
@@ -100,6 +114,16 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
 
         if (cluster.getMachineUserCrn() == null) {
             altusMachineUserService.initializeMachineUserForEnvironment(cluster);
+        }
+    }
+
+    protected boolean yarnResourceManagerAndClusterManagerHealthy(Cluster cluster) {
+        try {
+            return cmCommunicator.isClusterManagerRunning(cluster) && ApiHealthSummary.GOOD.equals(cmCommunicator.getRoleHealthStatusFromCM(cluster,
+                    YARN_SERVICE, RESOURCEMANAGER_HEALTH_CHECK));
+        } catch (Exception e) {
+            LOGGER.warn("Error while trying to determine yarn-RESOURCEMANAGER health status for cluster: {}", cluster.getStackCrn(), e);
+            return false;
         }
     }
 }

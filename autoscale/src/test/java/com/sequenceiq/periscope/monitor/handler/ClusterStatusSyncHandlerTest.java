@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -16,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
@@ -37,6 +39,9 @@ public class ClusterStatusSyncHandlerTest {
 
     @Mock
     private CloudbreakCommunicator cloudbreakCommunicator;
+
+    @Mock
+    private ClouderaManagerCommunicator cmCommunicator;
 
     @Mock
     private AltusMachineUserService altusMachineUserService;
@@ -191,6 +196,8 @@ public class ClusterStatusSyncHandlerTest {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getStackStatusByCrn(anyString())).thenReturn(getStackResponse(Status.UNREACHABLE));
+        when(cmCommunicator.isClusterManagerRunning(eq(cluster))).thenReturn(Boolean.FALSE);
+        when(cmCommunicator.getRoleHealthStatusFromCM(eq(cluster), anyString(), anyString())).thenReturn(ApiHealthSummary.BAD);
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -263,6 +270,38 @@ public class ClusterStatusSyncHandlerTest {
 
         verify(clusterService).findById(AUTOSCALE_CLUSTER_ID);
         verify(clusterService, never()).setState(anyLong(), any(ClusterState.class));
+        verify(cloudbreakCommunicator).getStackStatusByCrn(CLOUDBREAK_STACK_CRN);
+    }
+
+    @Test
+    public void testOnApplicationEventWhenClusterNotAvailableButYarnRMAndCMHealthy() {
+        Cluster cluster = getACluster(ClusterState.RUNNING);
+        cluster.setStopStartScalingEnabled(Boolean.TRUE);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
+        when(cloudbreakCommunicator.getStackStatusByCrn(anyString())).thenReturn(getStackResponse(Status.NODE_FAILURE));
+        when(cmCommunicator.getRoleHealthStatusFromCM(eq(cluster), anyString(), anyString())).thenReturn(ApiHealthSummary.GOOD);
+        when(cmCommunicator.isClusterManagerRunning(cluster)).thenReturn(Boolean.TRUE);
+
+        underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
+
+        verify(clusterService).findById(AUTOSCALE_CLUSTER_ID);
+        verify(clusterService, never()).setState(anyLong(), any(ClusterState.class));
+        verify(cloudbreakCommunicator).getStackStatusByCrn(CLOUDBREAK_STACK_CRN);
+    }
+
+    @Test
+    public void testOnApplicationEventWhenClusterNotAvailableAndYarnRMUnhealthy() {
+        Cluster cluster = getACluster(ClusterState.RUNNING);
+        cluster.setStopStartScalingEnabled(Boolean.TRUE);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
+        when(cloudbreakCommunicator.getStackStatusByCrn(anyString())).thenReturn(getStackResponse(Status.NODE_FAILURE));
+        when(cmCommunicator.getRoleHealthStatusFromCM(eq(cluster), anyString(), anyString())).thenReturn(ApiHealthSummary.BAD);
+        when(cmCommunicator.isClusterManagerRunning(cluster)).thenReturn(Boolean.TRUE);
+
+        underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
+
+        verify(clusterService).findById(AUTOSCALE_CLUSTER_ID);
+        verify(clusterService, times(1)).setState(AUTOSCALE_CLUSTER_ID, ClusterState.SUSPENDED);
         verify(cloudbreakCommunicator).getStackStatusByCrn(CLOUDBREAK_STACK_CRN);
     }
 
