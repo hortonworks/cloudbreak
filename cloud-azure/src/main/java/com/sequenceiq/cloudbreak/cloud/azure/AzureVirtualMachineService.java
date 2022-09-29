@@ -41,6 +41,10 @@ public class AzureVirtualMachineService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureVirtualMachineService.class);
 
+    private static final int SUCCESSFUL_INSTANCE_FETCH_COUNT_BEFORE_RETRY = 3;
+
+    private static final int MAXIMUM_INSTANCE_COUNT_FOR_ONE_BY_ONE_FETCHING = 20;
+
     @Inject
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
@@ -53,11 +57,14 @@ public class AzureVirtualMachineService {
         }
         if (hasNoVmInResourceGroup(virtualMachines)) {
             LOGGER.info("We could not receive any VM in resource group. Let's try to fetch VMs by instance ids.");
+            int successfullyFetchedInstanceCount = 0;
             for (String privateInstanceId : privateInstanceIds) {
                 VirtualMachine virtualMachineByResourceGroup = azureClient.getVirtualMachineByResourceGroup(resourceGroup, privateInstanceId);
                 if (virtualMachineByResourceGroup == null) {
                     LOGGER.info("Could not find vm with private id: " + privateInstanceId);
                 } else {
+                    successfullyFetchedInstanceCount++;
+                    errorIfInstancesActuallyExistOnAzure(privateInstanceIds.size(), successfullyFetchedInstanceCount);
                     virtualMachines.add(virtualMachineByResourceGroup);
                 }
             }
@@ -139,6 +146,16 @@ public class AzureVirtualMachineService {
         if (hasNoVmInResourceGroup(virtualMachines)) {
             LOGGER.warn("Azure returned 0 vms when listing by resource group. This should not be possible, retrying");
             throw new CloudConnectorException("Operation failed, azure returned an empty list while trying to list vms in resource group.");
+        }
+    }
+
+    private void errorIfInstancesActuallyExistOnAzure(int instancesToFetchCount, int successfulResponseCount) {
+        if (instancesToFetchCount > MAXIMUM_INSTANCE_COUNT_FOR_ONE_BY_ONE_FETCHING && successfulResponseCount > SUCCESSFUL_INSTANCE_FETCH_COUNT_BEFORE_RETRY) {
+            LOGGER.warn("At least '{}' instance(s) were found, which weren't returned while getting the list of VMs from Azure. " +
+                    "Fetching one by one is aborted and returning to getting all VMs at once.", SUCCESSFUL_INSTANCE_FETCH_COUNT_BEFORE_RETRY);
+            throw new CloudConnectorException(String.format("At least '%s' instance(s) were found, which weren't returned " +
+                    "while getting the list of VMs from Azure. Fetching one by one is aborted and returning to getting all VMs at once.",
+                    SUCCESSFUL_INSTANCE_FETCH_COUNT_BEFORE_RETRY));
         }
     }
 
