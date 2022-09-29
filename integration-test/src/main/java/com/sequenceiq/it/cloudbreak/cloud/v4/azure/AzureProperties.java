@@ -31,6 +31,8 @@ public class AzureProperties {
 
     private final DiskEncription diskEncryption = new DiskEncription();
 
+    private final Resourcegroup resourcegroup = new Resourcegroup();
+
     private FreeIpaProperties freeipa = new FreeIpaProperties();
 
     public FreeIpaProperties getFreeipa() {
@@ -91,6 +93,10 @@ public class AzureProperties {
 
     public DiskEncription getDiskEncryption() {
         return diskEncryption;
+    }
+
+    public Resourcegroup getResourcegroup() {
+        return resourcegroup;
     }
 
     public static class Credential {
@@ -344,7 +350,6 @@ public class AzureProperties {
     }
 
     public static class DiskEncription {
-
         private String encryptionKeyUrl;
 
         private String resourceGroupName;
@@ -364,5 +369,27 @@ public class AzureProperties {
         public void setResourceGroupName(String resourceGroupName) {
                 this.resourceGroupName = resourceGroupName;
             }
+    }
+
+    public static class Resourcegroup {
+        private String usage;
+
+        private String name;
+
+        public String getUsage() {
+            return usage;
+        }
+
+        public void setUsage(String usage) {
+            this.usage = usage;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 }

@@ -121,9 +121,10 @@ public class AzureClientActions {
         return Optional.ofNullable(vm).map(VirtualMachine::provisioningState).orElse("no provisioning state");
     }
 
-    // We don't have resource group name, so we are guessing it from cluster name and instance name
+    // If we don't have resource group name, we are going to be guessing it from cluster name and instance name.
     private String getResourceGroupName(String clusterName, String id) {
-        return id.replaceAll("(" + clusterName + "[0-9]+).*", "$1");
+        String resourcegroupName = azureProperties.getResourcegroup().getName();
+        return StringUtils.isBlank(resourcegroupName) ? id.replaceAll("(" + clusterName + "[0-9]+).*", "$1") : resourcegroupName;
     }
 
     public void setAzure(Azure azure) {

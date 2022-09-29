@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcpParams;
@@ -75,6 +76,11 @@ public class EnvironmentNetworkTestDto extends AbstractCloudbreakTestDto<Environ
 
     public EnvironmentNetworkTestDto withServiceEndpoints() {
         getRequest().setServiceEndpointCreation(getCloudProvider().serviceEndpoint());
+        return this;
+    }
+
+    public EnvironmentNetworkTestDto withServiceEndpoints(ServiceEndpointCreation serviceEndpointCreation) {
+        getRequest().setServiceEndpointCreation(serviceEndpointCreation);
         return this;
     }
 

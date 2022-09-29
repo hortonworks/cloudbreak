@@ -17,6 +17,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.microsoft.azure.management.resources.ResourceGroup;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -222,7 +223,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
 
         testContext
                 .given(EnvironmentNetworkTestDto.class)
-                    .withServiceEndpoints()
+                    .withServiceEndpoints(ServiceEndpointCreation.DISABLED)
                 .given("telemetry", TelemetryTestDto.class)
                     .withLogging()
                     .withReportClusterLogs()
