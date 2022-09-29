@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.cluster;
 import static com.sequenceiq.cloudbreak.polling.ExtendedPollingResult.ExtendedPollingResultBuilder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -136,6 +137,35 @@ public class ClusterManagerUpscaleServiceTest {
                 eq(Set.of(INSTANCE_METADATA_ID)), eq(InstanceStatus.ORCHESTRATION_FAILED),
                 eq("Upscaling cluster manager were not successful, waiting for hosts timed out"));
         assertEquals("Upscaling cluster manager were not successful, waiting for hosts timed out for nodes: [3]", exception.getMessage());
+    }
+
+    @Test
+    public void testUpscaleClusterManagerWhenRepairAndWaitForHostsTimedOutWithoutInstanceIds() throws ClusterClientInitException {
+        StackDto stackDto = getStackDto();
+        when(stackDtoService.getById(eq(STACK_ID))).thenReturn(stackDto);
+        when(stackDto.getClusterManagerIp()).thenReturn("otherclusterIp");
+        when(clusterHostServiceRunner.addClusterServices(eq(stackDto), any(), anyBoolean()))
+                .thenReturn(new NodeReachabilityResult(Set.of(), Set.of()));
+        doNothing().when(clusterService).updateInstancesToRunning(eq(STACK_ID), any());
+        when(clusterApiConnectors.getConnector(eq(stackDto), eq("otherclusterIp"))).thenReturn(clusterApi);
+        when(clusterApi.waitForHosts(any())).thenReturn(new ExtendedPollingResultBuilder().withPayload(Set.of()).timeout().build());
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.upscaleClusterManager(STACK_ID, Collections.singletonMap("hg", 1), false, true));
+
+        assertEquals("Upscaling cluster manager were not successful, waiting for hosts timed out, " +
+                "please check Cloudera Manager logs fur further details.", exception.getMessage());
+
+        when(clusterApi.waitForHosts(any())).thenReturn(new ExtendedPollingResultBuilder()
+                .timeout().withException(new RuntimeException("customerror")).build());
+        exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.upscaleClusterManager(STACK_ID, Collections.singletonMap("hg", 1), false, true));
+
+        assertTrue(exception.getMessage().contains("customerror"));
+
+        verifyNoInteractions(clusterServiceRunner);
+        verify(clusterApi, times(2)).waitForHosts(any());
+        verifyNoInteractions(instanceMetaDataService);
     }
 
     private StackDto getStackDto() {

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -86,16 +87,26 @@ public class ClusterManagerUpscaleService {
     }
 
     private void handleWaitForHostsTimeout(boolean repair, boolean primaryGatewayChanged, StackView stack, ExtendedPollingResult result) {
-        String message = String.format("Upscaling cluster manager were not successful, waiting for hosts timed out for nodes: %s",
-                result.getFailedInstanceIds());
-        LOGGER.warn(message);
-        if (!repair && !primaryGatewayChanged && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stack)) {
-            instanceMetaDataService.updateInstanceStatuses(result.getFailedInstanceIds(), InstanceStatus.ZOMBIE,
-                    "Upscaling cluster manager were not successful, waiting for hosts timed out");
+        if (CollectionUtils.isNotEmpty(result.getFailedInstanceIds())) {
+            String message = String.format("Upscaling cluster manager were not successful, waiting for hosts timed out for nodes: %s",
+                    result.getFailedInstanceIds());
+            LOGGER.warn(message);
+            if (!repair && !primaryGatewayChanged && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stack)) {
+                instanceMetaDataService.updateInstanceStatuses(result.getFailedInstanceIds(), InstanceStatus.ZOMBIE,
+                        "Upscaling cluster manager were not successful, waiting for hosts timed out");
+            } else {
+                instanceMetaDataService.updateInstanceStatuses(result.getFailedInstanceIds(), InstanceStatus.ORCHESTRATION_FAILED,
+                        "Upscaling cluster manager were not successful, waiting for hosts timed out");
+                throw new CloudbreakServiceException(message);
+            }
+        } else if (result.getException() != null) {
+            // if getFailedInstanceIds is null, then possibly something is wrong with CM, so we should throw exception anyway
+            LOGGER.error("Upscaling cluster manager were not successful, waiting for hosts timed out because: ", result.getException());
+            throw new CloudbreakServiceException(result.getException());
         } else {
-            instanceMetaDataService.updateInstanceStatuses(result.getFailedInstanceIds(), InstanceStatus.ORCHESTRATION_FAILED,
-                    "Upscaling cluster manager were not successful, waiting for hosts timed out");
-            throw new CloudbreakServiceException(message);
+            LOGGER.error("Upscaling cluster manager were not successful, waiting for hosts timed out!");
+            throw new CloudbreakServiceException("Upscaling cluster manager were not successful, waiting for hosts timed out, " +
+                    "please check Cloudera Manager logs fur further details.");
         }
     }
 }
