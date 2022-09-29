@@ -5,7 +5,7 @@ import subprocess
 import shutil
 import sys
 
-MAIN_PATCHED_SCRIPT="/usr/local/lib/python3.6/site-packages/checkipaconsistency/main.py"
+MAIN_PATCHED_SCRIPT = "/usr/local/lib/python" + str(sys.version_info.major) + "." + str(sys.version_info.minor) + "/site-packages/checkipaconsistency/main.py"
 CIPA_METRICS_PATH="/var/lib/node_exporter/files/cipa.prom"
 CIPA_CONFIG_PATH="/root/.config/checkipaconsistency"
 CIPA_BIN_PATH="/usr/local/bin/cipa"
@@ -27,7 +27,7 @@ def check_content(fname):
 def main():
     global MAIN_PATCHED_SCRIPT, CIPA_METRICS_PATH, CIPA_CONFIG_PATH, CIPA_BIN_PATH
     if not os.path.exists(MAIN_PATCHED_SCRIPT) or not check_content(MAIN_PATCHED_SCRIPT):
-        print("No cipa tool installed or OpenMetrics format output is not supported.")
+        print("No cipa tool installed or OpenMetrics format output is not supported. Package location path: " + MAIN_PATCHED_SCRIPT)
         sys.exit(0)
     if not os.path.exists(CIPA_BIN_PATH) or not os.path.exists(CIPA_CONFIG_PATH):
         print("[SKIP] cipa tool is required (with root config).")
