@@ -764,7 +764,7 @@
     },
     {
       "name": "SSB-SSE-UI",
-      "displayName": "Streaming SQL ENGINE",
+      "displayName": "Streaming SQL Console",
       "serviceName": "STREAMING_SQL_ENGINE",
       "knoxService": "SSB-SSE-UI",
       "knoxUrl": "/ssb-sse-ui/",
@@ -779,7 +779,7 @@
     },
     {
       "name": "SSB-SSE-WS",
-      "displayName": "Streaming SQL Engine WebSocket",
+      "displayName": "Streaming SQL Console WebSocket",
       "serviceName": "STREAMING_SQL_ENGINE",
       "knoxService": "SSB-SSE-WS",
       "knoxUrl": "/ssb-sse-ws/",
@@ -794,7 +794,7 @@
     },
     {
       "name": "SSB-SSE-UI-LB",
-      "displayName": "Streaming SQL ENGINE",
+      "displayName": "Streaming SQL Console (LB)",
       "serviceName": "STREAMING_SQL_ENGINE",
       "knoxService": "SSB-SSE-UI-LB",
       "knoxUrl": "/ssb-sse-ui-lb/",
@@ -809,7 +809,7 @@
     },
     {
       "name": "SSB-SSE-WS-LB",
-      "displayName": "Streaming SQL Engine WebSocket",
+      "displayName": "Streaming SQL Console WebSocket (LB)",
       "serviceName": "STREAMING_SQL_ENGINE",
       "knoxService": "SSB-SSE-WS-LB",
       "knoxUrl": "/ssb-sse-ws-lb/",
