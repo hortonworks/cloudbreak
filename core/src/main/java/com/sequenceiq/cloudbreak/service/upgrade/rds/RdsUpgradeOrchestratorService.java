@@ -9,6 +9,7 @@ import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,8 +26,10 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.template.VolumeUtils;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
@@ -76,6 +79,9 @@ public class RdsUpgradeOrchestratorService {
 
     @Inject
     private HostOrchestrator hostOrchestrator;
+
+    @Inject
+    private UpgradeRdsBackupRestoreStateParamsProvider upgradeRdsBackupRestoreStateParamsProvider;
 
     @Value("${cb.db.env.upgrade.rds.backuprestore.validationratio}")
     private double backupValidationRatio;
@@ -138,21 +144,35 @@ public class RdsUpgradeOrchestratorService {
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
-    public void validateDbBackupSpace(Long stackId) throws CloudbreakOrchestratorException {
-        Double rootVolumeFreeSpaceMb = getRootVolumeFreeSpace(stackId);
-        Double databaseSizeMb = determineDatabaseSize(stackId);
+    public void determineDbBackupLocation(Long stackId) throws CloudbreakOrchestratorException {
+        StackDto stackDto = stackDtoService.getById(stackId);
+        cleanUpFormerBackups(stackDto);
+        String volumeWithLargestFreeSpace = getVolumeWithLargestFreeSpace(stackDto);
+        validateDbBackupSpace(stackDto, volumeWithLargestFreeSpace);
+        updateRdsUpgradePillar(stackDto, volumeWithLargestFreeSpace);
+    }
+
+    private void updateRdsUpgradePillar(StackDto stackDto, String rdsBackupLocation) throws CloudbreakOrchestratorException {
+        OrchestratorStateParams stateParams = createStateParams(stackDto, GET_EXTERNAL_DB_SIZE, true);
+        SaltConfig saltConfig = new SaltConfig(upgradeRdsBackupRestoreStateParamsProvider.createParamsForRdsBackupRestore(stackDto, rdsBackupLocation));
+        hostOrchestrator.saveCustomPillars(saltConfig, new ClusterDeletionBasedExitCriteriaModel(stackDto.getId(), stackDto.getCluster().getId()), stateParams);
+    }
+
+    private void validateDbBackupSpace(StackDto stackDto, String backupLocation) throws CloudbreakOrchestratorException {
+        Double freeSpaceMb = getVolumeFreeSpace(stackDto, backupLocation);
+        Double databaseSizeMb = determineDatabaseSize(stackDto);
         Double estimatedBackupSizeMb = databaseSizeMb * backupValidationRatio;
-        if (rootVolumeFreeSpaceMb > estimatedBackupSizeMb) {
-            LOGGER.info("Root volume has enough free space ({}MB) for database backup ({}MB).",
-                    rootVolumeFreeSpaceMb.intValue(), estimatedBackupSizeMb.intValue());
+        if (freeSpaceMb > estimatedBackupSizeMb) {
+            LOGGER.info("{} volume has enough free space ({}MB) for database backup ({}MB).",
+                    backupLocation, freeSpaceMb.intValue(), estimatedBackupSizeMb.intValue());
         } else {
-            logErrorAndThrow(String.format("Root volume does not have enough free space (%sMB) for database backup (%sMB)",
-                    rootVolumeFreeSpaceMb.intValue(), estimatedBackupSizeMb.intValue()));
+            logErrorAndThrow(String.format("%s volume does not have enough free space (%sMB) for database backup (%sMB).",
+                    backupLocation, freeSpaceMb.intValue(), estimatedBackupSizeMb.intValue()));
         }
     }
 
-    private Double determineDatabaseSize(Long stackId) throws CloudbreakOrchestratorException {
-        OrchestratorStateParams stateParams = createStateParams(stackId, GET_EXTERNAL_DB_SIZE, true);
+    private Double determineDatabaseSize(StackDto stackDto) throws CloudbreakOrchestratorException {
+        OrchestratorStateParams stateParams = createStateParams(stackDto, GET_EXTERNAL_DB_SIZE, true);
         List<Map<String, JsonNode>> result = hostOrchestrator.applyOrchestratorState(stateParams);
         if (CollectionUtils.isEmpty(result) || 1 != result.size()) {
             logErrorAndThrow("Orchestrator engine checking database size did not return any results");
@@ -186,10 +206,11 @@ public class RdsUpgradeOrchestratorService {
         return Double.parseDouble(dbSize.textValue()) / BYTE_TO_MB;
     }
 
-    private Double getRootVolumeFreeSpace(Long stackId) throws CloudbreakOrchestratorException {
-        OrchestratorStateParams stateParams = createStateParams(stackId, null, true);
+    private Double getVolumeFreeSpace(StackDto stackDto, String volume) throws CloudbreakOrchestratorFailedException {
+        OrchestratorStateParams stateParams = createStateParams(stackDto, null, true);
+        String command = String.format("df -k %s | awk '{print $4}' | tail -n 1", volume);
         Map<String, String> rootVolumeFreeSpaceMap = hostOrchestrator.runCommandOnHosts(List.of(stateParams.getPrimaryGatewayConfig()),
-                stateParams.getTargetHostNames(), "df -k / | awk '{print $4}' | tail -n 1");
+                stateParams.getTargetHostNames(), command);
         Optional<String> rootVolumeFreeSpace = Optional.ofNullable(rootVolumeFreeSpaceMap.get(stateParams.getPrimaryGatewayConfig().getHostname()));
         if (rootVolumeFreeSpace.isPresent() && !rootVolumeFreeSpace.get().isEmpty()) {
             return Double.parseDouble(rootVolumeFreeSpace.get()) / KB_TO_MB;
@@ -198,6 +219,24 @@ public class RdsUpgradeOrchestratorService {
             LOGGER.warn(msg);
             throw new CloudbreakOrchestratorFailedException(msg);
         }
+    }
+
+    private String getVolumeWithLargestFreeSpace(StackDto stackDto) throws CloudbreakOrchestratorFailedException {
+        OrchestratorStateParams stateParams = createStateParams(stackDto, null, true);
+        String command = String.format("df | grep %s | awk '{print $4\" \"$6}' | sort -nr | head -n 1 | awk '{print $2}'", VolumeUtils.VOLUME_PREFIX);
+        Map<String, String> volumeMap = hostOrchestrator.runCommandOnHosts(List.of(stateParams.getPrimaryGatewayConfig()),
+                stateParams.getTargetHostNames(), command);
+        String volumeWithLargestFreeSpace = volumeMap.get(stateParams.getPrimaryGatewayConfig().getHostname());
+        String result = StringUtils.isNotEmpty(volumeWithLargestFreeSpace) ? volumeWithLargestFreeSpace : "/var";
+        LOGGER.info("The selected volume path for db backup: {}", result);
+        return result;
+    }
+
+    private void cleanUpFormerBackups(StackDto stackDto) throws CloudbreakOrchestratorFailedException {
+        OrchestratorStateParams stateParams = createStateParams(stackDto, null, true);
+        String command = String.format("ls -d %s* /var %s | xargs -I %% rm -rf %%/tmp/postgres_upgrade_backup",
+                VolumeUtils.VOLUME_PREFIX, VolumeUtils.DATABASE_VOLUME);
+        hostOrchestrator.runCommandOnHosts(List.of(stateParams.getPrimaryGatewayConfig()), stateParams.getTargetHostNames(), command);
     }
 
     private OrchestratorStateParams createStateParams(Long stackId, String saltState, boolean onlyOnPrimary) {

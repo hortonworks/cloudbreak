@@ -45,7 +45,7 @@ class ValidateBackupSpaceHandlerTest {
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
-        verify(rdsUpgradeOrchestratorService).validateDbBackupSpace(STACK_ID);
+        verify(rdsUpgradeOrchestratorService).determineDbBackupLocation(STACK_ID);
         assertThat(result.selector()).isEqualTo("VALIDATERDSUPGRADEBACKUPVALIDATIONRESULT");
     }
 
@@ -53,10 +53,10 @@ class ValidateBackupSpaceHandlerTest {
     void orchestrationException() throws CloudbreakOrchestratorException {
         ValidateRdsUpgradeBackupValidationRequest request = new ValidateRdsUpgradeBackupValidationRequest(STACK_ID);
         when(event.getData()).thenReturn(request);
-        doThrow(new CloudbreakOrchestratorFailedException("salt error")).when(rdsUpgradeOrchestratorService).validateDbBackupSpace(eq(STACK_ID));
+        doThrow(new CloudbreakOrchestratorFailedException("salt error")).when(rdsUpgradeOrchestratorService).determineDbBackupLocation(eq(STACK_ID));
 
         Selectable result = underTest.doAccept(event);
-        verify(rdsUpgradeOrchestratorService).validateDbBackupSpace(STACK_ID);
+        verify(rdsUpgradeOrchestratorService).determineDbBackupLocation(STACK_ID);
         assertThat(result.selector()).isEqualTo("VALIDATERDSUPGRADEFAILEDEVENT");
         assertThat(result).isInstanceOf(ValidateRdsUpgradeFailedEvent.class);
         ValidateRdsUpgradeFailedEvent failedEvent = (ValidateRdsUpgradeFailedEvent) result;

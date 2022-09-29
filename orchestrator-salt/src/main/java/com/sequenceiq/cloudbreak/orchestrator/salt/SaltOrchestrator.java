@@ -480,6 +480,17 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    public void saveCustomPillars(SaltConfig saltConfig, ExitCriteriaModel exitModel, OrchestratorStateParams stateParams)
+            throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = stateParams.getPrimaryGatewayConfig();
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            saveCustomPillars(saltConfig, exitModel, stateParams.getTargetHostNames(), sc);
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during save custom pillars", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
     private void saveCustomPillars(SaltConfig saltConfig, ExitCriteriaModel exitModel, Set<String> gatewayTargetIpAddresses,
             SaltConnector sc) throws Exception {
 

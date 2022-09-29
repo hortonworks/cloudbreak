@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres;
 
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -25,6 +27,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
+import com.sequenceiq.cloudbreak.service.upgrade.rds.UpgradeRdsBackupRestoreStateParamsProvider;
 
 @ExtendWith(MockitoExtension.class)
 class PostgresConfigServiceTest {
@@ -51,6 +54,9 @@ class PostgresConfigServiceTest {
     @Mock
     private EmbeddedDatabaseConfigProvider embeddedDatabaseConfigProvider;
 
+    @Mock
+    private UpgradeRdsBackupRestoreStateParamsProvider upgradeRdsBackupRestoreStateParamsProvider;
+
     @InjectMocks
     private PostgresConfigService underTest;
 
@@ -71,6 +77,7 @@ class PostgresConfigServiceTest {
         underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         assertThat(servicePillar).isEmpty();
+        verify(upgradeRdsBackupRestoreStateParamsProvider, times(1)).createParamsForRdsBackupRestore(stack, "");
     }
 
     @Test

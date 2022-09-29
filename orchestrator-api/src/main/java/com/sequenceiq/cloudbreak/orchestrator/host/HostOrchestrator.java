@@ -155,4 +155,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     boolean doesPhaseSlsExistWithTimeouts(GatewayConfig gatewayConfig, String stateSlsName, int connectTimeoutMs, int readTimeout)
             throws CloudbreakOrchestratorFailedException;
+
+    void saveCustomPillars(SaltConfig saltConfig, ExitCriteriaModel exitModel, OrchestratorStateParams stateParams)
+            throws CloudbreakOrchestratorFailedException;
 }
