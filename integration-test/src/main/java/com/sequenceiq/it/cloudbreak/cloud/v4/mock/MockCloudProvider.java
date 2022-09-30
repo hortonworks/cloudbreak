@@ -51,6 +51,7 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
@@ -111,6 +112,29 @@ public class MockCloudProvider extends AbstractCloudProvider {
         return cluster
                 .withValidateBlueprint(Boolean.TRUE)
                 .withBlueprintName(getBlueprintName());
+    }
+
+    @Override
+    public VerticalScalingTestDto freeIpaVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(mockProperties.getVerticalScale().getFreeipa().getGroup())
+                .withInstanceType(mockProperties.getVerticalScale().getFreeipa().getInstanceType());
+    }
+
+    @Override
+    public VerticalScalingTestDto distroXVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(mockProperties.getVerticalScale().getDatahub().getGroup())
+                .withInstanceType(mockProperties.getVerticalScale().getDatahub().getInstanceType());
+    }
+
+    @Override
+    public VerticalScalingTestDto datalakeVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(mockProperties.getVerticalScale().getDatalake().getGroup())
+                .withInstanceType(mockProperties.getVerticalScale().getDatalake().getInstanceType());
+    }
+
+    @Override
+    public boolean verticalScalingSupported() {
+        return mockProperties.getVerticalScale().isSupported();
     }
 
     @Override

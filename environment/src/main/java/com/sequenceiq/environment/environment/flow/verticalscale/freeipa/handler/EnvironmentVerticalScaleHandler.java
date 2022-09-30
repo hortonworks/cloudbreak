@@ -46,6 +46,9 @@ public class EnvironmentVerticalScaleHandler extends EventSenderAwareHandler<Env
             freeIpaService.describe(environmentVerticalScaleEvent.getResourceCrn()).ifPresentOrElse(freeIpa -> {
                 if (freeIpa.getStatus() == null || freeIpa.getAvailabilityStatus() == null) {
                     throw new FreeIpaOperationFailedException("FreeIPA status is unpredictable, Vertical Scale interrupted.");
+                } else if (!freeIpa.getStatus().isVerticallyScalable()) {
+                    throw new FreeIpaOperationFailedException("FreeIPA is not in a valid state to Vertically Scale. Current state is: " +
+                            freeIpa.getStatus().name());
                 } else {
                     LOGGER.info("FreeIPA will be vertically scaled.");
                     freeIpaPollerService.waitForVerticalScale(

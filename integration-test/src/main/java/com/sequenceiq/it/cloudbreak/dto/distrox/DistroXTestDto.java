@@ -346,6 +346,11 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
                 hasSpotTermination);
     }
 
+    public InstanceGroupV4Response findInstanceGroupByName(String name) {
+        return getResponse().getInstanceGroups().stream().filter(ig -> name.equals(ig.getName())).findFirst()
+                .orElseThrow(() -> new TestFailException("Unable to find Data Hub instance group based on the following name: " + name));
+    }
+
     @Override
     public String getSearchId() {
         return getName();

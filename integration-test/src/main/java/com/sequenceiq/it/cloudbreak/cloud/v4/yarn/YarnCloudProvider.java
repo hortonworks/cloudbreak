@@ -45,6 +45,7 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 
@@ -59,6 +60,29 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.YARN;
+    }
+
+    @Override
+    public VerticalScalingTestDto freeIpaVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(yarnProperties.getVerticalScale().getFreeipa().getGroup())
+                .withInstanceType(yarnProperties.getVerticalScale().getFreeipa().getInstanceType());
+    }
+
+    @Override
+    public VerticalScalingTestDto distroXVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(yarnProperties.getVerticalScale().getFreeipa().getGroup())
+                .withInstanceType(yarnProperties.getVerticalScale().getFreeipa().getInstanceType());
+    }
+
+    @Override
+    public VerticalScalingTestDto datalakeVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(yarnProperties.getVerticalScale().getFreeipa().getGroup())
+                .withInstanceType(yarnProperties.getVerticalScale().getFreeipa().getInstanceType());
+    }
+
+    @Override
+    public boolean verticalScalingSupported() {
+        return yarnProperties.getVerticalScale().isSupported();
     }
 
     @Override

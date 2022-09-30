@@ -6,6 +6,8 @@ import java.util.Set;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.it.cloudbreak.cloud.v4.VerticalScaleProperties;
+
 @Configuration
 @ConfigurationProperties(prefix = "integrationtest.mock")
 public class MockProperties {
@@ -33,6 +35,16 @@ public class MockProperties {
     private final Cloudstorage cloudstorage = new Cloudstorage();
 
     private final DiskEncryption diskEncryption = new DiskEncryption();
+
+    private VerticalScaleProperties verticalScale = new VerticalScaleProperties();
+
+    public VerticalScaleProperties getVerticalScale() {
+        return verticalScale;
+    }
+
+    public void setVerticalScale(VerticalScaleProperties verticalScale) {
+        this.verticalScale = verticalScale;
+    }
 
     public String getAvailabilityZone() {
         return availabilityZone;

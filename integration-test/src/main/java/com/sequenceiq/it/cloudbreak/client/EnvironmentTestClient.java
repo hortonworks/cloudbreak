@@ -23,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentListAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStartAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStopAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentVerticalScaleAction;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 
 @Service
@@ -82,6 +83,10 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> stop() {
         return new EnvironmentStopAction();
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> verticalScale(String verticalScaleKey) {
+        return new EnvironmentVerticalScaleAction(verticalScaleKey);
     }
 
     public Action<EnvironmentTestDto, EnvironmentClient> start() {
