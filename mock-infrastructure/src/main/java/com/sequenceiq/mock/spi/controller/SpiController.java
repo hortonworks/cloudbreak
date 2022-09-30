@@ -1,6 +1,7 @@
 package com.sequenceiq.mock.spi.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -151,5 +152,13 @@ public class SpiController {
             }
         }
         return cloudVmMetaDataStatuses;
+    }
+
+    @PostMapping("/update/{group}/instance_type/{instanceType}")
+    public List<CloudVmInstanceStatus> updateInstancetypeInGroup(@PathVariable("mock_uuid") String mockuuid,
+            @PathVariable("instanceType") String instanceType,
+            @PathVariable("group") String group) {
+        spiStoreService.updateInstancetypeInGroup(mockuuid, group, instanceType);
+        return Collections.emptyList();
     }
 }
