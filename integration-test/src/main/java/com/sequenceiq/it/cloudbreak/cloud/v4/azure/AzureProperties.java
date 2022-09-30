@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.it.cloudbreak.cloud.v4.FreeIpaProperties;
+import com.sequenceiq.it.cloudbreak.cloud.v4.VerticalScaleProperties;
 
 @Configuration
 @ConfigurationProperties(prefix = "integrationtest.azure")
@@ -34,6 +35,16 @@ public class AzureProperties {
     private final Resourcegroup resourcegroup = new Resourcegroup();
 
     private FreeIpaProperties freeipa = new FreeIpaProperties();
+
+    private VerticalScaleProperties verticalScale = new VerticalScaleProperties();
+
+    public VerticalScaleProperties getVerticalScale() {
+        return verticalScale;
+    }
+
+    public void setVerticalScale(VerticalScaleProperties verticalScale) {
+        this.verticalScale = verticalScale;
+    }
 
     public FreeIpaProperties getFreeipa() {
         return freeipa;

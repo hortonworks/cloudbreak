@@ -60,6 +60,7 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
@@ -100,6 +101,29 @@ public class AzureCloudProvider extends AbstractCloudProvider {
                     "\t * subscription with tenant: `integrationtest.azure.credential.subscriptionId` and `integrationtest.azure.credential.tenantId` and\n" +
                     "\t * app based: `integrationtest.azure.credential.appId` and `integrationtest.azure.credential.appPassword`");
         }
+    }
+
+    @Override
+    public VerticalScalingTestDto freeIpaVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(azureProperties.getVerticalScale().getFreeipa().getGroup())
+                .withInstanceType(azureProperties.getVerticalScale().getFreeipa().getInstanceType());
+    }
+
+    @Override
+    public VerticalScalingTestDto distroXVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(azureProperties.getVerticalScale().getDatahub().getGroup())
+                .withInstanceType(azureProperties.getVerticalScale().getDatahub().getInstanceType());
+    }
+
+    @Override
+    public VerticalScalingTestDto datalakeVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(azureProperties.getVerticalScale().getDatalake().getGroup())
+                .withInstanceType(azureProperties.getVerticalScale().getDatalake().getInstanceType());
+    }
+
+    @Override
+    public boolean verticalScalingSupported() {
+        return azureProperties.getVerticalScale().isSupported();
     }
 
     @Override

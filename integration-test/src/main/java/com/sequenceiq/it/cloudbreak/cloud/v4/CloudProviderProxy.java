@@ -53,6 +53,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxRepairTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
@@ -407,6 +408,21 @@ public class CloudProviderProxy implements CloudProvider {
         return delegate.getStorageOptimizedInstanceType();
     }
 
+    @Override
+    public VerticalScalingTestDto freeIpaVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return delegate.freeIpaVerticalScalingTestDto(verticalScalingTestDto);
+    }
+
+    @Override
+    public VerticalScalingTestDto distroXVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return delegate.distroXVerticalScalingTestDto(verticalScalingTestDto);
+    }
+
+    @Override
+    public VerticalScalingTestDto datalakeVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return delegate.datalakeVerticalScalingTestDto(verticalScalingTestDto);
+    }
+
     public CloudProvider getDelegate(CloudPlatform cloudPlatform) {
         return cloudProviderMap.getOrDefault(cloudPlatform, delegate);
     }
@@ -443,5 +459,10 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public boolean isMultiAZ() {
         return delegate.isMultiAZ();
+    }
+
+    @Override
+    public boolean verticalScalingSupported() {
+        return delegate.verticalScalingSupported();
     }
 }

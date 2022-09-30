@@ -3,6 +3,8 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.yarn;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.it.cloudbreak.cloud.v4.VerticalScaleProperties;
+
 @Configuration
 @ConfigurationProperties(prefix = "integrationtest.yarn")
 public class YarnProperties {
@@ -24,6 +26,16 @@ public class YarnProperties {
     private final Baseimage baseimage = new Baseimage();
 
     private final DiskEncryption diskEncryption = new DiskEncryption();
+
+    private VerticalScaleProperties verticalScale = new VerticalScaleProperties();
+
+    public VerticalScaleProperties getVerticalScale() {
+        return verticalScale;
+    }
+
+    public void setVerticalScale(VerticalScaleProperties verticalScale) {
+        this.verticalScale = verticalScale;
+    }
 
     public String getAvailabilityZone() {
         return availabilityZone;

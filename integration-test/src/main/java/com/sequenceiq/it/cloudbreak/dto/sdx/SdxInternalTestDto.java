@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -58,6 +59,7 @@ import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
@@ -145,6 +147,11 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return this;
     }
 
+    public SdxInternalTestDto withInstanceType(String instanceType) {
+        getRequest().getStackV4Request().getInstanceGroups().forEach(ig -> ig.getTemplate().setInstanceType(instanceType));
+        return this;
+    }
+
     public SdxInternalTestDto withCustomDomain(CustomDomainSettingsV4Request customDomain) {
         getRequest().getStackV4Request().setCustomDomain(customDomain);
         return this;
@@ -191,6 +198,11 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
             throw new IllegalArgumentException("Stack is null with given key: " + stackKey.getKey());
         }
         return withStackRequest(cluster, stack);
+    }
+
+    public InstanceGroupV4Response findInstanceGroupByName(String name) {
+        return getResponse().getStackV4Response().getInstanceGroups().stream().filter(ig -> name.equals(ig.getName())).findFirst()
+                .orElseThrow(() -> new TestFailException("Unable to find Data Lake instance group based on the following name: " + name));
     }
 
     public SdxInternalTestDto withDefaultSDXSettings() {

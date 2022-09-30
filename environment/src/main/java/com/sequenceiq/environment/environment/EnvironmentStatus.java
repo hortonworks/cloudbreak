@@ -196,6 +196,12 @@ public enum EnvironmentStatus {
             UPGRADE_CCM_FAILED
     );
 
+    public static final Set<EnvironmentStatus> NON_VERTICAL_SCALABLE_STATES = Set.of(
+            VERTICAL_SCALE_ON_FREEIPA_IN_PROGRESS,
+            FREEIPA_DELETED_ON_PROVIDER_SIDE,
+            ARCHIVED
+    );
+
     private final com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus responseStatus;
 
     EnvironmentStatus(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus responseStatus) {
@@ -216,6 +222,10 @@ public enum EnvironmentStatus {
 
     public boolean isCcmUpgradeablePhase() {
         return CCM_UPGRADEABLE_STATES.contains(this);
+    }
+
+    public boolean isVerticalScaleAllowed() {
+        return !NON_VERTICAL_SCALABLE_STATES.contains(this);
     }
 
 }

@@ -68,6 +68,7 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
@@ -468,6 +469,29 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public String getStorageOptimizedInstanceType() {
         return awsProperties.getStorageOptimizedInstance().getType();
+    }
+
+    @Override
+    public VerticalScalingTestDto freeIpaVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(awsProperties.getVerticalScale().getFreeipa().getGroup())
+                .withInstanceType(awsProperties.getVerticalScale().getFreeipa().getInstanceType());
+    }
+
+    @Override
+    public VerticalScalingTestDto distroXVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(awsProperties.getVerticalScale().getDatahub().getGroup())
+                .withInstanceType(awsProperties.getVerticalScale().getDatahub().getInstanceType());
+    }
+
+    @Override
+    public VerticalScalingTestDto datalakeVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(awsProperties.getVerticalScale().getDatalake().getGroup())
+                .withInstanceType(awsProperties.getVerticalScale().getDatalake().getInstanceType());
+    }
+
+    @Override
+    public boolean verticalScalingSupported() {
+        return awsProperties.getVerticalScale().isSupported();
     }
 
     private AttachedFreeIpaRequest getAttachedFreeIpaRequest() {
