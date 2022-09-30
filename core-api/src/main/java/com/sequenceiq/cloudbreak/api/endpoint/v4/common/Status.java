@@ -67,7 +67,8 @@ public enum Status {
     LOAD_BALANCER_UPDATE_FAILED(StatusKind.FINAL),
     UPGRADE_CCM_IN_PROGRESS(StatusKind.PROGRESS),
     UPGRADE_CCM_FAILED(StatusKind.FINAL),
-    UPGRADE_CCM_FINISHED(StatusKind.FINAL);
+    UPGRADE_CCM_FINISHED(StatusKind.FINAL),
+    DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS(StatusKind.PROGRESS);
 
     private static final Map<Status, Status> IN_PROGRESS_TO_FINAL_STATUS_MAPPING = ImmutableMap.<Status, Status>builder()
             .put(REQUESTED, CREATE_FAILED)
@@ -96,6 +97,7 @@ public enum Status {
             .put(EXTERNAL_DATABASE_UPGRADE_FINISHED, EXTERNAL_DATABASE_UPGRADE_FAILED)
             .put(LOAD_BALANCER_UPDATE_IN_PROGRESS, UPDATE_FAILED)
             .put(UPGRADE_CCM_IN_PROGRESS, UPGRADE_CCM_FAILED)
+            .put(DETERMINE_DATALAKE_DATA_SIZES_IN_PROGRESS, AVAILABLE)
             .build();
 
     private final StatusKind statusKind;

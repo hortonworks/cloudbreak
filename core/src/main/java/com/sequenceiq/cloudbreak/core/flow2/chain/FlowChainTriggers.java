@@ -62,6 +62,8 @@ public class FlowChainTriggers {
 
     public static final String UPGRADE_RDS_CHAIN_TRIGGER_EVENT = "UPGRADE_RDS_CHAIN_TRIGGER_EVENT";
 
+    public static final String DETERMINE_DATALAKE_DATA_SIZES_CHAIN_TRIGGER_EVENT = "DETERMINE_DATALAKE_DATA_SIZES_CHAIN_TRIGGER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

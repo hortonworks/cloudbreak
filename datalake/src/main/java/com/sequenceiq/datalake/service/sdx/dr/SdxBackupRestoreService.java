@@ -630,6 +630,23 @@ public class SdxBackupRestoreService {
         }
     }
 
+    public void submitDatalakeDataInfo(String operationId, String inputJson, String userId) {
+        datalakeDRProto.SubmitDatalakeDataInfoResponse response;
+        try {
+            response = datalakeDrClient.submitDatalakeDataInfo(operationId, inputJson, userId);
+        } catch (Exception ex) {
+            LOGGER.error("Unable to properly parse datalake data info input '" + inputJson + "' and submit it.", ex);
+            throw new BadRequestException("Unable to properly parse datalake data info input '" + inputJson + "' and submit it.", ex);
+        }
+
+        if (response == null) {
+            LOGGER.error("Failed to submit datalake data info for operation: " + operationId);
+            throw new CloudbreakApiException("Failed to submit datalake data info for operation: " + operationId);
+        }
+
+        LOGGER.info("Successfully submitted datalake data info for operation: " + operationId);
+    }
+
     private static boolean isVersionOlderThan(SdxCluster cluster, String baseVersion) {
         LOGGER.info("Compared: String version {} with Versioned {}", cluster.getRuntime(), baseVersion);
         Comparator<Versioned> versionComparator = new VersionComparator();

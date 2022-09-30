@@ -1383,4 +1383,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public FlowIdentifier updateSalt(SdxCluster sdxCluster) {
         return sdxReactorFlowManager.triggerSaltUpdate(sdxCluster);
     }
+
+    public void submitDatalakeDataSizes(SdxCluster sdxCluster, String operationId, String dataSizesJSON) {
+        sdxReactorFlowManager.triggerSubmitDatalakeDataInfoFlow(sdxCluster, operationId, dataSizesJSON);
+    }
 }

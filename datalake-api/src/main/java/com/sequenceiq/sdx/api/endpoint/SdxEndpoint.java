@@ -362,4 +362,14 @@ public interface SdxEndpoint {
     @ApiOperation(value = "Initiates the vertical scaling on Data Lake", produces = MediaType.APPLICATION_JSON,
             nickname = "verticalScalingByName")
     FlowIdentifier verticalScalingByName(@PathParam("name") String name, @Valid StackVerticalScaleV4Request updateRequest);
+
+    @PUT
+    @Path("/crn/{crn}/submitDatalakeDataSizes/internal")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Submits datalake data sizes to Thunderhead DR service", nickname = "submitDatalakeDataSizesInternal")
+    void submitDatalakeDataSizesInternal(
+            @PathParam("crn") String crn,
+            @NotNull(message = "The 'operationId' query parameter must be specified.") @QueryParam("operationId") String operationId,
+            @NotNull(message = "The 'dataSizesJson' parameter must be specified.") String dataSizesJson,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

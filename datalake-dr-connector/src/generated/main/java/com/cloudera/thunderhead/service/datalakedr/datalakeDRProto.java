@@ -30619,6 +30619,1648 @@ public final class datalakeDRProto {
 
   }
 
+  public interface DatalakeDataInfoObjectOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:datalakedr.DatalakeDataInfoObject)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * ID of the operation, used for storing in the backing DB.
+     * </pre>
+     *
+     * <code>string operationId = 1;</code>
+     * @return The operationId.
+     */
+    java.lang.String getOperationId();
+    /**
+     * <pre>
+     * ID of the operation, used for storing in the backing DB.
+     * </pre>
+     *
+     * <code>string operationId = 1;</code>
+     * @return The bytes for operationId.
+     */
+    com.google.protobuf.ByteString
+        getOperationIdBytes();
+
+    /**
+     * <pre>
+     * Total size of the DBs on the datalake.
+     * </pre>
+     *
+     * <code>uint64 databaseSizeInBytes = 2;</code>
+     * @return The databaseSizeInBytes.
+     */
+    long getDatabaseSizeInBytes();
+
+    /**
+     * <pre>
+     * Size of the Atlas entity audit events HBase table.
+     * </pre>
+     *
+     * <code>uint64 hbaseAtlasEntityAuditEventsTableSizeInBytes = 3;</code>
+     * @return The hbaseAtlasEntityAuditEventsTableSizeInBytes.
+     */
+    long getHbaseAtlasEntityAuditEventsTableSizeInBytes();
+
+    /**
+     * <pre>
+     * Size of the Atlas Janus HBase table.
+     * </pre>
+     *
+     * <code>uint64 hbaseAtlasJanusTableSizeInBytes = 4;</code>
+     * @return The hbaseAtlasJanusTableSizeInBytes.
+     */
+    long getHbaseAtlasJanusTableSizeInBytes();
+
+    /**
+     * <pre>
+     * Size of the vertex Solr index collection.
+     * </pre>
+     *
+     * <code>uint64 solrVertexIndexCollectionSizeInBytes = 5;</code>
+     * @return The solrVertexIndexCollectionSizeInBytes.
+     */
+    long getSolrVertexIndexCollectionSizeInBytes();
+
+    /**
+     * <pre>
+     * Size of the fulltext Solr index collection.
+     * </pre>
+     *
+     * <code>uint64 solrFulltextIndexCollectionSizeInBytes = 6;</code>
+     * @return The solrFulltextIndexCollectionSizeInBytes.
+     */
+    long getSolrFulltextIndexCollectionSizeInBytes();
+
+    /**
+     * <pre>
+     * Size of the edge Solr index collection.
+     * </pre>
+     *
+     * <code>uint64 solrEdgeIndexCollectionSizeInBytes = 7;</code>
+     * @return The solrEdgeIndexCollectionSizeInBytes.
+     */
+    long getSolrEdgeIndexCollectionSizeInBytes();
+
+    /**
+     * <pre>
+     * Size of the Ranger Audits Solr collection.
+     * </pre>
+     *
+     * <code>uint64 solrRangerAuditsCollectionSizeInBytes = 8;</code>
+     * @return The solrRangerAuditsCollectionSizeInBytes.
+     */
+    long getSolrRangerAuditsCollectionSizeInBytes();
+  }
+  /**
+   * <pre>
+   **
+   * Object containing datalake data info.
+   * </pre>
+   *
+   * Protobuf type {@code datalakedr.DatalakeDataInfoObject}
+   */
+  public static final class DatalakeDataInfoObject extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:datalakedr.DatalakeDataInfoObject)
+      DatalakeDataInfoObjectOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DatalakeDataInfoObject.newBuilder() to construct.
+    private DatalakeDataInfoObject(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DatalakeDataInfoObject() {
+      operationId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DatalakeDataInfoObject();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_DatalakeDataInfoObject_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_DatalakeDataInfoObject_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject.Builder.class);
+    }
+
+    public static final int OPERATIONID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object operationId_;
+    /**
+     * <pre>
+     * ID of the operation, used for storing in the backing DB.
+     * </pre>
+     *
+     * <code>string operationId = 1;</code>
+     * @return The operationId.
+     */
+    @java.lang.Override
+    public java.lang.String getOperationId() {
+      java.lang.Object ref = operationId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        operationId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * ID of the operation, used for storing in the backing DB.
+     * </pre>
+     *
+     * <code>string operationId = 1;</code>
+     * @return The bytes for operationId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getOperationIdBytes() {
+      java.lang.Object ref = operationId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        operationId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DATABASESIZEINBYTES_FIELD_NUMBER = 2;
+    private long databaseSizeInBytes_;
+    /**
+     * <pre>
+     * Total size of the DBs on the datalake.
+     * </pre>
+     *
+     * <code>uint64 databaseSizeInBytes = 2;</code>
+     * @return The databaseSizeInBytes.
+     */
+    @java.lang.Override
+    public long getDatabaseSizeInBytes() {
+      return databaseSizeInBytes_;
+    }
+
+    public static final int HBASEATLASENTITYAUDITEVENTSTABLESIZEINBYTES_FIELD_NUMBER = 3;
+    private long hbaseAtlasEntityAuditEventsTableSizeInBytes_;
+    /**
+     * <pre>
+     * Size of the Atlas entity audit events HBase table.
+     * </pre>
+     *
+     * <code>uint64 hbaseAtlasEntityAuditEventsTableSizeInBytes = 3;</code>
+     * @return The hbaseAtlasEntityAuditEventsTableSizeInBytes.
+     */
+    @java.lang.Override
+    public long getHbaseAtlasEntityAuditEventsTableSizeInBytes() {
+      return hbaseAtlasEntityAuditEventsTableSizeInBytes_;
+    }
+
+    public static final int HBASEATLASJANUSTABLESIZEINBYTES_FIELD_NUMBER = 4;
+    private long hbaseAtlasJanusTableSizeInBytes_;
+    /**
+     * <pre>
+     * Size of the Atlas Janus HBase table.
+     * </pre>
+     *
+     * <code>uint64 hbaseAtlasJanusTableSizeInBytes = 4;</code>
+     * @return The hbaseAtlasJanusTableSizeInBytes.
+     */
+    @java.lang.Override
+    public long getHbaseAtlasJanusTableSizeInBytes() {
+      return hbaseAtlasJanusTableSizeInBytes_;
+    }
+
+    public static final int SOLRVERTEXINDEXCOLLECTIONSIZEINBYTES_FIELD_NUMBER = 5;
+    private long solrVertexIndexCollectionSizeInBytes_;
+    /**
+     * <pre>
+     * Size of the vertex Solr index collection.
+     * </pre>
+     *
+     * <code>uint64 solrVertexIndexCollectionSizeInBytes = 5;</code>
+     * @return The solrVertexIndexCollectionSizeInBytes.
+     */
+    @java.lang.Override
+    public long getSolrVertexIndexCollectionSizeInBytes() {
+      return solrVertexIndexCollectionSizeInBytes_;
+    }
+
+    public static final int SOLRFULLTEXTINDEXCOLLECTIONSIZEINBYTES_FIELD_NUMBER = 6;
+    private long solrFulltextIndexCollectionSizeInBytes_;
+    /**
+     * <pre>
+     * Size of the fulltext Solr index collection.
+     * </pre>
+     *
+     * <code>uint64 solrFulltextIndexCollectionSizeInBytes = 6;</code>
+     * @return The solrFulltextIndexCollectionSizeInBytes.
+     */
+    @java.lang.Override
+    public long getSolrFulltextIndexCollectionSizeInBytes() {
+      return solrFulltextIndexCollectionSizeInBytes_;
+    }
+
+    public static final int SOLREDGEINDEXCOLLECTIONSIZEINBYTES_FIELD_NUMBER = 7;
+    private long solrEdgeIndexCollectionSizeInBytes_;
+    /**
+     * <pre>
+     * Size of the edge Solr index collection.
+     * </pre>
+     *
+     * <code>uint64 solrEdgeIndexCollectionSizeInBytes = 7;</code>
+     * @return The solrEdgeIndexCollectionSizeInBytes.
+     */
+    @java.lang.Override
+    public long getSolrEdgeIndexCollectionSizeInBytes() {
+      return solrEdgeIndexCollectionSizeInBytes_;
+    }
+
+    public static final int SOLRRANGERAUDITSCOLLECTIONSIZEINBYTES_FIELD_NUMBER = 8;
+    private long solrRangerAuditsCollectionSizeInBytes_;
+    /**
+     * <pre>
+     * Size of the Ranger Audits Solr collection.
+     * </pre>
+     *
+     * <code>uint64 solrRangerAuditsCollectionSizeInBytes = 8;</code>
+     * @return The solrRangerAuditsCollectionSizeInBytes.
+     */
+    @java.lang.Override
+    public long getSolrRangerAuditsCollectionSizeInBytes() {
+      return solrRangerAuditsCollectionSizeInBytes_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(operationId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, operationId_);
+      }
+      if (databaseSizeInBytes_ != 0L) {
+        output.writeUInt64(2, databaseSizeInBytes_);
+      }
+      if (hbaseAtlasEntityAuditEventsTableSizeInBytes_ != 0L) {
+        output.writeUInt64(3, hbaseAtlasEntityAuditEventsTableSizeInBytes_);
+      }
+      if (hbaseAtlasJanusTableSizeInBytes_ != 0L) {
+        output.writeUInt64(4, hbaseAtlasJanusTableSizeInBytes_);
+      }
+      if (solrVertexIndexCollectionSizeInBytes_ != 0L) {
+        output.writeUInt64(5, solrVertexIndexCollectionSizeInBytes_);
+      }
+      if (solrFulltextIndexCollectionSizeInBytes_ != 0L) {
+        output.writeUInt64(6, solrFulltextIndexCollectionSizeInBytes_);
+      }
+      if (solrEdgeIndexCollectionSizeInBytes_ != 0L) {
+        output.writeUInt64(7, solrEdgeIndexCollectionSizeInBytes_);
+      }
+      if (solrRangerAuditsCollectionSizeInBytes_ != 0L) {
+        output.writeUInt64(8, solrRangerAuditsCollectionSizeInBytes_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(operationId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, operationId_);
+      }
+      if (databaseSizeInBytes_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(2, databaseSizeInBytes_);
+      }
+      if (hbaseAtlasEntityAuditEventsTableSizeInBytes_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(3, hbaseAtlasEntityAuditEventsTableSizeInBytes_);
+      }
+      if (hbaseAtlasJanusTableSizeInBytes_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(4, hbaseAtlasJanusTableSizeInBytes_);
+      }
+      if (solrVertexIndexCollectionSizeInBytes_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(5, solrVertexIndexCollectionSizeInBytes_);
+      }
+      if (solrFulltextIndexCollectionSizeInBytes_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(6, solrFulltextIndexCollectionSizeInBytes_);
+      }
+      if (solrEdgeIndexCollectionSizeInBytes_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(7, solrEdgeIndexCollectionSizeInBytes_);
+      }
+      if (solrRangerAuditsCollectionSizeInBytes_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(8, solrRangerAuditsCollectionSizeInBytes_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject) obj;
+
+      if (!getOperationId()
+          .equals(other.getOperationId())) return false;
+      if (getDatabaseSizeInBytes()
+          != other.getDatabaseSizeInBytes()) return false;
+      if (getHbaseAtlasEntityAuditEventsTableSizeInBytes()
+          != other.getHbaseAtlasEntityAuditEventsTableSizeInBytes()) return false;
+      if (getHbaseAtlasJanusTableSizeInBytes()
+          != other.getHbaseAtlasJanusTableSizeInBytes()) return false;
+      if (getSolrVertexIndexCollectionSizeInBytes()
+          != other.getSolrVertexIndexCollectionSizeInBytes()) return false;
+      if (getSolrFulltextIndexCollectionSizeInBytes()
+          != other.getSolrFulltextIndexCollectionSizeInBytes()) return false;
+      if (getSolrEdgeIndexCollectionSizeInBytes()
+          != other.getSolrEdgeIndexCollectionSizeInBytes()) return false;
+      if (getSolrRangerAuditsCollectionSizeInBytes()
+          != other.getSolrRangerAuditsCollectionSizeInBytes()) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + OPERATIONID_FIELD_NUMBER;
+      hash = (53 * hash) + getOperationId().hashCode();
+      hash = (37 * hash) + DATABASESIZEINBYTES_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getDatabaseSizeInBytes());
+      hash = (37 * hash) + HBASEATLASENTITYAUDITEVENTSTABLESIZEINBYTES_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getHbaseAtlasEntityAuditEventsTableSizeInBytes());
+      hash = (37 * hash) + HBASEATLASJANUSTABLESIZEINBYTES_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getHbaseAtlasJanusTableSizeInBytes());
+      hash = (37 * hash) + SOLRVERTEXINDEXCOLLECTIONSIZEINBYTES_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getSolrVertexIndexCollectionSizeInBytes());
+      hash = (37 * hash) + SOLRFULLTEXTINDEXCOLLECTIONSIZEINBYTES_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getSolrFulltextIndexCollectionSizeInBytes());
+      hash = (37 * hash) + SOLREDGEINDEXCOLLECTIONSIZEINBYTES_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getSolrEdgeIndexCollectionSizeInBytes());
+      hash = (37 * hash) + SOLRRANGERAUDITSCOLLECTIONSIZEINBYTES_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getSolrRangerAuditsCollectionSizeInBytes());
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     **
+     * Object containing datalake data info.
+     * </pre>
+     *
+     * Protobuf type {@code datalakedr.DatalakeDataInfoObject}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:datalakedr.DatalakeDataInfoObject)
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObjectOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_DatalakeDataInfoObject_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_DatalakeDataInfoObject_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        operationId_ = "";
+
+        databaseSizeInBytes_ = 0L;
+
+        hbaseAtlasEntityAuditEventsTableSizeInBytes_ = 0L;
+
+        hbaseAtlasJanusTableSizeInBytes_ = 0L;
+
+        solrVertexIndexCollectionSizeInBytes_ = 0L;
+
+        solrFulltextIndexCollectionSizeInBytes_ = 0L;
+
+        solrEdgeIndexCollectionSizeInBytes_ = 0L;
+
+        solrRangerAuditsCollectionSizeInBytes_ = 0L;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_DatalakeDataInfoObject_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject build() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject buildPartial() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject result = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject(this);
+        result.operationId_ = operationId_;
+        result.databaseSizeInBytes_ = databaseSizeInBytes_;
+        result.hbaseAtlasEntityAuditEventsTableSizeInBytes_ = hbaseAtlasEntityAuditEventsTableSizeInBytes_;
+        result.hbaseAtlasJanusTableSizeInBytes_ = hbaseAtlasJanusTableSizeInBytes_;
+        result.solrVertexIndexCollectionSizeInBytes_ = solrVertexIndexCollectionSizeInBytes_;
+        result.solrFulltextIndexCollectionSizeInBytes_ = solrFulltextIndexCollectionSizeInBytes_;
+        result.solrEdgeIndexCollectionSizeInBytes_ = solrEdgeIndexCollectionSizeInBytes_;
+        result.solrRangerAuditsCollectionSizeInBytes_ = solrRangerAuditsCollectionSizeInBytes_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject) {
+          return mergeFrom((com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject other) {
+        if (other == com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject.getDefaultInstance()) return this;
+        if (!other.getOperationId().isEmpty()) {
+          operationId_ = other.operationId_;
+          onChanged();
+        }
+        if (other.getDatabaseSizeInBytes() != 0L) {
+          setDatabaseSizeInBytes(other.getDatabaseSizeInBytes());
+        }
+        if (other.getHbaseAtlasEntityAuditEventsTableSizeInBytes() != 0L) {
+          setHbaseAtlasEntityAuditEventsTableSizeInBytes(other.getHbaseAtlasEntityAuditEventsTableSizeInBytes());
+        }
+        if (other.getHbaseAtlasJanusTableSizeInBytes() != 0L) {
+          setHbaseAtlasJanusTableSizeInBytes(other.getHbaseAtlasJanusTableSizeInBytes());
+        }
+        if (other.getSolrVertexIndexCollectionSizeInBytes() != 0L) {
+          setSolrVertexIndexCollectionSizeInBytes(other.getSolrVertexIndexCollectionSizeInBytes());
+        }
+        if (other.getSolrFulltextIndexCollectionSizeInBytes() != 0L) {
+          setSolrFulltextIndexCollectionSizeInBytes(other.getSolrFulltextIndexCollectionSizeInBytes());
+        }
+        if (other.getSolrEdgeIndexCollectionSizeInBytes() != 0L) {
+          setSolrEdgeIndexCollectionSizeInBytes(other.getSolrEdgeIndexCollectionSizeInBytes());
+        }
+        if (other.getSolrRangerAuditsCollectionSizeInBytes() != 0L) {
+          setSolrRangerAuditsCollectionSizeInBytes(other.getSolrRangerAuditsCollectionSizeInBytes());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                operationId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                databaseSizeInBytes_ = input.readUInt64();
+
+                break;
+              } // case 16
+              case 24: {
+                hbaseAtlasEntityAuditEventsTableSizeInBytes_ = input.readUInt64();
+
+                break;
+              } // case 24
+              case 32: {
+                hbaseAtlasJanusTableSizeInBytes_ = input.readUInt64();
+
+                break;
+              } // case 32
+              case 40: {
+                solrVertexIndexCollectionSizeInBytes_ = input.readUInt64();
+
+                break;
+              } // case 40
+              case 48: {
+                solrFulltextIndexCollectionSizeInBytes_ = input.readUInt64();
+
+                break;
+              } // case 48
+              case 56: {
+                solrEdgeIndexCollectionSizeInBytes_ = input.readUInt64();
+
+                break;
+              } // case 56
+              case 64: {
+                solrRangerAuditsCollectionSizeInBytes_ = input.readUInt64();
+
+                break;
+              } // case 64
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+
+      private java.lang.Object operationId_ = "";
+      /**
+       * <pre>
+       * ID of the operation, used for storing in the backing DB.
+       * </pre>
+       *
+       * <code>string operationId = 1;</code>
+       * @return The operationId.
+       */
+      public java.lang.String getOperationId() {
+        java.lang.Object ref = operationId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          operationId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * ID of the operation, used for storing in the backing DB.
+       * </pre>
+       *
+       * <code>string operationId = 1;</code>
+       * @return The bytes for operationId.
+       */
+      public com.google.protobuf.ByteString
+          getOperationIdBytes() {
+        java.lang.Object ref = operationId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          operationId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * ID of the operation, used for storing in the backing DB.
+       * </pre>
+       *
+       * <code>string operationId = 1;</code>
+       * @param value The operationId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOperationId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        operationId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * ID of the operation, used for storing in the backing DB.
+       * </pre>
+       *
+       * <code>string operationId = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearOperationId() {
+        
+        operationId_ = getDefaultInstance().getOperationId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * ID of the operation, used for storing in the backing DB.
+       * </pre>
+       *
+       * <code>string operationId = 1;</code>
+       * @param value The bytes for operationId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOperationIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        operationId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long databaseSizeInBytes_ ;
+      /**
+       * <pre>
+       * Total size of the DBs on the datalake.
+       * </pre>
+       *
+       * <code>uint64 databaseSizeInBytes = 2;</code>
+       * @return The databaseSizeInBytes.
+       */
+      @java.lang.Override
+      public long getDatabaseSizeInBytes() {
+        return databaseSizeInBytes_;
+      }
+      /**
+       * <pre>
+       * Total size of the DBs on the datalake.
+       * </pre>
+       *
+       * <code>uint64 databaseSizeInBytes = 2;</code>
+       * @param value The databaseSizeInBytes to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatabaseSizeInBytes(long value) {
+        
+        databaseSizeInBytes_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Total size of the DBs on the datalake.
+       * </pre>
+       *
+       * <code>uint64 databaseSizeInBytes = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatabaseSizeInBytes() {
+        
+        databaseSizeInBytes_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long hbaseAtlasEntityAuditEventsTableSizeInBytes_ ;
+      /**
+       * <pre>
+       * Size of the Atlas entity audit events HBase table.
+       * </pre>
+       *
+       * <code>uint64 hbaseAtlasEntityAuditEventsTableSizeInBytes = 3;</code>
+       * @return The hbaseAtlasEntityAuditEventsTableSizeInBytes.
+       */
+      @java.lang.Override
+      public long getHbaseAtlasEntityAuditEventsTableSizeInBytes() {
+        return hbaseAtlasEntityAuditEventsTableSizeInBytes_;
+      }
+      /**
+       * <pre>
+       * Size of the Atlas entity audit events HBase table.
+       * </pre>
+       *
+       * <code>uint64 hbaseAtlasEntityAuditEventsTableSizeInBytes = 3;</code>
+       * @param value The hbaseAtlasEntityAuditEventsTableSizeInBytes to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHbaseAtlasEntityAuditEventsTableSizeInBytes(long value) {
+        
+        hbaseAtlasEntityAuditEventsTableSizeInBytes_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Size of the Atlas entity audit events HBase table.
+       * </pre>
+       *
+       * <code>uint64 hbaseAtlasEntityAuditEventsTableSizeInBytes = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHbaseAtlasEntityAuditEventsTableSizeInBytes() {
+        
+        hbaseAtlasEntityAuditEventsTableSizeInBytes_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long hbaseAtlasJanusTableSizeInBytes_ ;
+      /**
+       * <pre>
+       * Size of the Atlas Janus HBase table.
+       * </pre>
+       *
+       * <code>uint64 hbaseAtlasJanusTableSizeInBytes = 4;</code>
+       * @return The hbaseAtlasJanusTableSizeInBytes.
+       */
+      @java.lang.Override
+      public long getHbaseAtlasJanusTableSizeInBytes() {
+        return hbaseAtlasJanusTableSizeInBytes_;
+      }
+      /**
+       * <pre>
+       * Size of the Atlas Janus HBase table.
+       * </pre>
+       *
+       * <code>uint64 hbaseAtlasJanusTableSizeInBytes = 4;</code>
+       * @param value The hbaseAtlasJanusTableSizeInBytes to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHbaseAtlasJanusTableSizeInBytes(long value) {
+        
+        hbaseAtlasJanusTableSizeInBytes_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Size of the Atlas Janus HBase table.
+       * </pre>
+       *
+       * <code>uint64 hbaseAtlasJanusTableSizeInBytes = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHbaseAtlasJanusTableSizeInBytes() {
+        
+        hbaseAtlasJanusTableSizeInBytes_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long solrVertexIndexCollectionSizeInBytes_ ;
+      /**
+       * <pre>
+       * Size of the vertex Solr index collection.
+       * </pre>
+       *
+       * <code>uint64 solrVertexIndexCollectionSizeInBytes = 5;</code>
+       * @return The solrVertexIndexCollectionSizeInBytes.
+       */
+      @java.lang.Override
+      public long getSolrVertexIndexCollectionSizeInBytes() {
+        return solrVertexIndexCollectionSizeInBytes_;
+      }
+      /**
+       * <pre>
+       * Size of the vertex Solr index collection.
+       * </pre>
+       *
+       * <code>uint64 solrVertexIndexCollectionSizeInBytes = 5;</code>
+       * @param value The solrVertexIndexCollectionSizeInBytes to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSolrVertexIndexCollectionSizeInBytes(long value) {
+        
+        solrVertexIndexCollectionSizeInBytes_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Size of the vertex Solr index collection.
+       * </pre>
+       *
+       * <code>uint64 solrVertexIndexCollectionSizeInBytes = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSolrVertexIndexCollectionSizeInBytes() {
+        
+        solrVertexIndexCollectionSizeInBytes_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long solrFulltextIndexCollectionSizeInBytes_ ;
+      /**
+       * <pre>
+       * Size of the fulltext Solr index collection.
+       * </pre>
+       *
+       * <code>uint64 solrFulltextIndexCollectionSizeInBytes = 6;</code>
+       * @return The solrFulltextIndexCollectionSizeInBytes.
+       */
+      @java.lang.Override
+      public long getSolrFulltextIndexCollectionSizeInBytes() {
+        return solrFulltextIndexCollectionSizeInBytes_;
+      }
+      /**
+       * <pre>
+       * Size of the fulltext Solr index collection.
+       * </pre>
+       *
+       * <code>uint64 solrFulltextIndexCollectionSizeInBytes = 6;</code>
+       * @param value The solrFulltextIndexCollectionSizeInBytes to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSolrFulltextIndexCollectionSizeInBytes(long value) {
+        
+        solrFulltextIndexCollectionSizeInBytes_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Size of the fulltext Solr index collection.
+       * </pre>
+       *
+       * <code>uint64 solrFulltextIndexCollectionSizeInBytes = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSolrFulltextIndexCollectionSizeInBytes() {
+        
+        solrFulltextIndexCollectionSizeInBytes_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long solrEdgeIndexCollectionSizeInBytes_ ;
+      /**
+       * <pre>
+       * Size of the edge Solr index collection.
+       * </pre>
+       *
+       * <code>uint64 solrEdgeIndexCollectionSizeInBytes = 7;</code>
+       * @return The solrEdgeIndexCollectionSizeInBytes.
+       */
+      @java.lang.Override
+      public long getSolrEdgeIndexCollectionSizeInBytes() {
+        return solrEdgeIndexCollectionSizeInBytes_;
+      }
+      /**
+       * <pre>
+       * Size of the edge Solr index collection.
+       * </pre>
+       *
+       * <code>uint64 solrEdgeIndexCollectionSizeInBytes = 7;</code>
+       * @param value The solrEdgeIndexCollectionSizeInBytes to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSolrEdgeIndexCollectionSizeInBytes(long value) {
+        
+        solrEdgeIndexCollectionSizeInBytes_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Size of the edge Solr index collection.
+       * </pre>
+       *
+       * <code>uint64 solrEdgeIndexCollectionSizeInBytes = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSolrEdgeIndexCollectionSizeInBytes() {
+        
+        solrEdgeIndexCollectionSizeInBytes_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long solrRangerAuditsCollectionSizeInBytes_ ;
+      /**
+       * <pre>
+       * Size of the Ranger Audits Solr collection.
+       * </pre>
+       *
+       * <code>uint64 solrRangerAuditsCollectionSizeInBytes = 8;</code>
+       * @return The solrRangerAuditsCollectionSizeInBytes.
+       */
+      @java.lang.Override
+      public long getSolrRangerAuditsCollectionSizeInBytes() {
+        return solrRangerAuditsCollectionSizeInBytes_;
+      }
+      /**
+       * <pre>
+       * Size of the Ranger Audits Solr collection.
+       * </pre>
+       *
+       * <code>uint64 solrRangerAuditsCollectionSizeInBytes = 8;</code>
+       * @param value The solrRangerAuditsCollectionSizeInBytes to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSolrRangerAuditsCollectionSizeInBytes(long value) {
+        
+        solrRangerAuditsCollectionSizeInBytes_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Size of the Ranger Audits Solr collection.
+       * </pre>
+       *
+       * <code>uint64 solrRangerAuditsCollectionSizeInBytes = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSolrRangerAuditsCollectionSizeInBytes() {
+        
+        solrRangerAuditsCollectionSizeInBytes_ = 0L;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:datalakedr.DatalakeDataInfoObject)
+    }
+
+    // @@protoc_insertion_point(class_scope:datalakedr.DatalakeDataInfoObject)
+    private static final com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject();
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DatalakeDataInfoObject>
+        PARSER = new com.google.protobuf.AbstractParser<DatalakeDataInfoObject>() {
+      @java.lang.Override
+      public DatalakeDataInfoObject parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<DatalakeDataInfoObject> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DatalakeDataInfoObject> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface SubmitDatalakeDataInfoResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:datalakedr.SubmitDatalakeDataInfoResponse)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   **
+   * Empty response for submission of datalake data info.
+   * </pre>
+   *
+   * Protobuf type {@code datalakedr.SubmitDatalakeDataInfoResponse}
+   */
+  public static final class SubmitDatalakeDataInfoResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:datalakedr.SubmitDatalakeDataInfoResponse)
+      SubmitDatalakeDataInfoResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use SubmitDatalakeDataInfoResponse.newBuilder() to construct.
+    private SubmitDatalakeDataInfoResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SubmitDatalakeDataInfoResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SubmitDatalakeDataInfoResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_SubmitDatalakeDataInfoResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_SubmitDatalakeDataInfoResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     **
+     * Empty response for submission of datalake data info.
+     * </pre>
+     *
+     * Protobuf type {@code datalakedr.SubmitDatalakeDataInfoResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:datalakedr.SubmitDatalakeDataInfoResponse)
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_SubmitDatalakeDataInfoResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_SubmitDatalakeDataInfoResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_SubmitDatalakeDataInfoResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse build() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse buildPartial() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse result = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse other) {
+        if (other == com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:datalakedr.SubmitDatalakeDataInfoResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:datalakedr.SubmitDatalakeDataInfoResponse)
+    private static final com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<SubmitDatalakeDataInfoResponse>
+        PARSER = new com.google.protobuf.AbstractParser<SubmitDatalakeDataInfoResponse>() {
+      @java.lang.Override
+      public SubmitDatalakeDataInfoResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<SubmitDatalakeDataInfoResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SubmitDatalakeDataInfoResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SubmitDatalakeDataInfoResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_datalakedr_BackupRestoreOperationStatus_descriptor;
   private static final 
@@ -30724,6 +32366,16 @@ public final class datalakeDRProto {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_datalakedr_CancelDatalakeRestoreResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_datalakedr_DatalakeDataInfoObject_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_datalakedr_DatalakeDataInfoObject_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_datalakedr_SubmitDatalakeDataInfoResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_datalakedr_SubmitDatalakeDataInfoResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -30844,31 +32496,43 @@ public final class datalakeDRProto {
       "\t\".\n\034CancelDatalakeBackupResponse\022\016\n\006res" +
       "ult\030\001 \001(\t\"1\n\034CancelDatalakeRestoreReques" +
       "t\022\021\n\trestoreId\030\001 \001(\t\"/\n\035CancelDatalakeRe" +
-      "storeResponse\022\016\n\006result\030\001 \001(\t*.\n\010SkipFla" +
-      "g\022\013\n\007NOT_SET\020\000\022\010\n\004SKIP\020\001\022\013\n\007INCLUDE\020\0022\252\006" +
-      "\n\ndatalakeDR\022A\n\nGetVersion\022\027.version.Ver" +
-      "sionRequest\032\030.version.VersionResponse\"\000\022" +
-      "Y\n\016BackupDatalake\022!.datalakedr.BackupDat" +
-      "alakeRequest\032\".datalakedr.BackupDatalake" +
-      "Response\"\000\022\\\n\017RestoreDatalake\022\".datalake" +
-      "dr.RestoreDatalakeRequest\032#.datalakedr.R" +
-      "estoreDatalakeResponse\"\000\022k\n\024BackupDatala" +
-      "keStatus\022\'.datalakedr.BackupDatalakeStat" +
-      "usRequest\032(.datalakedr.BackupDatalakeSta" +
-      "tusResponse\"\000\022n\n\025RestoreDatalakeStatus\022(" +
-      ".datalakedr.RestoreDatalakeStatusRequest" +
-      "\032).datalakedr.RestoreDatalakeStatusRespo" +
-      "nse\"\000\022f\n\023ListDatalakeBackups\022%.datalaked" +
-      "r.ListDatalakeBackupRequest\032&.datalakedr" +
-      ".ListDatalakeBackupResponse\"\000\022k\n\024CancelD" +
-      "atalakeBackup\022\'.datalakedr.CancelDatalak" +
-      "eBackupRequest\032(.datalakedr.CancelDatala" +
-      "keBackupResponse\"\000\022n\n\025CancelDatalakeRest" +
-      "ore\022(.datalakedr.CancelDatalakeRestoreRe" +
-      "quest\032).datalakedr.CancelDatalakeRestore" +
-      "Response\"\000B>\n+com.cloudera.thunderhead.s" +
-      "ervice.datalakedrB\017datalakeDRProtob\006prot" +
-      "o3"
+      "storeResponse\022\016\n\006result\030\001 \001(\t\"\341\002\n\026Datala" +
+      "keDataInfoObject\022\023\n\013operationId\030\001 \001(\t\022\033\n" +
+      "\023databaseSizeInBytes\030\002 \001(\004\0223\n+hbaseAtlas" +
+      "EntityAuditEventsTableSizeInBytes\030\003 \001(\004\022" +
+      "\'\n\037hbaseAtlasJanusTableSizeInBytes\030\004 \001(\004" +
+      "\022,\n$solrVertexIndexCollectionSizeInBytes" +
+      "\030\005 \001(\004\022.\n&solrFulltextIndexCollectionSiz" +
+      "eInBytes\030\006 \001(\004\022*\n\"solrEdgeIndexCollectio" +
+      "nSizeInBytes\030\007 \001(\004\022-\n%solrRangerAuditsCo" +
+      "llectionSizeInBytes\030\010 \001(\004\" \n\036SubmitDatal" +
+      "akeDataInfoResponse*.\n\010SkipFlag\022\013\n\007NOT_S" +
+      "ET\020\000\022\010\n\004SKIP\020\001\022\013\n\007INCLUDE\020\0022\226\007\n\ndatalake" +
+      "DR\022A\n\nGetVersion\022\027.version.VersionReques" +
+      "t\032\030.version.VersionResponse\"\000\022Y\n\016BackupD" +
+      "atalake\022!.datalakedr.BackupDatalakeReque" +
+      "st\032\".datalakedr.BackupDatalakeResponse\"\000" +
+      "\022\\\n\017RestoreDatalake\022\".datalakedr.Restore" +
+      "DatalakeRequest\032#.datalakedr.RestoreData" +
+      "lakeResponse\"\000\022k\n\024BackupDatalakeStatus\022\'" +
+      ".datalakedr.BackupDatalakeStatusRequest\032" +
+      "(.datalakedr.BackupDatalakeStatusRespons" +
+      "e\"\000\022n\n\025RestoreDatalakeStatus\022(.datalaked" +
+      "r.RestoreDatalakeStatusRequest\032).datalak" +
+      "edr.RestoreDatalakeStatusResponse\"\000\022f\n\023L" +
+      "istDatalakeBackups\022%.datalakedr.ListData" +
+      "lakeBackupRequest\032&.datalakedr.ListDatal" +
+      "akeBackupResponse\"\000\022k\n\024CancelDatalakeBac" +
+      "kup\022\'.datalakedr.CancelDatalakeBackupReq" +
+      "uest\032(.datalakedr.CancelDatalakeBackupRe" +
+      "sponse\"\000\022n\n\025CancelDatalakeRestore\022(.data" +
+      "lakedr.CancelDatalakeRestoreRequest\032).da" +
+      "talakedr.CancelDatalakeRestoreResponse\"\000" +
+      "\022j\n\026SubmitDatalakeDataInfo\022\".datalakedr." +
+      "DatalakeDataInfoObject\032*.datalakedr.Subm" +
+      "itDatalakeDataInfoResponse\"\000B>\n+com.clou" +
+      "dera.thunderhead.service.datalakedrB\017dat" +
+      "alakeDRProtob\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -31001,6 +32665,18 @@ public final class datalakeDRProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_CancelDatalakeRestoreResponse_descriptor,
         new java.lang.String[] { "Result", });
+    internal_static_datalakedr_DatalakeDataInfoObject_descriptor =
+      getDescriptor().getMessageTypes().get(21);
+    internal_static_datalakedr_DatalakeDataInfoObject_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_datalakedr_DatalakeDataInfoObject_descriptor,
+        new java.lang.String[] { "OperationId", "DatabaseSizeInBytes", "HbaseAtlasEntityAuditEventsTableSizeInBytes", "HbaseAtlasJanusTableSizeInBytes", "SolrVertexIndexCollectionSizeInBytes", "SolrFulltextIndexCollectionSizeInBytes", "SolrEdgeIndexCollectionSizeInBytes", "SolrRangerAuditsCollectionSizeInBytes", });
+    internal_static_datalakedr_SubmitDatalakeDataInfoResponse_descriptor =
+      getDescriptor().getMessageTypes().get(22);
+    internal_static_datalakedr_SubmitDatalakeDataInfoResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_datalakedr_SubmitDatalakeDataInfoResponse_descriptor,
+        new java.lang.String[] { });
     com.cloudera.thunderhead.service.common.version.Version.getDescriptor();
   }
 
