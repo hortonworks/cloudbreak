@@ -49,6 +49,8 @@ public enum Status {
     public static final Collection<Status> FREEIPA_UNREACHABLE_STATUSES = List.of(REQUESTED, UNREACHABLE, STOPPED, DELETED_ON_PROVIDER_SIDE,
             DELETE_IN_PROGRESS, DELETE_COMPLETED);
 
+    public static final Collection<Status> FREEIPA_VERTICALLY_NON_SCALABLE_STATUSES = List.of(DELETED_ON_PROVIDER_SIDE, DELETE_IN_PROGRESS, DELETE_COMPLETED);
+
     public static final Collection<Status> FREEIPA_STOPPABLE_STATUSES = List.of(AVAILABLE, STOP_FAILED, START_FAILED);
 
     public static final Collection<Status> FREEIPA_STARTABLE_STATUSES = List.of(STOPPED, STOP_FAILED, START_FAILED);
@@ -110,4 +112,9 @@ public enum Status {
     public boolean isAvailable() {
         return AVAILABLE.equals(this);
     }
+
+    public boolean isVerticallyScalable() {
+        return !FREEIPA_VERTICALLY_NON_SCALABLE_STATUSES.contains(this);
+    }
+
 }

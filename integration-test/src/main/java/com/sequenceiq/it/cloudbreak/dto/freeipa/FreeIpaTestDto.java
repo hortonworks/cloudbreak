@@ -38,6 +38,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupNetworkRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
@@ -74,6 +75,7 @@ import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.SubnetId;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.FreeIpaInstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
@@ -364,6 +366,12 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
             LOGGER.warn("Catalog [{}] or image [{}] is null or empty", imageCatalog, imageUuid);
         }
         return this;
+    }
+
+    public InstanceGroupResponse findInstanceGroupByType(String name) {
+        return getResponse().getInstanceGroups().stream().filter(ig -> name.equals(ig.getName())).findFirst().orElseThrow(
+                () -> new TestFailException("Unable to find FreeIPA instance group based on the following name: " + name)
+        );
     }
 
     private boolean checkResponseHasInstanceGroups() {

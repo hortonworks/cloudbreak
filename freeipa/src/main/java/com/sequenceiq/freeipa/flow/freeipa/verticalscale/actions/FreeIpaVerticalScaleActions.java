@@ -120,7 +120,7 @@ public class FreeIpaVerticalScaleActions {
             protected void doExecute(StackContext context, FreeIpaVerticalScaleResult payload, Map<Object, Object> variables) {
                 freeIPAVerticalScaleService.updateTemplateWithVerticalScaleInformation(context.getStack().getId(), payload.getFreeIPAVerticalScaleRequest());
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.STOPPED, "Vertical scale complete");
-                sendEvent(context, FINALIZED_EVENT.selector(), payload);
+                sendEvent(context, FINALIZED_EVENT.event(), payload);
             }
         };
     }

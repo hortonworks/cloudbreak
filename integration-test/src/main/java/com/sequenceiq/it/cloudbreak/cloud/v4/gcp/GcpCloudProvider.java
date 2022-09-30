@@ -62,6 +62,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
@@ -81,6 +82,29 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Inject
     private GcpCloudFunctionality gcpCloudFunctionality;
+
+    @Override
+    public VerticalScalingTestDto freeIpaVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(gcpProperties.getVerticalScale().getFreeipa().getGroup())
+                .withInstanceType(gcpProperties.getVerticalScale().getFreeipa().getInstanceType());
+    }
+
+    @Override
+    public VerticalScalingTestDto distroXVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(gcpProperties.getVerticalScale().getDatahub().getGroup())
+                .withInstanceType(gcpProperties.getVerticalScale().getDatahub().getInstanceType());
+    }
+
+    @Override
+    public VerticalScalingTestDto datalakeVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(gcpProperties.getVerticalScale().getDatalake().getGroup())
+                .withInstanceType(gcpProperties.getVerticalScale().getDatalake().getInstanceType());
+    }
+
+    @Override
+    public boolean verticalScalingSupported() {
+        return gcpProperties.getVerticalScale().isSupported();
+    }
 
     @Override
     public String region() {

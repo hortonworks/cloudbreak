@@ -13,24 +13,24 @@ import com.sequenceiq.flow.reactor.api.event.BaseFailedFlowEvent;
 @JsonDeserialize(builder = EnvironmentVerticalScaleFailedEvent.Builder.class)
 public class EnvironmentVerticalScaleFailedEvent extends BaseFailedFlowEvent implements Selectable {
 
-    private final EnvironmentVerticalScaleEvent environmentVerticalScaleEvent;
+    private final EnvironmentVerticalScaleEvent verticalScaleFreeIPAEvent;
 
     private final EnvironmentStatus environmentStatus;
 
     @JsonCreator
     public EnvironmentVerticalScaleFailedEvent(
-            @JsonProperty("environmentDto") EnvironmentVerticalScaleEvent environmentVerticalScaleEvent,
+            @JsonProperty("verticalScaleFreeIPAEvent") EnvironmentVerticalScaleEvent verticalScaleFreeIPAEvent,
             @JsonProperty("exception") Exception exception,
             @JsonProperty("environmentStatus") EnvironmentStatus environmentStatus) {
 
-        super(FAILED_VERTICAL_SCALING_FREEIPA_EVENT.name(), environmentVerticalScaleEvent.getResourceId(), null,
-                environmentVerticalScaleEvent.getResourceName(), environmentVerticalScaleEvent.getResourceCrn(), exception);
-        this.environmentVerticalScaleEvent = environmentVerticalScaleEvent;
+        super(FAILED_VERTICAL_SCALING_FREEIPA_EVENT.name(), verticalScaleFreeIPAEvent.getResourceId(),
+                verticalScaleFreeIPAEvent.getResourceName(), verticalScaleFreeIPAEvent.getResourceCrn(), exception);
+        this.verticalScaleFreeIPAEvent = verticalScaleFreeIPAEvent;
         this.environmentStatus = environmentStatus;
     }
 
     public EnvironmentVerticalScaleEvent getVerticalScaleFreeIPAEvent() {
-        return environmentVerticalScaleEvent;
+        return verticalScaleFreeIPAEvent;
     }
 
     public EnvironmentStatus getEnvironmentStatus() {
@@ -40,7 +40,7 @@ public class EnvironmentVerticalScaleFailedEvent extends BaseFailedFlowEvent imp
     @JsonPOJOBuilder
     public static final class Builder {
 
-        private EnvironmentVerticalScaleEvent environmentVerticalScaleEvent;
+        private EnvironmentVerticalScaleEvent verticalScaleFreeIPAEvent;
 
         private EnvironmentStatus environmentStatus;
 
@@ -53,8 +53,8 @@ public class EnvironmentVerticalScaleFailedEvent extends BaseFailedFlowEvent imp
             return new Builder();
         }
 
-        public Builder withEnvironmentVerticalScaleEvent(EnvironmentVerticalScaleEvent environmentVerticalScaleEvent) {
-            this.environmentVerticalScaleEvent = environmentVerticalScaleEvent;
+        public Builder withVerticalScaleFreeIPAEvent(EnvironmentVerticalScaleEvent verticalScaleFreeIPAEvent) {
+            this.verticalScaleFreeIPAEvent = verticalScaleFreeIPAEvent;
             return this;
         }
 
@@ -69,7 +69,7 @@ public class EnvironmentVerticalScaleFailedEvent extends BaseFailedFlowEvent imp
         }
 
         public EnvironmentVerticalScaleFailedEvent build() {
-            return new EnvironmentVerticalScaleFailedEvent(environmentVerticalScaleEvent, exception, environmentStatus);
+            return new EnvironmentVerticalScaleFailedEvent(verticalScaleFreeIPAEvent, exception, environmentStatus);
         }
     }
 }
