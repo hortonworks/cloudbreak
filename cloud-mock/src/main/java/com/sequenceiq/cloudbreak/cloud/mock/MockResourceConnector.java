@@ -137,6 +137,10 @@ public class MockResourceConnector implements ResourceConnector {
 
     @Override
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
+        stack.getGroups().forEach(g -> {
+            mockUrlFactory.get(authenticatedContext, "/spi/update/" + g.getName() + "/instance_type/" + g.getReferenceInstanceTemplate().getFlavor())
+                    .post(Entity.entity(stack, MediaType.APPLICATION_JSON_TYPE), CloudVmInstanceStatus[].class);
+        });
         return emptyList();
     }
 

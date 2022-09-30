@@ -108,4 +108,10 @@ public class SpiStoreService {
         LOGGER.info("List all spi");
         return spiDtoMap.values();
     }
+
+    public void updateInstancetypeInGroup(String mockUuid, String groupName, String instanceType) {
+        SpiDto spiDto = read(mockUuid);
+        Group group = spiDto.getCloudStack().getGroups().stream().filter(g -> g.getName().equals(groupName)).findFirst().orElseThrow();
+        group.getInstances().forEach(i -> i.getTemplate().setFlavor(instanceType));
+    }
 }
