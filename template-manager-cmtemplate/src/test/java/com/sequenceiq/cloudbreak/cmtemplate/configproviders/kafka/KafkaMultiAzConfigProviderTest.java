@@ -85,7 +85,7 @@ public class KafkaMultiAzConfigProviderTest {
     @EnumSource(StackType.class)
     void isConfigurationNeeded(StackType stackType) {
         TemplatePreparationObject tpo = templatePreparationObject(stackType, null);
-        boolean expectedIsNeeded = stackType == StackType.DATALAKE || stackType == StackType.WORKLOAD;
+        boolean expectedIsNeeded = stackType == StackType.DATALAKE || stackType == StackType.WORKLOAD || stackType == StackType.TEMPLATE;
         assertThat(configProviderUnderTest.isConfigurationNeeded(null, tpo))
                 .as("Configuration should %sbe needed for stack type %s", expectedIsNeeded ? "" : "NOT ", stackType)
                 .isEqualTo(expectedIsNeeded);

@@ -54,7 +54,8 @@ public class KafkaMultiAzConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return (StackType.DATALAKE.equals(source.getStackType()) || StackType.WORKLOAD.equals(source.getStackType()))
+        return (StackType.DATALAKE.equals(source.getStackType()) || StackType.WORKLOAD.equals(source.getStackType()) ||
+            StackType.TEMPLATE.equals(source.getStackType()))
                 && source.getGeneralClusterConfigs().isMultiAzEnabled();
     }
 }
