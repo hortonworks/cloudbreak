@@ -427,6 +427,11 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
+    public void triggerDetermineDatalakeDataSizes(Long stackId) {
+        String selector = FlowChainTriggers.DETERMINE_DATALAKE_DATA_SIZES_CHAIN_TRIGGER_EVENT;
+        reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
+    }
+
     private NetworkScaleDetails getStackNetworkScaleDetails(InstanceGroupAdjustmentV4Request instanceGroupAdjustment) {
         List<String> preferredSubnetIds = new ArrayList<>();
         if (instanceGroupAdjustment.getNetworkScaleRequest() != null) {

@@ -165,6 +165,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerRdsUpgrade(STACK_ID, TargetMajorVersion.VERSION_11, null);
         underTest.triggerRotateSaltPassword(STACK_ID, RotateSaltPasswordReason.MANUAL, RotateSaltPasswordType.FALLBACK);
         underTest.triggerVerticalScale(STACK_ID, new StackVerticalScaleV4Request());
+        underTest.triggerDetermineDatalakeDataSizes(STACK_ID);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {

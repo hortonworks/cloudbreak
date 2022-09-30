@@ -596,4 +596,10 @@ public class StackV4Controller extends NotificationController implements StackV4
             @Valid StackVerticalScaleV4Request updateRequest) {
         return stackOperations.putVerticalScaling(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), updateRequest);
     }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    public void determineDatalakeDataSizes(Long workspaceId, String name, @AccountId String accountId) {
+        stackOperations.determineDatalakeDataSizes(restRequestThreadLocalService.getRequestedWorkspaceId(), NameOrCrn.ofName(name));
+    }
 }

@@ -72,6 +72,7 @@ import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerUpdateService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
+import com.sequenceiq.cloudbreak.service.datalakemetrics.DetermineDatalakeDataSizesService;
 import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
@@ -160,6 +161,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     @Inject
     private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
+
+    @Inject
+    private DetermineDatalakeDataSizesService determineDatalakeDataSizesService;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -508,5 +512,10 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     public void updateLoadBalancerDNS(Long workspaceId, NameOrCrn nameOrCrn) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         gatewayPublicEndpointManagementService.updateDnsEntryForLoadBalancers(stack);
+    }
+
+    public void determineDatalakeDataSizes(Long workspaceId, NameOrCrn nameOrCrn) {
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        determineDatalakeDataSizesService.determineDatalakeDataSizes(stack);
     }
 }
