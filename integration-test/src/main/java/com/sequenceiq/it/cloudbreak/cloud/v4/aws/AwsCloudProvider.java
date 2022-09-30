@@ -68,6 +68,9 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.DatalakeVerticalScalingTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.DistroXVerticalScalingTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.FreeIpaVerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
@@ -468,6 +471,32 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public String getStorageOptimizedInstanceType() {
         return awsProperties.getStorageOptimizedInstance().getType();
+    }
+
+    @Override
+    public FreeIpaVerticalScalingTestDto getFreeIpaVerticalScalingTestDto() {
+        return new FreeIpaVerticalScalingTestDto(
+                awsProperties.getVerticalScale().getFreeipa().getGroup(),
+                awsProperties.getVerticalScale().getFreeipa().getInstanceType());
+    }
+
+    @Override
+    public DistroXVerticalScalingTestDto getDistroXVerticalScalingTestDto() {
+        return new DistroXVerticalScalingTestDto(
+                awsProperties.getVerticalScale().getDatahub().getGroup(),
+                awsProperties.getVerticalScale().getDatahub().getInstanceType());
+    }
+
+    @Override
+    public DatalakeVerticalScalingTestDto getDatalakeVerticalScalingTestDto() {
+        return new DatalakeVerticalScalingTestDto(
+                awsProperties.getVerticalScale().getDatalake().getGroup(),
+                awsProperties.getVerticalScale().getDatalake().getInstanceType());
+    }
+
+    @Override
+    public boolean verticalScalingSupported() {
+        return awsProperties.getVerticalScale().isSupported();
     }
 
     private AttachedFreeIpaRequest getAttachedFreeIpaRequest() {

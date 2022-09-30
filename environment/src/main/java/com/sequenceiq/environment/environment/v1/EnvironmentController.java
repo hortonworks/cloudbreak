@@ -492,18 +492,18 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.ENVIRONMENT_VERTICAL_SCALING)
-    public void verticalScalingByName(
+    public FlowIdentifier verticalScalingByName(
             @ResourceName String name,
             @RequestObject @Valid VerticalScaleRequest updateRequest) {
-        environmentVerticalScaleService.verticalScaleByName(name, updateRequest);
+        return environmentVerticalScaleService.verticalScaleByName(name, updateRequest);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ENVIRONMENT_VERTICAL_SCALING)
-    public void verticalScalingByCrn(
+    public FlowIdentifier verticalScalingByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn,
             @RequestObject @Valid VerticalScaleRequest updateRequest) {
-        environmentVerticalScaleService.verticalScaleByCrn(crn, updateRequest);
+        return environmentVerticalScaleService.verticalScaleByCrn(crn, updateRequest);
     }
 
     @Override

@@ -111,6 +111,17 @@ integrationtest:
     region: eu-central-1
     location: eu-central-1
     availabilityZone: eu-central-1a
+    verticalScale:
+      supported: true
+      datalake:
+        group: master
+        instanceType: m5.4xlarge
+      datahub:
+        group: master
+        instanceType: m5.4xlarge
+      freeipa:
+        group: master
+        instanceType: m5.xlarge
     vpcId: vpc-0fc0a422f82ea8eec
     subnetIds:
       - subnet-025e39ebeb6efeca8
@@ -156,6 +167,8 @@ integrationtest:
     availabilityZone:
     region: West US 2
     location: West US 2
+    verticalScale:
+      supported: false
     network:
       networkId: cloud-daily
       noPublicIp: true
@@ -216,6 +229,8 @@ integrationtest:
     availabilityZone: europe-west2-a
     region: europe-west2
     location: europe-west2
+    verticalScale:
+      supported: false
     network:
       sharedProjectId:
       networkId:
@@ -259,6 +274,8 @@ integrationtest:
     availabilityZone:
     region: default
     location: Frankfurt
+    verticalScale:
+      supported: false
     credential:
       endpoint: http://yprod001.l42scl.hortonworks.com:9191
     instance:
@@ -281,6 +298,8 @@ integrationtest:
     location: London
     availabilityZone: London
     vpcId: vpc1
+    verticalScale:
+      supported: false
     subnetIds:
       - net1
       - net2

@@ -44,6 +44,9 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxRepairTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.DatalakeVerticalScalingTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.DistroXVerticalScalingTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.FreeIpaVerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
@@ -183,6 +186,12 @@ public interface CloudProvider {
 
     String getStorageOptimizedInstanceType();
 
+    FreeIpaVerticalScalingTestDto getFreeIpaVerticalScalingTestDto();
+
+    DistroXVerticalScalingTestDto getDistroXVerticalScalingTestDto();
+
+    DatalakeVerticalScalingTestDto getDatalakeVerticalScalingTestDto();
+
     void verifyDiskEncryptionKey(DetailedEnvironmentResponse environment, String environmentName);
 
     void verifyVolumeEncryptionKey(List<String> volumeEncryptionKeyIds, String environmentName);
@@ -190,4 +199,6 @@ public interface CloudProvider {
     boolean getGovCloud();
 
     boolean isMultiAZ();
+
+    boolean verticalScalingSupported();
 }

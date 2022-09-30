@@ -60,6 +60,9 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.DatalakeVerticalScalingTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.DistroXVerticalScalingTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.FreeIpaVerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
@@ -100,6 +103,32 @@ public class AzureCloudProvider extends AbstractCloudProvider {
                     "\t * subscription with tenant: `integrationtest.azure.credential.subscriptionId` and `integrationtest.azure.credential.tenantId` and\n" +
                     "\t * app based: `integrationtest.azure.credential.appId` and `integrationtest.azure.credential.appPassword`");
         }
+    }
+
+    @Override
+    public FreeIpaVerticalScalingTestDto getFreeIpaVerticalScalingTestDto() {
+        return new FreeIpaVerticalScalingTestDto(
+                azureProperties.getVerticalScale().getFreeipa().getGroup(),
+                azureProperties.getVerticalScale().getFreeipa().getInstanceType());
+    }
+
+    @Override
+    public DistroXVerticalScalingTestDto getDistroXVerticalScalingTestDto() {
+        return new DistroXVerticalScalingTestDto(
+                azureProperties.getVerticalScale().getDatahub().getGroup(),
+                azureProperties.getVerticalScale().getDatahub().getInstanceType());
+    }
+
+    @Override
+    public DatalakeVerticalScalingTestDto getDatalakeVerticalScalingTestDto() {
+        return new DatalakeVerticalScalingTestDto(
+                azureProperties.getVerticalScale().getDatalake().getGroup(),
+                azureProperties.getVerticalScale().getDatalake().getInstanceType());
+    }
+
+    @Override
+    public boolean verticalScalingSupported() {
+        return azureProperties.getVerticalScale().isSupported();
     }
 
     @Override

@@ -45,6 +45,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxVerticalScaleAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RenewDatalakeCertificateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.SdxRetryAction;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCMDiagnosticsTestDto;
@@ -230,4 +231,9 @@ public class SdxTestClient {
     public Action<SdxInternalTestDto, SdxClient> rotateSaltPassword() {
         return new SdxRotateSaltPasswordAction();
     }
+
+    public Action<SdxInternalTestDto, SdxClient> verticalScale() {
+        return new SdxVerticalScaleAction();
+    }
+
 }
