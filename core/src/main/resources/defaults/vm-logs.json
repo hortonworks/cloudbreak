@@ -338,5 +338,9 @@
   {
     "path": "/var/log/dl_postgres_backup.log",
     "label": "dl_backup"
+  },
+  {
+    "path": "/var/log/get_backup_data_sizes.log",
+    "label": "get_backup_data_sizes"
   }
 ]
