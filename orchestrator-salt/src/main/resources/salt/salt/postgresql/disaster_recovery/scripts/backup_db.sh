@@ -136,7 +136,7 @@ backup_database_for_service() {
   SERVICE="$1"
   is_database_exists $SERVICE
   if [ "$?" -eq 1 ];then
-    doLog "WARN database for $SERVICE doesn't exists"
+    doLog "WARN database for $SERVICE doesn't exist"
     return 0
   fi
 
