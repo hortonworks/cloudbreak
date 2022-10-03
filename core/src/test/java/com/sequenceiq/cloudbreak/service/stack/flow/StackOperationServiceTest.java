@@ -41,7 +41,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
@@ -87,6 +86,8 @@ public class StackOperationServiceTest {
 
     private static final long STACK_ID = 9876L;
 
+    private static final String TEST_BLUEPRINT_TEXT = "blueprintText";
+
     @InjectMocks
     private StackOperationService underTest;
 
@@ -129,8 +130,8 @@ public class StackOperationServiceTest {
     @Mock
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
-    @Spy
-    private UpdateNodeCountValidator updateNodeCountValidator = new UpdateNodeCountValidator();
+    @Mock
+    private UpdateNodeCountValidator updateNodeCountValidator;
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
@@ -330,15 +331,18 @@ public class StackOperationServiceTest {
         stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, stackStatus));
         StackDto stackDto = mock(StackDto.class);
+
         lenient().when(stackDto.getId()).thenReturn(STACK_ID);
         when(stackDto.getStack()).thenReturn(stack);
 
         InstanceGroupAdjustmentV4Request upscaleAdjustment = new InstanceGroupAdjustmentV4Request();
         upscaleAdjustment.setScalingAdjustment(5);
+        upscaleAdjustment.setInstanceGroup("compute");
 
         when(transactionService.required(any(Supplier.class))).thenAnswer(ans -> ((Supplier) ans.getArgument(0)).get());
         doNothing().when(updateNodeCountValidator).validateServiceRoles(any(), any(InstanceGroupAdjustmentV4Request.class));
         if (stackStatus != CLUSTER_UPGRADE_FAILED) {
+            doNothing().when(updateNodeCountValidator).validateStackStatusForStartHostGroup(any(), any());
             doNothing().when(updateNodeCountValidator).validateInstanceGroup(any(), any());
             doNothing().when(updateNodeCountValidator).validateScalabilityOfInstanceGroup(any(), any(InstanceGroupAdjustmentV4Request.class));
             doNothing().when(updateNodeCountValidator).validateScalingAdjustment(any(InstanceGroupAdjustmentV4Request.class), any());
@@ -356,7 +360,6 @@ public class StackOperationServiceTest {
             assertSame(CLUSTER_UPGRADE_FAILED, stackStatus);
             assertSame(BadRequestException.class, e.getClass());
         }
-
         // Somehow invoked with a negative value
         upscaleAdjustment.setScalingAdjustment(-1);
         assertThrows(BadRequestException.class,
