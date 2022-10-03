@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stackpatch;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.service.database.EmbeddedDbVersionCollector;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.externaldatabase.ExternalDbVersionCollector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Service
 public class CollectDbEngineVersionPatchService extends ExistingStackPatchService {
@@ -65,9 +67,27 @@ public class CollectDbEngineVersionPatchService extends ExistingStackPatchServic
     private void updateDbEngineVersion(Stack stack, String dbEngineVersion) {
         if (stack.isDatalake()) {
             LOGGER.info("Updating DB engine version in datalake service with crn [{}] to [{}]", stack.getResourceCrn(), dbEngineVersion);
-            sdxClientService.updateDatabaseEngineVersion(stack.getResourceCrn(), dbEngineVersion);
+            try {
+                sdxClientService.updateDatabaseEngineVersion(stack.getResourceCrn(), dbEngineVersion);
+            } catch (NotFoundException e) {
+                tryToFindAndUpdateDatalakeByNameIfCrnIsDifferent(stack, dbEngineVersion);
+            }
         }
         stackService.updateExternalDatabaseEngineVersion(stack.getId(), dbEngineVersion);
+    }
+
+    private void tryToFindAndUpdateDatalakeByNameIfCrnIsDifferent(Stack stack, String dbEngineVersion) {
+        LOGGER.info("Datalake not found by crn [{}], try to find by name [{}]", stack.getResourceCrn(), stack.getName());
+        Optional<SdxClusterResponse> dlByEnvCrn = sdxClientService.getByEnvironmentCrnInernal(stack.getEnvironmentCrn()).stream()
+                .filter(dl -> stack.getName().equals(dl.getName()))
+                .findFirst();
+        if (dlByEnvCrn.isPresent()) {
+            LOGGER.info("Datalake found by name with crn: [{}]", dlByEnvCrn.get().getCrn());
+            sdxClientService.updateDatabaseEngineVersion(dlByEnvCrn.get().getCrn(), dbEngineVersion);
+        } else {
+            throw new com.sequenceiq.cloudbreak.common.exception.NotFoundException(String.format("Cannot found datalake with name %s in env %s",
+                    stack.getName(), stack.getEnvironmentCrn()));
+        }
     }
 
     private Optional<String> collectDbEngineVersion(Stack stack) {
