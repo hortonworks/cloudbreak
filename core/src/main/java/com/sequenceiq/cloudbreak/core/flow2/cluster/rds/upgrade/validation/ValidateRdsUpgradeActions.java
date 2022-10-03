@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeBackupValidationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeBackupValidationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeFailedEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradePushSaltStatesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradePushSaltStatesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeTriggerRequest;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -35,17 +34,12 @@ public class ValidateRdsUpgradeActions {
             protected void doExecute(ValidateRdsUpgradeContext context, ValidateRdsUpgradeTriggerRequest payload, Map<Object, Object> variables) {
                 Long stackId = payload.getResourceId();
                 validateRdsUpgradeService.rdsUpgradeStarted(stackId, payload.getVersion());
-                if (validateRdsUpgradeService.shouldRunDataBackupRestore(context.getStack(), context.getCluster())) {
-                    validateRdsUpgradeService.pushSaltStates(stackId);
-                }
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(ValidateRdsUpgradeContext context) {
-                return validateRdsUpgradeService.shouldRunDataBackupRestore(context.getStack(), context.getCluster()) ?
-                        new ValidateRdsUpgradePushSaltStatesRequest(context.getStackId()) :
-                        new ValidateRdsUpgradePushSaltStatesResult(context.getStackId());
+                return new ValidateRdsUpgradePushSaltStatesResult(context.getStackId());
             }
         };
     }
