@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -51,6 +52,8 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 @Component
 public class StackDtoService {
 
+    private static final List<ComponentType> COMPONENT_TYPES_TO_FETCH = List.of(ComponentType.CDH_PRODUCT_DETAILS, ComponentType.CM_REPO_DETAILS);
+
     @Inject
     private StackService stackService;
 
@@ -92,14 +95,14 @@ public class StackDtoService {
         StackView stackView = nameOrCrn.hasName() ?
                 getByName(accountId, nameOrCrn.getName(), stackType, config) :
                 getByCrn(nameOrCrn.getCrn(), stackType, config);
-        return getStackProxy(stackView, false).orElseThrow(NotFoundException.notFound("StackDto", nameOrCrn.getNameOrCrn()));
+        return getStackProxy(stackView, false);
     }
 
     public StackDto getByNameOrCrn(NameOrCrn nameOrCrn, String accountId) {
         StackView stackView = nameOrCrn.hasName() ?
                 stackDtoRepository.findByName(accountId, nameOrCrn.getName()).orElseThrow(NotFoundException.notFound("Stack by name", nameOrCrn.getName())) :
                 stackDtoRepository.findByCrn(nameOrCrn.getCrn()).orElseThrow(NotFoundException.notFound("Stack by crn", nameOrCrn.getCrn()));
-        return getStackProxy(stackView, false).orElseThrow(NotFoundException.notFound("StackDto", nameOrCrn.getNameOrCrn()));
+        return getStackProxy(stackView, false);
     }
 
     public StackDto getById(Long id) {
@@ -108,23 +111,15 @@ public class StackDtoService {
 
     public StackDto getById(Long id, boolean fetchResources) {
         StackView stackView = stackDtoRepository.findById(id).orElseThrow(NotFoundException.notFound("Stack", id));
-        return getStackProxy(stackView, fetchResources).orElseThrow(NotFoundException.notFound("StackDto", id));
-    }
-
-    public Optional<StackDto> getByIdOpt(Long id) {
-        Optional<StackViewDelegate> stackView = stackDtoRepository.findById(id);
-        if (stackView.isEmpty()) {
-            return Optional.empty();
-        }
-        return getStackProxy(stackView.get(), false);
+        return getStackProxy(stackView, fetchResources);
     }
 
     public StackDto getByCrn(String crn) {
         StackView stackView = stackDtoRepository.findByCrn(crn).orElseThrow(NotFoundException.notFound("Stack by crn", crn));
-        return getStackProxy(stackView, false).orElseThrow(NotFoundException.notFound("StackDto by crn", crn));
+        return getStackProxy(stackView, false);
     }
 
-    private Optional<StackDto> getStackProxy(StackView stackView, boolean fetchResources) {
+    private StackDto getStackProxy(StackView stackView, boolean fetchResources) {
         Map<String, InstanceGroupDto> groupListMap = new HashMap<>();
         List<InstanceMetadataView> imDto = instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(stackView.getId());
         Map<Long, Map<InstanceGroupView, List<InstanceMetadataView>>> group = new HashMap<>();
@@ -166,8 +161,7 @@ public class StackDtoService {
             orchestrator = orchestratorService.getByStackId(stackView.getId()).orElse(null);
             fileSystem = cluster.getFileSystem();
             additionalFileSystem = cluster.getAdditionalFileSystem();
-            List<ComponentType> types = List.of(ComponentType.CDH_PRODUCT_DETAILS, ComponentType.CM_REPO_DETAILS);
-            components = clusterComponentConfigProvider.getComponentsByClusterIdAndInComponentType(cluster.getId(), types);
+            components = clusterComponentConfigProvider.getComponentsByClusterIdAndInComponentType(cluster.getId(), COMPONENT_TYPES_TO_FETCH);
         }
         List<StackParameters> parameters = stackParametersRepository.findAllByStackId(stackView.getId());
         SecurityConfig securityConfig = stackDtoRepository.getSecurityByStackId(stackView.getId());
@@ -180,8 +174,8 @@ public class StackDtoService {
                                     e -> instanceGroups.stream().filter(ig -> ig.getId().equals(e.getKey())).findFirst().get(),
                                     e -> e.getValue().stream().map(AvailabilityZoneView::getAvailabilityZone).collect(Collectors.toList())));
         }
-        return Optional.of(new StackDto(stackView, cluster, network, workspace, workspace.getTenant(), groupListMap, resources, blueprint, gateway,
-                orchestrator, fileSystem, additionalFileSystem, components, parameters, securityConfig, availabilityZonesByStackId));
+        return new StackDto(stackView, cluster, network, workspace, workspace.getTenant(), groupListMap, resources, blueprint, gateway,
+                orchestrator, fileSystem, additionalFileSystem, components, parameters, securityConfig, availabilityZonesByStackId);
     }
 
     public List<InstanceGroupDto> getInstanceMetadataByInstanceGroup(Long stackId) {
@@ -233,18 +227,8 @@ public class StackDtoService {
         return stackViewDelegate.orElseThrow(NotFoundException.notFound("Stack by crn", crn));
     }
 
-    public Optional<StackView> getStackViewByCrnOpt(String crn) {
-        Optional<StackViewDelegate> stackViewDelegate = stackDtoRepository.findByCrn(crn);
-        return Optional.ofNullable(stackViewDelegate.orElseThrow(null));
-    }
-
     public StackView getStackViewById(Long id) {
         return stackDtoRepository.findById(id).orElseThrow(NotFoundException.notFound("Stack", id));
-    }
-
-    public Optional<StackView> getStackViewByIdOpt(Long id) {
-        Optional<StackViewDelegate> stackViewDelegate = stackDtoRepository.findById(id);
-        return Optional.ofNullable(stackViewDelegate.orElseThrow(null));
     }
 
     public ClusterView getClusterViewByStackId(Long id) {
@@ -311,5 +295,13 @@ public class StackDtoService {
     public Optional<StackView> findNotTerminatedByNameAndAccountId(String resourceName, String accountId) {
         Optional<StackViewDelegate> stackView = stackDtoRepository.findByNameAndAccountId(resourceName, accountId);
         return Optional.ofNullable(stackView.orElse(null));
+    }
+
+    public List<StackDto> findAllByEnvironmentCrnAndStackType(String environmentCrn, List<StackType> stackTypes) {
+        Objects.requireNonNull(environmentCrn);
+        Objects.requireNonNull(stackTypes);
+        return stackDtoRepository.findAllByEnvironmentCrnAndStackType(environmentCrn, stackTypes).stream()
+                .map(stackViewDelegate -> getStackProxy(stackViewDelegate, false))
+                .collect(Collectors.toList());
     }
 }

@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.domain.IdAware;
@@ -97,9 +96,7 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
         this.tenant = tenant;
     }
 
-    @VisibleForTesting
     public StackDto() {
-
     }
 
     @Override

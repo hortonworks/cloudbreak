@@ -89,7 +89,7 @@ public class DistroXUpgradeAvailabilityService {
     public UpgradeV4Response checkForUpgrade(NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request, String userCrn) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         String accountId = Crn.safeFromString(userCrn).getAccountId();
-        UpgradeV4Response response = stackUpgradeOperations.checkForClusterUpgrade(accountId, stack, workspaceId, request);
+        UpgradeV4Response response = stackUpgradeOperations.checkForClusterUpgrade(accountId, stack, request);
         List<ImageInfoV4Response> filteredCandidates = filterCandidates(accountId, stack, request, response);
         List<ImageInfoV4Response> razValidatedCandidates = validateRangerRazCandidates(accountId, stack, filteredCandidates);
         response.setUpgradeCandidates(razValidatedCandidates);
