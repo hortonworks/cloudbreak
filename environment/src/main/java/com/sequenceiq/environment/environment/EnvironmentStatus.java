@@ -121,6 +121,12 @@ public enum EnvironmentStatus {
     // The FreeIPA instance deleted on provider side
     FREEIPA_DELETED_ON_PROVIDER_SIDE(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE),
 
+    // FreeIPA is unhealthy
+    FREEIPA_UNHEALTHY(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_UNHEALTHY),
+
+    // FreeIPA is unreachable
+    FREEIPA_UNREACHABLE(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_UNREACHABLE),
+
     // Start updating the LoadBalancer on Data Lake in an Environment
     LOAD_BALANCER_ENV_UPDATE_STARTED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.LOAD_BALANCER_ENV_UPDATE_STARTED),
     // Failed to updating the LoadBalancer on Data Lake in an Environment (Detailed message in the statusReason)

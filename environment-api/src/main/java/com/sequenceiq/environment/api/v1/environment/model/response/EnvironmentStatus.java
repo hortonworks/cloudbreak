@@ -76,6 +76,8 @@ public enum EnvironmentStatus {
     START_SYNCHRONIZE_USERS_FAILED("Failed to synchronize users"),
 
     FREEIPA_DELETED_ON_PROVIDER_SIDE("FreeIPA deleted on cloud provider side"),
+    FREEIPA_UNHEALTHY("FreeIPA is unhealthy"),
+    FREEIPA_UNREACHABLE("FreeIPA is unreachable"),
 
     LOAD_BALANCER_ENV_UPDATE_STARTED("Starting load balancer update for environment"),
     LOAD_BALANCER_ENV_UPDATE_FAILED("Failed to update environment with load balancer"),
@@ -146,6 +148,8 @@ public enum EnvironmentStatus {
             STOP_DATALAKE_FAILED,
             STOP_FREEIPA_FAILED,
             FREEIPA_DELETED_ON_PROVIDER_SIDE,
+            FREEIPA_UNHEALTHY,
+            FREEIPA_UNREACHABLE,
             UPGRADE_CCM_VALIDATION_FAILED,
             UPGRADE_CCM_ON_FREEIPA_FAILED,
             UPGRADE_CCM_ON_DATALAKE_FAILED,
