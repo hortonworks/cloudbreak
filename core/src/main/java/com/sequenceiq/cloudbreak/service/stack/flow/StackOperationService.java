@@ -309,14 +309,13 @@ public class StackOperationService {
         try {
             return transactionService.required(() -> {
                 updateNodeCountValidator.validateServiceRoles(stackDto, instanceGroupAdjustmentJson);
-                updateNodeCountValidator.validateStackStatusForStartHostGroup(stack);
+                updateNodeCountValidator.validateStackStatusForStartHostGroup(stackDto, instanceGroupAdjustmentJson);
                 updateNodeCountValidator.validateInstanceGroup(stackDto, instanceGroupAdjustmentJson.getInstanceGroup());
                 updateNodeCountValidator.validateInstanceGroupForStopStart(stackDto,
                         instanceGroupAdjustmentJson.getInstanceGroup(), instanceGroupAdjustmentJson.getScalingAdjustment());
                 updateNodeCountValidator.validateScalabilityOfInstanceGroup(stackDto, instanceGroupAdjustmentJson);
                 updateNodeCountValidator.validateScalingAdjustment(instanceGroupAdjustmentJson, stackDto);
                 if (withClusterEvent) {
-                    updateNodeCountValidator.validateClusterStatusForStartHostGroup(stack);
                     updateNodeCountValidator.validateHostGroupIsPresent(instanceGroupAdjustmentJson, stackDto);
                     updateNodeCountValidator.validateCMStatus(stackDto);
                 }

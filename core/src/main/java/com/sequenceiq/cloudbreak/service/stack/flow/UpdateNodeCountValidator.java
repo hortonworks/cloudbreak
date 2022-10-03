@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static com.sequenceiq.cloudbreak.service.stack.DependentRolesHealthCheckService.UNDEFINED_DEPENDENCY;
 import static java.lang.String.format;
 
 import java.util.List;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.stack.DependentRolesHealthCheckService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDownscaleValidatorService;
@@ -54,6 +56,9 @@ public class UpdateNodeCountValidator {
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Inject
+    private DependentRolesHealthCheckService dependentRolesHealthCheckService;
 
     @Inject
     private InstanceGroupService instanceGroupService;
@@ -129,10 +134,29 @@ public class UpdateNodeCountValidator {
                 stack.getName(), stack.getStatus()));
     }
 
-    public void validateStackStatusForStartHostGroup(StackView stack) {
-        if (!(stack.isAvailable() || stack.isAvailableWithStoppedInstances())) {
-            throw new BadRequestException(format("Data Hub '%s' has '%s' state. Node group start operation is not allowed for this state.",
-                    stack.getName(), stack.getStatus()));
+    public void validateStackStatusForStartHostGroup(StackDto stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentV4Request) {
+
+        if (stack.getStack().isModificationInProgress()) {
+            throw new BadRequestException(format("Data Hub '%s' has '%s' state. Upscaling is not allowed.",
+                    stack.getStack().getName(), stack.getStack().getStatus()));
+        }
+
+        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintText());
+        Set<String> dependentComponents = dependentRolesHealthCheckService.getDependentComponentsForHostGroup(processor,
+                instanceGroupAdjustmentV4Request.getInstanceGroup());
+
+        if (dependentComponents.contains(UNDEFINED_DEPENDENCY)) {
+            if (!(stack.getStack().isAvailable() || stack.getStack().isAvailableWithStoppedInstances())) {
+                throw new BadRequestException(format("Data Hub '%s' has '%s' state. Node group start operation is not allowed for this state.",
+                        stack.getStack().getName(), stack.getStack().getStatus()));
+            }
+        } else {
+            List<String> unhealthyHostGroupNames = dependentRolesHealthCheckService.getUnhealthyDependentHostGroups(stack, processor, dependentComponents);
+            if (!unhealthyHostGroupNames.isEmpty()) {
+                throw new BadRequestException(format("Upscaling is Not Allowed for HostGroup: '%s' as Data hub '%s' has " +
+                                "services which may not be healthy for instances in hostGroup(s): [%s]",
+                        instanceGroupAdjustmentV4Request.getInstanceGroup(), stack.getStack().getName(), unhealthyHostGroupNames));
+            }
         }
     }
 
@@ -160,14 +184,6 @@ public class UpdateNodeCountValidator {
                     instanceGroup,
                     scalingAdjustment,
                     instanceGroupService.findNotTerminatedByStackId(stack.getId()));
-        }
-    }
-
-    public void validateClusterStatusForStartHostGroup(StackView stack) {
-        Long clusterId = stack.getClusterId();
-        if (clusterId != null && !(stack.isAvailable() || stack.isAvailableWithStoppedInstances())) {
-            throw new BadRequestException(format("Data Hub '%s' has '%s' state. Node group start operation is not allowed for this state.",
-                    stack.getName(), stack.getStatus()));
         }
     }
 

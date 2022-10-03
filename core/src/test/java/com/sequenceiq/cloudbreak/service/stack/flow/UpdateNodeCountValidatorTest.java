@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.service.stack.DependentRolesHealthCheckService.UNDEFINED_DEPENDENCY;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,6 +13,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -41,6 +46,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.stack.DependentRolesHealthCheckService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -70,6 +76,9 @@ public class UpdateNodeCountValidatorTest {
 
     @Mock
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Mock
+    private DependentRolesHealthCheckService dependentRolesHealthCheckService;
 
     @ParameterizedTest(name = "The master node count is {0} this will be scaled with {2} " +
             "node and the minimum is {1} the ScalabilityOption is {3}.")
@@ -136,31 +145,57 @@ public class UpdateNodeCountValidatorTest {
     @MethodSource("testValidateStatusForStartHostGroupData")
     public void testValidateStatusForStartHostGroup(
             Status status,
-            Optional<String> errorMessageSegment) {
-        Stack stack = mock(Stack.class);
-        Cluster cluster = mock(Cluster.class);
-        when(stack.getName()).thenReturn("master-stack");
-        when(stack.getStatus()).thenReturn(status);
-        when(stack.getCluster()).thenReturn(cluster);
-        when(cluster.getName()).thenReturn("master-stack");
-        if (status == AVAILABLE) {
-            when(stack.isAvailable()).thenReturn(true);
-            when(stack.isAvailableWithStoppedInstances()).thenReturn(false);
+            Optional<String> errorMessageSegment,
+            String instancegroup,
+            boolean unDefinedDependencyPresent,
+            boolean unhealthyHostgroup) {
+        StackDto stackdto = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        setupMocksForStopStartInstanceGroupValidation(stackdto);
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustmentV4Request = mock(InstanceGroupAdjustmentV4Request.class);
+        Set<String> dependComponents = new HashSet<>();
+        List<String> unHealthyHosts = new ArrayList<>();
+        if (unhealthyHostgroup) {
+            unHealthyHosts.add("master");
+        }
+        dependComponents.add("RESOURCEMANAGER");
+
+        when(instanceGroupAdjustmentV4Request.getInstanceGroup()).thenReturn(instancegroup);
+        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
+        when(stackdto.getStack()).thenReturn(stackView);
+        when(stackdto.getStack().getName()).thenReturn("master-stack");
+        when(stackdto.getStack().getStatus()).thenReturn(status);
+        when(dependentRolesHealthCheckService.getUnhealthyDependentHostGroups(any(), any(), any())).thenReturn(unHealthyHosts);
+
+        if (unDefinedDependencyPresent) {
+            dependComponents.add(UNDEFINED_DEPENDENCY);
+        }
+        when(dependentRolesHealthCheckService.getDependentComponentsForHostGroup(any(), any())).thenReturn(dependComponents);
+
+        if (status == UPDATE_IN_PROGRESS) {
+            when(stackdto.getStack().isModificationInProgress()).thenReturn(true);
         } else {
-            when(stack.isAvailable()).thenReturn(false);
-            when(stack.isAvailableWithStoppedInstances()).thenReturn(false);
+            when(stackdto.getStack().isModificationInProgress()).thenReturn(false);
+        }
+
+        if (status == AVAILABLE) {
+            when(stackdto.getStack().isAvailable()).thenReturn(true);
+            when(stackdto.getStack().isAvailableWithStoppedInstances()).thenReturn(false);
+        } else {
+            when(stackdto.getStack().isAvailable()).thenReturn(false);
+            when(stackdto.getStack().isAvailableWithStoppedInstances()).thenReturn(false);
         }
 
         if (errorMessageSegment.isPresent()) {
-            checkExecutableThrowsException(errorMessageSegment, stack, () -> underTest.validateStackStatusForStartHostGroup(stack));
-            checkExecutableThrowsException(errorMessageSegment, stack, () -> underTest.validateClusterStatusForStartHostGroup(stack));
+            checkExecutableThrowsException(errorMessageSegment, stackdto,
+                    () -> underTest.validateStackStatusForStartHostGroup(stackdto, instanceGroupAdjustmentV4Request));
         } else {
-            assertDoesNotThrow(() -> underTest.validateStackStatusForStartHostGroup(stack));
-            assertDoesNotThrow(() -> underTest.validateClusterStatusForStartHostGroup(stack));
+            assertDoesNotThrow(() -> underTest.validateStackStatusForStartHostGroup(stackdto, instanceGroupAdjustmentV4Request));
         }
     }
 
-    private void checkExecutableThrowsException(Optional<String> errorMessageSegment, Stack stack, Executable executable) {
+    private void checkExecutableThrowsException(Optional<String> errorMessageSegment, StackDto stack, Executable executable) {
         BadRequestException badRequestException = assertThrows(BadRequestException.class, executable);
         Assert.assertEquals(errorMessageSegment.get(), badRequestException.getMessage());
         Assert.assertTrue(badRequestException.getMessage().contains(errorMessageSegment.get()));
@@ -168,10 +203,25 @@ public class UpdateNodeCountValidatorTest {
 
     private static Stream<Arguments> testValidateStatusForStartHostGroupData() {
         return Stream.of(
-                Arguments.of(AVAILABLE, NO_ERROR),
+                Arguments.of(AVAILABLE, NO_ERROR, "compute", false, false),
+                Arguments.of(AVAILABLE,
+                        Optional.of("Upscaling is Not Allowed for HostGroup: 'compute' as Data hub 'master-stack' " +
+                                "has services which may not be healthy for instances in hostGroup(s): [[master]]"), "compute", false, true),
+                Arguments.of(AVAILABLE, NO_ERROR, "compute", true, false),
+                Arguments.of(UPDATE_IN_PROGRESS,
+                        Optional.of("Data Hub 'master-stack' has 'UPDATE_IN_PROGRESS' state. Upscaling is not allowed."), "compute", false, false),
+                Arguments.of(UPDATE_IN_PROGRESS,
+                        Optional.of("Data Hub 'master-stack' has 'UPDATE_IN_PROGRESS' state. Upscaling is not allowed."), "compute", false, true),
+                Arguments.of(NODE_FAILURE, NO_ERROR, "compute", false, false),
                 Arguments.of(NODE_FAILURE,
-                        Optional.of("Data Hub 'master-stack' has 'NODE_FAILURE' state." +
-                                " Node group start operation is not allowed for this state."))
+                        Optional.of("Upscaling is Not Allowed for HostGroup: 'compute' as Data hub 'master-stack' " +
+                                "has services which may not be healthy for instances in hostGroup(s): [[master]]"), "compute", false, true),
+                Arguments.of(NODE_FAILURE,
+                        Optional.of("Data Hub 'master-stack' has 'NODE_FAILURE' state. Node group start operation is not allowed for this state."),
+                        "compute", true, false),
+                Arguments.of(NODE_FAILURE,
+                        Optional.of("Data Hub 'master-stack' has 'NODE_FAILURE' state. Node group start operation is not allowed for this state."),
+                        "compute", true, true)
         );
     }
 
