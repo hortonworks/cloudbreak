@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -43,6 +44,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
@@ -53,9 +55,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -71,11 +76,13 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
+import com.sequenceiq.cloudbreak.service.stack.DependentRolesHealthCheckService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -87,8 +94,16 @@ public class StackOperationServiceTest {
 
     private static final long STACK_ID = 9876L;
 
+    private static final String TEST_BLUEPRINT_TEXT = "blueprintText";
+
     @InjectMocks
     private StackOperationService underTest;
+
+    @Mock
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Mock
+    private DependentRolesHealthCheckService dependentRolesHealthCheckService;
 
     @Mock
     private CloudbreakEventService eventService;
@@ -330,12 +345,21 @@ public class StackOperationServiceTest {
         stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, stackStatus));
         StackDto stackDto = mock(StackDto.class);
+        setupMocksForStopStartInstanceGroupValidation(stackDto);
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+
         lenient().when(stackDto.getId()).thenReturn(STACK_ID);
         when(stackDto.getStack()).thenReturn(stack);
+        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
 
         InstanceGroupAdjustmentV4Request upscaleAdjustment = new InstanceGroupAdjustmentV4Request();
         upscaleAdjustment.setScalingAdjustment(5);
+        upscaleAdjustment.setInstanceGroup("compute");
 
+        ReflectionTestUtils.setField(updateNodeCountValidator, "cmTemplateProcessorFactory", cmTemplateProcessorFactory);
+        ReflectionTestUtils.setField(updateNodeCountValidator, "dependentRolesHealthCheckService", dependentRolesHealthCheckService);
+
+        doCallRealMethod().when(updateNodeCountValidator).validateStackStatusForStartHostGroup(any(StackDto.class), any(InstanceGroupAdjustmentV4Request.class));
         when(transactionService.required(any(Supplier.class))).thenAnswer(ans -> ((Supplier) ans.getArgument(0)).get());
         doNothing().when(updateNodeCountValidator).validateServiceRoles(any(), any(InstanceGroupAdjustmentV4Request.class));
         if (stackStatus != CLUSTER_UPGRADE_FAILED) {
@@ -356,7 +380,6 @@ public class StackOperationServiceTest {
             assertSame(CLUSTER_UPGRADE_FAILED, stackStatus);
             assertSame(BadRequestException.class, e.getClass());
         }
-
         // Somehow invoked with a negative value
         upscaleAdjustment.setScalingAdjustment(-1);
         assertThrows(BadRequestException.class,
@@ -365,6 +388,20 @@ public class StackOperationServiceTest {
         upscaleAdjustment.setScalingAdjustment(0);
         assertThrows(BadRequestException.class,
                 () -> underTest.updateNodeCountStartInstances(stackDto, upscaleAdjustment, true, ScalingStrategy.STOPSTART));
+
+
+    }
+
+    private void setupMocksForStopStartInstanceGroupValidation(StackDto stack) {
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        Blueprint blueprint = mock(Blueprint.class);
+
+        when(stack.getBlueprint()).thenReturn(blueprint);
+        when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
+        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
+        StackView stackview = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackview);
+        lenient().when(stackview.isModificationInProgress()).thenReturn(false);
     }
 
     public static Stream<Arguments> stackStatusForUpdateNodeCount() {
