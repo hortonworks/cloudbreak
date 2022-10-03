@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -24,10 +23,12 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
@@ -72,7 +73,7 @@ public class StackUpgradeOperations {
     private ClusterDBValidationService clusterDBValidationService;
 
     @Inject
-    private StackOperations stackOperations;
+    private StackDtoService stackDtoService;
 
     public FlowIdentifier upgradeOs(@NotNull NameOrCrn nameOrCrn, String accountId) {
         LOGGER.debug("Starting to upgrade OS: " + nameOrCrn);
@@ -100,10 +101,10 @@ public class StackUpgradeOperations {
     }
 
     public UpgradeV4Response checkForClusterUpgrade(String accountId, @NotNull NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request) {
-        return checkForClusterUpgrade(accountId, stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId), workspaceId, request);
+        return checkForClusterUpgrade(accountId, stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId), request);
     }
 
-    public UpgradeV4Response checkForClusterUpgrade(String accountId, @NotNull Stack stack, Long workspaceId, UpgradeV4Request request) {
+    public UpgradeV4Response checkForClusterUpgrade(String accountId, @NotNull Stack stack, UpgradeV4Request request) {
         MDCBuilder.buildMdcContext(stack);
         stack.setInstanceGroups(instanceGroupService.getByStackAndFetchTemplates(stack.getId()));
         boolean osUpgrade = upgradeService.isOsUpgrade(request);
@@ -124,24 +125,24 @@ public class StackUpgradeOperations {
         if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
             clusterUpgradeAvailabilityService.filterUpgradeOptions(accountId, upgradeResponse, request, stack.isDatalake());
         }
-        validateAttachedDataHubsForDataLake(accountId, workspaceId, stack, upgradeResponse, request);
+        validateAttachedDataHubsForDataLake(accountId, stack, upgradeResponse, request);
         LOGGER.debug("Upgrade response after validations: {}", upgradeResponse);
         return upgradeResponse;
     }
 
-    private void validateAttachedDataHubsForDataLake(String accountId, Long workspaceId, Stack stack, UpgradeV4Response upgradeResponse,
+    private void validateAttachedDataHubsForDataLake(String accountId, Stack stack, UpgradeV4Response upgradeResponse,
             UpgradeV4Request request) {
         InternalUpgradeSettings internalUpgradeSettings = request.getInternalUpgradeSettings();
         if (entitlementService.runtimeUpgradeEnabled(accountId) && StackType.DATALAKE == stack.getType()
                 && (internalUpgradeSettings == null || !internalUpgradeSettings.isUpgradePreparation())) {
             LOGGER.info("Checking that the attached DataHubs of the Data lake are both in stopped state and upgradeable only in case if "
                     + "Data lake runtime upgrade is enabled in [{}] account on [{}] cluster.", accountId, stack.getName());
-            StackViewV4Responses stackViewV4Responses = stackOperations.listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(),
+            List<? extends StackDtoDelegate> datahubsInEnvironment = stackDtoService.findAllByEnvironmentCrnAndStackType(stack.getEnvironmentCrn(),
                     List.of(StackType.WORKLOAD));
             if (!entitlementService.datahubRuntimeUpgradeEnabled(accountId)) {
-                upgradeResponse.appendReason(upgradePreconditionService.checkForNonUpgradeableAttachedClusters(stackViewV4Responses));
+                upgradeResponse.appendReason(upgradePreconditionService.checkForNonUpgradeableAttachedClusters(datahubsInEnvironment));
             }
-            upgradeResponse.appendReason(upgradePreconditionService.checkForRunningAttachedClusters(stackViewV4Responses, stack, request.
+            upgradeResponse.appendReason(upgradePreconditionService.checkForRunningAttachedClusters(datahubsInEnvironment, request.
                     isSkipDataHubValidation()));
         }
     }

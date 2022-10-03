@@ -3,9 +3,7 @@ package com.sequenceiq.distrox.v1.distrox;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -28,7 +26,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -36,9 +33,11 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
@@ -99,7 +98,7 @@ class StackUpgradeOperationsTest {
     private ClusterDBValidationService clusterDBValidationService;
 
     @Mock
-    private StackOperations stackOperations;
+    private StackDtoService stackDtoService;
 
     @Mock
     private CloudbreakUser cloudbreakUser;
@@ -153,7 +152,7 @@ class StackUpgradeOperationsTest {
         when(instanceMetaDataService.countByStackId(any())).thenReturn(stackInstanceCount);
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.checkForClusterUpgrade("accId", mock(Stack.class), WORKSPACE_ID, request));
+                () -> underTest.checkForClusterUpgrade("accId", mock(Stack.class), request));
 
         assertEquals("There are 201 nodes in the cluster. Upgrade has a limit of 200 nodes, above the limit it is unstable. " +
                 "Please downscale the cluster below the limit and retry the upgrade.", exception.getMessage());
@@ -171,7 +170,7 @@ class StackUpgradeOperationsTest {
         when(clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, false, false, request.getInternalUpgradeSettings())).thenReturn(upgradeResponse);
         when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
 
-        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, WORKSPACE_ID, request);
+        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, request);
 
         assertEquals(upgradeResponse, actual);
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
@@ -180,7 +179,6 @@ class StackUpgradeOperationsTest {
         verify(clusterUpgradeAvailabilityService).checkForUpgradesByName(stack, false, false, request.getInternalUpgradeSettings());
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponse, request, false);
         verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
-        verifyNoInteractions(stackOperations);
     }
 
     @Test
@@ -197,7 +195,7 @@ class StackUpgradeOperationsTest {
         when(clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings())).thenReturn(upgradeResponse);
         when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
 
-        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, WORKSPACE_ID, request);
+        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, request);
 
         assertEquals(upgradeResponse, actual);
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
@@ -209,14 +207,13 @@ class StackUpgradeOperationsTest {
         verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
         verifyNoInteractions(upgradePreconditionService);
         verifyNoInteractions(clusterDBValidationService);
-        verifyNoInteractions(stackOperations);
     }
 
     @Test
     void testCheckForClusterUpgradeShouldReturnUpgradeCandidatesWhenTheUpgradeIsRuntimeUpgradeAndTheStackTypeIsDataLakeAndReplaceVmEnabled() {
         Stack stack = createStack(StackType.DATALAKE);
-        StackViewV4Responses stackViewV4Responses = new StackViewV4Responses();
         UpgradeV4Request request = createUpgradeRequest(null, true);
+        StackDto stackDto = new StackDto();
         UpgradeV4Response upgradeResponse = createUpgradeResponse();
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
         when(upgradeService.isOsUpgrade(request)).thenReturn(false);
@@ -226,9 +223,9 @@ class StackUpgradeOperationsTest {
         when(limitConfiguration.getUpgradeNodeCountLimit(any())).thenReturn(NODE_LIMIT);
         when(clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings())).thenReturn(upgradeResponse);
         when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
-        when(stackOperations.listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any())).thenReturn(stackViewV4Responses);
+        when(stackDtoService.findAllByEnvironmentCrnAndStackType(ENVIRONMENT_CRN, List.of(StackType.WORKLOAD))).thenReturn(List.of(stackDto));
 
-        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, WORKSPACE_ID, request);
+        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, request);
 
         assertEquals(upgradeResponse, actual);
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
@@ -238,9 +235,8 @@ class StackUpgradeOperationsTest {
         verify(clusterUpgradeAvailabilityService).checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings());
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponse, request, true);
         verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
-        verify(stackOperations).listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any());
-        verify(upgradePreconditionService).checkForRunningAttachedClusters(stackViewV4Responses, stack, request.isSkipDataHubValidation());
-        verify(upgradePreconditionService).checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
+        verify(upgradePreconditionService).checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation());
+        verify(upgradePreconditionService).checkForNonUpgradeableAttachedClusters(List.of(stackDto));
         verifyNoInteractions(clusterDBValidationService);
     }
 
@@ -259,7 +255,7 @@ class StackUpgradeOperationsTest {
         when(clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings())).thenReturn(upgradeResponse);
         when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
 
-        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, WORKSPACE_ID, request);
+        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, request);
 
         assertEquals(upgradeResponse, actual);
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
@@ -269,15 +265,14 @@ class StackUpgradeOperationsTest {
         verify(clusterUpgradeAvailabilityService).checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings());
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponse, request, true);
         verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
-        verify(stackOperations, never()).listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any());
         verifyNoInteractions(upgradePreconditionService, clusterDBValidationService);
     }
 
     @Test
     void testCheckForClusterUpgradeShouldReturnCompositeErrorWhenBothAttachedDataHubValidationsFail() {
         Stack stack = createStack(StackType.DATALAKE);
-        StackViewV4Responses stackViewV4Responses = new StackViewV4Responses();
         UpgradeV4Request request = createUpgradeRequest(null, true);
+        StackDto stackDto = new StackDto();
         UpgradeV4Response upgradeResponseToReturn = createUpgradeResponse();
         UpgradeV4Response expectedResponse = createUpgradeResponse();
         expectedResponse.setReason("There are attached Data Hub clusters that are non-upgradeable There are attached Data Hub clusters in incorrect state");
@@ -290,13 +285,13 @@ class StackUpgradeOperationsTest {
         when(clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings()))
                 .thenReturn(upgradeResponseToReturn);
         when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
-        when(stackOperations.listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any())).thenReturn(stackViewV4Responses);
-        when(upgradePreconditionService.checkForRunningAttachedClusters(stackViewV4Responses, stack, request.isSkipDataHubValidation()))
+        when(upgradePreconditionService.checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation()))
                 .thenReturn("There are attached Data Hub clusters in incorrect state");
-        when(upgradePreconditionService.checkForNonUpgradeableAttachedClusters(stackViewV4Responses))
+        when(upgradePreconditionService.checkForNonUpgradeableAttachedClusters(List.of(stackDto)))
                 .thenReturn("There are attached Data Hub clusters that are non-upgradeable");
+        when(stackDtoService.findAllByEnvironmentCrnAndStackType(ENVIRONMENT_CRN, List.of(StackType.WORKLOAD))).thenReturn(List.of(stackDto));
 
-        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, WORKSPACE_ID, request);
+        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, request);
 
         assertEquals(expectedResponse, actual);
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
@@ -306,17 +301,16 @@ class StackUpgradeOperationsTest {
         verify(clusterUpgradeAvailabilityService).checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings());
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponseToReturn, request, true);
         verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
-        verify(stackOperations).listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any());
-        verify(upgradePreconditionService).checkForRunningAttachedClusters(stackViewV4Responses, stack, request.isSkipDataHubValidation());
-        verify(upgradePreconditionService).checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
+        verify(upgradePreconditionService).checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation());
+        verify(upgradePreconditionService).checkForNonUpgradeableAttachedClusters(List.of(stackDto));
         verifyNoInteractions(clusterDBValidationService);
     }
 
     @Test
     void testCheckForClusterUpgradeShouldNotValidateUpgradeableDataHubsWhenDataHubUpgradeEntitlementIsGranted() {
         Stack stack = createStack(StackType.DATALAKE);
-        StackViewV4Responses stackViewV4Responses = new StackViewV4Responses();
         UpgradeV4Request request = createUpgradeRequest(null, null);
+        StackDto stackDto = new StackDto();
         UpgradeV4Response upgradeResponseToReturn = createUpgradeResponse();
         UpgradeV4Response expectedResponse = createUpgradeResponse();
         expectedResponse.setReason("There are attached Data Hub clusters in incorrect state");
@@ -330,11 +324,11 @@ class StackUpgradeOperationsTest {
                 .thenReturn(upgradeResponseToReturn);
         when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
         when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
-        when(stackOperations.listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any())).thenReturn(stackViewV4Responses);
-        when(upgradePreconditionService.checkForRunningAttachedClusters(stackViewV4Responses, stack, request.isSkipDataHubValidation()))
+        when(upgradePreconditionService.checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation()))
                 .thenReturn("There are attached Data Hub clusters in incorrect state");
+        when(stackDtoService.findAllByEnvironmentCrnAndStackType(ENVIRONMENT_CRN, List.of(StackType.WORKLOAD))).thenReturn(List.of(stackDto));
 
-        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, WORKSPACE_ID, request);
+        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, request);
 
         assertEquals(expectedResponse, actual);
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
@@ -344,9 +338,8 @@ class StackUpgradeOperationsTest {
         verify(clusterUpgradeAvailabilityService).checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings());
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponseToReturn, request, true);
         verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
-        verify(stackOperations).listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any());
-        verify(upgradePreconditionService).checkForRunningAttachedClusters(stackViewV4Responses, stack, request.isSkipDataHubValidation());
-        verify(upgradePreconditionService, times(0)).checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
+        verify(upgradePreconditionService).checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation());
+        verify(upgradePreconditionService, times(0)).checkForNonUpgradeableAttachedClusters(List.of(stackDto));
         verifyNoInteractions(clusterDBValidationService);
     }
 

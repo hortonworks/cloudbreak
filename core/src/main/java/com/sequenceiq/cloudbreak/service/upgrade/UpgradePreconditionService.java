@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.BlueprintBasedUpgradeOption.UPGRADE_ENABLED;
-
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -11,13 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 
@@ -32,8 +29,8 @@ public class UpgradePreconditionService {
     @Inject
     private StackStopRestrictionService stackStopRestrictionService;
 
-    public String checkForRunningAttachedClusters(StackViewV4Responses stackViewV4Responses, Stack stack, Boolean skipDataHubValidation) {
-        String notStoppedAttachedClusters = getNotStoppedAttachedClusters(stackViewV4Responses, stack);
+    public String checkForRunningAttachedClusters(List<? extends StackDtoDelegate> datahubsInEnvironment, Boolean skipDataHubValidation) {
+        String notStoppedAttachedClusters = getNotStoppedAttachedClusters(datahubsInEnvironment);
         if (!Boolean.TRUE.equals(skipDataHubValidation) && !notStoppedAttachedClusters.isEmpty()) {
             return String.format("There are attached Data Hub clusters in incorrect state: %s. "
                     + "Please stop those to be able to perform the upgrade.", notStoppedAttachedClusters);
@@ -41,8 +38,8 @@ public class UpgradePreconditionService {
         return "";
     }
 
-    public String checkForNonUpgradeableAttachedClusters(StackViewV4Responses stackViewV4Responses) {
-        String notUpgradeableAttachedClusters = getNotUpgradeableAttachedClusters(stackViewV4Responses);
+    public String checkForNonUpgradeableAttachedClusters(List<? extends StackDtoDelegate> datahubsInEnvironment) {
+        String notUpgradeableAttachedClusters = getNotUpgradeableAttachedClusters(datahubsInEnvironment);
         if (!notUpgradeableAttachedClusters.isEmpty()) {
             return String.format("There are attached Data Hub clusters that are non-upgradeable: %s. "
                     + "Please delete those to be able to perform the upgrade.", notUpgradeableAttachedClusters);
@@ -50,51 +47,42 @@ public class UpgradePreconditionService {
         return "";
     }
 
-    private String getNotUpgradeableAttachedClusters(StackViewV4Responses stackViewV4Responses) {
-        return stackViewV4Responses.getResponses()
+    private String getNotUpgradeableAttachedClusters(List<? extends StackDtoDelegate> datahubsInEnvironment) {
+        return datahubsInEnvironment
                 .stream()
-                .filter(stackView -> UPGRADE_ENABLED != Optional.ofNullable(stackView.getCluster())
-                        .map(ClusterViewV4Response::getBlueprint)
-                        .map(BlueprintV4ViewResponse::isUpgradeable)
+                .filter(stackDto -> BlueprintUpgradeOption.GA != Optional.ofNullable(stackDto.getBlueprint())
+                        .map(Blueprint::getBlueprintUpgradeOption)
                         .orElse(null))
-                .map(StackViewV4Response::getName)
+                .map(StackDtoDelegate::getName)
                 .sorted()
                 .collect(Collectors.joining(","));
     }
 
-    private String getNotStoppedAttachedClusters(StackViewV4Responses stackViewV4Responses, Stack stack) {
-        return stackViewV4Responses.getResponses()
+    private String getNotStoppedAttachedClusters(List<? extends StackDtoDelegate> datahubsInEnvironment) {
+        return datahubsInEnvironment
                 .stream()
-                .filter(stackResponse -> (isStackStatusNotEligible(stackResponse) || isClusterStatusNotEligible(stackResponse)) && isStoppable(stack))
-                .map(StackViewV4Response::getName)
+                .filter(datahub -> (isStackStatusNotEligible(datahub)) && isStoppable(datahub))
+                .map(StackDtoDelegate::getName)
                 .collect(Collectors.joining(","));
     }
 
-    private boolean isStackStatusNotEligible(StackViewV4Response stackResponse) {
-        LOGGER.info("Checking stack status for {}", stackResponse.getName());
-        return !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackResponse.getStatus());
+    private boolean isStackStatusNotEligible(StackDtoDelegate stackDto) {
+        LOGGER.info("Checking stack status for {}", stackDto.getName());
+        return !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackDto.getStatus());
     }
 
-    private boolean isStoppable(Stack stack) {
+    private boolean isStoppable(StackDtoDelegate stack) {
         LOGGER.info("Checking volume for {}", stack.getName());
         return notUsingEphemeralVolume(stack) && notRunsOnSpotInstances(stack);
     }
 
-    public boolean notUsingEphemeralVolume(Stack stack) {
+    public boolean notUsingEphemeralVolume(StackDtoDelegate stack) {
         StopRestrictionReason stopRestrictionReason = stackStopRestrictionService.isInfrastructureStoppable(stack);
         return !StopRestrictionReason.EPHEMERAL_VOLUMES.equals(stopRestrictionReason)
                 && !StopRestrictionReason.EPHEMERAL_VOLUME_CACHING.equals(stopRestrictionReason);
     }
 
-    private boolean notRunsOnSpotInstances(Stack stack) {
+    private boolean notRunsOnSpotInstances(StackDtoDelegate stack) {
         return !spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack);
-    }
-
-    private boolean isClusterStatusNotEligible(StackViewV4Response stackResponse) {
-        LOGGER.info("Checking cluster status for {}", stackResponse.getName());
-        return stackResponse.getCluster() != null
-                && !Status.getAllowedDataHubStatesForSdxUpgrade()
-                        .contains(stackResponse.getCluster()
-                                .getStatus());
     }
 }

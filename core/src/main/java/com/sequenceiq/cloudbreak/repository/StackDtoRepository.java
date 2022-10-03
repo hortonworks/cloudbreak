@@ -152,6 +152,13 @@ public interface StackDtoRepository extends Repository<Stack, Long> {
     )
     Optional<StackViewDelegate> findByNameAndAccountId(@Param("names") String resourceName, @Param("accountId") String accountId);
 
+    @Query(BASE_QUERY
+            + "WHERE s.environmentCrn = :environmentCrn "
+            + "AND s.type in :stackTypes"
+    )
+    List<StackViewDelegate> findAllByEnvironmentCrnAndStackType(@Param("environmentCrn") String environmentCrn,
+            @Param("stackTypes") List<StackType> stackTypes);
+
     @Query("SELECT sc FROM SecurityConfig sc " +
             "LEFT JOIN sc.stack s " +
             "WHERE s.id = :stackId")
