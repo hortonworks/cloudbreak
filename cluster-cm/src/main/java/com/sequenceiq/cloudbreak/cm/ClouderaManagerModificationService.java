@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.cloudera.api.swagger.BatchResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
@@ -264,8 +265,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void upgradeClusterRuntime(Set<ClusterComponentView> components, boolean patchUpgrade, Optional<String> remoteDataContext)
-            throws CloudbreakException {
+    public void upgradeClusterRuntime(Set<ClusterComponentView> components, boolean patchUpgrade, Optional<String> remoteDataContext,
+            boolean rollingUpgradeEnabled) throws CloudbreakException {
         try {
             LOGGER.info("Starting to upgrade cluster runtimes. Patch upgrade: {}", patchUpgrade);
             ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
@@ -276,6 +277,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             startAgents();
             tagHostsWithHostTemplateName();
             checkParcelApiAvailability();
+            disableKnoxAutorestart(rollingUpgradeEnabled);
 
             refreshRemoteDataContextFromDatalakeInCaseOfDatahub(remoteDataContext);
 
@@ -291,7 +293,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             } else {
                 ClouderaManagerProduct cdhProduct = clouderaManagerProductsProvider.getCdhProducts(products);
                 upgradeNonCdhProducts(products, cdhProduct.getName(), parcelResourceApi, true);
-                upgradeCdh(clustersResourceApi, parcelResourceApi, cdhProduct);
+                upgradeCdh(clustersResourceApi, parcelResourceApi, cdhProduct, rollingUpgradeEnabled);
                 startServices();
                 deployConfigAndRefreshCMStaleServices(clustersResourceApi, false);
             }
@@ -411,11 +413,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         }
     }
 
-    private void upgradeCdh(ClustersResourceApi clustersResourceApi, ParcelResourceApi parcelResourceApi, ClouderaManagerProduct cdhService)
-            throws ApiException, CloudbreakException {
+    private void upgradeCdh(ClustersResourceApi clustersResourceApi, ParcelResourceApi parcelResourceApi, ClouderaManagerProduct cdhService,
+            boolean rollingUpgradeEnabled) throws ApiException, CloudbreakException {
         downloadParcels(Collections.singleton(cdhService), parcelResourceApi);
         distributeParcels(Collections.singleton(cdhService), parcelResourceApi);
-        callUpgradeCdhCommand(cdhService, clustersResourceApi);
+        callUpgradeCdhCommand(cdhService, clustersResourceApi, rollingUpgradeEnabled);
     }
 
     private Set<ClouderaManagerProduct> getProducts(Set<ClusterComponentView> components) {
@@ -463,9 +465,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         clouderaManagerParcelManagementService.refreshParcelRepos(clouderaManagerResourceApi, stack, apiClient);
     }
 
-    private void callUpgradeCdhCommand(ClouderaManagerProduct cdhProduct, ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
+    private void callUpgradeCdhCommand(ClouderaManagerProduct cdhProduct, ClustersResourceApi clustersResourceApi, boolean rollingUpgradeEnabled)
+            throws ApiException, CloudbreakException {
         eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_START_UPGRADE);
-        clouderaManagerUpgradeService.callUpgradeCdhCommand(cdhProduct.getVersion(), clustersResourceApi, stack, apiClient);
+        clouderaManagerUpgradeService.callUpgradeCdhCommand(cdhProduct.getVersion(), clustersResourceApi, stack, apiClient, rollingUpgradeEnabled);
     }
 
     private void callPostClouderaRuntimeUpgradeCommandIfCMIsNewerThan751(ClustersResourceApi clustersResourceApi)
@@ -827,7 +830,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
         try {
             LOGGER.debug("Stopping all Cloudera Runtime services");
-
             ExtendedPollingResult extendedPollingResult = clouderaManagerPollingServiceProvider.checkCmStatus(stack, apiClient);
             if (extendedPollingResult.isSuccess()) {
                 stopWithRunningCm(disableKnoxAutorestart, cluster, clustersResourceApi);
@@ -972,15 +974,19 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         String clusterName = cluster.getName();
         LOGGER.debug("Starting all services for cluster.");
         configService.enableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, apiClient, stack.getName());
-        eventService
-                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_STARTING);
+        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_STARTING);
         Collection<ApiService> apiServices = readServices(stack);
-        boolean anyServiceNotStarted = apiServices.stream()
-                .anyMatch(service -> !ApiServiceState.STARTED.equals(service.getServiceState())
+        Set<ApiService> notStartedServices = apiServices.stream()
+                .filter(service -> !ApiServiceState.STARTED.equals(service.getServiceState())
                         && !ApiServiceState.STARTING.equals(service.getServiceState())
-                        && !ApiServiceState.NA.equals(service.getServiceState()));
+                        && !ApiServiceState.NA.equals(service.getServiceState()))
+                .collect(Collectors.toSet());
         ApiCommand apiCommand = null;
-        if (anyServiceNotStarted) {
+        if (!notStartedServices.isEmpty()) {
+            LOGGER.debug("Starting cluster because the following services are not running: {}", notStartedServices.stream()
+                    .map(ApiService::getName)
+                    .filter(StringUtils::hasText)
+                    .collect(Collectors.toSet()));
             apiCommand = apiInstance.startCommand(clusterName);
             ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, apiClient, apiCommand.getId());
             handlePollingResult(pollingResult, "Cluster was terminated while waiting for Cloudera Runtime services to start",
@@ -999,6 +1005,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void startClouderaManager() throws CloudbreakException {
+        LOGGER.debug("Starting Cloudera Manager server on the hosts.");
         ExtendedPollingResult healthCheckResult = clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, apiClient);
         handlePollingResult(healthCheckResult, "Cluster was terminated while waiting for Cloudera Manager to start.",
                 "Cloudera Manager server was not restarted properly.");

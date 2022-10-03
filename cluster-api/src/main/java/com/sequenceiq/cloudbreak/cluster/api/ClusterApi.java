@@ -63,9 +63,9 @@ public interface ClusterApi {
         return clusterModificationService().upscaleCluster(instanceMetaDatasByHostGroup);
     }
 
-    default void upgradeClusterRuntime(Set<ClusterComponentView> components, boolean patchUpgrade, Optional<String> remoteDataContext)
-            throws CloudbreakException {
-        clusterModificationService().upgradeClusterRuntime(components, patchUpgrade, remoteDataContext);
+    default void upgradeClusterRuntime(Set<ClusterComponentView> components, boolean patchUpgrade, Optional<String> remoteDataContext,
+            boolean rollingUpgradeEnabled) throws CloudbreakException {
+        clusterModificationService().upgradeClusterRuntime(components, patchUpgrade, remoteDataContext, rollingUpgradeEnabled);
     }
 
     default void updateServiceConfig(String serviceType, Map<String, String> config) throws CloudbreakException {

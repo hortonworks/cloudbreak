@@ -15,6 +15,8 @@ public abstract class AbstractClusterUpgradeAction<P extends Payload>
 
     protected static final String TARGET_IMAGE = "TARGET_IMAGE";
 
+    protected static final String ROLLING_UPGRADE_ENABLED = "ROLLING_UPGRADE_ENABLED";
+
     protected AbstractClusterUpgradeAction(Class<P> payloadClass) {
         super(payloadClass);
     }

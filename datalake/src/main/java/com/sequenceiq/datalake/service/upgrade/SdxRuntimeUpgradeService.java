@@ -131,7 +131,7 @@ public class SdxRuntimeUpgradeService {
             String clusterName, String accountId, boolean upgradePreparation) {
         UpgradeV4Request request = sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest);
         if (upgradePreparation) {
-            InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(false, false, false, true);
+            InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(false, false, false, true, false);
             request.setInternalUpgradeSettings(internalUpgradeSettings);
         }
         UpgradeV4Response upgradeV4Response = ThreadBasedUserCrnProvider

@@ -44,7 +44,7 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
         addUpgradeValidationToChain(event, flowEventChain);
         flowEventChain.add(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(),
-                event.accepted(), event.getImageId()));
+                event.accepted(), event.getImageId(), event.isRollingUpgradeEnabled()));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 

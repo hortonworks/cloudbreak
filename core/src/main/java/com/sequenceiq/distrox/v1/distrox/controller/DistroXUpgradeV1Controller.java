@@ -114,25 +114,29 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
     @Override
     @InternalOnly
     public DistroXUpgradeV1Response upgradeClusterByNameInternal(@ResourceName String clusterName, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
-            @InitiatorUserCrn String initiatorUserCrn) {
+            @InitiatorUserCrn String initiatorUserCrn, Boolean rollingUpgradeEnabled) {
         validateClusterName(clusterName);
         NameOrCrn nameOrCrn = NameOrCrn.ofName(clusterName);
-        boolean dataHubRuntimeUpgradeEnabled = upgradeAvailabilityService.isRuntimeUpgradeEnabledByUserCrn(initiatorUserCrn);
-        boolean dataHubOsUpgradeEntitled = upgradeAvailabilityService.isOsUpgradeEnabledByUserCrn(initiatorUserCrn);
-        return upgradeCluster(clusterName, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(true, dataHubRuntimeUpgradeEnabled,
-                dataHubOsUpgradeEntitled), false);
+        InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(true,
+                upgradeAvailabilityService.isRuntimeUpgradeEnabledByUserCrn(initiatorUserCrn),
+                upgradeAvailabilityService.isOsUpgradeEnabledByUserCrn(initiatorUserCrn),
+                Boolean.TRUE.equals(rollingUpgradeEnabled));
+        UpgradeV4Request request = upgradeConverter.convert(distroxUpgradeRequest, internalUpgradeSettings);
+        return upgradeCluster(clusterName, request, nameOrCrn, false);
     }
 
     @Override
     @InternalOnly
     public DistroXUpgradeV1Response upgradeClusterByCrnInternal(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB)
             @ResourceCrn String clusterCrn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
-            @InitiatorUserCrn String initiatorUserCrn) {
+            @InitiatorUserCrn String initiatorUserCrn, Boolean rollingUpgradeEnabled) {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(clusterCrn);
-        boolean dataHubRuntimeUpgradeEnabled = upgradeAvailabilityService.isRuntimeUpgradeEnabledByUserCrn(initiatorUserCrn);
-        boolean dataHubOsUpgradeEntitled = upgradeAvailabilityService.isOsUpgradeEnabledByUserCrn(initiatorUserCrn);
-        return upgradeCluster(clusterCrn, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(true, dataHubRuntimeUpgradeEnabled,
-                dataHubOsUpgradeEntitled), false);
+        InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(true,
+                upgradeAvailabilityService.isRuntimeUpgradeEnabledByUserCrn(initiatorUserCrn),
+                upgradeAvailabilityService.isOsUpgradeEnabledByUserCrn(initiatorUserCrn),
+                Boolean.TRUE.equals(rollingUpgradeEnabled));
+        UpgradeV4Request request = upgradeConverter.convert(distroxUpgradeRequest, internalUpgradeSettings);
+        return upgradeCluster(clusterCrn, request, nameOrCrn, false);
     }
 
     @Override
@@ -147,14 +151,13 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         boolean dataHubRuntimeUpgradeEnabled = upgradeAvailabilityService.isRuntimeUpgradeEnabledByAccountId(accountId);
         boolean dataHubOsUpgradeEntitled = upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(accountId);
-        return upgradeCluster(clusterNameOrCrn, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(false, dataHubRuntimeUpgradeEnabled,
-                dataHubOsUpgradeEntitled), upgradePreparation);
+        UpgradeV4Request request = upgradeConverter.convert(distroxUpgradeRequest, new InternalUpgradeSettings(false, dataHubRuntimeUpgradeEnabled,
+                dataHubOsUpgradeEntitled));
+        return upgradeCluster(clusterNameOrCrn, request, nameOrCrn, upgradePreparation);
     }
 
-    private DistroXUpgradeV1Response upgradeCluster(String clusterNameOrCrn, DistroXUpgradeV1Request distroxUpgradeRequest, NameOrCrn nameOrCrn,
-            InternalUpgradeSettings internalUpgradeSettings, boolean upgradePreparation) {
+    private DistroXUpgradeV1Response upgradeCluster(String clusterNameOrCrn, UpgradeV4Request request, NameOrCrn nameOrCrn, boolean upgradePreparation) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        UpgradeV4Request request = upgradeConverter.convert(distroxUpgradeRequest, internalUpgradeSettings);
         Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
         if (request.isDryRun() || request.isShowAvailableImagesSet()) {
             LOGGER.info("Checking for upgrade for cluster [{}] with request: {}", clusterNameOrCrn, request);

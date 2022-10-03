@@ -72,7 +72,7 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
             Optional<String> remoteDataContext = getRemoteDataContext(stack);
             ClusterApi connector = clusterApiConnectors.getConnector(stackDto);
             Set<ClusterComponentView> components = parcelService.getParcelComponentsByBlueprint(stackDto);
-            connector.upgradeClusterRuntime(components, request.isPatchUpgrade(), remoteDataContext);
+            connector.upgradeClusterRuntime(components, request.isPatchUpgrade(), remoteDataContext, request.isRollingUpgradeEnabled());
             ParcelOperationStatus parcelOperationStatus = parcelService.removeUnusedParcelComponents(stackDto, components);
             if (parcelOperationStatus.getFailed().isEmpty()) {
                 result = new ClusterUpgradeSuccess(request.getResourceId());
