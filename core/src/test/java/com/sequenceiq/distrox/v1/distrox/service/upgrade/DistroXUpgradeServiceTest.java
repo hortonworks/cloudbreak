@@ -62,6 +62,8 @@ class DistroXUpgradeServiceTest {
 
     private static final String ACCOUNT_ID = "9d74eee4-1cad-45d7-b645-7ccf9edbb73d";
 
+    private static final boolean ROLLING_UPGRADE_ENABLED = true;
+
     @Mock
     private DistroXUpgradeAvailabilityService upgradeAvailabilityService;
 
@@ -148,7 +150,7 @@ class DistroXUpgradeServiceTest {
 
     @Test
     public void testTriggerFlowWithPaywallCheck() {
-        UpgradeV4Request request = new UpgradeV4Request();
+        UpgradeV4Request request = createRequest(false, ROLLING_UPGRADE_ENABLED);
         UpgradeV4Response response = new UpgradeV4Response();
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
@@ -166,8 +168,8 @@ class DistroXUpgradeServiceTest {
         when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN)).thenReturn("variant");
         when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString()))
-                .thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(),
+                eq(ROLLING_UPGRADE_ENABLED))).thenReturn(flowIdentifier);
 
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false);
 
@@ -181,7 +183,7 @@ class DistroXUpgradeServiceTest {
 
     @Test
     public void testTriggerFlowWithoutPaywallCheck() {
-        UpgradeV4Request request = new UpgradeV4Request();
+        UpgradeV4Request request = createRequest(false, false);
         UpgradeV4Response response = new UpgradeV4Response();
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
@@ -198,7 +200,7 @@ class DistroXUpgradeServiceTest {
         when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
         when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN)).thenReturn("variant");
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString()))
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(), eq(false)))
                 .thenReturn(flowIdentifier);
 
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false);
@@ -214,7 +216,7 @@ class DistroXUpgradeServiceTest {
     @Test
     public void testTriggerFlowWithTurnOffReplaceVmsParam() {
         // GIVEN
-        UpgradeV4Request request = new UpgradeV4Request();
+        UpgradeV4Request request = createRequest(false, ROLLING_UPGRADE_ENABLED);
         UpgradeV4Response response = new UpgradeV4Response();
         response.setReplaceVms(true);
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
@@ -232,19 +234,19 @@ class DistroXUpgradeServiceTest {
         when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
         when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN)).thenReturn("variant");
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString()))
-                .thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(),
+                eq(ROLLING_UPGRADE_ENABLED))).thenReturn(flowIdentifier);
         // WHEN
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false);
         // THEN
-        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS, "variant");
+        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS, "variant", ROLLING_UPGRADE_ENABLED);
         assertFalse(result.isReplaceVms());
     }
 
     @Test
     public void testTriggerFlowWithoutTurnOffReplaceVmsParam() {
         // GIVEN
-        UpgradeV4Request request = createRequest(true);
+        UpgradeV4Request request = createRequest(true, false);
         UpgradeV4Response response = new UpgradeV4Response();
         response.setReplaceVms(true);
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
@@ -262,17 +264,18 @@ class DistroXUpgradeServiceTest {
         when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN)).thenReturn("variant");
         when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(true);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), anyBoolean(), anyString())).thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), anyBoolean(), anyString(), eq(false)))
+                .thenReturn(flowIdentifier);
         // WHEN
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false);
         // THEN
-        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, true, true, "variant");
+        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, true, true, "variant", false);
         assertTrue(result.isReplaceVms());
     }
 
     @Test
     public void testTriggerDistroXUpgradeShouldThrowBadRequestExceptionWhenTheOsUpgradeIsDisabledByEntitlement() {
-        UpgradeV4Request request = createRequest(false);
+        UpgradeV4Request request = createRequest(false, false);
         request.setLockComponents(true);
         UpgradeV4Response response = new UpgradeV4Response();
         response.setReplaceVms(true);
@@ -290,7 +293,7 @@ class DistroXUpgradeServiceTest {
     @Test
     public void testTriggerFlowWhenReplaceVmsParamIsFalse() {
         // GIVEN
-        UpgradeV4Request request = new UpgradeV4Request();
+        UpgradeV4Request request = createRequest(false, ROLLING_UPGRADE_ENABLED);
         UpgradeV4Response response = new UpgradeV4Response();
         response.setReplaceVms(false);
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
@@ -308,18 +311,18 @@ class DistroXUpgradeServiceTest {
         when(stackUpgradeService.calculateUpgradeVariant(stackView, USER_CRN)).thenReturn("variant");
         when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString()))
-                .thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString(),
+                eq(ROLLING_UPGRADE_ENABLED))).thenReturn(flowIdentifier);
         // WHEN
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false);
         // THEN
-        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS, "variant");
+        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS, "variant", ROLLING_UPGRADE_ENABLED);
         assertFalse(result.isReplaceVms());
     }
 
-    private UpgradeV4Request createRequest(boolean osUpgradeEnabled) {
+    private UpgradeV4Request createRequest(boolean osUpgradeEnabled, boolean rollingUpgradeEnabled) {
         UpgradeV4Request request = new UpgradeV4Request();
-        request.setInternalUpgradeSettings(new InternalUpgradeSettings(true, true, osUpgradeEnabled));
+        request.setInternalUpgradeSettings(new InternalUpgradeSettings(true, true, osUpgradeEnabled, rollingUpgradeEnabled));
         return request;
     }
 }

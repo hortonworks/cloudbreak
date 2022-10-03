@@ -17,6 +17,8 @@ public class DistroXUpgradeTriggerEvent extends StackEvent {
 
     private final String triggeredStackVariant;
 
+    private final boolean rollingUpgradeEnabled;
+
     @JsonCreator
     public DistroXUpgradeTriggerEvent(
             @JsonProperty("selector") String selector,
@@ -24,12 +26,14 @@ public class DistroXUpgradeTriggerEvent extends StackEvent {
             @JsonProperty("imageChangeDto") ImageChangeDto imageChangeDto,
             @JsonProperty("replaceVms") boolean replaceVms,
             @JsonProperty("lockComponents") boolean lockComponents,
-            @JsonProperty("triggeredStackVariant") String triggeredStackVariant) {
+            @JsonProperty("triggeredStackVariant") String triggeredStackVariant,
+            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled) {
         super(selector, stackId);
         this.imageChangeDto = imageChangeDto;
         this.replaceVms = replaceVms;
         this.lockComponents = lockComponents;
         this.triggeredStackVariant = triggeredStackVariant;
+        this.rollingUpgradeEnabled = rollingUpgradeEnabled;
     }
 
     public ImageChangeDto getImageChangeDto() {
@@ -48,12 +52,17 @@ public class DistroXUpgradeTriggerEvent extends StackEvent {
         return triggeredStackVariant;
     }
 
+    public boolean isRollingUpgradeEnabled() {
+        return rollingUpgradeEnabled;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", DistroXUpgradeTriggerEvent.class.getSimpleName() + "[", "]")
                 .add("imageChangeDto=" + imageChangeDto)
                 .add("replaceVms=" + replaceVms)
                 .add("lockComponents=" + lockComponents)
+                .add("rollingUpgradeEnabled=" + rollingUpgradeEnabled)
                 .toString();
     }
 }

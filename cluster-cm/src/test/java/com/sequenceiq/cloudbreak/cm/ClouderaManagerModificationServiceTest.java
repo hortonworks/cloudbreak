@@ -693,7 +693,7 @@ class ClouderaManagerModificationServiceTest {
                 .collect(Collectors.toSet());
 
         NotFoundException exception = assertThrows(NotFoundException.class, () -> underTest.upgradeClusterRuntime(clusterComponentsNoCDH, false,
-                Optional.empty()));
+                Optional.empty(), false));
         Assertions.assertEquals("Runtime component not found!", exception.getMessage());
     }
 
@@ -738,7 +738,7 @@ class ClouderaManagerModificationServiceTest {
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
         when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_4_3.getVersion());
 
-        underTest.upgradeClusterRuntime(clusterComponentViews, true, Optional.empty());
+        underTest.upgradeClusterRuntime(clusterComponentViews, true, Optional.empty(), false);
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, apiClientMock);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, apiClientMock);
@@ -824,7 +824,7 @@ class ClouderaManagerModificationServiceTest {
 
         when(clouderaManagerApiClientProvider.getV45Client(any(), any(), any(), any())).thenReturn(apiClientMock);
 
-        underTest.upgradeClusterRuntime(clusterComponentViews, true, Optional.empty());
+        underTest.upgradeClusterRuntime(clusterComponentViews, true, Optional.empty(), false);
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, apiClientMock);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, apiClientMock);
@@ -909,7 +909,7 @@ class ClouderaManagerModificationServiceTest {
 
         when(clouderaManagerApiClientProvider.getV45Client(any(), any(), any(), any())).thenReturn(apiClientMock);
 
-        underTest.upgradeClusterRuntime(clusterComponentViews, true, Optional.empty());
+        underTest.upgradeClusterRuntime(clusterComponentViews, true, Optional.empty(), false);
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, apiClientMock);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, apiClientMock);
@@ -986,7 +986,7 @@ class ClouderaManagerModificationServiceTest {
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
         when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_5_1.getVersion());
 
-        underTest.upgradeClusterRuntime(clusterComponentViews, false, Optional.empty());
+        underTest.upgradeClusterRuntime(clusterComponentViews, false, Optional.empty(), true);
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmStartup(stack, apiClientMock);
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(stack, apiClientMock);
@@ -995,7 +995,7 @@ class ClouderaManagerModificationServiceTest {
         verify(clouderaManagerParcelManagementService, times(1)).refreshParcelRepos(clouderaManagerResourceApi, stack, apiClientMock);
         verify(clouderaManagerParcelManagementService, times(2)).downloadParcels(any(), eq(parcelResourceApi), eq(stack), eq(apiClientMock));
         verify(clouderaManagerParcelManagementService, times(2)).distributeParcels(any(), eq(parcelResourceApi), eq(stack), eq(apiClientMock));
-        verify(clouderaManagerUpgradeService, times(1)).callUpgradeCdhCommand(TestUtil.CDH_VERSION, clustersResourceApi, stack, apiClientMock);
+        verify(clouderaManagerUpgradeService, times(1)).callUpgradeCdhCommand(TestUtil.CDH_VERSION, clustersResourceApi, stack, apiClientMock, true);
         verify(clouderaManagerParcelManagementService).activateParcels(any(), eq(parcelResourceApi), eq(stack), eq(apiClientMock));
         verify(clouderaManagerCommonCommandService, times(1)).getDeployClientConfigCommandId(any(), any(), any());
         verify(clouderaManagerCommonCommandService, times(1)).getApiCommand(any(), any(), any(), any());
@@ -1010,7 +1010,7 @@ class ClouderaManagerModificationServiceTest {
         inOrder.verify(clouderaManagerParcelManagementService).downloadParcels(any(), eq(parcelResourceApi), eq(stack), eq(apiClientMock));
         inOrder.verify(clouderaManagerParcelManagementService).distributeParcels(any(), eq(parcelResourceApi), eq(stack), eq(apiClientMock));
         inOrder.verify(clouderaManagerParcelManagementService).activateParcels(any(), eq(parcelResourceApi), eq(stack), eq(apiClientMock));
-        inOrder.verify(clouderaManagerUpgradeService).callUpgradeCdhCommand(TestUtil.CDH_VERSION, clustersResourceApi, stack, apiClientMock);
+        inOrder.verify(clouderaManagerUpgradeService).callUpgradeCdhCommand(TestUtil.CDH_VERSION, clustersResourceApi, stack, apiClientMock, true);
         inOrder.verify(servicesResourceApi).readServices(stack.getName(), "SUMMARY");
         inOrder.verify(clouderaManagerCommonCommandService).getDeployClientConfigCommandId(stack, clustersResourceApi, apiCommandList.getItems());
         inOrder.verify(clouderaManagerCommonCommandService).getApiCommand(any(), any(), any(), any());

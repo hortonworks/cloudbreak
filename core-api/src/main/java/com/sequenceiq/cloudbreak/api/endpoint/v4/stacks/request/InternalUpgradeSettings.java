@@ -17,10 +17,22 @@ public class InternalUpgradeSettings {
 
     private final boolean upgradePreparation;
 
+    private final boolean rollingUpgradeEnabled;
+
     public InternalUpgradeSettings(boolean skipValidations, boolean dataHubRuntimeUpgradeEntitled, boolean dataHubOsUpgradeEntitled) {
         this.skipValidations = skipValidations;
         this.dataHubRuntimeUpgradeEntitled = dataHubRuntimeUpgradeEntitled;
         this.dataHubOsUpgradeEntitled = dataHubOsUpgradeEntitled;
+        this.rollingUpgradeEnabled = false;
+        this.upgradePreparation = false;
+    }
+
+    public InternalUpgradeSettings(boolean skipValidations, boolean dataHubRuntimeUpgradeEntitled, boolean dataHubOsUpgradeEntitled,
+            boolean rollingUpgradeEnabled) {
+        this.skipValidations = skipValidations;
+        this.dataHubRuntimeUpgradeEntitled = dataHubRuntimeUpgradeEntitled;
+        this.dataHubOsUpgradeEntitled = dataHubOsUpgradeEntitled;
+        this.rollingUpgradeEnabled = rollingUpgradeEnabled;
         upgradePreparation = false;
     }
 
@@ -28,11 +40,13 @@ public class InternalUpgradeSettings {
     public InternalUpgradeSettings(@JsonProperty("skipValidations") boolean skipValidations,
             @JsonProperty("dataHubRuntimeUpgradeEntitled") boolean dataHubRuntimeUpgradeEntitled,
             @JsonProperty("dataHubOsUpgradeEntitled") boolean dataHubOsUpgradeEntitled,
-            @JsonProperty("upgradePreparation") boolean upgradePreparation) {
+            @JsonProperty("upgradePreparation") boolean upgradePreparation,
+            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled) {
         this.skipValidations = skipValidations;
         this.dataHubRuntimeUpgradeEntitled = dataHubRuntimeUpgradeEntitled;
         this.dataHubOsUpgradeEntitled = dataHubOsUpgradeEntitled;
         this.upgradePreparation = upgradePreparation;
+        this.rollingUpgradeEnabled = rollingUpgradeEnabled;
     }
 
     public boolean isSkipValidations() {
@@ -49,6 +63,10 @@ public class InternalUpgradeSettings {
 
     public boolean isUpgradePreparation() {
         return upgradePreparation;
+    }
+
+    public boolean isRollingUpgradeEnabled() {
+        return rollingUpgradeEnabled;
     }
 
     @Override

@@ -68,6 +68,7 @@ public class ClusterUpgradeActions {
                     UpgradeImageInfo images = imageComponentUpdaterService.updateComponentsForUpgrade(payload.getImageId(), payload.getResourceId());
                     variables.put(CURRENT_IMAGE, images.getCurrentStatedImage());
                     variables.put(TARGET_IMAGE, images.getTargetStatedImage());
+                    variables.put(ROLLING_UPGRADE_ENABLED, payload.isRollingUpgradeEnabled());
                     clusterUpgradeTargetImageService.saveImage(context.getStackId(), images.getTargetStatedImage());
                     clusterUpgradeService.initUpgradeCluster(context.getStackId(), getTargetImage(variables));
                     Selectable event = new ClusterUpgradeInitRequest(context.getStackId(), isPatchUpgrade(images.getCurrentStatedImage().getImage(),
@@ -110,9 +111,9 @@ public class ClusterUpgradeActions {
                 StatedImage targetStatedImage = getTargetImage(variables);
                 Image targetImage = targetStatedImage.getImage();
                 imageComponentUpdaterService.updateComponentsForUpgrade(targetStatedImage, payload.getResourceId());
-                clusterUpgradeService.upgradeClusterManager(context.getStackId());
+                boolean rollingUpgradeEnabled = (boolean) variables.get(ROLLING_UPGRADE_ENABLED);
                 Selectable event = new ClusterManagerUpgradeRequest(context.getStackId(),
-                        !clusterUpgradeService.isClusterRuntimeUpgradeNeeded(currentImage, targetImage));
+                        !clusterUpgradeService.isClusterRuntimeUpgradeNeeded(currentImage, targetImage), rollingUpgradeEnabled);
                 sendEvent(context, event.selector(), event);
             }
 
@@ -142,7 +143,8 @@ public class ClusterUpgradeActions {
                 boolean clusterRuntimeUpgradeNeeded = clusterUpgradeService.upgradeCluster(context.getStackId(), currentImage, targetImage);
                 Selectable event;
                 if (clusterRuntimeUpgradeNeeded) {
-                    event = new ClusterUpgradeRequest(context.getStackId(), isPatchUpgrade(currentImage, targetImage));
+                    boolean rollingUpgradeEnabled = (boolean) variables.get(ROLLING_UPGRADE_ENABLED);
+                    event = new ClusterUpgradeRequest(context.getStackId(), isPatchUpgrade(currentImage, targetImage), rollingUpgradeEnabled);
                 } else {
                     event = new ClusterUpgradeSuccess(context.getStackId());
                 }

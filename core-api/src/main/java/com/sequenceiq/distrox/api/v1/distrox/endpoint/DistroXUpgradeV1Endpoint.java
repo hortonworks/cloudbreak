@@ -76,7 +76,7 @@ public interface DistroXUpgradeV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Upgrades the distrox cluster internal", nickname = "upgradeDistroxClusterInternal")
     DistroXUpgradeV1Response upgradeClusterByNameInternal(@PathParam("name") String name, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn, @QueryParam("rollingUpgradeEnabled") Boolean rollingUpgradeEnabled);
 
     @POST
     @Path("internal/crn/{crn}/upgrade")
@@ -84,7 +84,7 @@ public interface DistroXUpgradeV1Endpoint {
     @ApiOperation(value = "Upgrades the distrox cluster internal", nickname = "upgradeDistroxClusterByCrnInternal")
     DistroXUpgradeV1Response upgradeClusterByCrnInternal(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn, @QueryParam("rollingUpgradeEnabled") Boolean rollingUpgradeEnabled);
 
     @PUT
     @Path("internal/crn/{crn}/upgrade_ccm")

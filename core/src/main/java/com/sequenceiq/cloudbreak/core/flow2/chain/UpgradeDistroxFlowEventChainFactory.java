@@ -60,7 +60,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         flowEventChain.add(createClusterUpgradePreparationTriggerEvent(event));
         flowEventChain.add(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
-                event.getImageChangeDto().getImageId()));
+                event.getImageChangeDto().getImageId(), event.isRollingUpgradeEnabled()));
         flowEventChain.add(new StackImageUpdateTriggerEvent(FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT, event.getImageChangeDto()));
         if (event.isReplaceVms()) {
             Map<String, List<String>> nodeMap = getReplaceableInstancesByHostgroup(event);

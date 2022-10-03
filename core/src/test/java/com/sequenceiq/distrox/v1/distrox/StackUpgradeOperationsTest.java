@@ -53,8 +53,6 @@ class StackUpgradeOperationsTest {
 
     private static final long STACK_ID = 1L;
 
-    private static final long WORKSPACE_ID = 2L;
-
     private static final String ACCOUNT_ID = "account-id";
 
     private static final String STACK_NAME = "stack-name";
@@ -244,7 +242,7 @@ class StackUpgradeOperationsTest {
     void testCheckForClusterUpgradeShouldReturnUpgradeCandidatesWhenTheUpgradeIsRuntimeUpgradeAndTheStackTypeIsDataLakeAndReplaceVmEnabledAndPrepare() {
         Stack stack = createStack(StackType.DATALAKE);
         UpgradeV4Request request = createUpgradeRequest(null, null);
-        request.setInternalUpgradeSettings(new InternalUpgradeSettings(false, false, false, true));
+        request.setInternalUpgradeSettings(new InternalUpgradeSettings(false, false, false, true, false));
         UpgradeV4Response upgradeResponse = createUpgradeResponse();
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
         when(upgradeService.isOsUpgrade(request)).thenReturn(false);

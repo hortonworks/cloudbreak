@@ -15,6 +15,7 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCdhUpgradeArgs;
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiRollingUpgradeClusterArgs;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
@@ -43,11 +44,11 @@ class ClouderaManagerUpgradeService {
     @Inject
     private ClouderaManagerCommandsService clouderaManagerCommandsService;
 
-    void callUpgradeCdhCommand(String stackProductVersion, ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, ApiClient apiClient)
-            throws ApiException, CloudbreakException {
+    void callUpgradeCdhCommand(String stackProductVersion, ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, ApiClient apiClient,
+            boolean rollingUpgradeEnabled) throws ApiException, CloudbreakException {
         LOGGER.info("Upgrading the CDP Runtime...");
         try {
-            BigDecimal upgradeCommandId = determineUpgradeLogic(stackProductVersion, clustersResourceApi, stack, apiClient, false);
+            BigDecimal upgradeCommandId = determineUpgradeLogic(stackProductVersion, clustersResourceApi, stack, apiClient, false, rollingUpgradeEnabled);
             ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, upgradeCommandId);
             pollingResultErrorHandler.handlePollingResult(pollingResult,
                     "Cluster was terminated while waiting for CDP Runtime to be upgraded",
@@ -66,7 +67,7 @@ class ClouderaManagerUpgradeService {
     void callPostRuntimeUpgradeCommand(ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, ApiClient apiClient)
             throws ApiException, CloudbreakException {
         LOGGER.info("Call post runtime upgrade command after maintenance upgrade");
-        BigDecimal upgradeCommandId = determineUpgradeLogic("", clustersResourceApi, stack, apiClient, true);
+        BigDecimal upgradeCommandId = determineUpgradeLogic("", clustersResourceApi, stack, apiClient, true, false);
         ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, upgradeCommandId);
         pollingResultErrorHandler.handlePollingResult(pollingResult.getPollingResult(), "Cluster was terminated while waiting for CDP Runtime to be upgraded",
                 "Timeout during CDP Runtime upgrade.");
@@ -74,7 +75,7 @@ class ClouderaManagerUpgradeService {
     }
 
     private BigDecimal determineUpgradeLogic(String stackProductVersion, ClustersResourceApi clustersResourceApi, StackDtoDelegate stack,
-            ApiClient apiClient, boolean postRuntimeUpgrade) throws ApiException {
+            ApiClient apiClient, boolean postRuntimeUpgrade, boolean rollingUpgradeEnabled) throws ApiException {
         String command = postRuntimeUpgrade ? POST_RUNTIME_UPGRADE_COMMAND : RUNTIME_UPGRADE_COMMAND;
         LOGGER.debug("Upgrade command to execute: {}", command);
         Optional<BigDecimal> optionalUpgradeCommand = findUpgradeApiCommandId(clustersResourceApi, stack, command);
@@ -95,32 +96,37 @@ class ClouderaManagerUpgradeService {
                     LOGGER.debug("Last upgrade command ({}) is not active, it was {} successful and {} retryable, submitting it now", upgradeCommandId,
                             commandSuccess ? "" : "not",
                             commandCanRetry ? "" : "not");
-                    upgradeCommandId = executeUpgrade(stackProductVersion, clustersResourceApi, stack, postRuntimeUpgrade);
+                    upgradeCommandId = executeUpgrade(stackProductVersion, clustersResourceApi, stack, postRuntimeUpgrade, rollingUpgradeEnabled);
                 }
             }
         } else {
             LOGGER.debug("There is no upgrade command submitted yet, submitting it now");
-            upgradeCommandId = executeUpgrade(stackProductVersion, clustersResourceApi, stack, postRuntimeUpgrade);
+            upgradeCommandId = executeUpgrade(stackProductVersion, clustersResourceApi, stack, postRuntimeUpgrade, rollingUpgradeEnabled);
         }
         return upgradeCommandId;
     }
 
     private BigDecimal executeUpgrade(String stackProductVersion, ClustersResourceApi clustersResourceApi, StackDtoDelegate stack,
-            boolean postRuntimeUpgrade) throws ApiException {
+            boolean postRuntimeUpgrade, boolean rollingUpgradeEnabled) throws ApiException {
         BigDecimal upgradeCommandId;
         if (postRuntimeUpgrade) {
             LOGGER.debug("Calling post upgrade with command {}", POST_RUNTIME_UPGRADE_COMMAND);
             upgradeCommandId = callPostUpgrade(clustersResourceApi, stack);
         } else {
             LOGGER.debug("Calling upgrade with command {}", RUNTIME_UPGRADE_COMMAND);
-            upgradeCommandId = callUpgrade(stackProductVersion, clustersResourceApi, stack);
+            upgradeCommandId = callUpgrade(stackProductVersion, clustersResourceApi, stack, rollingUpgradeEnabled);
         }
         return upgradeCommandId;
     }
 
-    private BigDecimal callUpgrade(String stackProductVersion, ClustersResourceApi clustersResourceApi, StackDtoDelegate stack) throws ApiException {
+    private BigDecimal callUpgrade(String stackProductVersion, ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, boolean rollingUpgradeEnabled)
+            throws ApiException {
         ApiCdhUpgradeArgs upgradeArgs = new ApiCdhUpgradeArgs();
         upgradeArgs.setCdhParcelVersion(stackProductVersion);
+        if (rollingUpgradeEnabled) {
+            LOGGER.debug("Rolling upgrade is enabled for CDH upgrade command.");
+            upgradeArgs.setRollingRestartArgs(new ApiRollingUpgradeClusterArgs());
+        }
         return clustersResourceApi.upgradeCdhCommand(stack.getName(), upgradeArgs).getId();
     }
 
