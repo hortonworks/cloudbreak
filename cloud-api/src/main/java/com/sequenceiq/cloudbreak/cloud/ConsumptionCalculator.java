@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud;
 
+import java.util.Set;
+
 import javax.validation.ValidationException;
 import com.cloudera.thunderhead.service.metering.events.MeteringEventsProto;
 import com.sequenceiq.cloudbreak.cloud.model.CloudConsumption;
@@ -12,7 +14,7 @@ public interface ConsumptionCalculator {
 
     void validate(CloudConsumption cloudConsumption) throws ValidationException;
 
-    StorageSizeResponse calculate(StorageSizeRequest request);
+    Set<StorageSizeResponse> calculate(StorageSizeRequest request);
 
     String getObjectId(String objectId);
 

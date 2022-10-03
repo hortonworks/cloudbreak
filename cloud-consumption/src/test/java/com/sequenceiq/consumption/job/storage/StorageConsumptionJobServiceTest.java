@@ -108,7 +108,8 @@ public class StorageConsumptionJobServiceTest {
         when(consumptionService.findAllStorageConsumptionForEnvCrnAndBucketName(
                 consumptionToSchedule.getEnvironmentCrn(),
                 consumptionToSchedule.getStorageLocation(),
-                consumptionToSchedule.getConsumptionType().getStorageService()))
+                consumptionToSchedule.getConsumptionType().getStorageService(),
+                consumptionToSchedule.getConsumptionType()))
                 .thenReturn(List.of(consumptionToSchedule));
         mockSchedulingById(1L);
 
@@ -126,7 +127,8 @@ public class StorageConsumptionJobServiceTest {
         when(consumptionService.findAllStorageConsumptionForEnvCrnAndBucketName(
                 consumptionToSchedule.getEnvironmentCrn(),
                 consumptionToSchedule.getStorageLocation(),
-                consumptionToSchedule.getConsumptionType().getStorageService()))
+                consumptionToSchedule.getConsumptionType().getStorageService(),
+                consumptionToSchedule.getConsumptionType()))
                 .thenReturn(List.of(consumptionToSchedule, consumptionOther));
         doReturn(null).when(scheduler).getJobDetail(argThat((JobKey jobkey) -> "1".equals(jobkey.getName())));
         doReturn(mock(JobDetail.class)).when(scheduler).getJobDetail(argThat((JobKey jobkey) -> "2".equals(jobkey.getName())));
@@ -155,7 +157,8 @@ public class StorageConsumptionJobServiceTest {
         when(consumptionService.findAllStorageConsumptionForEnvCrnAndBucketName(
                 consumptionToUnSchedule.getEnvironmentCrn(),
                 consumptionToUnSchedule.getStorageLocation(),
-                consumptionToUnSchedule.getConsumptionType().getStorageService()))
+                consumptionToUnSchedule.getConsumptionType().getStorageService(),
+                consumptionToUnSchedule.getConsumptionType()))
                 .thenReturn(List.of(consumptionToUnSchedule));
 
         underTest.unschedule(consumptionToUnSchedule);
@@ -174,7 +177,8 @@ public class StorageConsumptionJobServiceTest {
         when(consumptionService.findAllStorageConsumptionForEnvCrnAndBucketName(
                 consumptionToUnSchedule.getEnvironmentCrn(),
                 consumptionToUnSchedule.getStorageLocation(),
-                consumptionToUnSchedule.getConsumptionType().getStorageService()))
+                consumptionToUnSchedule.getConsumptionType().getStorageService(),
+                consumptionToUnSchedule.getConsumptionType()))
                 .thenReturn(List.of(consumptionToUnSchedule, consumptionOther));
         mockSchedulingById(2L);
 

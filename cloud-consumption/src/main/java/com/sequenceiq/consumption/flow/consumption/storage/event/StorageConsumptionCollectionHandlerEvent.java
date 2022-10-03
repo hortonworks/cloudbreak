@@ -1,5 +1,7 @@
 package com.sequenceiq.consumption.flow.consumption.storage.event;
 
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
@@ -13,13 +15,13 @@ public class StorageConsumptionCollectionHandlerEvent extends StorageConsumption
 
     private final ConsumptionContext context;
 
-    private final StorageConsumptionResult storageConsumptionResult;
+    private final Set<StorageConsumptionResult> storageConsumptionResults;
 
     public StorageConsumptionCollectionHandlerEvent(String selector, Long resourceId, String resourceCrn, ConsumptionContext context,
-            StorageConsumptionResult storageConsumptionResult) {
+            Set<StorageConsumptionResult> storageConsumptionResults) {
         super(selector, resourceId, resourceCrn);
         this.context = context;
-        this.storageConsumptionResult = storageConsumptionResult;
+        this.storageConsumptionResults = storageConsumptionResults;
     }
 
     @JsonCreator
@@ -28,27 +30,27 @@ public class StorageConsumptionCollectionHandlerEvent extends StorageConsumption
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("context") ConsumptionContext context,
-            @JsonProperty("storageConsumptionResult") StorageConsumptionResult storageConsumptionResult,
+            @JsonProperty("storageConsumptionResults") Set<StorageConsumptionResult> storageConsumptionResults,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
 
         super(selector, resourceId, resourceCrn, accepted);
         this.context = context;
-        this.storageConsumptionResult = storageConsumptionResult;
+        this.storageConsumptionResults = storageConsumptionResults;
     }
 
     public ConsumptionContext getContext() {
         return context;
     }
 
-    public StorageConsumptionResult getStorageConsumptionResult() {
-        return storageConsumptionResult;
+    public Set<StorageConsumptionResult> getStorageConsumptionResults() {
+        return storageConsumptionResults;
     }
 
     @Override
     public String toString() {
         return "StorageConsumptionCollectionHandlerEvent{" +
                 "context=" + context +
-                ", storageConsumptionResult=" + storageConsumptionResult +
+                ", storageConsumptionResults=" + storageConsumptionResults +
                 "} " + super.toString();
     }
 }

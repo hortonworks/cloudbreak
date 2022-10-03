@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.consumption;
 
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.validation.ValidationException;
@@ -23,11 +24,11 @@ import com.sequenceiq.cloudbreak.common.mappable.StorageType;
 import com.sequenceiq.common.model.FileSystemType;
 
 @Service
-public class AwsEFSConsumptionCalculator implements ConsumptionCalculator {
+public class AwsEfsConsumptionCalculator implements ConsumptionCalculator {
 
     private static final StorageType EFS = StorageType.EFS;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsEFSConsumptionCalculator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsEfsConsumptionCalculator.class);
 
     private static final long NO_BYTE_IN_MB = 1000L * 1000L;
 
@@ -45,22 +46,23 @@ public class AwsEFSConsumptionCalculator implements ConsumptionCalculator {
         }
     }
 
-    @Override
-    public StorageSizeResponse calculate(StorageSizeRequest request) {
+    public Set<StorageSizeResponse> calculate(StorageSizeRequest request) {
         DescribeFileSystemsResult result = awsEfsCommonService.getEfsSize(
                 request.getCredential(),
                 request.getRegion().value(),
                 request.getStartTime(),
                 request.getEndTime(),
-                request.getObjectStoragePath());
+                request.getFirstCloudObjectId());
         Optional<FileSystemDescription> latestFileSystemDescription = result.getFileSystems().stream().findFirst();
         if (latestFileSystemDescription.isPresent()) {
             FileSystemDescription fileSystemDescription = latestFileSystemDescription.get();
             LOGGER.debug("Gathered FileSystemDescription from EFS: {}", fileSystemDescription);
-            return StorageSizeResponse.builder().withStorageInBytes(fileSystemDescription.getSizeInBytes().getValue()).build();
+            StorageSizeResponse storageSizeResponse = StorageSizeResponse.builder()
+                    .withStorageInBytes(fileSystemDescription.getSizeInBytes().getValue())
+                    .build();
+            return Set.of(storageSizeResponse);
         } else {
-            String message = String.format("No Efs were returned by efs id %s and timeframe from %s to %s",
-                    request.getObjectStoragePath(), request.getStartTime().toString(), request.getEndTime().toString());
+            String message = String.format("Unable to describe EFS volume with ID %s", request.getCloudObjectIdsString());
             LOGGER.error(message);
             throw new CloudConnectorException(message);
         }

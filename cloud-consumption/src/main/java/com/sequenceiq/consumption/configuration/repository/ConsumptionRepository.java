@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepos
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
 import com.sequenceiq.consumption.domain.Consumption;
 
 @Transactional(TxType.REQUIRED)
@@ -48,18 +49,26 @@ public interface ConsumptionRepository extends AccountAwareResourceRepository<Co
     @Query("SELECT c " +
             "FROM Consumption c " +
             "WHERE c.monitoredResourceCrn = :monitoredResourceCrn " +
-            "AND c.consumptionType = 'STORAGE' " +
+            "AND c.consumptionType = :consumptionType " +
             "AND c.storageLocation = :storageLocation")
     Optional<Consumption> findStorageConsumptionByMonitoredResourceCrnAndLocation(@Param("monitoredResourceCrn") String monitoredResourceCrn,
-            @Param("storageLocation") String storageLocation);
+            @Param("storageLocation") String storageLocation, @Param("consumptionType") ConsumptionType consumptionType);
+
+    @Query("SELECT c " +
+            "FROM Consumption c " +
+            "WHERE c.monitoredResourceCrn = :monitoredResourceCrn " +
+            "AND c.storageLocation = :objectId")
+    Optional<Consumption> findStorageConsumptionByMonitoredResourceCrnAndObjectId(
+            @Param("monitoredResourceCrn") String monitoredResourceCrn,
+            @Param("objectId") String objectId);
 
     @Query("SELECT COUNT(c)>0 " +
             "FROM Consumption c " +
             "WHERE c.monitoredResourceCrn = :monitoredResourceCrn " +
-            "AND c.consumptionType = 'STORAGE' " +
+            "AND c.consumptionType = :consumptionType " +
             "AND c.storageLocation = :storageLocation")
     boolean doesStorageConsumptionExistWithLocationForMonitoredCrn(@Param("monitoredResourceCrn") String monitoredResourceCrn,
-            @Param("storageLocation") String storageLocation);
+        @Param("storageLocation") String storageLocation, @Param("consumptionType") ConsumptionType consumptionType);
 
     @Query("SELECT c " +
             "FROM Consumption c ")
@@ -67,7 +76,8 @@ public interface ConsumptionRepository extends AccountAwareResourceRepository<Co
 
     @Query("SELECT c " +
             "FROM Consumption c " +
-            "WHERE c.consumptionType = 'STORAGE' " +
+            "WHERE c.consumptionType = :consumptionType " +
             "AND c.environmentCrn = :environmentCrn")
-    List<Consumption> findAllStorageConsumptionByEnvironmentCrn(@Param("environmentCrn") String environmentCrn);
+    List<Consumption> findAllStorageConsumptionByEnvironmentCrn(@Param("environmentCrn") String environmentCrn,
+        @Param("consumptionType") ConsumptionType consumptionType);
 }

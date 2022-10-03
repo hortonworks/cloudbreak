@@ -155,11 +155,12 @@ cb:
     regions: AWS:eu-west-1,AZURE:North Europe,GCP:europe-west1,YARN:default,MOCK:USA
 
 altus:
-  audit:
-    enabled: false
   ums:
     host: localhost
     caller: consumption
+  audit:
+    enabled: true
+    endpoint: localhost:8982
 
 crn:
   partition: cdp

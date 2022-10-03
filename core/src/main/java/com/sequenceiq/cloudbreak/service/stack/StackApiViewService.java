@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.converter.stack.StackListItemToStackApiViewConverter;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.HostGroupViewRepository;
@@ -125,5 +126,10 @@ public class StackApiViewService {
 
     public StackApiView retrieveStackByCrnAndType(String crn, StackType stackType) {
         return stackApiViewRepository.findByResourceCrnAndStackType(crn, stackType).orElseThrow(notFound("Stack", crn));
+    }
+
+    public Set<InstanceMetaData> retrieveInstancesByCrnAndType(String crn, StackType stackType) {
+        StackApiView stackApiView = retrieveStackByCrnAndType(crn, stackType);
+        return instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stackApiView.getId());
     }
 }

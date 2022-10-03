@@ -27,7 +27,7 @@ public abstract class ConsumptionBaseRequest implements Serializable {
     @ApiModelProperty(value = ConsumptionModelDescription.MONITORED_RESOURCE_TYPE, required = true)
     private ResourceType monitoredResourceType;
 
-    @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE})
+    @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.DATAHUB})
     @NotNull
     @ApiModelProperty(value = ConsumptionModelDescription.MONITORED_RESOURCE_CRN, required = true)
     private String monitoredResourceCrn;

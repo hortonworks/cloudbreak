@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.consumption;
 
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.validation.ValidationException;
@@ -47,17 +48,20 @@ public class AwsS3ConsumptionCalculator implements ConsumptionCalculator {
     }
 
     @Override
-    public StorageSizeResponse calculate(StorageSizeRequest request) {
+    public Set<StorageSizeResponse> calculate(StorageSizeRequest request) {
         GetMetricStatisticsResult result = cloudWatchCommonService.getBucketSize(request.getCredential(), request.getRegion().value(),
-                request.getStartTime(), request.getEndTime(), request.getObjectStoragePath());
+                request.getStartTime(), request.getEndTime(), request.getFirstCloudObjectId());
         Optional<Datapoint> latestDatapoint = result.getDatapoints().stream().max(Comparator.comparing(Datapoint::getTimestamp));
         if (latestDatapoint.isPresent()) {
             Datapoint datapoint = latestDatapoint.get();
             LOGGER.debug("Gathered datapoint from CloudWatch: {}", datapoint);
-            return StorageSizeResponse.builder().withStorageInBytes(datapoint.getMaximum()).build();
+            StorageSizeResponse storageSizeResponse = StorageSizeResponse.builder()
+                    .withStorageInBytes(datapoint.getMaximum())
+                    .build();
+            return Set.of(storageSizeResponse);
         } else {
             String message = String.format("No datapoints were returned by CloudWatch for bucket %s and timeframe from %s to %s",
-                    request.getObjectStoragePath(), request.getStartTime().toString(), request.getEndTime().toString());
+                    request.getCloudObjectIdsString(), request.getStartTime().toString(), request.getEndTime().toString());
             LOGGER.error(message);
             throw new CloudConnectorException(message);
         }

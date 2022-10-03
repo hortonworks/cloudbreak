@@ -44,7 +44,7 @@ public class StorageConsumptionCollectionActions {
                 LOGGER.debug("Flow entered into SEND_CONSUMPTION_EVENT_STATE. resourceCrn: '{}'", resourceCrn);
                 StorageConsumptionCollectionHandlerEvent event = new StorageConsumptionCollectionHandlerEvent(
                         StorageConsumptionCollectionHandlerSelectors.SEND_CONSUMPTION_EVENT_HANDLER.selector(),
-                        payload.getResourceId(), resourceCrn, context, payload.getStorageConsumptionResult());
+                        payload.getResourceId(), resourceCrn, context, payload.getStorageConsumptionResults());
                 sendEvent(context, event);
             }
         };

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.Set;
 
 import javax.ws.rs.InternalServerErrorException;
 
@@ -35,6 +36,7 @@ import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionTyp
 import com.sequenceiq.consumption.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.dto.Credential;
+import com.sequenceiq.consumption.dto.StorageConsumptionResult;
 import com.sequenceiq.consumption.flow.consumption.ConsumptionContext;
 import com.sequenceiq.consumption.flow.consumption.storage.event.SendStorageConsumptionEvent;
 import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionFailureEvent;
@@ -114,21 +116,23 @@ public class StorageConsumptionCollectionHandlerTest {
         mockCredentialServices();
 
         StorageSizeResponse objectStorageSizeResponse = StorageSizeResponse.builder().withStorageInBytes(STORAGE_SIZE).build();
-        when(awsS3ConsumptionCalculator.calculate(any(StorageSizeRequest.class))).thenReturn(objectStorageSizeResponse);
+        when(awsS3ConsumptionCalculator.calculate(any(StorageSizeRequest.class))).thenReturn(Set.of(objectStorageSizeResponse));
         when(awsS3ConsumptionCalculator.getObjectId(VALID_STORAGE_LOCATION)).thenReturn(VALID_BUCKET_NAME);
         StorageConsumptionCollectionHandlerEvent event = createInputEvent(ConsumptionType.STORAGE);
         SendStorageConsumptionEvent result = (SendStorageConsumptionEvent) underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
         assertEquals(CRN, result.getResourceCrn());
         assertEquals(ID, result.getResourceId());
-        assertEquals(STORAGE_SIZE, result.getStorageConsumptionResult().getStorageInBytes(), DOUBLE_ASSERT_EPSILON);
+        for (StorageConsumptionResult storageConsumptionResult : result.getStorageConsumptionResults()) {
+            assertEquals(STORAGE_SIZE, storageConsumptionResult.getStorageInBytes(), DOUBLE_ASSERT_EPSILON);
+        }
         assertEquals(SEND_CONSUMPTION_EVENT_EVENT.selector(), result.selector());
 
         verify(environmentService).getByCrn(ENV_CRN);
         verify(credentialService).getCredentialByEnvCrn(ENV_CRN);
         verify(credentialConverter).convert(credential);
         verify(awsS3ConsumptionCalculator).calculate(requestCaptor.capture());
-        assertEquals(VALID_BUCKET_NAME, requestCaptor.getValue().getObjectStoragePath());
+        assertEquals(VALID_BUCKET_NAME, requestCaptor.getValue().getCloudObjectIds().stream().findFirst().get());
         assertEquals(cloudCredential, requestCaptor.getValue().getCredential());
         assertEquals(REGION, requestCaptor.getValue().getRegion().getRegionName());
     }
@@ -169,7 +173,7 @@ public class StorageConsumptionCollectionHandlerTest {
         verify(credentialConverter).convert(credential);
 
         verify(awsS3ConsumptionCalculator).calculate(requestCaptor.capture());
-        assertEquals(VALID_BUCKET_NAME, requestCaptor.getValue().getObjectStoragePath());
+        assertEquals(VALID_BUCKET_NAME, requestCaptor.getValue().getCloudObjectIds().stream().findFirst().get());
         assertEquals(cloudCredential, requestCaptor.getValue().getCredential());
         assertEquals(REGION, requestCaptor.getValue().getRegion().getRegionName());
     }
@@ -217,7 +221,7 @@ public class StorageConsumptionCollectionHandlerTest {
         when(environmentService.getByCrn(ENV_CRN)).thenReturn(detailedEnvironmentResponse);
 
         if (cloudPlatform.equals(CloudPlatform.AWS)) {
-            when(awsS3ConsumptionCalculator.calculate(any())).thenReturn(StorageSizeResponse.builder().withStorageInBytes(250).build());
+            when(awsS3ConsumptionCalculator.calculate(any())).thenReturn(Set.of(StorageSizeResponse.builder().withStorageInBytes(250).build()));
             CloudPlatformConnectors cloudPlatformConnectors = mock(CloudPlatformConnectors.class);
             CloudConnector connector = mock(CloudConnector.class);
             when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
