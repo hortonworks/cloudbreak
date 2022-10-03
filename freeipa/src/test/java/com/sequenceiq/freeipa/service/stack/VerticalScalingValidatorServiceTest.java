@@ -76,28 +76,6 @@ public class VerticalScalingValidatorServiceTest {
     }
 
     @Test
-    public void testStatusWhenStackStoppedShouldRunVerticalScale() {
-        when(stack.isStopped()).thenReturn(true);
-
-        underTest.validateStatus(stack);
-
-        verify(stack, times(1)).isStopped();
-    }
-
-    @Test
-    public void testStatusWhenStackAvailableShouldThrowBadRequest() {
-        when(stack.isStopped()).thenReturn(false);
-
-        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateStatus(stack);
-        });
-
-        verify(stack, times(1)).isStopped();
-        assertEquals("Vertical scaling currently only available for FreeIPA when it is stopped",
-                badRequestException.getMessage());
-    }
-
-    @Test
     public void testRequestWhenPlatformIsNotSupportShouldThrowBadRequest() {
         ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of(AWS));
         when(stack.getCloudPlatform()).thenReturn(OPENSTACK);

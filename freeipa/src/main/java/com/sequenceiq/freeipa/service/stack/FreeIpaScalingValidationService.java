@@ -42,7 +42,6 @@ public class FreeIpaScalingValidationService {
     }
 
     public void validateStackForVerticalUpscale(Stack stack, VerticalScaleRequest request) {
-        verticalScalingValidatorService.validateStatus(stack);
         verticalScalingValidatorService.validateRequest(stack, request);
     }
 

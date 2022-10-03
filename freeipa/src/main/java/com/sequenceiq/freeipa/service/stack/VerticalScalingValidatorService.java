@@ -42,12 +42,6 @@ public class VerticalScalingValidatorService {
     @Inject
     private VerticalScaleInstanceProvider verticalScaleInstanceProvider;
 
-    public void validateStatus(Stack stack) {
-        if (!stack.isStopped()) {
-            throw new BadRequestException("Vertical scaling currently only available for FreeIPA when it is stopped");
-        }
-    }
-
     public void validateRequest(Stack stack, VerticalScaleRequest verticalScaleV4Request) {
         if (!verticalScalingSupported.contains(stack.getCloudPlatform())) {
             throw new BadRequestException(String.format("Vertical scaling is not supported on %s cloud platform", stack.getCloudPlatform()));

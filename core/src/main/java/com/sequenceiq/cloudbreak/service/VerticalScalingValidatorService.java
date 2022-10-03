@@ -59,12 +59,6 @@ public class VerticalScalingValidatorService {
         }
     }
 
-    public void validateStatus(Stack stack) {
-        if (!stack.isStopped()) {
-            throw new BadRequestException("Vertical scaling currently only available for Clusters when it is stopped");
-        }
-    }
-
     public void validateInstanceType(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request) {
         String group = verticalScaleV4Request.getGroup();
         Optional<InstanceGroup> instanceGroupOptional = stack.getInstanceGroups()
