@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -44,6 +46,9 @@ public class UpgradeRdsService {
 
     @Inject
     private DatabaseUpgradeBackupRestoreChecker backupRestoreChecker;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     void stopServicesState(Long stackId) {
         setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_STOP_SERVICES), ResourceEvent.CLUSTER_RDS_UPGRADE_STOP_SERVICES);
@@ -124,6 +129,10 @@ public class UpgradeRdsService {
 
     public boolean shouldRunDataBackupRestore(StackView stack, ClusterView cluster) {
         return backupRestoreChecker.shouldRunDataBackupRestore(stack, cluster);
+    }
+
+    public boolean shouldStopStartServices(StackView stack) {
+        return !entitlementService.isPostgresUpgradeSkipServicesAndCmStopEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId());
     }
 
     private String getMessage(ResourceEvent resourceEvent) {

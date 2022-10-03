@@ -66,6 +66,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EMBEDDED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
@@ -479,6 +480,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.postgres.upgrade.skip.attached.datahubs.check.enable}")
     private boolean skipPostgresUpgradeAttachedDatahubsCheck;
+
+    @Value("${auth.mock.postgres.upgrade.skip.service.stop.enable}")
+    private boolean skipPostgresUpgradeServicesAndCmStop;
 
     private String cbLicense;
 
@@ -1033,6 +1037,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (skipPostgresUpgradeAttachedDatahubsCheck) {
             builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK));
+        }
+        if (skipPostgresUpgradeServicesAndCmStop) {
+            builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
