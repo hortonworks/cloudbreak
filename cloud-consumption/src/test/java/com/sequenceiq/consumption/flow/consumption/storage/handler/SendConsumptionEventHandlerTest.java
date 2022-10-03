@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -124,7 +125,7 @@ public class SendConsumptionEventHandlerTest {
 
         return new StorageConsumptionCollectionHandlerEvent(
                 STORAGE_CONSUMPTION_COLLECTION_HANDLER.selector(),
-                ID, CRN, context, storageConsumptionResult);
+                ID, CRN, context, storageConsumptionResult == null ? Set.of() : Set.of(storageConsumptionResult));
     }
 }
 

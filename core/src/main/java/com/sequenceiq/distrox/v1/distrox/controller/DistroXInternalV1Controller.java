@@ -13,6 +13,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StatusCrnsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackInstancesV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
@@ -34,6 +35,12 @@ public class DistroXInternalV1Controller implements DistroXInternalV1Endpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
     public StackViewV4Response getByCrn(@ResourceCrn @TenantAwareParam String crn) {
         return stackOperations.getForInternalCrn(NameOrCrn.ofCrn(crn), StackType.WORKLOAD);
+    }
+
+    @Override
+    @InternalOnly
+    public StackInstancesV4Responses getInstancesByCrn(@ResourceCrn @TenantAwareParam String crn) {
+        return stackOperations.getInstancesForInternalCrn(crn, StackType.WORKLOAD);
     }
 
     @Override

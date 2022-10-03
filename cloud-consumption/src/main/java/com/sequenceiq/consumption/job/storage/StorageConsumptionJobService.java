@@ -26,6 +26,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.mappable.StorageType;
+import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.service.ConsumptionService;
 
@@ -88,9 +89,10 @@ public class StorageConsumptionJobService {
         String storageLocation = consumption.getStorageLocation();
         String environmentCrn = consumption.getEnvironmentCrn();
         StorageType storageType = consumption.getConsumptionType().getStorageService();
+        ConsumptionType consumptionType = consumption.getConsumptionType();
         try {
             List<Consumption> consumptionsForSameEnvAndBucket = consumptionService
-                    .findAllStorageConsumptionForEnvCrnAndBucketName(environmentCrn, storageLocation, storageType);
+                    .findAllStorageConsumptionForEnvCrnAndBucketName(environmentCrn, storageLocation, storageType, consumptionType);
             if (isJobRunningForConsumptions(consumptionsForSameEnvAndBucket)) {
                 LOGGER.info("Skipping scheduling as aggregated storage consumption job is already running for " +
                                 "environment CRN '{}' and bucket name of location '{}'.", environmentCrn, storageLocation);
@@ -129,6 +131,7 @@ public class StorageConsumptionJobService {
         String storageLocation = consumption.getStorageLocation();
         String environmentCrn = consumption.getEnvironmentCrn();
         StorageType storageType = consumption.getConsumptionType().getStorageService();
+        ConsumptionType consumptionType = consumption.getConsumptionType();
         try {
             if (isJobRunningForConsumption(consumption)) {
                 LOGGER.info("Unscheduling aggregated storage consumption job for environment CRN '{}' and bucket name of location '{}'. " +
@@ -136,7 +139,7 @@ public class StorageConsumptionJobService {
                         environmentCrn, storageLocation, consumption.getResourceCrn(), consumption.getId());
                 unschedule(consumption.getId());
                 Optional<Consumption> nextConsumptionForGroupOptional = consumptionService
-                        .findAllStorageConsumptionForEnvCrnAndBucketName(environmentCrn, storageLocation, storageType)
+                        .findAllStorageConsumptionForEnvCrnAndBucketName(environmentCrn, storageLocation, storageType, consumptionType)
                         .stream()
                         .filter(cons -> !cons.getId().equals(consumption.getId()))
                         .findFirst();

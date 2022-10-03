@@ -4,7 +4,9 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionHandlerSelectors.SEND_CONSUMPTION_EVENT_HANDLER;
 import static com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionStateSelectors.STORAGE_CONSUMPTION_COLLECTION_FINISH_EVENT;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -49,17 +51,25 @@ public class SendConsumptionEventHandler  extends AbstractStorageOperationHandle
                 .build();
         LOGGER.debug("Getting credential for environment with CRN '{}'.", consumption.getEnvironmentCrn());
         String cloudPlatform = consumption.getConsumptionType().getStorageService().cloudPlatformName();
-        StorageConsumptionResult storage = consumptionEvent.getStorageConsumptionResult();
+        Set<StorageConsumptionResult> storageConsumptionResults = consumptionEvent.getStorageConsumptionResults();
         Optional<ConsumptionCalculator> consumptionCalculator = cloudPlatformConnectors
                 .getDefault(platform(cloudPlatform))
                 .consumptionCalculator(consumption.getConsumptionType().getStorageService());
-        if (storage != null && consumptionCalculator.isPresent()) {
-            MeteringEventsProto.StorageHeartbeat heartbeat = consumptionCalculator.get()
-                    .convertToStorageHeartbeat(cloudConsumption, storage.getStorageInBytes());
-            meteringEventProcessor.storageHeartbeat(heartbeat,
-                    consumptionCalculator.get().getMeteringServiceType(),
-                    consumptionCalculator.get().getServiceFeature()
-            );
+        if (storageConsumptionResults != null && !storageConsumptionResults.isEmpty() && consumptionCalculator.isPresent()) {
+            Set<MeteringEventsProto.StorageHeartbeat> heartbeats = new HashSet<>();
+            for (StorageConsumptionResult storageConsumptionResult : storageConsumptionResults) {
+                heartbeats.add(consumptionCalculator
+                                .get()
+                                .convertToStorageHeartbeat(cloudConsumption, storageConsumptionResult.getStorageInBytes()));
+            }
+
+            for (MeteringEventsProto.StorageHeartbeat heartbeat : heartbeats) {
+                meteringEventProcessor.storageHeartbeat(
+                        heartbeat,
+                        consumptionCalculator.get().getMeteringServiceType(),
+                        consumptionCalculator.get().getServiceFeature()
+                );
+            }
             LOGGER.debug("StorageHeartbeat event was successfully sent for Consumption with CRN [{}]", resourceCrn);
 
             return StorageConsumptionCollectionEvent.builder()

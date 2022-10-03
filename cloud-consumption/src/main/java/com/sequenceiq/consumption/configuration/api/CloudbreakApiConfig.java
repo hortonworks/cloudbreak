@@ -7,7 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.cloudbreak.client.internal.CloudbreakApiClientParams;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 
 @Configuration
 public class CloudbreakApiConfig {
@@ -25,8 +29,23 @@ public class CloudbreakApiConfig {
     @Value("${cert.ignorePreValidation:true}")
     private boolean ignorePreValidation;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    private CloudbreakServiceUserCrnClient cloudbreakClient() {
+        return new CloudbreakUserCrnClientBuilder(cloudbreakServerUrl)
+                .withCertificateValidation(false)
+                .withIgnorePreValidation(true)
+                .withDebug(true)
+                .build();
+    }
+
     @Bean
-    public CloudbreakApiClientParams cloudbreakClient() {
-        return new CloudbreakApiClientParams(restDebug, certificateValidation, ignorePreValidation, cloudbreakServerUrl);
+    public CloudbreakInternalCrnClient client() {
+        return new CloudbreakInternalCrnClient(cloudbreakClient(), internalCrnBuilder());
+    }
+
+    private RegionAwareInternalCrnGenerator internalCrnBuilder() {
+        return regionAwareInternalCrnGeneratorFactory.coreAdmin();
     }
 }

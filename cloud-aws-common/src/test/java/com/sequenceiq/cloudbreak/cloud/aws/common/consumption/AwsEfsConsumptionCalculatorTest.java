@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.ValidationException;
 
@@ -32,13 +33,11 @@ import com.sequenceiq.cloudbreak.cloud.model.StorageSizeResponse;
 import com.sequenceiq.common.model.FileSystemType;
 
 @ExtendWith(MockitoExtension.class)
-class AwsEFSConsumptionCalculatorTest {
+class AwsEfsConsumptionCalculatorTest {
 
-    private static final String BUCKET_NAME = "fs-123345";
+    private static final String EFS_NAME = "fs-123345";
 
     private static final String REGION_NAME = "bucket-location";
-
-    private static final String ERROR_MESSAGE = "errormessage";
 
     private static final double DOUBLE_ASSERT_EPSILON = 0.001;
 
@@ -50,7 +49,7 @@ class AwsEFSConsumptionCalculatorTest {
     private AwsEfsCommonService awsEfsCommonService;
 
     @InjectMocks
-    private AwsEFSConsumptionCalculator underTest;
+    private AwsEfsConsumptionCalculator underTest;
 
     @Test
     public void getEfsDoesNotExistThrowsException() {
@@ -58,7 +57,7 @@ class AwsEFSConsumptionCalculatorTest {
         Date endTime = Date.from(Instant.now());
         Region region = Region.region(REGION_NAME);
         StorageSizeRequest request = StorageSizeRequest.builder()
-                .withObjectStoragePath(BUCKET_NAME)
+                .withCloudObjectIds(Set.of(EFS_NAME))
                 .withStartTime(startTime)
                 .withEndTime(endTime)
                 .withRegion(region)
@@ -66,13 +65,13 @@ class AwsEFSConsumptionCalculatorTest {
 
         DescribeFileSystemsResult statisticsResult = new DescribeFileSystemsResult()
                 .withFileSystems(List.of());
-        when(awsEfsCommonService.getEfsSize(null, REGION_NAME, startTime, endTime, BUCKET_NAME)).thenReturn(statisticsResult);
+        when(awsEfsCommonService.getEfsSize(null, REGION_NAME, startTime, endTime, EFS_NAME)).thenReturn(statisticsResult);
 
         CloudConnectorException ex = assertThrows(CloudConnectorException.class, () -> underTest.calculate(request));
 
-        verify(awsEfsCommonService).getEfsSize(null, REGION_NAME, startTime, endTime, BUCKET_NAME);
-        assertEquals(String.format("No Efs were returned by efs id %s and timeframe from %s to %s",
-                BUCKET_NAME, startTime, endTime), ex.getMessage());
+        verify(awsEfsCommonService).getEfsSize(null, REGION_NAME, startTime, endTime, EFS_NAME);
+        assertEquals(String.format("Unable to describe EFS volume with ID %s",
+                EFS_NAME), ex.getMessage());
     }
 
     @Test
@@ -81,7 +80,7 @@ class AwsEFSConsumptionCalculatorTest {
         Date endTime = Date.from(Instant.now());
         Region region = Region.region(REGION_NAME);
         StorageSizeRequest request = StorageSizeRequest.builder()
-                .withObjectStoragePath(BUCKET_NAME)
+                .withCloudObjectIds(Set.of(EFS_NAME))
                 .withStartTime(startTime)
                 .withEndTime(endTime)
                 .withRegion(region)
@@ -92,12 +91,12 @@ class AwsEFSConsumptionCalculatorTest {
                 .withSizeInBytes(new FileSystemSize().withValue(42L));
         DescribeFileSystemsResult statisticsResult = new DescribeFileSystemsResult()
                 .withFileSystems(List.of(description));
-        when(awsEfsCommonService.getEfsSize(null, REGION_NAME, startTime, endTime, BUCKET_NAME)).thenReturn(statisticsResult);
+        when(awsEfsCommonService.getEfsSize(null, REGION_NAME, startTime, endTime, EFS_NAME)).thenReturn(statisticsResult);
 
-        StorageSizeResponse result = underTest.calculate(request);
+        Set<StorageSizeResponse> result = underTest.calculate(request);
 
-        verify(awsEfsCommonService).getEfsSize(null, REGION_NAME, startTime, endTime, BUCKET_NAME);
-        assertEquals(42.0, result.getStorageInBytes(), DOUBLE_ASSERT_EPSILON);
+        verify(awsEfsCommonService).getEfsSize(null, REGION_NAME, startTime, endTime, EFS_NAME);
+        assertEquals(42.0, result.stream().findFirst().get().getStorageInBytes(), DOUBLE_ASSERT_EPSILON);
     }
 
     @Test

@@ -84,7 +84,7 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
     }
 
     public Optional<Consumption> findStorageConsumptionByMonitoredResourceCrnAndLocation(String monitoredResourceCrn, String storageLocation) {
-        Optional<Consumption> result = consumptionRepository.findStorageConsumptionByMonitoredResourceCrnAndLocation(monitoredResourceCrn, storageLocation);
+        Optional<Consumption> result = consumptionRepository.findStorageConsumptionByMonitoredResourceCrnAndObjectId(monitoredResourceCrn, storageLocation);
         result.ifPresentOrElse(
                 consumption -> LOGGER.debug("Storage consumption with location [{}] found for resource with CRN [{}].", storageLocation, monitoredResourceCrn),
                 () -> LOGGER.warn("Storage consumption with location [{}] not found for resource with CRN [{}].", storageLocation, monitoredResourceCrn));
@@ -114,7 +114,15 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
     }
 
     public boolean isConsumptionPresentForLocationAndMonitoredCrn(String monitoredResourceCrn, String storageLocation) {
-        return consumptionRepository.doesStorageConsumptionExistWithLocationForMonitoredCrn(monitoredResourceCrn, storageLocation);
+        Optional<Consumption> consumption = findByMonitoredResourceCrnAndObjectId(monitoredResourceCrn, storageLocation);
+        if (consumption.isPresent()) {
+            return consumptionRepository.doesStorageConsumptionExistWithLocationForMonitoredCrn(
+                    monitoredResourceCrn,
+                    storageLocation,
+                    consumption.get().getConsumptionType());
+        } else {
+            return false;
+        }
     }
 
     public List<Consumption> findAllConsumption() {
@@ -122,8 +130,9 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
     }
 
     public List<Consumption> findAllStorageConsumptionForEnvCrnAndBucketName(String environmentCrn,
-        String storageLocation, StorageType storageType) {
-        List<Consumption> consumptionsForEnv = consumptionRepository.findAllStorageConsumptionByEnvironmentCrn(environmentCrn);
+        String storageLocation, StorageType storageType, ConsumptionType consumptionType) {
+        List<Consumption> consumptionsForEnv = consumptionRepository
+                .findAllStorageConsumptionByEnvironmentCrn(environmentCrn, consumptionType);
         try {
             Optional<ConsumptionCalculator> consumptionCalculatorOptional = cloudPlatformConnectors
                     .getDefault(platform(storageType.cloudPlatformName()))
@@ -205,5 +214,10 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
         } else {
             return false;
         }
+    }
+
+    public Optional<Consumption> findByMonitoredResourceCrnAndObjectId(String monitoredResourceCrn, String objectId) {
+        return consumptionRepository
+                .findStorageConsumptionByMonitoredResourceCrnAndObjectId(monitoredResourceCrn, objectId);
     }
 }

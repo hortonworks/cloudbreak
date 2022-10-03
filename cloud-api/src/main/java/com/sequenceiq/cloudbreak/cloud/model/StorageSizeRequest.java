@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Date;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
@@ -8,7 +10,7 @@ public class StorageSizeRequest {
 
     private @NotNull CloudCredential credential;
 
-    private @NotNull String objectStoragePath;
+    private @NotNull Set<String> cloudObjectIds;
 
     private Region region;
 
@@ -21,7 +23,7 @@ public class StorageSizeRequest {
 
     public StorageSizeRequest(Builder builder) {
         this.credential = builder.credential;
-        this.objectStoragePath = builder.objectStoragePath;
+        this.cloudObjectIds = builder.cloudObjectIds;
         this.region = builder.region;
         this.startTime = builder.startTime;
         this.endTime = builder.endTime;
@@ -35,12 +37,22 @@ public class StorageSizeRequest {
         this.credential = credential;
     }
 
-    public String getObjectStoragePath() {
-        return objectStoragePath;
+    public Set<String> getCloudObjectIds() {
+        return cloudObjectIds;
     }
 
-    public void setObjectStoragePath(String objectStoragePath) {
-        this.objectStoragePath = objectStoragePath;
+    public String getCloudObjectIdsString() {
+        return cloudObjectIds.stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(","));
+    }
+
+    public String getFirstCloudObjectId() {
+        return cloudObjectIds.stream().findFirst().orElse(null);
+    }
+
+    public void setCloudObjectIds(Set<String> cloudObjectIds) {
+        this.cloudObjectIds = cloudObjectIds;
     }
 
     public Region getRegion() {
@@ -75,7 +87,7 @@ public class StorageSizeRequest {
     public String toString() {
         return "ObjectStorageSizeRequest{" +
                 "credential=" + credential +
-                ", objectStoragePath='" + objectStoragePath + '\'' +
+                ", cloudObjectIds='" + cloudObjectIds + '\'' +
                 ", region=" + region +
                 ", startTime=" + startTime +
                 ", endTime=" + endTime +
@@ -86,7 +98,7 @@ public class StorageSizeRequest {
 
         private CloudCredential credential;
 
-        private String objectStoragePath;
+        private Set<String> cloudObjectIds;
 
         private Region region;
 
@@ -99,8 +111,8 @@ public class StorageSizeRequest {
             return this;
         }
 
-        public Builder withObjectStoragePath(String objectStoragePath) {
-            this.objectStoragePath = objectStoragePath;
+        public Builder withCloudObjectIds(Set<String> cloudObjectIds) {
+            this.cloudObjectIds = cloudObjectIds;
             return this;
         }
 

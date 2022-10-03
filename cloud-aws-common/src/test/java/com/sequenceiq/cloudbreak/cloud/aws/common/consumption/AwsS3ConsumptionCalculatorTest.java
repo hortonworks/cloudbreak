@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.ValidationException;
 
@@ -37,8 +38,6 @@ class AwsS3ConsumptionCalculatorTest {
 
     private static final String REGION_NAME = "bucket-location";
 
-    private static final String ERROR_MESSAGE = "errormessage";
-
     private static final double DOUBLE_ASSERT_EPSILON = 0.001;
 
     private static final String S3_OBJECT_PATH = "s3a://bucket-name/folder/file";
@@ -57,7 +56,7 @@ class AwsS3ConsumptionCalculatorTest {
         Date endTime = Date.from(Instant.now());
         Region region = Region.region(REGION_NAME);
         StorageSizeRequest request = StorageSizeRequest.builder()
-                .withObjectStoragePath(BUCKET_NAME)
+                .withCloudObjectIds(Set.of(BUCKET_NAME))
                 .withStartTime(startTime)
                 .withEndTime(endTime)
                 .withRegion(region)
@@ -80,7 +79,7 @@ class AwsS3ConsumptionCalculatorTest {
         Date endTime = Date.from(Instant.now());
         Region region = Region.region(REGION_NAME);
         StorageSizeRequest request = StorageSizeRequest.builder()
-                .withObjectStoragePath(BUCKET_NAME)
+                .withCloudObjectIds(Set.of(BUCKET_NAME))
                 .withStartTime(startTime)
                 .withEndTime(endTime)
                 .withRegion(region)
@@ -93,10 +92,10 @@ class AwsS3ConsumptionCalculatorTest {
                 .withDatapoints(List.of(datapoint));
         when(cloudWatchCommonService.getBucketSize(null, REGION_NAME, startTime, endTime, BUCKET_NAME)).thenReturn(statisticsResult);
 
-        StorageSizeResponse result = underTest.calculate(request);
+        Set<StorageSizeResponse> result = underTest.calculate(request);
 
         verify(cloudWatchCommonService).getBucketSize(null, REGION_NAME, startTime, endTime, BUCKET_NAME);
-        assertEquals(42.0, result.getStorageInBytes(), DOUBLE_ASSERT_EPSILON);
+        assertEquals(42.0, result.stream().findFirst().get().getStorageInBytes(), DOUBLE_ASSERT_EPSILON);
     }
 
     @Test
@@ -105,7 +104,7 @@ class AwsS3ConsumptionCalculatorTest {
         Date endTime = Date.from(Instant.now());
         Region region = Region.region(REGION_NAME);
         StorageSizeRequest request = StorageSizeRequest.builder()
-                .withObjectStoragePath(BUCKET_NAME)
+                .withCloudObjectIds(Set.of(BUCKET_NAME))
                 .withStartTime(startTime)
                 .withEndTime(endTime)
                 .withRegion(region)
@@ -125,10 +124,10 @@ class AwsS3ConsumptionCalculatorTest {
                 .withDatapoints(List.of(latestDatapoint, earlierDatapoint, earliestDatapoint));
         when(cloudWatchCommonService.getBucketSize(null, REGION_NAME, startTime, endTime, BUCKET_NAME)).thenReturn(statisticsResult);
 
-        StorageSizeResponse result = underTest.calculate(request);
+        Set<StorageSizeResponse> result = underTest.calculate(request);
 
         verify(cloudWatchCommonService).getBucketSize(null, REGION_NAME, startTime, endTime, BUCKET_NAME);
-        assertEquals(42.0, result.getStorageInBytes(), DOUBLE_ASSERT_EPSILON);
+        assertEquals(42.0, result.stream().findFirst().get().getStorageInBytes(), DOUBLE_ASSERT_EPSILON);
     }
 
     @Test

@@ -80,8 +80,7 @@ public class ConsumptionServiceTest {
 
     @Test
     void testFindStorageConsumptionByMonitoredResourceCrnAndLocationNotFound() {
-        when(consumptionRepository
-                .findStorageConsumptionByMonitoredResourceCrnAndLocation(eq(MONITORED_RESOURCE_CRN), eq(STORAGE_LOCATION)))
+        when(consumptionRepository.findStorageConsumptionByMonitoredResourceCrnAndObjectId(MONITORED_RESOURCE_CRN, STORAGE_LOCATION))
                 .thenReturn(Optional.empty());
 
         Optional<Consumption> result =
@@ -94,8 +93,7 @@ public class ConsumptionServiceTest {
     @Test
     void testFindStorageConsumptionByMonitoredResourceCrnAndLocationFound() {
         Consumption consumption = mock(Consumption.class);
-        when(consumptionRepository
-                .findStorageConsumptionByMonitoredResourceCrnAndLocation(eq(MONITORED_RESOURCE_CRN), eq(STORAGE_LOCATION)))
+        when(consumptionRepository.findStorageConsumptionByMonitoredResourceCrnAndObjectId(MONITORED_RESOURCE_CRN, STORAGE_LOCATION))
                 .thenReturn(Optional.of(consumption));
 
         Optional<Consumption> result = underTest
@@ -121,10 +119,16 @@ public class ConsumptionServiceTest {
         Consumption consumption = new Consumption();
         consumption.setName(NAME);
         consumption.setId(1L);
+        consumption.setConsumptionType(ConsumptionType.STORAGE);
         consumption.setAccountId(ACCOUNT_ID);
         when(consumptionDtoConverter.creationDtoToConsumption(eq(consumptionCreationDto))).thenReturn(consumption);
         when(consumptionRepository.save(consumption)).thenReturn(consumption);
-        when(consumptionRepository.doesStorageConsumptionExistWithLocationForMonitoredCrn(MONITORED_RESOURCE_CRN, STORAGE_LOCATION)).thenReturn(false);
+        when(consumptionRepository.findStorageConsumptionByMonitoredResourceCrnAndObjectId(MONITORED_RESOURCE_CRN, STORAGE_LOCATION))
+                .thenReturn(Optional.of(consumption));
+        when(consumptionRepository.doesStorageConsumptionExistWithLocationForMonitoredCrn(
+                MONITORED_RESOURCE_CRN,
+                STORAGE_LOCATION,
+                ConsumptionType.STORAGE)).thenReturn(false);
 
         Optional<Consumption> result = underTest.create(consumptionCreationDto);
 
@@ -132,7 +136,7 @@ public class ConsumptionServiceTest {
         assertThat(result).isPresent();
         assertEquals(consumption, result.get());
         verify(consumptionRepository, Mockito.times(1))
-                .doesStorageConsumptionExistWithLocationForMonitoredCrn(MONITORED_RESOURCE_CRN, STORAGE_LOCATION);
+                .doesStorageConsumptionExistWithLocationForMonitoredCrn(MONITORED_RESOURCE_CRN, STORAGE_LOCATION, ConsumptionType.STORAGE);
         verify(consumptionRepository).save(consumption);
         verify(consumptionDtoConverter).creationDtoToConsumption(eq(consumptionCreationDto));
     }
@@ -153,14 +157,24 @@ public class ConsumptionServiceTest {
         consumption.setName(NAME);
         consumption.setId(1L);
         consumption.setAccountId(ACCOUNT_ID);
-        when(consumptionRepository.doesStorageConsumptionExistWithLocationForMonitoredCrn(MONITORED_RESOURCE_CRN, STORAGE_LOCATION)).thenReturn(true);
+        consumption.setConsumptionType(ConsumptionType.STORAGE);
+        consumption.setMonitoredResourceType(ResourceType.ENVIRONMENT);
+        when(consumptionRepository.doesStorageConsumptionExistWithLocationForMonitoredCrn(
+                MONITORED_RESOURCE_CRN,
+                STORAGE_LOCATION,
+                ConsumptionType.STORAGE)).thenReturn(true);
+        when(consumptionRepository.findStorageConsumptionByMonitoredResourceCrnAndObjectId(MONITORED_RESOURCE_CRN, STORAGE_LOCATION))
+                .thenReturn(Optional.of(consumption));
 
         Optional<Consumption> result = underTest.create(consumptionCreationDto);
 
         assertThat(result).isNotNull();
         assertThat(result).isEmpty();
         verify(consumptionRepository, Mockito.times(1))
-                .doesStorageConsumptionExistWithLocationForMonitoredCrn(MONITORED_RESOURCE_CRN, STORAGE_LOCATION);
+                .doesStorageConsumptionExistWithLocationForMonitoredCrn(
+                        MONITORED_RESOURCE_CRN,
+                        STORAGE_LOCATION,
+                        ConsumptionType.STORAGE);
         verify(consumptionRepository, Mockito.times(0)).save(consumption);
         verify(consumptionDtoConverter, Mockito.times(0)).creationDtoToConsumption(eq(consumptionCreationDto));
     }
@@ -212,7 +226,8 @@ public class ConsumptionServiceTest {
 
     @Test
     public void testFindAllStorageConsumptionForEnvCrnAndBucketNameNoResult() {
-        when(consumptionRepository.findAllStorageConsumptionByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(List.of());
+        when(consumptionRepository.findAllStorageConsumptionByEnvironmentCrn(ENVIRONMENT_CRN, ConsumptionType.STORAGE))
+                .thenReturn(List.of());
         when(awsS3ConsumptionCalculator.getObjectId(STORAGE_LOCATION)).thenAnswer(invocation -> BUCKET);
         CloudConnector connector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
@@ -221,15 +236,16 @@ public class ConsumptionServiceTest {
         List<Consumption> result = underTest.findAllStorageConsumptionForEnvCrnAndBucketName(
                 ENVIRONMENT_CRN,
                 STORAGE_LOCATION,
-                StorageType.S3);
+                StorageType.S3,
+                ConsumptionType.STORAGE);
 
         assertTrue(result.isEmpty());
     }
 
     @Test
     public void testFindAllStorageConsumptionForEnvCrnAndBucketNameValidationError() {
-        when(consumptionRepository.findAllStorageConsumptionByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(
-                List.of(consumption(ENVIRONMENT_CRN, STORAGE_LOCATION)));
+        when(consumptionRepository.findAllStorageConsumptionByEnvironmentCrn(ENVIRONMENT_CRN, ConsumptionType.STORAGE))
+                .thenReturn(List.of(consumption(ENVIRONMENT_CRN, STORAGE_LOCATION)));
         when(awsS3ConsumptionCalculator.getObjectId(STORAGE_LOCATION)).thenThrow(new ValidationException("error"));
         CloudConnector connector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
@@ -238,7 +254,8 @@ public class ConsumptionServiceTest {
         List<Consumption> result = underTest.findAllStorageConsumptionForEnvCrnAndBucketName(
                 ENVIRONMENT_CRN,
                 STORAGE_LOCATION,
-                StorageType.S3);
+                StorageType.S3,
+                ConsumptionType.STORAGE);
 
         assertTrue(result.isEmpty());
     }
@@ -249,8 +266,8 @@ public class ConsumptionServiceTest {
         Consumption consumption2 = consumption(ENVIRONMENT_CRN, STORAGE_LOCATION);
         Consumption consumption3 = consumption(ENVIRONMENT_CRN, STORAGE_LOCATION_OTHER);
 
-        when(consumptionRepository.findAllStorageConsumptionByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(
-                List.of(consumption1, consumption2, consumption3));
+        when(consumptionRepository.findAllStorageConsumptionByEnvironmentCrn(ENVIRONMENT_CRN, ConsumptionType.STORAGE))
+                .thenReturn(List.of(consumption1, consumption2, consumption3));
         when(awsS3ConsumptionCalculator.getObjectId(STORAGE_LOCATION)).thenAnswer(invocation -> BUCKET);
         when(awsS3ConsumptionCalculator.getObjectId(STORAGE_LOCATION_OTHER)).thenAnswer(invocation -> BUCKET_OTHER);
         CloudConnector connector = mock(CloudConnector.class);
@@ -260,7 +277,8 @@ public class ConsumptionServiceTest {
         List<Consumption> result = underTest.findAllStorageConsumptionForEnvCrnAndBucketName(
                 ENVIRONMENT_CRN,
                 STORAGE_LOCATION,
-                StorageType.S3);
+                StorageType.S3,
+                ConsumptionType.STORAGE);
 
         assertEquals(List.of(consumption1, consumption2), result);
     }

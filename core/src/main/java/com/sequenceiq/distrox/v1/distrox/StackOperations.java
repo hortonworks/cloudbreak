@@ -39,11 +39,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackInstancesV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
@@ -56,11 +58,13 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackClusterStatusViewToStatusConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.UserNamePasswordV4RequestToUpdateClusterV4RequestConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceMetaDataToInstanceMetaDataV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.detach.StackUpdateService;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
@@ -132,6 +136,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     @Inject
     private StackApiViewToStackViewV4ResponseConverter stackApiViewToStackViewV4ResponseConverter;
+
+    @Inject
+    private InstanceMetaDataToInstanceMetaDataV4ResponseConverter instanceMetaDataToInstanceMetaDataV4ResponseConverter;
 
     @Inject
     private StackClusterStatusViewToStatusConverter stackClusterStatusViewToStatusConverter;
@@ -230,6 +237,17 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         LOGGER.info("Adding environment name to the response.");
         environmentServiceDecorator.prepareEnvironment(stackViewV4Response);
         return stackViewV4Response;
+    }
+
+    public StackInstancesV4Responses getInstancesForInternalCrn(String crn, StackType stackType) {
+        Set<InstanceMetaData> instanceMetaData = stackApiViewService.retrieveInstancesByCrnAndType(crn, stackType);
+        LOGGER.info("Query Stack (view) successfully finished with crn {}", crn);
+        Set<InstanceMetaDataV4Response> result = instanceMetaData.stream()
+                .map(e -> instanceMetaDataToInstanceMetaDataV4ResponseConverter.convert(e))
+                .collect(Collectors.toSet());
+        StackInstancesV4Responses stackInstancesV4Responses = new StackInstancesV4Responses();
+        stackInstancesV4Responses.setResponses(result);
+        return stackInstancesV4Responses;
     }
 
     public StackStatusV4Responses getStatusForInternalCrns(List<String> crns, StackType stackType) {
