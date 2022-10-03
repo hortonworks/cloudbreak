@@ -62,7 +62,7 @@ public class ClusterUseCaseMapper {
                 UsageProto.CDPClusterStatus.Value.CCM_UPGRADE_STARTED);
         firstStepUseCaseMap.put(Pair.of("", "CoreVerticalScaleFlowConfig"),
                 UsageProto.CDPClusterStatus.Value.VERTICAL_SCALE_STARTED);
-        firstStepUseCaseMap.put(Pair.of("UpgradeRdsFlowEventChainFactory", "ValidateRdsUpgradeFlowConfig"),
+        firstStepUseCaseMap.put(Pair.of("UpgradeRdsFlowEventChainFactory", "SaltUpdateFlowConfig"),
                 UsageProto.CDPClusterStatus.Value.DATABASE_UPGRADE_STARTED);
     }
 
