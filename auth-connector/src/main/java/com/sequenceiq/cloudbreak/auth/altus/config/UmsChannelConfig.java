@@ -15,19 +15,19 @@ import io.grpc.ManagedChannelBuilder;
 public class UmsChannelConfig {
 
     @Value("${altus.ums.host:}")
-    private String endpoint;
+    private String host;
 
     @Value("${altus.ums.port:8982}")
     private int port;
 
     @Bean
     public ManagedChannelWrapper umsManagedChannelWrapper() {
-        return newManagedChannelWrapper(endpoint, port);
+        return newManagedChannelWrapper(host, port);
     }
 
-    public static ManagedChannelWrapper newManagedChannelWrapper(String endpoint, int port) {
+    public static ManagedChannelWrapper newManagedChannelWrapper(String host, int port) {
         return new ManagedChannelWrapper(
-                ManagedChannelBuilder.forAddress(endpoint, port)
+                ManagedChannelBuilder.forAddress(host, port)
                         .usePlaintext()
                         .maxInboundMessageSize(DEFAULT_MAX_MESSAGE_SIZE)
                         .build());

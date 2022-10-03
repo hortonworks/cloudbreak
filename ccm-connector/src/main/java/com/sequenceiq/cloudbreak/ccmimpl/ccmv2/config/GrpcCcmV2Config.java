@@ -1,7 +1,14 @@
 package com.sequenceiq.cloudbreak.ccmimpl.ccmv2.config;
 
+import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
+
+import io.grpc.ManagedChannelBuilder;
 
 @Component
 public class GrpcCcmV2Config {
@@ -17,6 +24,15 @@ public class GrpcCcmV2Config {
 
     @Value("${altus.ccmv2mgmt.client.timeout_ms:300000}")
     private int timeoutMs;
+
+    @Bean
+    public ManagedChannelWrapper ccmV2ManagedChannelWrapper() {
+        return new ManagedChannelWrapper(
+                ManagedChannelBuilder.forAddress(host, port)
+                        .usePlaintext()
+                        .maxInboundMessageSize(DEFAULT_MAX_MESSAGE_SIZE)
+                        .build());
+    }
 
     public String getHost() {
         return host;

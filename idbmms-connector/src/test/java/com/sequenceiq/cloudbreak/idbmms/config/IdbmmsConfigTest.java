@@ -21,14 +21,14 @@ class IdbmmsConfigTest {
 
     @Test
     void isConfiguredTestEmptyEndpoint() {
-        ReflectionTestUtils.setField(underTest, "endpoint", "");
+        ReflectionTestUtils.setField(underTest, "host", "");
 
         assertThat(underTest.isConfigured()).isFalse();
     }
 
     @Test
     void isConfiguredTestGoodEndpoint() {
-        ReflectionTestUtils.setField(underTest, "endpoint", "myhost.com");
+        ReflectionTestUtils.setField(underTest, "host", "myhost.com");
 
         assertThat(underTest.isConfigured()).isTrue();
     }

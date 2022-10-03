@@ -1,13 +1,22 @@
 package com.sequenceiq.cloudbreak.datalakedr.config;
 
+import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
+
+import io.grpc.ManagedChannelBuilder;
 
 @Configuration
 public class DatalakeDrConfig {
+
+    static final String DEFAULT_DATALAKE_DR_HOST = "localhost";
 
     static final int DEFAULT_DATALAKE_DR_PORT = 80;
 
@@ -36,7 +45,19 @@ public class DatalakeDrConfig {
             } else {
                 throw new IllegalStateException("altus.datalakedr.endpoint is not configured");
             }
+        } else {
+            host = DEFAULT_DATALAKE_DR_HOST;
+            port = DEFAULT_DATALAKE_DR_PORT;
         }
+    }
+
+    @Bean
+    public ManagedChannelWrapper datalakeDrManagedChannelWrapper() {
+        return new ManagedChannelWrapper(
+                ManagedChannelBuilder.forAddress(host, port)
+                        .usePlaintext()
+                        .maxInboundMessageSize(DEFAULT_MAX_MESSAGE_SIZE)
+                        .build());
     }
 
     public String getEndpoint() {
