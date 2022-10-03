@@ -1,9 +1,12 @@
 package com.sequenceiq.environment.environment.sync;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -61,6 +64,12 @@ public class EnvironmentSyncServiceTest {
 
         EnvironmentStatus actual = underTest.getStatusByFreeipa(environment);
         Assertions.assertEquals(EnvironmentStatus.AVAILABLE, actual);
+    }
+
+    @Test
+    void allFreeIpaStatusesMapped() {
+        Set<Status> testedSet = underTest.getStatusMap().keySet();
+        assertThat(testedSet).hasSameElementsAs(Arrays.asList(Status.values()));
     }
 
     // @formatter:off
