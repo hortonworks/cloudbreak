@@ -2,14 +2,19 @@ package com.sequenceiq.cloudbreak.service.stackpatch;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
+
+import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
@@ -28,6 +33,7 @@ import com.sequenceiq.cloudbreak.service.database.EmbeddedDbVersionCollector;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.externaldatabase.ExternalDbVersionCollector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @ExtendWith(MockitoExtension.class)
 class CollectDbEngineVersionPatchServiceTest {
@@ -35,6 +41,12 @@ class CollectDbEngineVersionPatchServiceTest {
     private static final Long STACK_ID = 3L;
 
     private static final String STACK_CRN = "stackCrn";
+
+    private static final String STACK_CRN_2 = "stackCrn2";
+
+    private static final String ENV_CRN = "envCrn";
+
+    private static final String STACK_NAME = "stackName";
 
     private static final String DB_CRN = "dbCrn";
 
@@ -71,24 +83,24 @@ class CollectDbEngineVersionPatchServiceTest {
     // @formatter:off
     // CHECKSTYLE:OFF
     static Object[][] scenarios() {
-        return new Object[][] {
+        return new Object[][]{
                 // name                                     stackAvailability datalake dbCrn    dbVersion  expected
-                { "Available embedded distrox with db version",         true,   false,  null,   DB_VERSION, true },
-                { "Available embedded distrox without db version",      true,   false,  null,   null,       false },
-                { "Not available embedded distrox with db version",     false,  false,  null,   DB_VERSION, false },
-                { "Not available embedded distrox without db version",  false,  false,  null,   null,       false },
-                { "Available external distrox with db version",         true,   false,  DB_CRN, DB_VERSION, true },
-                { "Available external distrox without db version",      true,   false,  DB_CRN, null,       false },
-                { "Not available external distrox with db version",     false,  false,  DB_CRN, DB_VERSION, true },
-                { "Not available external distrox without db version",  false,  false,  DB_CRN, null,       false },
-                { "Available embedded datalake with db version",        true,   true,   null,   DB_VERSION, true },
-                { "Available embedded datalake without db version",     true,   true,   null,   null,       false },
-                { "Not available embedded datalake with db version",    false,  true,   null,   DB_VERSION, false },
-                { "Not available embedded datalake without db version", false,  true,   null,   null,       false },
-                { "Available external datalake with db version",        true,   true,   DB_CRN, DB_VERSION, true },
-                { "Available external datalake without db version",     true,   true,   DB_CRN, null,       false },
-                { "Not available external datalake with db version",    false,  true,   DB_CRN, DB_VERSION, true },
-                { "Not available external datalake without db version", false,  true,   DB_CRN, null,       false },
+                {"Available embedded distrox with db version", true, false, null, DB_VERSION, true},
+                {"Available embedded distrox without db version", true, false, null, null, false},
+                {"Not available embedded distrox with db version", false, false, null, DB_VERSION, false},
+                {"Not available embedded distrox without db version", false, false, null, null, false},
+                {"Available external distrox with db version", true, false, DB_CRN, DB_VERSION, true},
+                {"Available external distrox without db version", true, false, DB_CRN, null, false},
+                {"Not available external distrox with db version", false, false, DB_CRN, DB_VERSION, true},
+                {"Not available external distrox without db version", false, false, DB_CRN, null, false},
+                {"Available embedded datalake with db version", true, true, null, DB_VERSION, true},
+                {"Available embedded datalake without db version", true, true, null, null, false},
+                {"Not available embedded datalake with db version", false, true, null, DB_VERSION, false},
+                {"Not available embedded datalake without db version", false, true, null, null, false},
+                {"Available external datalake with db version", true, true, DB_CRN, DB_VERSION, true},
+                {"Available external datalake without db version", true, true, DB_CRN, null, false},
+                {"Not available external datalake with db version", false, true, DB_CRN, DB_VERSION, true},
+                {"Not available external datalake without db version", false, true, DB_CRN, null, false},
         };
     }
     // CHECKSTYLE:ON
@@ -124,5 +136,53 @@ class CollectDbEngineVersionPatchServiceTest {
         } else {
             verifyNoInteractions(sdxClientService, stackService);
         }
+    }
+
+    @Test
+    public void testCrnDifferentForDatalake() throws ExistingStackPatchApplyException {
+        Stack stack = mock(Stack.class);
+        when(stack.isAvailable()).thenReturn(true);
+        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.isDatalake()).thenReturn(true);
+        when(stack.getName()).thenReturn(STACK_NAME);
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(DB_CRN);
+        when(stack.getCluster()).thenReturn(cluster);
+        Optional<String> dbVersionResult = Optional.of(DB_VERSION);
+        when(externalDbVersionCollector.collectDbVersion(DB_CRN)).thenReturn(dbVersionResult);
+        doThrow(new NotFoundException("nope")).when(sdxClientService).updateDatabaseEngineVersion(STACK_CRN, DB_VERSION);
+        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
+        sdxClusterResponse.setCrn(STACK_CRN_2);
+        sdxClusterResponse.setName(STACK_NAME);
+        when(sdxClientService.getByEnvironmentCrnInernal(ENV_CRN)).thenReturn(List.of(sdxClusterResponse));
+
+        boolean result = underTest.doApply(stack);
+
+        assertTrue(result);
+        verify(sdxClientService).updateDatabaseEngineVersion(STACK_CRN_2, DB_VERSION);
+        verify(stackService).updateExternalDatabaseEngineVersion(STACK_ID, DB_VERSION);
+    }
+
+    @Test
+    public void testDatalakeDoesntExist() {
+        Stack stack = mock(Stack.class);
+        when(stack.isAvailable()).thenReturn(true);
+        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
+        when(stack.isDatalake()).thenReturn(true);
+        when(stack.getName()).thenReturn(STACK_NAME);
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(DB_CRN);
+        when(stack.getCluster()).thenReturn(cluster);
+        Optional<String> dbVersionResult = Optional.of(DB_VERSION);
+        when(externalDbVersionCollector.collectDbVersion(DB_CRN)).thenReturn(dbVersionResult);
+        doThrow(new NotFoundException("nope")).when(sdxClientService).updateDatabaseEngineVersion(STACK_CRN, DB_VERSION);
+        when(sdxClientService.getByEnvironmentCrnInernal(ENV_CRN)).thenReturn(List.of());
+
+        assertThrows(com.sequenceiq.cloudbreak.common.exception.NotFoundException.class, () -> underTest.doApply(stack));
+
+        verifyNoInteractions(stackService);
     }
 }
