@@ -60,6 +60,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_LOAD_BALANCER_DNS_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPGRADE_CLUSTER_IN_WORKSPACE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DETERMINE_DATALAKE_DATA_SIZES;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_DATALAKE_DATA_SIZES;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.VERTICAL_SCALE_BY_NAME;
 
 import java.util.List;
@@ -104,6 +105,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordSta
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.datalakemetrics.datasizes.DatalakeDataSizesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.BackupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.imagecatalog.GenerateImageCatalogV4Response;
@@ -681,5 +683,12 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DETERMINE_DATALAKE_DATA_SIZES, nickname = "determineDatalakeDataSizes")
     void determineDatalakeDataSizes(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @AccountId @QueryParam("accountId") String accountId);
+
+    @GET
+    @Path("{name}/get_datalake_data_sizes")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = GET_DATALAKE_DATA_SIZES, nickname = "getDatalakeDataSizes")
+    DatalakeDataSizesV4Response getDatalakeDataSizes(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @AccountId @QueryParam("accountId") String accountId);
 }

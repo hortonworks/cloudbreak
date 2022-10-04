@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordSta
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.datalakemetrics.datasizes.DatalakeDataSizesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.BackupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.imagecatalog.GenerateImageCatalogV4Response;
@@ -601,5 +602,11 @@ public class StackV4Controller extends NotificationController implements StackV4
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public void determineDatalakeDataSizes(Long workspaceId, String name, @AccountId String accountId) {
         stackOperations.determineDatalakeDataSizes(restRequestThreadLocalService.getRequestedWorkspaceId(), NameOrCrn.ofName(name));
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    public DatalakeDataSizesV4Response getDatalakeDataSizes(Long workspaceId, String name, @AccountId String accountId) {
+        return stackOperations.getDatalakeDataSizes(restRequestThreadLocalService.getRequestedWorkspaceId(), NameOrCrn.ofName(name));
     }
 }

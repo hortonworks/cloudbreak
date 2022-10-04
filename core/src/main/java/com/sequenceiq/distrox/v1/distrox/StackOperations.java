@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.datalakemetrics.datasizes.DatalakeDataSizesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
@@ -73,6 +74,7 @@ import com.sequenceiq.cloudbreak.service.LoadBalancerUpdateService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.datalakemetrics.DetermineDatalakeDataSizesService;
+import com.sequenceiq.cloudbreak.service.datalakemetrics.GetDatalakeDataSizesService;
 import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
@@ -164,6 +166,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     @Inject
     private DetermineDatalakeDataSizesService determineDatalakeDataSizesService;
+
+    @Inject
+    private GetDatalakeDataSizesService getDatalakeDataSizesService;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -517,5 +522,10 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     public void determineDatalakeDataSizes(Long workspaceId, NameOrCrn nameOrCrn) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         determineDatalakeDataSizesService.determineDatalakeDataSizes(stack);
+    }
+
+    public DatalakeDataSizesV4Response getDatalakeDataSizes(Long workspaceId, NameOrCrn nameOrCrn) {
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        return getDatalakeDataSizesService.getDatalakeDataSizes(stack);
     }
 }
