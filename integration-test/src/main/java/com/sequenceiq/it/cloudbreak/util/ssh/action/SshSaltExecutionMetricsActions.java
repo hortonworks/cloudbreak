@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.ssh.action;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY_PRIMARY;
 import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
+import static java.lang.String.format;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,6 +45,7 @@ import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.salt.SaltFunctionReport;
 import com.sequenceiq.it.cloudbreak.salt.SaltHighstateReport;
 import com.sequenceiq.it.cloudbreak.salt.SaltStateReport;
@@ -66,7 +68,8 @@ public class SshSaltExecutionMetricsActions extends SshJClientActions {
 
     public List<SaltHighstateReport> getSaltExecutionMetrics(String environmentCrn, String resourceName, MicroserviceClient client,
             String workingDirectoryLocation, String serviceName) {
-            String saltMasterIp = getSaltMasterIp(environmentCrn, resourceName, client, serviceName);
+        String saltMasterIp = getSaltMasterIp(environmentCrn, resourceName, client, serviceName);
+        List<SaltHighstateReport> saltHighstateReports = new ArrayList<>();
         try {
             if (!saltMasterIp.isBlank()) {
                 String extractSaltMetricsCommand = getExtractSaltMetricsCommand(serviceName);
@@ -74,22 +77,23 @@ public class SshSaltExecutionMetricsActions extends SshJClientActions {
                 LOGGER.info("SSH test result on IP: [{}]: Return code: [{}], Result: {}", saltMasterIp, cmdOut.getLeft(), cmdOut.getRight());
 
                 downloadSaltExecutionMetrics(saltMasterIp, workingDirectoryLocation, serviceName);
-                unzipArchive(String.format("%s/salt_execution_metrics_%s.zip", workingDirectoryLocation, serviceName), new File(workingDirectoryLocation));
-                return generateReport(workingDirectoryLocation, serviceName);
+                unzipArchive(format("%s/salt_execution_metrics_%s.zip", workingDirectoryLocation, serviceName), new File(workingDirectoryLocation));
+                saltHighstateReports = generateReport(workingDirectoryLocation, serviceName);
             } else {
-                throw new RuntimeException(String.format("Couldn't collect salt execution metrics for %s", resourceName));
+                Log.warn(LOGGER, format(" Salt Master IP is missing! Salt execution metrics collection is not possible right now for resource: %s ",
+                        resourceName));
             }
-        } catch (IOException e) {
-            LOGGER.info("Error occurred while trying to retrieve Salt execution metrics and generating report on instance [{}]: {}",
-                    saltMasterIp, e.getMessage());
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            Log.warn(LOGGER, format(" Error occurred while try to retrieve Salt execution metrics then generating reports! Instance: %s | Exception: %s ",
+                    saltMasterIp, e.getMessage()));
         }
+        return saltHighstateReports;
     }
 
     public void writeSaltHighstateReportsToFiles(TestContext testContext, String workingDirectoryLocation, String serviceName,
             List<SaltHighstateReport> saltHighstateReportList) {
         try {
-            new ObjectMapper().writeValue(new File(String.format("%s/salt_metrics_report_%s_%s.json", workingDirectoryLocation, serviceName,
+            new ObjectMapper().writeValue(new File(format("%s/salt_metrics_report_%s_%s.json", workingDirectoryLocation, serviceName,
                     testContext.getTestMethodName().orElse(DEFAULT_TEST_METHOD_NAME))), saltHighstateReportList);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -98,9 +102,9 @@ public class SshSaltExecutionMetricsActions extends SshJClientActions {
 
     private void downloadSaltExecutionMetrics(String instanceIp, String workingDirectoryLocation, String serviceName) throws IOException {
         SSHClient sshClient = createSshClient(instanceIp, null, null, null);
-        sshClient.newSCPFileTransfer().download(String.format("/home/cloudbreak/salt_execution_metrics_%s.zip", serviceName), workingDirectoryLocation);
+        sshClient.newSCPFileTransfer().download(format("/home/cloudbreak/salt_execution_metrics_%s.zip", serviceName), workingDirectoryLocation);
 
-        if (Files.exists(Path.of(String.format("%s/salt_execution_metrics_%s.zip", workingDirectoryLocation, serviceName)))) {
+        if (Files.exists(Path.of(format("%s/salt_execution_metrics_%s.zip", workingDirectoryLocation, serviceName)))) {
             LOGGER.info("Salt execution metrics successfully downloaded from instance [{}]", instanceIp);
         } else {
             LOGGER.info("Salt execution metrics could not be downloaded from instance [{}]", instanceIp);
@@ -122,7 +126,7 @@ public class SshSaltExecutionMetricsActions extends SshJClientActions {
             commandResult = commands.next();
         }
         commands.close();
-        return String.format(commandResult, serviceName, serviceName, serviceName, serviceName, serviceName, serviceName);
+        return format(commandResult, serviceName, serviceName, serviceName, serviceName, serviceName, serviceName);
     }
 
     private String getSaltMasterIp(String environmentCrn, String resourceName, MicroserviceClient client, String serviceName) {
@@ -208,12 +212,12 @@ public class SshSaltExecutionMetricsActions extends SshJClientActions {
 
     private List<SaltHighstateReport> generateReport(String workingDirectoryLocation, String serviceName) {
         try {
-            List<String> jids = Files.readAllLines(Path.of(String.format("%s/salt_jids_%s.txt", workingDirectoryLocation, serviceName)));
+            List<String> jids = Files.readAllLines(Path.of(format("%s/salt_jids_%s.txt", workingDirectoryLocation, serviceName)));
             List<SaltHighstateReport> saltHighstateReportList = new ArrayList<>();
 
             for (String jid : jids) {
                 SaltHighstateReport saltHighstateReport = getHighstateReport(jid,
-                        Path.of(String.format("%s/salt_job_result_%s.json", workingDirectoryLocation, jid)));
+                        Path.of(format("%s/salt_job_result_%s.json", workingDirectoryLocation, jid)));
                 saltHighstateReportList.add(saltHighstateReport);
             }
 

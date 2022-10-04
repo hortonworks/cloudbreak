@@ -3,6 +3,9 @@ package com.sequenceiq.it.cloudbreak.salt;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SaltHighstateReport {
     private String jid;
 

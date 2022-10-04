@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,31 +95,35 @@ public class SaltHighStateDurationAssertions {
 
     private void validateSaltStatesTotalDurations(List<SaltHighstateReport> saltHighstateReports, Map<String, Double> fetchedSaltDurations) {
         Table<String, String, Double> saltStatesTotalDurations = Tables.synchronizedTable(HashBasedTable.create());
-        LOGGER.info("Number of Salt High State reports: {}", saltHighstateReports.size());
-        for (SaltHighstateReport saltHighstateReport : saltHighstateReports) {
-            String jobID = saltHighstateReport.getJid();
-            Map<String, List<SaltStateReport>> saltStateReportByInstance = saltHighstateReport.getInstances();
-            LOGGER.info("Generating the state duration reports for '{}' job!", jobID);
-            for (Entry<String, List<SaltStateReport>> saltStateReportEntry : saltStateReportByInstance.entrySet()) {
-                String instance = saltStateReportEntry.getKey();
-                List<SaltStateReport> stateReports = saltStateReportEntry.getValue();
-                stateReports.forEach(stateReport -> {
-                    String instanceKey = StringUtils.join(List.of(jobID, instance), ".");
-                    saltStatesTotalDurations.put(instanceKey, stateReport.getState(), stateReport.getTotalDuration());
+        if (CollectionUtils.isNotEmpty(saltHighstateReports)) {
+            LOGGER.info("Number of Salt High State reports: {}", saltHighstateReports.size());
+            for (SaltHighstateReport saltHighstateReport : saltHighstateReports) {
+                String jobID = saltHighstateReport.getJid();
+                Map<String, List<SaltStateReport>> saltStateReportByInstance = saltHighstateReport.getInstances();
+                LOGGER.info("Generating the state duration reports for '{}' job!", jobID);
+                for (Entry<String, List<SaltStateReport>> saltStateReportEntry : saltStateReportByInstance.entrySet()) {
+                    String instance = saltStateReportEntry.getKey();
+                    List<SaltStateReport> stateReports = saltStateReportEntry.getValue();
+                    stateReports.forEach(stateReport -> {
+                        String instanceKey = StringUtils.join(List.of(jobID, instance), ".");
+                        saltStatesTotalDurations.put(instanceKey, stateReport.getState(), stateReport.getTotalDuration());
 
-                    Double duration = fetchedSaltDurations.entrySet().stream()
-                            .filter(entry -> StringUtils.equalsIgnoreCase(stateReport.getState(), entry.getKey()))
-                            .map(Entry::getValue)
-                            .filter(Objects::nonNull)
-                            .findFirst()
-                            .orElse(0.000001d);
-                    if (duration.compareTo(0.000001d) != 0 && stateReport.getTotalDuration() > duration) {
-                        Log.warn(LOGGER, format(" The duration '%.2f' of instance state ('%s'::'%s') exceeds the limit '%.2f'! ",
-                                stateReport.getTotalDuration(), instanceKey, stateReport.getState(), duration));
-                    }
-                });
+                        Double duration = fetchedSaltDurations.entrySet().stream()
+                                .filter(entry -> StringUtils.equalsIgnoreCase(stateReport.getState(), entry.getKey()))
+                                .map(Entry::getValue)
+                                .filter(Objects::nonNull)
+                                .findFirst()
+                                .orElse(0.000001d);
+                        if (duration.compareTo(0.000001d) != 0 && stateReport.getTotalDuration() > duration) {
+                            Log.warn(LOGGER, format(" The duration '%.2f' of instance state ('%s'::'%s') exceeds the limit '%.2f'! ",
+                                    stateReport.getTotalDuration(), instanceKey, stateReport.getState(), duration));
+                        }
+                    });
+                }
             }
+            LOGGER.info("Total durations for Salt states by job: {}", saltStatesTotalDurations);
+        } else {
+            Log.warn(LOGGER, " Salt High State reports are missing! Salt states' duration validation is not possible right now! ");
         }
-        LOGGER.info("Total durations for Salt states by job: {}", saltStatesTotalDurations);
     }
 }
