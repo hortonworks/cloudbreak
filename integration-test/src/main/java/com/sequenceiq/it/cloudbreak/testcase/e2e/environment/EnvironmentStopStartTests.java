@@ -34,6 +34,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.cloudbreak.util.clouderamanager.ClouderaManagerUtil;
@@ -101,6 +102,10 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
         String filePath = "/pre-service-deployment";
         String fileName = "pre-service-deployment";
 
+        String freeipaVerticalScaleKey = "freeipaVerticalScaleKey";
+        String sdxVerticalScaleKey = "sdxVerticalScaleKey";
+        String distroxVerticalScaleKey = "distroxVerticalScaleKey";
+
         testContext
                 .given(RecipeTestDto.class)
                     .withName(recipeName)
@@ -147,14 +152,20 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.stop())
                 .await(EnvironmentStatus.ENV_STOPPED)
+                .given(freeipaVerticalScaleKey, VerticalScalingTestDto.class)
+                .withFreeipaVerticalScale()
+                .given(sdxVerticalScaleKey, VerticalScalingTestDto.class)
+                .withSdxVerticalScale()
+                .given(distroxVerticalScaleKey, VerticalScalingTestDto.class)
+                .withDistroXVerticalScale()
                 .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.verticalScale())
+                .when(environmentTestClient.verticalScale(freeipaVerticalScaleKey))
                 .await(EnvironmentStatus.ENV_STOPPED)
                 .given(SdxInternalTestDto.class)
-                .when(sdxTestClient.verticalScale())
+                .when(sdxTestClient.verticalScale(sdxVerticalScaleKey))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .given("dx1", DistroXTestDto.class)
-                .when(distroXTestClient.verticalScale())
+                .when(distroXTestClient.verticalScale(distroxVerticalScaleKey))
                 .await(STACK_STOPPED, RunningParameter.key("dx1"))
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.start())

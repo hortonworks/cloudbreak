@@ -62,9 +62,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.dto.verticalscale.DatalakeVerticalScalingTestDto;
-import com.sequenceiq.it.cloudbreak.dto.verticalscale.DistroXVerticalScalingTestDto;
-import com.sequenceiq.it.cloudbreak.dto.verticalscale.FreeIpaVerticalScalingTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
@@ -86,24 +84,21 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     private GcpCloudFunctionality gcpCloudFunctionality;
 
     @Override
-    public FreeIpaVerticalScalingTestDto getFreeIpaVerticalScalingTestDto() {
-        return new FreeIpaVerticalScalingTestDto(
-                gcpProperties.getVerticalScale().getFreeipa().getGroup(),
-                gcpProperties.getVerticalScale().getFreeipa().getInstanceType());
+    public VerticalScalingTestDto freeIpaVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(gcpProperties.getVerticalScale().getFreeipa().getGroup())
+                .withInstanceType(gcpProperties.getVerticalScale().getFreeipa().getInstanceType());
     }
 
     @Override
-    public DistroXVerticalScalingTestDto getDistroXVerticalScalingTestDto() {
-        return new DistroXVerticalScalingTestDto(
-                gcpProperties.getVerticalScale().getDatahub().getGroup(),
-                gcpProperties.getVerticalScale().getDatahub().getInstanceType());
+    public VerticalScalingTestDto distroXVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(gcpProperties.getVerticalScale().getFreeipa().getGroup())
+                .withInstanceType(gcpProperties.getVerticalScale().getFreeipa().getInstanceType());
     }
 
     @Override
-    public DatalakeVerticalScalingTestDto getDatalakeVerticalScalingTestDto() {
-        return new DatalakeVerticalScalingTestDto(
-                gcpProperties.getVerticalScale().getDatalake().getGroup(),
-                gcpProperties.getVerticalScale().getDatalake().getInstanceType());
+    public VerticalScalingTestDto datalakeVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(gcpProperties.getVerticalScale().getFreeipa().getGroup())
+                .withInstanceType(gcpProperties.getVerticalScale().getFreeipa().getInstanceType());
     }
 
     @Override

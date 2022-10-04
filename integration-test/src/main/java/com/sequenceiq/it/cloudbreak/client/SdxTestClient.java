@@ -232,8 +232,8 @@ public class SdxTestClient {
         return new SdxRotateSaltPasswordAction();
     }
 
-    public Action<SdxInternalTestDto, SdxClient> verticalScale() {
-        return new SdxVerticalScaleAction();
+    public Action<SdxInternalTestDto, SdxClient> verticalScale(String verticalScaleKey) {
+        return new SdxVerticalScaleAction(verticalScaleKey);
     }
 
 }

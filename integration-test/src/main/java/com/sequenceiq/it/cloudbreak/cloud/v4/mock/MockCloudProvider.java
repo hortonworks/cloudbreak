@@ -51,9 +51,7 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.dto.verticalscale.DatalakeVerticalScalingTestDto;
-import com.sequenceiq.it.cloudbreak.dto.verticalscale.DistroXVerticalScalingTestDto;
-import com.sequenceiq.it.cloudbreak.dto.verticalscale.FreeIpaVerticalScalingTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
@@ -117,24 +115,21 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public FreeIpaVerticalScalingTestDto getFreeIpaVerticalScalingTestDto() {
-        return new FreeIpaVerticalScalingTestDto(
-                mockProperties.getVerticalScale().getFreeipa().getGroup(),
-                mockProperties.getVerticalScale().getFreeipa().getInstanceType());
+    public VerticalScalingTestDto freeIpaVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+         return verticalScalingTestDto.withGroup(mockProperties.getVerticalScale().getFreeipa().getGroup())
+                         .withInstanceType(mockProperties.getVerticalScale().getFreeipa().getInstanceType());
     }
 
     @Override
-    public DistroXVerticalScalingTestDto getDistroXVerticalScalingTestDto() {
-        return new DistroXVerticalScalingTestDto(
-                mockProperties.getVerticalScale().getDatahub().getGroup(),
-                mockProperties.getVerticalScale().getDatahub().getInstanceType());
+    public VerticalScalingTestDto distroXVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(mockProperties.getVerticalScale().getFreeipa().getGroup())
+                .withInstanceType(mockProperties.getVerticalScale().getFreeipa().getInstanceType());
     }
 
     @Override
-    public DatalakeVerticalScalingTestDto getDatalakeVerticalScalingTestDto() {
-        return new DatalakeVerticalScalingTestDto(
-                mockProperties.getVerticalScale().getDatalake().getGroup(),
-                mockProperties.getVerticalScale().getDatalake().getInstanceType());
+    public VerticalScalingTestDto datalakeVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return verticalScalingTestDto.withGroup(mockProperties.getVerticalScale().getFreeipa().getGroup())
+                .withInstanceType(mockProperties.getVerticalScale().getFreeipa().getInstanceType());
     }
 
     @Override

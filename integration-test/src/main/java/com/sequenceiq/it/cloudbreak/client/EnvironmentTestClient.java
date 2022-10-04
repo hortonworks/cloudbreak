@@ -84,8 +84,8 @@ public class EnvironmentTestClient {
         return new EnvironmentStopAction();
     }
 
-    public Action<EnvironmentTestDto, EnvironmentClient> verticalScale() {
-        return new EnvironmentVerticalScaleAction();
+    public Action<EnvironmentTestDto, EnvironmentClient> verticalScale(String verticalScaleKey) {
+        return new EnvironmentVerticalScaleAction(verticalScaleKey);
     }
 
     public Action<EnvironmentTestDto, EnvironmentClient> start() {

@@ -130,7 +130,7 @@ public class DistroXTestClient {
         return new DistroXRotateSaltPasswordAction();
     }
 
-    public Action<DistroXTestDto, CloudbreakClient> verticalScale() {
-        return new DistroXVerticalScaleAction();
+    public Action<DistroXTestDto, CloudbreakClient> verticalScale(String verticalScaleKey) {
+        return new DistroXVerticalScaleAction(verticalScaleKey);
     }
 }

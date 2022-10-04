@@ -44,9 +44,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxRepairTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.dto.verticalscale.DatalakeVerticalScalingTestDto;
-import com.sequenceiq.it.cloudbreak.dto.verticalscale.DistroXVerticalScalingTestDto;
-import com.sequenceiq.it.cloudbreak.dto.verticalscale.FreeIpaVerticalScalingTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
@@ -186,11 +184,11 @@ public interface CloudProvider {
 
     String getStorageOptimizedInstanceType();
 
-    FreeIpaVerticalScalingTestDto getFreeIpaVerticalScalingTestDto();
+    VerticalScalingTestDto freeIpaVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto);
 
-    DistroXVerticalScalingTestDto getDistroXVerticalScalingTestDto();
+    VerticalScalingTestDto distroXVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto);
 
-    DatalakeVerticalScalingTestDto getDatalakeVerticalScalingTestDto();
+    VerticalScalingTestDto datalakeVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto);
 
     void verifyDiskEncryptionKey(DetailedEnvironmentResponse environment, String environmentName);
 

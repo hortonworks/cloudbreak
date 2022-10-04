@@ -53,9 +53,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxRepairTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.dto.verticalscale.DatalakeVerticalScalingTestDto;
-import com.sequenceiq.it.cloudbreak.dto.verticalscale.DistroXVerticalScalingTestDto;
-import com.sequenceiq.it.cloudbreak.dto.verticalscale.FreeIpaVerticalScalingTestDto;
+import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
@@ -411,18 +409,18 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public FreeIpaVerticalScalingTestDto getFreeIpaVerticalScalingTestDto() {
-        return delegate.getFreeIpaVerticalScalingTestDto();
+    public VerticalScalingTestDto freeIpaVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return delegate.freeIpaVerticalScalingTestDto(verticalScalingTestDto);
     }
 
     @Override
-    public DistroXVerticalScalingTestDto getDistroXVerticalScalingTestDto() {
-        return delegate.getDistroXVerticalScalingTestDto();
+    public VerticalScalingTestDto distroXVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return delegate.distroXVerticalScalingTestDto(verticalScalingTestDto);
     }
 
     @Override
-    public DatalakeVerticalScalingTestDto getDatalakeVerticalScalingTestDto() {
-        return delegate.getDatalakeVerticalScalingTestDto();
+    public VerticalScalingTestDto datalakeVerticalScalingTestDto(VerticalScalingTestDto verticalScalingTestDto) {
+        return delegate.datalakeVerticalScalingTestDto(verticalScalingTestDto);
     }
 
     public CloudProvider getDelegate(CloudPlatform cloudPlatform) {
