@@ -40,6 +40,16 @@ public class SdxClientService {
         }
     }
 
+    public List<SdxClusterResponse> getByEnvironmentCrnInernal(String environmentCrn) {
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> sdxEndpoint.getByEnvCrn(environmentCrn));
+        } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
+            LOGGER.error(String.format("Failed to get datalake clusters for environment %s", environmentCrn), e);
+            return new ArrayList<>();
+        }
+    }
+
     public SdxClusterResponse getByCrn(String crn) {
         return sdxEndpoint.getByCrn(crn);
     }

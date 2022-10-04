@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validatio
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -25,7 +26,6 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.AbstractValidateRdsUpgradeEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeBackupValidationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeBackupValidationResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradePushSaltStatesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradePushSaltStatesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.validation.ValidateRdsUpgradeTriggerRequest;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -64,23 +64,13 @@ class ValidateRdsUpgradeActionsTest {
     private ValidateRdsUpgradeActions underTest;
 
     @Test
-    public void testShouldPushSaltStates() throws Exception {
-        AbstractAction action = (AbstractAction) underTest.pushSaltStates();
-        ValidateRdsUpgradeTriggerRequest triggerEvent =
-                new ValidateRdsUpgradeTriggerRequest(VALIDATE_RDS_UPGRADE_EVENT.event(), STACK_ID, TARGET_MAJOR_VERSION, new Promise<>());
-        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true);
-
-        verify(validateRdsUpgradeService).pushSaltStates(STACK_ID);
-        verifyBackupRestoreAction(ValidateRdsUpgradePushSaltStatesRequest.class);
-    }
-
-    @Test
-    public void testShouldNotPushSaltStates() throws Exception {
+    public void testShouldPushSaltStatesNoOperation() throws Exception {
         AbstractAction action = (AbstractAction) underTest.pushSaltStates();
         ValidateRdsUpgradeTriggerRequest triggerEvent =
                 new ValidateRdsUpgradeTriggerRequest(VALIDATE_RDS_UPGRADE_EVENT.event(), STACK_ID, TARGET_MAJOR_VERSION, new Promise<>());
         mockAndTriggerRdsUpgradeAction(action, triggerEvent, false);
 
+        verify(validateRdsUpgradeService).rdsUpgradeStarted(STACK_ID, TARGET_MAJOR_VERSION);
         verify(validateRdsUpgradeService, never()).pushSaltStates(STACK_ID);
         verifyBackupRestoreAction(ValidateRdsUpgradePushSaltStatesResult.class);
     }
@@ -115,7 +105,7 @@ class ValidateRdsUpgradeActionsTest {
         StackView stack = mock(StackView.class);
         when(stack.getId()).thenReturn(STACK_ID);
         ClusterView cluster = mock(ClusterView.class);
-        when(validateRdsUpgradeService.shouldRunDataBackupRestore(stack, cluster)).thenReturn(shouldRunDataBackupRestore);
+        lenient().when(validateRdsUpgradeService.shouldRunDataBackupRestore(stack, cluster)).thenReturn(shouldRunDataBackupRestore);
         ValidateRdsUpgradeContext context =  new ValidateRdsUpgradeContext(new FlowParameters(FLOW_ID, FLOW_ID, null), stack, cluster);
 
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
