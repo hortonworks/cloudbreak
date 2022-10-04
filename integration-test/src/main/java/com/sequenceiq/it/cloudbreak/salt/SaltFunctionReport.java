@@ -3,8 +3,10 @@ package com.sequenceiq.it.cloudbreak.salt;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SaltFunctionReport {
     private Map<String, Object> changes;
 
