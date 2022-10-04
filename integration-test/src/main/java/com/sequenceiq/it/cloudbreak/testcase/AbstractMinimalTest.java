@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
+import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.ITestContext;
@@ -32,10 +32,10 @@ import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.E2ETestContext;
 import com.sequenceiq.it.cloudbreak.context.MeasuredTestContext;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.PurgeGarbageService;
-import com.sequenceiq.it.cloudbreak.context.E2ETestContext;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription.TestCaseDescriptionBuilder;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -48,7 +48,7 @@ import com.sequenceiq.it.util.LongStringGeneratorUtil;
 import io.opentracing.contrib.spring.tracer.configuration.TracerAutoConfiguration;
 
 @ContextConfiguration(classes = {IntegrationTestConfiguration.class, AuditBeanConfig.class, TracerAutoConfiguration.class},
-        initializers = ConfigFileApplicationContextInitializer.class)
+        initializers = ConfigDataApplicationContextInitializer.class)
 public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTests {
 
     public static final Map<String, Status> STACK_DELETED = Map.of("status", Status.DELETE_COMPLETED);

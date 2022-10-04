@@ -13,7 +13,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
+import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.util.CollectionUtils;
@@ -38,7 +38,7 @@ import com.sequenceiq.it.cloudbreak.util.CleanupService;
 import com.sequenceiq.it.config.ITProps;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 
-@ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
+@ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigDataApplicationContextInitializer.class)
 public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextTests {
 
     private static final int WITH_TYPE_LENGTH = 4;

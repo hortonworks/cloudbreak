@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
+import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.util.StringUtils;
@@ -21,7 +21,7 @@ import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.periscope.client.AutoscaleUserCrnClient;
 import com.sequenceiq.periscope.client.AutoscaleUserCrnClientBuilder;
 
-@ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
+@ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigDataApplicationContextInitializer.class)
 public class AutoscaleTestSuiteInitializer extends AbstractTestNGSpringContextTests {
     private static final Logger LOG = LoggerFactory.getLogger(AutoscaleTestSuiteInitializer.class);
 
