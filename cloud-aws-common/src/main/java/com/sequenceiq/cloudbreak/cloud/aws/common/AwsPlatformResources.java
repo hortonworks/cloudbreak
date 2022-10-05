@@ -183,7 +183,7 @@ public class AwsPlatformResources implements PlatformResources {
 
     private static final int MAX_RESULTS = 1000;
 
-    private static final int ONE_THOUSAND = 1000;
+    private static final int ONE_THOUSAND_TWENTY_FOUR = 1024;
 
     @Inject
     private CommonAwsClient awsClient;
@@ -770,7 +770,7 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     private float getMemory(InstanceTypeInfo instanceType) {
-        return (float) instanceType.getMemoryInfo().getSizeInMiB() / ONE_THOUSAND;
+        return (float) instanceType.getMemoryInfo().getSizeInMiB() / ONE_THOUSAND_TWENTY_FOUR;
     }
 
     private List<String> getInstanceTypes(List<String> instanceTypes, int i) {
