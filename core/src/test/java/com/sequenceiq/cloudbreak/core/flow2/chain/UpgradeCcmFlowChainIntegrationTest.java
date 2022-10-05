@@ -46,15 +46,22 @@ import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.CcmUpgradeFlowTriggerCondition;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmActions;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateActions;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateService;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.update.userdata.FlowIntegrationTestConfig;
@@ -64,6 +71,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.DeregisterAgentHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.HealthCheckHandler;
@@ -72,15 +81,25 @@ import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.Reconfigure
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.RegisterClusterProxyHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.RemoveAgentHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.TunnelUpdateHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.kerberos.KeytabConfigurationHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.kerberos.KeytabProvider;
+import com.sequenceiq.cloudbreak.reactor.handler.orchestration.BootstrapMachineHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.orchestration.StartAmbariServicesHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.recipe.UploadRecipesHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.userdata.UpdateUserDataHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.userdata.UpdateUserDataOnProviderHandler;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
+import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeOrchestratorService;
+import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -106,9 +125,11 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     private static final int ALL_CALLED_ONCE = 3;
 
-    private static final int CALLED_TILL_UPDATE_TUNNEL = 1;
+    private static final int CALLED_TILL_BOOTSTRAP = 1;
 
-    private static final int CALLED_TILL_UPDATE_USERDATA = 2;
+    private static final int CALLED_TILL_UPDATE_TUNNEL = 2;
+
+    private static final int CALLED_TILL_UPDATE_USERDATA = 3;
 
     @Inject
     private FlowLogRepository flowLogRepository;
@@ -156,13 +177,52 @@ class UpgradeCcmFlowChainIntegrationTest {
     private UpgradeCcmService upgradeCcmService;
 
     @MockBean
-    private UpgradeOrchestratorService upgradeOrchestratorService;
+    private SaltUpdateService saltUpdateService;
+
+    @MockBean
+    private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
+
+    @MockBean
+    private ClusterBootstrapper clusterBootstrapper;
+
+    @MockBean
+    private ClusterProxyService clusterProxyService;
+
+    @MockBean
+    private RecipeEngine recipeEngine;
+
+    @MockBean
+    private GatewayConfigService gatewayConfigService;
+
+    @MockBean
+    private KerberosConfigService kerberosConfigService;
+
+    @MockBean
+    private KerberosDetailService kerberosDetailService;
+
+    @MockBean
+    private HostOrchestrator hostOrchestrator;
+
+    @MockBean
+    private KeytabProvider keytabProvider;
+
+    @MockBean
+    private EnvironmentConfigProvider environmentConfigProvider;
+
+    @MockBean
+    private ClusterServiceRunner clusterServiceRunner;
+
+    @MockBean
+    private ClusterApiConnectors clusterApiConnectors;
 
     @SpyBean
     private FlowChains flowChains;
 
     @Mock
     private ResourceConnector resourcesApi;
+
+    @Mock
+    private ClusterApi clusterApi;
 
     private Stack mockStack() {
         Stack stack = new Stack();
@@ -193,6 +253,7 @@ class UpgradeCcmFlowChainIntegrationTest {
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(stackDto.getStack()).thenReturn(stack);
         when(stackDto.getWorkspace()).thenReturn(stack.getWorkspace());
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
     }
 
     @BeforeEach
@@ -208,50 +269,59 @@ class UpgradeCcmFlowChainIntegrationTest {
         when(connector.authentication()).thenReturn(authApi);
         when(connector.resources()).thenReturn(resourcesApi);
         when(authApi.authenticate(any(), any())).thenReturn(context);
+        when(clusterApiConnectors.getConnector(any(), any())).thenReturn(clusterApi);
     }
 
     @Test
     public void testCcmUpgradeFlowChainWhenSuccessful() throws Exception {
-        testFlow(ALL_CALLED_ONCE, true, true);
+        testFlow(ALL_CALLED_ONCE, true, true, true);
+    }
+
+    @Test
+    public void testCcmUpgradeFlowChainWhenSaltUpdateFails() throws Exception {
+        doThrow(BadRequestException.class).when(clusterBootstrapper).reBootstrapMachines(anyLong());
+        testFlow(CALLED_TILL_BOOTSTRAP, false, false, false);
     }
 
     @Test
     public void testCcmUpgradeFlowChainWhenUpdateCcmFails() throws Exception {
         doThrow(BadRequestException.class).when(upgradeCcmService).updateTunnel(anyLong());
-        testFlow(CALLED_TILL_UPDATE_TUNNEL, false, false);
+        testFlow(CALLED_TILL_UPDATE_TUNNEL, true, false, false);
     }
 
     @Test
     public void testCcmUpgradeFlowChainWhenUpdateUserDataFails() throws Exception {
         doThrow(BadRequestException.class).when(userDataService).updateJumpgateFlagOnly(anyLong());
-        testFlow(CALLED_TILL_UPDATE_USERDATA, true, false);
+        testFlow(CALLED_TILL_UPDATE_USERDATA, true, true, false);
     }
 
-    private void testFlow(int calledOnce, boolean ccmUpgradeSuccess, boolean userDataUpdateSuccess) throws Exception {
+    private void testFlow(int calledOnce, boolean saltUpdateSuccess, boolean ccmUpgradeSuccess, boolean userDataUpdateSuccess) throws Exception {
         triggerFlow();
         letItFlow();
 
-        flowFinishedSuccessfully(ccmUpgradeSuccess ? 2 : 1);
-        verifyFinishingStatCalls(ccmUpgradeSuccess, userDataUpdateSuccess);
+        flowFinished(ccmUpgradeSuccess ? 3 : (saltUpdateSuccess ? 2 : 1));
+        verifyFinishingStatCalls(saltUpdateSuccess, ccmUpgradeSuccess, userDataUpdateSuccess);
         verifyServiceCalls(calledOnce);
     }
 
-    private void verifyFinishingStatCalls(boolean ccmUpgradeSuccess, boolean userDataUpdateSuccess) throws Exception {
+    private void verifyFinishingStatCalls(boolean saltUpdateSuccess, boolean ccmUpgradeSuccess, boolean userDataUpdateSuccess) throws Exception {
         verify(upgradeCcmService, times(ccmUpgradeSuccess ? 1 : 0)).ccmUpgradeFinished(eq(1L), eq(0L));
         verify(resourcesApi, times(userDataUpdateSuccess ? 1 : 0)).updateUserData(any(), any(), any(), eq(USER_DATA));
-        verify(upgradeCcmService, times(ccmUpgradeSuccess ? 0 : 1)).ccmUpgradeFailed(any(), anyLong());
+        verify(upgradeCcmService, times(ccmUpgradeSuccess || !saltUpdateSuccess ? 0 : 1)).ccmUpgradeFailed(any(), anyLong());
+        verify(clusterApi, times(saltUpdateSuccess ? 1 : 0)).waitForServer(anyBoolean());
     }
 
     private void verifyServiceCalls(int calledOnceCount) throws Exception {
         final int[] expected = new int[ALL_CALLED_ONCE];
         Arrays.fill(expected, 0, calledOnceCount, 1);
         int i = 0;
-        InOrder inOrder = Mockito.inOrder(upgradeCcmService, userDataService, resourcesApi);
+        InOrder inOrder = Mockito.inOrder(upgradeCcmService, userDataService, resourcesApi, clusterBootstrapper);
+        inOrder.verify(clusterBootstrapper, times(expected[i++])).reBootstrapMachines(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).updateTunnel(STACK_ID);
         inOrder.verify(userDataService, times(expected[i++])).updateJumpgateFlagOnly(STACK_ID);
     }
 
-    private void flowFinishedSuccessfully(int numberOfRanFlows) {
+    private void flowFinished(int numberOfRanFlows) {
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
         verify(flowLogRepository, times(2 * numberOfRanFlows)).save(flowLog.capture());
         assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
@@ -272,6 +342,12 @@ class UpgradeCcmFlowChainIntegrationTest {
     @Profile("integration-test")
     @TestConfiguration
     @Import({
+            SaltUpdateFlowConfig.class,
+            SaltUpdateActions.class,
+            BootstrapMachineHandler.class,
+            UploadRecipesHandler.class,
+            KeytabConfigurationHandler.class,
+            StartAmbariServicesHandler.class,
             UpgradeCcmFlowEventChainFactory.class,
             UpdateUserDataFlowConfig.class,
             UserDataUpdateActions.class,
@@ -291,5 +367,6 @@ class UpgradeCcmFlowChainIntegrationTest {
             FlowIntegrationTestConfig.class
     })
     static class Config {
+
     }
 }
