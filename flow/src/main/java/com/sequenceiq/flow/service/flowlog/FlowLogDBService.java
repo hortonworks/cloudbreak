@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.util.Benchmark;
@@ -76,6 +77,9 @@ public class FlowLogDBService implements FlowLogService {
 
     @Inject
     private ResourceIdProvider resourceIdProvider;
+
+    @Inject
+    private Clock clock;
 
     @Override
     public FlowLog save(FlowParameters flowParameters, String flowChainId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
@@ -183,7 +187,12 @@ public class FlowLogDBService implements FlowLogService {
     @Override
     public void updateLastFlowLogStatus(FlowLog lastFlowLog, boolean failureEvent) {
         StateStatus stateStatus = failureEvent ? StateStatus.FAILED : StateStatus.SUCCESSFUL;
-        flowLogRepository.updateLastLogStatusInFlow(lastFlowLog.getId(), stateStatus);
+        Long currentTime = getCurrentTime();
+        flowLogRepository.updateLastLogStatusInFlow(lastFlowLog.getId(), stateStatus, currentTime);
+    }
+
+    public Long getCurrentTime() {
+        return clock.getCurrentTimeMillis();
     }
 
     @Override

@@ -78,8 +78,8 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     List<FlowLog> findAllByFlowIdsCreatedDesc(@Param("flowIds") Set<String> flowIds);
 
     @Modifying
-    @Query("UPDATE FlowLog fl SET fl.stateStatus = :stateStatus WHERE fl.id = :id")
-    void updateLastLogStatusInFlow(@Param("id") Long id, @Param("stateStatus") StateStatus stateStatus);
+    @Query("UPDATE FlowLog fl SET fl.stateStatus = :stateStatus, fl.endTime = :endTime WHERE fl.id = :id")
+    void updateLastLogStatusInFlow(@Param("id") Long id, @Param("stateStatus") StateStatus stateStatus, @Param("endTime") Long endTime);
 
     @Modifying
     @Query("DELETE FROM FlowLog fl WHERE fl.finalized = TRUE")

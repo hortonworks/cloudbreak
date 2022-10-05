@@ -25,6 +25,8 @@ public class FlowLogResponse {
 
     private String flowTriggerUserCrn;
 
+    private Long endTime;
+
     public Long getResourceId() {
         return resourceId;
     }
@@ -105,6 +107,14 @@ public class FlowLogResponse {
         this.flowTriggerUserCrn = flowTriggerUserCrn;
     }
 
+    public Long getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Long endTime) {
+        this.endTime = endTime;
+    }
+
     @Override
     public String toString() {
         return "FlowLogResponse{" +
@@ -118,6 +128,7 @@ public class FlowLogResponse {
                 ", nodeId='" + nodeId + '\'' +
                 ", stateStatus=" + stateStatus +
                 ", flowTriggerUserCrn='" + flowTriggerUserCrn + '\'' +
+                ", flowEndTime='" + endTime + '\'' +
                 '}';
     }
 }

@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -47,6 +48,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.flow.api.model.operation.OperationType;
@@ -99,6 +101,9 @@ class FlowLogDBServiceTest {
     @Mock
     private NodeConfig nodeConfig;
 
+    @Mock
+    private Clock clock;
+
     @Captor
     private ArgumentCaptor<FlowLog> savedFlowLogCaptor;
 
@@ -115,10 +120,12 @@ class FlowLogDBServiceTest {
     private void runUpdateLastFlowLogStatusTest(boolean failureEvent, StateStatus successful) {
         FlowLog flowLog = new FlowLog();
         flowLog.setId(ID);
+        Long currentTime = 123456789L;
+        doReturn(currentTime).when(clock).getCurrentTimeMillis();
 
         underTest.updateLastFlowLogStatus(flowLog, failureEvent);
 
-        verify(flowLogRepository, times(1)).updateLastLogStatusInFlow(ID, successful);
+        verify(flowLogRepository, times(1)).updateLastLogStatusInFlow(ID, successful, currentTime);
     }
 
     @Test
@@ -221,6 +228,8 @@ class FlowLogDBServiceTest {
     @Test
     void cancelTooOldTerminationFlowForResourceTest() throws TransactionService.TransactionExecutionException {
         Set<FlowLogIdWithTypeAndTimestamp> flowLogs = new LinkedHashSet<>();
+        Long currentTime = 123456789L;
+        doReturn(currentTime).when(clock).getCurrentTimeMillis();
         FlowLogIdWithTypeAndTimestamp flowLog2 = mock(FlowLogIdWithTypeAndTimestamp.class);
         when(flowLog2.getFlowType()).thenReturn(ClassValue.of(Class.class));
         flowLogs.add(flowLog2);
@@ -239,7 +248,7 @@ class FlowLogDBServiceTest {
         underTest.cancelTooOldTerminationFlowForResource(1L, 10000L);
         verify(flowLogRepository).finalizeByFlowId(eq("flow1"));
         verify(flowLogRepository, times(0)).finalizeByFlowId(eq("flow2"));
-        verify(flowLogRepository).updateLastLogStatusInFlow(eq(10L), eq(StateStatus.SUCCESSFUL));
+        verify(flowLogRepository).updateLastLogStatusInFlow(eq(10L), eq(StateStatus.SUCCESSFUL), eq(currentTime));
     }
 
     @Test
@@ -257,7 +266,7 @@ class FlowLogDBServiceTest {
         underTest.cancelTooOldTerminationFlowForResource(1L, 10000L);
         verify(flowLogRepository, times(0)).finalizeByFlowId(eq("flow1"));
         verify(flowLogRepository, times(0)).finalizeByFlowId(eq("flow2"));
-        verify(flowLogRepository, times(0)).updateLastLogStatusInFlow(eq(10L), eq(StateStatus.SUCCESSFUL));
+        verify(flowLogRepository, times(0)).updateLastLogStatusInFlow(eq(10L), eq(StateStatus.SUCCESSFUL), eq(1L));
     }
 
     @Test
@@ -311,6 +320,8 @@ class FlowLogDBServiceTest {
     }
 
     private void prepareFinalization() throws TransactionExecutionException {
+        Long currentTime = 123456789L;
+        doReturn(currentTime).when(clock).getCurrentTimeMillis();
         when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> ((Supplier) invocation.getArguments()[0]).get());
         FlowLog lastFlowLog = new FlowLog(ID, FLOW_ID, "currentState", false, StateStatus.SUCCESSFUL, OperationType.DIAGNOSTICS);
         lastFlowLog.setId(DATABASE_ID);
@@ -320,7 +331,7 @@ class FlowLogDBServiceTest {
 
     private void verifyFinalization() {
         verify(flowLogRepository).finalizeByFlowId(FLOW_ID);
-        verify(flowLogRepository).updateLastLogStatusInFlow(DATABASE_ID, StateStatus.SUCCESSFUL);
+        verify(flowLogRepository).updateLastLogStatusInFlow(DATABASE_ID, StateStatus.SUCCESSFUL, 123456789L);
         verify(flowLogRepository).save(savedFlowLogCaptor.capture());
     }
 
