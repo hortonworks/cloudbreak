@@ -3,7 +3,6 @@ package com.sequenceiq.it.cloudbreak.util.gcp.action;
 import static java.lang.String.format;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -15,14 +14,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.gax.paging.Page;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.GlobalOperations;
 import com.google.api.services.compute.Compute.ZoneOperations.Get;
@@ -30,11 +29,11 @@ import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.CustomerEncryptionKey;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Operation;
-import com.google.api.services.storage.Storage;
-import com.google.api.services.storage.Storage.Buckets.Delete;
-import com.google.api.services.storage.model.Objects;
-import com.google.api.services.storage.model.StorageObject;
-import com.sequenceiq.it.cloudbreak.cloud.v4.gcp.GcpProperties;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.Storage.BlobListOption;
+import com.google.cloud.storage.Storage.BlobSourceOption;
+import com.google.cloud.storage.StorageException;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.gcp.client.GcpClient;
@@ -47,9 +46,6 @@ public class GcpClientActions extends GcpClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpClientActions.class);
 
-    @Inject
-    private GcpProperties gcpProperties;
-
     public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
         LOGGER.info("Collect tags/labels for instance ids: '{}'", String.join(", ", instanceIds));
         Map<String, Map<String, String>> instanceTags = new HashMap<>();
@@ -58,7 +54,7 @@ public class GcpClientActions extends GcpClient {
             try {
                 Instance instance = compute
                         .instances()
-                        .get(getProjectId(), gcpProperties.getAvailabilityZone(), instanceId)
+                        .get(getProjectId(), getAvailabilityZone(), instanceId)
                         .execute();
                 instanceTags.put(instanceId, instance.getLabels());
             } catch (Exception e) {
@@ -76,7 +72,7 @@ public class GcpClientActions extends GcpClient {
             try {
                 Instance instance = compute
                         .instances()
-                        .get(getProjectId(), gcpProperties.getAvailabilityZone(), instanceId)
+                        .get(getProjectId(), getAvailabilityZone(), instanceId)
                         .execute();
                 List<String> attachedDiskNames = instance
                         .getDisks()
@@ -105,7 +101,7 @@ public class GcpClientActions extends GcpClient {
             try {
                 Instance instance = compute
                         .instances()
-                        .get(getProjectId(), gcpProperties.getAvailabilityZone(), instanceId)
+                        .get(getProjectId(), getAvailabilityZone(), instanceId)
                         .execute();
                 Optional<String> encryptionKey = instance
                         .getDisks()
@@ -123,7 +119,6 @@ public class GcpClientActions extends GcpClient {
     }
 
     public Map<String, String> instanceSubnet(List<String> instanceIds) {
-        //TODO
         return null;
     }
 
@@ -134,7 +129,7 @@ public class GcpClientActions extends GcpClient {
             try {
                 Operation deleteOperation = compute
                         .instances()
-                        .delete(getProjectId(), gcpProperties.getAvailabilityZone(), instanceId)
+                        .delete(getProjectId(), getAvailabilityZone(), instanceId)
                         .execute();
                 Log.log(LOGGER, format(" Gcp instance [%s] state is [%s] with message: %s", instanceId, deleteOperation.getStatus(),
                         deleteOperation.getStatusMessage()));
@@ -199,7 +194,7 @@ public class GcpClientActions extends GcpClient {
             try {
                 stopInstanceOperation = compute
                         .instances()
-                        .stop(getProjectId(), gcpProperties.getAvailabilityZone(), instanceId)
+                        .stop(getProjectId(), getAvailabilityZone(), instanceId)
                         .execute();
                 Log.log(LOGGER, format(" Gcp instance [%s] state is [%s] with message: %s", instanceId, stopInstanceOperation.getStatus(),
                         stopInstanceOperation.getStatusMessage()));
@@ -267,11 +262,10 @@ public class GcpClientActions extends GcpClient {
 
     public URI getBaseLocationUri() {
         try {
-            return new URI(gcpProperties.getCloudStorage().getBaseLocation());
+            return new URI(getBaseLocation());
         } catch (URISyntaxException e) {
-            LOGGER.error("Google GCS base location path: '{}' is not a valid URI!", gcpProperties.getCloudStorage().getBaseLocation());
-            throw new TestFailException(format(" Google GCS base location path: '%s' is not a valid URI! ",
-                    gcpProperties.getCloudStorage().getBaseLocation()));
+            LOGGER.error("Google GCS base location path: '{}' is not a valid URI!", getBaseLocation());
+            throw new TestFailException(format(" Google GCS base location path: '%s' is not a valid URI! ", getBaseLocation()));
         }
     }
 
@@ -289,12 +283,11 @@ public class GcpClientActions extends GcpClient {
         URI baseLocationUri = getBaseLocationUri(baseLocation);
         String bucketName = baseLocationUri.getHost();
         String selectedObjectPath = baseLocationUri.getPath();
-        String keyPrefix = Arrays.stream(StringUtils.split(selectedObjectPath, "/"))
-                        .filter(StringUtils::isNotEmpty)
-                        .collect(Collectors.toList()).get(0);
-        List<StorageObject> filteredObjects;
-        Objects storageObjects;
-        Storage.Objects.List listObjectsOperation;
+        String keyPrefix = Arrays.stream(StringUtils.split(baseLocationUri.getPath(), "/"))
+                .filter(StringUtils::isNotEmpty)
+                .collect(Collectors.toList()).get(0);
+        Page<Blob> blobs;
+        List<Blob> filteredBlobs = new ArrayList<>();
 
         Log.log(LOGGER, format(" Google GCS URI: %s", baseLocationUri));
         Log.log(LOGGER, format(" Google GCS Bucket: %s", bucketName));
@@ -302,97 +295,86 @@ public class GcpClientActions extends GcpClient {
         Log.log(LOGGER, format(" Google GCS Object: %s", selectedObjectPath));
 
         try {
-            listObjectsOperation = storage.objects().list(bucketName).setPrefix(keyPrefix);
+            blobs = storage
+                    .list(bucketName, BlobListOption.prefix(keyPrefix), BlobListOption.currentDirectory());
         } catch (Exception e) {
-            LOGGER.error(format("GCP GCS bucket '%s' is not present at base location '%s'", bucketName, baseLocationUri), e);
-            throw new TestFailException(format("GCP GCS bucket '%s' is not present at base location '%s'", bucketName, baseLocationUri), e);
+            Log.error(LOGGER, format("GCP GCS bucket '%s' is not present or accessible at base location '%s'", bucketName, baseLocationUri), e);
+            throw new TestFailException(format("GCP GCS bucket '%s' is not present or accessible at base location '%s'", bucketName, baseLocationUri), e);
         }
 
-        do {
-            try {
-                storageObjects = listObjectsOperation.execute();
-            } catch (IOException e) {
-                LOGGER.error(format("GCP GCS bucket '%s' is not accessible at base location '%s'", bucketName, baseLocationUri), e);
-                throw new TestFailException(format("GCP GCS bucket '%s' is not accessible at base location '%s'", bucketName, baseLocationUri), e);
-            }
-
-            if (storageObjects == null || storageObjects.getItems() == null) {
-                LOGGER.error("Google GCS path: '{}' does not exist!", keyPrefix);
-                throw new TestFailException(format(" Google GCS path: '%s' does not exist! ", keyPrefix));
-            }
-
-            filteredObjects = storageObjects.getItems().stream()
-                    .filter(storageObject -> {
-                        try {
-                            URI selfLink = new URI(storageObject.getSelfLink());
-                            return selfLink.getPath().contains(selectedObjectPath);
-                        } catch (URISyntaxException e) {
-                            LOGGER.error("Google GCS object: '{}' path: '{}' is not a valid URI!", storageObject.getName(), storageObject.getSelfLink());
-                            throw new TestFailException(format(" Google GCS object: '%s' path: '%s' is not a valid URI!",
-                                    storageObject.getName(), storageObject.getSelfLink()));
-                        }
-                    })
-                    .collect(Collectors.toList());
-
-            listObjectsOperation.setPageToken(storageObjects.getNextPageToken());
-        } while (StringUtils.isNotEmpty(storageObjects.getNextPageToken()));
-
-        if (filteredObjects.isEmpty()) {
-            Log.error(LOGGER, "Google GCS object: %s has 0 sub-objects!", selectedObjectPath);
-            throw new TestFailException(format("Google GCS object: %s has 0 sub-objects!", selectedObjectPath));
+        if (blobs == null || blobs.getValues() == null) {
+            Log.error(LOGGER, "Google GCS path: '{}' does not exist!", keyPrefix);
+            throw new TestFailException(format(" Google GCS path: '%s' does not exist! ", keyPrefix));
         } else {
-            Log.log(LOGGER, format(" Google GCS object: '%s' contains '%d' sub-objects.", selectedObjectPath, filteredObjects.size()));
-        }
-
-        for (StorageObject objectSummary : filteredObjects.stream().limit(10).collect(Collectors.toList())) {
-            if (objectSummary.getSize().compareTo(BigInteger.ZERO) == 0 && !zeroContent) {
-                LOGGER.error("Google GCS path: '{}' has 0 bytes of content!", selectedObjectPath);
-                throw new TestFailException(format(" Google GCS path: '%s' has 0 bytes of content! ", selectedObjectPath));
+            for (Blob blob : blobs.iterateAll()) {
+                try {
+                    URI selfLink = new URI(blob.getSelfLink());
+                    if (selfLink.getPath().contains(selectedObjectPath)) {
+                        filteredBlobs.add(blob);
+                    }
+                } catch (URISyntaxException e) {
+                    Log.error(LOGGER, format("Google GCS object: '%s' path: '%s' is not a valid URI!", blob.getName(), blob.getSelfLink()));
+                    throw new TestFailException(format(" Google GCS object: '%s' path: '%s' is not a valid URI!",
+                            blob.getName(), blob.getSelfLink()));
+                }
+            }
+            if (CollectionUtils.isEmpty(filteredBlobs)) {
+                Log.error(LOGGER, "Google GCS object: %s has 0 sub-objects!", selectedObjectPath);
+                throw new TestFailException(format("Google GCS object: %s has 0 sub-objects!", selectedObjectPath));
+            } else {
+                Log.log(LOGGER, format(" Google GCS object: '%s' contains '%d' sub-objects.", selectedObjectPath, filteredBlobs.size()));
+                for (Blob filteredBlob : filteredBlobs.stream().limit(10).collect(Collectors.toList())) {
+                    if (filteredBlob.getSize().compareTo(0L) == 0 && !zeroContent) {
+                        LOGGER.error("Google GCS path: '{}' has 0 bytes of content!", selectedObjectPath);
+                        throw new TestFailException(format(" Google GCS path: '%s' has 0 bytes of content! ", selectedObjectPath));
+                    }
+                }
             }
         }
     }
 
     public void deleteNonVersionedBucket(String baseLocation) {
-        LOGGER.info("Delete bucket from base location: '{}'", baseLocation);
         Storage storage = buildStorage();
+        URI baseLocationUri = getBaseLocationUri(baseLocation);
+        String bucketName = baseLocationUri.getHost();
+        String selectedObjectPath = baseLocationUri.getPath();
+        String keyPrefix = Arrays.stream(StringUtils.split(selectedObjectPath, "/"))
+                .filter(StringUtils::isNotEmpty)
+                .collect(Collectors.toList()).get(0);
+        Blob blob;
+
+        Log.log(LOGGER, format(" Google GCS URI: %s", baseLocationUri));
+        Log.log(LOGGER, format(" Google GCS Bucket: %s", bucketName));
+        Log.log(LOGGER, format(" Google GCS Key Prefix: %s", keyPrefix));
+        Log.log(LOGGER, format(" Google GCS Object: %s", selectedObjectPath));
+
         try {
-            Delete operation = storage.buckets().delete(baseLocation);
-            operation.execute();
-        } catch (IOException ioException) {
-            String msg = format("Failed to delete bucket from base location '%s'", baseLocation);
-            LOGGER.error(msg, ioException);
-            throw new TestFailException(msg, ioException);
+            blob = storage.get(bucketName, keyPrefix);
+        } catch (Exception e) {
+            Log.error(LOGGER, format("GCP GCS bucket '%s' is not present or accessible at base location '%s'", bucketName, baseLocationUri), e);
+            throw new TestFailException(format("GCP GCS bucket '%s' is not present or accessible at base location '%s'", bucketName, baseLocationUri), e);
+        }
+        if (blob.exists()) {
+            try {
+                BlobSourceOption precondition =
+                        BlobSourceOption.generationMatch(blob.getGeneration());
+                storage.delete(bucketName, keyPrefix, precondition);
+            } catch (StorageException e) {
+                Log.error(LOGGER, format("Failed to delete bucket from base location '%s'", baseLocation));
+                throw new TestFailException(format("Failed to delete bucket from base location '%s'", baseLocation), e);
+            }
+        } else {
+            Log.log(LOGGER, "Google GCS path: '{}' does not exist! It has already been deleted.", keyPrefix);
         }
     }
 
     public String getLoggingUrl(String baseLocation, String clusterLogPath) {
-        Storage storage = buildStorage();
         URI baseLocationUri = getBaseLocationUri(baseLocation);
         String bucketName = baseLocationUri.getHost();
         String keyPrefix = Arrays.stream(StringUtils.split(baseLocationUri.getPath(), "/"))
                 .filter(StringUtils::isNotEmpty)
                 .collect(Collectors.toList()).get(0);
-        Objects storageObjects;
-
-        Log.log(LOGGER, format(" Google GCS URI: %s", baseLocationUri));
-        Log.log(LOGGER, format(" Google GCS Bucket: %s", bucketName));
-        Log.log(LOGGER, format(" Google GCS Key Prefix: %s", keyPrefix));
-        Log.log(LOGGER, format(" Google GCS Cluster Logs: %s", clusterLogPath));
-
-        try {
-            Storage.Objects.List listObjectsOperation = storage.objects().list(bucketName).setPrefix(keyPrefix);
-            storageObjects = listObjectsOperation.execute();
-        } catch (IOException e) {
-            String msg = format("Google GCS bucket '%s' is NOT present!", bucketName);
-            LOGGER.error(msg, e);
-            throw new TestFailException(msg, e);
-        }
-        if (!storageObjects.isEmpty()) {
-            return format("https://console.cloud.google.com/storage/browser/%s/%s%s?project=gcp-dev-cloudbreak",
+        return format("https://console.cloud.google.com/storage/browser/%s/%s%s?project=gcp-dev-cloudbreak",
                     bucketName, keyPrefix, clusterLogPath);
-        } else {
-            LOGGER.error("Google GCS path: '{}' does not exist!", baseLocationUri);
-            throw new TestFailException(format(" Google GCS path: '%s' does not exist! ", baseLocationUri));
-        }
     }
 }
