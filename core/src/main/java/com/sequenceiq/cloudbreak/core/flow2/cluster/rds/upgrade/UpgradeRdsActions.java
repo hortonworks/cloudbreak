@@ -47,13 +47,12 @@ public class UpgradeRdsActions {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsTriggerRequest payload, Map<Object, Object> variables) {
                 putIfPresent(variables, CLOUD_STORAGE_BACKUP_LOCATION, payload.getBackupLocation());
-                upgradeRdsService.stopServicesState(payload.getResourceId());
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(UpgradeRdsContext context) {
-                return new UpgradeRdsStopServicesRequest(context.getStackId(), context.getVersion());
+                if (upgradeRdsService.shouldStopStartServices(context.getStack())) {
+                    upgradeRdsService.stopServicesState(payload.getResourceId());
+                    sendEvent(context, new UpgradeRdsStopServicesRequest(context.getStackId(), context.getVersion()));
+                } else {
+                    sendEvent(context, new UpgradeRdsStopServicesResult(context.getStackId(), context.getVersion()));
+                }
             }
         };
     }
@@ -115,13 +114,12 @@ public class UpgradeRdsActions {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsDataRestoreResult.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsDataRestoreResult payload, Map<Object, Object> variables) {
-                upgradeRdsService.startServicesState(payload.getResourceId());
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(UpgradeRdsContext context) {
-                return new UpgradeRdsStartServicesRequest(context.getStackId(), context.getVersion());
+                if (upgradeRdsService.shouldStopStartServices(context.getStack())) {
+                    upgradeRdsService.startServicesState(payload.getResourceId());
+                    sendEvent(context, new UpgradeRdsStartServicesRequest(context.getStackId(), context.getVersion()));
+                } else {
+                    sendEvent(context, new UpgradeRdsStartServicesResult(context.getStackId(), context.getVersion()));
+                }
             }
         };
     }

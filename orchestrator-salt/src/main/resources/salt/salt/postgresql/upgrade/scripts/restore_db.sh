@@ -100,8 +100,7 @@ run_restore() {
   restore_database_for_service {{ service }}
   {% endif %}
   {% endfor %}
-  # TODO: Commented only for test cases, uncomment before feature is released
-  #rm -rfv "$BACKUPS_DIR/*" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
+  rm -rfv "$BACKUPS_DIR/*" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
 
 }
 
