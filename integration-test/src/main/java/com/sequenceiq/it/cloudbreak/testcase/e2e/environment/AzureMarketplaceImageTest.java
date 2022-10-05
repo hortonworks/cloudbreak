@@ -24,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 
@@ -87,6 +88,9 @@ public class AzureMarketplaceImageTest extends AbstractE2ETest {
             }
             if (!image.getId().equals(imageUuid)) {
                 throw new IllegalArgumentException("Image uuid does not match the Marketplace image uuid!");
+            }
+            if (environment.getTags().getUserDefined().isEmpty()) {
+                throw new TestFailException("User defined tags aren't being set in the environment!");
             }
             return testDto;
         };

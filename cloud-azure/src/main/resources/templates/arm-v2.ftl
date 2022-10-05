@@ -99,6 +99,13 @@
                 "name": "[variables('${group.compressedName}AsName')]",
                 "apiVersion": "2018-04-01",
                 "location": "[parameters('region')]",
+                "tags": {
+                    <#if userDefinedTags?? && userDefinedTags?has_content>
+                        <#list userDefinedTags?keys as key>
+                        "${key}": "${userDefinedTags[key]}"<#if key_has_next>,</#if>
+                        </#list>
+                    </#if>
+                },
                 "sku": {
                     "name": "Aligned"
                 },
@@ -563,6 +570,13 @@
                     "apiVersion": "2020-06-01",
                     "name": "${loadBalancer.name}-publicIp",
                     "location": "[parameters('region')]",
+                    "tags": {
+                        <#if userDefinedTags?? && userDefinedTags?has_content>
+                            <#list userDefinedTags?keys as key>
+                            "${key}": "${userDefinedTags[key]}"<#if key_has_next>,</#if>
+                            </#list>
+                        </#if>
+                    },
                     "sku": {
                         "name": "${loadBalancer.sku.templateName}"
                     },
