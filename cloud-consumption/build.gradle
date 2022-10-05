@@ -96,7 +96,7 @@ dependencies {
     testImplementation project(path: ':flow', configuration: 'tests')
 
     constraints {
-        implementation     group: 'org.yaml',                  name: 'snakeyaml',                      version: '1.23'
+        implementation     group: 'org.yaml',                  name: 'snakeyaml',                      version: snakeYamlVersion
         implementation     group: 'com.google.guava',          name: 'guava',                          version: guavaVersion
         implementation     group: 'com.google.code.gson',      name: 'gson',                           version: gsonVersion
         implementation     group: 'dnsjava',                   name: 'dnsjava',                        version: '2.1.7'

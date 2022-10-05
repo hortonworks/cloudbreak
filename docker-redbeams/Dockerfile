@@ -1,4 +1,4 @@
-FROM docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-11-runtime:1.14-3-03082022
+FROM docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-11-runtime:1.14-5-04102022
 # We can not use alpine based image because of https://github.com/grpc/grpc-java/issues/8751
 MAINTAINER info@cloudera.com
 
@@ -16,7 +16,7 @@ RUN microdnf install unzip
 ADD ${REPO_URL}/com/sequenceiq/redbeams/$VERSION/redbeams-$VERSION.jar /redbeams.jar
 
 # add jmx exporter
-ADD jmx_prometheus_javaagent-0.16.1.jar /jmx_prometheus_javaagent.jar
+ADD jmx_prometheus_javaagent-0.17.2.jar /jmx_prometheus_javaagent.jar
 
 # extract schema files
 RUN ( unzip redbeams.jar schema/* -d / ) || \
