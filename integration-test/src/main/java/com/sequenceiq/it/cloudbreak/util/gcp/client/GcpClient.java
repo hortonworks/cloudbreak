@@ -17,26 +17,31 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.SecurityUtils;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.Builder;
 import com.google.api.services.compute.ComputeScopes;
-import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.it.cloudbreak.cloud.v4.gcp.GcpProperties;
+import com.sequenceiq.it.cloudbreak.cloud.v4.gcp.GcpProperties.Credential;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 @Component
 public class GcpClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpClient.class);
 
-    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
     private static final List<String> SCOPES = Arrays.asList(ComputeScopes.COMPUTE, StorageScopes.DEVSTORAGE_FULL_CONTROL);
 
@@ -52,67 +57,63 @@ public class GcpClient {
     public Compute buildCompute() {
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            GoogleCredential credential = buildCredential(httpTransport);
-            return new Compute.Builder(
-                    httpTransport, JSON_FACTORY, null).setApplicationName(APPLICATION_NAME)
-                    .setHttpRequestInitializer(credential)
+            GoogleCredentials credentials = buildCredential();
+            HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(credentials);
+            return new Builder(httpTransport, JSON_FACTORY, requestInitializer)
+                    .setApplicationName(APPLICATION_NAME)
                     .build();
-        } catch (Exception e) {
-            LOGGER.warn("Error occurred while building Google Compute access.", e);
-            throw new IllegalArgumentException("Error occurred while building Google Compute access.", e);
+        } catch (GeneralSecurityException e) {
+            LOGGER.error("Cannot establish NetHttpTransport with trusted certificates!", e);
+            throw new RuntimeException("Cannot establish NetHttpTransport with trusted certificates!", e);
+        } catch (IOException e) {
+            LOGGER.error("Canot return the key store for trusted certificates!", e);
+            throw new RuntimeException("Canot return the key store for trusted certificates!", e);
         }
     }
 
     public Storage buildStorage() {
+        return StorageOptions
+                .newBuilder()
+                .setCredentials(buildCredential())
+                .setProjectId(getProjectId())
+                .build()
+                .getService();
+    }
+
+    public GoogleCredentials buildCredential() {
+        Credential credential = gcpProperties.getCredential();
+        String credentialJson = credential.getJson().getBase64();
+        String credentialP12 = credential.getP12().getBase64();
+        GoogleCredentials googleCredentials = null;
         try {
-            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            GoogleCredential credential = buildCredential(httpTransport);
-            return new Storage.Builder(
-                    httpTransport, JSON_FACTORY, setHttpTimeout(credential)).setApplicationName(APPLICATION_NAME)
-                    .setHttpRequestInitializer(setHttpTimeout(credential))
-                    .build();
-        } catch (Exception e) {
-            LOGGER.warn("Error occurred while building Google Storage access.", e);
-        }
-        return null;
-    }
+            if (isNotEmpty(credentialJson)) {
+                googleCredentials = GoogleCredentials
+                        .fromStream(new ByteArrayInputStream(Base64.decodeBase64(credentialJson)))
+                        .createScoped(SCOPES);
+            } else if (isNotEmpty(credentialP12)) {
+                PrivateKey privateKey = SecurityUtils
+                        .loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
+                                new ByteArrayInputStream(Base64.decodeBase64(credentialP12)), "notasecret", "privatekey",
+                                "notasecret");
 
-    private HttpRequestInitializer setHttpTimeout(final HttpRequestInitializer requestInitializer) {
-        return new HttpRequestInitializer() {
-            @Override
-            public void initialize(HttpRequest httpRequest) throws IOException {
-                requestInitializer.initialize(httpRequest);
-                httpRequest.setConnectTimeout(MINUTES * ONE_MINUTE_IN_MILLISECOND);
-                httpRequest.setReadTimeout(MINUTES * ONE_MINUTE_IN_MILLISECOND);
-            }
-        };
-
-    }
-
-    public GoogleCredential buildCredential(HttpTransport httpTransport) throws IOException, GeneralSecurityException {
-        String credentialJson = gcpProperties.getCredential().getJson().getBase64();
-        if (isNotEmpty(credentialJson)) {
-            return GoogleCredential.fromStream(new ByteArrayInputStream(Base64.decodeBase64(credentialJson)), httpTransport, JSON_FACTORY)
-                    .createScoped(SCOPES);
-        } else {
-            try {
-                GcpProperties.Credential credential = gcpProperties.getCredential();
-                PrivateKey pk = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
-                        new ByteArrayInputStream(Base64.decodeBase64(credential.getP12().getBase64())), "notasecret", "privatekey",
-                        "notasecret");
-                return new GoogleCredential.Builder().setTransport(httpTransport)
-                        .setJsonFactory(JSON_FACTORY)
-                        .setServiceAccountId(credential.getP12().getServiceAccountId())
-                        .setServiceAccountScopes(SCOPES)
-                        .setServiceAccountPrivateKey(pk)
+                googleCredentials = ServiceAccountCredentials.newBuilder()
+                        .setClientEmail(credential.getP12().getServiceAccountId())
+                        .setPrivateKey(privateKey)
+                        .setScopes(SCOPES)
                         .build();
-            } catch (IOException e) {
-                throw new IllegalArgumentException("Can not read private key from P12 file", e);
             }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Cannot create Google Cloud Client!", e);
+        }
+        if (googleCredentials == null) {
+            Log.error(LOGGER, "Cannot create GCP Client, because of both of the JSON and P12 credentials are missing!");
+            throw new RuntimeException("Cannot create GCP Client, because of both of the JSON and P12 credentials are missing!");
+        } else {
+            return googleCredentials;
         }
     }
 
-    public String getProjectIdFromCredentialJson(String credentialJson) {
+    protected String getProjectIdFromCredentialJson(String credentialJson) {
         try {
             JsonNode credNode = JsonUtil.readTree(new String(Base64.decodeBase64(credentialJson)));
             JsonNode projectId = credNode.get("project_id");
@@ -125,13 +126,20 @@ public class GcpClient {
         throw new IllegalArgumentException("Could not extract project id from credential JSON");
     }
 
-    public String getProjectId() {
+    protected String getProjectId() {
         if (gcpProperties.getCredential().getP12().getProjectId() == null || gcpProperties.getCredential().getP12().getProjectId().isEmpty()) {
-            GcpProperties.Credential credential = gcpProperties.getCredential();
+            Credential credential = gcpProperties.getCredential();
             return getProjectIdFromCredentialJson(credential.getJson().getBase64());
         } else {
             return gcpProperties.getCredential().getP12().getProjectId();
         }
     }
 
+    protected String getAvailabilityZone() {
+        return gcpProperties.getAvailabilityZone();
+    }
+
+    protected String getBaseLocation() {
+        return gcpProperties.getCloudStorage().getBaseLocation();
+    }
 }
