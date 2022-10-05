@@ -74,6 +74,13 @@
                 "name": "[variables('${group.compressedName}AsName')]",
                 "apiVersion": "2018-04-01",
                 "location": "[parameters('region')]",
+                "tags": {
+                    <#if userDefinedTags?? && userDefinedTags?has_content>
+                        <#list userDefinedTags?keys as key>
+                        "${key}": "${userDefinedTags[key]}"<#if key_has_next>,</#if>
+                        </#list>
+                    </#if>
+                },
                 <#if group.managedDisk == true>
                 "sku": {
                     "name": "Aligned"
