@@ -9,6 +9,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmTriggerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateRequest;
@@ -26,8 +28,9 @@ public class UpgradeCcmFlowEventChainFactory implements FlowEventChainFactory<Up
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(UpgradeCcmFlowChainTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
+        flowEventChain.add(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(
-                new UpgradeCcmTriggerRequest(UPGRADE_CCM_EVENT.event(), event.getResourceId(), event.getClusterId(), event.getOldTunnel(), event.accepted()));
+                new UpgradeCcmTriggerRequest(UPGRADE_CCM_EVENT.event(), event.getResourceId(), event.getClusterId(), event.getOldTunnel()));
         flowEventChain.add(new UserDataUpdateRequest(UPDATE_USERDATA_TRIGGER_EVENT.event(), event.getResourceId(), event.getOldTunnel()));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
