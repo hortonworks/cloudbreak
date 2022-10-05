@@ -74,6 +74,9 @@ public class FlowLog {
     @Convert(converter = OperationTypeConverter.class)
     private OperationType operationType = OperationType.UNKNOWN;
 
+    @Column
+    private Long endTime;
+
     public FlowLog() {
 
     }
@@ -90,6 +93,7 @@ public class FlowLog {
         this.finalized = finalized;
         this.stateStatus = stateStatus;
         this.operationType = operationType;
+        this.endTime = null;
     }
 
     public FlowLog(Long resourceId,
@@ -116,6 +120,25 @@ public class FlowLog {
         this.variablesJackson = variablesJackson;
         this.flowType = flowType;
         this.currentState = currentState;
+        this.endTime = null;
+    }
+
+    public FlowLog(Long resourceId,
+            String flowId,
+            String flowChainId,
+            String flowTriggerUserCrn,
+            String nextEvent,
+            String payload,
+            String payloadJackson,
+            ClassValue payloadType,
+            String variables,
+            String variablesJackson,
+            ClassValue flowType,
+            String currentState,
+            Long endTime) {
+        this(resourceId, flowId, flowChainId, flowTriggerUserCrn, nextEvent, payload,
+                payloadJackson, payloadType, variables, variablesJackson, flowType, currentState);
+        this.endTime = endTime;
     }
 
     public Long getId() {
@@ -278,6 +301,14 @@ public class FlowLog {
         this.variablesJackson = variablesJackson;
     }
 
+    public Long getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Long endTime) {
+        this.endTime = endTime;
+    }
+
     public String minimizedString() {
         return "FlowLog{" +
                 "resourceId=" + resourceId +
@@ -287,6 +318,7 @@ public class FlowLog {
                 ", stateStatus=" + stateStatus +
                 ", nextEvent=" + nextEvent +
                 ", operationType=" + operationType +
+                ", endTime=" + endTime +
                 '}';
     }
 

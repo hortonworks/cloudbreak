@@ -20,6 +20,7 @@ public class FlowLogConverter {
         flowLogResponse.setResourceId(source.getResourceId());
         flowLogResponse.setNextEvent(source.getNextEvent());
         flowLogResponse.setNodeId(source.getCloudbreakNodeId());
+        flowLogResponse.setEndTime(source.getEndTime());
         if (source.getStateStatus() != null) {
             flowLogResponse.setStateStatus(StateStatus.valueOf(source.getStateStatus().name()));
         }
