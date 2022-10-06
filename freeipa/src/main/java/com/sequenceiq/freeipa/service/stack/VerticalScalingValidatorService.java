@@ -55,7 +55,7 @@ public class VerticalScalingValidatorService {
         if (verticalScaleV4Request.getTemplate().getInstanceType() == null) {
             throw new BadRequestException(String.format("Define an exiting instancetype to vertically scale the %s FreeIpa.", stack.getCloudPlatform()));
         } else {
-            validateInstanceType(stack, verticalScaleV4Request);
+            //validateInstanceType(stack, verticalScaleV4Request);
         }
         if (anyAttachedVolumePropertyDefinedInVerticalScalingRequest(verticalScaleV4Request)) {
             throw new BadRequestException(String.format("Only instance type modification is supported on %s FreeIpa.", stack.getCloudPlatform()));

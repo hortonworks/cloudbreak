@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.environment.flow.verticalscale.freeipa.
 import static com.sequenceiq.environment.environment.flow.verticalscale.freeipa.event.EnvironmentVerticalScaleStateSelectors.FINALIZE_VERTICAL_SCALING_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.verticalscale.freeipa.event.EnvironmentVerticalScaleStateSelectors.HANDLED_FAILED_VERTICAL_SCALING_FREEIPA_EVENT;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -108,7 +109,7 @@ public class EnvironmentVerticalScaleActions {
                                 payload,
                                 payload.getEnvironmentStatus(),
                                 convertStatus(payload.getEnvironmentStatus()),
-                                Set.of(payload.getVerticalScaleFreeIPAEvent().getFreeIPAVerticalScaleRequest().getTemplate().getInstanceType(),
+                                List.of(payload.getVerticalScaleFreeIPAEvent().getFreeIPAVerticalScaleRequest().getTemplate().getInstanceType(),
                                         payload.getException().getMessage()),
                                 EnvironmentVerticalScaleState.VERTICAL_SCALING_FREEIPA_FAILED_STATE);
                 metricService.incrementMetricCounter(MetricType.ENV_VERTICAL_SCALE_FAILED, environmentDto, payload.getException());

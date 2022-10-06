@@ -56,7 +56,8 @@ public class EnvironmentVerticalScaleService {
     private void validateUpgrade(EnvironmentDto environment) {
         if (!environment.getStatus().isVerticallyScalablePhase()) {
             throw new BadRequestException(
-                String.format("Environment '%s' must be STOPPED to start Vertical Scaling.", environment.getName()));
+                String.format("Environment '%s' must be STOPPED to start Vertical Scaling. The environment state is %s", environment.getName(),
+                        environment.getStatus()));
         }
     }
 }

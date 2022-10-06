@@ -191,7 +191,9 @@ public enum EnvironmentStatus {
     );
 
     public static final Set<EnvironmentStatus> VERTICAL_SCALABLE_STATES = Set.of(
-            ENV_STOPPED
+            ENV_STOPPED,
+            VERTICAL_SCALE_ON_FREEIPA_FAILED,
+            VERTICAL_SCALE_ON_FREEIPA_IN_PROGRESS
     );
 
     private final com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus responseStatus;
