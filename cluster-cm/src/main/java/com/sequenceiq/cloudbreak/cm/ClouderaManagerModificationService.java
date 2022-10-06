@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -51,6 +53,8 @@ import com.cloudera.api.swagger.model.ApiBatchRequestElement;
 import com.cloudera.api.swagger.model.ApiBatchResponse;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
+import com.cloudera.api.swagger.model.ApiConfig;
+import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiEntityTag;
 import com.cloudera.api.swagger.model.ApiHost;
@@ -771,17 +775,32 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void setHostRackIdBatch(Map<String, InstanceMetaData> instancesMap, Map<String, ApiHost> hostsMap) throws ApiException {
         LOGGER.debug("Setting rack ID for hosts with batch operation.");
-        List<ApiBatchRequestElement> batchRequestElements = hostsMap.entrySet().stream()
-                .map(entry -> setRackIdForHostIfExists(instancesMap, entry.getKey(), entry.getValue()))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(this::getBatchRequestElementForUpdateHost)
-                .collect(Collectors.toList());
+        List<ApiBatchRequestElement> batchRequestElements = getRackIdUpdateRequests(hostsMap, instancesMap);
+        batchRequestElements.addAll(getUpgradeDomainUpdateHostConfigRequests(instancesMap, hostsMap));
         if (!batchRequestElements.isEmpty()) {
             updateHostsWithRackIdUsingBatchCall(batchRequestElements);
         } else {
             LOGGER.debug("Setting rack ID for hosts batch operation canceled, there is nothing to update.");
         }
+    }
+
+    @NotNull
+    private List<ApiBatchRequestElement> getRackIdUpdateRequests(Map<String, ApiHost> hostsMap, Map<String, InstanceMetaData> instancesMap) {
+        return hostsMap.entrySet().stream()
+                .map(entry -> setRackIdForHostIfExists(instancesMap, entry.getKey(), entry.getValue()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(this::getBatchRequestElementForUpdateHost)
+                .collect(Collectors.toList());
+    }
+
+    private List<ApiBatchRequestElement> getUpgradeDomainUpdateHostConfigRequests(Map<String, InstanceMetaData> instancesMap, Map<String, ApiHost> hostsMap) {
+        return hostsMap.entrySet().stream()
+                .filter(entry -> StringUtils.isNotEmpty(instancesMap.get(entry.getKey()).getAvailabilityZone()))
+                        .map(entry -> {
+            InstanceMetaData instanceMetaData = instancesMap.get(entry.getKey());
+            return getBatchRequestElementForUpdateHostConfig(entry.getValue(), instanceMetaData.getAvailabilityZone());
+        }).collect(Collectors.toList());
     }
 
     private Optional<ApiHost> setRackIdForHostIfExists(Map<String, InstanceMetaData> instancesMap, String hostname, ApiHost host) {
@@ -793,6 +812,21 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 .flatMap(instance -> Optional.ofNullable(instance.getRackId()))
                 .filter(Predicate.not(String::isEmpty))
                 .filter(rackId -> !rackId.equals(host.getRackId()));
+    }
+
+    private ApiBatchRequestElement getBatchRequestElementForUpdateHostConfig(ApiHost host, String upgradeDomain) {
+        ApiConfig apiConfig = new ApiConfig();
+        apiConfig.setName("upgrade_domain");
+        apiConfig.setValue(upgradeDomain);
+        ApiConfigList apiConfigList = new ApiConfigList();
+        apiConfigList.setItems(Collections.singletonList(apiConfig));
+
+        return new ApiBatchRequestElement()
+                .method(HTTPMethod.PUT)
+                .url(ClouderaManagerApiClientProvider.API_V_31 + "/hosts/" + URLUtils.encodeString(host.getHostId()) + "/config")
+                .body(apiConfigList)
+                .acceptType("application/json")
+                .contentType("application/json");
     }
 
     private ApiBatchRequestElement getBatchRequestElementForUpdateHost(ApiHost host) {

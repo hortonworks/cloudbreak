@@ -151,6 +151,7 @@ public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
     public void installCluster(Long stackId) throws CloudbreakException, ClusterClientInitException {
         StackDto stackDto = stackDtoService.getById(stackId);
         getClusterSetupService(stackDto).installCluster(stackDto.getCluster().getExtendedBlueprintText());
+        getClusterSetupService(stackDto).setupUpgradeDomains();
     }
 
     public void autoConfigureCluster(Long stackId) throws CloudbreakException, ClusterClientInitException {

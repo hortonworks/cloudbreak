@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVer
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +32,8 @@ import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.ToolsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiBatchRequest;
+import com.cloudera.api.swagger.model.ApiBatchRequestElement;
 import com.cloudera.api.swagger.model.ApiCluster;
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiCommand;
@@ -39,6 +42,7 @@ import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiRemoteDataContext;
+import com.cloudera.api.swagger.model.HTTPMethod;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -74,6 +78,7 @@ import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.repository.ClusterCommandRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.util.URLUtils;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -255,6 +260,34 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             throw mapApiException(e);
         } catch (Exception e) {
             throw mapException(e);
+        }
+    }
+
+    @Override
+    public void setupUpgradeDomains() {
+        try {
+            ApiBatchRequest apiBatchRequest = new ApiBatchRequest();
+            List<ApiHost> apiHosts = clouderaManagerApiFactory.getClustersResourceApi(apiClient).listHosts(stack.getName(), null, null, null).getItems();
+            List<InstanceMetadataView> notTerminatedInstanceMetaData = stack.getNotTerminatedInstanceMetaData();
+            for (ApiHost apiHost : apiHosts) {
+                notTerminatedInstanceMetaData.stream().filter(instanceMetadataView -> apiHost.getHostname().equals(instanceMetadataView.getDiscoveryFQDN()))
+                        .map(InstanceMetadataView::getAvailabilityZone).findFirst().ifPresent(availabilityZone -> {
+                            String batchUrl = ClouderaManagerApiClientProvider.API_V_31 + "/hosts/" + URLUtils.encodeString(apiHost.getHostId()) + "/config";
+                            ApiBatchRequestElement apiBatchRequestElement = new ApiBatchRequestElement();
+                            apiBatchRequestElement.setMethod(HTTPMethod.PUT);
+                            apiBatchRequestElement.setUrl(batchUrl);
+                            ApiConfig apiConfig = new ApiConfig();
+                            apiConfig.setName("upgrade_domain");
+                            apiConfig.setValue(availabilityZone);
+                            ApiConfigList apiConfigList = new ApiConfigList();
+                            apiConfigList.setItems(Collections.singletonList(apiConfig));
+                            apiBatchRequestElement.setBody(apiConfigList);
+                            apiBatchRequest.addItemsItem(apiBatchRequestElement);
+                        });
+            }
+            clouderaManagerApiFactory.getBatchResourceApi(apiClient).execute(apiBatchRequest);
+        } catch (ApiException e) {
+            LOGGER.error("errrooooorr");
         }
     }
 

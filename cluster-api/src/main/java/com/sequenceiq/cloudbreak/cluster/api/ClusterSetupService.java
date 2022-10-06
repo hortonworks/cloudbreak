@@ -42,6 +42,8 @@ public interface ClusterSetupService {
 
     void refreshParcelRepos();
 
+    void setupUpgradeDomains();
+
     void installCluster(String template);
 
     void autoConfigureClusterManager();
