@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.it.cloudbreak.action.UmsTimeoutWorkaroundUtils;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.wait.service.ExceptionChecker;
 
@@ -49,8 +50,10 @@ public class InstanceExistenceChecker<T extends InstanceWaitObject> extends Exce
         try {
             waitObject.fetchData();
         } catch (Exception e) {
-            LOGGER.error("Failed to get instance group status, because of {}", e.getMessage(), e);
-            throw new TestFailException("Failed to get instance group status", e);
+            if (!UmsTimeoutWorkaroundUtils.umsTimeoutRelatedException(e)) {
+                LOGGER.error("Failed to get instance group status, because of {}", e.getMessage(), e);
+                throw new TestFailException("Failed to get instance group status", e);
+            }
         }
     }
 

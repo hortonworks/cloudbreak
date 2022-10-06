@@ -6,6 +6,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.it.cloudbreak.action.UmsTimeoutWorkaroundUtils;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.wait.service.ExceptionChecker;
 
@@ -81,8 +82,12 @@ public class InstanceFailedChecker<T extends InstanceWaitObject> extends Excepti
             waitObject.fetchData();
             failed = false;
         } catch (Exception e) {
-            LOGGER.error("Failed to get instances: '{}', because of {}", instanceIds, e.getMessage(), e);
-            throw new TestFailException(String.format("Failed to get instances status: '%s'", instanceIds), e);
+            if (UmsTimeoutWorkaroundUtils.umsTimeoutRelatedException(e)) {
+                failed = false;
+            } else {
+                LOGGER.error("Failed to get instances: '{}', because of {}", instanceIds, e.getMessage(), e);
+                throw new TestFailException(String.format("Failed to get instances status: '%s'", instanceIds), e);
+            }
         }
     }
 }

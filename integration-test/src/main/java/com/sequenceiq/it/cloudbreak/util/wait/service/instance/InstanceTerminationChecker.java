@@ -7,6 +7,7 @@ import java.util.NoSuchElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.it.cloudbreak.action.UmsTimeoutWorkaroundUtils;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.wait.service.ExceptionChecker;
 
@@ -80,8 +81,12 @@ public class InstanceTerminationChecker<T extends InstanceWaitObject> extends Ex
             LOGGER.warn("{} instance id is not present, may this was deleted.", instanceIds, e);
             deleted = true;
         } catch (Exception e) {
-            LOGGER.error("'{}' instance id deletion has been failed, because of: {}", instanceIds, e.getMessage(), e);
-            throw new TestFailException(String.format("'%s' id group deletion has been failed", instanceIds), e);
+            if (UmsTimeoutWorkaroundUtils.umsTimeoutRelatedException(e)) {
+                deleted = false;
+            } else {
+                LOGGER.error("'{}' instance id deletion has been failed, because of: {}", instanceIds, e.getMessage(), e);
+                throw new TestFailException(String.format("'%s' id group deletion has been failed", instanceIds), e);
+            }
         }
     }
 }

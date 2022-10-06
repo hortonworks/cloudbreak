@@ -8,12 +8,12 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.RetryableAction;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class RecipeGetInternalAction implements Action<RecipeTestDto, CloudbreakClient> {
+public class RecipeGetInternalAction implements RetryableAction<RecipeTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeGetInternalAction.class);
 

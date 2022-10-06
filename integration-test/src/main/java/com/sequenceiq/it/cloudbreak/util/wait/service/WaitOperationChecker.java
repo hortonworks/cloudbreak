@@ -5,6 +5,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.it.cloudbreak.action.UmsTimeoutWorkaroundUtils;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 public class WaitOperationChecker<T extends WaitObject> extends ExceptionChecker<T> {
@@ -92,8 +93,10 @@ public class WaitOperationChecker<T extends WaitObject> extends ExceptionChecker
         try {
             waitObject.fetchData();
         } catch (Exception e) {
-            LOGGER.error("Failed to get cluster status or statusReason: {}", e.getMessage(), e);
-            throw new TestFailException("Failed to get cluster status or statusReason", e);
+            if (!UmsTimeoutWorkaroundUtils.umsTimeoutRelatedException(e)) {
+                LOGGER.error("Failed to get cluster status or statusReason: {}", e.getMessage(), e);
+                throw new TestFailException("Failed to get cluster status or statusReason", e);
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ import javax.ws.rs.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.it.cloudbreak.action.UmsTimeoutWorkaroundUtils;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 public class WaitFailedChecker<T extends WaitObject> extends ExceptionChecker<T> {
@@ -76,8 +77,12 @@ public class WaitFailedChecker<T extends WaitObject> extends ExceptionChecker<T>
             LOGGER.warn("No {} found with name: {}", waitObject.getClass().getSimpleName(), waitObject.getName(), e);
             failed = true;
         } catch (Exception e) {
-            LOGGER.error("Failed to get {} status or statusReason: {}", waitObject.getClass().getSimpleName(), e.getMessage(), e);
-            throw new TestFailException("Failed to get " + waitObject.getClass().getSimpleName() + " status or statusReason", e);
+            if (UmsTimeoutWorkaroundUtils.umsTimeoutRelatedException(e)) {
+                failed = false;
+            } else {
+                LOGGER.error("Failed to get {} status or statusReason: {}", waitObject.getClass().getSimpleName(), e.getMessage(), e);
+                throw new TestFailException("Failed to get " + waitObject.getClass().getSimpleName() + " status or statusReason", e);
+            }
         }
     }
 }

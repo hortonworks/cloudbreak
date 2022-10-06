@@ -5,11 +5,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
-import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.RetryableAction;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 
-public class ProxyConfigListAction implements Action<ProxyTestDto, EnvironmentClient> {
+public class ProxyConfigListAction implements RetryableAction<ProxyTestDto, EnvironmentClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyConfigListAction.class);
 

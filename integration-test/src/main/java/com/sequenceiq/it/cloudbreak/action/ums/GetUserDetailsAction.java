@@ -8,12 +8,12 @@ import org.slf4j.LoggerFactory;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.UmsClient;
-import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.RetryableAction;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class GetUserDetailsAction implements Action<UmsTestDto, UmsClient> {
+public class GetUserDetailsAction implements RetryableAction<UmsTestDto, UmsClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GetUserDetailsAction.class);
 

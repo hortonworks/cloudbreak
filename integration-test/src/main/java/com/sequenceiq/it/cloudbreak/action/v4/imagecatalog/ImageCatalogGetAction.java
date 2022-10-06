@@ -4,12 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.RetryableAction;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class ImageCatalogGetAction implements Action<ImageCatalogTestDto, CloudbreakClient> {
+public class ImageCatalogGetAction implements RetryableAction<ImageCatalogTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogGetAction.class);
 

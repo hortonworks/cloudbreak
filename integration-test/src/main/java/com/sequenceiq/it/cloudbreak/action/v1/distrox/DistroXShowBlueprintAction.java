@@ -5,12 +5,12 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.RetryableAction;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class DistroXShowBlueprintAction implements Action<DistroXTestDto, CloudbreakClient> {
+public class DistroXShowBlueprintAction implements RetryableAction<DistroXTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXShowBlueprintAction.class);
 

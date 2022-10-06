@@ -6,12 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
-import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.RetryableAction;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class KerberosGetAction implements Action<KerberosTestDto, FreeIpaClient> {
+public class KerberosGetAction implements RetryableAction<KerberosTestDto, FreeIpaClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosGetAction.class);
 

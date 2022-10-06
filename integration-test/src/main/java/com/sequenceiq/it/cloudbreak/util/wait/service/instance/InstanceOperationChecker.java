@@ -6,6 +6,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.it.cloudbreak.action.UmsTimeoutWorkaroundUtils;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.wait.service.ExceptionChecker;
 
@@ -91,8 +92,10 @@ public class InstanceOperationChecker<T extends InstanceWaitObject> extends Exce
         try {
             waitObject.fetchData();
         } catch (Exception e) {
-            LOGGER.error("Failed to get '{}' instance group status, because of {}", instanceIds, e.getMessage(), e);
-            throw new TestFailException(String.format("Failed to get '%s' instance group status", instanceIds), e);
+            if (!UmsTimeoutWorkaroundUtils.umsTimeoutRelatedException(e)) {
+                LOGGER.error("Failed to get '{}' instance group status, because of {}", instanceIds, e.getMessage(), e);
+                throw new TestFailException(String.format("Failed to get '%s' instance group status", instanceIds), e);
+            }
         }
     }
 }

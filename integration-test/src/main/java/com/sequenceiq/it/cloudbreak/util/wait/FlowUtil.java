@@ -16,6 +16,7 @@ import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
+import com.sequenceiq.it.cloudbreak.action.UmsTimeoutWorkaroundUtils;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -72,7 +73,7 @@ public class FlowUtil {
             String name = testDto.getName();
             try {
                 Log.await(LOGGER, String.format(" Cloudbreak await for flow '%s' for '%s'", testDto, name));
-                waitForFlow(flowEndpoint, testDto.getCrn(), testDto.getLastKnownFlowChainId(), testDto.getLastKnownFlowId(), runningParameter);
+                waitForFlow(flowEndpoint, testDto.getCrn(), testDto.getLastKnownFlowChainId(), testDto.getLastKnownFlowId(), runningParameter, testContext);
             } catch (Exception e) {
                 if (runningParameter.isLogError()) {
                     LOGGER.error("Cloudbreak await for flow '{}' is failed for: '{}', because of {}", testDto, name, e.getMessage(), e);
@@ -85,7 +86,8 @@ public class FlowUtil {
         return testDto;
     }
 
-    private void waitForFlow(FlowPublicEndpoint flowEndpoint, String crn, String flowChainId, String flowId, RunningParameter runningParameter) {
+    private void waitForFlow(FlowPublicEndpoint flowEndpoint, String crn, String flowChainId, String flowId,
+            RunningParameter runningParameter, TestContext testContext) {
         boolean flowRunning = true;
         boolean flowFailed = false;
 
@@ -115,6 +117,7 @@ public class FlowUtil {
                     throw new TestFailException(String.format(" Error during polling flow. Crn=%s, FlowId=%s , FlowChainId=%s, Message=%s ",
                             crn, flowId, flowChainId, ex.getMessage()));
                 } else {
+                    UmsTimeoutWorkaroundUtils.waitForUmsIfNeeded(testContext, ex);
                     LOGGER.info("Retrying after failure. Failure count {}", ++failureCount);
                 }
             }

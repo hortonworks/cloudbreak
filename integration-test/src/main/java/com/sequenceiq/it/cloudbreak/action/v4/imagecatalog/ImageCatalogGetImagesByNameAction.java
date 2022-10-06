@@ -8,12 +8,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.RetryableAction;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class ImageCatalogGetImagesByNameAction implements Action<ImageCatalogTestDto, CloudbreakClient> {
+public class ImageCatalogGetImagesByNameAction implements RetryableAction<ImageCatalogTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogGetImagesByNameAction.class);
 

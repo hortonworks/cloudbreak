@@ -10,14 +10,14 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.RetryableAction;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.ClusterTemplateUtil;
 
-public class ClusterTemplateListAction implements Action<ClusterTemplateTestDto, CloudbreakClient> {
+public class ClusterTemplateListAction implements RetryableAction<ClusterTemplateTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateListAction.class);
 

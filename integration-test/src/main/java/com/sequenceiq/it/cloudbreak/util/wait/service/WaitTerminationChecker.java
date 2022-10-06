@@ -7,6 +7,7 @@ import javax.ws.rs.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.it.cloudbreak.action.UmsTimeoutWorkaroundUtils;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 public class WaitTerminationChecker<T extends WaitObject> extends ExceptionChecker<T> {
@@ -78,8 +79,10 @@ public class WaitTerminationChecker<T extends WaitObject> extends ExceptionCheck
             LOGGER.warn("No {} found with name: {}", waitObject.getClass().getSimpleName(), name);
             deleted = true;
         } catch (Exception e) {
-            LOGGER.error("Cluster termination failed, because of: {}", e.getMessage(), e);
-            throw new TestFailException("Cluster termination failed", e);
+            if (!UmsTimeoutWorkaroundUtils.umsTimeoutRelatedException(e)) {
+                LOGGER.error("Cluster termination failed, because of: {}", e.getMessage(), e);
+                throw new TestFailException("Cluster termination failed", e);
+            }
         }
     }
 }

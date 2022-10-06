@@ -44,6 +44,8 @@ import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.SdxSaasItClient;
 import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.RetryableAction;
+import com.sequenceiq.it.cloudbreak.action.UmsTimeoutWorkaroundUtils;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
@@ -127,6 +129,9 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Value("${integrationtest.cloudbreak.server}")
     private String defaultServer;
+
+    @Value("${integrationtest.ums.timeout.workaround.retry.enabled:true}")
+    private boolean umsWorkaroundRetryEnabled;
 
     @Inject
     private CloudProviderProxy cloudProvider;
@@ -357,7 +362,23 @@ public abstract class TestContext implements ApplicationContextAware {
 
     protected <T extends CloudbreakTestDto, U extends MicroserviceClient>
     T doAction(T entity, Class<? extends MicroserviceClient> clientClass, Action<T, U> action, String who) throws Exception {
-        return action.action(getTestContext(), entity, getMicroserviceClient(entity.getClass(), who));
+        TestContext testContext = getTestContext();
+        U microserviceClient = getMicroserviceClient(entity.getClass(), who);
+        try {
+            return action.action(testContext, entity, microserviceClient);
+        } catch (Exception e) {
+            return retryIfNeeded(entity, action, microserviceClient, e, testContext);
+        }
+    }
+
+    private <T extends CloudbreakTestDto, U extends MicroserviceClient> T retryIfNeeded(T entity, Action<T, U> action, U microserviceClient,
+            Exception e, TestContext testContext) throws Exception {
+        if (UmsTimeoutWorkaroundUtils.shouldRetry(testContext, e, action instanceof RetryableAction)) {
+            UmsTimeoutWorkaroundUtils.waitForUms();
+            return action.action(testContext, entity, microserviceClient);
+        } else {
+            throw e;
+        }
     }
 
     public <T extends CloudbreakTestDto> T then(Class<T> entityClass, Class<? extends MicroserviceClient> clientClass,
@@ -1319,6 +1340,10 @@ public abstract class TestContext implements ApplicationContextAware {
             throw new NullPointerException(format("Following variable must be set whether as environment variables or (test) application.yaml: %s",
                     name.replaceAll("\\.", "_").toUpperCase()));
         }
+    }
+
+    public boolean isUmsWorkaroundRetryEnabled() {
+        return umsWorkaroundRetryEnabled;
     }
 
     @Override
