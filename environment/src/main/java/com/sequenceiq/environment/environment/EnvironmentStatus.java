@@ -63,6 +63,9 @@ public enum EnvironmentStatus {
     // Deleting all the related UMS resource for the environment
     UMS_RESOURCE_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UMS_RESOURCE_DELETE_IN_PROGRESS),
 
+    // Deleting structured events for the environment
+    EVENT_CLEANUP_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.EVENT_CLEANUP_IN_PROGRESS),
+
     // Deleting all the ID broker mapping for the environment
     IDBROKER_MAPPINGS_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.IDBROKER_MAPPINGS_DELETE_IN_PROGRESS),
     // Deleting all the Dynamo DB table for the environment (If user choosing create new)
