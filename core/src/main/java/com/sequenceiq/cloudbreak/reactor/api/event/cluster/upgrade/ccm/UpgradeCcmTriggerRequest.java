@@ -4,11 +4,7 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.common.event.AcceptResult;
-import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.common.api.type.Tunnel;
-
-import reactor.rx.Promise;
 
 public class UpgradeCcmTriggerRequest extends AbstractUpgradeCcmEvent {
 
@@ -22,8 +18,7 @@ public class UpgradeCcmTriggerRequest extends AbstractUpgradeCcmEvent {
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("clusterId") Long clusterId,
             @JsonProperty("oldTunnel") Tunnel oldTunnel,
-            @JsonProperty("revertTime") LocalDateTime revertTime,
-            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
-        super(selector, stackId, clusterId, oldTunnel, revertTime, accepted);
+            @JsonProperty("revertTime") LocalDateTime revertTime) {
+        super(selector, stackId, clusterId, oldTunnel, revertTime);
     }
 }
