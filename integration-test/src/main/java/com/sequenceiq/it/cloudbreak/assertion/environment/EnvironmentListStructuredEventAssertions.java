@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_DATABASE
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_DATAHUB_CLUSTERS_DELETION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_DATALAKE_CLUSTERS_DELETION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_DELETION_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_EVENT_CLEANUP_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_FREEIPA_DELETION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_IDBROKER_MAPPINGS_DELETION_STARTED;
@@ -124,6 +125,7 @@ public class EnvironmentListStructuredEventAssertions {
             "S3GUARD_TABLE_DELETE_STARTED_STATE",
             "CLUSTER_DEFINITION_DELETE_STARTED_STATE",
             "UMS_RESOURCE_DELETE_STARTED_STATE",
+            "EVENT_CLEANUP_STARTED_STATE",
             "ENV_DELETE_FINISHED_STATE"
     );
 
@@ -137,6 +139,7 @@ public class EnvironmentListStructuredEventAssertions {
             ENVIRONMENT_IDBROKER_MAPPINGS_DELETION_STARTED,
             ENVIRONMENT_S3GUARD_TABLE_DELETION_STARTED,
             ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED,
+            ENVIRONMENT_EVENT_CLEANUP_STARTED,
             ENVIRONMENT_DATAHUB_CLUSTERS_DELETION_STARTED,
             ENVIRONMENT_DATALAKE_CLUSTERS_DELETION_STARTED,
             ENVIRONMENT_DELETION_FINISHED,

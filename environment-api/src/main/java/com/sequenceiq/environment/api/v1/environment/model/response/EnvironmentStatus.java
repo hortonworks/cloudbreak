@@ -36,6 +36,8 @@ public enum EnvironmentStatus {
 
     UMS_RESOURCE_DELETE_IN_PROGRESS("User resources deletion in progress"),
 
+    EVENT_CLEANUP_IN_PROGRESS("Environment event cleanup in progress"),
+
     IDBROKER_MAPPINGS_DELETE_IN_PROGRESS("Deleting Role Mappings"),
     S3GUARD_TABLE_DELETE_IN_PROGRESS("Deleting DynamoDB table"),
 
