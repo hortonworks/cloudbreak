@@ -3,12 +3,16 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static java.util.stream.Collectors.toSet;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -22,13 +26,30 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private static final Integer NUM_FAILED_VOLUMES_TOLERATED = 0;
 
+    private static final String DFS_REPLICATION = "dfs_replication";
+
+    private static final Integer DFS_REPLICATION_VALUE = 2;
+
+    private final EntitlementService entitlementService;
+
+    public HdfsRoleConfigProvider(EntitlementService entitlementService) {
+        this.entitlementService = entitlementService;
+    }
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
             case HdfsRoles.DATANODE:
-                return List.of(
+                List<ApiClusterTemplateConfig> configs = new ArrayList<>();
+                configs.add(
                         config(FAILED_VOLUMES_TOLERATED, NUM_FAILED_VOLUMES_TOLERATED.toString())
                 );
+                if (isDfsReplicaControlled(source)) {
+                    configs.add(
+                            config(DFS_REPLICATION, DFS_REPLICATION_VALUE.toString())
+                    );
+                }
+                return configs;
             case HdfsRoles.NAMENODE:
                 if (isNamenodeHA(source)) {
                     return List.of(
@@ -41,6 +62,13 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
             default:
                 return List.of();
         }
+    }
+
+    private boolean isDfsReplicaControlled(TemplatePreparationObject source) {
+        return entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
+                && isNamenodeHA(source)
+                && null != source.getStackType()
+                && source.getStackType().equals(StackType.DATALAKE);
     }
 
     @Override
