@@ -899,6 +899,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     public int deployConfigAndStartClusterServices() throws CloudbreakException {
         try {
             LOGGER.info("Deploying configuration and restarting services");
+            configService.enableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, apiClient, stack.getName());
             deployConfig();
             return restartServices();
         } catch (ApiException e) {
