@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmServic
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmPushSaltStatesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmPushSaltStatesResult;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeOrchestratorService;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -28,9 +27,6 @@ public class PushSaltStateHandler extends ExceptionCatcherEventHandler<UpgradeCc
 
     @Inject
     private UpgradeCcmService upgradeCcmService;
-
-    @Inject
-    private UpgradeOrchestratorService upgradeOrchestratorService;
 
     @Override
     public String selector() {
@@ -51,7 +47,7 @@ public class PushSaltStateHandler extends ExceptionCatcherEventHandler<UpgradeCc
         Long clusterId = request.getClusterId();
         LOGGER.info("Pushing salt states for CCM upgrade...");
         upgradeCcmService.updateTunnel(stackId, Tunnel.latestUpgradeTarget());
-        upgradeOrchestratorService.pushSaltState(stackId, clusterId);
+        upgradeCcmService.pushSaltState(stackId, clusterId);
         return new UpgradeCcmPushSaltStatesResult(stackId, clusterId, request.getOldTunnel(), request.getRevertTime());
     }
 }

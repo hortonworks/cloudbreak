@@ -14,8 +14,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmService;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFailedEvent;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeOrchestratorService;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -27,7 +27,7 @@ class RevertSaltStatesHandlerTest {
     private static final Long CLUSTER_ID = 34L;
 
     @Mock
-    private UpgradeOrchestratorService upgradeOrchestratorService;
+    private UpgradeCcmService upgradeCcmService;
 
     @Mock
     private HandlerEvent<UpgradeCcmFailedEvent> event;
@@ -50,7 +50,7 @@ class RevertSaltStatesHandlerTest {
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
-        verify(upgradeOrchestratorService).pushSaltState(STACK_ID, CLUSTER_ID);
+        verify(upgradeCcmService).pushSaltState(STACK_ID, CLUSTER_ID);
         assertThat(result.selector()).isEqualTo("UPGRADECCMFAILEDEVENT");
     }
 }

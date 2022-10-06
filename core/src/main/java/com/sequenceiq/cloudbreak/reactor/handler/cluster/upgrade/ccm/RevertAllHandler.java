@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmService;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFailedEvent;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeOrchestratorService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -29,9 +28,6 @@ public class RevertAllHandler extends ExceptionCatcherEventHandler<UpgradeCcmFai
 
     @Inject
     private UpgradeCcmService upgradeCcmService;
-
-    @Inject
-    private UpgradeOrchestratorService upgradeCcmOrchestratorService;
 
     @Override
     public String selector() {
@@ -67,7 +63,7 @@ public class RevertAllHandler extends ExceptionCatcherEventHandler<UpgradeCcmFai
             }
         }
         upgradeCcmService.healthCheck(stackId);
-        upgradeCcmOrchestratorService.pushSaltState(stackId, clusterId);
+        upgradeCcmService.pushSaltState(stackId, clusterId);
         LOGGER.info("Upgrade CCM revert all finished");
         return new UpgradeCcmFailedEvent(UPGRADE_CCM_FAILED_EVENT.event(), stackId, request.getClusterId(), request.getOldTunnel(), getClass(),
                 request.getException(), request.getRevertTime());
