@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -114,7 +113,6 @@ public class TerminationService {
         try {
             cleanUpService.cleanUpStructuredEventsForStack(stackId);
             cleanUpService.detachClusterComponentRelatedAuditEntries(stackId);
-            cleanUpService.cleanUpStructuredEventsForAccount(Crn.safeFromString(resourceCrn).getAccountId());
         } catch (Exception e) {
             LOGGER.warn("Unable to clean up resources due to: " + e.getMessage(), e);
         }

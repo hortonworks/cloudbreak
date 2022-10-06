@@ -2,15 +2,16 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponentHistory;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.structuredevent.db.LegacyStructuredEventDBService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 @Service
 public class FinalizationCleanUpService {
@@ -47,11 +48,6 @@ public class FinalizationCleanUpService {
         LOGGER.debug("About to start clean up structured events for resource (stackId: {}) that are older the than three months.", stackId);
         executeCleanUp(() -> structuredEventDBService.deleteEntriesByResourceIdsOlderThanThreeMonths(stackId), StructuredEventEntity.class,
                 "that belogs to the following resource ID:" + stackId);
-    }
-
-    public void cleanUpStructuredEventsForAccount(String accountId) {
-        LOGGER.debug("About to start fetch and clean up structured events that belongs to accunt (id: {}) and older then three months.", accountId);
-        structuredEventDBService.deleteEntriesForAccountThatIsOlderThanThreeMonths(accountId);
     }
 
     private void executeCleanUp(Runnable runnable, Class<?> targetEntity) {
