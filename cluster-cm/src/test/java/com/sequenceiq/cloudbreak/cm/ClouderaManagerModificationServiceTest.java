@@ -1151,6 +1151,21 @@ class ClouderaManagerModificationServiceTest {
     }
 
     @Test
+    public void testDeployConfigAndStartClusterServices() throws Exception {
+        // GIVEN
+        BigDecimal apiCommandId = new BigDecimal(200);
+        when(clustersResourceApi.deployClientConfig(stack.getName())).thenReturn(new ApiCommand().id(new BigDecimal(100)));
+        when(clouderaManagerApiFactory.getClustersResourceApi(eq(apiClientMock))).thenReturn(clustersResourceApi);
+        when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY", null)).thenReturn(new ApiCommandList().items(
+                List.of(new ApiCommand().id(apiCommandId).name("Restart"))));
+        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClientMock, apiCommandId)).thenReturn(success);
+        // WHEN
+        underTest.deployConfigAndStartClusterServices();
+        // THEN
+        verify(configService, times(1)).enableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, apiClientMock, stack.getName());
+    }
+
+    @Test
     void removeUnusedParcels() {
         // GIVEN
         Set<String> parcelNamesFromImage = new HashSet<>();
