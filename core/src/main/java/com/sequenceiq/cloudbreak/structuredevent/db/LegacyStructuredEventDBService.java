@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEve
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.converter.StructuredEventEntityToStructuredEventConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.converter.StructuredEventToStructuredEventEntityConverter;
-import com.sequenceiq.cloudbreak.util.DatabaseCommandFormatter;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -51,9 +50,6 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     private static final long THREE_MONTHS = Duration.ofDays(NINETY_DAYS).toMillis();
 
     private static final int MILLISEC_MULTIPLIER = 1000;
-
-    @Inject
-    private DatabaseCommandFormatter databaseCommandFormatter;
 
     @Inject
     private LegacyStructuredEventRepository repository;
@@ -173,16 +169,8 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     }
 
     public void deleteEntriesByResourceIdsOlderThanThreeMonths(Long resourceId) {
-        repository.deleteRecordsByResourceIdOlderThan(resourceId, getTimestampThatThreeMonthsBeforeNow());
         measureAndWarnIfLong(() -> repository.deleteRecordsByResourceIdOlderThan(resourceId, getTimestampThatThreeMonthsBeforeNow()), LOGGER,
                 "Cleaning up StructuredEvent(s) (for resourceId: " + resourceId + ") that are older than 3 months");
-    }
-
-    public void deleteEntriesForAccountThatIsOlderThanThreeMonths(String accountId) {
-        measureAndWarnIfLong(() -> repository.deleteByResourceCrnLikeAndTimestampIsLessThan(
-                databaseCommandFormatter.encapsulateContentForLikelinessQuery(accountId),
-                getTimestampThatThreeMonthsBeforeNow()), LOGGER, "Cleaning up StructuredEvent(s) (for account: "
-                + accountId + ") that are older than 3 months and belongs to deleted Stack(s)");
     }
 
     public StructuredEventEntity findByWorkspaceIdAndId(Long workspaceId, Long id) {
