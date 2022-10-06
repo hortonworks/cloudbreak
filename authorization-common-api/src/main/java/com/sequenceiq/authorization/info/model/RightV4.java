@@ -27,6 +27,7 @@ public enum RightV4 {
     CHANGE_CRED(AuthorizationResourceAction.CHANGE_CREDENTIAL),
     DH_CREATE(AuthorizationResourceAction.ENVIRONMENT_CREATE_DATAHUB),
     UPDATE_AZURE_ENCRYPTION_RESOURCES(AuthorizationResourceAction.UPDATE_AZURE_ENCRYPTION_RESOURCES),
+    ENV_VERTICAL_SCALING(AuthorizationResourceAction.ENVIRONMENT_VERTICAL_SCALING),
     // dh level
     DH_START(AuthorizationResourceAction.START_DATAHUB),
     DH_STOP(AuthorizationResourceAction.STOP_DATAHUB),
@@ -38,6 +39,7 @@ public enum RightV4 {
     DH_RECOVER(AuthorizationResourceAction.RECOVER_DATAHUB),
     DH_UPGRADE(AuthorizationResourceAction.UPGRADE_DATAHUB),
     DH_REFRESH_RECIPES(AuthorizationResourceAction.REFRESH_RECIPES_DATAHUB),
+    DH_VERTICAL_SCALING(AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING),
     // sdx level
     SDX_UPGRADE(AuthorizationResourceAction.UPGRADE_DATALAKE),
     SDX_RECOVER(AuthorizationResourceAction.RECOVER_DATALAKE),
@@ -45,6 +47,7 @@ public enum RightV4 {
     SDX_RETRY(AuthorizationResourceAction.RETRY_DATALAKE_OPERATION),
     SDX_DESCRIBE(AuthorizationResourceAction.DESCRIBE_DATALAKE),
     SDX_RESIZE(AuthorizationResourceAction.RESIZE_DATALAKE),
+    SDX_VERTICAL_SCALING(AuthorizationResourceAction.DATALAKE_VERTICAL_SCALING),
     SDX_REFRESH_RECIPES(AuthorizationResourceAction.REFRESH_RECIPES_DATALAKE);
 
     private static final Map<AuthorizationResourceAction, RightV4> BY_ACTION = Stream.of(RightV4.values())
