@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.log.Log;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
 import com.sequenceiq.it.cloudbreak.util.azure.azurevm.action.AzureClientActions;
@@ -136,5 +136,11 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     @Override
     public Set<String> getVolumeMountPoints(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
         return Set.of("/mnt/resource", "/hadoopfs/ephfs1");
+    }
+
+    @Override
+    public Map<String, String> getLaunchTemplateUserData(String stack) {
+        LOGGER.info("not implemented for azure");
+        return null;
     }
 }

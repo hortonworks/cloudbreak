@@ -3,7 +3,9 @@ package com.sequenceiq.it.cloudbreak.util.aws.amazonec2.action;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,9 +19,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.cloudformation.model.StackResourceSummary;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.DescribeLaunchTemplateVersionsRequest;
+import com.amazonaws.services.ec2.model.DescribeLaunchTemplateVersionsResult;
+import com.amazonaws.services.ec2.model.DescribeLaunchTemplatesRequest;
+import com.amazonaws.services.ec2.model.DescribeLaunchTemplatesResult;
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesResult;
 import com.amazonaws.services.ec2.model.EbsInstanceBlockDevice;
@@ -43,6 +50,7 @@ import com.amazonaws.waiters.WaiterUnrecoverableException;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
+import com.sequenceiq.it.cloudbreak.util.aws.amazoncf.action.CfClientActions;
 import com.sequenceiq.it.cloudbreak.util.aws.amazonec2.client.EC2Client;
 
 @Component
@@ -56,6 +64,9 @@ public class EC2ClientActions extends EC2Client {
 
     @Inject
     private SdxUtil sdxUtil;
+
+    @Inject
+    private CfClientActions cfClientActions;
 
     public List<String> getInstanceVolumeIds(List<String> instanceIds, boolean rootVolumes) {
         AmazonEC2 ec2Client = buildEC2Client();
@@ -208,5 +219,23 @@ public class EC2ClientActions extends EC2Client {
         volumeIdKmsIdMap.forEach((volumeId, kmsKeyId) -> Log.log(LOGGER, format(" Following KMS Key IDs are available: [%s] for '%s' EC2 volume. ",
                 kmsKeyId, volumeId)));
         return new ArrayList<>(volumeIdKmsIdMap.values());
+    }
+
+    public Map<String, String> listLaunchTemplatesUserData(String stack) {
+        List<StackResourceSummary> launchTemplateList = cfClientActions.getLaunchTemplatesToStack(stack);
+        AmazonEC2 client = buildEC2Client();
+
+        Map<String, String> result = new HashMap<>();
+        DescribeLaunchTemplatesResult launchTemplates = client.describeLaunchTemplates(new DescribeLaunchTemplatesRequest()
+                .withLaunchTemplateIds(launchTemplateList.stream().map(lt -> lt.getPhysicalResourceId()).collect(Collectors.toList())));
+        for (int i = 0; i < launchTemplateList.size(); i++) {
+            DescribeLaunchTemplateVersionsResult ver = client.describeLaunchTemplateVersions(new DescribeLaunchTemplateVersionsRequest()
+                    .withLaunchTemplateId(launchTemplates.getLaunchTemplates().get(i).getLaunchTemplateId())
+                    .withVersions(String.valueOf(launchTemplates.getLaunchTemplates().get(i).getLatestVersionNumber())));
+            String userData = new String(Base64.getDecoder().decode(ver.getLaunchTemplateVersions().get(0).getLaunchTemplateData().getUserData()));
+            result.put(launchTemplates.getLaunchTemplates().get(i).getLaunchTemplateId(), userData);
+        }
+
+        return result;
     }
 }

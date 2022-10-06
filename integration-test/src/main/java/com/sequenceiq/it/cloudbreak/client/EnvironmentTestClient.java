@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCascadingDeleteAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCcmUpgrade;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeAuthenticationAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeCredentialAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeSecurityAccessAction;
@@ -93,5 +94,9 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> changeSecurityAccess() {
         return new EnvironmentChangeSecurityAccessAction();
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> upgradeCcm() {
+        return new EnvironmentCcmUpgrade();
     }
 }
