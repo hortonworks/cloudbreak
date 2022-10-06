@@ -30,6 +30,9 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     @Inject
     private AmazonS3Util amazonS3Util;
 
+//    @Inject
+//    private AmazonCloudFormation
+
     @Inject
     private SshEnaDriverCheckActions sshEnaDriverCheckActions;
 
@@ -124,5 +127,10 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     @Override
     public Set<String> getVolumeMountPoints(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
         return sshJUtil.getAwsVolumeMountPoints(instanceGroups, hostGroupNames);
+    }
+
+    @Override
+    public Map<String, String> getLaunchTemplateUserData(String name) {
+        return amazonEC2Util.listLaunchTemplatesUserData(name);
     }
 }

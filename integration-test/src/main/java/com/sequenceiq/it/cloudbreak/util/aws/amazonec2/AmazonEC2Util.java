@@ -44,4 +44,8 @@ public class AmazonEC2Util {
     public Map<String, String> instanceSubnet(List<String> instanceIds) {
         return ec2ClientActions.instanceSubnet(instanceIds);
     }
+
+    public Map<String, String> listLaunchTemplatesUserData(String name) {
+        return ec2ClientActions.listLaunchTemplatesUserData(name);
+    }
 }

@@ -139,4 +139,10 @@ public interface CloudFunctionality {
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
     void verifyEnaDriver(StackV4Response stackV4Response, CloudbreakClient cloudbreakClient);
+
+    @Retryable(
+            maxAttempts = ATTEMPTS,
+            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
+    )
+    Map<String, String> getLaunchTemplateUserData(String name);
 }

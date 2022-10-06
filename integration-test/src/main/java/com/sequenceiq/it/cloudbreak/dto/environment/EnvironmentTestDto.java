@@ -476,4 +476,14 @@ public class EnvironmentTestDto
             setLastKnownFlowChainId(flowIdentifier.getPollableId());
         }
     }
+
+    public EnvironmentTestDto withOverrideTunnel() {
+        getRequest().setOverrideTunnel(Boolean.TRUE);
+        return this;
+    }
+
+    public EnvironmentTestDto withoutOverrideTunnel() {
+        getRequest().setOverrideTunnel(Boolean.FALSE);
+        return this;
+    }
 }

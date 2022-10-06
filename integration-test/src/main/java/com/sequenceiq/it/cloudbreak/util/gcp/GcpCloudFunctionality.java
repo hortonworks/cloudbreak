@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.log.Log;
@@ -130,5 +130,11 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     public Set<String> getVolumeMountPoints(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
         LOGGER.debug("Currently not implemented for GCP!");
         return Collections.emptySet();
+    }
+
+    @Override
+    public Map<String, String> getLaunchTemplateUserData(String stack) {
+        LOGGER.debug("Currently not implemented for GCP!");
+        return null;
     }
 }
