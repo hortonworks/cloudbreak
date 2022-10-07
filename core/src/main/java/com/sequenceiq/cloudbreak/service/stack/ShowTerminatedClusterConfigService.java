@@ -21,6 +21,9 @@ public class ShowTerminatedClusterConfigService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShowTerminatedClusterConfigService.class);
 
+    private static final ShowTerminatedClustersAfterConfig HIDE_TERMINATED =
+            new ShowTerminatedClustersAfterConfig(false, 0L);
+
     private ShowTerminatedClustersConfig defaultShowTerminatedClustersConfig;
 
     @Inject
@@ -60,6 +63,10 @@ public class ShowTerminatedClusterConfigService {
                 config.isActive(),
                 computeShowAfterTimestampMillisecs(config.getTimeout())
         );
+    }
+
+    public ShowTerminatedClustersAfterConfig getHideTerminated() {
+        return HIDE_TERMINATED;
     }
 
     public ShowTerminatedClustersConfig getConfig() {

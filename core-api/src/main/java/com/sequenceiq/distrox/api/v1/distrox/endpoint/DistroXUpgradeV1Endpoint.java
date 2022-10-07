@@ -42,7 +42,8 @@ public interface DistroXUpgradeV1Endpoint {
     @Path("/crn/{crn}/rds_upgrade")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Upgrades the external database of the distrox cluster", nickname = "upgradeDistroXRdsByCrn")
-    DistroXRdsUpgradeV1Response upgradeRdsByCrn(@PathParam("crn") String clusterCrn, @Valid DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest);
+    DistroXRdsUpgradeV1Response upgradeRdsByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String clusterCrn,
+            @Valid DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest);
 
     @POST
     @Path("{name}/upgrade")
@@ -54,7 +55,8 @@ public interface DistroXUpgradeV1Endpoint {
     @Path("/crn/{crn}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Upgrades the distrox cluster", nickname = "upgradeDistroxClusterByCrn")
-    DistroXUpgradeV1Response upgradeClusterByCrn(@PathParam("crn") String crn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest);
+    DistroXUpgradeV1Response upgradeClusterByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+            @Valid DistroXUpgradeV1Request distroxUpgradeRequest);
 
     @POST
     @Path("{name}/prepare_upgrade")
@@ -66,7 +68,8 @@ public interface DistroXUpgradeV1Endpoint {
     @Path("/crn/{crn}/prepare_upgrade")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "prepares the distrox cluster for upgrade", nickname = "prepareDistroxClusterUpgradeByCrn")
-    DistroXUpgradeV1Response prepareClusterUpgradeByCrn(@PathParam("crn") String crn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest);
+    DistroXUpgradeV1Response prepareClusterUpgradeByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+            @Valid DistroXUpgradeV1Request distroxUpgradeRequest);
 
     @POST
     @Path("internal/{name}/upgrade")
@@ -79,7 +82,8 @@ public interface DistroXUpgradeV1Endpoint {
     @Path("internal/crn/{crn}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Upgrades the distrox cluster internal", nickname = "upgradeDistroxClusterByCrnInternal")
-    DistroXUpgradeV1Response upgradeClusterByCrnInternal(@PathParam("crn") String crn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
+    DistroXUpgradeV1Response upgradeClusterByCrnInternal(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+            @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
