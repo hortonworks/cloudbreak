@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterCommissionService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
@@ -36,8 +38,11 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.ScalingException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
@@ -81,12 +86,22 @@ class ClusterUpscaleServiceTest {
     @Mock
     private StackDto stackDto;
 
+    @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
+    private ClusterService clusterService;
+
+    @Mock
+    private FlowMessageService flowMessageService;
+
     @BeforeEach
     public void setUp() {
         Cluster cluster = new Cluster();
         cluster.setId(2L);
         when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
-        inOrder = Mockito.inOrder(parcelService, recipeEngine, clusterStatusService, clusterCommissionService, clusterApi, clusterHostServiceRunner);
+        inOrder = Mockito.inOrder(parcelService, recipeEngine, clusterStatusService, clusterCommissionService, clusterApi, clusterHostServiceRunner,
+                clusterService);
         lenient().when(stackDto.getCluster()).thenReturn(cluster);
         lenient().when(stackDto.getId()).thenReturn(1L);
     }
@@ -108,7 +123,7 @@ class ClusterUpscaleServiceTest {
         Map<String, String> candidates = Map.of("master-1", "privateIp");
         when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
 
-        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null);
+        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null, false);
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stackDto);
         inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), candidates);
@@ -137,7 +152,7 @@ class ClusterUpscaleServiceTest {
         Map<String, String> candidates = Map.of("master-1", "privateIp");
         when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
 
-        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null);
+        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null, false);
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stackDto);
         inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), candidates);
@@ -166,7 +181,7 @@ class ClusterUpscaleServiceTest {
         Map<String, String> candidates = Map.of("master-1", "privateIp");
         when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
 
-        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null);
+        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null, false);
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stackDto);
         inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), candidates);
@@ -191,7 +206,7 @@ class ClusterUpscaleServiceTest {
 
         when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
 
-        underTest.installServicesOnNewHosts(1L, Set.of("master"), false, false, Map.of("master", Set.of("master-1", "master-2", "master-3")), null);
+        underTest.installServicesOnNewHosts(1L, Set.of("master"), false, false, Map.of("master", Set.of("master-1", "master-2", "master-3")), null, false);
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stackDto);
         inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), candidates);
@@ -207,10 +222,68 @@ class ClusterUpscaleServiceTest {
         when(parcelService.removeUnusedParcelComponents(stackDto)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of("parcel", "parcel")));
 
         CloudbreakException exception = assertThrows(CloudbreakException.class,
-                () -> underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, new HashMap<>(), null));
+                () -> underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, new HashMap<>(), null, false));
 
         assertEquals("Failed to remove the following parcels: {parcel=[parcel]}", exception.getMessage());
         verify(parcelService).removeUnusedParcelComponents(stackDto);
+    }
+
+    @Test
+    public void testInstallServicesShouldNotThrowExceptionWhenTargetedUpscaleClusterFailed() throws CloudbreakException {
+        when(entitlementService.targetedUpscaleSupported(any())).thenReturn(Boolean.TRUE);
+        HostGroup hostGroup = newHostGroup(
+                "master",
+                newInstance(InstanceStatus.SERVICES_HEALTHY),
+                newInstance(InstanceStatus.SERVICES_HEALTHY),
+                newInstance(InstanceStatus.SERVICES_HEALTHY));
+        when(hostGroupService.getByClusterWithRecipes(any())).thenReturn(Set.of(hostGroup));
+        when(hostGroupService.getByCluster(any())).thenReturn(Set.of(hostGroup));
+        when(parcelService.removeUnusedParcelComponents(stackDto)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of()));
+
+        Map<String, String> candidates = Map.of("master-1", "privateIp");
+        when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
+        when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
+        when(clusterApi.upscaleCluster(any())).thenThrow(new ScalingException("error", Set.of("instanceId1")));
+
+        underTest.installServicesOnNewHosts(1L, Set.of("master"), false, true, new HashMap<>(), null, false);
+
+        inOrder.verify(parcelService).removeUnusedParcelComponents(stackDto);
+        inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), candidates);
+        inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
+        inOrder.verify(clusterApi, times(0)).restartAll(false);
+        inOrder.verify(clusterStatusService, times(0)).getDecommissionedHostsFromCM();
+        inOrder.verify(clusterCommissionService, times(0)).recommissionHosts(any());
+        inOrder.verify(clusterService, times(1)).updateInstancesToZombieByInstanceIds(eq(1L), eq(Set.of("instanceId1")));
+    }
+
+    @Test
+    public void testInstallServicesShouldThrowExceptionWhenNotTargetedUpscaleClusterFailed() throws CloudbreakException {
+        HostGroup hostGroup = newHostGroup(
+                "master",
+                newInstance(InstanceStatus.SERVICES_HEALTHY),
+                newInstance(InstanceStatus.SERVICES_HEALTHY),
+                newInstance(InstanceStatus.SERVICES_HEALTHY));
+        when(hostGroupService.getByClusterWithRecipes(any())).thenReturn(Set.of(hostGroup));
+        when(hostGroupService.getByCluster(any())).thenReturn(Set.of(hostGroup));
+        when(parcelService.removeUnusedParcelComponents(stackDto)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of()));
+
+        Map<String, String> candidates = Map.of("master-1", "privateIp");
+        when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
+        when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
+        when(clusterApi.upscaleCluster(any())).thenThrow(new ScalingException("error", Set.of("instanceId1")));
+
+        ScalingException exception = assertThrows(ScalingException.class,
+                () -> underTest.installServicesOnNewHosts(1L, Set.of("master"), false, true, new HashMap<>(), null, true));
+
+        Assertions.assertThat(exception.getFailedInstanceIds()).containsExactly("instanceId1");
+        assertEquals("error", exception.getMessage());
+        inOrder.verify(parcelService).removeUnusedParcelComponents(stackDto);
+        inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), candidates);
+        inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
+        inOrder.verify(clusterApi, times(0)).restartAll(false);
+        inOrder.verify(clusterStatusService, times(0)).getDecommissionedHostsFromCM();
+        inOrder.verify(clusterCommissionService, times(0)).recommissionHosts(any());
+        inOrder.verify(clusterService, times(1)).updateInstancesToOrchestrationFailedByInstanceIds(eq(1L), eq(Set.of("instanceId1")));
     }
 
     private HostGroup newHostGroup(String name, InstanceMetaData... instances) {
