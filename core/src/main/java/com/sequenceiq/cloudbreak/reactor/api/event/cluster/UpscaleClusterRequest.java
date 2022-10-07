@@ -18,12 +18,16 @@ public class UpscaleClusterRequest extends AbstractClusterScaleRequest {
 
     private final Map<String, Integer> hostGroupWithAdjustment;
 
-    public UpscaleClusterRequest(Long stackId, Set<String> hostGroups, boolean repair, boolean restartServices, Map<String, Integer> hostGroupWithAdjustment) {
+    private final boolean primaryGatewayChanged;
+
+    public UpscaleClusterRequest(Long stackId, Set<String> hostGroups, boolean repair, boolean restartServices, Map<String, Integer> hostGroupWithAdjustment,
+            boolean primaryGatewayChanged) {
         super(stackId, hostGroups);
         this.repair = repair;
         this.restartServices = restartServices;
         this.hostGroupWithAdjustment = hostGroupWithAdjustment;
         this.hostGroupsWithHostNames = new HashMap<>();
+        this.primaryGatewayChanged = primaryGatewayChanged;
     }
 
     @JsonCreator
@@ -33,12 +37,14 @@ public class UpscaleClusterRequest extends AbstractClusterScaleRequest {
             @JsonProperty("repair") boolean repair,
             @JsonProperty("restartServices") boolean restartServices,
             @JsonProperty("hostGroupsWithHostNames") Map<String, Set<String>> hostGroupsWithHostNames,
-            @JsonProperty("hostGroupWithAdjustment") Map<String, Integer> hostGroupWithAdjustment) {
+            @JsonProperty("hostGroupWithAdjustment") Map<String, Integer> hostGroupWithAdjustment,
+            @JsonProperty("primaryGatewayChanged") boolean primaryGatewayChanged) {
         super(stackId, hostGroups);
         this.repair = repair;
         this.restartServices = restartServices;
         this.hostGroupWithAdjustment = hostGroupWithAdjustment;
         this.hostGroupsWithHostNames = hostGroupsWithHostNames;
+        this.primaryGatewayChanged = primaryGatewayChanged;
     }
 
     public boolean isRepair() {
@@ -55,5 +61,9 @@ public class UpscaleClusterRequest extends AbstractClusterScaleRequest {
 
     public Map<String, Integer> getHostGroupWithAdjustment() {
         return hostGroupWithAdjustment;
+    }
+
+    public boolean isPrimaryGatewayChanged() {
+        return primaryGatewayChanged;
     }
 }

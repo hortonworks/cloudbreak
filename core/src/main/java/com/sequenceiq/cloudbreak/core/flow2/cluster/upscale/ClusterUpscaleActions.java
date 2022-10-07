@@ -174,7 +174,8 @@ public class ClusterUpscaleActions {
                     Map<String, Set<String>> hostGroupsWithHostNames =
                             (Map<String, Set<String>>) variables.getOrDefault(HOST_NAMES_BY_HOST_GROUP, new HashMap<>());
                     UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroups(),
-                            context.isRepair(), context.isRestartServices(), hostGroupsWithHostNames, context.getHostGroupWithAdjustment());
+                            context.isRepair(), context.isRestartServices(), hostGroupsWithHostNames, context.getHostGroupWithAdjustment(),
+                            context.isSinglePrimaryGateway());
                     sendEvent(context, request.selector(), request);
                 }
             }
@@ -364,7 +365,7 @@ public class ClusterUpscaleActions {
             @Override
             protected Selectable createRequest(ClusterUpscaleContext context) {
                 UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroups(),
-                        context.isRepair(), context.isRestartServices(), context.getHostGroupWithAdjustment());
+                        context.isRepair(), context.isRestartServices(), context.getHostGroupWithAdjustment(), context.isSinglePrimaryGateway());
                 return new UpscaleClusterResult(request);
             }
         };

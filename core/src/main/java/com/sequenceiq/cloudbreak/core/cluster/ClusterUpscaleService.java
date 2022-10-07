@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_WITH_ZOMBIE_NODES;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_UPSCALE_FAILED;
 import static java.lang.String.format;
 
 import java.util.HashSet;
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
@@ -73,8 +74,12 @@ public class ClusterUpscaleService {
     @Inject
     private FlowMessageService flowMessageService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public void installServicesOnNewHosts(Long stackId, Set<String> hostGroupNames, Boolean repair, Boolean restartServices,
-            Map<String, Set<String>> hostGroupsWithHostNames, Map<String, Integer> hostGroupWithAdjustment) throws CloudbreakException {
+            Map<String, Set<String>> hostGroupsWithHostNames, Map<String, Integer> hostGroupWithAdjustment, boolean primaryGatewayChanged)
+            throws CloudbreakException {
         StackDto stackDto = stackDtoService.getById(stackId);
         LOGGER.debug("Start installing CM services");
         removeUnusedParcelComponents(stackDto);
@@ -99,11 +104,12 @@ public class ClusterUpscaleService {
             clusterHostServiceRunner.createCronForUserHomeCreation(stackDto, candidateAddresses.keySet());
             setInstanceStatus(runningInstanceMetaDataSet, upscaledHosts);
         } catch (ScalingException se) {
-            if (Boolean.FALSE.equals(repair)) {
-                clusterService.updateInstancesToZombieByIds(stackId, se.getFailedInstanceIds());
-                flowMessageService.fireEventAndLog(stackDto.getId(), Status.UPDATE_IN_PROGRESS.name(),
-                        CLUSTER_SCALING_WITH_ZOMBIE_NODES, Joiner.on(",").join(se.getFailedInstanceIds()));
+            flowMessageService.fireEventAndLog(stackDto.getId(), Status.UPDATE_IN_PROGRESS.name(),
+                    CLUSTER_SCALING_UPSCALE_FAILED, Joiner.on(",").join(se.getFailedInstanceIds()));
+            if (Boolean.FALSE.equals(repair) && !primaryGatewayChanged && entitlementService.targetedUpscaleSupported(stackDto.getAccountId())) {
+                clusterService.updateInstancesToZombieByInstanceIds(stackId, se.getFailedInstanceIds());
             } else {
+                clusterService.updateInstancesToOrchestrationFailedByInstanceIds(stackId, se.getFailedInstanceIds());
                 throw se;
             }
         }

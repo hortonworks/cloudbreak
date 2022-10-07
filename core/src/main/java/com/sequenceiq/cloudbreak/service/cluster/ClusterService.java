@@ -2,10 +2,10 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.CREATED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.ORCHESTRATION_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.ZOMBIE;
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPO_ID_TAG;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
@@ -222,17 +222,26 @@ public class ClusterService {
         Set<String> unreachableInstanceIds = unreachableNodes.stream()
                 .map(Node::getInstanceId)
                 .collect(Collectors.toSet());
-        updateInstancesToZombieByIds(stackId, unreachableInstanceIds);
+        updateInstancesToZombieByInstanceIds(stackId, unreachableInstanceIds);
     }
 
-    public void updateInstancesToZombieByIds(Long stackId, Set<String> unreachableInstanceIds) {
-        LOGGER.debug("Update instance statuses to ZOMBIE, instanceIds: {}", unreachableInstanceIds);
+    public void updateInstancesToZombieByInstanceIds(Long stackId, Set<String> unreachableInstanceIds) {
+        updateInstanceStatusesByInstanceIds(stackId, unreachableInstanceIds, ORCHESTRATION_FAILED, "Detected as Zombie instance metadata");
+    }
+
+    public void updateInstancesToOrchestrationFailedByInstanceIds(Long stackId, Set<String> unreachableInstanceIds) {
+        updateInstanceStatusesByInstanceIds(stackId, unreachableInstanceIds, ORCHESTRATION_FAILED, "Detected as ORCHESTRATION_FAILED instance metadata");
+    }
+
+    private void updateInstanceStatusesByInstanceIds(Long stackId, Set<String> unreachableInstanceIds, InstanceStatus newInstanceStatus,
+            String newStatusReason) {
+        LOGGER.debug("Update instance statuses to {}, instanceIds: {}", newInstanceStatus, unreachableInstanceIds);
         List<? extends InstanceMetadataView> notDeletedInstanceMetadatas = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stackId);
         List<Long> instanceMetadataIds = notDeletedInstanceMetadatas.stream()
                 .filter(instanceMetadata -> unreachableInstanceIds.contains(instanceMetadata.getInstanceId()))
                 .map(InstanceMetadataView::getId)
                 .collect(Collectors.toList());
-        instanceMetaDataService.updateAllInstancesToStatus(instanceMetadataIds, ZOMBIE, "Detected as Zombie instance metadata");
+        instanceMetaDataService.updateAllInstancesToStatus(instanceMetadataIds, newInstanceStatus, newStatusReason);
     }
 
     public String getStackRepositoryJson(Long stackId) {

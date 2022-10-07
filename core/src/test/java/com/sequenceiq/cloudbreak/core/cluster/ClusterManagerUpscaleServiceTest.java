@@ -136,7 +136,8 @@ public class ClusterManagerUpscaleServiceTest {
         verify(instanceMetaDataService, times(1)).updateInstanceStatuses(
                 eq(Set.of(INSTANCE_METADATA_ID)), eq(InstanceStatus.ORCHESTRATION_FAILED),
                 eq("Upscaling cluster manager were not successful, waiting for hosts timed out"));
-        assertEquals("Upscaling cluster manager were not successful, waiting for hosts timed out for nodes: [3]", exception.getMessage());
+        assertEquals("Upscaling cluster manager was not successful, waiting for hosts timed out for nodes: [3], " +
+                "please check Cloudera Manager logs for further details.", exception.getMessage());
     }
 
     @Test
@@ -153,8 +154,8 @@ public class ClusterManagerUpscaleServiceTest {
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.upscaleClusterManager(STACK_ID, Collections.singletonMap("hg", 1), false, true));
 
-        assertEquals("Upscaling cluster manager were not successful, waiting for hosts timed out, " +
-                "please check Cloudera Manager logs fur further details.", exception.getMessage());
+        assertEquals("Upscaling cluster manager was not successful, waiting for hosts timed out, " +
+                "please check Cloudera Manager logs for further details.", exception.getMessage());
 
         when(clusterApi.waitForHosts(any())).thenReturn(new ExtendedPollingResultBuilder()
                 .timeout().withException(new RuntimeException("customerror")).build());
@@ -165,7 +166,7 @@ public class ClusterManagerUpscaleServiceTest {
 
         verifyNoInteractions(clusterServiceRunner);
         verify(clusterApi, times(2)).waitForHosts(any());
-        verifyNoInteractions(instanceMetaDataService);
+        verify(instanceMetaDataService, times(2)).updateInstanceStatuses(any(), eq(InstanceStatus.ORCHESTRATION_FAILED), any());
     }
 
     private StackDto getStackDto() {
