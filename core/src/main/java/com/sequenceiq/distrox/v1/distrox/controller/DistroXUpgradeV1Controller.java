@@ -14,6 +14,7 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
@@ -58,16 +60,37 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
     @Inject
     private StackCcmUpgradeService stackCcmUpgradeService;
 
+    @Inject
+    private StackService stackService;
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
+    public DistroXRdsUpgradeV1Response upgradeRdsByName(@ResourceName String name, @Valid DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest) {
+        validateClusterName(name);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(name);
+        return upgradeRds(distroxRdsUpgradeRequest, nameOrCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
+    public DistroXRdsUpgradeV1Response upgradeRdsByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB)
+            @ResourceCrn String crn, @Valid DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest) {
+        NameOrCrn nameOrCrn = NameOrCrn.ofCrn(crn);
+        return upgradeRds(distroxRdsUpgradeRequest, nameOrCrn);
+    }
+
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
     public DistroXUpgradeV1Response upgradeClusterByName(@ResourceName String clusterName, @Valid DistroXUpgradeV1Request distroxUpgradeRequest) {
+        validateClusterName(clusterName);
         NameOrCrn nameOrCrn = NameOrCrn.ofName(clusterName);
         return upgradeCluster(clusterName, distroxUpgradeRequest, nameOrCrn, false);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
-    public DistroXUpgradeV1Response upgradeClusterByCrn(@ResourceCrn String clusterCrn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest) {
+    public DistroXUpgradeV1Response upgradeClusterByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB)
+            @ResourceCrn String clusterCrn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest) {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(clusterCrn);
         return upgradeCluster(clusterCrn, distroxUpgradeRequest, nameOrCrn, false);
     }
@@ -75,35 +98,24 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
     public DistroXUpgradeV1Response prepareClusterUpgradeByName(@ResourceName String clusterName, @Valid DistroXUpgradeV1Request distroxUpgradeRequest) {
+        validateClusterName(clusterName);
         NameOrCrn nameOrCrn = NameOrCrn.ofName(clusterName);
         return upgradeCluster(clusterName, distroxUpgradeRequest, nameOrCrn, true);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
-    public DistroXUpgradeV1Response prepareClusterUpgradeByCrn(@ResourceCrn String clusterCrn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest) {
+    public DistroXUpgradeV1Response prepareClusterUpgradeByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB)
+            @ResourceCrn String clusterCrn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest) {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(clusterCrn);
         return upgradeCluster(clusterCrn, distroxUpgradeRequest, nameOrCrn, true);
-    }
-
-    @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
-    public DistroXRdsUpgradeV1Response upgradeRdsByName(@ResourceName String name, @Valid DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest) {
-        NameOrCrn nameOrCrn = NameOrCrn.ofName(name);
-        return upgradeRds(distroxRdsUpgradeRequest, nameOrCrn);
-    }
-
-    @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
-    public DistroXRdsUpgradeV1Response upgradeRdsByCrn(@ResourceCrn String crn, @Valid DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest) {
-        NameOrCrn nameOrCrn = NameOrCrn.ofCrn(crn);
-        return upgradeRds(distroxRdsUpgradeRequest, nameOrCrn);
     }
 
     @Override
     @InternalOnly
     public DistroXUpgradeV1Response upgradeClusterByNameInternal(@ResourceName String clusterName, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
             @InitiatorUserCrn String initiatorUserCrn) {
+        validateClusterName(clusterName);
         NameOrCrn nameOrCrn = NameOrCrn.ofName(clusterName);
         boolean dataHubRuntimeUpgradeEnabled = upgradeAvailabilityService.isRuntimeUpgradeEnabledByUserCrn(initiatorUserCrn);
         boolean dataHubOsUpgradeEntitled = upgradeAvailabilityService.isOsUpgradeEnabledByUserCrn(initiatorUserCrn);
@@ -113,7 +125,8 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
 
     @Override
     @InternalOnly
-    public DistroXUpgradeV1Response upgradeClusterByCrnInternal(@ResourceCrn String clusterCrn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
+    public DistroXUpgradeV1Response upgradeClusterByCrnInternal(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB)
+            @ResourceCrn String clusterCrn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
             @InitiatorUserCrn String initiatorUserCrn) {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(clusterCrn);
         boolean dataHubRuntimeUpgradeEnabled = upgradeAvailabilityService.isRuntimeUpgradeEnabledByUserCrn(initiatorUserCrn);
@@ -156,5 +169,10 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
 
     private DistroXRdsUpgradeV1Response upgradeRds(DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest, NameOrCrn nameOrCrn) {
         return rdsUpgradeService.triggerUpgrade(nameOrCrn, distroxRdsUpgradeRequest);
+    }
+
+    private void validateClusterName(String clusterName) {
+        stackService.checkLiveStackExistenceByName(clusterName, restRequestThreadLocalService.getAccountId(), StackType.WORKLOAD);
+
     }
 }

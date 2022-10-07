@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCc
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
@@ -60,12 +62,16 @@ class DistroXUpgradeV1ControllerTest {
     @Mock
     private StackCcmUpgradeService stackCcmUpgradeService;
 
+    @Mock
+    private StackService stackService;
+
     @InjectMocks
     private DistroXUpgradeV1Controller underTest;
 
     @BeforeEach
     public void init() {
         lenient().when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
+        lenient().when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
     }
 
     @Test
@@ -83,6 +89,7 @@ class DistroXUpgradeV1ControllerTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, distroxUpgradeRequest));
 
+        verify(stackService).checkLiveStackExistenceByName(CLUSTER_NAME, ACCOUNT_ID, StackType.WORKLOAD);
         verify(upgradeAvailabilityService).checkForUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, upgradeV4Request, USER_CRN);
         verifyNoInteractions(upgradeService);
     }
@@ -102,6 +109,7 @@ class DistroXUpgradeV1ControllerTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, distroxUpgradeRequest));
 
+        verify(stackService).checkLiveStackExistenceByName(CLUSTER_NAME, ACCOUNT_ID, StackType.WORKLOAD);
         verify(upgradeAvailabilityService).checkForUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, upgradeV4Request, USER_CRN);
         verifyNoInteractions(upgradeService);
     }
@@ -120,6 +128,7 @@ class DistroXUpgradeV1ControllerTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, distroxUpgradeRequest));
 
+        verify(stackService).checkLiveStackExistenceByName(CLUSTER_NAME, ACCOUNT_ID, StackType.WORKLOAD);
         verify(upgradeService).triggerUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false);
     }
 
@@ -154,6 +163,7 @@ class DistroXUpgradeV1ControllerTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.prepareClusterUpgradeByName(CLUSTER_NAME, distroxUpgradeRequest));
 
+        verify(stackService).checkLiveStackExistenceByName(CLUSTER_NAME, ACCOUNT_ID, StackType.WORKLOAD);
         verify(upgradeService).triggerUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, true);
     }
 

@@ -717,6 +717,14 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         }
     }
 
+    public void checkLiveStackExistenceByName(String name, String accountId, StackType stackType) {
+        ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.getHideTerminated();
+        Optional<StackDto> stack = findByNameAndWorkspaceId(name, accountId, stackType, showTerminatedClustersAfterConfig);
+        if (stack.isEmpty()) {
+            throw new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
+        }
+    }
+
     public Stack save(Stack stack) {
         return stackRepository.save(stack);
     }
