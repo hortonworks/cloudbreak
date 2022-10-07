@@ -74,6 +74,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EMBEDDED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ROTATE_SALTUSER_PASSWORD;
@@ -551,6 +552,10 @@ public class EntitlementService {
 
     public boolean isPostgresUpgradeExceptionEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_POSTGRES_UPGRADE_EXCEPTION);
+    }
+
+    public boolean isPostgresUpgradeSkipServicesAndCmStopEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP);
     }
 
     public boolean isUserSyncSplitFreeIPAUserRetrievalEnabled(String accountId) {
