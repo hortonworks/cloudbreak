@@ -27,6 +27,7 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
+import com.sequenceiq.common.api.telemetry.request.MonitoringRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
 import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
@@ -162,6 +163,20 @@ public class TelemetryConverterTest {
 
         assertNotNull(result);
         assertFalse(result.getFeatures().getMonitoring().getEnabled());
+    }
+
+    @Test
+    public void testConvertWhenMonitoringIsDisabledButUrlIsInRequest() {
+        ReflectionTestUtils.setField(underTest, "monitoringEnabled", false);
+        TelemetryRequest input = new TelemetryRequest();
+        MonitoringRequest monitoring = new MonitoringRequest();
+        monitoring.setRemoteWriteUrl("anurl");
+        input.setMonitoring(monitoring);
+
+        Telemetry result = underTest.convert(input, StackType.WORKLOAD);
+
+        assertNotNull(result);
+        assertTrue(result.getFeatures().getMonitoring().getEnabled());
     }
 
     @Test
