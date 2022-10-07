@@ -129,6 +129,7 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
             throw e.getCause();
         }
         Cluster updatedCluster = clusterService.findById(cluster.getId());
+        asClusterCommonService.processAutoscalingStateChanged(updatedCluster);
         return createClusterJsonResponse(updatedCluster);
     }
 
@@ -142,6 +143,8 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
             alertValidator.validateStopStartEntitlementAndDisableIfNotEntitled(cluster);
         }
         alertValidator.validateScheduleWithStopStart(cluster, autoscaleClusterRequest);
+
+        String policyHostGroup = asClusterCommonService.determineLoadBasedPolicyHostGroup(cluster).orElse(null);
         try {
             transactionService.required(() -> {
                 clusterService.deleteAlertsForCluster(cluster.getId());
@@ -157,7 +160,10 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
         }
 
         Cluster updatedCluster = clusterService.findById(cluster.getId());
-        asClusterCommonService.processAutoscalingStateChanged(updatedCluster);
+        if (updatedCluster.getLoadAlerts().isEmpty()) {
+            asClusterCommonService.deleteStoppedNodesIfPresent(updatedCluster.getId(), policyHostGroup);
+        }
+        asClusterCommonService.processAutoscalingConfigChanged(updatedCluster);
         return createClusterJsonResponse(updatedCluster);
     }
 }

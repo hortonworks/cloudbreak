@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
+import com.sequenceiq.distrox.api.v1.distrox.model.MultipleInstanceDeleteRequest;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.SecurityConfig;
@@ -99,6 +100,16 @@ public class CloudbreakCommunicator {
             return Optional.empty();
         }, String.format("PutStackStartInstances query for cluster crn: %s, Scaling adjustment: %s, Host group: %s", cluster.getStackCrn(),
                 updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment(), updateStackJson.getInstanceGroupAdjustment().getInstanceGroup()));
+    }
+
+    public void deleteInstancesForCluster(Cluster cluster, List<String> instanceIds) {
+        requestLogging.logResponseTime(() -> {
+            MultipleInstanceDeleteRequest multiDeleteRequest = new MultipleInstanceDeleteRequest();
+            multiDeleteRequest.setInstances(instanceIds);
+            cloudbreakInternalCrnClient.withInternalCrn().distroXV1Endpoint().deleteInstancesByCrn(cluster.getStackCrn(), instanceIds, multiDeleteRequest,
+                    false);
+            return Optional.empty();
+        }, String.format("DeleteInstancesForCluster query for cluster crn: %s, InstanceIds: %s", cluster.getStackCrn(), instanceIds));
     }
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 10000))

@@ -7,6 +7,7 @@ import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ENABLED;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -37,6 +38,7 @@ import com.sequenceiq.periscope.service.AlertService;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
+import com.sequenceiq.periscope.service.NodeDeletionService;
 import com.sequenceiq.periscope.service.NotFoundException;
 import com.sequenceiq.periscope.service.UsageReportingService;
 
@@ -52,6 +54,9 @@ public class AutoScaleClusterCommonService implements AuthorizationResourceCrnPr
 
     @Inject
     private UsageReportingService usageReportingService;
+
+    @Inject
+    private NodeDeletionService nodeDeletionService;
 
     @Inject
     private CloudbreakCommunicator cloudbreakCommunicator;
@@ -105,7 +110,6 @@ public class AutoScaleClusterCommonService implements AuthorizationResourceCrnPr
         Cluster cluster = clusterService.findById(clusterId);
         if (enableAutoScaling != null && !cluster.isAutoscalingEnabled().equals(enableAutoScaling)) {
             cluster = clusterService.setAutoscaleState(clusterId, enableAutoScaling);
-            processAutoscalingStateChanged(cluster);
         }
         return cluster;
     }
@@ -114,25 +118,43 @@ public class AutoScaleClusterCommonService implements AuthorizationResourceCrnPr
         Cluster cluster = clusterService.findById(clusterId);
         if (enableStopStartScaling != null && !cluster.isStopStartScalingEnabled().equals(enableStopStartScaling)) {
             cluster = clusterService.setStopStartScalingState(cluster, enableStopStartScaling);
-            processAutoscalingStateChanged(cluster);
         }
         return cluster;
     }
 
     public void deleteAlertsForClusterCrn(String stackCrn) {
         Cluster cluster = getClusterByCrnOrName(NameOrCrn.ofCrn(stackCrn));
+        String policyHostGroup = determineLoadBasedPolicyHostGroup(cluster).orElse(null);
         cluster = clusterService.deleteAlertsForCluster(cluster.getId());
-        processAutoscalingStateChanged(cluster);
+        deleteStoppedNodesIfPresent(cluster.getId(), policyHostGroup);
+        processAutoscalingAlertsDeleted(cluster);
     }
 
     public void deleteAlertsForClusterName(String stackName) {
         Cluster cluster = getClusterByCrnOrName(NameOrCrn.ofName(stackName));
+        String policyHostGroup = determineLoadBasedPolicyHostGroup(cluster).orElse(null);
         cluster = clusterService.deleteAlertsForCluster(cluster.getId());
-        processAutoscalingStateChanged(cluster);
+        deleteStoppedNodesIfPresent(cluster.getId(), policyHostGroup);
+        processAutoscalingAlertsDeleted(cluster);
+    }
+
+    public void deleteStoppedNodesIfPresent(Long clusterId, String hostGroup) {
+        Cluster cluster = clusterService.findById(clusterId);
+        nodeDeletionService.deleteStoppedNodesIfPresent(cluster, hostGroup);
+    }
+
+    public void processAutoscalingAlertsDeleted(Cluster cluster) {
+        createAutoscalingAlertsDeletedHistoryAndNotify(cluster);
+        usageReportingService.reportAutoscalingConfigChanged(restRequestThreadLocalService.getCloudbreakUser().getUserCrn(), cluster);
+    }
+
+    public void processAutoscalingConfigChanged(Cluster cluster) {
+        createAutoscalingConfigChangedHistoryAndNotify(cluster);
+        usageReportingService.reportAutoscalingConfigChanged(restRequestThreadLocalService.getCloudbreakUser().getUserCrn(), cluster);
     }
 
     public void processAutoscalingStateChanged(Cluster cluster) {
-        createAutoscalingConfigChangedHistoryAndNotify(cluster);
+        createAutoscalingStateChangedHistoryAndNotify(cluster);
         usageReportingService.reportAutoscalingConfigChanged(restRequestThreadLocalService.getCloudbreakUser().getUserCrn(), cluster);
     }
 
@@ -164,6 +186,15 @@ public class AutoScaleClusterCommonService implements AuthorizationResourceCrnPr
         return Optional.ofNullable(getClusterByCrnOrName(NameOrCrn.ofCrn(resourceCrn)).getEnvironmentCrn());
     }
 
+    public Optional<String> determineLoadBasedPolicyHostGroup(Cluster cluster) {
+        Set<LoadAlert> loadAlerts = cluster.getLoadAlerts();
+        if (loadAlerts.isEmpty()) {
+            LOGGER.info("No loadAlerts found for cluster: {}, policyHostGroup not defined", cluster.getStackCrn());
+            return Optional.empty();
+        }
+        return loadAlerts.stream().map(alert -> alert.getScalingPolicy().getHostGroup()).findAny();
+    }
+
     protected Cluster getClusterByCrnOrName(NameOrCrn nameOrCrn) {
         return nameOrCrn.hasName() ?
                 clusterService.findOneByStackNameAndTenant(nameOrCrn.getName(), restRequestThreadLocalService.getCloudbreakTenant())
@@ -193,6 +224,13 @@ public class AutoScaleClusterCommonService implements AuthorizationResourceCrnPr
                 ? historyService.createEntry(ScalingStatus.ENABLED, messagesService.getMessage(AUTOSCALING_ENABLED), cluster)
                 : historyService.createEntry(ScalingStatus.DISABLED, messagesService.getMessage(AUTOSCALING_DISABLED), cluster);
         notificationSender.sendHistoryUpdateNotification(history, cluster);
+    }
+
+    protected void createAutoscalingAlertsDeletedHistoryAndNotify(Cluster cluster) {
+        ScalingStatus scalingStatus = ScalingStatus.DISABLED;
+        String statusMessage = messagesService.getMessage(MessageCode.AUTOSCALING_POLICIES_DELETED);
+        notificationSender.sendConfigUpdateNotification(cluster);
+        notificationSender.sendHistoryUpdateNotification(historyService.createEntry(scalingStatus, statusMessage, cluster), cluster);
     }
 
     protected void createAutoscalingConfigChangedHistoryAndNotify(Cluster cluster) {
