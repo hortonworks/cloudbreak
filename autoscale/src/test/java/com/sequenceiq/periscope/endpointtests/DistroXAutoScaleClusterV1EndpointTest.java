@@ -56,6 +56,7 @@ import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.LoadAlertRepository;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
 import com.sequenceiq.periscope.service.AutoscaleRecommendationService;
+import com.sequenceiq.periscope.service.NodeDeletionService;
 import com.sequenceiq.periscope.service.configuration.ClusterProxyConfigurationService;
 import com.sequenceiq.periscope.service.configuration.LimitsConfigurationService;
 import com.sequenceiq.periscope.testcontext.EndpointTestContext;
@@ -105,6 +106,9 @@ public class DistroXAutoScaleClusterV1EndpointTest {
 
     @MockBean
     private AutoscaleRecommendationService recommendationService;
+
+    @MockBean
+    private NodeDeletionService nodeDeletionService;
 
     @MockBean
     private QuartzJobInitializer quartzJobInitializer;
@@ -173,6 +177,7 @@ public class DistroXAutoScaleClusterV1EndpointTest {
         when(limitsConfigurationService.getMaxNodeCountLimit(anyString())).thenReturn(400);
         when(recommendationService.getAutoscaleRecommendations(TEST_CLUSTER_CRN))
                 .thenReturn(new AutoscaleRecommendationV4Response(Set.of("compute"), Set.of("compute")));
+        doNothing().when(nodeDeletionService).deleteStoppedNodesIfPresent(any(), anyString());
     }
 
     @After

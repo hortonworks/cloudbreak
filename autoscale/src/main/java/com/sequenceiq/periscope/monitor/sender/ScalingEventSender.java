@@ -48,13 +48,13 @@ public class ScalingEventSender {
         eventPublisher.publishEvent(scalingEvent);
     }
 
-    public void sendScaleDownEvent(BaseAlert baseAlert, Integer existingHostGroupSize, List<String> yarnRecommendedDecommissionHosts,
+    public void sendScaleDownEvent(BaseAlert baseAlert, Integer existingHostGroupSize, List<String> hostsToDecommission,
             Integer servicesHealthyHostGroupSize, ScalingAdjustmentType adjustmentType) {
         ScalingEvent scalingEvent = new ScalingEvent(baseAlert);
         scalingEvent.setExistingHostGroupNodeCount(existingHostGroupSize);
         scalingEvent.setExistingServiceHealthyHostGroupNodeCount(servicesHealthyHostGroupSize);
-        scalingEvent.setDesiredAbsoluteHostGroupNodeCount(existingHostGroupSize - yarnRecommendedDecommissionHosts.size());
-        scalingEvent.setDecommissionNodeIds(yarnRecommendedDecommissionHosts);
+        scalingEvent.setDesiredAbsoluteHostGroupNodeCount(existingHostGroupSize - hostsToDecommission.size());
+        scalingEvent.setDecommissionNodeIds(hostsToDecommission);
         scalingEvent.setScalingAdjustmentType(adjustmentType);
         LOGGER.info("Triggering scaleDown event: {} for cluster: {}", scalingEvent, baseAlert.getCluster().getStackCrn());
         eventPublisher.publishEvent(scalingEvent);

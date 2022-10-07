@@ -10,11 +10,17 @@ public class MessageCode {
 
     public static final String AUTOSCALING_CONFIG_UPDATED = "autoscale.config.updated";
 
+    public static final String AUTOSCALING_STOPPED_NODES_DELETION = "autoscale.stopped.nodes.deleted";
+
+    public static final String AUTOSCALING_STOPPED_NODES_DELETION_FAILED = "autoscale.stopped.nodes.deleted.failed";
+
     public static final String AUTOSCALING_CLUSTER_LIMIT_EXCEEDED = "autoscale.cluster.limit.exceeded";
 
     public static final String AUTOSCALING_ENABLED = "autoscale.enabled";
 
     public static final String AUTOSCALING_DISABLED = "autoscale.disabled";
+
+    public static final String AUTOSCALING_POLICIES_DELETED = "autoscale.alerts.deleted";
 
     public static final String AUTOSCALING_ENTITLEMENT_NOT_ENABLED = "autoscale.entitlement.not.enabled";
 
