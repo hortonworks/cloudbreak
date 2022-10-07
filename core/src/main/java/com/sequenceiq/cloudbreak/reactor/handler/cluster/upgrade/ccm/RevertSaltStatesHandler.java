@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmService;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFailedEvent;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeOrchestratorService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -23,7 +23,7 @@ public class RevertSaltStatesHandler extends ExceptionCatcherEventHandler<Upgrad
     private static final Logger LOGGER = LoggerFactory.getLogger(RevertSaltStatesHandler.class);
 
     @Inject
-    private UpgradeOrchestratorService upgradeOrchestratorService;
+    private UpgradeCcmService upgradeCcmService;
 
     @Override
     public String selector() {
@@ -42,7 +42,7 @@ public class RevertSaltStatesHandler extends ExceptionCatcherEventHandler<Upgrad
         UpgradeCcmFailedEvent request = event.getData();
         Long stackId = request.getResourceId();
         LOGGER.info("Reverting salt states is starting");
-        upgradeOrchestratorService.pushSaltState(stackId, event.getData().getClusterId());
+        upgradeCcmService.pushSaltState(stackId, event.getData().getClusterId());
         LOGGER.info("Upgrade CCM revert salt states finished");
         return new UpgradeCcmFailedEvent(UPGRADE_CCM_FAILED_EVENT.event(), stackId, request.getClusterId(), request.getOldTunnel(), getClass(),
                 request.getException(), request.getRevertTime());

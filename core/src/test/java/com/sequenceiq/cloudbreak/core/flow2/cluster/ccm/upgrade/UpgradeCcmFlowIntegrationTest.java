@@ -76,7 +76,6 @@ import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeOrchestratorService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.HealthCheckService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.UpgradeCcmOrchestratorService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -150,9 +149,6 @@ class UpgradeCcmFlowIntegrationTest {
     @SpyBean
     private UpgradeCcmService upgradeCcmService;
 
-    @SpyBean
-    private UpgradeOrchestratorService upgradeOrchestratorService;
-
     private Stack stack;
 
     @BeforeEach
@@ -173,7 +169,7 @@ class UpgradeCcmFlowIntegrationTest {
 
     @Test
     public void testCcmUpgradeWhenPushSaltStatesFail() throws CloudbreakOrchestratorException {
-        doThrow(new BadRequestException()).when(upgradeOrchestratorService).pushSaltState(STACK_ID, CLUSTER_ID);
+        doThrow(new BadRequestException()).when(upgradeCcmService).pushSaltState(STACK_ID, CLUSTER_ID);
 
         ImmutablePair<InOrder, UpgradeCcmFailedEvent> result = testIt(false, UNTIL_PUSH_SALT_STATES);
         InOrder inOrder = result.left;
@@ -189,7 +185,7 @@ class UpgradeCcmFlowIntegrationTest {
         ImmutablePair<InOrder, UpgradeCcmFailedEvent> result = testIt(false, UNTIL_RECONFIGURE_NGINX);
         InOrder inOrder = result.left;
         inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID, Tunnel.CCM);
-        inOrder.verify(upgradeOrchestratorService).pushSaltState(STACK_ID, CLUSTER_ID);
+        inOrder.verify(upgradeCcmService).pushSaltState(STACK_ID, CLUSTER_ID);
         UpgradeCcmFailedEvent failure = result.right;
         Assertions.assertTrue(failure.getFailureOrigin().equals(RevertSaltStatesHandler.class));
         Assertions.assertNotNull(failure.getRevertTime());
@@ -203,7 +199,7 @@ class UpgradeCcmFlowIntegrationTest {
         inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID, Tunnel.CCM);
         inOrder.verify(upgradeCcmService).registerClusterProxy(STACK_ID);
         inOrder.verify(upgradeCcmService).healthCheck(STACK_ID);
-        inOrder.verify(upgradeOrchestratorService).pushSaltState(STACK_ID, CLUSTER_ID);
+        inOrder.verify(upgradeCcmService).pushSaltState(STACK_ID, CLUSTER_ID);
         UpgradeCcmFailedEvent failure = result.right;
         Assertions.assertTrue(failure.getFailureOrigin().equals(RevertAllHandler.class));
         Assertions.assertNotNull(failure.getRevertTime());
@@ -263,9 +259,9 @@ class UpgradeCcmFlowIntegrationTest {
         int i = 0;
 
         Tunnel oldTunnel = Tunnel.CCM;
-        InOrder inOrder = Mockito.inOrder(upgradeCcmService, upgradeOrchestratorService);
+        InOrder inOrder = Mockito.inOrder(upgradeCcmService);
         inOrder.verify(upgradeCcmService, times(expected[i++])).updateTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
-        inOrder.verify(upgradeOrchestratorService, times(expected[i++])).pushSaltState(STACK_ID, CLUSTER_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).pushSaltState(STACK_ID, CLUSTER_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).reconfigureNginx(STACK_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).registerClusterProxyAndCheckHealth(STACK_ID);
         if (calledOnceCount == i) {

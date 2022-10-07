@@ -2,11 +2,8 @@ package com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm;
 
 import java.time.LocalDateTime;
 
-import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.common.api.type.Tunnel;
-
-import reactor.rx.Promise;
 
 public abstract class AbstractUpgradeCcmEvent extends StackEvent implements UpgradeCcmBaseEvent {
 
@@ -23,8 +20,8 @@ public abstract class AbstractUpgradeCcmEvent extends StackEvent implements Upgr
         this.revertTime = revertTime;
     }
 
-    public AbstractUpgradeCcmEvent(String selector, Long stackId, Long clusterId, Tunnel oldTunnel, LocalDateTime revertTime, Promise<AcceptResult> accepted) {
-        super(selector, stackId, accepted);
+    public AbstractUpgradeCcmEvent(String selector, Long stackId, Long clusterId, Tunnel oldTunnel, LocalDateTime revertTime) {
+        super(selector, stackId);
         this.clusterId = clusterId;
         this.oldTunnel = oldTunnel;
         this.revertTime = revertTime;
