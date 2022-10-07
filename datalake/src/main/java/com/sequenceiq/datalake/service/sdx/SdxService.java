@@ -402,7 +402,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     private Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest,
-            final StackV4Request internalStackV4Request, final ImageSettingsV4Request imageSettingsV4Request) {
+            final StackV4Request internalStackV4Request, ImageSettingsV4Request imageSettingsV4Request) {
         LOGGER.info("Creating SDX cluster with name {}", name);
         String accountId = getAccountIdFromCrn(userCrn);
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), accountId);

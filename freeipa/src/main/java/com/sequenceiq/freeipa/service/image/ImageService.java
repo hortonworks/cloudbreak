@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.envers.AuditReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +24,7 @@ import com.sequenceiq.freeipa.converter.image.ImageToImageEntityConverter;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.stack.image.change.action.ImageRevisionReaderService;
 import com.sequenceiq.freeipa.repository.ImageRepository;
 
 @Service
@@ -46,7 +46,7 @@ public class ImageService {
     private ImageProviderFactory imageProviderFactory;
 
     @Inject
-    private AuditReader auditReader;
+    private ImageRevisionReaderService imageRevisionReaderService;
 
     @Value("${freeipa.image.catalog.default.os}")
     private String defaultOs;
@@ -121,8 +121,7 @@ public class ImageService {
     }
 
     public void revertImageToRevision(Long imageEntityId, Number revision) {
-        ImageEntity originalImageEntity =
-                auditReader.find(ImageEntity.class, imageEntityId, revision);
+        ImageEntity originalImageEntity = imageRevisionReaderService.find(imageEntityId, revision);
         LOGGER.info("Reverting to revision [{}] using {}", revision, originalImageEntity);
         ImageEntity imageEntity = imageRepository.findById(imageEntityId).get();
         imageEntity.setImageName(originalImageEntity.getImageName());

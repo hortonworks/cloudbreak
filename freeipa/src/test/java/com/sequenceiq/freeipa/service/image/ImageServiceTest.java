@@ -14,7 +14,6 @@ import java.util.Optional;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
-import org.hibernate.envers.AuditReader;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -31,6 +30,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.stack.image.change.action.ImageRevisionReaderService;
 import com.sequenceiq.freeipa.repository.ImageRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,7 +64,7 @@ public class ImageServiceTest {
     private ImageRepository imageRepository;
 
     @Mock
-    private AuditReader auditReader;
+    private ImageRevisionReaderService imageRevisionReaderService;
 
     @InjectMocks
     private ImageService underTest;
@@ -138,7 +138,7 @@ public class ImageServiceTest {
         originalImage.setImageId(IMAGE_UUID);
         originalImage.setImageCatalogName(IMAGE_CATALOG);
         originalImage.setImageCatalogUrl(IMAGE_CATALOG_URL);
-        when(auditReader.find(ImageEntity.class, 2L, 3L)).thenReturn(originalImage);
+        when(imageRevisionReaderService.find(2L, 3L)).thenReturn(originalImage);
         ImageEntity currentImage = new ImageEntity();
         currentImage.setId(2L);
         when(imageRepository.findById(2L)).thenReturn(Optional.of(currentImage));

@@ -13,8 +13,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
+
 import org.apache.commons.codec.binary.Base64;
 import org.hibernate.envers.AuditReader;
+import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.exception.NotAuditedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -47,15 +51,19 @@ public class ClusterComponentConfigProvider {
 
     private ClusterComponentHistoryRepository clusterComponentHistoryRepository;
 
-    private AuditReader auditReader;
+    private EntityManager entityManager;
+
+    private TransactionService transactionService;
 
     public ClusterComponentConfigProvider(ClusterComponentRepository componentRepository,
             ClusterComponentViewRepository componentViewRepository,
-            ClusterComponentHistoryRepository clusterComponentHistoryRepository, AuditReader auditReader) {
+            ClusterComponentHistoryRepository clusterComponentHistoryRepository,
+            EntityManager entityManager, TransactionService transactionService) {
         this.componentRepository = componentRepository;
         this.componentViewRepository = componentViewRepository;
         this.clusterComponentHistoryRepository = clusterComponentHistoryRepository;
-        this.auditReader = auditReader;
+        this.entityManager = entityManager;
+        this.transactionService = transactionService;
     }
 
     public ClusterComponent getComponent(Long clusterId, ComponentType componentType) {
@@ -190,22 +198,27 @@ public class ClusterComponentConfigProvider {
     public void restorePreviousVersion(ClusterComponent clusterComponent) {
         LOGGER.info("Trying to revert to previous version for {}", clusterComponent);
         try {
-            List<Number> revisions = auditReader.getRevisions(ClusterComponent.class, clusterComponent.getId());
-            if (!revisions.isEmpty()) {
-                // @see AuditReader: list of revision numbers, at which the entity was modified, sorted in ascending order
-                Number latestRevision = revisions.get(revisions.size() - 1);
-                ClusterComponent previousClusterComponent = auditReader.find(ClusterComponent.class, clusterComponent.getId(), latestRevision);
-                LOGGER.info("Previous version found: {}", previousClusterComponent);
-                componentRepository.save(previousClusterComponent);
-            } else {
-                LOGGER.info("No previous version found for {}", clusterComponent);
-            }
+            transactionService.required(() -> getRevision(clusterComponent));
         } catch (NotAuditedException e) {
             LOGGER.warn("Not audited class", e);
         } catch (IllegalArgumentException e) {
             LOGGER.warn("Couldn't fetch revision for {}", clusterComponent, e);
         } catch (Exception e) {
             LOGGER.error("Couldn't revert to previous version for {}", clusterComponent, e);
+        }
+    }
+
+    private void getRevision(ClusterComponent clusterComponent) {
+        AuditReader auditReader = AuditReaderFactory.get(entityManager);
+        List<Number> revisions = auditReader.getRevisions(ClusterComponent.class, clusterComponent.getId());
+        if (!revisions.isEmpty()) {
+            // @see AuditReader: list of revision numbers, at which the entity was modified, sorted in ascending order
+            Number latestRevision = revisions.get(revisions.size() - 1);
+            ClusterComponent previousClusterComponent = auditReader.find(ClusterComponent.class, clusterComponent.getId(), latestRevision);
+            LOGGER.info("Previous version found: {}", previousClusterComponent);
+            componentRepository.save(previousClusterComponent);
+        } else {
+            LOGGER.info("No previous version found for {}", clusterComponent);
         }
     }
 
