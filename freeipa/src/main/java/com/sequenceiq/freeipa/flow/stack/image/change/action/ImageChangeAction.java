@@ -10,7 +10,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.hibernate.envers.AuditReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +27,7 @@ public class ImageChangeAction extends AbstractImageChangeAction<ImageChangeEven
     private ImageService imageService;
 
     @Inject
-    private AuditReader auditReader;
+    private ImageRevisionReaderService imageRevisionReaderService;
 
     public ImageChangeAction() {
         super(ImageChangeEvent.class);
@@ -51,7 +50,8 @@ public class ImageChangeAction extends AbstractImageChangeAction<ImageChangeEven
     private ImageEntity storeOriginalImageRevision(ImageChangeEvent payload, Map<Object, Object> variables) {
         ImageEntity imageEntity = imageService.getByStackId(payload.getResourceId());
         Long imageEntityId = imageEntity.getId();
-        List<Number> revisions = auditReader.getRevisions(ImageEntity.class, imageEntityId);
+        List<Number> revisions = imageRevisionReaderService.getRevisions(imageEntityId);
+        LOGGER.debug("Revisions found for current image with id {} are: {}", imageEntityId, revisions);
         if (!revisions.isEmpty()) {
             storeRevisionInfo(variables, imageEntityId, revisions);
         } else {

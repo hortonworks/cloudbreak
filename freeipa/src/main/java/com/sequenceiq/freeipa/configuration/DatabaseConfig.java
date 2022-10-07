@@ -10,8 +10,6 @@ import javax.inject.Named;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import org.hibernate.envers.AuditReader;
-import org.hibernate.envers.AuditReaderFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -136,11 +134,6 @@ public class DatabaseConfig {
         hibernateJpaVendorAdapter.setShowSql(true);
         hibernateJpaVendorAdapter.setDatabase(Database.POSTGRESQL);
         return hibernateJpaVendorAdapter;
-    }
-
-    @Bean
-    public AuditReader auditReader(EntityManagerFactory entityManagerFactory) {
-        return AuditReaderFactory.get(entityManagerFactory.createEntityManager());
     }
 
     private BatchProperties createBatchProperties() {
