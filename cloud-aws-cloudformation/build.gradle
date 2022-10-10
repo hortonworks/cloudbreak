@@ -1,9 +1,17 @@
-apply plugin: 'java'
+buildscript {
+  repositories {
+    mavenCentral()
+    maven { url = "$repoUrl" }
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+  }
+}
 
-repositories {
-  maven { url = "$repoUrl" }
-  maven { url = "$springRepoUrl" }
-  mavenCentral()
+plugins {
+  id 'java'
+  id 'java-library'
 }
 
 jar {
@@ -12,14 +20,7 @@ jar {
 }
 
 dependencies {
-  implementation project(':common')
-  implementation project(':cloud-common')
-  implementation project(':cloud-reactor')
-  implementation project(':cloud-aws-common')
-  implementation project(':cloud-api')
-  implementation project(':cloud-template')
-  implementation project(':template-manager-tag')
-  implementation project(':auth-connector')
+  api project(':cloud-aws-common')
 
   implementation group: 'com.dyngr', name: 'polling', version: dyngrPollingVersion
 

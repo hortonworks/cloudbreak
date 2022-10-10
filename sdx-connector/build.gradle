@@ -10,7 +10,8 @@ buildscript {
 }
 
 plugins {
-  id "java-library"
+  id 'java'
+  id 'java-library'
 }
 
 apply plugin: 'com.google.protobuf'

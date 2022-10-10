@@ -22,12 +22,11 @@ jar {
 }
 
 dependencies {
-  api project(":common")
-  implementation project(":auth-connector")
+  api project(":auth-connector")
 
   implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-  implementation group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
-  implementation group: 'org.springframework.boot',      name: 'spring-boot-starter-data-jpa',   version: springBootVersion
+    api group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
+    api group: 'org.springframework.boot',      name: 'spring-boot-starter-data-jpa',   version: springBootVersion
   implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
 
   testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion

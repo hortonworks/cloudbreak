@@ -1,4 +1,0 @@
-{
-  "url":"https://${mockHost}:9443/imagecatalog",
-  "name":"${imagecatalogName}"
-}

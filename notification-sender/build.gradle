@@ -1,9 +1,17 @@
-plugins {
-    id 'java'
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = "$repoUrl" }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+    }
 }
 
-repositories {
-    mavenCentral()
+plugins {
+    id 'java'
+    id 'java-library'
 }
 
 dependencies {
@@ -13,5 +21,5 @@ dependencies {
 
   implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
   implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-  implementation group: 'org.springframework',           name: 'spring-context',                 version: springFrameworkVersion
+  api group: 'org.springframework',           name: 'spring-context',                 version: springFrameworkVersion
 }

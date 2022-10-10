@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
+import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
@@ -10,7 +10,7 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 
-@ContextConfiguration(classes = {IntegrationTestConfiguration.class}, initializers = ConfigFileApplicationContextInitializer.class)
+@ContextConfiguration(classes = {IntegrationTestConfiguration.class}, initializers = ConfigDataApplicationContextInitializer.class)
 public class GherkinTest extends AbstractTestNGSpringContextTests {
     public static final String RESULT = "RESULT";
 

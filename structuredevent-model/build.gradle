@@ -1,11 +1,17 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = "$repoUrl" }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+    }
+}
+
 plugins {
     id 'java'
     id 'java-library'
-}
-
-repositories {
-    mavenCentral()
-    maven { url = "$repoUrl" }
 }
 
 jar {
@@ -14,12 +20,11 @@ jar {
 }
 
 dependencies {
-    api project(':common')
-    implementation project(':cloud-api')
+    api project(':cloud-api')
 
     implementation group: 'org.apache.commons',         name: 'commons-collections4', version: commonsCollections4Version
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind',    version: jacksonVersion
     implementation group: 'com.google.code.gson',       name: 'gson',                version: gsonVersion
-    implementation group: 'org.springframework.data',   name: 'spring-data-commons', version: springDataJpaFrameworkVersion
+    api group: 'org.springframework.data',   name: 'spring-data-commons', version: springDataJpaFrameworkVersion
 
 }

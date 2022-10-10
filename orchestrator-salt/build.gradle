@@ -1,8 +1,17 @@
-apply plugin: 'java'
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = "$repoUrl" }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+    }
+}
 
-repositories {
-    mavenCentral()
-    maven { url = "$repoUrl" }
+plugins {
+    id 'java'
+    id 'java-library'
 }
 
 jar {
@@ -18,8 +27,8 @@ dependencies {
     implementation project(':cloud-common')
 
     implementation group: 'org.yaml',                      name: 'snakeyaml',                      version: '1.23'
-    implementation group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
-    implementation group: 'org.springframework.boot',      name: 'spring-boot-starter-web',        version: springBootVersion
+    api group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
+    api group: 'org.springframework.boot',      name: 'spring-boot-starter-web',        version: springBootVersion
 
     implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
     implementation group: 'org.glassfish.jersey.core',     name: 'jersey-common',                  version: jerseyCoreVersion

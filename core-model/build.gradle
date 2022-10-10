@@ -1,10 +1,18 @@
-apply plugin: 'java'
-
-repositories {
-    maven { url = "$repoUrl" }
-    mavenCentral()
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = "$repoUrl" }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+    }
 }
 
+plugins {
+    id 'java'
+    id 'java-library'
+}
 jar {
   baseName = 'core-model'
   archiveName = 'core-model.jar'
@@ -20,7 +28,7 @@ dependencies {
 
     implementation group: 'net.sf.json-lib',                   name: 'json-lib',               version: '2.4',  classifier: 'jdk15'
     implementation group: 'org.hibernate.javax.persistence',   name: 'hibernate-jpa-2.1-api',  version: '1.0.0.Final'
-    implementation group: 'org.springframework.data',          name: 'spring-data-envers',     version: springDataJpaFrameworkVersion
+    api group: 'org.springframework.data',          name: 'spring-data-envers',     version: springDataJpaFrameworkVersion
     implementation group: 'org.apache.commons',                name: 'commons-lang3',          version: apacheCommonsLangVersion
     implementation group: 'net.jcip',                          name: 'jcip-annotations',       version: '1.0'
     implementation group: 'com.github.spotbugs',               name: 'spotbugs-annotations',   version: '4.4.2'

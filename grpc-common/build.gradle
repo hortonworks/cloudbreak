@@ -4,12 +4,14 @@ buildscript {
     maven { url = "$repoUrl" }
   }
   dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
     classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
   }
 }
 
 plugins {
-    id "java-library"
+  id 'java'
+  id 'java-library'
 }
 
 apply plugin: 'com.google.protobuf'

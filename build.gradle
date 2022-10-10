@@ -12,6 +12,8 @@ buildscript {
   }
   dependencies {
     classpath 'org.ajoberstar.grgit:grgit-gradle:4.1.1'
+    classpath "com.savvasdalkitsis:module-dependency-graph:0.10"
+
   }
 }
 
@@ -20,6 +22,8 @@ plugins {
   id "com.github.spotbugs" version "4.7.8"
   id "com.adarshr.test-logger" version "2.1.1"
   id "nebula.blacklist" version "3.1.0"
+  id 'com.savvasdalkitsis.module-dependency-graph' version '0.10'
+
 //  id 'nebula.lint' version '17.2.3'
 }
 
@@ -49,6 +53,7 @@ allprojects {
   apply plugin: 'idea'
   apply plugin: 'eclipse'
   apply plugin: 'nebula.blacklist'
+  apply plugin: 'com.savvasdalkitsis.module-dependency-graph'
 
   group = 'com.sequenceiq'
 
@@ -105,6 +110,7 @@ subprojects {
   apply plugin: 'com.github.spotbugs'
   apply plugin: 'jacoco'
   apply plugin: 'com.adarshr.test-logger'
+
   //apply plugin: org.sonarqube.gradle.SonarQubePlugin
 
   sourceCompatibility = 11

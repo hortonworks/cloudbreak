@@ -1,8 +1,17 @@
-apply plugin: 'java'
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = "$repoUrl" }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+    }
+}
 
-repositories {
-    maven { url = "$repoUrl" }
-    mavenCentral()
+plugins {
+    id 'java'
+    id 'java-library'
 }
 
 jar {
@@ -14,7 +23,6 @@ dependencies {
 
     implementation group: 'com.github.jknack',             name: 'handlebars',                     version: handlebarsVersion
 
-    implementation project(':common')
     implementation project(':orchestrator-api')
     implementation project(':core-api')
     implementation project(':core-model')

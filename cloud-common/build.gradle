@@ -1,16 +1,19 @@
-apply plugin: 'java'
-apply plugin: 'io.spring.dependency-management'
-
 buildscript {
-  repositories {
-    maven { url = "$repoUrl" }
-    maven { url '= "$springRepoUrl"' }
-    mavenCentral()
-  }
-  dependencies {
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-  }
+    repositories {
+        mavenCentral()
+        maven { url = "$repoUrl" }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+    }
 }
+
+plugins {
+    id 'java'
+    id 'java-library'
+}
+apply plugin: 'io.spring.dependency-management'
 
 configurations.all {
     resolutionStrategy {
@@ -24,7 +27,7 @@ jar {
 }
 
 dependencies {
-    implementation project(':common')
+    api project(':common')
 
     implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jApiVersion
     implementation group: 'org.springframework.boot',              name: 'spring-boot-starter',            version: springBootVersion

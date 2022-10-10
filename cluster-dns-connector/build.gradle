@@ -1,10 +1,7 @@
-apply plugin: 'com.google.protobuf'
-
 buildscript {
   repositories {
     mavenCentral()
     maven { url = "$repoUrl" }
-    maven { url = "$springRepoUrl" }
   }
   dependencies {
     classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
@@ -12,7 +9,13 @@ buildscript {
   }
 }
 
+plugins {
+  id 'java'
+  id 'java-library'
+}
+
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.google.protobuf'
 
 dependencyManagement {
   dependencies {
@@ -23,8 +26,7 @@ dependencyManagement {
 }
 
 dependencies {
-  implementation project(':grpc-common')
-  implementation project(':auth-connector')
+  api project(':auth-connector')
 
   implementation     group: 'com.dyngr',                 name: 'polling',                         version: dyngrPollingVersion
 

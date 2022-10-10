@@ -22,13 +22,15 @@ dependencies {
 
   implementation group: 'com.google.protobuf',          name: 'protobuf-java',        version: protobufVersion
 
-  implementation group: 'org.slf4j',                             name: 'slf4j-api',                      version: slf4jApiVersion
-  implementation group: 'ch.qos.logback.contrib',                name: 'logback-json-classic',           version: logbackJsonClassicVersion
+  api group: 'org.slf4j',                             name: 'slf4j-api',                      version: slf4jApiVersion
+  api group: 'ch.qos.logback.contrib',                name: 'logback-json-classic',           version: logbackJsonClassicVersion
   implementation group: 'io.micrometer',                         name: 'micrometer-core',                version: micrometerVersion
   implementation (group: 'io.micrometer',                         name: 'micrometer-jersey2',             version: micrometerVersion) {
     exclude group: 'org.glassfish.jersey.inject'
   }
   implementation group: 'io.micrometer',                         name: 'micrometer-registry-prometheus', version: micrometerVersion
+  api     group: "javax.validation",              name: "validation-api",                 version: javaxValidationVersion
+  api group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
   api group: 'commons-io',                            name: 'commons-io',                     version: apacheCommonsIoVersion
   api group: 'commons-net',                           name: 'commons-net',                    version: '3.6'
   api group: 'org.apache.commons',                    name: 'commons-collections4',           version: commonsCollections4Version
@@ -56,9 +58,9 @@ dependencies {
 
   api group: 'org.springframework.boot',              name: 'spring-boot-autoconfigure',      version: springBootVersion
   api group: 'org.springframework.boot',              name: 'spring-boot-starter-logging',    version: springBootVersion
-  implementation group: 'org.springframework',                   name: 'spring-beans',                   version: springFrameworkVersion
-  implementation group: 'org.springframework',                   name: 'spring-context',                 version: springFrameworkVersion
-  implementation group: 'org.springframework',                   name: 'spring-context-support',         version: springFrameworkVersion
+  api group: 'org.springframework',                   name: 'spring-beans',                   version: springFrameworkVersion
+  api group: 'org.springframework',                   name: 'spring-context',                 version: springFrameworkVersion
+  api group: 'org.springframework',                   name: 'spring-context-support',         version: springFrameworkVersion
   api group: 'org.springframework.data',              name: 'spring-data-jpa',                version: springDataJpaFrameworkVersion
   api group: 'org.springframework',                   name: 'spring-jdbc',                    version: springFrameworkVersion
   api group: 'org.hibernate',                         name: 'hibernate-core',                 version: hibernateCoreVersion

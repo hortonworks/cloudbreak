@@ -1,9 +1,17 @@
-apply plugin: 'java'
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = "$repoUrl" }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+    }
+}
 
-repositories {
-    maven { url = "$repoUrl" }
-    maven { url = "$springRepoUrl" }
-    mavenCentral()
+plugins {
+    id 'java'
+    id 'java-library'
 }
 
 jar {
@@ -12,11 +20,11 @@ jar {
 }
 
 dependencies {
-    implementation project(':common')
-    implementation project(':auth-connector')
-    implementation project(':cloud-common')
-    implementation project(':cloud-api')
-    implementation project(':cloud-reactor')
+    api project(':common')
+    api project(':auth-connector')
+    api project(':cloud-common')
+    api project(':cloud-api')
+    api project(':cloud-reactor')
 
     implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
 

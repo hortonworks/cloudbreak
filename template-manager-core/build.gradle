@@ -1,17 +1,24 @@
-apply plugin: 'java'
-
-repositories {
-    maven { url = "$repoUrl" }
-    mavenCentral()
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = "$repoUrl" }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+    }
 }
 
+plugins {
+    id 'java'
+    id 'java-library'
+}
 jar {
     baseName = 'template-manager-core'
 }
 
 dependencies {
     implementation project(':common')
-    implementation project(':common-model')
     implementation project(':common-handlebar')
     implementation project(':orchestrator-api')
     implementation project(':core-api')

@@ -1,27 +1,23 @@
+buildscript {
+  repositories {
+    mavenCentral()
+    maven { url = "$repoUrl" }
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+  }
+}
+
 plugins {
   id 'java'
   id 'java-library'
 }
 
-repositories {
-  maven { url = "$repoUrl" }
-  maven { url = "$springRepoUrl" }
-  mavenCentral()
-}
-
-repositories {
-  mavenCentral()
-}
-
 dependencies {
-  implementation project(':cloud-api')
-  implementation project(':cloud-common')
-  implementation project(':cloud-reactor')
-  implementation project(':cloud-template')
-  implementation project(':common-handlebar')
-  implementation project(':template-manager-tag')
-  implementation project(':auth-connector')
-  implementation project(':usage-collection')
+  api project(':cloud-template')
+  api project(':common-handlebar')
+  api project(':template-manager-tag')
 
   implementation group: 'com.dyngr', name: 'polling', version: dyngrPollingVersion
 

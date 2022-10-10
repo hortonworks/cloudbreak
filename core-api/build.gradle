@@ -1,12 +1,17 @@
-plugins {
-    id "java-library"
+buildscript {
+  repositories {
+    mavenCentral()
+    maven { url = "$repoUrl" }
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+  }
 }
 
-apply plugin: 'java'
-
-repositories {
-  mavenCentral()
-  maven { url = "$repoUrl" }
+plugins {
+  id 'java'
+  id 'java-library'
 }
 
 jar {
@@ -18,7 +23,6 @@ dependencies {
   implementation project(':authorization-common-api')
   api project(':cloud-api')
   api project(':auth-connector')
-  api project(':common')
   implementation project(':structuredevent-model')
   implementation project(':environment-api')
   implementation project(':custom-configurations-api')
@@ -45,9 +49,9 @@ dependencies {
   implementation group: 'org.apache.httpcomponents',     name: 'httpclient',                     version: httpClientVersion
   implementation group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
   implementation group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
-  implementation group: 'org.springframework.boot',      name: 'spring-boot-starter-security',   version: springBootVersion
+  api group: 'org.springframework.boot',      name: 'spring-boot-starter-security',   version: springBootVersion
   implementation group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
-  implementation group: 'org.springframework',           name: 'spring-aspects',                 version: springFrameworkVersion
+  api group: 'org.springframework',           name: 'spring-aspects',                 version: springFrameworkVersion
   implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
   implementation group: 'commons-validator',             name: 'commons-validator',              version: apacheCommonsValidatorVersion
 

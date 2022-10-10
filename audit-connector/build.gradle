@@ -1,18 +1,23 @@
-apply plugin: 'com.google.protobuf'
-
 buildscript {
     repositories {
         mavenCentral()
         maven { url = "$repoUrl" }
     }
     dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
     }
 }
 
+plugins {
+    id 'java'
+    id 'java-library'
+}
+
+apply plugin: 'com.google.protobuf'
+
 dependencies {
-    implementation project(':grpc-common')
-    implementation project(':auth-connector')
+    api project(':auth-connector')
     implementation project(':structuredevent-model')
     implementation project(':flow')
 

@@ -1,23 +1,26 @@
-apply plugin: 'java'
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = "$repoUrl" }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+    }
+}
+
+plugins {
+    id 'java'
+    id 'java-library'
+}
 
 jar {
     baseName = 'cloud-aws-gov'
     archiveName = 'cloud-aws-gov.jar'
 }
 
-repositories {
-    maven { url = "$repoUrl" }
-    maven { url = "$springRepoUrl" }
-    mavenCentral()
-}
-
 dependencies {
-    implementation project(':common')
-    implementation project(':cloud-api')
-    implementation project(':cloud-aws-common')
-    implementation project(':cloud-reactor')
-    implementation project(':cloud-template')
-    implementation project(':cloud-aws-native')
+    api project(':cloud-aws-native')
 }
 
 test {

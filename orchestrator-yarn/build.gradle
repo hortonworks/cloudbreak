@@ -1,8 +1,17 @@
-apply plugin: 'java'
+buildscript {
+  repositories {
+    mavenCentral()
+    maven { url = "$repoUrl" }
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+  }
+}
 
-repositories {
-  maven { url = "$repoUrl" }
-  mavenCentral()
+plugins {
+  id 'java'
+  id 'java-library'
 }
 
 jar {
@@ -17,7 +26,7 @@ dependencies {
   implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
   //this is required by idea, otherwise in some cases the 2.1.2 version will be added to claspath
   implementation group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
-  implementation group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
+  api group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
 
   testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
   implementation group: 'com.sun.jersey',                name: 'jersey-core',                    version: '1.19.1'

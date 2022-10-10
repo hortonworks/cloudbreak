@@ -1,11 +1,17 @@
-plugins {
-    id "java-library"
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = "$repoUrl" }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+    }
 }
 
-repositories {
-    maven { url = "$repoUrl" }
-    maven { url '= "$springRepoUrl"' }
-    mavenCentral()
+plugins {
+    id 'java'
+    id 'java-library'
 }
 
 jar {
@@ -15,9 +21,7 @@ jar {
 
 dependencies {
     api project(':cloud-reactor-api')
-    implementation project(':common-model')
     implementation project(':flow')
-    implementation project(':auth-connector')
 
     implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
     implementation group: 'org.springframework',           name: 'spring-tx',                      version: springFrameworkVersion
