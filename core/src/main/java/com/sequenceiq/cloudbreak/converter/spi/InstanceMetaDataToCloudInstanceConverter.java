@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -66,21 +67,22 @@ public class InstanceMetaDataToCloudInstanceConverter {
     public List<CloudInstance> convert(Collection<InstanceMetadataView> instanceMetadataViews, StackView stack) {
         List<CloudInstance> cloudInstances = new ArrayList<>();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
-        logConvertDetails(environment.getCloudPlatform(), String.format("Converting to cloudInstances based on input param instanceDataViews: %s",
+        logConvertDetails(environment.getCloudPlatform(),
+                String.format("Converting to cloudInstances based on input param instanceDataViews: %s, stackId: %s, clusterId: %s",
                 Joiner.on(",").join(instanceMetadataViews.stream()
                                 .map(imd -> String.format("[name: %s, instance group name: %s]", imd.getInstanceName(), imd.getInstanceGroupName()))
-                                .collect(Collectors.toSet()))));
+                                .collect(Collectors.toSet())), stack.getId(), stack.getClusterId()));
         Set<String> instanceGroupNames = instanceMetadataViews.stream().map(im -> im.getInstanceGroupName()).collect(Collectors.toSet());
         logConvertDetails(environment.getCloudPlatform(),
-                String.format("InstanceGroup names has been collected based on input param instanceMetadataViews, result: %s",
-                        Joiner.on(",").join(instanceGroupNames)));
-        List<InstanceGroupView> instanceGroupViews = instanceGroupService
-                .findAllInstanceGroupViewByStackIdAndGroupName(stack.getId(), instanceGroupNames);
+                String.format("InstanceGroup names has been collected based on input param instanceMetadataViews, result: %s, stackId: %s, clusterId: %s",
+                        Joiner.on(",").join(instanceGroupNames), stack.getId(), stack.getClusterId()));
+        List<InstanceGroupView> instanceGroupViews = instanceGroupService.findAllInstanceGroupViewByStackIdAndGroupName(stack.getId(), instanceGroupNames);
+        fetchDataToDebugAndLog(stack);
         logConvertDetails(environment.getCloudPlatform(),
-                String.format("InstanceGroupViews has been collected based on previously collected group names: %s",
+                String.format("InstanceGroupViews has been collected based on previously collected group names: %s, stackId: %s, clusterId: %s",
                         Joiner.on(",").join(instanceGroupViews.stream()
                                 .map(ig -> String.format("[name: %s, type: %s]", ig.getGroupName(), ig.getInstanceGroupType()))
-                                .collect(Collectors.toSet()))));
+                                .collect(Collectors.toSet())), stack.getId(), stack.getClusterId()));
         for (InstanceMetadataView instanceMetadataView : instanceMetadataViews) {
             InstanceGroupView instanceGroupView = instanceGroupViews.stream()
                     .filter(ig -> ig.getGroupName().equals(instanceMetadataView.getInstanceGroupName()))
@@ -89,6 +91,17 @@ public class InstanceMetaDataToCloudInstanceConverter {
             cloudInstances.add(convert(instanceMetadataView, instanceGroupView, environment, stack.getStackAuthentication()));
         }
         return cloudInstances;
+    }
+
+    private void fetchDataToDebugAndLog(StackView stack) {
+        String cloudPlatform = stack.getCloudPlatform();
+        if (cloudPlatform != null && CloudPlatform.GCP.equals(CloudPlatform.valueOf(cloudPlatform))) {
+            Set<InstanceGroup> instanceGroups = instanceGroupService.getByStackAndFetchTemplates(stack.getId());
+            List<String> instanceGroupNames = instanceGroups.stream().map(ig -> ig.getGroupName() + ": " + ig.getNodeCount() + " nodes")
+                    .collect(Collectors.toList());
+            logConvertDetails(cloudPlatform, String.format("InstanceGroups for stack (%s): %s", stack.getId(),
+                    Joiner.on(",").join(instanceGroupNames)));
+        }
     }
 
     public List<CloudInstance> convert(List<InstanceMetadataView> metaDataEntities, InstanceGroupView group, String envCrn,
