@@ -438,7 +438,9 @@ public class TelemetryConverter {
     }
 
     private void setMonitoring(TelemetryRequest request, Features features) {
-        if (monitoringEnabled) {
+        // second condition is a temporary workaround, later we should check an entitlement instead to simplify logic
+        // now if monitoring and url is not null, it means env/freeipa has monitoring enabled, based on conditions in those services
+        if (monitoringEnabled || (request.getMonitoring() != null && request.getMonitoring().getRemoteWriteUrl() != null)) {
             if (request.getFeatures() != null && request.getFeatures().getMonitoring() != null) {
                 LOGGER.debug("Fill cluster monitoring setting from telemetry feature request");
                 features.setMonitoring(request.getFeatures().getMonitoring());
