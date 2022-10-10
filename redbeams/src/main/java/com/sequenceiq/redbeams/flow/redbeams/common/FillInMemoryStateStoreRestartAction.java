@@ -6,9 +6,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.flow.core.RestartContext;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
@@ -25,16 +24,15 @@ public class FillInMemoryStateStoreRestartAction extends DefaultRestartAction {
     private RedbeamsInMemoryStateStoreUpdaterService redbeamsInMemoryStateStoreUpdaterService;
 
     @Override
-    public void restart(FlowParameters flowParameters, String flowChainId, String event, Object payload) {
-        Payload redbeamsPayload = (Payload) payload;
-        DBStack dbStack = dbStackService.getById(redbeamsPayload.getResourceId());
+    public void restart(RestartContext restartContext, Object payload) {
+        DBStack dbStack = dbStackService.getById(restartContext.getResourceId());
         if (dbStack != null) {
             redbeamsInMemoryStateStoreUpdaterService.update(dbStack.getId(), dbStack.getStatus());
             MDCBuilder.buildMdcContext(dbStack);
             MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
             MDCBuilder.addAccountId(getAccountId(dbStack));
         }
-        super.restart(flowParameters, flowChainId, event, payload);
+        super.restart(restartContext, payload);
     }
 
     private String getAccountId(DBStack dbStack) {

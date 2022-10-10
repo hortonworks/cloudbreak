@@ -1,15 +1,23 @@
 package com.sequenceiq.flow.core.restart;
 
+import static com.sequenceiq.flow.core.FlowConstants.FLOW_CHAIN_ID;
+import static com.sequenceiq.flow.core.FlowConstants.FLOW_ID;
+import static com.sequenceiq.flow.core.FlowConstants.FLOW_TRIGGER_USERCRN;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.FlowConstants;
-import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.RestartAction;
+import com.sequenceiq.flow.core.RestartContext;
+import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
@@ -21,22 +29,45 @@ import reactor.bus.EventBus;
 @Component("DefaultRestartAction")
 public class DefaultRestartAction implements RestartAction {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultRestartAction.class);
+
     @Inject
     private EventBus eventBus;
 
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
+    @Inject
+    @Lazy
+    private FlowChains flowChains;
+
     @Override
-    public void restart(FlowParameters flowParameters, String flowChainId, String event, Object payload) {
-        Map<String, Object> headers = new HashMap<>();
-        headers.put(FlowConstants.FLOW_ID, flowParameters.getFlowId());
-        if (flowParameters.getFlowTriggerUserCrn() != null) {
-            headers.put(FlowConstants.FLOW_TRIGGER_USERCRN, flowParameters.getFlowTriggerUserCrn());
+    public void restart(RestartContext restartContext, Object payload) {
+        LOGGER.info("Restarting flow with {}", restartContext);
+        doBeforeRestart(restartContext, payload);
+        if (restartContext.getFlowId() != null) {
+            Map<String, Object> headers = new HashMap<>();
+            headers.put(FLOW_ID, restartContext.getFlowId());
+            putIfNotNull(headers, FLOW_TRIGGER_USERCRN, restartContext.getFlowTriggerUserCrn());
+            putIfNotNull(headers, FLOW_CHAIN_ID, restartContext.getFlowChainId());
+            eventBus.notify(restartContext.getEvent(), eventFactory.createEventWithErrHandler(headers, payload));
+        } else if (restartContext.getFlowChainId() != null) {
+            flowChains.triggerNextFlow(
+                    restartContext.getFlowChainId(),
+                    restartContext.getFlowTriggerUserCrn(),
+                    restartContext.getContextParams(),
+                    restartContext.getFlowOperationType(),
+                    Optional.empty());
         }
-        if (flowChainId != null) {
-            headers.put(FlowConstants.FLOW_CHAIN_ID, flowChainId);
+    }
+
+    public void doBeforeRestart(RestartContext restartContext, Object payload) {
+
+    }
+
+    private void putIfNotNull(Map<String, Object> map, String key, Object value) {
+        if (value != null) {
+            map.put(key, value);
         }
-        eventBus.notify(event, eventFactory.createEventWithErrHandler(headers, payload));
     }
 }

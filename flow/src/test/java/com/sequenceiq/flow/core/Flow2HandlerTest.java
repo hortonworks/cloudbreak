@@ -67,6 +67,7 @@ import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
 import com.sequenceiq.flow.core.helloworld.config.HelloWorldFlowConfig;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.flow.domain.ClassValue;
+import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.ha.NodeConfig;
@@ -563,7 +564,7 @@ class Flow2HandlerTest {
     }
 
     @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = { false, true })
+    @ValueSource(booleans = {false, true})
     void testRestartFlow(boolean useJackson) throws TransactionExecutionException {
         FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID, useJackson);
         Payload payload = new TestPayload(STACK_ID);
@@ -585,21 +586,21 @@ class Flow2HandlerTest {
         underTest.restartFlow(FLOW_ID);
 
         ArgumentCaptor<Payload> payloadCaptor = ArgumentCaptor.forClass(Payload.class);
-        ArgumentCaptor<FlowParameters> flowParamsCaptor = ArgumentCaptor.forClass(FlowParameters.class);
+        ArgumentCaptor<RestartContext> restartContextCaptor = ArgumentCaptor.forClass(RestartContext.class);
 
         verify(flowChainHandler, times(1)).restoreFlowChain(FLOW_CHAIN_ID);
         verify(flowLogService, never()).terminate(STACK_ID, FLOW_ID);
-        verify(defaultRestartAction, times(1)).restart(flowParamsCaptor.capture(), eq(FLOW_CHAIN_ID), eq(NEXT_EVENT), payloadCaptor.capture());
+        verify(defaultRestartAction, times(1)).restart(restartContextCaptor.capture(), payloadCaptor.capture());
 
         Payload captorValue = payloadCaptor.getValue();
         assertEquals(STACK_ID, captorValue.getResourceId());
-        FlowParameters flowParameters = flowParamsCaptor.getValue();
-        assertEquals(FLOW_ID, flowParameters.getFlowId());
-        assertEquals(FLOW_TRIGGER_USERCRN, flowParameters.getFlowTriggerUserCrn());
+        RestartContext restartContext = restartContextCaptor.getValue();
+        assertEquals(FLOW_ID, restartContext.getFlowId());
+        assertEquals(FLOW_TRIGGER_USERCRN, restartContext.getFlowTriggerUserCrn());
     }
 
     @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = { false, true })
+    @ValueSource(booleans = {false, true})
     void testRestartFlowNoRestartAction(boolean useJackson) throws TransactionExecutionException {
         FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID, useJackson);
         Payload payload = new TestPayload(STACK_ID);
@@ -621,11 +622,11 @@ class Flow2HandlerTest {
 
         verify(flowChainHandler, times(1)).restoreFlowChain(FLOW_CHAIN_ID);
         verify(flowLogService, times(1)).terminate(STACK_ID, FLOW_ID);
-        verify(defaultRestartAction, never()).restart(any(), any(), any(), any());
+        verify(defaultRestartAction, never()).restart(any(), any());
     }
 
     @ParameterizedTest(name = "use Jackson = {0}")
-    @ValueSource(booleans = { false, true })
+    @ValueSource(booleans = {false, true})
     void testRestartFlowNoRestartActionNoFlowChainId(boolean useJackson) throws TransactionExecutionException {
         FlowLog flowLog = createFlowLog(null, useJackson);
         Payload payload = new TestPayload(STACK_ID);
@@ -646,11 +647,47 @@ class Flow2HandlerTest {
 
         verify(flowChainHandler, never()).restoreFlowChain(FLOW_CHAIN_ID);
         verify(flowLogService, times(1)).terminate(STACK_ID, FLOW_ID);
-        verify(defaultRestartAction, never()).restart(any(), any(), any(), any());
+        verify(defaultRestartAction, never()).restart(any(), any());
+    }
+
+    @ParameterizedTest(name = "use Jackson = {0}")
+    @ValueSource(booleans = {false, true})
+    void testRestartFlowChainWhenFirstFlowIsFinished(boolean useJackson) throws TransactionExecutionException {
+        FlowLog flowLog = createFinishedFlowLog(FLOW_CHAIN_ID, useJackson);
+        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
+        FlowChainLog flowChainLog = new FlowChainLog();
+        flowChainLog.setFlowChainId(FLOW_CHAIN_ID);
+        when(flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(FLOW_CHAIN_ID))
+                .thenReturn(Optional.of(flowChainLog));
+        when(flowChainLogService.hasEventInFlowChainQueue(any())).thenReturn(true);
+
+        HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
+        setUpFlowConfigCreateFlow(helloWorldFlowConfig);
+        List<FlowConfiguration<?>> flowConfigs = Lists.newArrayList(helloWorldFlowConfig);
+        ReflectionTestUtils.setField(underTest, "flowConfigs", flowConfigs);
+
+        underTest.restartFlow(FLOW_ID);
+
+        verify(flowChainHandler, times(1)).restoreFlowChain(FLOW_CHAIN_ID);
+        verify(defaultRestartAction, times(1)).restart(any(), any());
+        verify(flowLogService, never()).terminate(STACK_ID, FLOW_ID);
     }
 
     private FlowLog createFlowLog(String flowChainId, boolean useJackson) {
         FlowLog flowLog = new FlowLog(STACK_ID, FLOW_ID, "START_STATE", true, StateStatus.SUCCESSFUL, OperationType.UNKNOWN);
+        flowLog.setFlowType(ClassValue.of(HelloWorldFlowConfig.class));
+        flowLog.setVariables(JsonWriter.objectToJson(new HashMap<>()));
+        if (useJackson) {
+            flowLog.setVariablesJackson(TypedJsonUtil.writeValueAsStringSilent(new HashMap<>()));
+        }
+        flowLog.setFlowChainId(flowChainId);
+        flowLog.setNextEvent(NEXT_EVENT);
+        flowLog.setFlowTriggerUserCrn(FLOW_TRIGGER_USERCRN);
+        return flowLog;
+    }
+
+    private FlowLog createFinishedFlowLog(String flowChainId, boolean useJackson) {
+        FlowLog flowLog = new FlowLog(STACK_ID, FLOW_ID, FlowConstants.FINISHED_STATE, true, StateStatus.SUCCESSFUL, OperationType.UNKNOWN);
         flowLog.setFlowType(ClassValue.of(HelloWorldFlowConfig.class));
         flowLog.setVariables(JsonWriter.objectToJson(new HashMap<>()));
         if (useJackson) {
@@ -671,6 +708,7 @@ class Flow2HandlerTest {
         when(extendedState.getVariables()).thenReturn(new HashMap<>());
         ReflectionTestUtils.setField(stackStartFlowConfig, "stateMachineFactory", stateMachineFactory);
         ReflectionTestUtils.setField(stackStartFlowConfig, "applicationContext", applicationContext);
+        when(applicationContext.getBean(anyString(), any(Class.class))).thenReturn(defaultRestartAction);
     }
 
     private static class OwnFlowState implements FlowState {

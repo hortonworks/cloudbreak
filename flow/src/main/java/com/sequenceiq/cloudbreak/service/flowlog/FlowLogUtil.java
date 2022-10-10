@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.flowlog;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
@@ -79,37 +81,46 @@ public class FlowLogUtil {
     }
 
     public static Payload tryDeserializeTriggerEvent(FlowChainLog flowChainLog) {
-        if (null == flowChainLog.getTriggerEvent() && null == flowChainLog.getTriggerEventJackson()) {
-            return null;
-        } else {
-            try {
-                if (null != flowChainLog.getTriggerEventJackson()) {
-                    return JsonUtil.readValueWithJsonIoFallback(flowChainLog.getTriggerEventJackson(), flowChainLog.getTriggerEvent(), Payload.class);
-                } else {
-                    return (Payload) JsonReader.jsonToJava(flowChainLog.getTriggerEvent());
-                }
-            } catch (Exception exception) {
-                LOGGER.warn("Couldn't deserialize trigger event from flow chain log {}", flowChainLog);
-                return null;
-            }
-        }
+        return tryDeserialize(flowChainLog.getTriggerEventJackson(), flowChainLog.getTriggerEvent(), Payload.class, false);
     }
 
     public static Payload tryDeserializePayload(FlowLog flowLog) {
-        if (null == flowLog.getPayload() && null == flowLog.getPayloadJackson()) {
-            return null;
-        } else {
-            try {
-                if (null != flowLog.getPayloadJackson()) {
-                    return JsonUtil.readValueWithJsonIoFallback(flowLog.getPayloadJackson(), flowLog.getPayload(), Payload.class);
-                } else {
-                    return (Payload) JsonReader.jsonToJava(flowLog.getPayload());
-                }
+        return tryDeserialize(flowLog.getPayloadJackson(), flowLog.getPayload(), Payload.class, false);
+    }
 
-            } catch (Exception exception) {
-                LOGGER.warn("Couldn't deserialize payload from flow log {}", flowLog);
-                return null;
+    public static Payload deserializePayload(FlowLog flowLog) {
+        return deserialize(flowLog.getPayloadJackson(), flowLog.getPayload(), Payload.class, false);
+    }
+
+    public static Map<Object, Object> deserializeVariables(FlowLog flowLog) {
+        return (Map<Object, Object>) deserialize(flowLog.getVariablesJackson(), flowLog.getVariables(), Map.class, true);
+    }
+
+    public static Map<Object, Object> tryDeserializeVariables(FlowLog flowLog) {
+        return (Map<Object, Object>) tryDeserialize(flowLog.getVariablesJackson(), flowLog.getVariables(), Map.class, true);
+    }
+
+    private static <T> T tryDeserialize(String json, String jsonIo, Class<T> type, boolean useTypedJsonReader) {
+        if (null == jsonIo && null == json) {
+            return null;
+        }
+        try {
+            return deserialize(json, jsonIo, type, useTypedJsonReader);
+        } catch (Exception e) {
+            LOGGER.warn("Deserialization failed {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private static <T> T deserialize(String json, String jsonIo, Class<T> type, boolean useTypedJsonReader) {
+        if (null != json) {
+            if (useTypedJsonReader) {
+                return TypedJsonUtil.readValueWithJsonIoFallback(json, jsonIo, type);
+            } else {
+                return JsonUtil.readValueWithJsonIoFallback(json, jsonIo, type);
             }
+        } else {
+            return (T) JsonReader.jsonToJava(jsonIo);
         }
     }
 }
