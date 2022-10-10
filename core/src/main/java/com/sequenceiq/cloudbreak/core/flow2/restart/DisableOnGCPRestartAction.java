@@ -6,13 +6,12 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.FlowLogService;
-import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.flow.core.RestartContext;
 
 @Component("DisableOnGCPRestartAction")
 public class DisableOnGCPRestartAction extends FillInMemoryStateStoreRestartAction {
@@ -24,17 +23,18 @@ public class DisableOnGCPRestartAction extends FillInMemoryStateStoreRestartActi
     private FlowLogService flowLogService;
 
     @Override
-    public void restart(FlowParameters flowParameters, String flowChainId, String event, Object payload) {
-        Payload stackPayload = (Payload) payload;
-        StackView stack = stackDtoService.getStackViewById(stackPayload.getResourceId());
+    public void restart(RestartContext restartContext, Object payload) {
+        StackView stack = stackDtoService.getStackViewById(restartContext.getResourceId());
         if (stack.getPlatformVariant().equals(GCP)) {
-            try {
-                flowLogService.terminate(stackPayload.getResourceId(), flowParameters.getFlowId());
-            } catch (TransactionExecutionException e) {
-                throw new TransactionRuntimeExecutionException(e);
+            if (restartContext.getFlowId() != null) {
+                try {
+                    flowLogService.terminate(restartContext.getResourceId(), restartContext.getFlowId());
+                } catch (TransactionExecutionException e) {
+                    throw new TransactionRuntimeExecutionException(e);
+                }
             }
         } else {
-            restart(flowParameters, flowChainId, event, payload, stack);
+            super.restart(restartContext, payload);
         }
     }
 }

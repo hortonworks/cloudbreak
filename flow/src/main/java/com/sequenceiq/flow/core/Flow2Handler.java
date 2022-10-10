@@ -1,5 +1,7 @@
 package com.sequenceiq.flow.core;
 
+import static com.sequenceiq.cloudbreak.service.flowlog.FlowLogUtil.deserializePayload;
+import static com.sequenceiq.cloudbreak.service.flowlog.FlowLogUtil.deserializeVariables;
 import static com.sequenceiq.flow.core.FlowConstants.FLOW_CANCEL;
 import static com.sequenceiq.flow.core.FlowConstants.FLOW_CHAIN_ID;
 import static com.sequenceiq.flow.core.FlowConstants.FLOW_CHAIN_TYPE;
@@ -26,14 +28,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -53,6 +52,7 @@ import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.exception.FlowNotFoundException;
 import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
+import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 import com.sequenceiq.flow.ha.NodeConfig;
@@ -491,62 +491,21 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     }
 
     public void restartFlow(FlowLog flowLog) {
-        if (notSupportedFlowType(flowLog)) {
-            try {
-                LOGGER.error("Flow type or payload is not present on the classpath anymore. Terminating the flow {}.", flowLog);
-                flowLogService.terminate(flowLog.getResourceId(), flowLog.getFlowId());
-                return;
-            } catch (TransactionExecutionException e) {
-                throw new TransactionRuntimeExecutionException(e);
+        try {
+            if (notSupportedFlowType(flowLog)) {
+                terminateFlow(flowLog);
+            } else if (isRestartableFlow(flowLog)) {
+                continueFlow(flowLog);
+            } else if (isRestartableFlowChain(flowLog)) {
+                continueFlowChain(flowLog);
             }
-        }
-
-        if (flowLog.getFlowType() != null) {
-            Optional<FlowConfiguration<?>> flowConfig = flowConfigs
-                    .stream()
-                    .filter(fc -> flowLog.isFlowType(fc.getClass()))
-                    .findFirst();
-            try {
-                String flowChainType = flowChainLogService.getFlowChainType(flowLog.getFlowChainId());
-                Payload payload;
-                if (null != flowLog.getPayloadJackson()) {
-                    payload = JsonUtil.readValueWithJsonIoFallback(flowLog.getPayloadJackson(), flowLog.getPayload(), Payload.class);
-                } else {
-                    payload = (Payload) JsonReader.jsonToJava(flowLog.getPayload());
-                }
-                Flow flow = flowConfig.get().createFlow(flowLog.getFlowId(), flowLog.getFlowChainId(), payload.getResourceId(), flowChainType);
-                runningFlows.put(flow, flowLog.getFlowChainId());
-                flowStatCache.put(flow.getFlowId(), flowLog.getFlowChainId(), payload.getResourceId(),
-                        flowConfig.get().getFlowOperationType().name(), flow.getFlowConfigClass(), true);
-                if (flowLog.getFlowChainId() != null) {
-                    flowChainHandler.restoreFlowChain(flowLog.getFlowChainId());
-                }
-                Map<Object, Object> variables;
-                if (null != flowLog.getVariablesJackson()) {
-                    variables = TypedJsonUtil.readValueWithJsonIoFallback(flowLog.getVariablesJackson(), flowLog.getVariables(), Map.class);
-                } else {
-                    variables = (Map<Object, Object>) JsonReader.jsonToJava(flowLog.getVariables());
-                }
-                flow.initialize(flowLog.getCurrentState(), variables);
-                RestartAction restartAction = flowConfig.get().getRestartAction(flowLog.getNextEvent());
-                if (restartAction != null) {
-                    LOGGER.debug("Restarting flow with id: '{}', flow chain id: '{}', flow type: '{}', restart action: '{}'", flow.getFlowId(),
-                            flowLog.getFlowChainId(), flowLog.getFlowType().getClassValue().getSimpleName(), restartAction.getClass().getSimpleName());
-                    Span span = tracer.buildSpan(flowLog.getCurrentState()).ignoreActiveSpan().start();
-                    restartAction.restart(new FlowParameters(flowLog.getFlowId(), flowLog.getFlowTriggerUserCrn(),
-                            flowLog.getOperationType().name(), span.context()), flowLog.getFlowChainId(), flowLog.getNextEvent(), payload);
-                    return;
-                }
-            } catch (Exception e) {
-                String message = String.format("Flow could not be restarted with id: '%s', flow chain id: '%s' and flow type: '%s'", flowLog.getFlowId(),
-                        flowLog.getFlowChainId(), flowLog.getFlowType().getClassValue().getSimpleName());
-                LOGGER.error(message, e);
-            }
-            try {
-                flowLogService.terminate(flowLog.getResourceId(), flowLog.getFlowId());
-            } catch (TransactionExecutionException e) {
-                throw new TransactionRuntimeExecutionException(e);
-            }
+        } catch (Exception e) {
+            LOGGER.error("Flow could not be restarted with id: '{}', flow chain id: '{}' and flow type: '{}'",
+                    flowLog.getFlowId(),
+                    flowLog.getFlowChainId(),
+                    flowLog.getFlowType().getClassValue().getSimpleName(),
+                    e);
+            terminateFlow(flowLog);
         }
     }
 
@@ -561,6 +520,90 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             return true;
         }
         return false;
+    }
+
+    private void terminateFlow(FlowLog flowLog) {
+        try {
+            flowLogService.terminate(flowLog.getResourceId(), flowLog.getFlowId());
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    private boolean isRestartableFlow(FlowLog flowLog) {
+        return !FlowConstants.FINISHED_STATE.equals(flowLog.getCurrentState()) && flowLog.getFlowType() != null;
+    }
+
+    private void continueFlow(FlowLog flowLog) {
+        FlowConfiguration<?> flowConfig = findFlowConfig(flowLog);
+        String flowChainType = flowChainLogService.getFlowChainType(flowLog.getFlowChainId());
+        Payload payload = deserializePayload(flowLog);
+        Flow flow = flowConfig.createFlow(flowLog.getFlowId(), flowLog.getFlowChainId(), flowLog.getResourceId(), flowChainType);
+        runningFlows.put(flow, flowLog.getFlowChainId());
+        flowStatCache.put(flowLog.getFlowId(), flowLog.getFlowChainId(), flowLog.getResourceId(),
+                flowConfig.getFlowOperationType().name(), flow.getFlowConfigClass(), true);
+        if (flowLog.getFlowChainId() != null) {
+            flowChainHandler.restoreFlowChain(flowLog.getFlowChainId());
+        }
+        flow.initialize(flowLog.getCurrentState(), deserializeVariables(flowLog));
+        RestartAction restartAction = flowConfig.getRestartAction(flowLog.getNextEvent());
+        if (restartAction != null) {
+            tracer.buildSpan(flowLog.getCurrentState()).ignoreActiveSpan().start();
+            RestartContext restartContext = RestartContext.flowRestart(
+                    flowLog.getResourceId(),
+                    flowLog.getFlowId(),
+                    flowLog.getFlowChainId(),
+                    flowLog.getFlowTriggerUserCrn(),
+                    flowLog.getOperationType().name(),
+                    flowLog.getNextEvent());
+            restartAction.restart(restartContext, payload);
+        } else {
+            terminateFlow(flowLog);
+        }
+    }
+
+    private boolean isRestartableFlowChain(FlowLog flowLog) {
+        if (!FlowConstants.FINISHED_STATE.equals(flowLog.getCurrentState())
+                || flowLog.getFlowChainId() == null
+                || flowLog.getFlowType() == null) {
+            return false;
+        }
+        return flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(flowLog.getFlowChainId())
+                .map(flowChainLog -> {
+                    List<FlowChainLog> relatedFlowChainLogs;
+                    if (flowChainLog.getParentFlowChainId() == null) {
+                        relatedFlowChainLogs = List.of(flowChainLog);
+                    } else {
+                        relatedFlowChainLogs = flowChainLogService.collectRelatedFlowChains(flowChainLog);
+                    }
+                    return flowChainLogService.hasEventInFlowChainQueue(relatedFlowChainLogs);
+                })
+                .orElse(false);
+    }
+
+    private void continueFlowChain(FlowLog flowLog) {
+        flowChainHandler.restoreFlowChain(flowLog.getFlowChainId());
+        FlowConfiguration<?> flowConfig = findFlowConfig(flowLog);
+        RestartAction restartAction = flowConfig.getRestartAction(null);
+        if (restartAction != null) {
+            RestartContext restartContext = RestartContext.flowChainRestart(
+                    flowLog.getResourceId(),
+                    flowLog.getFlowChainId(),
+                    flowLog.getFlowTriggerUserCrn(),
+                    flowLog.getOperationType().name(),
+                    FlowLogUtil.tryDeserializeVariables(flowLog));
+            restartAction.restart(restartContext, null);
+        } else {
+            terminateFlow(flowLog);
+        }
+    }
+
+    private FlowConfiguration<?> findFlowConfig(FlowLog flowLog) {
+        return flowConfigs
+                .stream()
+                .filter(fc -> flowLog.isFlowType(fc.getClass()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Not found flow type " + flowLog.getFlowType()));
     }
 
     private String getFlowId(Event<?> event) {
@@ -612,10 +655,5 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             throw new InternalServerErrorException(String.format("Retry cannot be performed, because there is no recent action for resource %s. ", resourceId));
         }
         return flowLogs;
-    }
-
-    public Optional<FlowLog> getFirstStateLogfromLatestFlow(Long resourceId) {
-        List<FlowLog> flowLogs = flowLogService.findAllForLastFlowIdByResourceIdOrderByCreatedDesc(resourceId);
-        return FlowLogUtil.getFirstStateLog(flowLogs);
     }
 }

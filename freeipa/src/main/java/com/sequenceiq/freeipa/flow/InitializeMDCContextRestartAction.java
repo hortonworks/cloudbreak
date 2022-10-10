@@ -4,9 +4,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.flow.core.RestartContext;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -18,10 +17,8 @@ public class InitializeMDCContextRestartAction extends DefaultRestartAction {
     private StackService stackService;
 
     @Override
-    public void restart(FlowParameters flowParameters, String flowChainId, String event, Object payload) {
-        Payload stackPayload = (Payload) payload;
-        Stack stack = stackService.getStackById(stackPayload.getResourceId());
+    public void doBeforeRestart(RestartContext restartContext, Object payload) {
+        Stack stack = stackService.getStackById(restartContext.getResourceId());
         MDCBuilder.buildMdcContext(stack);
-        super.restart(flowParameters, flowChainId, event, payload);
     }
 }

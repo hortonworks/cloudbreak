@@ -160,6 +160,11 @@ public class FlowLogDBService implements FlowLogService {
                 flowLog.setVariables(variablesJson);
                 flowLog.setVariablesJackson(variablesJackson);
             }
+            lastFlowLogOpt.ifPresent(lastFlowLog -> {
+                flowLog.setFlowType(lastFlowLog.getFlowType());
+                flowLog.setFlowChainId(lastFlowLog.getFlowChainId());
+                flowLog.setFlowTriggerUserCrn(lastFlowLog.getFlowTriggerUserCrn());
+            });
             flowLog.setCloudbreakNodeId(nodeConfig.getId());
             LOGGER.info("Persisting final FlowLog: {}", flowLog);
             return flowLogRepository.save(flowLog);

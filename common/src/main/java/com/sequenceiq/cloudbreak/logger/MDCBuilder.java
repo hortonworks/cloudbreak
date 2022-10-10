@@ -41,7 +41,9 @@ public class MDCBuilder {
     }
 
     public static void addFlowId(String flowId) {
-        MDC.put(LoggerContextKey.FLOW_ID.toString(), flowId);
+        if (flowId != null) {
+            MDC.put(LoggerContextKey.FLOW_ID.toString(), flowId);
+        }
     }
 
     public static void addRequestId(String requestId) {
