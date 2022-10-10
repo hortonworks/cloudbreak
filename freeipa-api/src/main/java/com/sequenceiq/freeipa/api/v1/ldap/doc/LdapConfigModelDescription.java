@@ -5,8 +5,6 @@ public class LdapConfigModelDescription {
             + " a central place to store usernames and passwords for the users of his/her clusters.";
     public static final String LDAP_CONFIG_DESCRIPTION = "Operations on LDAP server configurations";
     public static final String LDAP_CONNECTION_RESULT = "result of Ldap connection test";
-    public static final String REQUEST = "LDAP config request";
-    public static final String RESPONSE = "LDAP config response";
     public static final String SERVER_HOST = "public host or IP address of LDAP server";
     public static final String SERVER_PORT = "port of LDAP server (typically: 389 or 636 for LDAPS)";
     public static final String PROTOCOL = "determines the protocol (LDAP or LDAP over SSL)";

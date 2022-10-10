@@ -95,7 +95,7 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
     }
 
     @Override
-    public JpaRepository repository() {
+    public JpaRepository<KerberosConfig, Long> repository() {
         return kerberosConfigRepository;
     }
 

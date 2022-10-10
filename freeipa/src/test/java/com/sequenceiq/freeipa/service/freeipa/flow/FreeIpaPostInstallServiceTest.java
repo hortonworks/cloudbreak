@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.binduser.UserSyncBindUserService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -51,6 +53,9 @@ class FreeIpaPostInstallServiceTest {
     @Mock
     private FreeIpaRecipeService freeIpaRecipeService;
 
+    @Mock
+    private UserSyncBindUserService userSyncBindUserService;
+
     @InjectMocks
     private FreeIpaPostInstallService freeIpaPostInstallService;
 
@@ -63,8 +68,13 @@ class FreeIpaPostInstallServiceTest {
         Set<Node> nodes = Set.of(mock(Node.class));
         when(freeIpaNodeUtilService.mapInstancesToNodes(anySet())).thenReturn(nodes);
         when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.POST_SERVICE_DEPLOYMENT, RecipeType.POST_CLUSTER_INSTALL)).thenReturn(true);
+        when(userSyncBindUserService.doesBindUserAndConfigAlreadyExist(stack)).thenReturn(false);
+
         freeIpaPostInstallService.postInstallFreeIpa(1L, false);
+
         verify(hostOrchestrator).postServiceDeploymentRecipes(eq(gatewayConfig), eq(nodes), any(StackBasedExitCriteriaModel.class));
+        verify(userSyncBindUserService).doesBindUserAndConfigAlreadyExist(stack);
+        verify(userSyncBindUserService).createUserAndLdapConfig(stack);
     }
 
     @Test
@@ -74,8 +84,12 @@ class FreeIpaPostInstallServiceTest {
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         Set<Node> nodes = Set.of(mock(Node.class));
         when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.POST_SERVICE_DEPLOYMENT, RecipeType.POST_CLUSTER_INSTALL)).thenReturn(false);
+        when(userSyncBindUserService.doesBindUserAndConfigAlreadyExist(stack)).thenReturn(true);
+
         freeIpaPostInstallService.postInstallFreeIpa(1L, false);
+
         verify(hostOrchestrator, times(0)).postServiceDeploymentRecipes(eq(gatewayConfig), eq(nodes), any(StackBasedExitCriteriaModel.class));
+        verify(userSyncBindUserService, never()).createUserAndLdapConfig(stack);
     }
 
 }

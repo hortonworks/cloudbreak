@@ -186,7 +186,7 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     }
 
     public String testConnection(DatabaseConfig config) {
-        MapBindingResult errors = new MapBindingResult(new HashMap(), "database");
+        MapBindingResult errors = new MapBindingResult(new HashMap<>(), "database");
         connectionValidator.validate(config, errors);
         if (!errors.hasErrors()) {
             return DATABASE_TEST_RESULT_SUCCESS;
@@ -272,7 +272,7 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     }
 
     @Override
-    public JpaRepository repository() {
+    public JpaRepository<DatabaseConfig, Long> repository() {
         return repository;
     }
 
@@ -306,7 +306,7 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     public Map<String, Optional<String>> getNamesByCrnsForMessage(Collection<String> crnStrings) {
         Map<String, Optional<String>> result = new HashMap<>();
         List<Crn> crns = crnStrings.stream().map(crnString -> Crn.safeFromString(crnString)).collect(Collectors.toList());
-        repository.findByResourceCrnIn(crns).stream()
+        repository.findByResourceCrnIn(crns)
                 .forEach(nameAndCrn -> result.put(nameAndCrn.getResourceCrn().toString(), Optional.ofNullable(nameAndCrn.getName())));
         return result;
     }
