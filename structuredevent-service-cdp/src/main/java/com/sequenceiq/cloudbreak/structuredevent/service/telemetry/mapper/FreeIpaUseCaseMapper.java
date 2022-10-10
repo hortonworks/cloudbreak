@@ -107,7 +107,7 @@ public class FreeIpaUseCaseMapper {
                             UsageProto.CDPFreeIPAStatus.Value.VERTICAL_SCALE_FAILED);
                     break;
                 case "UpgradeFlowEventChainFactory":
-                    useCase = getFreeIpaStatus(nextFlowState, "FLOWCHAIN_FINALIZE_FINISHED_STATE",
+                    useCase = getFreeIpaStatus(nextFlowState, "SALT_UPDATE_FINISHED_STATE",
                             UsageProto.CDPFreeIPAStatus.Value.UPGRADE_FINISHED,
                             UsageProto.CDPFreeIPAStatus.Value.UPGRADE_FAILED);
                     break;
