@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -39,7 +41,7 @@ class ClouderaManagerParcelDecommissionService {
     public ParcelOperationStatus deactivateUnusedParcels(ParcelsResourceApi parcelsResourceApi, ParcelResourceApi parcelResourceApi, String stackName,
             Set<String> usedParcelComponentNames, Set<String> parcelNamesFromImage) {
         Set<ParcelInfo> activeParcels = getParcelsInStatus(parcelsResourceApi, stackName, ParcelStatus.ACTIVATED);
-        Multimap<String, String> parcelsToDeactivate = getUnusedParcels(activeParcels, usedParcelComponentNames, parcelNamesFromImage);
+        Map<String, String> parcelsToDeactivate = getUnusedParcels(activeParcels, usedParcelComponentNames, parcelNamesFromImage);
         LOGGER.debug("The following parcels will be deactivated: {}", parcelsToDeactivate);
         return deactivateParcels(parcelResourceApi, stackName, parcelsToDeactivate);
     }
@@ -47,7 +49,7 @@ class ClouderaManagerParcelDecommissionService {
     public ParcelOperationStatus undistributeUnusedParcels(ApiClient apiClient, ParcelsResourceApi parcelsResourceApi, ParcelResourceApi parcelResourceApi,
             StackDtoDelegate stack, Set<String> usedParcelComponentNames, Set<String> parcelNamesFromImage) {
         Set<ParcelInfo> distributedParcels = getParcelsInStatus(parcelsResourceApi, stack.getName(), ParcelStatus.DISTRIBUTED);
-        Multimap<String, String> parcelsToUndistribute = getUnusedParcels(distributedParcels, usedParcelComponentNames, parcelNamesFromImage);
+        Map<String, String> parcelsToUndistribute = getUnusedParcels(distributedParcels, usedParcelComponentNames, parcelNamesFromImage);
         LOGGER.debug("The following parcels will be undistributed: {}", parcelsToUndistribute);
         return undistributeParcels(apiClient, parcelResourceApi, stack, parcelsToUndistribute);
     }
@@ -55,7 +57,7 @@ class ClouderaManagerParcelDecommissionService {
     public ParcelOperationStatus removeUnusedParcels(ApiClient apiClient, ParcelsResourceApi parcelsResourceApi, ParcelResourceApi parcelResourceApi,
             StackDtoDelegate stack, Set<String> usedParcelComponentNames, Set<String> parcelNamesFromImage) {
         Set<ParcelInfo> downloadedParcels = getParcelsInStatus(parcelsResourceApi, stack.getName(), ParcelStatus.DOWNLOADED);
-        Multimap<String, String> parcelsToRemove = getUnusedParcels(downloadedParcels, usedParcelComponentNames, parcelNamesFromImage);
+        Map<String, String> parcelsToRemove = getUnusedParcels(downloadedParcels, usedParcelComponentNames, parcelNamesFromImage);
         LOGGER.debug("The following parcels will be removed: {}", parcelsToRemove);
         return removeParcels(apiClient, parcelResourceApi, stack, parcelsToRemove);
     }
@@ -72,45 +74,52 @@ class ClouderaManagerParcelDecommissionService {
 
     private void removeDownloadedUnusedParcels(ApiClient apiClient, ParcelsResourceApi parcelsResourceApi, ParcelResourceApi parcelResourceApi,
             StackDtoDelegate stack, ClouderaManagerProduct product) {
-        Multimap<String, String> unusedDownloadedParcelVersions =
+        Map<String, String> unusedDownloadedParcelVersions =
                 getParcelVersionsByStatusNameAndVersion(parcelsResourceApi, stack, product, ParcelStatus.DOWNLOADED);
         removeParcels(apiClient, parcelResourceApi, stack, unusedDownloadedParcelVersions);
     }
 
     private void undistributeUnusedDistributedParcels(ApiClient apiClient, ParcelsResourceApi parcelsResourceApi, ParcelResourceApi parcelResourceApi,
             StackDtoDelegate stack, ClouderaManagerProduct product) {
-        Multimap<String, String> unusedDistributedParcelVersions =
+        Map<String, String> unusedDistributedParcelVersions =
                 getParcelVersionsByStatusNameAndVersion(parcelsResourceApi, stack, product, ParcelStatus.DISTRIBUTED);
         undistributeParcels(apiClient, parcelResourceApi, stack, unusedDistributedParcelVersions);
     }
 
-    private Multimap<String, String> getParcelVersionsByStatusNameAndVersion(ParcelsResourceApi parcelsResourceApi, StackDtoDelegate stack,
+    private Map<String, String> getParcelVersionsByStatusNameAndVersion(ParcelsResourceApi parcelsResourceApi, StackDtoDelegate stack,
             ClouderaManagerProduct product, ParcelStatus parcelStatus) {
-        return parcelManagementService.getParcelsInStatus(parcelsResourceApi, stack.getName(), parcelStatus)
-                .stream()
-                .filter(parcelInfo -> parcelInfo.getName().equals(product.getName()) && !parcelInfo.getVersion().equals(product.getVersion()))
-                .collect(Multimaps.toMultimap(ParcelInfo::getName, ParcelInfo::getVersion, HashMultimap::create));
+        Map<String, String> result = new HashMap<>();
+        for (ParcelInfo parcelInfo : parcelManagementService.getParcelsInStatus(parcelsResourceApi, stack.getName(), parcelStatus)) {
+            if (parcelInfo.getName().equals(product.getName()) && !parcelInfo.getVersion().equals(product.getVersion())) {
+                result.put(parcelInfo.getName(), parcelInfo.getVersion());
+            }
+        }
+        return result;
     }
 
-    private Multimap<String, String> getUnusedParcels(Set<ParcelInfo> usedParcels, Set<String> usedParcelComponentNames, Set<String> parcelsFromImage) {
-        return usedParcels.stream()
-                .filter(usedParcel -> !usedParcelComponentNames.contains(usedParcel.getName()) && parcelsFromImage.contains(usedParcel.getName()))
-                .collect(Multimaps.toMultimap(ParcelInfo::getName, ParcelInfo::getVersion, HashMultimap::create));
+    private Map<String, String> getUnusedParcels(Set<ParcelInfo> usedParcels, Set<String> usedParcelComponentNames, Set<String> parcelsFromImage) {
+        Map<String, String> result = new HashMap<>();
+        for (ParcelInfo usedParcel : usedParcels) {
+            if (!usedParcelComponentNames.contains(usedParcel.getName()) && parcelsFromImage.contains(usedParcel.getName())) {
+                result.put(usedParcel.getName(), usedParcel.getVersion());
+            }
+        }
+        return result;
     }
 
-    private ParcelOperationStatus deactivateParcels(ParcelResourceApi parcelResourceApi, String stackName, Multimap<String, String> activeParcels) {
-        return activeParcels.entries().stream()
+    private ParcelOperationStatus deactivateParcels(ParcelResourceApi parcelResourceApi, String stackName, Map<String, String> activeParcels) {
+        return activeParcels.entrySet().stream()
                 .map(parcel -> runSingleParcelCommand("DEACTIVATE", stackName, parcel, parcelResourceApi::deactivateCommand))
                 .reduce(new ParcelOperationStatus(), ParcelOperationStatus::merge);
     }
 
     private ParcelOperationStatus undistributeParcels(ApiClient apiClient, ParcelResourceApi parcelResourceApi, StackDtoDelegate stack,
-            Multimap<String, String> parcels) {
-        ParcelOperationStatus undistributeStatus = parcels.entries().stream()
+            Map<String, String> parcels) {
+        ParcelOperationStatus undistributeStatus = parcels.entrySet().stream()
                 .map(parcel -> runSingleParcelCommand("UNDISTRIBUTE", stack.getName(), parcel, parcelResourceApi::startRemovalOfDistributionCommand))
                 .reduce(new ParcelOperationStatus(), ParcelOperationStatus::merge);
 
-        Multimap<String, String> pollableParcels = filterForPollableParcels(parcels, undistributeStatus);
+        Map<String, String> pollableParcels = filterForPollableParcels(parcels, undistributeStatus);
         ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelStatus(stack, apiClient, pollableParcels,
                 ParcelStatus.DOWNLOADED);
         if (pollingResult.isExited()) {
@@ -121,10 +130,15 @@ class ClouderaManagerParcelDecommissionService {
         return undistributeStatus;
     }
 
-    private Multimap<String, String> filterForPollableParcels(Multimap<String, String> parcels, ParcelOperationStatus parcelOperationStatus) {
-        return parcels.entries().stream()
-                .filter(entry -> parcelOperationStatus.getSuccessful().containsEntry(entry.getKey(), entry.getValue()))
-                .collect(Multimaps.toMultimap(Entry::getKey, Entry::getValue, HashMultimap::create));
+    private Map<String, String> filterForPollableParcels(Map<String, String> parcels, ParcelOperationStatus parcelOperationStatus) {
+        Map<String, String> result = new HashMap<>();
+        for (Entry<String, String> entry : parcels.entrySet()) {
+            String p = parcelOperationStatus.getSuccessful().get(entry.getKey());
+            if (entry.getValue().equals(p)) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return result;
     }
 
     private ParcelOperationStatus runSingleParcelCommand(String commandName, String stackName, Entry<String, String> parcelForCommand,
@@ -142,11 +156,11 @@ class ClouderaManagerParcelDecommissionService {
     }
 
     private ParcelOperationStatus removeParcels(ApiClient apiClient, ParcelResourceApi parcelResourceApi, StackDtoDelegate stack,
-            Multimap<String, String> parcels) {
-        ParcelOperationStatus removalStatus = parcels.entries().stream()
+            Map<String, String> parcels) {
+        ParcelOperationStatus removalStatus = parcels.entrySet().stream()
                 .map(parcel -> runSingleParcelCommand("REMOVE", stack.getName(), parcel, parcelResourceApi::removeDownloadCommand))
                 .reduce(new ParcelOperationStatus(), ParcelOperationStatus::merge);
-        Multimap<String, String> pollableParcels = filterForPollableParcels(parcels, removalStatus);
+        Map<String, String> pollableParcels = filterForPollableParcels(parcels, removalStatus);
         ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelDelete(stack, apiClient, pollableParcels);
         if (pollingResult.isExited()) {
             throw new CancellationException("Cluster was terminated while waiting for parcels deletion");

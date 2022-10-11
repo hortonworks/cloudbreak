@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.cluster.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -10,31 +14,38 @@ import com.google.common.collect.Multimaps;
 
 public class ParcelOperationStatus {
 
-    private Multimap<String, String> successful = HashMultimap.create();
+    private Map<String, String> successful = new HashMap<>();
 
-    private Multimap<String, String> failed = HashMultimap.create();
+    private Map<String, String> failed = new HashMap<>();
 
     public ParcelOperationStatus() {
     }
 
     public ParcelOperationStatus(Map<String, String> successful, Map<String, String> failed) {
-        this.successful = successful.entrySet().stream().collect(Multimaps.toMultimap(Map.Entry::getKey, Map.Entry::getValue, HashMultimap::create));
-        this.failed = failed.entrySet().stream().collect(Multimaps.toMultimap(Map.Entry::getKey, Map.Entry::getValue, HashMultimap::create));
+        this.successful = new HashMap<>();
+        for (Map.Entry<String, String> entry : successful.entrySet()) {
+            this.successful.put(entry.getKey(), entry.getValue());
+        }
+
+        this.failed = new HashMap<>();
+        for (Map.Entry<String, String> entry : failed.entrySet()) {
+            this.failed.put(entry.getKey(), entry.getValue());
+        }
     }
 
-    public Multimap<String, String> getSuccessful() {
+    public Map<String, String> getSuccessful() {
         return successful;
     }
 
-    public void setSuccessful(Multimap<String, String> successful) {
+    public void setSuccessful(Map<String, String> successful) {
         this.successful = successful;
     }
 
-    public Multimap<String, String> getFailed() {
+    public Map<String, String> getFailed() {
         return failed;
     }
 
-    public void setFailed(Multimap<String, String> failed) {
+    public void setFailed(Map<String, String> failed) {
         this.failed = failed;
     }
 

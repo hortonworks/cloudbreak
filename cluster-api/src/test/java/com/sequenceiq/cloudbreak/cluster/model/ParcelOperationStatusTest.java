@@ -18,9 +18,12 @@ public class ParcelOperationStatusTest {
         ParcelOperationStatus result = status1.merge(status2).merge(status3);
 
         assertEquals(1, result.getSuccessful().size());
-        assertTrue(result.getSuccessful().containsEntry("parcel3", "v3"));
+        String parcel3 = result.getSuccessful().get("parcel3");
+        assertEquals(parcel3, "v3");
         assertEquals(2, result.getFailed().size());
-        assertTrue(result.getFailed().containsEntry("parcel1", "v1"));
-        assertTrue(result.getFailed().containsEntry("parcel2", "v2"));
+        String parcel1 = result.getFailed().get("parcel1");
+        assertEquals(parcel1, "v1");
+        String parcel2 = result.getFailed().get("parcel2");
+        assertEquals(parcel2, "v2");
     }
 }

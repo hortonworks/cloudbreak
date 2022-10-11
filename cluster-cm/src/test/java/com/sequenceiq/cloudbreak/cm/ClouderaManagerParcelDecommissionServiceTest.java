@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -79,7 +80,8 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         verifyNoMoreInteractions(parcelResourceApi);
         assertEquals(1, actual.getSuccessful().size());
         assertEquals(0, actual.getFailed().size());
-        assertTrue(actual.getSuccessful().containsEntry("product3", "version3"));
+        String product3 = actual.getSuccessful().get("product3");
+        assertEquals(product3, "version3");
     }
 
     @Test
@@ -99,7 +101,8 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         verifyNoMoreInteractions(parcelResourceApi);
         assertEquals(0, operationStatus.getSuccessful().size());
         assertEquals(1, operationStatus.getFailed().size());
-        assertTrue(operationStatus.getFailed().containsEntry("product3", "version3"));
+        String product3 = operationStatus.getFailed().get("product3");
+        assertEquals(product3, "version3");
     }
 
     @Test
@@ -125,7 +128,8 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         verifyNoMoreInteractions(parcelResourceApi);
         assertEquals(1, operationStatus.getSuccessful().size());
         assertEquals(0, operationStatus.getFailed().size());
-        assertTrue(operationStatus.getSuccessful().containsEntry("product3", "version3"));
+        String product3 = operationStatus.getSuccessful().get("product3");
+        assertEquals(product3, "version3");
     }
 
     @Test
@@ -152,7 +156,8 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         verifyNoMoreInteractions(parcelResourceApi);
         assertEquals(0, operationStatus.getSuccessful().size());
         assertEquals(1, operationStatus.getFailed().size());
-        assertTrue(operationStatus.getFailed().containsEntry("product3", "version3"));
+        String product3 = operationStatus.getFailed().get("product3");
+        assertEquals(product3, "version3");
     }
 
     @Test
@@ -178,7 +183,8 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         verifyNoMoreInteractions(parcelResourceApi);
         assertEquals(0, operationStatus.getFailed().size());
         assertEquals(1, operationStatus.getSuccessful().size());
-        assertTrue(operationStatus.getSuccessful().containsEntry("product3", "version3"));
+        String product3 = operationStatus.getSuccessful().get("product3");
+        assertEquals(product3, "version3");
     }
 
     @Test
@@ -205,7 +211,8 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         verifyNoMoreInteractions(parcelResourceApi);
         assertEquals(1, operationStatus.getFailed().size());
         assertEquals(0, operationStatus.getSuccessful().size());
-        assertTrue(operationStatus.getFailed().containsEntry("product3", "version3"));
+        String product3 = operationStatus.getFailed().get("product3");
+        assertEquals(product3, "version3");
     }
 
     @Test
@@ -219,7 +226,7 @@ public class ClouderaManagerParcelDecommissionServiceTest {
                 new ParcelInfo(currentProductWithVersionToKeep.getName(), "old2", ParcelStatus.DISTRIBUTED),
                 new ParcelInfo(currentProductWithVersionToKeep.getName(), currentProductWithVersionToKeep.getVersion(), ParcelStatus.DISTRIBUTED)))
                 .when(parcelManagementService).getParcelsInStatus(parcelsResourceApi, STACK_NAME, ParcelStatus.DISTRIBUTED);
-        ArgumentCaptor<Multimap<String, String>> parcelVersionsCaptorForDownloaded = ArgumentCaptor.forClass(Multimap.class);
+        ArgumentCaptor<Map<String, String>> parcelVersionsCaptorForDownloaded = ArgumentCaptor.forClass(HashMap.class);
         when(clouderaManagerPollingServiceProvider
                 .startPollingCmParcelStatus(eq(stack), eq(apiClient), parcelVersionsCaptorForDownloaded.capture(), eq(ParcelStatus.DOWNLOADED)))
                 .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
@@ -230,7 +237,7 @@ public class ClouderaManagerParcelDecommissionServiceTest {
                 new ParcelInfo(currentProductWithVersionToKeep.getName(), currentProductWithVersionToKeep.getVersion(), ParcelStatus.DOWNLOADED)))
                 .when(parcelManagementService).getParcelsInStatus(parcelsResourceApi, STACK_NAME, ParcelStatus.DOWNLOADED);
 
-        ArgumentCaptor<Multimap<String, String>> parcelVersionsCaptorForDelete = ArgumentCaptor.forClass(Multimap.class);
+        ArgumentCaptor<Map<String, String>> parcelVersionsCaptorForDelete = ArgumentCaptor.forClass(HashMap.class);
         when(clouderaManagerPollingServiceProvider
                 .startPollingCmParcelDelete(eq(stack), eq(apiClient), parcelVersionsCaptorForDelete.capture()))
                 .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
@@ -240,13 +247,17 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         verify(parcelResourceApi).startRemovalOfDistributionCommand(STACK_NAME, currentProductWithVersionToKeep.getName(), "old");
         verify(parcelResourceApi).startRemovalOfDistributionCommand(STACK_NAME, currentProductWithVersionToKeep.getName(), "old2");
         assertEquals(2, parcelVersionsCaptorForDownloaded.getValue().size());
-        assertTrue(parcelVersionsCaptorForDownloaded.getValue().containsEntry("CDH", "old"));
-        assertTrue(parcelVersionsCaptorForDownloaded.getValue().containsEntry("CDH", "old2"));
+        String cdh = parcelVersionsCaptorForDownloaded.getValue().get("CDH");
+        assertEquals(cdh, "old");
+        String cdh1 = parcelVersionsCaptorForDownloaded.getValue().get("CDH");
+        assertEquals(cdh1, "old2");
         verify(parcelResourceApi).removeDownloadCommand(STACK_NAME, currentProductWithVersionToKeep.getName(), "old");
         verify(parcelResourceApi).removeDownloadCommand(STACK_NAME, currentProductWithVersionToKeep.getName(), "old2");
         assertEquals(2, parcelVersionsCaptorForDelete.getValue().size());
-        assertTrue(parcelVersionsCaptorForDelete.getValue().containsEntry("CDH", "old"));
-        assertTrue(parcelVersionsCaptorForDelete.getValue().containsEntry("CDH", "old2"));
+        String cdh2 = parcelVersionsCaptorForDelete.getValue().get("CDH");
+        assertEquals(cdh2, "old");
+        String cdh3 = parcelVersionsCaptorForDelete.getValue().get("CDH");
+        assertEquals(cdh3, "old2");
         verifyNoMoreInteractions(parcelResourceApi);
     }
 

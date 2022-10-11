@@ -1211,10 +1211,13 @@ class ClouderaManagerModificationServiceTest {
         verify(clouderaManagerParcelDecommissionService, times(1)).removeUnusedParcels(apiClientMock, parcelsResourceApi, parcelResourceApi, stack,
                 usedParcelComponentNames, parcelNamesFromImage);
         assertEquals(1, operationStatus.getSuccessful().size());
-        assertTrue(operationStatus.getSuccessful().containsEntry("product5", "version5"));
+        String product5 = operationStatus.getSuccessful().get("product5");
+        assertEquals(product5, "version5");
         assertEquals(2, operationStatus.getFailed().size());
-        assertTrue(operationStatus.getFailed().containsEntry("spark3", "version3"));
-        assertTrue(operationStatus.getFailed().containsEntry("product4", "version4"));
+        String spark3 = operationStatus.getFailed().get("spark3");
+        assertEquals(spark3, "version3");
+        String product4 = operationStatus.getFailed().get("product4");
+        assertEquals(product4, "version4");
     }
 
     @Test

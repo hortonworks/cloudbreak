@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -21,10 +22,10 @@ import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 public class ClouderaManagerParcelDeletedListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelDeletedListenerTask.class);
 
-    private final Multimap<String, String> parcelVersions;
+    private final Map<String, String> parcelVersions;
 
     public ClouderaManagerParcelDeletedListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            ClusterEventService clusterEventService, Multimap<String, String> parcelVersions) {
+            ClusterEventService clusterEventService, Map<String, String> parcelVersions) {
         super(clouderaManagerApiPojoFactory, clusterEventService);
         this.parcelVersions = parcelVersions;
     }
@@ -57,7 +58,8 @@ public class ClouderaManagerParcelDeletedListenerTask extends AbstractClouderaMa
     }
 
     private boolean isMatchingParcel(ApiParcel parcel) {
-        return parcelVersions.containsEntry(parcel.getProduct(), parcel.getVersion());
+        String result = parcelVersions.get(parcel.getProduct());
+        return parcel.getVersion().equals(result);
     }
 
     private String getJoinedParcelStages(List<ApiParcel> notActivated) {

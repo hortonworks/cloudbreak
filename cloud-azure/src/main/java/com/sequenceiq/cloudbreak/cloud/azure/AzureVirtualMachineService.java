@@ -146,21 +146,25 @@ public class AzureVirtualMachineService {
         LOGGER.info("Get vms from azure: {}", cloudInstances);
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         AzureClient azureClient = ac.getParameter(AzureClient.class);
-        ArrayListMultimap<String, String> resourceGroupInstanceMultimap = cloudInstances.stream()
-                .collect(Multimaps.toMultimap(
-                        cloudInstance -> azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), cloudInstance),
-                        CloudInstance::getInstanceId,
-                        ArrayListMultimap::create));
+
+        Map<String, List<String>> resourceGroupInstanceMultimap = new HashMap<>();
+        for (CloudInstance cloudInstance : cloudInstances) {
+            String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), cloudInstance);
+            if (!resourceGroupInstanceMultimap.keySet().contains(resourceGroupName)) {
+                resourceGroupInstanceMultimap.put(resourceGroupName, new ArrayList<>());
+            }
+            resourceGroupInstanceMultimap.get(resourceGroupName).add(cloudInstance.getInstanceId());
+        }
 
         Map<String, VirtualMachine> virtualMachines = new HashMap<>();
-        for (Map.Entry<String, Collection<String>> resourceGroupInstanceIdsMap : resourceGroupInstanceMultimap.asMap().entrySet()) {
-            LOGGER.info("Get vms for resource group and add to all virtual machines: {}", resourceGroupInstanceIdsMap.getKey());
+        for (String entryKey : resourceGroupInstanceMultimap.keySet()) {
+            LOGGER.info("Get vms for resource group and add to all virtual machines: {}", entryKey);
             try {
-                virtualMachines.putAll(getVirtualMachinesByNameEmptyAllowed(azureClient,
-                        resourceGroupInstanceIdsMap.getKey(), resourceGroupInstanceIdsMap.getValue()));
+                virtualMachines.putAll(getVirtualMachinesByNameEmptyAllowed(azureClient, entryKey,
+                        resourceGroupInstanceMultimap.get(entryKey)));
             } catch (CloudException e) {
                 LOGGER.debug("Exception occurred during the list of Virtual Machines by resource group", e);
-                for (String instance : resourceGroupInstanceIdsMap.getValue()) {
+                for (String instance : resourceGroupInstanceMultimap.get(entryKey)) {
                     cloudInstances.stream().filter(cloudInstance -> instance.equals(cloudInstance.getInstanceId())).findFirst().ifPresent(cloudInstance -> {
                         if (e.body() != null && "ResourceNotFound".equals(e.body().code())) {
                             statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.TERMINATED));

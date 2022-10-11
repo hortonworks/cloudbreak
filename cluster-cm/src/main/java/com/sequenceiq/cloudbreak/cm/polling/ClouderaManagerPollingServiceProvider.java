@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm.polling;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -161,7 +162,7 @@ public class ClouderaManagerPollingServiceProvider {
                 new ClouderaManagerSingleParcelActivationListenerTask(clouderaManagerApiPojoFactory, clusterEventService, product));
     }
 
-    public ExtendedPollingResult startPollingCmParcelStatus(StackDtoDelegate stack, ApiClient apiClient, Multimap<String, String> parcelVersions,
+    public ExtendedPollingResult startPollingCmParcelStatus(StackDtoDelegate stack, ApiClient apiClient, Map<String, String> parcelVersions,
             ParcelStatus parcelStatus) {
         LOGGER.debug("Waiting for Cloudera Manager parcels {} to become to status [{}]. [Server address: {}]", parcelVersions, parcelStatus,
                 stack.getClusterManagerIp());
@@ -169,7 +170,7 @@ public class ClouderaManagerPollingServiceProvider {
                 new ClouderaManagerParcelStatusListenerTask(clouderaManagerApiPojoFactory, clusterEventService, parcelVersions, parcelStatus));
     }
 
-    public ExtendedPollingResult startPollingCmParcelDelete(StackDtoDelegate stack, ApiClient apiClient, Multimap<String, String> parcelVersions) {
+    public ExtendedPollingResult startPollingCmParcelDelete(StackDtoDelegate stack, ApiClient apiClient, Map<String, String> parcelVersions) {
         LOGGER.debug("Waiting for Cloudera Manager parcels {} to be deleted. [Server address: {}]", parcelVersions,
                 stack.getClusterManagerIp());
         return pollCommandWithTimeListener(stack, apiClient, BigDecimal.ZERO, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),

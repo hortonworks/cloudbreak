@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -21,12 +22,12 @@ import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 public class ClouderaManagerParcelStatusListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelStatusListenerTask.class);
 
-    private final Multimap<String, String> parcelVersions;
+    private final Map<String, String> parcelVersions;
 
     private final ParcelStatus parcelStatus;
 
     public ClouderaManagerParcelStatusListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            ClusterEventService clusterEventService, Multimap<String, String> parcelVersions, ParcelStatus parcelStatus) {
+            ClusterEventService clusterEventService, Map<String, String> parcelVersions, ParcelStatus parcelStatus) {
         super(clouderaManagerApiPojoFactory, clusterEventService);
         this.parcelVersions = parcelVersions;
         this.parcelStatus = parcelStatus;
@@ -54,7 +55,10 @@ public class ClouderaManagerParcelStatusListenerTask extends AbstractClouderaMan
 
     private List<ApiParcel> getNotInProperStateParcels(ApiParcelList parcels) {
         return parcels.getItems().stream()
-                .filter(parcel -> parcelVersions.containsEntry(parcel.getProduct(), parcel.getVersion()))
+                .filter(parcel ->  {
+                    String parcelVersion = parcelVersions.get(parcel.getProduct());
+                    return parcel.getVersion().equals(parcelVersion);
+                })
                 .filter(parcel -> !parcelStatus.name().equals(parcel.getStage()))
                 .collect(Collectors.toList());
     }
