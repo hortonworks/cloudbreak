@@ -4,7 +4,6 @@ import static java.lang.String.format;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -263,7 +262,7 @@ public class GcpClientActions extends GcpClient {
     public URI getBaseLocationUri() {
         try {
             return new URI(getBaseLocation());
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             LOGGER.error("Google GCS base location path: '{}' is not a valid URI!", getBaseLocation());
             throw new TestFailException(format(" Google GCS base location path: '%s' is not a valid URI! ", getBaseLocation()));
         }
@@ -272,7 +271,7 @@ public class GcpClientActions extends GcpClient {
     public URI getBaseLocationUri(String baseLocation) {
         try {
             return new URI(baseLocation);
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             LOGGER.error("Google GCS base location path: '{}' is not a valid URI!", baseLocation);
             throw new TestFailException(format(" Google GCS base location path: '%s' is not a valid URI! ", baseLocation));
         }
@@ -295,8 +294,24 @@ public class GcpClientActions extends GcpClient {
         Log.log(LOGGER, format(" Google GCS Object: %s", selectedObjectPath));
 
         try {
+            /**
+             * If specified, results are returned in a directory-like mode. Blobs whose names, after a possible prefix(String),
+             * do not contain the '/' delimiter are returned as is.
+             *
+             * Blobs whose names, after a possible prefix(String), contain the '/' delimiter, will have their name truncated
+             * after the delimiter and will be returned as Blob objects where only:
+             * - BlobInfo.getBlobId(),
+             * - BlobInfo.getSize() and
+             * - BlobInfo.isDirectory() are set.
+             * For such directory blobs:
+             * - BlobId.getGeneration() returns null,
+             * - BlobInfo.getSize() returns 0
+             * - BlobInfo.isDirectory() returns true.
+             *
+             * Duplicate directory blobs are omitted.
+             */
             blobs = storage
-                    .list(bucketName, BlobListOption.prefix(keyPrefix), BlobListOption.currentDirectory());
+                    .list(bucketName, BlobListOption.prefix(keyPrefix + "/"), BlobListOption.currentDirectory());
         } catch (Exception e) {
             Log.error(LOGGER, format("GCP GCS bucket '%s' is not present or accessible at base location '%s'", bucketName, baseLocationUri), e);
             throw new TestFailException(format("GCP GCS bucket '%s' is not present or accessible at base location '%s'", bucketName, baseLocationUri), e);
@@ -307,15 +322,8 @@ public class GcpClientActions extends GcpClient {
             throw new TestFailException(format(" Google GCS path: '%s' does not exist! ", keyPrefix));
         } else {
             for (Blob blob : blobs.iterateAll()) {
-                try {
-                    URI selfLink = new URI(blob.getSelfLink());
-                    if (selfLink.getPath().contains(selectedObjectPath)) {
-                        filteredBlobs.add(blob);
-                    }
-                } catch (URISyntaxException e) {
-                    Log.error(LOGGER, format("Google GCS object: '%s' path: '%s' is not a valid URI!", blob.getName(), blob.getSelfLink()));
-                    throw new TestFailException(format(" Google GCS object: '%s' path: '%s' is not a valid URI!",
-                            blob.getName(), blob.getSelfLink()));
+                if (StringUtils.remove(blob.getName(), "/").contains(StringUtils.remove(selectedObjectPath, "/"))) {
+                    filteredBlobs.add(blob);
                 }
             }
             if (CollectionUtils.isEmpty(filteredBlobs)) {
@@ -325,8 +333,18 @@ public class GcpClientActions extends GcpClient {
                 Log.log(LOGGER, format(" Google GCS object: '%s' contains '%d' sub-objects.", selectedObjectPath, filteredBlobs.size()));
                 for (Blob filteredBlob : filteredBlobs.stream().limit(10).collect(Collectors.toList())) {
                     if (filteredBlob.getSize().compareTo(0L) == 0 && !zeroContent) {
-                        LOGGER.error("Google GCS path: '{}' has 0 bytes of content!", selectedObjectPath);
-                        throw new TestFailException(format(" Google GCS path: '%s' has 0 bytes of content! ", selectedObjectPath));
+                        /**
+                         * Directory blobs:
+                         * - BlobId.getGeneration() returns null,
+                         * - BlobInfo.getSize() returns 0
+                         * - BlobInfo.isDirectory() returns true
+                         */
+                        if (filteredBlob.isDirectory()) {
+                            LOGGER.warn("Google GCS path: '{}' has 0 bytes of content!", selectedObjectPath);
+                        } else {
+                            LOGGER.error("Google GCS path: '{}' has 0 bytes of content!", selectedObjectPath);
+                            throw new TestFailException(format("Google GCS path: '%s' has 0 bytes of content!", selectedObjectPath));
+                        }
                     }
                 }
             }
