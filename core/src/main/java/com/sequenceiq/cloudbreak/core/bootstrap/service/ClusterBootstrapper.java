@@ -302,7 +302,9 @@ public class ClusterBootstrapper {
             LOGGER.info("Add gateway config: {}", gatewayConfig);
             allGatewayConfig.add(gatewayConfig);
             ExtendedPollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithAbsoluteTimeout(
-                    hostBootstrapApiCheckerTask, new HostBootstrapApiContext(stack, gatewayConfig, hostOrchestrator), POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
+                    hostBootstrapApiCheckerTask,
+                    new HostBootstrapApiContext(stack, gatewayConfig, hostOrchestrator, stack.getTunnel()),
+                    POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
             validatePollingResultForCancellation(bootstrapApiPolling.getPollingResult(), "Polling of bootstrap API was cancelled.");
         }
         return allGatewayConfig;
@@ -413,7 +415,9 @@ public class ClusterBootstrapper {
         for (InstanceMetadataView gateway : stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()) {
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack.getStack(), stack.getSecurityConfig(), gateway, enableKnox);
             ExtendedPollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithAbsoluteTimeout(
-                    hostBootstrapApiCheckerTask, new HostBootstrapApiContext(stack, gatewayConfig, hostOrchestrator), POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
+                    hostBootstrapApiCheckerTask,
+                    new HostBootstrapApiContext(stack, gatewayConfig, hostOrchestrator, stack.getTunnel()),
+                    POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
             validatePollingResultForCancellation(bootstrapApiPolling.getPollingResult(), "Polling of bootstrap API was cancelled.");
         }
 

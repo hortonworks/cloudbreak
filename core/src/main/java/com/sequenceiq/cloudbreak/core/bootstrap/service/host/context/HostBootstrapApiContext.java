@@ -4,6 +4,7 @@ import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.StackContext;
+import com.sequenceiq.common.api.type.Tunnel;
 
 public class HostBootstrapApiContext extends StackContext {
 
@@ -11,10 +12,13 @@ public class HostBootstrapApiContext extends StackContext {
 
     private final HostOrchestrator hostOrchestrator;
 
-    public HostBootstrapApiContext(StackDtoDelegate stack, GatewayConfig gatewayConfig, HostOrchestrator hostOrchestrator) {
+    private final Tunnel tunnel;
+
+    public HostBootstrapApiContext(StackDtoDelegate stack, GatewayConfig gatewayConfig, HostOrchestrator hostOrchestrator, Tunnel tunnel) {
         super(stack);
         this.gatewayConfig = gatewayConfig;
         this.hostOrchestrator = hostOrchestrator;
+        this.tunnel = tunnel;
     }
 
     public GatewayConfig getGatewayConfig() {
@@ -23,5 +27,9 @@ public class HostBootstrapApiContext extends StackContext {
 
     public HostOrchestrator getHostOrchestrator() {
         return hostOrchestrator;
+    }
+
+    public Tunnel getTunnel() {
+        return tunnel;
     }
 }
