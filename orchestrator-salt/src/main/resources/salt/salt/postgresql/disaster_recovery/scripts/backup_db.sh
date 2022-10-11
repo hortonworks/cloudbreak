@@ -7,38 +7,12 @@
 set -o nounset
 set -o pipefail
 
-if [[ $# -lt 6 || $# -gt 7 || "$1" == "None" ]]; then
-  echo "Invalid inputs provided"
-  echo "Script accepts at least 6 and at most 7 inputs:"
-  echo "  1. Object Storage Service url to place backups."
-  echo "  2. PostgreSQL host name."
-  echo "  3. PostgreSQL port."
-  echo "  4. PostgreSQL user name."
-  echo "  5. Ranger admin group."
-  echo "  6. Whether or not to close connections for the database while it is being backed up."
-  echo "  7. (optional) Name of the databases to backup. If not given, will backup ranger and hive databases."
-  exit 1
-fi
-
-BACKUP_LOCATION="$1"
-HOST="$2"
-PORT="$3"
-USERNAME="$4"
-RANGERGROUP="$5"
-CLOSECONNECTIONS="$6"
-DATABASENAMES="${@: 7}"
 LOGFILE=/var/log/dl_postgres_backup.log
 echo "Logs at ${LOGFILE}"
 
 exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1> >(tee -a "${LOGFILE}") 2> >(tee -a "${LOGFILE}" >&2)
-
-{%- from 'postgresql/settings.sls' import postgresql with context %}
-{% if postgresql.ssl_enabled == True %}
-export PGSSLROOTCERT="{{ postgresql.root_certs_file }}"
-export PGSSLMODE=verify-full
-{%- endif %}
 
 doLog() {
   type_of_msg=$(echo "$@" | cut -d" " -f1)
@@ -50,6 +24,33 @@ doLog() {
   test -t 1 && echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg"
   echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg" >>$LOGFILE
 }
+
+if [[ $# -lt 6 || $# -gt 10 || "$1" == "None" ]]; then
+  doLog "Invalid inputs provided"
+  doLog "Script accepts at least 6 and at most 7 inputs:"
+  doLog "  1. Object Storage Service url to place backups."
+  doLog "  2. PostgreSQL host name."
+  doLog "  3. PostgreSQL port."
+  doLog "  4. PostgreSQL user name."
+  doLog "  5. Ranger admin group."
+  doLog "  6. Whether or not to close connections for the database while it is being backed up."
+  doLog "  7-10. (optional) Names of the databases to backup. If not given, will backup ranger and hive databases."
+  exit 1
+fi
+
+BACKUP_LOCATION="$1"
+HOST="$2"
+PORT="$3"
+USERNAME="$4"
+RANGERGROUP="$5"
+CLOSECONNECTIONS="$6"
+DATABASENAMES="${@: 7}"
+
+{%- from 'postgresql/settings.sls' import postgresql with context %}
+{% if postgresql.ssl_enabled == True %}
+export PGSSLROOTCERT="{{ postgresql.root_certs_file }}"
+export PGSSLMODE=verify-full
+{%- endif %}
 
 errorExit() {
   doLog "ERROR $1"
