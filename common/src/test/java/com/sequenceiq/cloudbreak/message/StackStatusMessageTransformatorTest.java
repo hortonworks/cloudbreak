@@ -38,9 +38,9 @@ class StackStatusMessageTransformatorTest {
 
         String expected = "The Control Plane was not able to establish the connection with the gateway instance. " +
                 "This could be caused by the Jumpgate agent running on this instance not being able to connect to " +
-                "the Cloudera server. Please check your connection and proxy settings and make sure the instance can" +
-                " reach *.ccm.cdp.cloudera.com Please check your instance on the cloud provider side if it is up" +
-                " and running. Restart it if it could not start up properly.";
+                "the Cloudera server. Please check your connection and proxy settings and make sure the instance can " +
+                "reach *.v2.ccm.cdp.cloudera.com Please check your instance on the cloud provider side if it is up and " +
+                "running. Restart it if it could not start up properly.";
         Assertions.assertEquals(expected, result);
     }
 
