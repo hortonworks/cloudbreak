@@ -16,7 +16,9 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyDefaultStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredSyncEventFactory;
@@ -34,6 +36,9 @@ public class StructuredSynchronizerJob extends StatusCheckerJob {
     private StackService stackService;
 
     @Inject
+    private StackDtoService stackDtoService;
+
+    @Inject
     private StructuredSynchronizerJobService syncJobService;
 
     @Inject
@@ -47,8 +52,8 @@ public class StructuredSynchronizerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Optional<Object> getMdcContextObject() {
-        return Optional.ofNullable(stackService.getById(getLocalIdAsLong()));
+    protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
+        return Optional.ofNullable(stackDtoService.getStackViewById(getLocalIdAsLong()));
     }
 
     @Override
