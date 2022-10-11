@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateConfigInjector;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveRoles;
@@ -57,6 +58,9 @@ public class ProcessAutoRestartInjector implements CmTemplateConfigInjector {
     }
 
     private boolean shouldAutoRestart(String service, String roleType) {
+        if (Strings.isNullOrEmpty(service) || Strings.isNullOrEmpty(roleType)) {
+            return false;
+        }
         return SERVICES.contains(service) && !IGNORED_ROLES.contains(roleType);
     }
 
