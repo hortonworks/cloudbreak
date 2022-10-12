@@ -110,8 +110,8 @@ public enum Status {
     }
 
     public boolean isUpgradeInProgress() {
-        return UPGRADE_REQUESTED.equals(this) ||
-                UPGRADE_IN_PROGRESS.equals(this);
+        return UPGRADE_REQUESTED.equals(this)
+                || UPGRADE_IN_PROGRESS.equals(this);
     }
 
     public static Set<Status> getAutoSyncStatuses() {

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -99,20 +100,21 @@ public class RdsUpgradeService {
     }
 
     private void validate(NameOrCrn nameOrCrn, StackView stack, TargetMajorVersion targetMajorVersion, String accountId) {
-        validateRdsIsNotUpgraded(nameOrCrn, targetMajorVersion);
+        StackDatabaseServerResponse databaseServer = databaseService.getDatabaseServer(nameOrCrn);
+        validateRdsIsNotUpgraded(databaseServer, targetMajorVersion);
         validateRuntimeEligibleForUpgrade(stack, accountId);
         validateStackStatus(stack);
         validateAttachedDatahubsAreNotRunning(stack, accountId);
+        validateRdsIsAvailableForUpgrade(databaseServer);
     }
 
-    private void validateRdsIsNotUpgraded(NameOrCrn nameOrCrn, TargetMajorVersion targetMajorVersion) {
-        if (getCurrentRdsVersion(nameOrCrn).equals(targetMajorVersion.getMajorVersion())) {
+    private void validateRdsIsNotUpgraded(StackDatabaseServerResponse databaseServer, TargetMajorVersion targetMajorVersion) {
+        if (getCurrentRdsVersion(databaseServer).equals(targetMajorVersion.getMajorVersion())) {
             alreadyOnLatestAnswer(targetMajorVersion);
         }
     }
 
-    private String getCurrentRdsVersion(NameOrCrn nameOrCrn) {
-        StackDatabaseServerResponse databaseServer = databaseService.getDatabaseServer(nameOrCrn);
+    private String getCurrentRdsVersion(StackDatabaseServerResponse databaseServer) {
         return Optional.ofNullable(databaseServer)
                 .map(StackDatabaseServerResponse::getMajorVersion)
                 .map(MajorVersion::getMajorVersion)
@@ -155,6 +157,16 @@ public class RdsUpgradeService {
                 LOGGER.warn(msg);
                 throw new BadRequestException(msg);
             }
+        }
+    }
+
+    private void validateRdsIsAvailableForUpgrade(StackDatabaseServerResponse databaseServer) {
+        DatabaseServerStatus dbStatus = databaseServer.getStatus();
+        if (dbStatus == null || !dbStatus.isAvailableForUpgrade()) {
+            String msg = "Upgrading database server is not possible as database server is not available";
+            msg += dbStatus == null ? "." : String.format(", it is in %s state.", dbStatus.toString());
+            LOGGER.warn(msg);
+            throw new BadRequestException(msg);
         }
     }
 
