@@ -49,13 +49,14 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
             "ig.groupName as groupName, " +
             "ig.instanceGroupType as instanceGroupType, " +
             "ig.template as template, " +
-            "ig.securityGroup as securityGroup, " +
+            "sg as securityGroup, " +
             "ig.attributes as attributes, " +
             "ig.minimumNodeCount as minimumNodeCount, " +
             "ig.instanceGroupNetwork as instanceGroupNetwork, " +
             "ig.scalabilityOption as scalabilityOption " +
             "FROM InstanceGroup ig " +
             "LEFT JOIN ig.targetGroups tg " +
+            "LEFT JOIN ig.securityGroup sg " +
             "WHERE tg.id= :targetGroupId")
     List<InstanceGroupViewDelegate> findByTargetGroupId(@Param("targetGroupId") Long targetGroupId);
 
@@ -86,12 +87,13 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
             "ig.groupName as groupName, " +
             "ig.instanceGroupType as instanceGroupType, " +
             "ig.template as template, " +
-            "ig.securityGroup as securityGroup, " +
+            "sg as securityGroup, " +
             "ig.attributes as attributes, " +
             "ig.minimumNodeCount as minimumNodeCount, " +
             "ig.instanceGroupNetwork as instanceGroupNetwork, " +
             "ig.scalabilityOption as scalabilityOption " +
             "FROM InstanceGroup ig " +
+            "LEFT JOIN ig.securityGroup sg " +
             "LEFT JOIN ig.stack s " +
             "WHERE s.id= :stackId " +
             "AND ig.groupName = :groupName")
@@ -101,13 +103,14 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
             "ig.groupName as groupName, " +
             "ig.instanceGroupType as instanceGroupType, " +
             "ig.template as template, " +
-            "ig.securityGroup as securityGroup, " +
+            "sg as securityGroup, " +
             "ig.attributes as attributes, " +
             "ig.minimumNodeCount as minimumNodeCount, " +
             "ig.instanceGroupNetwork as instanceGroupNetwork, " +
             "ig.scalabilityOption as scalabilityOption " +
             "FROM InstanceGroup ig " +
             "LEFT JOIN ig.stack s " +
+            "LEFT JOIN ig.securityGroup sg " +
             "WHERE s.id= :stackId " +
             "AND ig.groupName in :groupNames")
     List<InstanceGroupViewDelegate> findAllInstanceGroupViewByStackIdAndGroupNames(@Param("stackId") Long stackId,
