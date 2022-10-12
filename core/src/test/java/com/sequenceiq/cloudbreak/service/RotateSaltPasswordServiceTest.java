@@ -27,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -37,6 +38,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.SaltBootstrapVersionChec
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -123,8 +125,6 @@ class RotateSaltPasswordServiceTest {
         securityConfig = new SecurityConfig();
         securityConfig.setSaltSecurityConfig(saltSecurityConfig);
         lenient().when(stack.getSecurityConfig()).thenReturn(securityConfig);
-
-        lenient().when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(List.of(mock(InstanceMetadataView.class)));
     }
 
     @Test
@@ -162,7 +162,29 @@ class RotateSaltPasswordServiceTest {
 
         Assertions.assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessage("There are no available gateway instances");
+                .hasMessage("Rotating SaltStack user password is not supported when there are no available gateway instances");
+    }
+
+    @Test
+    public void testRotateSaltPasswordOnStackWithNotRunningInstanceAndFallbackImplementation() {
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceStatus(InstanceStatus.STOPPED);
+        when(stack.getNotTerminatedInstanceMetaData()).thenReturn(List.of(instanceMetaData));
+
+        Assertions.assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Rotating SaltStack user password is only supported when all instances are running");
+    }
+
+    @Test
+    public void testRotateSaltPasswordOnStackWithNotRunningInstanceAndDefaultImplementation() {
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceStatus(InstanceStatus.STOPPED);
+        lenient().when(stack.getNotTerminatedInstanceMetaData()).thenReturn(List.of(instanceMetaData));
+        when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(any())).thenReturn(true);
+
+        Assertions.assertThatCode(() -> underTest.rotateSaltPassword(stack))
+                .doesNotThrowAnyException();
     }
 
     @Test

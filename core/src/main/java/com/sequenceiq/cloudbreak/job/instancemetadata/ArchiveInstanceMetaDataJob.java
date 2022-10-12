@@ -14,7 +14,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.stack.archive.ArchiveInstanceMetaDataException;
 import com.sequenceiq.cloudbreak.service.stack.archive.ArchiveInstanceMetaDataService;
@@ -32,6 +34,9 @@ public class ArchiveInstanceMetaDataJob extends StatusCheckerJob {
     private StackViewService stackViewService;
 
     @Inject
+    private StackDtoService stackDtoService;
+
+    @Inject
     private ArchiveInstanceMetaDataJobService jobService;
 
     @Inject
@@ -42,8 +47,8 @@ public class ArchiveInstanceMetaDataJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Optional<Object> getMdcContextObject() {
-        return Optional.ofNullable(stackViewService.findById(getStackId()));
+    protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
+        return Optional.ofNullable(stackDtoService.getStackViewById(getLocalIdAsLong()));
     }
 
     @Override

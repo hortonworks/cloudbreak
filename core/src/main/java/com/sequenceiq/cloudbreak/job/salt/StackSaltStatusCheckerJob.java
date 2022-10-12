@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
 import com.sequenceiq.cloudbreak.service.SaltPasswordStatusService;
@@ -99,7 +100,7 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Optional<Object> getMdcContextObject() {
+    protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
         return Optional.ofNullable(stackDtoService.getStackViewById(getStackId()));
     }
 
