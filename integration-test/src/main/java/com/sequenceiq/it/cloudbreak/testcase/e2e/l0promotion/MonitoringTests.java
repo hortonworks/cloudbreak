@@ -34,17 +34,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
-/**
- * Creating 7.2.15+ pre-warmed images with Common Monitoring is still in progress.
- * So in the meantime we can use older images (7.2.12) where some features
- * (smon-exporter, cm_health_check_info and request-signer's error_count with success_count)
- * are not working properly or at all (metrics endpoint).
- *
- * In these circumstances we cannot add these test cases to the L0 Promotion suite yet. So
- * these are prepared but not finished for the L0 Monitoring test cases. In the future we can
- * extend and improve these verifications based on the finalized monitoring feature with the
- * latest images.
- */
 public class MonitoringTests extends AbstractE2ETest {
 
     @Inject
