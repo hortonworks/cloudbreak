@@ -63,7 +63,11 @@ public abstract class TracedQuartzJob extends QuartzJobBean {
         context.put(LoggerContextKey.REQUEST_ID.toString(), requestId);
     }
 
+    /**
+     * @deprecated use {@link TracedQuartzJob#getMdcContextConfigProvider()} instead for type-safety
+     */
     @Nullable
+    @Deprecated
     protected Optional<Object> getMdcContextObject() {
         return null;
     }

@@ -72,7 +72,11 @@ public class RotateSaltPasswordService {
             throw new BadRequestException("Rotating SaltStack user password is not supported in your account");
         }
         if (stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().isEmpty()) {
-            throw new IllegalStateException("There are no available gateway instances");
+            throw new IllegalStateException("Rotating SaltStack user password is not supported when there are no available gateway instances");
+        }
+        if (!isChangeSaltuserPasswordSupported(stack) && stack.getNotTerminatedInstanceMetaData().stream().anyMatch(im -> !im.isRunning())) {
+            // fallback implementation re-bootstraps all nodes, so they have to be running
+            throw new IllegalStateException("Rotating SaltStack user password is only supported when all instances are running");
         }
     }
 
