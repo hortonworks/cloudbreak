@@ -400,7 +400,9 @@ public class StackV4RequestToStackConverter {
             cluster.setPassword(source.getCluster().getPassword());
             cluster.setCloudbreakUser(ambariUserName);
             cluster.setCloudbreakPassword(PasswordUtil.generatePassword());
-            if (monitoringConfiguration.isEnabled() && monitoringConfiguration.getClouderaManagerExporter() != null) {
+            if (source.getTelemetry() != null && source.getTelemetry().getMonitoring() != null
+                    && StringUtils.isNotEmpty(source.getTelemetry().getMonitoring().getRemoteWriteUrl())
+                    && monitoringConfiguration.getClouderaManagerExporter() != null) {
                 cluster.setCloudbreakClusterManagerMonitoringUser(monitoringConfiguration.getClouderaManagerExporter().getUser());
                 cluster.setCloudbreakClusterManagerMonitoringPassword(PasswordUtil.generatePassword());
             }
