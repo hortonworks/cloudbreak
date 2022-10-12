@@ -27,5 +27,10 @@ public enum DatabaseServerStatus {
     UPGRADE_REQUESTED,
     UPGRADE_IN_PROGRESS,
     UPGRADE_FAILED,
-    UNKNOWN
+    UNKNOWN;
+
+    public boolean isAvailableForUpgrade() {
+        return AVAILABLE.equals(this)
+                || UPGRADE_FAILED.equals(this);
+    }
 }
