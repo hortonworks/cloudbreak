@@ -6,38 +6,12 @@
 set -o nounset
 set -o pipefail
 
-if [[ $# -lt 5 || $# -gt 6 || "$1" == "None" ]]; then
-  echo "Invalid inputs provided"
-  echo "Script accepts at least 5 and at most 6 inputs:"
-  echo "  1. Object Storage Service url to retrieve backups."
-  echo "  2. PostgreSQL host name."
-  echo "  3. PostgreSQL port."
-  echo "  4. PostgreSQL user name."
-  echo "  5. Ranger admin group."
-  echo "  6. (optional) Name of the database to restore. If not given, will restore ranger and hive databases."
-  exit 1
-fi
-
-BACKUP_LOCATION="$1/*" # Trailing slash and glob so we copy the _items_ in the directory not the directory itself.
-HOST="$2"
-PORT="$3"
-USERNAME="$4"
-RANGERGROUP="$5"
-DATABASENAME="${6-}"
 LOGFILE=/var/log/dl_postgres_restore.log
 echo "Logs at ${LOGFILE}"
 
 exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1> >(tee -a "${LOGFILE}") 2> >(tee -a "${LOGFILE}" >&2)
-
-BACKUPS_DIR="/var/tmp/postgres_restore_staging"
-
-{%- from 'postgresql/settings.sls' import postgresql with context %}
-{% if postgresql.ssl_enabled == True %}
-export PGSSLROOTCERT="{{ postgresql.root_certs_file }}"
-export PGSSLMODE=verify-full
-{%- endif %}
 
 doLog() {
   type_of_msg=$(echo "$@" | cut -d" " -f1)
@@ -50,6 +24,33 @@ doLog() {
   test -t 1 && echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg"
   echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg" >>$LOGFILE
 }
+
+if [[ $# -lt 5 || $# -gt 6 || "$1" == "None" ]]; then
+  doLog "Invalid inputs provided"
+  doLog "Script accepts at least 5 and at most 6 inputs:"
+  doLog "  1. Object Storage Service url to retrieve backups."
+  doLog "  2. PostgreSQL host name."
+  doLog "  3. PostgreSQL port."
+  doLog "  4. PostgreSQL user name."
+  doLog "  5. Ranger admin group."
+  doLog "  6. (optional) Name of the database to restore. If not given, will restore ranger and hive databases."
+  exit 1
+fi
+
+BACKUP_LOCATION="$1/*" # Trailing slash and glob so we copy the _items_ in the directory not the directory itself.
+HOST="$2"
+PORT="$3"
+USERNAME="$4"
+RANGERGROUP="$5"
+DATABASENAME="${6-}"
+
+BACKUPS_DIR="/var/tmp/postgres_restore_staging"
+
+{%- from 'postgresql/settings.sls' import postgresql with context %}
+{% if postgresql.ssl_enabled == True %}
+export PGSSLROOTCERT="{{ postgresql.root_certs_file }}"
+export PGSSLMODE=verify-full
+{%- endif %}
 
 errorExit() {
   doLog "ERROR $1"
