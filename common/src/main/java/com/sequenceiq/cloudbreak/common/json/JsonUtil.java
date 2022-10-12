@@ -43,6 +43,7 @@ public class JsonUtil {
         MAPPER.enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
         MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false);
         MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        MAPPER.disable(SerializationFeature.FAIL_ON_SELF_REFERENCES);
         MAPPER.enable(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL);
         MAPPER.registerModule(new Jdk8Module());
         MAPPER.registerModule(new JavaTimeModule());

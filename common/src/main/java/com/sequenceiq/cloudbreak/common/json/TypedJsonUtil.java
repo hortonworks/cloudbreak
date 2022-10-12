@@ -29,6 +29,7 @@ public class TypedJsonUtil {
             .enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY)
             .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false)
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+            .disable(SerializationFeature.FAIL_ON_SELF_REFERENCES)
             .enable(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL)
             .activateDefaultTypingAsProperty(LaissezFaireSubTypeValidator.instance, DefaultTyping.JAVA_LANG_OBJECT, "@type")
             .addModule(new Jdk8Module())
