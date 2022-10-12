@@ -17,7 +17,6 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto;
@@ -28,11 +27,12 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.node.health.client.model.CdpNodeStatusRequest;
 import com.sequenceiq.node.health.client.model.CdpNodeStatuses;
@@ -55,8 +55,7 @@ public class NodeStatusCheckerJob extends StatusCheckerJob {
     private StackService stackService;
 
     @Inject
-    @Qualifier("stackViewServiceDeprecated")
-    private StackViewService stackViewService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private NodeStatusCheckerJobService jobService;
@@ -69,8 +68,8 @@ public class NodeStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Optional<Object> getMdcContextObject() {
-        return Optional.ofNullable(stackViewService.findById(getStackId()));
+    protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
+        return Optional.ofNullable(stackDtoService.getStackViewById(getStackId()));
     }
 
     @Override
