@@ -15,6 +15,7 @@ import com.sequenceiq.sdx.api.endpoint.OperationEndpoint;
 import com.sequenceiq.sdx.api.endpoint.ProgressEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxBackupEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxFlowEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRestoreEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
@@ -83,5 +84,11 @@ public class SdxApiClientConfig {
     @ConditionalOnBean(name = "sdxApiClientWebTarget")
     OperationEndpoint createSdxV1OperationEndpoint(WebTarget sdxApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(sdxApiClientWebTarget, OperationEndpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "sdxApiClientWebTarget")
+    SdxFlowEndpoint createSdxV1FlowEndpoint(WebTarget sdxApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(sdxApiClientWebTarget, SdxFlowEndpoint.class);
     }
 }

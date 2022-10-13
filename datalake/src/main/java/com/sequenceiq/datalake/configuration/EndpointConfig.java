@@ -26,13 +26,13 @@ import com.sequenceiq.datalake.controller.sdx.DatabaseConfigController;
 import com.sequenceiq.datalake.controller.sdx.DatabaseServerController;
 import com.sequenceiq.datalake.controller.sdx.SdxBackupController;
 import com.sequenceiq.datalake.controller.sdx.SdxController;
+import com.sequenceiq.datalake.controller.sdx.SdxFlowController;
 import com.sequenceiq.datalake.controller.sdx.SdxInternalController;
 import com.sequenceiq.datalake.controller.sdx.SdxRecipeController;
 import com.sequenceiq.datalake.controller.sdx.SdxRecoveryController;
 import com.sequenceiq.datalake.controller.sdx.SdxRestoreController;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeController;
 import com.sequenceiq.datalake.controller.util.UtilController;
-import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 import com.sequenceiq.sdx.api.SdxApi;
 
@@ -52,7 +52,7 @@ public class EndpointConfig extends ResourceConfig {
             SdxInternalController.class,
             DatabaseConfigController.class,
             UtilController.class,
-            FlowController.class,
+            SdxFlowController.class,
             FlowPublicController.class,
             AuthorizationInfoController.class,
             DiagnosticsController.class,

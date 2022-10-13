@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
@@ -25,8 +25,10 @@ import com.dyngr.Polling;
 import com.dyngr.core.AttemptMaker;
 import com.dyngr.exception.PollerException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.environment.environment.flow.DatalakeMultipleFlowsResultEvaluator;
 import com.sequenceiq.environment.environment.poller.SdxPollerProvider;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -51,30 +53,37 @@ public class SdxPollerService {
 
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+    private final DatalakeMultipleFlowsResultEvaluator multipleFlowsResultEvaluator;
+
     public SdxPollerService(SdxService sdxService, SdxPollerProvider sdxPollerProvider,
-            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
+            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor,
+            DatalakeMultipleFlowsResultEvaluator multipleFlowsResultEvaluator) {
         this.sdxService = sdxService;
         this.sdxPollerProvider = sdxPollerProvider;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
+        this.multipleFlowsResultEvaluator = multipleFlowsResultEvaluator;
     }
 
     public void startAttachedDatalake(Long envId, String environmentName) {
-        executeSdxOperationAndStartPolling(envId, environmentName, SKIP_START_OPERATION, sdxService::startByCrn, sdxPollerProvider::startSdxClustersPoller);
+        executeSdxOperationAndStartPolling(envId, environmentName, SKIP_START_OPERATION, sdxService::startByCrn, sdxPollerProvider::startStopSdxClustersPoller);
     }
 
     public void stopAttachedDatalakeClusters(Long envId, String environmentName) {
-        executeSdxOperationAndStartPolling(envId, environmentName, SKIP_STOP_OPERATION, sdxService::stopByCrn, sdxPollerProvider::stopSdxClustersPoller);
+        executeSdxOperationAndStartPolling(envId, environmentName, SKIP_STOP_OPERATION, sdxService::stopByCrn, sdxPollerProvider::startStopSdxClustersPoller);
     }
 
     private void executeSdxOperationAndStartPolling(Long envId, String environmentName, Set<SdxClusterStatusResponse> skipStatuses,
-            Consumer<String> sdxOperation, BiFunction<Long, List<String>, AttemptMaker<Void>> attemptMakerFactory) {
+            Function<String, FlowIdentifier> sdxOperation, BiFunction<Long, List<FlowIdentifier>, AttemptMaker<Void>> attemptMakerFactory) {
         try {
-            List<String> sdxCrns = getExecuteSdxOperationsAndGetCrns(environmentName, sdxOperation, skipStatuses);
-            if (CollectionUtils.isNotEmpty(sdxCrns)) {
+            List<FlowIdentifier> flowIdentifiers = getExecuteSdxOperationsAndGetCrns(environmentName, sdxOperation, skipStatuses);
+            if (CollectionUtils.isNotEmpty(flowIdentifiers)) {
                 Polling.stopAfterAttempt(attempt)
-                        .stopIfException(true)
+                        .stopIfException(false)
                         .waitPeriodly(sleeptime, TimeUnit.SECONDS)
-                        .run(attemptMakerFactory.apply(envId, sdxCrns));
+                        .run(attemptMakerFactory.apply(envId, flowIdentifiers));
+            }
+            if (multipleFlowsResultEvaluator.anyFailed(flowIdentifiers)) {
+                throw new EnvironmentServiceException(String.format("Sdx start/stop operation failed. FlowIds: %s", flowIdentifiers));
             }
         } catch (PollerException e) {
             if (e.getCause() != null && e.getCause() instanceof WebApplicationException) {
@@ -89,18 +98,20 @@ public class SdxPollerService {
         }
     }
 
-    List<String> getExecuteSdxOperationsAndGetCrns(String environmentName, Consumer<String> sdxOperation, Set<SdxClusterStatusResponse> skipStatuses) {
+    List<FlowIdentifier> getExecuteSdxOperationsAndGetCrns(String environmentName, Function<String, FlowIdentifier> sdxOperation,
+            Set<SdxClusterStatusResponse> skipStatuses) {
         Collection<SdxClusterResponse> attachedSdxClusters = getAttachedDatalakeClusters(environmentName);
         return attachedSdxClusters.stream()
                 .map(response -> {
                     String crn = response.getCrn();
+                    FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
                     if (skipStatuses.contains(response.getStatus())) {
                         LOGGER.info("The env operation is skipped because of the status of sdx in the proper state: {}", skipStatuses);
                     } else {
                         LOGGER.info("The env operation is executed, the status of sdx is {} but the skip status is {}", response.getStatus(), skipStatuses);
-                        sdxOperation.accept(crn);
+                        flowIdentifier = sdxOperation.apply(crn);
                     }
-                    return crn;
+                    return flowIdentifier;
                 })
                 .collect(Collectors.toList());
     }
