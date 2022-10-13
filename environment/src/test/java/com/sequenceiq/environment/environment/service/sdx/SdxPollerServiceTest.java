@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -31,7 +32,7 @@ public class SdxPollerServiceTest {
     private SdxService sdxService;
 
     @Mock
-    private Consumer<String> consumer;
+    private Function<String, FlowIdentifier> consumer;
 
     @Test
     public void testGetExecuteSdxOperationsAndGetCrnsWhenShouldSkipTheConsumer() {
@@ -40,23 +41,22 @@ public class SdxPollerServiceTest {
         sdxClusterResponse.setStatus(SdxClusterStatusResponse.STOPPED);
         when(sdxService.list(ENV_NAME)).thenReturn(List.of(sdxClusterResponse));
 
-        List<String> actual = underTest.getExecuteSdxOperationsAndGetCrns(ENV_NAME, consumer, Set.of(SdxClusterStatusResponse.STOPPED));
+        List<FlowIdentifier> actual = underTest.getExecuteSdxOperationsAndGetCrns(ENV_NAME, consumer, Set.of(SdxClusterStatusResponse.STOPPED));
 
-        verify(consumer, never()).accept(any());
+        verify(consumer, never()).apply(any());
         Assertions.assertEquals(1, actual.size());
     }
 
     @Test
     public void testGetExecuteSdxOperationsAndGetCrnsWhenShouldNotSkipTheConsumer() {
-
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
         sdxClusterResponse.setStatus(SdxClusterStatusResponse.RUNNING);
         sdxClusterResponse.setCrn("crn");
         when(sdxService.list(ENV_NAME)).thenReturn(List.of(sdxClusterResponse));
 
-        List<String> actual = underTest.getExecuteSdxOperationsAndGetCrns(ENV_NAME, consumer, Set.of(SdxClusterStatusResponse.STOPPED));
+        List<FlowIdentifier> actual = underTest.getExecuteSdxOperationsAndGetCrns(ENV_NAME, consumer, Set.of(SdxClusterStatusResponse.STOPPED));
 
-        verify(consumer).accept(any());
+        verify(consumer).apply(any());
         Assertions.assertEquals(1, actual.size());
     }
 
@@ -71,10 +71,10 @@ public class SdxPollerServiceTest {
         sdxClusterResponse1.setCrn("crn1");
         when(sdxService.list(ENV_NAME)).thenReturn(List.of(sdxClusterResponse, sdxClusterResponse1));
 
-        List<String> actual = underTest.getExecuteSdxOperationsAndGetCrns(ENV_NAME, consumer, Set.of(SdxClusterStatusResponse.STOPPED));
+        List<FlowIdentifier> actual = underTest.getExecuteSdxOperationsAndGetCrns(ENV_NAME, consumer, Set.of(SdxClusterStatusResponse.STOPPED));
 
-        verify(consumer).accept("crn");
-        verify(consumer, never()).accept("crn1");
+        verify(consumer).apply("crn");
+        verify(consumer, never()).apply("crn1");
         Assertions.assertEquals(2, actual.size());
     }
 

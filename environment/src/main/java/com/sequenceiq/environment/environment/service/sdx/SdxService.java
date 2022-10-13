@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.saas.sdx.PaasRemoteDataContextSupplier;
 import com.sequenceiq.environment.exception.SdxOperationFailedException;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.sdx.api.endpoint.OperationEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
@@ -68,9 +69,9 @@ public class SdxService implements PaasRemoteDataContextSupplier {
         }
     }
 
-    public void startByCrn(String crn) {
+    public FlowIdentifier startByCrn(String crn) {
         try {
-            sdxEndpoint.startByCrn(crn);
+            return sdxEndpoint.startByCrn(crn);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to start SDX cluster by crn '%s' due to '%s'.", crn, errorMessage), e);
@@ -78,9 +79,9 @@ public class SdxService implements PaasRemoteDataContextSupplier {
         }
     }
 
-    public void stopByCrn(String crn) {
+    public FlowIdentifier stopByCrn(String crn) {
         try {
-            sdxEndpoint.stopByCrn(crn);
+            return sdxEndpoint.stopByCrn(crn);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to stop SDX cluster by crn '%s' due to '%s'.", crn, errorMessage), e);
