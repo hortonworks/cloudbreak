@@ -49,7 +49,7 @@ public class EnvironmentValidateVerticalScaleHandler extends EventSenderAwareHan
             EnvironmentVerticalScaleFailedEvent failedEvent =
                     new EnvironmentVerticalScaleFailedEvent(verticalScaleFreeIPAEvent.getData(), e, EnvironmentStatus.VERTICAL_SCALE_FAILED);
             eventSender().sendEvent(failedEvent, verticalScaleFreeIPAEvent.getHeaders());
-            LOGGER.debug("VERTICAL_SCALE_FREEIPA_FAILED event sent");
+            LOGGER.debug("VERTICAL_SCALE_ON_FREEIPA_FAILED event sent");
         }
     }
 }

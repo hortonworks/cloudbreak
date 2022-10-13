@@ -30,7 +30,7 @@ public class EnvironmentVerticalScaleHandler extends EventSenderAwareHandler<Env
     protected EnvironmentVerticalScaleHandler(EventSender eventSender, FreeIpaService freeIpaService, FreeIpaPollerService freePollerIpaService) {
         super(eventSender);
         this.freeIpaService = freeIpaService;
-        this.freeIpaPollerService = freePollerIpaService;
+        freeIpaPollerService = freePollerIpaService;
     }
 
     @Override
@@ -46,9 +46,6 @@ public class EnvironmentVerticalScaleHandler extends EventSenderAwareHandler<Env
             freeIpaService.describe(environmentVerticalScaleEvent.getResourceCrn()).ifPresentOrElse(freeIpa -> {
                 if (freeIpa.getStatus() == null || freeIpa.getAvailabilityStatus() == null) {
                     throw new FreeIpaOperationFailedException("FreeIPA status is unpredictable, Vertical Scale interrupted.");
-                } else if (!freeIpa.getStatus().isVerticallyScalable()) {
-                    throw new FreeIpaOperationFailedException("FreeIPA is not in a valid state to Vertically Scale. Current state is: " +
-                            freeIpa.getStatus().name());
                 } else {
                     LOGGER.info("FreeIPA will be vertically scaled.");
                     freeIpaPollerService.waitForVerticalScale(
@@ -77,7 +74,8 @@ public class EnvironmentVerticalScaleHandler extends EventSenderAwareHandler<Env
             EnvironmentVerticalScaleFailedEvent failedEvent =
                     new EnvironmentVerticalScaleFailedEvent(environmentVerticalScaleEvent, e, EnvironmentStatus.VERTICAL_SCALE_ON_FREEIPA_FAILED);
             eventSender().sendEvent(failedEvent, verticalScaleFreeIPAEventEvent.getHeaders());
-            LOGGER.debug("VERTICAL_SCALE_FREEIPA_FAILED event sent");
+            LOGGER.debug("VERTICAL_SCALE_ON_FREEIPA_FAILED event sent");
         }
     }
+
 }
