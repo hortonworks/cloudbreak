@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
@@ -54,7 +55,10 @@ public class CustomAmazonWaiterProvider {
 
     @PreDestroy
     public void shutDown() {
-        MoreExecutors.shutdownAndAwaitTermination(executorService, Duration.ofSeconds(EXECUTOR_SERVICE_TIMEOUT));
+        MoreExecutors.shutdownAndAwaitTermination(
+                executorService,
+                Duration.ofSeconds(EXECUTOR_SERVICE_TIMEOUT).toSeconds(),
+                TimeUnit.SECONDS);
     }
 
     public Waiter<DescribeAutoScalingGroupsRequest> getAutoscalingInstancesInServiceWaiter(AmazonAutoScalingClient asClient, Integer requiredCount) {

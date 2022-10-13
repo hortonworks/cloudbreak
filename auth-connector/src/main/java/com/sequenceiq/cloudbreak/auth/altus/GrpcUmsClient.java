@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
+import com.sequenceiq.cloudbreak.common.MultimapCollector;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
@@ -820,8 +821,7 @@ public class GrpcUmsClient {
         UserManagementProto.ListAssignedResourceRolesResponse response =
                 client.listAssignedResourceRoles(assigneeCrn);
         Multimap<String, String> resourceRoleAssignments = response.getResourceAssignmentList().stream()
-                .collect(Multimaps
-                        .toMultimap(
+                .collect(MultimapCollector.toMultiMap(
                                 UserManagementProto.ResourceAssignment::getResourceCrn,
                                 UserManagementProto.ResourceAssignment::getResourceRoleCrn,
                                 ArrayListMultimap::create));

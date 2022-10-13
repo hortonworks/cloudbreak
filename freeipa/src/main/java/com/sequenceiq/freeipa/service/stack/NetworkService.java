@@ -73,7 +73,7 @@ public class NetworkService {
                 .flatMap(cloudNetwork -> cloudNetwork.getSubnetsMeta().stream())
                 .filter(cloudSubnet -> StringUtils.isNoneBlank(cloudSubnet.getId(), cloudSubnet.getCidr()))
                 .filter(cloudSubnet -> subnetIds.contains(cloudSubnet.getId()) || subnetIds.contains(cloudSubnet.getName()))
-                .collect(Multimaps.toMultimap(CloudSubnet::getId, CloudSubnet::getCidr, ArrayListMultimap::create));
+                .collect(MultimapCollector.toMultiMap(CloudSubnet::getId, CloudSubnet::getCidr, ArrayListMultimap::create));
     }
 
     private CloudNetworks fetchCloudNetworks(String environmentCrn, Stack stack, String networkId, Collection<String> subnetIds) {

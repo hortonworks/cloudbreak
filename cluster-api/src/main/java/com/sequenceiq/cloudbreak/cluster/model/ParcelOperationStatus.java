@@ -7,6 +7,7 @@ import java.util.StringJoiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.sequenceiq.cloudbreak.common.MultimapCollector;
 
 public class ParcelOperationStatus {
 
@@ -18,8 +19,8 @@ public class ParcelOperationStatus {
     }
 
     public ParcelOperationStatus(Map<String, String> successful, Map<String, String> failed) {
-        this.successful = successful.entrySet().stream().collect(Multimaps.toMultimap(Map.Entry::getKey, Map.Entry::getValue, HashMultimap::create));
-        this.failed = failed.entrySet().stream().collect(Multimaps.toMultimap(Map.Entry::getKey, Map.Entry::getValue, HashMultimap::create));
+        this.successful = successful.entrySet().stream().collect(MultimapCollector.toMultiMap(Map.Entry::getKey, Map.Entry::getValue, HashMultimap::create));
+        this.failed = failed.entrySet().stream().collect(MultimapCollector.toMultiMap(Map.Entry::getKey, Map.Entry::getValue, HashMultimap::create));
     }
 
     public Multimap<String, String> getSuccessful() {
@@ -59,7 +60,9 @@ public class ParcelOperationStatus {
     public ParcelOperationStatus merge(ParcelOperationStatus operationStatus) {
         successful.putAll(operationStatus.successful);
         failed.putAll(operationStatus.failed);
-        operationStatus.failed.forEach((key, value) -> successful.remove(key, value));
+//        operationStatus.failed.entries().forEach((key, value) -> {
+//            successful.remove(key, value);
+//        });
         return this;
     }
 

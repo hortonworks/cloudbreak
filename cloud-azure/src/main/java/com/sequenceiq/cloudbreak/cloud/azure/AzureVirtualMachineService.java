@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.MultimapCollector;
 
 import rx.Completable;
 import rx.schedulers.Schedulers;
@@ -147,7 +148,7 @@ public class AzureVirtualMachineService {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         AzureClient azureClient = ac.getParameter(AzureClient.class);
         ArrayListMultimap<String, String> resourceGroupInstanceMultimap = cloudInstances.stream()
-                .collect(Multimaps.toMultimap(
+                .collect(MultimapCollector.toMultiMap(
                         cloudInstance -> azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), cloudInstance),
                         CloudInstance::getInstanceId,
                         ArrayListMultimap::create));

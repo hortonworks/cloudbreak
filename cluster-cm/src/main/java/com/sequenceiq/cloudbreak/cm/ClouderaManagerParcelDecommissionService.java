@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
+import com.sequenceiq.cloudbreak.common.MultimapCollector;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 
@@ -89,13 +90,13 @@ class ClouderaManagerParcelDecommissionService {
         return parcelManagementService.getParcelsInStatus(parcelsResourceApi, stack.getName(), parcelStatus)
                 .stream()
                 .filter(parcelInfo -> parcelInfo.getName().equals(product.getName()) && !parcelInfo.getVersion().equals(product.getVersion()))
-                .collect(Multimaps.toMultimap(ParcelInfo::getName, ParcelInfo::getVersion, HashMultimap::create));
+                .collect(MultimapCollector.toMultiMap(ParcelInfo::getName, ParcelInfo::getVersion, HashMultimap::create));
     }
 
     private Multimap<String, String> getUnusedParcels(Set<ParcelInfo> usedParcels, Set<String> usedParcelComponentNames, Set<String> parcelsFromImage) {
         return usedParcels.stream()
                 .filter(usedParcel -> !usedParcelComponentNames.contains(usedParcel.getName()) && parcelsFromImage.contains(usedParcel.getName()))
-                .collect(Multimaps.toMultimap(ParcelInfo::getName, ParcelInfo::getVersion, HashMultimap::create));
+                .collect(MultimapCollector.toMultiMap(ParcelInfo::getName, ParcelInfo::getVersion, HashMultimap::create));
     }
 
     private ParcelOperationStatus deactivateParcels(ParcelResourceApi parcelResourceApi, String stackName, Multimap<String, String> activeParcels) {
@@ -124,7 +125,7 @@ class ClouderaManagerParcelDecommissionService {
     private Multimap<String, String> filterForPollableParcels(Multimap<String, String> parcels, ParcelOperationStatus parcelOperationStatus) {
         return parcels.entries().stream()
                 .filter(entry -> parcelOperationStatus.getSuccessful().containsEntry(entry.getKey(), entry.getValue()))
-                .collect(Multimaps.toMultimap(Entry::getKey, Entry::getValue, HashMultimap::create));
+                .collect(MultimapCollector.toMultiMap(Entry::getKey, Entry::getValue, HashMultimap::create));
     }
 
     private ParcelOperationStatus runSingleParcelCommand(String commandName, String stackName, Entry<String, String> parcelForCommand,
