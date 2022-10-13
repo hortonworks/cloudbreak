@@ -429,7 +429,6 @@ public class DistroXAutoScaleClusterV1EndpointTest {
 
         distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest);
 
-        distroXAutoscaleClusterRequest.setTimeAlertRequests(null);
         distroXAutoscaleClusterRequest.setUseStopStartMechanism(true);
 
         distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest);

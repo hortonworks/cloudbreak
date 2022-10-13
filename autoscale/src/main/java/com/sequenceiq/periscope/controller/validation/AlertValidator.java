@@ -156,6 +156,9 @@ public class AlertValidator {
     }
 
     private boolean newOrPreExistingTimeAlerts(Cluster cluster, DistroXAutoscaleClusterRequest distroXAutoscaleClusterRequest) {
+        if (distroXAutoscaleClusterRequest.getTimeAlertRequests().isEmpty()) {
+            return false;
+        }
         return !(cluster.getTimeAlerts().isEmpty() && distroXAutoscaleClusterRequest.getTimeAlertRequests().isEmpty());
     }
 
