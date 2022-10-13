@@ -80,17 +80,17 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(UmsTestDto.class)
-                .assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .withDatahubCreator()
+                    .assignTarget(EnvironmentTestDto.class.getSimpleName())
+                    .withDatahubCreator()
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
-                .withEnvironmentUser()
+                    .withEnvironmentUser()
                 .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
-                .withClouderaManager(clouderaManager)
+                    .withClouderaManager(clouderaManager)
                 .given(stack, StackTestDto.class).withCluster(cluster)
                 .given(sdxInternal, SdxInternalTestDto.class)
-                .withStackRequest(key(cluster), key(stack))
+                    .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
@@ -99,11 +99,15 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                         "'datalake/describeDetailedDatalake' right on any of the environment[(]s[)] " + environmentDatalakePattern(testContext) +
                         " or on " + datalakePattern(testContext.get(sdxInternal).getName()))
                         .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
+                .validate();
+
+        testContext
                 .given(RenewDatalakeCertificateTestDto.class)
-                .withStackCrn(testContext.get(sdxInternal).getCrn())
+                    .withStackCrn(testContext.get(sdxInternal).getCrn())
                 .whenException(sdxTestClient.renewDatalakeCertificateV4(), ForbiddenException.class, expectedMessage("Doesn't have 'datalake/repairDatalake'" +
                         " right on any of the environment[(]s[)] " + environmentDatalakePattern(testContext) + " or on " +
-                        datalakePattern(testContext.get(sdxInternal).getName())).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
+                        datalakePattern(testContext.get(sdxInternal).getName()))
+                        .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
     }
 
