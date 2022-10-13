@@ -78,9 +78,10 @@ dependencies {
   api group: 'io.opentracing.contrib',                name: 'opentracing-spring-web',                 version: opentracingSpringWebVersion
   api group: 'io.opentracing.contrib',         name: 'opentracing-spring-jaeger-starter',      version: opentracingSpringJaegerStarterVersion
   constraints {
-    implementation ('io.jaegertracing:jaeger-client:1.6.0') {
-      because 'default transitive dependency version (1.3.2) contains security vulnerabilities'
-    }
+    api 'io.jaegertracing:jaeger-client:1.8.1'
+    api 'org.jetbrains.kotlin:kotlin-stdlib:1.6.21'
+    implementation 'io.jaegertracing:jaeger-client:1.8.1'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.6.21'
   }
   implementation (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonVersion) {
     force = true
