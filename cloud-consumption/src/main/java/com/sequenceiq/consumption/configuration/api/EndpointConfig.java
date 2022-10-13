@@ -53,6 +53,7 @@ public class EndpointConfig extends ResourceConfig {
         this.applicationVersion = applicationVersion;
         this.auditEnabled = auditEnabled;
         this.exceptionMappers = exceptionMappers;
+        registerFilters();
         registerEndpoints();
         registerExceptionMappers();
         registerSwagger();
@@ -85,14 +86,16 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerEndpoints() {
-        if (auditEnabled) {
-            register(CDPStructuredEventFilter.class);
-        }
-
         CONTROLLERS.forEach(this::register);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
         register(io.swagger.jaxrs.listing.AcceptHeaderApiListingResource.class);
+    }
+
+    private void registerFilters() {
+        if (auditEnabled) {
+            register(CDPStructuredEventFilter.class);
+        }
     }
 }

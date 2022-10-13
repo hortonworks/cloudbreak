@@ -85,6 +85,7 @@ public class EndpointConfig extends ResourceConfig {
 
     @PostConstruct
     private void init() {
+        register(CDPRestAuditFilter.class);
         registerEndpoints();
         registerExceptionMappers();
         register(serverTracingDynamicFeature);
@@ -116,8 +117,6 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerEndpoints() {
-        register(CDPRestAuditFilter.class);
-
         CONTROLLERS.forEach(this::register);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
