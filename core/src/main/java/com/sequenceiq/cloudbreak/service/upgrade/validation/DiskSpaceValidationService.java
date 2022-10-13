@@ -55,8 +55,8 @@ public class DiskSpaceValidationService {
                 stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata());
         if (!notEligibleNodes.isEmpty()) {
             throw new UpgradeValidationFailedException(String.format(
-                    "There is not enough free space on the nodes to perform upgrade operation. The required free space by nodes: %s",
-                    formatFreeSpaceByNodes(notEligibleNodes)));
+                    "There is not enough free space on the nodes to perform upgrade operation. The required and the available free space by nodes: %s",
+                    formatValidationFailureMessage(notEligibleNodes, freeDiskSpaceByNodes)));
         }
     }
 
@@ -71,7 +71,7 @@ public class DiskSpaceValidationService {
         Map<String, Long> nodesByRequiredFreeSpace = getNodesByRequiredFreeSpace(freeDiskSpaceByNodes, parcelSize, gatewayInstances);
         return nodesByRequiredFreeSpace.entrySet().stream()
                 .filter(node -> node.getValue() > Double.parseDouble(freeDiskSpaceByNodes.get(node.getKey())))
-                .collect(Collectors.toMap(Map.Entry::getKey, node -> formatRequiredSpace(node.getValue())));
+                .collect(Collectors.toMap(Map.Entry::getKey, node -> formatDiskSpace(node.getValue())));
     }
 
     private Map<String, Long> getNodesByRequiredFreeSpace(Map<String, String> freeDiskSpaceByNodes, long parcelSize,
@@ -90,14 +90,19 @@ public class DiskSpaceValidationService {
                 .anyMatch(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null && instanceMetaData.getDiscoveryFQDN().equals(hostname));
     }
 
-    private String formatRequiredSpace(double requiredFreeSpace) {
-        return requiredFreeSpace >= GB_IN_KB ? new DecimalFormat("#.#").format(requiredFreeSpace / (double) GB_IN_KB) + " GB"
-                : (requiredFreeSpace / DIVIDER_TO_MB) + " MB";
+    private String formatDiskSpace(double diskSpace) {
+        return diskSpace >= GB_IN_KB ? new DecimalFormat("#.#").format(diskSpace / (double) GB_IN_KB) + " GB"
+                :  new DecimalFormat("#").format(diskSpace / DIVIDER_TO_MB) + " MB";
     }
 
-    private String formatFreeSpaceByNodes(Map<String, String> notEligibleNodes) {
-        return notEligibleNodes.entrySet().stream()
-                .map(map -> map.getKey().concat(": ").concat(map.getValue()))
+    private String formatValidationFailureMessage(Map<String, String> requiredDiskSpaceByNodes, Map<String, String> freeDiskSpaceByNodes) {
+        return requiredDiskSpaceByNodes.entrySet().stream()
+                .map(map ->
+                        map.getKey()
+                                .concat(": required free space is: ")
+                                .concat(map.getValue())
+                                .concat(" and the available free space is: ")
+                                .concat(formatDiskSpace(Double.parseDouble(freeDiskSpaceByNodes.get(map.getKey())))))
                 .collect(Collectors.joining(", "));
     }
 }

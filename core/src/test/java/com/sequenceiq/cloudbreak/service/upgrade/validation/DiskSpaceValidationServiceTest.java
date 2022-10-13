@@ -80,20 +80,20 @@ public class DiskSpaceValidationServiceTest {
 
     @Test
     public void testValidateFreeSpaceForUpgradeShouldThrowExceptionWhenThereAreNoEnoughFreeSpaceAndTheRequiredSpaceIsReturnedInMb() {
-        Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> {
-            underTest.validateFreeSpaceForUpgrade(stack, 920000L);
-        });
-        assertEquals("There is not enough free space on the nodes to perform upgrade operation. The required free space by nodes: host1: 2.2 GB, host2: 3.1 GB",
+        Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validateFreeSpaceForUpgrade(stack, 92000L));
+        assertEquals("There is not enough free space on the nodes to perform upgrade operation. The required and the available free space by nodes: host1: "
+                        + "required free space is: 225 MB and the available free space is: 89 MB, "
+                        + "host2: required free space is: 314 MB and the available free space is: 166 MB",
                 exception.getMessage());
         verifyMocks();
     }
 
     @Test
     public void testValidateFreeSpaceForUpgradeShouldThrowExceptionWhenThereAreNoEnoughFreeSpaceAndTheRequiredSpaceIsReturnedInGb() {
-        Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> {
-            underTest.validateFreeSpaceForUpgrade(stack, 1750000L);
-        });
-        assertEquals("There is not enough free space on the nodes to perform upgrade operation. The required free space by nodes: host1: 4.2 GB, host2: 5.8 GB",
+        Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validateFreeSpaceForUpgrade(stack, 1750000L));
+        assertEquals("There is not enough free space on the nodes to perform upgrade operation. The required and the available free space by nodes: host1: "
+                        + "required free space is: 4.2 GB and the available free space is: 89 MB, "
+                        + "host2: required free space is: 5.8 GB and the available free space is: 166 MB",
                 exception.getMessage());
         verifyMocks();
     }
