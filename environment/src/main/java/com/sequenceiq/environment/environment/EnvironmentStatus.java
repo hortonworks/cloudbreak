@@ -196,10 +196,6 @@ public enum EnvironmentStatus {
             UPGRADE_CCM_FAILED
     );
 
-    public static final Set<EnvironmentStatus> VERTICAL_SCALABLE_STATES = Set.of(
-            ENV_STOPPED
-    );
-
     private final com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus responseStatus;
 
     EnvironmentStatus(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus responseStatus) {
@@ -222,7 +218,4 @@ public enum EnvironmentStatus {
         return CCM_UPGRADEABLE_STATES.contains(this);
     }
 
-    public boolean isVerticallyScalablePhase() {
-        return VERTICAL_SCALABLE_STATES.contains(this);
-    }
 }

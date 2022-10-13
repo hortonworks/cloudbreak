@@ -80,21 +80,22 @@ public class DatalakeVerticalScaleHandler extends EventSenderAwareHandler<Datala
                     new DatalakeVerticalScaleFailedEvent(dataLakeVerticalScaleEvent, pollerStoppedException,
                             DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_FAILED);
             eventSender().sendEvent(failedEvent, request.getHeaders());
-            LOGGER.debug("VERTICAL_SCALE_FREEIPA_FAILED event sent");
+            LOGGER.debug("DATALAKE_VERTICAL_SCALE_ON_DATALAKE_FAILED event sent");
         } catch (PollerException exception) {
             LOGGER.error("Polling failed for stack: {}", dataLakeVerticalScaleEvent.getResourceId(), exception);
             DatalakeVerticalScaleFailedEvent failedEvent =
                     new DatalakeVerticalScaleFailedEvent(dataLakeVerticalScaleEvent, exception,
                             DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_FAILED);
             eventSender().sendEvent(failedEvent, request.getHeaders());
-            LOGGER.debug("VERTICAL_SCALE_FREEIPA_FAILED event sent");
+            LOGGER.debug("DATALAKE_VERTICAL_SCALE_ON_DATALAKE_FAILED event sent");
         } catch (Exception anotherException) {
             LOGGER.error("Something wrong happened in stack creation wait phase", anotherException);
             DatalakeVerticalScaleFailedEvent failedEvent =
                     new DatalakeVerticalScaleFailedEvent(dataLakeVerticalScaleEvent, anotherException,
                             DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_FAILED);
             eventSender().sendEvent(failedEvent, request.getHeaders());
-            LOGGER.debug("VERTICAL_SCALE_FREEIPA_FAILED event sent");
+            LOGGER.debug("DATALAKE_VERTICAL_SCALE_ON_DATALAKE_FAILED event sent");
         }
     }
+
 }

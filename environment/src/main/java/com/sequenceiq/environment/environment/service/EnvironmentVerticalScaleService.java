@@ -40,7 +40,6 @@ public class EnvironmentVerticalScaleService {
 
     private FlowIdentifier verticalScale(EnvironmentDto environment, VerticalScaleRequest updateRequest) {
         validateEntitlements(environment);
-        validateUpgrade(environment);
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return reactorFlowManager.triggerVerticalScaleFlow(environment, userCrn, updateRequest);
     }
@@ -53,10 +52,4 @@ public class EnvironmentVerticalScaleService {
         }
     }
 
-    private void validateUpgrade(EnvironmentDto environment) {
-        if (!environment.getStatus().isVerticallyScalablePhase()) {
-            throw new BadRequestException(
-                String.format("Environment '%s' must be STOPPED to start Vertical Scaling.", environment.getName()));
-        }
-    }
 }
