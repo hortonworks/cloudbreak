@@ -32,11 +32,11 @@ public class DistroXVerticalScaleV1Request implements JsonEntity {
         this.group = group;
     }
 
-    public InstanceTemplateV1Request getInstanceTemplateV1Request() {
+    public InstanceTemplateV1Request getTemplate() {
         return template;
     }
 
-    public void setInstanceTemplateV1Request(InstanceTemplateV1Request template) {
+    public void setTemplate(InstanceTemplateV1Request template) {
         this.template = template;
     }
 }
