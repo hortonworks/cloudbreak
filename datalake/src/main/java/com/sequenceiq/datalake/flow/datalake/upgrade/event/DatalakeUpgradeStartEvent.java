@@ -12,16 +12,20 @@ public class DatalakeUpgradeStartEvent extends SdxEvent {
 
     private final boolean replaceVms;
 
+    private final boolean rollingUpgradeEnabled;
+
     @JsonCreator
     public DatalakeUpgradeStartEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long sdxId,
             @JsonProperty("userId") String userId,
             @JsonProperty("imageId") String imageId,
-            @JsonProperty("replaceVms") boolean replaceVms) {
+            @JsonProperty("replaceVms") boolean replaceVms,
+            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled) {
         super(selector, sdxId, userId);
         this.imageId = imageId;
         this.replaceVms = replaceVms;
+        this.rollingUpgradeEnabled = rollingUpgradeEnabled;
     }
 
     public String getImageId() {
@@ -32,11 +36,16 @@ public class DatalakeUpgradeStartEvent extends SdxEvent {
         return replaceVms;
     }
 
+    public boolean isRollingUpgradeEnabled() {
+        return rollingUpgradeEnabled;
+    }
+
     @Override
     public boolean equalsEvent(SdxEvent other) {
         return isClassAndEqualsEvent(DatalakeUpgradeStartEvent.class, other,
                 event -> Objects.equals(imageId, event.imageId)
-                        && replaceVms == event.replaceVms);
+                        && replaceVms == event.replaceVms
+                        && rollingUpgradeEnabled == event.rollingUpgradeEnabled);
     }
 
     @Override
@@ -44,6 +53,7 @@ public class DatalakeUpgradeStartEvent extends SdxEvent {
         return "DatalakeUpgradeStartEvent{" +
                 "imageId='" + imageId + '\'' +
                 ", replaceVms=" + replaceVms +
+                ", rollingUpgradeEnabled=" + rollingUpgradeEnabled +
                 "} " + super.toString();
     }
 }

@@ -362,13 +362,14 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier upgradeClusterByName(Long workspaceId, String name, String imageId, @AccountId String accountId) {
-        return stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), imageId);
+        return stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), imageId, Boolean.FALSE);
     }
 
     @Override
     @InternalOnly
-    public FlowIdentifier upgradeClusterByNameInternal(Long workspaceId, String name, String imageId, @InitiatorUserCrn String initiatorUserCrn) {
-        return stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), imageId);
+    public FlowIdentifier upgradeClusterByNameInternal(Long workspaceId, String name, String imageId, @InitiatorUserCrn String initiatorUserCrn,
+            Boolean rollingUpgradeEnabled) {
+        return stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), imageId, rollingUpgradeEnabled);
     }
 
     @Override

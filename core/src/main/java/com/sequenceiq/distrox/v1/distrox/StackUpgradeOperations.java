@@ -80,9 +80,9 @@ public class StackUpgradeOperations {
         return upgradeService.upgradeOs(accountId, nameOrCrn);
     }
 
-    public FlowIdentifier upgradeCluster(@NotNull NameOrCrn nameOrCrn, String accountId, String imageId) {
+    public FlowIdentifier upgradeCluster(@NotNull NameOrCrn nameOrCrn, String accountId, String imageId, Boolean rollingUpgradeEnabled) {
         LOGGER.debug("Starting to upgrade cluster: " + nameOrCrn);
-        return upgradeService.upgradeCluster(accountId, nameOrCrn, imageId);
+        return upgradeService.upgradeCluster(accountId, nameOrCrn, imageId, rollingUpgradeEnabled);
     }
 
     public FlowIdentifier prepareClusterUpgrade(@NotNull NameOrCrn nameOrCrn, String accountId, String imageId) {

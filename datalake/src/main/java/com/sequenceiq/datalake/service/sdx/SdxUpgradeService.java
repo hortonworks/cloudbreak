@@ -77,7 +77,7 @@ public class SdxUpgradeService {
         }
     }
 
-    public void upgradeRuntime(Long id, String imageId) {
+    public void upgradeRuntime(Long id, String imageId, boolean rollingUpgradeEnabled) {
         SdxCluster sdxCluster = sdxService.getById(id);
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS, "Upgrading datalake stack", sdxCluster);
         try {
@@ -85,7 +85,7 @@ public class SdxUpgradeService {
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () ->
-                    stackV4Endpoint.upgradeClusterByNameInternal(0L, sdxCluster.getClusterName(), imageId, initiatorUserCrn));
+                    stackV4Endpoint.upgradeClusterByNameInternal(0L, sdxCluster.getClusterName(), imageId, initiatorUserCrn, rollingUpgradeEnabled));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);

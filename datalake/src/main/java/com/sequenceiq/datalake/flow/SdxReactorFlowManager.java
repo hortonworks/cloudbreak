@@ -162,7 +162,7 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerDatalakeRuntimeUpgradeFlow(SdxCluster cluster, String imageId, SdxUpgradeReplaceVms replaceVms, boolean skipBackup,
-            DatalakeDrSkipOptions skipOptions) {
+            DatalakeDrSkipOptions skipOptions, boolean rollingUpgradeEnabled) {
         LOGGER.info("Trigger Datalake runtime upgrade for: {} with imageId: {} and replace vm param: {}", cluster, imageId, replaceVms);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         if (!skipBackup && sdxBackupRestoreService.shouldSdxBackupBePerformed(
@@ -172,11 +172,11 @@ public class SdxReactorFlowManager {
             return notify(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT,
                     new DatalakeUpgradeFlowChainStartEvent(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT, cluster.getId(),
                             userId, imageId, replaceVms.getBooleanValue(), environmentClientService.getBackupLocation(cluster.getEnvCrn()),
-                            skipOptions),
+                            skipOptions, rollingUpgradeEnabled),
                     cluster.getClusterName());
         } else {
             return notify(DATALAKE_UPGRADE_EVENT.event(), new DatalakeUpgradeStartEvent(DATALAKE_UPGRADE_EVENT.event(), cluster.getId(),
-                    userId, imageId, replaceVms.getBooleanValue()), cluster.getClusterName());
+                    userId, imageId, replaceVms.getBooleanValue(), rollingUpgradeEnabled), cluster.getClusterName());
         }
     }
 

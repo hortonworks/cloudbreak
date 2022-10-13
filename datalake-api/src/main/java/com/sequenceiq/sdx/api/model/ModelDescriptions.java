@@ -101,6 +101,8 @@ public class ModelDescriptions {
     public static final String SKIP_DATAHUB_VALIDATION = "With this option, the Data Lake upgrade can be performed with running Data Hub clusters. " +
             "The usage of this option can cause problems on the running Data Hub clusters during the Data Lake upgrade.";
 
+    public static final String ROLLING_UPGRADE_ENABLED = "Doesn't perform the actual operation just validates if all preconditions are met.";
+
     public static final String SKIP_BACKUP = "Option to skip the backup before the upgrade.";
 
     public static final String SKIP_ATLAS = "Option to skip the backup/restore of Atlas data.";
