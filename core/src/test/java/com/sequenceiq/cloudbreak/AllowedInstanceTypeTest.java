@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.ENABLED_TYPES;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -37,7 +38,7 @@ import com.sequenceiq.distrox.v1.distrox.service.InternalClusterTemplateValidato
 @SpringBootTest(classes = AllowedInstanceTypeTest.TestAppContext.class)
 public class AllowedInstanceTypeTest {
 
-    @Value("${cb.aws.distrox.enabled.instance.types:}")
+    @Value("${cb.aws.distrox.enabled.instance.types:" + ENABLED_TYPES + "}")
     private List<String> awsSupportedTypes;
 
     @Value("${cb.azure.distrox.enabled.instance.types:}")

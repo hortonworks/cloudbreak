@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.init.clustertemplate;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.ENABLED_TYPES;
 import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
 
 import java.io.File;
@@ -116,8 +117,7 @@ public class DefaultClusterTemplateValidationTest {
 
         Map<String, Object> aws = (Map<String, Object>) cb.get("aws");
         Map<String, Object> distrox = (Map<String, Object>) aws.get("distrox");
-        List<String> awsEnabledInstanceTypes = Arrays.stream(distrox.get("enabled.instance.types")
-                .toString()
+        List<String> awsEnabledInstanceTypes = Arrays.stream(ENABLED_TYPES
                 .trim()
                 .split(","))
                 .collect(Collectors.toList())
