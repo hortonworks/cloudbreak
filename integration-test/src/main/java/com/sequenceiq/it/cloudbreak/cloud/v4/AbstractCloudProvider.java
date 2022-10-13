@@ -364,6 +364,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
+    public boolean isExternalDatabaseSslEnforcementSupported() {
+        return false;
+    }
+
+    @Override
     public EnvironmentNetworkTestDto newNetwork(EnvironmentNetworkTestDto network) {
         return network;
     }

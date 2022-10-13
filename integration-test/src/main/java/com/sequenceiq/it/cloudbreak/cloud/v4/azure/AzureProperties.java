@@ -38,6 +38,8 @@ public class AzureProperties {
 
     private VerticalScaleProperties verticalScale = new VerticalScaleProperties();
 
+    private Boolean externalDatabaseSslEnforcementSupported;
+
     public VerticalScaleProperties getVerticalScale() {
         return verticalScale;
     }
@@ -108,6 +110,14 @@ public class AzureProperties {
 
     public Resourcegroup getResourcegroup() {
         return resourcegroup;
+    }
+
+    public Boolean getExternalDatabaseSslEnforcementSupported() {
+        return Boolean.TRUE.equals(externalDatabaseSslEnforcementSupported);
+    }
+
+    public void setExternalDatabaseSslEnforcementSupported(Boolean externalDatabaseSslEnforcementSupported) {
+        this.externalDatabaseSslEnforcementSupported = externalDatabaseSslEnforcementSupported;
     }
 
     public static class Credential {

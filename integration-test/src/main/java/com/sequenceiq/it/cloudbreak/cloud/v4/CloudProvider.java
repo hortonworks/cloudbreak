@@ -201,4 +201,6 @@ public interface CloudProvider {
     boolean isMultiAZ();
 
     boolean verticalScalingSupported();
+
+    boolean isExternalDatabaseSslEnforcementSupported();
 }

@@ -62,6 +62,7 @@ import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
 import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 
 @Prototype
@@ -364,6 +365,14 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
             throw new IllegalArgumentException("SDX Upgrade does not exist!");
         }
         return upgrade.getRequest();
+    }
+
+    public SdxUpgradeDatabaseServerRequest getSdxUpgradeDatabaseServerRequest() {
+        SdxUpgradeDatabaseServerTestDto upgradeDatabaseServer = given(SdxUpgradeDatabaseServerTestDto.class);
+        if (upgradeDatabaseServer == null) {
+            throw new IllegalArgumentException("SDX Upgrade Database Server does not exist!");
+        }
+        return upgradeDatabaseServer.getRequest();
     }
 
     public SdxRecoveryRequest getSdxRecoveryRequest() {

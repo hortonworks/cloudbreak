@@ -23,6 +23,8 @@ public class CommonClusterManagerProperties {
 
     private UpgradeProperties upgrade = new UpgradeProperties();
 
+    private UpgradeDatabaseServerProperties upgradeDatabaseServer = new UpgradeDatabaseServerProperties();
+
     public String getRuntimeVersion() {
         return runtimeVersion;
     }
@@ -72,6 +74,10 @@ public class CommonClusterManagerProperties {
 
     public UpgradeProperties getUpgrade() {
         return upgrade;
+    }
+
+    public UpgradeDatabaseServerProperties getUpgradeDatabaseServer() {
+        return upgradeDatabaseServer;
     }
 
     public static class ClouderaManager {
@@ -188,5 +194,27 @@ public class CommonClusterManagerProperties {
             this.distroXUpgrade3rdPartyTargetVersion = distroXUpgrade3rdPartyTargetVersion;
         }
 
+    }
+
+    public static class UpgradeDatabaseServerProperties {
+        private String originalDatabaseMajorVersion;
+
+        private String targetDatabaseMajorVersion;
+
+        public String getOriginalDatabaseMajorVersion() {
+            return originalDatabaseMajorVersion;
+        }
+
+        public void setOriginalDatabaseMajorVersion(String originalDatabaseMajorVersion) {
+            this.originalDatabaseMajorVersion = originalDatabaseMajorVersion;
+        }
+
+        public String getTargetDatabaseMajorVersion() {
+            return targetDatabaseMajorVersion;
+        }
+
+        public void setTargetDatabaseMajorVersion(String targetDatabaseMajorVersion) {
+            this.targetDatabaseMajorVersion = targetDatabaseMajorVersion;
+        }
     }
 }
