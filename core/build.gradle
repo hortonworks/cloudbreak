@@ -160,7 +160,6 @@ dependencyManagement {
     dependency group: 'com.google.code.gson',               name: 'gson',                        version: gsonVersion
     dependency group: 'org.freemarker',                     name: 'freemarker',                  version: freemarkerVersion
     dependency group: 'org.postgresql',                     name: 'postgresql',                  version: postgreSQLVersion
-    dependency group: 'org.codehaus.jettison',              name: 'jettison',                    version: '1.3.5'
     dependency group: 'org.glassfish.jersey.media',         name: 'jersey-media-multipart',      version: jerseyCoreVersion
     dependency group: 'javax.xml.bind',                     name: 'jaxb-api',                    version: '2.3.0'
     dependency group: 'org.mybatis',                        name: 'mybatis-migrations',          version: mybatisMigrationVersion
@@ -199,7 +198,6 @@ dependencies {
   implementation group: 'org.apache.commons',                 name: 'commons-lang3'
   implementation group: 'org.freemarker',                     name: 'freemarker'
   implementation group: 'org.postgresql',                     name: 'postgresql'
-  implementation group: 'org.codehaus.jettison',              name: 'jettison'
   implementation group: 'org.bouncycastle',                   name: 'bcprov-jdk15on'
   implementation group: 'org.bouncycastle',                   name: 'bcpkix-jdk15on'
   implementation group: 'org.glassfish.jersey.media',         name: 'jersey-media-multipart'
