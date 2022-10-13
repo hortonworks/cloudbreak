@@ -470,4 +470,8 @@ public class CloudProviderProxy implements CloudProvider {
     public boolean verticalScalingSupported() {
         return delegate.verticalScalingSupported();
     }
+
+    public boolean isExternalDatabaseSslEnforcementSupported() {
+        return delegate.isExternalDatabaseSslEnforcementSupported();
+    }
 }

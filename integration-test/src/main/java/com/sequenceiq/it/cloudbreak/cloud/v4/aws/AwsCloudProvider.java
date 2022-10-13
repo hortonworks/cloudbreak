@@ -572,4 +572,9 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     public boolean isMultiAZ() {
         return awsProperties.getMultiaz();
     }
+
+    @Override
+    public boolean isExternalDatabaseSslEnforcementSupported() {
+        return awsProperties.getExternalDatabaseSslEnforcementSupported();
+    }
 }

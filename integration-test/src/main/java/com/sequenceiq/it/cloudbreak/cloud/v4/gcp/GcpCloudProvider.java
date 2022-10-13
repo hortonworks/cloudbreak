@@ -545,4 +545,9 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     public boolean isMultiAZ() {
         return gcpProperties.getMultiaz();
     }
+
+    @Override
+    public boolean isExternalDatabaseSslEnforcementSupported() {
+        return gcpProperties.getExternalDatabaseSslEnforcementSupported();
+    }
 }
