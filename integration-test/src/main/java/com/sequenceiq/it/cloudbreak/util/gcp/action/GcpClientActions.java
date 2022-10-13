@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.gax.paging.Page;
+import com.google.api.gax.paging.Pages;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.GlobalOperations;
 import com.google.api.services.compute.Compute.ZoneOperations.Get;
@@ -309,15 +311,18 @@ public class GcpClientActions extends GcpClient {
              * - BlobInfo.isDirectory() returns true.
              *
              * Duplicate directory blobs are omitted.
+             *
+             * from https://cloud.google.com/java/docs/reference/google-cloud-storage/latest/com.google.cloud.storage.Storage.BlobListOption
              */
+            String blobListPrefix = StringUtils.endsWith(keyPrefix, "/") ? keyPrefix : keyPrefix + "/";
             blobs = storage
-                    .list(bucketName, BlobListOption.prefix(keyPrefix + "/"), BlobListOption.currentDirectory());
+                    .list(bucketName, BlobListOption.prefix(blobListPrefix), BlobListOption.currentDirectory());
         } catch (Exception e) {
             Log.error(LOGGER, format("GCP GCS bucket '%s' is not present or accessible at base location '%s'", bucketName, baseLocationUri), e);
             throw new TestFailException(format("GCP GCS bucket '%s' is not present or accessible at base location '%s'", bucketName, baseLocationUri), e);
         }
 
-        if (blobs == null || blobs.getValues() == null) {
+        if (StreamSupport.stream(blobs.getValues().spliterator(), false).findAny().isEmpty()) {
             Log.error(LOGGER, "Google GCS path: '{}' does not exist!", keyPrefix);
             throw new TestFailException(format(" Google GCS path: '%s' does not exist! ", keyPrefix));
         } else {
@@ -331,21 +336,46 @@ public class GcpClientActions extends GcpClient {
                 throw new TestFailException(format("Google GCS object: %s has 0 sub-objects!", selectedObjectPath));
             } else {
                 Log.log(LOGGER, format(" Google GCS object: '%s' contains '%d' sub-objects.", selectedObjectPath, filteredBlobs.size()));
-                for (Blob filteredBlob : filteredBlobs.stream().limit(10).collect(Collectors.toList())) {
-                    if (filteredBlob.getSize().compareTo(0L) == 0 && !zeroContent) {
-                        /**
-                         * Directory blobs:
-                         * - BlobId.getGeneration() returns null,
-                         * - BlobInfo.getSize() returns 0
-                         * - BlobInfo.isDirectory() returns true
-                         */
-                        if (filteredBlob.isDirectory()) {
-                            LOGGER.warn("Google GCS path: '{}' has 0 bytes of content!", selectedObjectPath);
-                        } else {
-                            LOGGER.error("Google GCS path: '{}' has 0 bytes of content!", selectedObjectPath);
-                            throw new TestFailException(format("Google GCS path: '%s' has 0 bytes of content!", selectedObjectPath));
+                validationOfSelectedObjectContent(storage, bucketName, selectedObjectPath, filteredBlobs, zeroContent);
+            }
+        }
+    }
+
+    private void validationOfSelectedObjectContent(Storage storage, String bucketName, String selectedObjectPath, List<Blob> filteredBlobs,
+            boolean zeroContent) {
+        for (Blob filteredBlob : filteredBlobs.stream().limit(10).collect(Collectors.toList())) {
+            if (filteredBlob.getSize().compareTo(0L) == 0 && !zeroContent) {
+                /**
+                 * Directory blobs:
+                 * - BlobId.getGeneration() returns null,
+                 * - BlobInfo.getSize() returns 0
+                 * - BlobInfo.isDirectory() returns true
+                 */
+                if (filteredBlob.isDirectory()) {
+                    Page<Blob> subblobs = Pages.empty();
+                    try {
+                        subblobs = storage
+                                .list(bucketName, BlobListOption.prefix(filteredBlob.getName()), BlobListOption.currentDirectory());
+                    } catch (Exception e) {
+                        LOGGER.warn("Google GCS object: '{}' is a directory." +
+                                " However sub-objects are not present or accessible!", selectedObjectPath);
+                    }
+                    if (StreamSupport.stream(subblobs.getValues().spliterator(), false).findAny().isEmpty()) {
+                        LOGGER.warn("Google GCS object: '{}' is an empty directory.", filteredBlob.getName());
+                    } else {
+                        for (Blob subblob : subblobs.iterateAll()) {
+                            LOGGER.info("Google GCS sub-object: '{}' with size '{}' is present under '{}'!", subblob.getName(), subblob.getSize(),
+                                    filteredBlob.getName());
+                            if (!subblob.isDirectory()) {
+                                if (subblob.getSize().compareTo(0L) == 0) {
+                                    LOGGER.warn("Google GCS object: '{}' is a file with 0 bytes of content!", subblob.getName());
+                                }
+                            }
                         }
                     }
+                } else {
+                    LOGGER.error("Google GCS object: '{}' has 0 bytes of content!", selectedObjectPath);
+                    throw new TestFailException(format("Google GCS object: '%s' has 0 bytes of content!", selectedObjectPath));
                 }
             }
         }
