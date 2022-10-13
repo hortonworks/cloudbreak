@@ -5,6 +5,7 @@ import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ENTITLEMEN
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_STOP_START_ENTITLEMENT_NOT_ENABLED;
 import static com.sequenceiq.periscope.common.MessageCode.UNSUPPORTED_AUTOSCALING_HOSTGROUP;
 import static com.sequenceiq.periscope.common.MessageCode.VALIDATION_TIME_STOP_START_UNSUPPORTED;
+import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
@@ -42,6 +43,7 @@ import com.sequenceiq.periscope.api.model.ScalingPolicyRequest;
 import com.sequenceiq.periscope.api.model.TimeAlertRequest;
 import com.sequenceiq.periscope.controller.AutoScaleClusterCommonService;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.service.AutoscaleRecommendationService;
 import com.sequenceiq.periscope.service.DateService;
@@ -297,8 +299,15 @@ public class AlertValidatorTest {
     @Test
     public void testEnableStopStartInRequestWithTimeAlertPreCreated() {
         DistroXAutoscaleClusterRequest autoscaleRequest = new DistroXAutoscaleClusterRequest();
+        TimeAlertRequest timeAlertRequest = new TimeAlertRequest();
+        timeAlertRequest.setTimeZone("Asia/Calcutta");
+        timeAlertRequest.setCron("1 0 0 1 1 1");
+        timeAlertRequest.setAlertName("timeAlert");
+        autoscaleRequest.setTimeAlertRequests(List.of(timeAlertRequest));
+
         autoscaleRequest.setEnableAutoscaling(Boolean.TRUE);
         autoscaleRequest.setUseStopStartMechanism(Boolean.TRUE);
+
         TimeAlert timeAlert = new TimeAlert();
         timeAlert.setTimeZone("Asia/Calcutta");
         timeAlert.setCluster(aCluster);
@@ -364,6 +373,37 @@ public class AlertValidatorTest {
         aCluster.setStopStartScalingEnabled(Boolean.TRUE);
 
         assertDoesNotThrow(() -> underTest.validateScheduleWithStopStart(aCluster, autoscaleClusterRequest));
+    }
+
+    @Test
+    public void testCreateLoadAlertSuccessWithStopStartIfTimeAlertPreCreatedButEmptyInRequest() {
+        DistroXAutoscaleClusterRequest asClusterRequest = new DistroXAutoscaleClusterRequest();
+        asClusterRequest.setEnableAutoscaling(Boolean.TRUE);
+        ScalingPolicyRequest sp1 = new ScalingPolicyRequest();
+        sp1.setHostGroup("compute");
+        LoadAlertRequest loadAlertRequest = new LoadAlertRequest();
+        loadAlertRequest.setScalingPolicy(sp1);
+        LoadAlertConfigurationRequest loadAlertConfig = new LoadAlertConfigurationRequest();
+        loadAlertConfig.setMinResourceValue(1);
+        loadAlertConfig.setMaxResourceValue(100);
+        loadAlertConfig.setCoolDownMinutes(5);
+        loadAlertRequest.setLoadAlertConfiguration(loadAlertConfig);
+        asClusterRequest.setLoadAlertRequests(List.of(loadAlertRequest));
+
+        asClusterRequest.setTimeAlertRequests(emptyList());
+
+        TimeAlert timeAlert = new TimeAlert();
+        ScalingPolicy scalingPolicy = new ScalingPolicy();
+        scalingPolicy.setAdjustmentType(AdjustmentType.EXACT);
+        scalingPolicy.setHostGroup("compute");
+        scalingPolicy.setAlert(timeAlert);
+        scalingPolicy.setScalingAdjustment(4);
+        timeAlert.setScalingPolicy(scalingPolicy);
+        timeAlert.setTimeZone("Asia/Calcutta");
+        timeAlert.setCron("1 0 1 1 1 1");
+        aCluster.setTimeAlerts(Set.of(timeAlert));
+
+        assertDoesNotThrow(() -> underTest.validateScheduleWithStopStart(aCluster, asClusterRequest));
     }
 
     @Test
