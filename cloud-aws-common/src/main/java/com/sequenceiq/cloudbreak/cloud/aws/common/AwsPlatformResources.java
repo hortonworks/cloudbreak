@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static com.amazonaws.util.StringUtils.isNullOrEmpty;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.ENABLED_TYPES;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
@@ -212,7 +213,7 @@ public class AwsPlatformResources implements PlatformResources {
     @Value("${cb.aws.disabled.instance.types:}")
     private List<String> disabledInstanceTypes;
 
-    @Value("${cb.aws.distrox.enabled.instance.types:}")
+    @Value("${cb.aws.distrox.enabled.instance.types:" + ENABLED_TYPES + "}")
     private List<String> enabledDistroxInstanceTypes;
 
     @Value("${cb.aws.fetch.max.items:500}")
