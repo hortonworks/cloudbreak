@@ -88,7 +88,7 @@ public class VerticalScaleService {
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () ->
-                    stackV4Endpoint.putVerticalScalingByNameInternal(0L, sdxCluster.getClusterName(), initiatorUserCrn, request));
+                    stackV4Endpoint.verticalScalingByName(0L, sdxCluster.getClusterName(), initiatorUserCrn, request));
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS,
                     "Data Lake vertical scale in progress", sdxCluster);
         } catch (NotFoundException e) {

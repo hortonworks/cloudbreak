@@ -310,8 +310,8 @@ public interface FreeIpaV1Endpoint {
     @Path("vertical_scaling")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = VERTICAL_SCALE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "putVerticalScalingFreeIpaV1ByEnvironmentCrn")
-    VerticalScaleResponse putVerticalScalingFreeIpaV1ByEnvironmentCrn(
+            nickname = "verticalScalingByCrn")
+    VerticalScaleResponse verticalScalingByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
             @Valid @NotNull VerticalScaleRequest updateRequest);
 
