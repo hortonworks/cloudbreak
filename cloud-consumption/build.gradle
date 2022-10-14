@@ -105,7 +105,7 @@ dependencies {
         implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                       version: '2.3.1'
         runtimeOnly        group: 'com.sun.xml.bind',          name: 'jaxb-impl',                      version: '2.3.0'
         runtimeOnly        group: 'org.glassfish.jaxb',        name: 'jaxb-runtime',                   version: '2.3.0'
-        implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: '2.28'
+        implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: '2.37'
         implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: mybatisMigrationVersion
         implementation     group: 'org.postgresql',            name: 'postgresql',                     version: postgreSQLVersion
         implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
