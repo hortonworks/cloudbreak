@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 import com.sequenceiq.cloudbreak.structuredevent.LegacyDefaultStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
+import com.sequenceiq.cloudbreak.structuredevent.filter.CDPJaxRsFilterPropertyKeys;
 import com.sequenceiq.flow.ha.NodeConfig;
 
 @ExtendWith(MockitoExtension.class)
@@ -75,9 +76,9 @@ class StructuredEventFilterTest {
 
         underTest.filter(requestContext);
 
-        RestRequestDetails requestDetais = (RestRequestDetails) requestContext.getProperty("REQUEST_DETAIS");
+        RestRequestDetails requestDetails = (RestRequestDetails) requestContext.getProperty(CDPJaxRsFilterPropertyKeys.REQUEST_DETAILS);
 
-        headersMap.forEach((key, value) -> assertEquals(value.get(0), requestDetais.getHeaders().get(key)));
+        headersMap.forEach((key, value) -> assertEquals(value.get(0), requestDetails.getHeaders().get(key)));
     }
 
     private ContainerRequest createRequestContext(MultivaluedMap<String, String> headersMap) {

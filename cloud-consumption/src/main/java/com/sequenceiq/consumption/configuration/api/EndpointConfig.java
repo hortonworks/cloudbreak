@@ -14,6 +14,7 @@ import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
 import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPStructuredEventV1Controller;
+import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPRestAuditFilter;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPStructuredEventFilter;
 import com.sequenceiq.consumption.api.v1.ConsumptionApi;
 import com.sequenceiq.consumption.endpoint.ConsumptionInternalV1Controller;
@@ -94,6 +95,7 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerFilters() {
+        register(CDPRestAuditFilter.class);
         if (auditEnabled) {
             register(CDPStructuredEventFilter.class);
         }

@@ -28,6 +28,8 @@ public interface CloudbreakEventService {
 
     String CONSUMPTION_RESOURCE_TYPE = "consumption";
 
+    String REDBEAMS_RESOURCE_TYPE = "redbeams";
+
     void fireCloudbreakEvent(Long entityId, String eventType, ResourceEvent resourceEvent);
 
     void fireCloudbreakEvent(Long entityId, String eventType, ResourceEvent resourceEvent, Collection<String> eventMessageArgs);

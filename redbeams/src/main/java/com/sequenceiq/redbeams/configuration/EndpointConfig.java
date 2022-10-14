@@ -8,10 +8,12 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.ext.ExceptionMapper;
 
 import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
+import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPRestAuditFilter;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 import com.sequenceiq.redbeams.api.RedbeamsApi;
@@ -38,8 +40,8 @@ public class EndpointConfig extends ResourceConfig {
             AuthorizationInfoController.class
     );
 
-    // @Value("${redbeams.structuredevent.rest.enabled:false}")
-    // private Boolean auditEnabled;
+    @Value("${redbeams.structuredevent.rest.enabled:false}")
+    private Boolean auditEnabled;
 
     @Inject
     private List<ExceptionMapper<?>> exceptionMappers;
@@ -52,11 +54,7 @@ public class EndpointConfig extends ResourceConfig {
 
     @PostConstruct
     private void init() {
-        /* TODO Add StructuredEventFilter, preferably as a library
-            if (auditEnabled) {
-                register(StructuredEventFilter.class);
-            }
-         */
+        registerFilters();
         registerEndpoints();
         registerExceptionMappers();
         register(serverTracingDynamicFeature);
@@ -77,5 +75,9 @@ public class EndpointConfig extends ResourceConfig {
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
         register(io.swagger.jaxrs.listing.AcceptHeaderApiListingResource.class);
+    }
+
+    private void registerFilters() {
+        register(CDPRestAuditFilter.class);
     }
 }
