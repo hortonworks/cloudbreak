@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds;
 
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -49,6 +52,9 @@ public class StartServicesHandler extends ExceptionCatcherEventHandler<UpgradeRd
     @Inject
     private HostOrchestrator hostOrchestrator;
 
+    @Inject
+    private UpgradeRdsService upgradeRdsService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(UpgradeRdsStartServicesRequest.class);
@@ -74,8 +80,12 @@ public class StartServicesHandler extends ExceptionCatcherEventHandler<UpgradeRd
             ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), cluster.getId());
             LOGGER.info("Starting cluster manager server and its agents after RDS upgrade...");
             hostOrchestrator.startClusterManagerWithItsAgents(gatewayConfig, stackUtil.collectReachableNodes(stackDto), exitModel);
-            LOGGER.info("Starting services after RDS upgrade...");
-            clusterApiConnectors.getConnector(stackDto).startCluster();
+            if (upgradeRdsService.shouldStopStartServices(stack)) {
+                LOGGER.info("Starting services after RDS upgrade...");
+                clusterApiConnectors.getConnector(stackDto).startCluster();
+            } else {
+                LOGGER.info("Skip starting services as {} entitlement is enabled.", CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP);
+            }
         } catch (Exception ex) {
             LOGGER.warn("Start services has failed", ex);
             return new UpgradeRdsFailedEvent(stackId, ex, DetailedStackStatus.DATABASE_UPGRADE_FAILED);

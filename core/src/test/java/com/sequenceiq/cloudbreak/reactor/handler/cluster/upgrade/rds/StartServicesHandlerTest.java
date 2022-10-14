@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -63,6 +64,9 @@ class StartServicesHandlerTest {
     @Mock
     private HandlerEvent<UpgradeRdsStartServicesRequest> event;
 
+    @Mock
+    private UpgradeRdsService upgradeRdsService;
+
     @InjectMocks
     private StartServicesHandler underTest;
 
@@ -72,7 +76,7 @@ class StartServicesHandlerTest {
     }
 
     @Test
-    void testDoAccept() throws CloudbreakException {
+    void testDoAcceptWhenNoSkipStartStopEntitlement() throws CloudbreakException {
         // GIVEN
         UpgradeRdsStartServicesRequest request = new UpgradeRdsStartServicesRequest(STACK_ID, TARGET_MAJOR_VERSION);
         when(event.getData()).thenReturn(request);
@@ -88,6 +92,31 @@ class StartServicesHandlerTest {
                 .thenReturn(gatewayConfig);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(mock(ClusterApi.class));
         when(stackUtil.collectReachableNodes(stackDto)).thenReturn(Set.of(mock(Node.class)));
+        // WHEN
+        Selectable actualSelectable = underTest.doAccept(event);
+        // THEN
+        verify(clusterApiConnectors.getConnector(stackDto), never()).startCluster();
+        assertThat(actualSelectable.selector()).isEqualTo("UPGRADERDSSTARTSERVICESRESULT");
+    }
+
+    @Test
+    void testDoAcceptWhenSkipStartStopEntitlementIsTrue() throws CloudbreakException {
+        // GIVEN
+        UpgradeRdsStartServicesRequest request = new UpgradeRdsStartServicesRequest(STACK_ID, TARGET_MAJOR_VERSION);
+        when(event.getData()).thenReturn(request);
+        StackDto stackDto = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        ClusterView clusterView = mock(ClusterView.class);
+        when(stackDto.getStack()).thenReturn(stackView);
+        when(stackDto.getCluster()).thenReturn(clusterView);
+        when(stackDto.getPrimaryGatewayInstance()).thenReturn(mock(InstanceMetadataView.class));
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(gatewayConfigService.getGatewayConfig(stackView, stackDto.getSecurityConfig(), stackDto.getPrimaryGatewayInstance(), stackDto.hasGateway()))
+                .thenReturn(gatewayConfig);
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(mock(ClusterApi.class));
+        when(stackUtil.collectReachableNodes(stackDto)).thenReturn(Set.of(mock(Node.class)));
+        when(upgradeRdsService.shouldStopStartServices(stackView)).thenReturn(true);
         // WHEN
         Selectable actualSelectable = underTest.doAccept(event);
         // THEN
