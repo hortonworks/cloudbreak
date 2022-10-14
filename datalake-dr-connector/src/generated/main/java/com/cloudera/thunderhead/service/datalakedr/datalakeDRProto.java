@@ -236,55 +236,6 @@ public final class datalakeDRProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private BackupRestoreOperationStatus(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              status_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              failureReason_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_BackupRestoreOperationStatus_descriptor;
@@ -410,7 +361,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, failureReason_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -425,7 +376,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, failureReason_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -444,7 +395,7 @@ public final class datalakeDRProto {
           .equals(other.getStatus())) return false;
       if (!getFailureReason()
           .equals(other.getFailureReason())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -459,7 +410,7 @@ public final class datalakeDRProto {
       hash = (53 * hash) + getStatus().hashCode();
       hash = (37 * hash) + FAILUREREASON_FIELD_NUMBER;
       hash = (53 * hash) + getFailureReason().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -580,18 +531,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -684,7 +630,7 @@ public final class datalakeDRProto {
           failureReason_ = other.failureReason_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -699,17 +645,40 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                status_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                failureReason_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -937,7 +906,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new BackupRestoreOperationStatus(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -1060,82 +1040,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private AdminOperationsBackupRestoreState(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
-              if (stopServices_ != null) {
-                subBuilder = stopServices_.toBuilder();
-              }
-              stopServices_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(stopServices_);
-                stopServices_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
-              if (startServices_ != null) {
-                subBuilder = startServices_.toBuilder();
-              }
-              startServices_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(startServices_);
-                startServices_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 26: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
-              if (precheckStoragePermission_ != null) {
-                subBuilder = precheckStoragePermission_.toBuilder();
-              }
-              precheckStoragePermission_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(precheckStoragePermission_);
-                precheckStoragePermission_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -1275,7 +1179,7 @@ public final class datalakeDRProto {
       if (precheckStoragePermission_ != null) {
         output.writeMessage(3, getPrecheckStoragePermission());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -1296,7 +1200,7 @@ public final class datalakeDRProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getPrecheckStoragePermission());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -1326,7 +1230,7 @@ public final class datalakeDRProto {
         if (!getPrecheckStoragePermission()
             .equals(other.getPrecheckStoragePermission())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -1349,7 +1253,7 @@ public final class datalakeDRProto {
         hash = (37 * hash) + PRECHECKSTORAGEPERMISSION_FIELD_NUMBER;
         hash = (53 * hash) + getPrecheckStoragePermission().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -1470,18 +1374,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -1602,7 +1501,7 @@ public final class datalakeDRProto {
         if (other.hasPrecheckStoragePermission()) {
           mergePrecheckStoragePermission(other.getPrecheckStoragePermission());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -1617,17 +1516,51 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getStopServicesFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getStartServicesFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getPrecheckStoragePermissionFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -2092,7 +2025,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new AdminOperationsBackupRestoreState(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -2200,69 +2144,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private HbaseBackupRestoreState(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
-              if (atlasEntityAuditEventTable_ != null) {
-                subBuilder = atlasEntityAuditEventTable_.toBuilder();
-              }
-              atlasEntityAuditEventTable_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(atlasEntityAuditEventTable_);
-                atlasEntityAuditEventTable_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
-              if (atlasJanusTable_ != null) {
-                subBuilder = atlasJanusTable_.toBuilder();
-              }
-              atlasJanusTable_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(atlasJanusTable_);
-                atlasJanusTable_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -2373,7 +2254,7 @@ public final class datalakeDRProto {
       if (atlasJanusTable_ != null) {
         output.writeMessage(2, getAtlasJanusTable());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -2390,7 +2271,7 @@ public final class datalakeDRProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, getAtlasJanusTable());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -2415,7 +2296,7 @@ public final class datalakeDRProto {
         if (!getAtlasJanusTable()
             .equals(other.getAtlasJanusTable())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -2434,7 +2315,7 @@ public final class datalakeDRProto {
         hash = (37 * hash) + ATLASJANUSTABLE_FIELD_NUMBER;
         hash = (53 * hash) + getAtlasJanusTable().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -2555,18 +2436,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -2673,7 +2549,7 @@ public final class datalakeDRProto {
         if (other.hasAtlasJanusTable()) {
           mergeAtlasJanusTable(other.getAtlasJanusTable());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -2688,17 +2564,44 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getAtlasEntityAuditEventTableFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getAtlasJanusTableFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -3044,7 +2947,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new HbaseBackupRestoreState(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -3314,147 +3228,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private SolrBackupRestoreState(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
-              if (edgeIndexCollection_ != null) {
-                subBuilder = edgeIndexCollection_.toBuilder();
-              }
-              edgeIndexCollection_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(edgeIndexCollection_);
-                edgeIndexCollection_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
-              if (fulltextIndexCollection_ != null) {
-                subBuilder = fulltextIndexCollection_.toBuilder();
-              }
-              fulltextIndexCollection_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(fulltextIndexCollection_);
-                fulltextIndexCollection_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 26: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
-              if (rangerAuditsCollection_ != null) {
-                subBuilder = rangerAuditsCollection_.toBuilder();
-              }
-              rangerAuditsCollection_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(rangerAuditsCollection_);
-                rangerAuditsCollection_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 34: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
-              if (vertexIndexCollection_ != null) {
-                subBuilder = vertexIndexCollection_.toBuilder();
-              }
-              vertexIndexCollection_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(vertexIndexCollection_);
-                vertexIndexCollection_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 42: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
-              if (edgeIndexCollectionDelete_ != null) {
-                subBuilder = edgeIndexCollectionDelete_.toBuilder();
-              }
-              edgeIndexCollectionDelete_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(edgeIndexCollectionDelete_);
-                edgeIndexCollectionDelete_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 50: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
-              if (fulltextIndexCollectionDelete_ != null) {
-                subBuilder = fulltextIndexCollectionDelete_.toBuilder();
-              }
-              fulltextIndexCollectionDelete_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(fulltextIndexCollectionDelete_);
-                fulltextIndexCollectionDelete_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 58: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
-              if (rangerAuditsCollectionDelete_ != null) {
-                subBuilder = rangerAuditsCollectionDelete_.toBuilder();
-              }
-              rangerAuditsCollectionDelete_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(rangerAuditsCollectionDelete_);
-                rangerAuditsCollectionDelete_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 66: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
-              if (vertexIndexCollectionDelete_ != null) {
-                subBuilder = vertexIndexCollectionDelete_.toBuilder();
-              }
-              vertexIndexCollectionDelete_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(vertexIndexCollectionDelete_);
-                vertexIndexCollectionDelete_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -3811,7 +3584,7 @@ public final class datalakeDRProto {
       if (vertexIndexCollectionDelete_ != null) {
         output.writeMessage(8, getVertexIndexCollectionDelete());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -3852,7 +3625,7 @@ public final class datalakeDRProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(8, getVertexIndexCollectionDelete());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -3907,7 +3680,7 @@ public final class datalakeDRProto {
         if (!getVertexIndexCollectionDelete()
             .equals(other.getVertexIndexCollectionDelete())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -3950,7 +3723,7 @@ public final class datalakeDRProto {
         hash = (37 * hash) + VERTEXINDEXCOLLECTIONDELETE_FIELD_NUMBER;
         hash = (53 * hash) + getVertexIndexCollectionDelete().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -4071,18 +3844,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -4273,7 +4041,7 @@ public final class datalakeDRProto {
         if (other.hasVertexIndexCollectionDelete()) {
           mergeVertexIndexCollectionDelete(other.getVertexIndexCollectionDelete());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -4288,17 +4056,86 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getEdgeIndexCollectionFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getFulltextIndexCollectionFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getRangerAuditsCollectionFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getVertexIndexCollectionFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 34
+              case 42: {
+                input.readMessage(
+                    getEdgeIndexCollectionDeleteFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 42
+              case 50: {
+                input.readMessage(
+                    getFulltextIndexCollectionDeleteFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 50
+              case 58: {
+                input.readMessage(
+                    getRangerAuditsCollectionDeleteFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 58
+              case 66: {
+                input.readMessage(
+                    getVertexIndexCollectionDeleteFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 66
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -5574,7 +5411,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SolrBackupRestoreState(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -5656,56 +5504,6 @@ public final class datalakeDRProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private DatabaseBackupRestoreState(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
-              if (database_ != null) {
-                subBuilder = database_.toBuilder();
-              }
-              database_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(database_);
-                database_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_DatabaseBackupRestoreState_descriptor;
@@ -5774,7 +5572,7 @@ public final class datalakeDRProto {
       if (database_ != null) {
         output.writeMessage(1, getDatabase());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -5787,7 +5585,7 @@ public final class datalakeDRProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getDatabase());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -5807,7 +5605,7 @@ public final class datalakeDRProto {
         if (!getDatabase()
             .equals(other.getDatabase())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -5822,7 +5620,7 @@ public final class datalakeDRProto {
         hash = (37 * hash) + DATABASE_FIELD_NUMBER;
         hash = (53 * hash) + getDatabase().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -5943,18 +5741,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -6047,7 +5840,7 @@ public final class datalakeDRProto {
         if (other.hasDatabase()) {
           mergeDatabase(other.getDatabase());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -6062,17 +5855,37 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getDatabaseFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -6263,7 +6076,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DatabaseBackupRestoreState(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -6425,95 +6249,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private InternalBackupRestoreState(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.Builder subBuilder = null;
-              if (adminOperations_ != null) {
-                subBuilder = adminOperations_.toBuilder();
-              }
-              adminOperations_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(adminOperations_);
-                adminOperations_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.Builder subBuilder = null;
-              if (hbase_ != null) {
-                subBuilder = hbase_.toBuilder();
-              }
-              hbase_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(hbase_);
-                hbase_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 26: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.Builder subBuilder = null;
-              if (solr_ != null) {
-                subBuilder = solr_.toBuilder();
-              }
-              solr_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(solr_);
-                solr_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 34: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.Builder subBuilder = null;
-              if (database_ != null) {
-                subBuilder = database_.toBuilder();
-              }
-              database_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(database_);
-                database_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -6706,7 +6441,7 @@ public final class datalakeDRProto {
       if (database_ != null) {
         output.writeMessage(4, getDatabase());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -6731,7 +6466,7 @@ public final class datalakeDRProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, getDatabase());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -6766,7 +6501,7 @@ public final class datalakeDRProto {
         if (!getDatabase()
             .equals(other.getDatabase())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -6793,7 +6528,7 @@ public final class datalakeDRProto {
         hash = (37 * hash) + DATABASE_FIELD_NUMBER;
         hash = (53 * hash) + getDatabase().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -6914,18 +6649,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -7060,7 +6790,7 @@ public final class datalakeDRProto {
         if (other.hasDatabase()) {
           mergeDatabase(other.getDatabase());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -7075,17 +6805,58 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getAdminOperationsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getHbaseFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getSolrFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getDatabaseFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 34
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -7741,7 +7512,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new InternalBackupRestoreState(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -7949,94 +7731,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private BackupDatalakeRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              datalakeName_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupName_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupLocation_ = s;
-              break;
-            }
-            case 32: {
-
-              closeDbConnections_ = input.readBool();
-              break;
-            }
-            case 40: {
-              int rawValue = input.readEnum();
-
-              skipRangerHmsMetadata_ = rawValue;
-              break;
-            }
-            case 48: {
-              int rawValue = input.readEnum();
-
-              skipAtlasMetadata_ = rawValue;
-              break;
-            }
-            case 56: {
-              int rawValue = input.readEnum();
-
-              skipRangerAudits_ = rawValue;
-              break;
-            }
-            case 64: {
-
-              skipValidation_ = input.readBool();
-              break;
-            }
-            case 72: {
-
-              validationOnly_ = input.readBool();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -8356,7 +8050,7 @@ public final class datalakeDRProto {
       if (validationOnly_ != false) {
         output.writeBool(9, validationOnly_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -8398,7 +8092,7 @@ public final class datalakeDRProto {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(9, validationOnly_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -8428,7 +8122,7 @@ public final class datalakeDRProto {
           != other.getSkipValidation()) return false;
       if (getValidationOnly()
           != other.getValidationOnly()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -8460,7 +8154,7 @@ public final class datalakeDRProto {
       hash = (37 * hash) + VALIDATIONONLY_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getValidationOnly());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -8582,18 +8276,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -8729,7 +8418,7 @@ public final class datalakeDRProto {
         if (other.getValidationOnly() != false) {
           setValidationOnly(other.getValidationOnly());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -8744,17 +8433,75 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                datalakeName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                backupName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                backupLocation_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 32: {
+                closeDbConnections_ = input.readBool();
+
+                break;
+              } // case 32
+              case 40: {
+                skipRangerHmsMetadata_ = input.readEnum();
+
+                break;
+              } // case 40
+              case 48: {
+                skipAtlasMetadata_ = input.readEnum();
+
+                break;
+              } // case 48
+              case 56: {
+                skipRangerAudits_ = input.readEnum();
+
+                break;
+              } // case 56
+              case 64: {
+                skipValidation_ = input.readBool();
+
+                break;
+              } // case 64
+              case 72: {
+                validationOnly_ = input.readBool();
+
+                break;
+              } // case 72
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -9429,7 +9176,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new BackupDatalakeRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -9742,122 +9500,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private BackupDatalakeResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupName_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              userCrn_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupId_ = s;
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              internalState_ = s;
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              overallState_ = s;
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              startTimestamp_ = s;
-              break;
-            }
-            case 66: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              endTimestamp_ = s;
-              break;
-            }
-            case 74: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupLocation_ = s;
-              break;
-            }
-            case 82: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              failureReason_ = s;
-              break;
-            }
-            case 90: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder subBuilder = null;
-              if (operationStates_ != null) {
-                subBuilder = operationStates_.toBuilder();
-              }
-              operationStates_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(operationStates_);
-                operationStates_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 98: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              runtimeVersion_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -10466,7 +10108,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 12, runtimeVersion_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -10512,7 +10154,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, runtimeVersion_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -10554,7 +10196,7 @@ public final class datalakeDRProto {
       }
       if (!getRuntimeVersion()
           .equals(other.getRuntimeVersion())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -10591,7 +10233,7 @@ public final class datalakeDRProto {
       }
       hash = (37 * hash) + RUNTIMEVERSION_FIELD_NUMBER;
       hash = (53 * hash) + getRuntimeVersion().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -10713,18 +10355,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -10894,7 +10531,7 @@ public final class datalakeDRProto {
           runtimeVersion_ = other.runtimeVersion_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -10909,17 +10546,92 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                backupName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                userCrn_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                backupId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 42: {
+                internalState_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              case 50: {
+                overallState_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              case 58: {
+                startTimestamp_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 58
+              case 66: {
+                endTimestamp_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 66
+              case 74: {
+                backupLocation_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 74
+              case 82: {
+                failureReason_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 82
+              case 90: {
+                input.readMessage(
+                    getOperationStatesFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 90
+              case 98: {
+                runtimeVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 98
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -12166,7 +11878,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new BackupDatalakeResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -12411,105 +12134,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RestoreDatalakeRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              datalakeName_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupName_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupId_ = s;
-              break;
-            }
-            case 32: {
-
-              includeDatabase_ = input.readBool();
-              break;
-            }
-            case 40: {
-
-              force_ = input.readBool();
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupLocationOverride_ = s;
-              break;
-            }
-            case 56: {
-              int rawValue = input.readEnum();
-
-              skipRangerHmsMetadata_ = rawValue;
-              break;
-            }
-            case 64: {
-              int rawValue = input.readEnum();
-
-              skipAtlasMetadata_ = rawValue;
-              break;
-            }
-            case 72: {
-              int rawValue = input.readEnum();
-
-              skipRangerAudits_ = rawValue;
-              break;
-            }
-            case 80: {
-
-              skipValidation_ = input.readBool();
-              break;
-            }
-            case 88: {
-
-              validationOnly_ = input.readBool();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -12902,7 +12526,7 @@ public final class datalakeDRProto {
       if (validationOnly_ != false) {
         output.writeBool(11, validationOnly_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -12951,7 +12575,7 @@ public final class datalakeDRProto {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(11, validationOnly_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -12985,7 +12609,7 @@ public final class datalakeDRProto {
           != other.getSkipValidation()) return false;
       if (getValidationOnly()
           != other.getValidationOnly()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -13022,7 +12646,7 @@ public final class datalakeDRProto {
       hash = (37 * hash) + VALIDATIONONLY_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getValidationOnly());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -13144,18 +12768,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -13304,7 +12923,7 @@ public final class datalakeDRProto {
         if (other.getValidationOnly() != false) {
           setValidationOnly(other.getValidationOnly());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -13319,17 +12938,85 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                datalakeName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                backupName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                backupId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 32: {
+                includeDatabase_ = input.readBool();
+
+                break;
+              } // case 32
+              case 40: {
+                force_ = input.readBool();
+
+                break;
+              } // case 40
+              case 50: {
+                backupLocationOverride_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              case 56: {
+                skipRangerHmsMetadata_ = input.readEnum();
+
+                break;
+              } // case 56
+              case 64: {
+                skipAtlasMetadata_ = input.readEnum();
+
+                break;
+              } // case 64
+              case 72: {
+                skipRangerAudits_ = input.readEnum();
+
+                break;
+              } // case 72
+              case 80: {
+                skipValidation_ = input.readBool();
+
+                break;
+              } // case 80
+              case 88: {
+                validationOnly_ = input.readBool();
+
+                break;
+              } // case 88
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -14158,7 +13845,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RestoreDatalakeRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -14463,122 +14161,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RestoreDatalakeResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupId_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              restoreId_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              userCrn_ = s;
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              internalState_ = s;
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              overallState_ = s;
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              startTimestamp_ = s;
-              break;
-            }
-            case 66: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              endTimestamp_ = s;
-              break;
-            }
-            case 74: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupLocation_ = s;
-              break;
-            }
-            case 82: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              failureReason_ = s;
-              break;
-            }
-            case 90: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder subBuilder = null;
-              if (operationStates_ != null) {
-                subBuilder = operationStates_.toBuilder();
-              }
-              operationStates_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(operationStates_);
-                operationStates_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 98: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              runtimeVersion_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -15179,7 +14761,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 12, runtimeVersion_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -15225,7 +14807,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, runtimeVersion_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -15267,7 +14849,7 @@ public final class datalakeDRProto {
       }
       if (!getRuntimeVersion()
           .equals(other.getRuntimeVersion())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -15304,7 +14886,7 @@ public final class datalakeDRProto {
       }
       hash = (37 * hash) + RUNTIMEVERSION_FIELD_NUMBER;
       hash = (53 * hash) + getRuntimeVersion().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -15426,18 +15008,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -15607,7 +15184,7 @@ public final class datalakeDRProto {
           runtimeVersion_ = other.runtimeVersion_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -15622,17 +15199,92 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                backupId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                restoreId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                userCrn_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 42: {
+                internalState_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              case 50: {
+                overallState_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              case 58: {
+                startTimestamp_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 58
+              case 66: {
+                endTimestamp_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 66
+              case 74: {
+                backupLocation_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 74
+              case 82: {
+                failureReason_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 82
+              case 90: {
+                input.readMessage(
+                    getOperationStatesFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 90
+              case 98: {
+                runtimeVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 98
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -16859,7 +16511,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RestoreDatalakeResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -16977,61 +16640,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private BackupDatalakeStatusRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              datalakeName_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupId_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupName_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -17207,7 +16815,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, backupName_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -17225,7 +16833,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, backupName_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -17246,7 +16854,7 @@ public final class datalakeDRProto {
           .equals(other.getBackupId())) return false;
       if (!getBackupName()
           .equals(other.getBackupName())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -17263,7 +16871,7 @@ public final class datalakeDRProto {
       hash = (53 * hash) + getBackupId().hashCode();
       hash = (37 * hash) + BACKUPNAME_FIELD_NUMBER;
       hash = (53 * hash) + getBackupName().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -17385,18 +16993,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -17496,7 +17099,7 @@ public final class datalakeDRProto {
           backupName_ = other.backupName_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -17511,17 +17114,45 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                datalakeName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                backupId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                backupName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -17845,7 +17476,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new BackupDatalakeStatusRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -18158,122 +17800,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private BackupDatalakeStatusResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupName_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              userCrn_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupId_ = s;
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              internalState_ = s;
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              overallState_ = s;
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              startTimestamp_ = s;
-              break;
-            }
-            case 66: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              endTimestamp_ = s;
-              break;
-            }
-            case 74: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupLocation_ = s;
-              break;
-            }
-            case 82: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              failureReason_ = s;
-              break;
-            }
-            case 90: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder subBuilder = null;
-              if (operationStates_ != null) {
-                subBuilder = operationStates_.toBuilder();
-              }
-              operationStates_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(operationStates_);
-                operationStates_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 98: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              runtimeVersion_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -18882,7 +18408,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 12, runtimeVersion_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -18928,7 +18454,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, runtimeVersion_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -18970,7 +18496,7 @@ public final class datalakeDRProto {
       }
       if (!getRuntimeVersion()
           .equals(other.getRuntimeVersion())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -19007,7 +18533,7 @@ public final class datalakeDRProto {
       }
       hash = (37 * hash) + RUNTIMEVERSION_FIELD_NUMBER;
       hash = (53 * hash) + getRuntimeVersion().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -19129,18 +18655,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -19310,7 +18831,7 @@ public final class datalakeDRProto {
           runtimeVersion_ = other.runtimeVersion_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -19325,17 +18846,92 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                backupName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                userCrn_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                backupId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 42: {
+                internalState_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              case 50: {
+                overallState_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              case 58: {
+                startTimestamp_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 58
+              case 66: {
+                endTimestamp_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 66
+              case 74: {
+                backupLocation_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 74
+              case 82: {
+                failureReason_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 82
+              case 90: {
+                input.readMessage(
+                    getOperationStatesFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 90
+              case 98: {
+                runtimeVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 98
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -20582,7 +20178,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new BackupDatalakeStatusResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -20679,55 +20286,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RestoreDatalakeStatusRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              datalakeName_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              restoreId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -20854,7 +20412,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(restoreId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, restoreId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -20869,7 +20427,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(restoreId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, restoreId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -20888,7 +20446,7 @@ public final class datalakeDRProto {
           .equals(other.getDatalakeName())) return false;
       if (!getRestoreId()
           .equals(other.getRestoreId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -20903,7 +20461,7 @@ public final class datalakeDRProto {
       hash = (53 * hash) + getDatalakeName().hashCode();
       hash = (37 * hash) + RESTOREID_FIELD_NUMBER;
       hash = (53 * hash) + getRestoreId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -21025,18 +20583,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -21129,7 +20682,7 @@ public final class datalakeDRProto {
           restoreId_ = other.restoreId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -21144,17 +20697,40 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                datalakeName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                restoreId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -21382,7 +20958,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RestoreDatalakeStatusRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -21695,122 +21282,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RestoreDatalakeStatusResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              restoreId_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupId_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              userCrn_ = s;
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              internalState_ = s;
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              overallState_ = s;
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              startTimestamp_ = s;
-              break;
-            }
-            case 66: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              endTimestamp_ = s;
-              break;
-            }
-            case 74: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupLocation_ = s;
-              break;
-            }
-            case 82: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              failureReason_ = s;
-              break;
-            }
-            case 90: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder subBuilder = null;
-              if (operationStates_ != null) {
-                subBuilder = operationStates_.toBuilder();
-              }
-              operationStates_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(operationStates_);
-                operationStates_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 98: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              runtimeVersion_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -22419,7 +21890,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 12, runtimeVersion_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -22465,7 +21936,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, runtimeVersion_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -22507,7 +21978,7 @@ public final class datalakeDRProto {
       }
       if (!getRuntimeVersion()
           .equals(other.getRuntimeVersion())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -22544,7 +22015,7 @@ public final class datalakeDRProto {
       }
       hash = (37 * hash) + RUNTIMEVERSION_FIELD_NUMBER;
       hash = (53 * hash) + getRuntimeVersion().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -22666,18 +22137,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -22847,7 +22313,7 @@ public final class datalakeDRProto {
           runtimeVersion_ = other.runtimeVersion_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -22862,17 +22328,92 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                restoreId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                backupId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                userCrn_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 42: {
+                internalState_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              case 50: {
+                overallState_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              case 58: {
+                startTimestamp_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 58
+              case 66: {
+                endTimestamp_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 66
+              case 74: {
+                backupLocation_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 74
+              case 82: {
+                failureReason_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 82
+              case 90: {
+                input.readMessage(
+                    getOperationStatesFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 90
+              case 98: {
+                runtimeVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 98
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -24119,7 +23660,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RestoreDatalakeStatusResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -24432,122 +23984,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DatalakeBackupInfo(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupName_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              userCrn_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupId_ = s;
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              internalState_ = s;
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              overallState_ = s;
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              startTimestamp_ = s;
-              break;
-            }
-            case 66: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              endTimestamp_ = s;
-              break;
-            }
-            case 74: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupLocation_ = s;
-              break;
-            }
-            case 82: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              failureReason_ = s;
-              break;
-            }
-            case 90: {
-              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder subBuilder = null;
-              if (operationStates_ != null) {
-                subBuilder = operationStates_.toBuilder();
-              }
-              operationStates_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(operationStates_);
-                operationStates_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 98: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              runtimeVersion_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -25156,7 +24592,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 12, runtimeVersion_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -25202,7 +24638,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, runtimeVersion_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -25244,7 +24680,7 @@ public final class datalakeDRProto {
       }
       if (!getRuntimeVersion()
           .equals(other.getRuntimeVersion())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -25281,7 +24717,7 @@ public final class datalakeDRProto {
       }
       hash = (37 * hash) + RUNTIMEVERSION_FIELD_NUMBER;
       hash = (53 * hash) + getRuntimeVersion().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -25403,18 +24839,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -25584,7 +25015,7 @@ public final class datalakeDRProto {
           runtimeVersion_ = other.runtimeVersion_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -25599,17 +25030,92 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                backupName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                userCrn_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                backupId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 42: {
+                internalState_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              case 50: {
+                overallState_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              case 58: {
+                startTimestamp_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 58
+              case 66: {
+                endTimestamp_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 66
+              case 74: {
+                backupLocation_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 74
+              case 82: {
+                failureReason_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 82
+              case 90: {
+                input.readMessage(
+                    getOperationStatesFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 90
+              case 98: {
+                runtimeVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 98
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -26856,7 +26362,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DatalakeBackupInfo(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -26932,49 +26449,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListDatalakeBackupRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              datalakeName_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -27052,7 +26526,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalakeName_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -27064,7 +26538,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalakeName_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -27081,7 +26555,7 @@ public final class datalakeDRProto {
 
       if (!getDatalakeName()
           .equals(other.getDatalakeName())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -27094,7 +26568,7 @@ public final class datalakeDRProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + DATALAKENAME_FIELD_NUMBER;
       hash = (53 * hash) + getDatalakeName().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -27216,18 +26690,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -27313,7 +26782,7 @@ public final class datalakeDRProto {
           datalakeName_ = other.datalakeName_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -27328,17 +26797,35 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                datalakeName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -27470,7 +26957,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListDatalakeBackupRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -27566,56 +27064,6 @@ public final class datalakeDRProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private ListDatalakeBackupResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                datalakeInfo_ = new java.util.ArrayList<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              datalakeInfo_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo.parser(), extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          datalakeInfo_ = java.util.Collections.unmodifiableList(datalakeInfo_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_ListDatalakeBackupResponse_descriptor;
@@ -27701,7 +27149,7 @@ public final class datalakeDRProto {
       for (int i = 0; i < datalakeInfo_.size(); i++) {
         output.writeMessage(1, datalakeInfo_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -27714,7 +27162,7 @@ public final class datalakeDRProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, datalakeInfo_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -27731,7 +27179,7 @@ public final class datalakeDRProto {
 
       if (!getDatalakeInfoList()
           .equals(other.getDatalakeInfoList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -27746,7 +27194,7 @@ public final class datalakeDRProto {
         hash = (37 * hash) + DATALAKE_INFO_FIELD_NUMBER;
         hash = (53 * hash) + getDatalakeInfoList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -27868,29 +27316,24 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getDatalakeInfoFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (datalakeInfoBuilder_ == null) {
           datalakeInfo_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          datalakeInfo_ = null;
           datalakeInfoBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -28001,7 +27444,7 @@ public final class datalakeDRProto {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -28016,17 +27459,43 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo.parser(),
+                        extensionRegistry);
+                if (datalakeInfoBuilder_ == null) {
+                  ensureDatalakeInfoIsMutable();
+                  datalakeInfo_.add(m);
+                } else {
+                  datalakeInfoBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -28357,7 +27826,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListDatalakeBackupResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -28433,49 +27913,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CancelDatalakeBackupRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -28553,7 +27990,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, backupId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -28565,7 +28002,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, backupId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -28582,7 +28019,7 @@ public final class datalakeDRProto {
 
       if (!getBackupId()
           .equals(other.getBackupId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -28595,7 +28032,7 @@ public final class datalakeDRProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + BACKUPID_FIELD_NUMBER;
       hash = (53 * hash) + getBackupId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -28717,18 +28154,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -28814,7 +28246,7 @@ public final class datalakeDRProto {
           backupId_ = other.backupId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -28829,17 +28261,35 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                backupId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -28971,7 +28421,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CancelDatalakeBackupRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -29047,49 +28508,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CancelDatalakeBackupResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              result_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -29167,7 +28585,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(result_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, result_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -29179,7 +28597,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(result_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, result_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -29196,7 +28614,7 @@ public final class datalakeDRProto {
 
       if (!getResult()
           .equals(other.getResult())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -29209,7 +28627,7 @@ public final class datalakeDRProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + RESULT_FIELD_NUMBER;
       hash = (53 * hash) + getResult().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -29331,18 +28749,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -29428,7 +28841,7 @@ public final class datalakeDRProto {
           result_ = other.result_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -29443,17 +28856,35 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                result_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -29585,7 +29016,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CancelDatalakeBackupResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -29661,49 +29103,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CancelDatalakeRestoreRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              restoreId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -29781,7 +29180,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(restoreId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, restoreId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -29793,7 +29192,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(restoreId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, restoreId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -29810,7 +29209,7 @@ public final class datalakeDRProto {
 
       if (!getRestoreId()
           .equals(other.getRestoreId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -29823,7 +29222,7 @@ public final class datalakeDRProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + RESTOREID_FIELD_NUMBER;
       hash = (53 * hash) + getRestoreId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -29945,18 +29344,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -30042,7 +29436,7 @@ public final class datalakeDRProto {
           restoreId_ = other.restoreId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -30057,17 +29451,35 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                restoreId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -30199,7 +29611,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CancelDatalakeRestoreRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -30275,49 +29698,6 @@ public final class datalakeDRProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CancelDatalakeRestoreResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              result_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -30395,7 +29775,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(result_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, result_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -30407,7 +29787,7 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(result_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, result_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -30424,7 +29804,7 @@ public final class datalakeDRProto {
 
       if (!getResult()
           .equals(other.getResult())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -30437,7 +29817,7 @@ public final class datalakeDRProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + RESULT_FIELD_NUMBER;
       hash = (53 * hash) + getResult().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -30559,18 +29939,13 @@ public final class datalakeDRProto {
 
       // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -30656,7 +30031,7 @@ public final class datalakeDRProto {
           result_ = other.result_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -30671,17 +30046,35 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                result_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -30813,7 +30206,18 @@ public final class datalakeDRProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CancelDatalakeRestoreResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 

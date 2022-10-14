@@ -123,66 +123,6 @@ public final class AuditProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private ArchivingConfigInfo(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              storageLocation_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              credentialName_ = s;
-              break;
-            }
-            case 24: {
-
-              enabled_ = input.readBool();
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              storageRegion_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ArchivingConfigInfo_descriptor;
@@ -375,7 +315,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storageRegion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, storageRegion_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -397,7 +337,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storageRegion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, storageRegion_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -420,7 +360,7 @@ public final class AuditProto {
           != other.getEnabled()) return false;
       if (!getStorageRegion()
           .equals(other.getStorageRegion())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -440,7 +380,7 @@ public final class AuditProto {
           getEnabled());
       hash = (37 * hash) + STORAGEREGION_FIELD_NUMBER;
       hash = (53 * hash) + getStorageRegion().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -562,18 +502,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -679,7 +614,7 @@ public final class AuditProto {
           storageRegion_ = other.storageRegion_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -694,17 +629,50 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                storageLocation_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                credentialName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 24: {
+                enabled_ = input.readBool();
+
+                break;
+              } // case 24
+              case 34: {
+                storageRegion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -1071,7 +1039,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ArchivingConfigInfo(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -1209,71 +1188,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ConfigureArchivingRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              storageLocation_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              credentialName_ = s;
-              break;
-            }
-            case 24: {
-
-              enabled_ = input.readBool();
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              storageRegion_ = s;
-              break;
-            }
-            case 40: {
-
-              verifyOnly_ = input.readBool();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -1485,7 +1399,7 @@ public final class AuditProto {
       if (verifyOnly_ != false) {
         output.writeBool(5, verifyOnly_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -1511,7 +1425,7 @@ public final class AuditProto {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(5, verifyOnly_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -1536,7 +1450,7 @@ public final class AuditProto {
           .equals(other.getStorageRegion())) return false;
       if (getVerifyOnly()
           != other.getVerifyOnly()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -1559,7 +1473,7 @@ public final class AuditProto {
       hash = (37 * hash) + VERIFYONLY_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getVerifyOnly());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -1681,18 +1595,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -1804,7 +1713,7 @@ public final class AuditProto {
         if (other.getVerifyOnly() != false) {
           setVerifyOnly(other.getVerifyOnly());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -1819,17 +1728,55 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                storageLocation_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                credentialName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 24: {
+                enabled_ = input.readBool();
+
+                break;
+              } // case 24
+              case 34: {
+                storageRegion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 40: {
+                verifyOnly_ = input.readBool();
+
+                break;
+              } // case 40
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -2239,7 +2186,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ConfigureArchivingRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -2322,56 +2280,6 @@ public final class AuditProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private ConfigureArchivingResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder subBuilder = null;
-              if (configuration_ != null) {
-                subBuilder = configuration_.toBuilder();
-              }
-              configuration_ = input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(configuration_);
-                configuration_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ConfigureArchivingResponse_descriptor;
@@ -2440,7 +2348,7 @@ public final class AuditProto {
       if (configuration_ != null) {
         output.writeMessage(1, getConfiguration());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -2453,7 +2361,7 @@ public final class AuditProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getConfiguration());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -2473,7 +2381,7 @@ public final class AuditProto {
         if (!getConfiguration()
             .equals(other.getConfiguration())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -2488,7 +2396,7 @@ public final class AuditProto {
         hash = (37 * hash) + CONFIGURATION_FIELD_NUMBER;
         hash = (53 * hash) + getConfiguration().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -2610,18 +2518,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -2714,7 +2617,7 @@ public final class AuditProto {
         if (other.hasConfiguration()) {
           mergeConfiguration(other.getConfiguration());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -2729,17 +2632,37 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getConfigurationFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -2930,7 +2853,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ConfigureArchivingResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -2986,43 +2920,6 @@ public final class AuditProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private GetArchivingConfigRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetArchivingConfigRequest_descriptor;
@@ -3050,7 +2947,7 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -3059,7 +2956,7 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -3074,7 +2971,7 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest other = (com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest) obj;
 
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -3085,7 +2982,7 @@ public final class AuditProto {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -3207,18 +3104,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -3297,7 +3189,7 @@ public final class AuditProto {
 
       public Builder mergeFrom(com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest other) {
         if (other == com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -3312,17 +3204,30 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       @java.lang.Override
@@ -3358,7 +3263,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new GetArchivingConfigRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -3441,56 +3357,6 @@ public final class AuditProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private GetArchivingConfigResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder subBuilder = null;
-              if (configuration_ != null) {
-                subBuilder = configuration_.toBuilder();
-              }
-              configuration_ = input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(configuration_);
-                configuration_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_GetArchivingConfigResponse_descriptor;
@@ -3559,7 +3425,7 @@ public final class AuditProto {
       if (configuration_ != null) {
         output.writeMessage(1, getConfiguration());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -3572,7 +3438,7 @@ public final class AuditProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getConfiguration());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -3592,7 +3458,7 @@ public final class AuditProto {
         if (!getConfiguration()
             .equals(other.getConfiguration())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -3607,7 +3473,7 @@ public final class AuditProto {
         hash = (37 * hash) + CONFIGURATION_FIELD_NUMBER;
         hash = (53 * hash) + getConfiguration().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -3729,18 +3595,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -3833,7 +3694,7 @@ public final class AuditProto {
         if (other.hasConfiguration()) {
           mergeConfiguration(other.getConfiguration());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -3848,17 +3709,37 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getConfigurationFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -4049,7 +3930,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new GetArchivingConfigResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -4119,56 +4011,6 @@ public final class AuditProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private CreateAuditEventRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent.Builder subBuilder = null;
-              if (auditEvent_ != null) {
-                subBuilder = auditEvent_.toBuilder();
-              }
-              auditEvent_ = input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(auditEvent_);
-                auditEvent_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_CreateAuditEventRequest_descriptor;
@@ -4225,7 +4067,7 @@ public final class AuditProto {
       if (auditEvent_ != null) {
         output.writeMessage(1, getAuditEvent());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -4238,7 +4080,7 @@ public final class AuditProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getAuditEvent());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -4258,7 +4100,7 @@ public final class AuditProto {
         if (!getAuditEvent()
             .equals(other.getAuditEvent())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -4273,7 +4115,7 @@ public final class AuditProto {
         hash = (37 * hash) + AUDITEVENT_FIELD_NUMBER;
         hash = (53 * hash) + getAuditEvent().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -4394,18 +4236,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -4498,7 +4335,7 @@ public final class AuditProto {
         if (other.hasAuditEvent()) {
           mergeAuditEvent(other.getAuditEvent());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -4513,17 +4350,37 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getAuditEventFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -4678,7 +4535,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CreateAuditEventRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -4733,43 +4601,6 @@ public final class AuditProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private CreateAuditEventResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_CreateAuditEventResponse_descriptor;
@@ -4797,7 +4628,7 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -4806,7 +4637,7 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -4821,7 +4652,7 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse other = (com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse) obj;
 
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -4832,7 +4663,7 @@ public final class AuditProto {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -4953,18 +4784,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -5043,7 +4869,7 @@ public final class AuditProto {
 
       public Builder mergeFrom(com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse other) {
         if (other == com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -5058,17 +4884,30 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       @java.lang.Override
@@ -5104,7 +4943,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CreateAuditEventResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -5174,56 +5024,6 @@ public final class AuditProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private CreateAttemptAuditEventRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent.Builder subBuilder = null;
-              if (auditEvent_ != null) {
-                subBuilder = auditEvent_.toBuilder();
-              }
-              auditEvent_ = input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(auditEvent_);
-                auditEvent_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_CreateAttemptAuditEventRequest_descriptor;
@@ -5280,7 +5080,7 @@ public final class AuditProto {
       if (auditEvent_ != null) {
         output.writeMessage(1, getAuditEvent());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -5293,7 +5093,7 @@ public final class AuditProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getAuditEvent());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -5313,7 +5113,7 @@ public final class AuditProto {
         if (!getAuditEvent()
             .equals(other.getAuditEvent())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -5328,7 +5128,7 @@ public final class AuditProto {
         hash = (37 * hash) + AUDITEVENT_FIELD_NUMBER;
         hash = (53 * hash) + getAuditEvent().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -5449,18 +5249,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -5553,7 +5348,7 @@ public final class AuditProto {
         if (other.hasAuditEvent()) {
           mergeAuditEvent(other.getAuditEvent());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -5568,17 +5363,37 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getAuditEventFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -5733,7 +5548,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CreateAttemptAuditEventRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -5788,43 +5614,6 @@ public final class AuditProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private CreateAttemptAuditEventResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_CreateAttemptAuditEventResponse_descriptor;
@@ -5852,7 +5641,7 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -5861,7 +5650,7 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -5876,7 +5665,7 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse other = (com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse) obj;
 
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -5887,7 +5676,7 @@ public final class AuditProto {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -6008,18 +5797,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -6098,7 +5882,7 @@ public final class AuditProto {
 
       public Builder mergeFrom(com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse other) {
         if (other == com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -6113,17 +5897,30 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       @java.lang.Override
@@ -6159,7 +5956,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CreateAttemptAuditEventResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -6229,56 +6037,6 @@ public final class AuditProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private UpdateAttemptAuditEventWithResultRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResult.Builder subBuilder = null;
-              if (result_ != null) {
-                subBuilder = result_.toBuilder();
-              }
-              result_ = input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResult.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(result_);
-                result_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_UpdateAttemptAuditEventWithResultRequest_descriptor;
@@ -6335,7 +6093,7 @@ public final class AuditProto {
       if (result_ != null) {
         output.writeMessage(1, getResult());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -6348,7 +6106,7 @@ public final class AuditProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getResult());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -6368,7 +6126,7 @@ public final class AuditProto {
         if (!getResult()
             .equals(other.getResult())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -6383,7 +6141,7 @@ public final class AuditProto {
         hash = (37 * hash) + RESULT_FIELD_NUMBER;
         hash = (53 * hash) + getResult().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -6504,18 +6262,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -6608,7 +6361,7 @@ public final class AuditProto {
         if (other.hasResult()) {
           mergeResult(other.getResult());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -6623,17 +6376,37 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getResultFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -6788,7 +6561,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UpdateAttemptAuditEventWithResultRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -6843,43 +6627,6 @@ public final class AuditProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private UpdateAttemptAuditEventWithResultResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_UpdateAttemptAuditEventWithResultResponse_descriptor;
@@ -6907,7 +6654,7 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -6916,7 +6663,7 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -6931,7 +6678,7 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse other = (com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse) obj;
 
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -6942,7 +6689,7 @@ public final class AuditProto {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -7063,18 +6810,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -7153,7 +6895,7 @@ public final class AuditProto {
 
       public Builder mergeFrom(com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse other) {
         if (other == com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -7168,17 +6910,30 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       @java.lang.Override
@@ -7214,7 +6969,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UpdateAttemptAuditEventWithResultResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -7390,82 +7156,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListEventsRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              fromTimestamp_ = input.readInt64();
-              break;
-            }
-            case 16: {
-
-              toTimestamp_ = input.readInt64();
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            case 32: {
-
-              pageSize_ = input.readInt32();
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              pageToken_ = s;
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestId_ = s;
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              eventSource_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -7752,7 +7442,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventSource_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, eventSource_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -7785,7 +7475,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventSource_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, eventSource_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -7814,7 +7504,7 @@ public final class AuditProto {
           .equals(other.getRequestId())) return false;
       if (!getEventSource()
           .equals(other.getEventSource())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -7841,7 +7531,7 @@ public final class AuditProto {
       hash = (53 * hash) + getRequestId().hashCode();
       hash = (37 * hash) + EVENTSOURCE_FIELD_NUMBER;
       hash = (53 * hash) + getEventSource().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -7962,18 +7652,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -8098,7 +7783,7 @@ public final class AuditProto {
           eventSource_ = other.eventSource_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -8113,17 +7798,65 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                fromTimestamp_ = input.readInt64();
+
+                break;
+              } // case 8
+              case 16: {
+                toTimestamp_ = input.readInt64();
+
+                break;
+              } // case 16
+              case 26: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 32: {
+                pageSize_ = input.readInt32();
+
+                break;
+              } // case 32
+              case 42: {
+                pageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              case 50: {
+                requestId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              case 58: {
+                eventSource_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 58
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -8693,7 +8426,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListEventsRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -8813,62 +8557,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListEventsResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                auditEvent_ = new java.util.ArrayList<com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              auditEvent_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent.parser(), extensionRegistry));
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              nextPageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          auditEvent_ = java.util.Collections.unmodifiableList(auditEvent_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -9009,7 +8697,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, nextPageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -9025,7 +8713,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, nextPageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -9044,7 +8732,7 @@ public final class AuditProto {
           .equals(other.getAuditEventList())) return false;
       if (!getNextPageToken()
           .equals(other.getNextPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -9061,7 +8749,7 @@ public final class AuditProto {
       }
       hash = (37 * hash) + NEXTPAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getNextPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -9182,29 +8870,24 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getAuditEventFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (auditEventBuilder_ == null) {
           auditEvent_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          auditEvent_ = null;
           auditEventBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         nextPageToken_ = "";
 
         return this;
@@ -9322,7 +9005,7 @@ public final class AuditProto {
           nextPageToken_ = other.nextPageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -9337,17 +9020,48 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent.parser(),
+                        extensionRegistry);
+                if (auditEventBuilder_ == null) {
+                  ensureAuditEventIsMutable();
+                  auditEvent_.add(m);
+                } else {
+                  auditEventBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 18: {
+                nextPageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -9792,7 +9506,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListEventsResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -10134,138 +9859,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private AuditEvent(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              id_ = s;
-              break;
-            }
-            case 16: {
-
-              timestamp_ = input.readInt64();
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-              actorCase_ = 4;
-              actor_ = s;
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestId_ = s;
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              eventName_ = s;
-              break;
-            }
-            case 66: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              sourceIPAddress_ = s;
-              break;
-            }
-            case 74: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              eventSource_ = s;
-              break;
-            }
-            case 82: {
-              java.lang.String s = input.readStringRequireUtf8();
-              actorCase_ = 10;
-              actor_ = s;
-              break;
-            }
-            case 90: {
-              com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestData.Builder subBuilder = null;
-              if (eventTypeCase_ == 11) {
-                subBuilder = ((com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestData) eventType_).toBuilder();
-              }
-              eventType_ =
-                  input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestData.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestData) eventType_);
-                eventType_ = subBuilder.buildPartial();
-              }
-              eventTypeCase_ = 11;
-              break;
-            }
-            case 98: {
-              com.cloudera.thunderhead.service.audit.AuditProto.ServiceEventData.Builder subBuilder = null;
-              if (eventTypeCase_ == 12) {
-                subBuilder = ((com.cloudera.thunderhead.service.audit.AuditProto.ServiceEventData) eventType_).toBuilder();
-              }
-              eventType_ =
-                  input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.ServiceEventData.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.ServiceEventData) eventType_);
-                eventType_ = subBuilder.buildPartial();
-              }
-              eventTypeCase_ = 12;
-              break;
-            }
-            case 106: {
-              com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData.Builder subBuilder = null;
-              if (eventTypeCase_ == 13) {
-                subBuilder = ((com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData) eventType_).toBuilder();
-              }
-              eventType_ =
-                  input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData) eventType_);
-                eventType_ = subBuilder.buildPartial();
-              }
-              eventTypeCase_ = 13;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -10967,7 +10560,7 @@ public final class AuditProto {
       if (eventTypeCase_ == 13) {
         output.writeMessage(13, (com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData) eventType_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -11016,7 +10609,7 @@ public final class AuditProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(13, (com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData) eventType_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -11075,7 +10668,7 @@ public final class AuditProto {
         case 0:
         default:
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -11129,7 +10722,7 @@ public final class AuditProto {
         case 0:
         default:
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -11254,18 +10847,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -11284,6 +10872,15 @@ public final class AuditProto {
 
         eventSource_ = "";
 
+        if (apiRequestDataBuilder_ != null) {
+          apiRequestDataBuilder_.clear();
+        }
+        if (serviceEventDataBuilder_ != null) {
+          serviceEventDataBuilder_.clear();
+        }
+        if (interactiveLoginEventDataBuilder_ != null) {
+          interactiveLoginEventDataBuilder_.clear();
+        }
         actorCase_ = 0;
         actor_ = null;
         eventTypeCase_ = 0;
@@ -11459,7 +11056,7 @@ public final class AuditProto {
             break;
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -11474,17 +11071,98 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                id_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                timestamp_ = input.readInt64();
+
+                break;
+              } // case 16
+              case 26: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                java.lang.String s = input.readStringRequireUtf8();
+                actorCase_ = 4;
+                actor_ = s;
+                break;
+              } // case 34
+              case 42: {
+                requestId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              case 50: {
+                eventName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              case 66: {
+                sourceIPAddress_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 66
+              case 74: {
+                eventSource_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 74
+              case 82: {
+                java.lang.String s = input.readStringRequireUtf8();
+                actorCase_ = 10;
+                actor_ = s;
+                break;
+              } // case 82
+              case 90: {
+                input.readMessage(
+                    getApiRequestDataFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                eventTypeCase_ = 11;
+                break;
+              } // case 90
+              case 98: {
+                input.readMessage(
+                    getServiceEventDataFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                eventTypeCase_ = 12;
+                break;
+              } // case 98
+              case 106: {
+                input.readMessage(
+                    getInteractiveLoginEventDataFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                eventTypeCase_ = 13;
+                break;
+              } // case 106
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int actorCase_ = 0;
@@ -12484,8 +12162,9 @@ public final class AuditProto {
         } else {
           if (eventTypeCase_ == 11) {
             apiRequestDataBuilder_.mergeFrom(value);
+          } else {
+            apiRequestDataBuilder_.setMessage(value);
           }
-          apiRequestDataBuilder_.setMessage(value);
         }
         eventTypeCase_ = 11;
         return this;
@@ -12661,8 +12340,9 @@ public final class AuditProto {
         } else {
           if (eventTypeCase_ == 12) {
             serviceEventDataBuilder_.mergeFrom(value);
+          } else {
+            serviceEventDataBuilder_.setMessage(value);
           }
-          serviceEventDataBuilder_.setMessage(value);
         }
         eventTypeCase_ = 12;
         return this;
@@ -12838,8 +12518,9 @@ public final class AuditProto {
         } else {
           if (eventTypeCase_ == 13) {
             interactiveLoginEventDataBuilder_.mergeFrom(value);
+          } else {
+            interactiveLoginEventDataBuilder_.setMessage(value);
           }
-          interactiveLoginEventDataBuilder_.setMessage(value);
         }
         eventTypeCase_ = 13;
         return this;
@@ -12953,7 +12634,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new AuditEvent(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -13063,55 +12755,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ServiceEventData(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              detailsVersion_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              eventDetails_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -13250,7 +12893,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventDetails_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, eventDetails_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -13265,7 +12908,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventDetails_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, eventDetails_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -13284,7 +12927,7 @@ public final class AuditProto {
           .equals(other.getDetailsVersion())) return false;
       if (!getEventDetails()
           .equals(other.getEventDetails())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -13299,7 +12942,7 @@ public final class AuditProto {
       hash = (53 * hash) + getDetailsVersion().hashCode();
       hash = (37 * hash) + EVENTDETAILS_FIELD_NUMBER;
       hash = (53 * hash) + getEventDetails().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -13422,18 +13065,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ServiceEventData.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -13526,7 +13164,7 @@ public final class AuditProto {
           eventDetails_ = other.eventDetails_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -13541,17 +13179,40 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ServiceEventData parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                detailsVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                eventDetails_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ServiceEventData) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -13809,7 +13470,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ServiceEventData(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -13937,66 +13609,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ApiRequestData(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestParameters_ = s;
-              break;
-            }
-            case 16: {
-
-              mutating_ = input.readBool();
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              apiVersion_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              userAgent_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -14190,7 +13802,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userAgent_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, userAgent_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -14212,7 +13824,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userAgent_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, userAgent_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -14235,7 +13847,7 @@ public final class AuditProto {
           .equals(other.getApiVersion())) return false;
       if (!getUserAgent()
           .equals(other.getUserAgent())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -14255,7 +13867,7 @@ public final class AuditProto {
       hash = (53 * hash) + getApiVersion().hashCode();
       hash = (37 * hash) + USERAGENT_FIELD_NUMBER;
       hash = (53 * hash) + getUserAgent().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -14377,18 +13989,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestData.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -14494,7 +14101,7 @@ public final class AuditProto {
           userAgent_ = other.userAgent_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -14509,17 +14116,50 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestData parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                requestParameters_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                mutating_ = input.readBool();
+
+                break;
+              } // case 16
+              case 26: {
+                apiVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                userAgent_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestData) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -14886,7 +14526,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ApiRequestData(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -15146,98 +14797,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private InteractiveLoginEventData(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              identityProviderCrn_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              identityProviderSessionId_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              identityProviderUserId_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              email_ = s;
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              firstName_ = s;
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              lastName_ = s;
-              break;
-            }
-            case 66: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                groups_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              groups_.add(s);
-              break;
-            }
-            case 74: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              azureObjectId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          groups_ = groups_.getUnmodifiableView();
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -15679,7 +15238,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(azureObjectId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, azureObjectId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -15717,7 +15276,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(azureObjectId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, azureObjectId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -15748,7 +15307,7 @@ public final class AuditProto {
           .equals(other.getGroupsList())) return false;
       if (!getAzureObjectId()
           .equals(other.getAzureObjectId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -15777,7 +15336,7 @@ public final class AuditProto {
       }
       hash = (37 * hash) + AZUREOBJECTID_FIELD_NUMBER;
       hash = (53 * hash) + getAzureObjectId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -15899,18 +15458,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -16056,7 +15610,7 @@ public final class AuditProto {
           azureObjectId_ = other.azureObjectId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -16071,17 +15625,71 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                identityProviderCrn_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                identityProviderSessionId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                identityProviderUserId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                email_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 50: {
+                firstName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              case 58: {
+                lastName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 58
+              case 66: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureGroupsIsMutable();
+                groups_.add(s);
+                break;
+              } // case 66
+              case 74: {
+                azureObjectId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 74
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -16975,7 +16583,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new InteractiveLoginEventData(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -17187,108 +16806,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private AttemptAuditEventResult(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              id_ = s;
-              break;
-            }
-            case 88: {
-
-              resultTimestamp_ = input.readInt64();
-              break;
-            }
-            case 98: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              resultCode_ = s;
-              break;
-            }
-            case 114: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              resultMessage_ = s;
-              break;
-            }
-            case 122: {
-              com.cloudera.thunderhead.service.audit.AuditProto.ResultApiRequestData.Builder subBuilder = null;
-              if (eventTypeCase_ == 15) {
-                subBuilder = ((com.cloudera.thunderhead.service.audit.AuditProto.ResultApiRequestData) eventType_).toBuilder();
-              }
-              eventType_ =
-                  input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.ResultApiRequestData.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.ResultApiRequestData) eventType_);
-                eventType_ = subBuilder.buildPartial();
-              }
-              eventTypeCase_ = 15;
-              break;
-            }
-            case 130: {
-              com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData.Builder subBuilder = null;
-              if (eventTypeCase_ == 16) {
-                subBuilder = ((com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData) eventType_).toBuilder();
-              }
-              eventType_ =
-                  input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData) eventType_);
-                eventType_ = subBuilder.buildPartial();
-              }
-              eventTypeCase_ = 16;
-              break;
-            }
-            case 138: {
-              com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventData.Builder subBuilder = null;
-              if (eventTypeCase_ == 17) {
-                subBuilder = ((com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventData) eventType_).toBuilder();
-              }
-              eventType_ =
-                  input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventData.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventData) eventType_);
-                eventType_ = subBuilder.buildPartial();
-              }
-              eventTypeCase_ = 17;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -17665,7 +17182,7 @@ public final class AuditProto {
       if (eventTypeCase_ == 17) {
         output.writeMessage(17, (com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventData) eventType_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -17699,7 +17216,7 @@ public final class AuditProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(17, (com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventData) eventType_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -17739,7 +17256,7 @@ public final class AuditProto {
         case 0:
         default:
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -17775,7 +17292,7 @@ public final class AuditProto {
         case 0:
         default:
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -17896,18 +17413,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResult.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -17920,6 +17432,15 @@ public final class AuditProto {
 
         resultMessage_ = "";
 
+        if (resultApiRequestDataBuilder_ != null) {
+          resultApiRequestDataBuilder_.clear();
+        }
+        if (resultServiceEventDataBuilder_ != null) {
+          resultServiceEventDataBuilder_.clear();
+        }
+        if (resultInteractiveLoginEventDataBuilder_ != null) {
+          resultInteractiveLoginEventDataBuilder_.clear();
+        }
         eventTypeCase_ = 0;
         eventType_ = null;
         return this;
@@ -18054,7 +17575,7 @@ public final class AuditProto {
             break;
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -18069,17 +17590,71 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResult parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                id_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 88: {
+                resultTimestamp_ = input.readInt64();
+
+                break;
+              } // case 88
+              case 98: {
+                resultCode_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 98
+              case 114: {
+                resultMessage_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 114
+              case 122: {
+                input.readMessage(
+                    getResultApiRequestDataFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                eventTypeCase_ = 15;
+                break;
+              } // case 122
+              case 130: {
+                input.readMessage(
+                    getResultServiceEventDataFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                eventTypeCase_ = 16;
+                break;
+              } // case 130
+              case 138: {
+                input.readMessage(
+                    getResultInteractiveLoginEventDataFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                eventTypeCase_ = 17;
+                break;
+              } // case 138
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResult) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int eventTypeCase_ = 0;
@@ -18528,8 +18103,9 @@ public final class AuditProto {
         } else {
           if (eventTypeCase_ == 15) {
             resultApiRequestDataBuilder_.mergeFrom(value);
+          } else {
+            resultApiRequestDataBuilder_.setMessage(value);
           }
-          resultApiRequestDataBuilder_.setMessage(value);
         }
         eventTypeCase_ = 15;
         return this;
@@ -18705,8 +18281,9 @@ public final class AuditProto {
         } else {
           if (eventTypeCase_ == 16) {
             resultServiceEventDataBuilder_.mergeFrom(value);
+          } else {
+            resultServiceEventDataBuilder_.setMessage(value);
           }
-          resultServiceEventDataBuilder_.setMessage(value);
         }
         eventTypeCase_ = 16;
         return this;
@@ -18882,8 +18459,9 @@ public final class AuditProto {
         } else {
           if (eventTypeCase_ == 17) {
             resultInteractiveLoginEventDataBuilder_.mergeFrom(value);
+          } else {
+            resultInteractiveLoginEventDataBuilder_.setMessage(value);
           }
-          resultInteractiveLoginEventDataBuilder_.setMessage(value);
         }
         eventTypeCase_ = 17;
         return this;
@@ -18997,7 +18575,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new AttemptAuditEventResult(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -19073,49 +18662,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ResultApiRequestData(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              responseParameters_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -19193,7 +18739,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(responseParameters_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, responseParameters_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -19205,7 +18751,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(responseParameters_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, responseParameters_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -19222,7 +18768,7 @@ public final class AuditProto {
 
       if (!getResponseParameters()
           .equals(other.getResponseParameters())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -19235,7 +18781,7 @@ public final class AuditProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + RESPONSEPARAMETERS_FIELD_NUMBER;
       hash = (53 * hash) + getResponseParameters().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -19357,18 +18903,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ResultApiRequestData.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -19454,7 +18995,7 @@ public final class AuditProto {
           responseParameters_ = other.responseParameters_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -19469,17 +19010,35 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ResultApiRequestData parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                responseParameters_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ResultApiRequestData) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -19611,7 +19170,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ResultApiRequestData(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -19744,62 +19314,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ResultServiceEventData(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                resourceCrn_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              resourceCrn_.add(s);
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              resultDetails_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          resourceCrn_ = resourceCrn_.getUnmodifiableView();
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -19945,7 +19459,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resultDetails_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, resultDetails_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -19965,7 +19479,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resultDetails_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, resultDetails_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -19984,7 +19498,7 @@ public final class AuditProto {
           .equals(other.getResourceCrnList())) return false;
       if (!getResultDetails()
           .equals(other.getResultDetails())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -20001,7 +19515,7 @@ public final class AuditProto {
       }
       hash = (37 * hash) + RESULTDETAILS_FIELD_NUMBER;
       hash = (53 * hash) + getResultDetails().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -20124,18 +19638,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -20239,7 +19748,7 @@ public final class AuditProto {
           resultDetails_ = other.resultDetails_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -20254,17 +19763,41 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureResourceCrnIsMutable();
+                resourceCrn_.add(s);
+                break;
+              } // case 10
+              case 18: {
+                resultDetails_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -20578,7 +20111,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ResultServiceEventData(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -20665,54 +20209,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ResultInteractiveLoginEventData(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              accountAdmin_ = input.readBool();
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              userCrn_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -20809,7 +20305,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, userCrn_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -20825,7 +20321,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, userCrn_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -20844,7 +20340,7 @@ public final class AuditProto {
           != other.getAccountAdmin()) return false;
       if (!getUserCrn()
           .equals(other.getUserCrn())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -20860,7 +20356,7 @@ public final class AuditProto {
           getAccountAdmin());
       hash = (37 * hash) + USERCRN_FIELD_NUMBER;
       hash = (53 * hash) + getUserCrn().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -20982,18 +20478,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventData.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -21085,7 +20576,7 @@ public final class AuditProto {
           userCrn_ = other.userCrn_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -21100,17 +20591,40 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventData parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                accountAdmin_ = input.readBool();
+
+                break;
+              } // case 8
+              case 18: {
+                userCrn_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventData) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -21288,7 +20802,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ResultInteractiveLoginEventData(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -21459,78 +20984,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ApiRequestEvent(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestParameters_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              responseParameters_ = s;
-              break;
-            }
-            case 24: {
-
-              mutating_ = input.readBool();
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              apiVersion_ = s;
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              sourceIPAddress_ = s;
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              userAgent_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -21822,7 +21275,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userAgent_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, userAgent_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -21850,7 +21303,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userAgent_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, userAgent_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -21877,7 +21330,7 @@ public final class AuditProto {
           .equals(other.getSourceIPAddress())) return false;
       if (!getUserAgent()
           .equals(other.getUserAgent())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -21901,7 +21354,7 @@ public final class AuditProto {
       hash = (53 * hash) + getSourceIPAddress().hashCode();
       hash = (37 * hash) + USERAGENT_FIELD_NUMBER;
       hash = (53 * hash) + getUserAgent().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -22024,18 +21477,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestEvent.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -22155,7 +21603,7 @@ public final class AuditProto {
           userAgent_ = other.userAgent_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -22170,17 +21618,60 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestEvent parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                requestParameters_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                responseParameters_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 24: {
+                mutating_ = input.readBool();
+
+                break;
+              } // case 24
+              case 34: {
+                apiVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 42: {
+                sourceIPAddress_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              case 50: {
+                userAgent_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestEvent) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -22739,7 +22230,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ApiRequestEvent(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -22888,68 +22390,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CdpServiceEvent(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              additionalServiceEventDetails_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                resourceCrn_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              resourceCrn_.add(s);
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              detailsVersion_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          resourceCrn_ = resourceCrn_.getUnmodifiableView();
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -23138,7 +22578,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(detailsVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, detailsVersion_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -23161,7 +22601,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(detailsVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, detailsVersion_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -23182,7 +22622,7 @@ public final class AuditProto {
           .equals(other.getResourceCrnList())) return false;
       if (!getDetailsVersion()
           .equals(other.getDetailsVersion())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -23201,7 +22641,7 @@ public final class AuditProto {
       }
       hash = (37 * hash) + DETAILSVERSION_FIELD_NUMBER;
       hash = (53 * hash) + getDetailsVersion().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -23325,18 +22765,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -23447,7 +22882,7 @@ public final class AuditProto {
           detailsVersion_ = other.detailsVersion_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -23462,17 +22897,46 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                additionalServiceEventDetails_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureResourceCrnIsMutable();
+                resourceCrn_.add(s);
+                break;
+              } // case 18
+              case 26: {
+                detailsVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -23867,7 +23331,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CdpServiceEvent(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -24162,109 +23637,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private InteractiveLoginEvent(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              identityProviderCrn_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              identityProviderSessionId_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              identityProviderUserId_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              email_ = s;
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              sourceIPAddress_ = s;
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              firstName_ = s;
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              lastName_ = s;
-              break;
-            }
-            case 64: {
-
-              accountAdmin_ = input.readBool();
-              break;
-            }
-            case 74: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                groups_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              groups_.add(s);
-              break;
-            }
-            case 82: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              userCrn_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          groups_ = groups_.getUnmodifiableView();
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -24774,7 +24146,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, userCrn_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -24819,7 +24191,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, userCrn_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -24854,7 +24226,7 @@ public final class AuditProto {
           .equals(other.getGroupsList())) return false;
       if (!getUserCrn()
           .equals(other.getUserCrn())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -24888,7 +24260,7 @@ public final class AuditProto {
       }
       hash = (37 * hash) + USERCRN_FIELD_NUMBER;
       hash = (53 * hash) + getUserCrn().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -25013,18 +24385,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -25183,7 +24550,7 @@ public final class AuditProto {
           userCrn_ = other.userCrn_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -25198,17 +24565,81 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                identityProviderCrn_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                identityProviderSessionId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                identityProviderUserId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                email_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 42: {
+                sourceIPAddress_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              case 50: {
+                firstName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              case 58: {
+                lastName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 58
+              case 64: {
+                accountAdmin_ = input.readBool();
+
+                break;
+              } // case 64
+              case 74: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureGroupsIsMutable();
+                groups_.add(s);
+                break;
+              } // case 74
+              case 82: {
+                userCrn_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 82
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -26244,7 +25675,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new InteractiveLoginEvent(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -26363,55 +25805,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ActorIdentity(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-              actorTypeCase_ = 1;
-              actorType_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-              actorTypeCase_ = 2;
-              actorType_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -26618,7 +26011,7 @@ public final class AuditProto {
       if (actorTypeCase_ == 2) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, actorType_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -26633,7 +26026,7 @@ public final class AuditProto {
       if (actorTypeCase_ == 2) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, actorType_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -26661,7 +26054,7 @@ public final class AuditProto {
         case 0:
         default:
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -26684,7 +26077,7 @@ public final class AuditProto {
         case 0:
         default:
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -26807,18 +26200,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentity.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -26923,7 +26311,7 @@ public final class AuditProto {
             break;
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -26938,17 +26326,42 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentity parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                java.lang.String s = input.readStringRequireUtf8();
+                actorTypeCase_ = 1;
+                actorType_ = s;
+                break;
+              } // case 10
+              case 18: {
+                java.lang.String s = input.readStringRequireUtf8();
+                actorTypeCase_ = 2;
+                actorType_ = s;
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentity) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int actorTypeCase_ = 0;
@@ -27247,7 +26660,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ActorIdentity(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -27618,157 +27042,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CdpAuditEvent(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              version_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              id_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              eventSource_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              eventName_ = s;
-              break;
-            }
-            case 40: {
-
-              timestamp_ = input.readInt64();
-              break;
-            }
-            case 50: {
-              com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentity.Builder subBuilder = null;
-              if (actorIdentity_ != null) {
-                subBuilder = actorIdentity_.toBuilder();
-              }
-              actorIdentity_ = input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentity.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(actorIdentity_);
-                actorIdentity_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            case 66: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestId_ = s;
-              break;
-            }
-            case 74: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              resultCode_ = s;
-              break;
-            }
-            case 82: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              resultMessage_ = s;
-              break;
-            }
-            case 90: {
-              com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestEvent.Builder subBuilder = null;
-              if (eventTypeCase_ == 11) {
-                subBuilder = ((com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestEvent) eventType_).toBuilder();
-              }
-              eventType_ =
-                  input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestEvent.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestEvent) eventType_);
-                eventType_ = subBuilder.buildPartial();
-              }
-              eventTypeCase_ = 11;
-              break;
-            }
-            case 98: {
-              com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent.Builder subBuilder = null;
-              if (eventTypeCase_ == 12) {
-                subBuilder = ((com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent) eventType_).toBuilder();
-              }
-              eventType_ =
-                  input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent) eventType_);
-                eventType_ = subBuilder.buildPartial();
-              }
-              eventTypeCase_ = 12;
-              break;
-            }
-            case 106: {
-              com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent.Builder subBuilder = null;
-              if (eventTypeCase_ == 13) {
-                subBuilder = ((com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent) eventType_).toBuilder();
-              }
-              eventType_ =
-                  input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent) eventType_);
-                eventType_ = subBuilder.buildPartial();
-              }
-              eventTypeCase_ = 13;
-              break;
-            }
-            case 114: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              archiveId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -28486,7 +27759,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(archiveId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 14, archiveId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -28542,7 +27815,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(archiveId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(14, archiveId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -28599,7 +27872,7 @@ public final class AuditProto {
         case 0:
         default:
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -28651,7 +27924,7 @@ public final class AuditProto {
         case 0:
         default:
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -28772,18 +28045,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -28812,6 +28080,15 @@ public final class AuditProto {
 
         resultMessage_ = "";
 
+        if (apiRequestEventBuilder_ != null) {
+          apiRequestEventBuilder_.clear();
+        }
+        if (cdpServiceEventBuilder_ != null) {
+          cdpServiceEventBuilder_.clear();
+        }
+        if (interactiveLoginEventBuilder_ != null) {
+          interactiveLoginEventBuilder_.clear();
+        }
         archiveId_ = "";
 
         eventTypeCase_ = 0;
@@ -28986,7 +28263,7 @@ public final class AuditProto {
             break;
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -29001,17 +28278,108 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                version_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                id_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                eventSource_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                eventName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 40: {
+                timestamp_ = input.readInt64();
+
+                break;
+              } // case 40
+              case 50: {
+                input.readMessage(
+                    getActorIdentityFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 50
+              case 58: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 58
+              case 66: {
+                requestId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 66
+              case 74: {
+                resultCode_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 74
+              case 82: {
+                resultMessage_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 82
+              case 90: {
+                input.readMessage(
+                    getApiRequestEventFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                eventTypeCase_ = 11;
+                break;
+              } // case 90
+              case 98: {
+                input.readMessage(
+                    getCdpServiceEventFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                eventTypeCase_ = 12;
+                break;
+              } // case 98
+              case 106: {
+                input.readMessage(
+                    getInteractiveLoginEventFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                eventTypeCase_ = 13;
+                break;
+              } // case 106
+              case 114: {
+                archiveId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 114
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int eventTypeCase_ = 0;
@@ -30105,8 +29473,9 @@ public final class AuditProto {
         } else {
           if (eventTypeCase_ == 11) {
             apiRequestEventBuilder_.mergeFrom(value);
+          } else {
+            apiRequestEventBuilder_.setMessage(value);
           }
-          apiRequestEventBuilder_.setMessage(value);
         }
         eventTypeCase_ = 11;
         return this;
@@ -30282,8 +29651,9 @@ public final class AuditProto {
         } else {
           if (eventTypeCase_ == 12) {
             cdpServiceEventBuilder_.mergeFrom(value);
+          } else {
+            cdpServiceEventBuilder_.setMessage(value);
           }
-          cdpServiceEventBuilder_.setMessage(value);
         }
         eventTypeCase_ = 12;
         return this;
@@ -30459,8 +29829,9 @@ public final class AuditProto {
         } else {
           if (eventTypeCase_ == 13) {
             interactiveLoginEventBuilder_.mergeFrom(value);
+          } else {
+            interactiveLoginEventBuilder_.setMessage(value);
           }
-          interactiveLoginEventBuilder_.setMessage(value);
         }
         eventTypeCase_ = 13;
         return this;
@@ -30675,7 +30046,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CdpAuditEvent(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -30770,59 +30152,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ArchiveAuditEventsRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              fromTimestamp_ = input.readInt64();
-              break;
-            }
-            case 16: {
-
-              toTimestamp_ = input.readInt64();
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -30936,7 +30265,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, accountId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -30956,7 +30285,7 @@ public final class AuditProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, accountId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -30977,7 +30306,7 @@ public final class AuditProto {
           != other.getToTimestamp()) return false;
       if (!getAccountId()
           .equals(other.getAccountId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -30996,7 +30325,7 @@ public final class AuditProto {
           getToTimestamp());
       hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
       hash = (53 * hash) + getAccountId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -31117,18 +30446,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -31226,7 +30550,7 @@ public final class AuditProto {
           accountId_ = other.accountId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -31241,17 +30565,45 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                fromTimestamp_ = input.readInt64();
+
+                break;
+              } // case 8
+              case 16: {
+                toTimestamp_ = input.readInt64();
+
+                break;
+              } // case 16
+              case 26: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -31469,7 +30821,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ArchiveAuditEventsRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -31579,61 +30942,6 @@ public final class AuditProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private ArchiveAuditEventsResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              eventCount_ = input.readInt64();
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                eventBatches_ = new java.util.ArrayList<com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              eventBatches_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse.parser(), extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          eventBatches_ = java.util.Collections.unmodifiableList(eventBatches_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.audit.AuditProto.internal_static_audit_ArchiveAuditEventsResponse_descriptor;
@@ -31742,7 +31050,7 @@ public final class AuditProto {
       for (int i = 0; i < eventBatches_.size(); i++) {
         output.writeMessage(2, eventBatches_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -31759,7 +31067,7 @@ public final class AuditProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, eventBatches_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -31778,7 +31086,7 @@ public final class AuditProto {
           != other.getEventCount()) return false;
       if (!getEventBatchesList()
           .equals(other.getEventBatchesList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -31796,7 +31104,7 @@ public final class AuditProto {
         hash = (37 * hash) + EVENTBATCHES_FIELD_NUMBER;
         hash = (53 * hash) + getEventBatchesList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -31917,19 +31225,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getEventBatchesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -31938,10 +31240,11 @@ public final class AuditProto {
 
         if (eventBatchesBuilder_ == null) {
           eventBatches_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          eventBatches_ = null;
           eventBatchesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -32056,7 +31359,7 @@ public final class AuditProto {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -32071,17 +31374,48 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                eventCount_ = input.readInt64();
+
+                break;
+              } // case 8
+              case 18: {
+                com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse.parser(),
+                        extensionRegistry);
+                if (eventBatchesBuilder_ == null) {
+                  ensureEventBatchesIsMutable();
+                  eventBatches_.add(m);
+                } else {
+                  eventBatchesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -32473,7 +31807,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ArchiveAuditEventsResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -32589,65 +31934,6 @@ public final class AuditProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ArchiveAuditEventsBatchResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            case 16: {
-
-              eventCount_ = input.readInt64();
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              archiveId_ = s;
-              break;
-            }
-            case 32: {
-
-              archiveTimestamp_ = input.readInt64();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -32810,7 +32096,7 @@ public final class AuditProto {
       if (archiveTimestamp_ != 0L) {
         output.writeInt64(4, archiveTimestamp_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -32833,7 +32119,7 @@ public final class AuditProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(4, archiveTimestamp_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -32856,7 +32142,7 @@ public final class AuditProto {
           .equals(other.getArchiveId())) return false;
       if (getArchiveTimestamp()
           != other.getArchiveTimestamp()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -32877,7 +32163,7 @@ public final class AuditProto {
       hash = (37 * hash) + ARCHIVETIMESTAMP_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getArchiveTimestamp());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -32998,18 +32284,13 @@ public final class AuditProto {
 
       // Construct using com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -33114,7 +32395,7 @@ public final class AuditProto {
         if (other.getArchiveTimestamp() != 0L) {
           setArchiveTimestamp(other.getArchiveTimestamp());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -33129,17 +32410,50 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                eventCount_ = input.readInt64();
+
+                break;
+              } // case 16
+              case 26: {
+                archiveId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 32: {
+                archiveTimestamp_ = input.readInt64();
+
+                break;
+              } // case 32
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -33453,7 +32767,18 @@ public final class AuditProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ArchiveAuditEventsBatchResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 

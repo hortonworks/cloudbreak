@@ -49,43 +49,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private ListSupportedCloudRegionsRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_ListSupportedCloudRegionsRequest_descriptor;
@@ -113,7 +76,7 @@ public final class SDXSvcAdminProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -122,7 +85,7 @@ public final class SDXSvcAdminProto {
       if (size != -1) return size;
 
       size = 0;
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -137,7 +100,7 @@ public final class SDXSvcAdminProto {
       }
       com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsRequest other = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsRequest) obj;
 
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -148,7 +111,7 @@ public final class SDXSvcAdminProto {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -269,18 +232,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -359,7 +317,7 @@ public final class SDXSvcAdminProto {
 
       public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsRequest other) {
         if (other == com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsRequest.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -374,17 +332,30 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       @java.lang.Override
@@ -420,7 +391,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListSupportedCloudRegionsRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -520,56 +502,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private ListSupportedCloudRegionsResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                regions_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatformRegion>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              regions_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatformRegion.parser(), extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          regions_ = java.util.Collections.unmodifiableList(regions_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_ListSupportedCloudRegionsResponse_descriptor;
@@ -660,7 +592,7 @@ public final class SDXSvcAdminProto {
       for (int i = 0; i < regions_.size(); i++) {
         output.writeMessage(1, regions_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -673,7 +605,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, regions_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -690,7 +622,7 @@ public final class SDXSvcAdminProto {
 
       if (!getRegionsList()
           .equals(other.getRegionsList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -705,7 +637,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + REGIONS_FIELD_NUMBER;
         hash = (53 * hash) + getRegionsList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -826,29 +758,24 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getRegionsFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (regionsBuilder_ == null) {
           regions_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          regions_ = null;
           regionsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -959,7 +886,7 @@ public final class SDXSvcAdminProto {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -974,17 +901,43 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatformRegion m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.CloudPlatformRegion.parser(),
+                        extensionRegistry);
+                if (regionsBuilder_ == null) {
+                  ensureRegionsIsMutable();
+                  regions_.add(m);
+                } else {
+                  regionsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -1333,7 +1286,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListSupportedCloudRegionsResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -1388,43 +1352,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private ListSupportedCloudPlatformsRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_ListSupportedCloudPlatformsRequest_descriptor;
@@ -1452,7 +1379,7 @@ public final class SDXSvcAdminProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -1461,7 +1388,7 @@ public final class SDXSvcAdminProto {
       if (size != -1) return size;
 
       size = 0;
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -1476,7 +1403,7 @@ public final class SDXSvcAdminProto {
       }
       com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsRequest other = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsRequest) obj;
 
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -1487,7 +1414,7 @@ public final class SDXSvcAdminProto {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -1608,18 +1535,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -1698,7 +1620,7 @@ public final class SDXSvcAdminProto {
 
       public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsRequest other) {
         if (other == com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsRequest.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -1713,17 +1635,30 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       @java.lang.Override
@@ -1759,7 +1694,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListSupportedCloudPlatformsRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -1863,70 +1809,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListSupportedCloudPlatformsResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              int rawValue = input.readEnum();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                platforms_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              platforms_.add(rawValue);
-              break;
-            }
-            case 10: {
-              int length = input.readRawVarint32();
-              int oldLimit = input.pushLimit(length);
-              while(input.getBytesUntilLimit() > 0) {
-                int rawValue = input.readEnum();
-                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                  platforms_ = new java.util.ArrayList<java.lang.Integer>();
-                  mutable_bitField0_ |= 0x00000001;
-                }
-                platforms_.add(rawValue);
-              }
-              input.popLimit(oldLimit);
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          platforms_ = java.util.Collections.unmodifiableList(platforms_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -2041,7 +1923,7 @@ public final class SDXSvcAdminProto {
       for (int i = 0; i < platforms_.size(); i++) {
         output.writeEnumNoTag(platforms_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -2062,7 +1944,7 @@ public final class SDXSvcAdminProto {
             .computeUInt32SizeNoTag(dataSize);
         }platformsMemoizedSerializedSize = dataSize;
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -2078,7 +1960,7 @@ public final class SDXSvcAdminProto {
       com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsResponse other = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsResponse) obj;
 
       if (!platforms_.equals(other.platforms_)) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -2093,7 +1975,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + PLATFORMS_FIELD_NUMBER;
         hash = (53 * hash) + platforms_.hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -2214,18 +2096,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -2322,7 +2199,7 @@ public final class SDXSvcAdminProto {
           }
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -2337,17 +2214,47 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                int tmpRaw = input.readEnum();
+                ensurePlatformsIsMutable();
+                platforms_.add(tmpRaw);
+                break;
+              } // case 8
+              case 10: {
+                int length = input.readRawVarint32();
+                int oldLimit = input.pushLimit(length);
+                while(input.getBytesUntilLimit() > 0) {
+                  int tmpRaw = input.readEnum();
+                  ensurePlatformsIsMutable();
+                  platforms_.add(tmpRaw);
+                }
+                input.popLimit(oldLimit);
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -2495,8 +2402,8 @@ public final class SDXSvcAdminProto {
        * </pre>
        *
        * <code>repeated .sdxsvccommon.CloudPlatform.Value platforms = 1;</code>
-       * @param index The index of the value to return.
-       * @return The enum numeric value on the wire of platforms at the given index.
+       * @param index The index to set the value at.
+       * @param value The enum numeric value on the wire for platforms to set.
        * @return This builder for chaining.
        */
       public Builder setPlatformsValue(
@@ -2572,7 +2479,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListSupportedCloudPlatformsResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -2731,73 +2649,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private AddServiceRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              serviceType_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              name_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              serviceVersion_ = s;
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -3071,7 +2922,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, accountId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -3095,7 +2946,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, accountId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -3120,7 +2971,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getServiceVersion())) return false;
       if (!getAccountId()
           .equals(other.getAccountId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -3141,7 +2992,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getServiceVersion().hashCode();
       hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
       hash = (53 * hash) + getAccountId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -3262,18 +3113,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.AddServiceRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -3387,7 +3233,7 @@ public final class SDXSvcAdminProto {
           accountId_ = other.accountId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -3402,17 +3248,55 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.AddServiceRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                serviceType_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                name_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                serviceVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 42: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.AddServiceRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -3928,7 +3812,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new AddServiceRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -4010,56 +3905,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private AddServiceResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.Builder subBuilder = null;
-              if (service_ != null) {
-                subBuilder = service_.toBuilder();
-              }
-              service_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(service_);
-                service_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_AddServiceResponse_descriptor;
@@ -4128,7 +3973,7 @@ public final class SDXSvcAdminProto {
       if (service_ != null) {
         output.writeMessage(1, getService());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -4141,7 +3986,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getService());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -4161,7 +4006,7 @@ public final class SDXSvcAdminProto {
         if (!getService()
             .equals(other.getService())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -4176,7 +4021,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + SERVICE_FIELD_NUMBER;
         hash = (53 * hash) + getService().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -4297,18 +4142,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.AddServiceResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -4401,7 +4241,7 @@ public final class SDXSvcAdminProto {
         if (other.hasService()) {
           mergeService(other.getService());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -4416,17 +4256,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.AddServiceResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getServiceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.AddServiceResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -4617,7 +4477,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new AddServiceResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -4734,61 +4605,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RemoveServiceRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              service_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -4964,7 +4780,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, accountId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -4982,7 +4798,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, accountId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -5003,7 +4819,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getService())) return false;
       if (!getAccountId()
           .equals(other.getAccountId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -5020,7 +4836,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getService().hashCode();
       hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
       hash = (53 * hash) + getAccountId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -5141,18 +4957,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RemoveServiceRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -5252,7 +5063,7 @@ public final class SDXSvcAdminProto {
           accountId_ = other.accountId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -5267,17 +5078,45 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RemoveServiceRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                service_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RemoveServiceRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -5601,7 +5440,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RemoveServiceRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -5676,49 +5526,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RemoveServiceResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -5796,7 +5603,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -5808,7 +5615,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -5825,7 +5632,7 @@ public final class SDXSvcAdminProto {
 
       if (!getRequestId()
           .equals(other.getRequestId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -5838,7 +5645,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + REQUESTID_FIELD_NUMBER;
       hash = (53 * hash) + getRequestId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -5959,18 +5766,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RemoveServiceResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -6056,7 +5858,7 @@ public final class SDXSvcAdminProto {
           requestId_ = other.requestId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -6071,17 +5873,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RemoveServiceResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                requestId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RemoveServiceResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -6213,7 +6033,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RemoveServiceResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -6330,61 +6161,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DescribeServiceRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              service_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -6560,7 +6336,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, accountId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -6578,7 +6354,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, accountId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -6599,7 +6375,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getService())) return false;
       if (!getAccountId()
           .equals(other.getAccountId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -6616,7 +6392,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getService().hashCode();
       hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
       hash = (53 * hash) + getAccountId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -6737,18 +6513,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeServiceRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -6848,7 +6619,7 @@ public final class SDXSvcAdminProto {
           accountId_ = other.accountId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -6863,17 +6634,45 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeServiceRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                service_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeServiceRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -7197,7 +6996,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DescribeServiceRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -7320,68 +7130,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DescribeServiceResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            case 26: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.Builder subBuilder = null;
-              if (service_ != null) {
-                subBuilder = service_.toBuilder();
-              }
-              service_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Service.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(service_);
-                service_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -7549,7 +7297,7 @@ public final class SDXSvcAdminProto {
       if (service_ != null) {
         output.writeMessage(3, getService());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -7568,7 +7316,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getService());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -7592,7 +7340,7 @@ public final class SDXSvcAdminProto {
         if (!getService()
             .equals(other.getService())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -7611,7 +7359,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + SERVICE_FIELD_NUMBER;
         hash = (53 * hash) + getService().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -7732,18 +7480,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeServiceResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -7850,7 +7593,7 @@ public final class SDXSvcAdminProto {
         if (other.hasService()) {
           mergeService(other.getService());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -7865,17 +7608,47 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeServiceResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getServiceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeServiceResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -8258,7 +8031,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DescribeServiceResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -8375,61 +8159,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RequestServiceRestartRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              service_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -8605,7 +8334,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, accountId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -8623,7 +8352,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, accountId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -8644,7 +8373,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getService())) return false;
       if (!getAccountId()
           .equals(other.getAccountId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -8661,7 +8390,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getService().hashCode();
       hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
       hash = (53 * hash) + getAccountId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -8782,18 +8511,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceRestartRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -8893,7 +8617,7 @@ public final class SDXSvcAdminProto {
           accountId_ = other.accountId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -8908,17 +8632,45 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceRestartRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                service_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceRestartRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -9242,7 +8994,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RequestServiceRestartRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -9317,49 +9080,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RequestServiceRestartResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -9437,7 +9157,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -9449,7 +9169,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -9466,7 +9186,7 @@ public final class SDXSvcAdminProto {
 
       if (!getRequestId()
           .equals(other.getRequestId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -9479,7 +9199,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + REQUESTID_FIELD_NUMBER;
       hash = (53 * hash) + getRequestId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -9600,18 +9320,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceRestartResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -9697,7 +9412,7 @@ public final class SDXSvcAdminProto {
           requestId_ = other.requestId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -9712,17 +9427,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceRestartResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                requestId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceRestartResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -9854,7 +9587,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RequestServiceRestartResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -9971,61 +9715,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RequestServiceSuspendRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              service_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -10201,7 +9890,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, accountId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -10219,7 +9908,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, accountId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -10240,7 +9929,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getService())) return false;
       if (!getAccountId()
           .equals(other.getAccountId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -10257,7 +9946,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getService().hashCode();
       hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
       hash = (53 * hash) + getAccountId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -10378,18 +10067,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceSuspendRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -10489,7 +10173,7 @@ public final class SDXSvcAdminProto {
           accountId_ = other.accountId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -10504,17 +10188,45 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceSuspendRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                service_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceSuspendRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -10838,7 +10550,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RequestServiceSuspendRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -10913,49 +10636,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RequestServiceSuspendResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -11033,7 +10713,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -11045,7 +10725,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -11062,7 +10742,7 @@ public final class SDXSvcAdminProto {
 
       if (!getRequestId()
           .equals(other.getRequestId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -11075,7 +10755,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + REQUESTID_FIELD_NUMBER;
       hash = (53 * hash) + getRequestId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -11196,18 +10876,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceSuspendResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -11293,7 +10968,7 @@ public final class SDXSvcAdminProto {
           requestId_ = other.requestId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -11308,17 +10983,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceSuspendResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                requestId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceSuspendResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -11450,7 +11143,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RequestServiceSuspendResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -11567,61 +11271,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RequestServiceStartRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              service_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -11797,7 +11446,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, accountId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -11815,7 +11464,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, accountId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -11836,7 +11485,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getService())) return false;
       if (!getAccountId()
           .equals(other.getAccountId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -11853,7 +11502,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getService().hashCode();
       hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
       hash = (53 * hash) + getAccountId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -11974,18 +11623,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceStartRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -12085,7 +11729,7 @@ public final class SDXSvcAdminProto {
           accountId_ = other.accountId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -12100,17 +11744,45 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceStartRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                service_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceStartRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -12434,7 +12106,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RequestServiceStartRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -12509,49 +12192,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RequestServiceStartResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -12629,7 +12269,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -12641,7 +12281,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -12658,7 +12298,7 @@ public final class SDXSvcAdminProto {
 
       if (!getRequestId()
           .equals(other.getRequestId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -12671,7 +12311,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + REQUESTID_FIELD_NUMBER;
       hash = (53 * hash) + getRequestId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -12792,18 +12432,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceStartResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -12889,7 +12524,7 @@ public final class SDXSvcAdminProto {
           requestId_ = other.requestId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -12904,17 +12539,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceStartResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                requestId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceStartResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -13046,7 +12699,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RequestServiceStartResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -13184,67 +12848,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RequestServiceUpgradeRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              service_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              serviceVersion_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -13469,7 +13072,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, accountId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -13490,7 +13093,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, accountId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -13513,7 +13116,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getServiceVersion())) return false;
       if (!getAccountId()
           .equals(other.getAccountId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -13532,7 +13135,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getServiceVersion().hashCode();
       hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
       hash = (53 * hash) + getAccountId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -13653,18 +13256,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceUpgradeRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -13771,7 +13369,7 @@ public final class SDXSvcAdminProto {
           accountId_ = other.accountId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -13786,17 +13384,50 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceUpgradeRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                service_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                serviceVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceUpgradeRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -14216,7 +13847,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RequestServiceUpgradeRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -14291,49 +13933,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RequestServiceUpgradeResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -14411,7 +14010,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -14423,7 +14022,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -14440,7 +14039,7 @@ public final class SDXSvcAdminProto {
 
       if (!getRequestId()
           .equals(other.getRequestId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -14453,7 +14052,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + REQUESTID_FIELD_NUMBER;
       hash = (53 * hash) + getRequestId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -14574,18 +14173,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceUpgradeResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -14671,7 +14265,7 @@ public final class SDXSvcAdminProto {
           requestId_ = other.requestId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -14686,17 +14280,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceUpgradeResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                requestId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceUpgradeResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -14828,7 +14440,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RequestServiceUpgradeResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -14903,49 +14526,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CheckServiceRequestRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -15023,7 +14603,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -15035,7 +14615,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -15052,7 +14632,7 @@ public final class SDXSvcAdminProto {
 
       if (!getRequestId()
           .equals(other.getRequestId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -15065,7 +14645,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + REQUESTID_FIELD_NUMBER;
       hash = (53 * hash) + getRequestId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -15186,18 +14766,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckServiceRequestRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -15283,7 +14858,7 @@ public final class SDXSvcAdminProto {
           requestId_ = other.requestId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -15298,17 +14873,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckServiceRequestRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                requestId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckServiceRequestRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -15440,7 +15033,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CheckServiceRequestRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -15515,49 +15119,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CheckServiceRequestResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestStatus_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -15635,7 +15196,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestStatus_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestStatus_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -15647,7 +15208,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestStatus_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestStatus_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -15664,7 +15225,7 @@ public final class SDXSvcAdminProto {
 
       if (!getRequestStatus()
           .equals(other.getRequestStatus())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -15677,7 +15238,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + REQUESTSTATUS_FIELD_NUMBER;
       hash = (53 * hash) + getRequestStatus().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -15798,18 +15359,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckServiceRequestResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -15895,7 +15451,7 @@ public final class SDXSvcAdminProto {
           requestStatus_ = other.requestStatus_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -15910,17 +15466,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckServiceRequestResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                requestStatus_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckServiceRequestResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -16052,7 +15626,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CheckServiceRequestResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -16199,72 +15784,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListServiceVersionsRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-              int rawValue = input.readEnum();
-
-              cloudPlatform_ = rawValue;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cloudRegion_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              serviceType_ = s;
-              break;
-            }
-            case 800: {
-
-              pageSize_ = input.readInt32();
-              break;
-            }
-            case 810: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              pageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -16488,7 +16007,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 101, pageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -16514,7 +16033,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(101, pageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -16538,7 +16057,7 @@ public final class SDXSvcAdminProto {
           != other.getPageSize()) return false;
       if (!getPageToken()
           .equals(other.getPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -16559,7 +16078,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getPageSize();
       hash = (37 * hash) + PAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -16680,18 +16199,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListServiceVersionsRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -16803,7 +16317,7 @@ public final class SDXSvcAdminProto {
           pageToken_ = other.pageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -16818,17 +16332,55 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListServiceVersionsRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                cloudPlatform_ = input.readEnum();
+
+                break;
+              } // case 8
+              case 18: {
+                cloudRegion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                serviceType_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 800: {
+                pageSize_ = input.readInt32();
+
+                break;
+              } // case 800
+              case 810: {
+                pageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 810
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListServiceVersionsRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -17269,7 +16821,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListServiceVersionsRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -17386,62 +16949,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListServiceVersionsResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                version_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              version_.add(s);
-              break;
-            }
-            case 802: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              nextPageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          version_ = version_.getUnmodifiableView();
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -17573,7 +17080,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 100, nextPageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -17593,7 +17100,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(100, nextPageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -17612,7 +17119,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getVersionList())) return false;
       if (!getNextPageToken()
           .equals(other.getNextPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -17629,7 +17136,7 @@ public final class SDXSvcAdminProto {
       }
       hash = (37 * hash) + NEXTPAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getNextPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -17750,18 +17257,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListServiceVersionsResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -17865,7 +17367,7 @@ public final class SDXSvcAdminProto {
           nextPageToken_ = other.nextPageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -17880,17 +17382,41 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListServiceVersionsResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureVersionIsMutable();
+                version_.add(s);
+                break;
+              } // case 10
+              case 802: {
+                nextPageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 802
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListServiceVersionsResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -18169,7 +17695,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListServiceVersionsResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -18244,49 +17781,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RequestInstanceStopRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -18364,7 +17858,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instance_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, instance_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -18376,7 +17870,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instance_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, instance_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -18393,7 +17887,7 @@ public final class SDXSvcAdminProto {
 
       if (!getInstance()
           .equals(other.getInstance())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -18406,7 +17900,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + INSTANCE_FIELD_NUMBER;
       hash = (53 * hash) + getInstance().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -18527,18 +18021,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStopRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -18624,7 +18113,7 @@ public final class SDXSvcAdminProto {
           instance_ = other.instance_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -18639,17 +18128,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStopRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStopRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -18781,7 +18288,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RequestInstanceStopRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -18856,49 +18374,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RequestInstanceStopResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -18976,7 +18451,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -18988,7 +18463,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -19005,7 +18480,7 @@ public final class SDXSvcAdminProto {
 
       if (!getRequestId()
           .equals(other.getRequestId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -19018,7 +18493,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + REQUESTID_FIELD_NUMBER;
       hash = (53 * hash) + getRequestId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -19139,18 +18614,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStopResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -19236,7 +18706,7 @@ public final class SDXSvcAdminProto {
           requestId_ = other.requestId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -19251,17 +18721,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStopResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                requestId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStopResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -19393,7 +18881,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RequestInstanceStopResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -19468,49 +18967,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RequestInstanceStartRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -19588,7 +19044,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instance_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, instance_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -19600,7 +19056,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instance_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, instance_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -19617,7 +19073,7 @@ public final class SDXSvcAdminProto {
 
       if (!getInstance()
           .equals(other.getInstance())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -19630,7 +19086,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + INSTANCE_FIELD_NUMBER;
       hash = (53 * hash) + getInstance().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -19751,18 +19207,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStartRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -19848,7 +19299,7 @@ public final class SDXSvcAdminProto {
           instance_ = other.instance_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -19863,17 +19314,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStartRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStartRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -20005,7 +19474,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RequestInstanceStartRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -20080,49 +19560,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RequestInstanceStartResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -20200,7 +19637,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -20212,7 +19649,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -20229,7 +19666,7 @@ public final class SDXSvcAdminProto {
 
       if (!getRequestId()
           .equals(other.getRequestId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -20242,7 +19679,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + REQUESTID_FIELD_NUMBER;
       hash = (53 * hash) + getRequestId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -20363,18 +19800,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStartResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -20460,7 +19892,7 @@ public final class SDXSvcAdminProto {
           requestId_ = other.requestId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -20475,17 +19907,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStartResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                requestId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStartResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -20617,7 +20067,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RequestInstanceStartResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -20692,49 +20153,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RequestInstanceRestartRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -20812,7 +20230,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instance_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, instance_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -20824,7 +20242,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instance_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, instance_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -20841,7 +20259,7 @@ public final class SDXSvcAdminProto {
 
       if (!getInstance()
           .equals(other.getInstance())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -20854,7 +20272,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + INSTANCE_FIELD_NUMBER;
       hash = (53 * hash) + getInstance().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -20975,18 +20393,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceRestartRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -21072,7 +20485,7 @@ public final class SDXSvcAdminProto {
           instance_ = other.instance_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -21087,17 +20500,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceRestartRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceRestartRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -21229,7 +20660,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RequestInstanceRestartRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -21304,49 +20746,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RequestInstanceRestartResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -21424,7 +20823,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -21436,7 +20835,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -21453,7 +20852,7 @@ public final class SDXSvcAdminProto {
 
       if (!getRequestId()
           .equals(other.getRequestId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -21466,7 +20865,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + REQUESTID_FIELD_NUMBER;
       hash = (53 * hash) + getRequestId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -21587,18 +20986,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceRestartResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -21684,7 +21078,7 @@ public final class SDXSvcAdminProto {
           requestId_ = other.requestId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -21699,17 +21093,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceRestartResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                requestId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceRestartResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -21841,7 +21253,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RequestInstanceRestartResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -21958,61 +21381,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private PairEnvironmentToInstanceRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              environment_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -22188,7 +21556,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, accountId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -22206,7 +21574,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, accountId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -22227,7 +21595,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getInstance())) return false;
       if (!getAccountId()
           .equals(other.getAccountId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -22244,7 +21612,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getInstance().hashCode();
       hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
       hash = (53 * hash) + getAccountId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -22365,18 +21733,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -22476,7 +21839,7 @@ public final class SDXSvcAdminProto {
           accountId_ = other.accountId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -22491,17 +21854,45 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                environment_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -22825,7 +22216,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new PairEnvironmentToInstanceRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -22880,43 +22282,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private PairEnvironmentToInstanceResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_PairEnvironmentToInstanceResponse_descriptor;
@@ -22944,7 +22309,7 @@ public final class SDXSvcAdminProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -22953,7 +22318,7 @@ public final class SDXSvcAdminProto {
       if (size != -1) return size;
 
       size = 0;
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -22968,7 +22333,7 @@ public final class SDXSvcAdminProto {
       }
       com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceResponse other = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceResponse) obj;
 
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -22979,7 +22344,7 @@ public final class SDXSvcAdminProto {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -23100,18 +22465,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -23190,7 +22550,7 @@ public final class SDXSvcAdminProto {
 
       public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceResponse other) {
         if (other == com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceResponse.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -23205,17 +22565,30 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       @java.lang.Override
@@ -23251,7 +22624,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new PairEnvironmentToInstanceResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -23368,61 +22752,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private UnpairEnvironmentFromInstanceRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              environment_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -23598,7 +22927,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, accountId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -23616,7 +22945,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, accountId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -23637,7 +22966,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getInstance())) return false;
       if (!getAccountId()
           .equals(other.getAccountId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -23654,7 +22983,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getInstance().hashCode();
       hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
       hash = (53 * hash) + getAccountId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -23775,18 +23104,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -23886,7 +23210,7 @@ public final class SDXSvcAdminProto {
           accountId_ = other.accountId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -23901,17 +23225,45 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                environment_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -24235,7 +23587,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UnpairEnvironmentFromInstanceRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -24290,43 +23653,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private UnpairEnvironmentFromInstanceResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_UnpairEnvironmentFromInstanceResponse_descriptor;
@@ -24354,7 +23680,7 @@ public final class SDXSvcAdminProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -24363,7 +23689,7 @@ public final class SDXSvcAdminProto {
       if (size != -1) return size;
 
       size = 0;
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -24378,7 +23704,7 @@ public final class SDXSvcAdminProto {
       }
       com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceResponse other = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceResponse) obj;
 
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -24389,7 +23715,7 @@ public final class SDXSvcAdminProto {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -24510,18 +23836,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -24600,7 +23921,7 @@ public final class SDXSvcAdminProto {
 
       public Builder mergeFrom(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceResponse other) {
         if (other == com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceResponse.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -24615,17 +23936,30 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       @java.lang.Override
@@ -24661,7 +23995,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UnpairEnvironmentFromInstanceResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -24778,61 +24123,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RequestMoveInstanceToOperationalEnvironmentRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              operationalEnvironment_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -25008,7 +24298,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, accountId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -25026,7 +24316,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, accountId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -25047,7 +24337,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getOperationalEnvironment())) return false;
       if (!getAccountId()
           .equals(other.getAccountId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -25064,7 +24354,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getOperationalEnvironment().hashCode();
       hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
       hash = (53 * hash) + getAccountId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -25185,18 +24475,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestMoveInstanceToOperationalEnvironmentRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -25296,7 +24581,7 @@ public final class SDXSvcAdminProto {
           accountId_ = other.accountId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -25311,17 +24596,45 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestMoveInstanceToOperationalEnvironmentRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                operationalEnvironment_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestMoveInstanceToOperationalEnvironmentRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -25645,7 +24958,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RequestMoveInstanceToOperationalEnvironmentRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -25720,49 +25044,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RequestMoveInstanceToOperationalEnvironmentResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -25840,7 +25121,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -25852,7 +25133,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -25869,7 +25150,7 @@ public final class SDXSvcAdminProto {
 
       if (!getRequestId()
           .equals(other.getRequestId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -25882,7 +25163,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + REQUESTID_FIELD_NUMBER;
       hash = (53 * hash) + getRequestId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -26003,18 +25284,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestMoveInstanceToOperationalEnvironmentResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -26100,7 +25376,7 @@ public final class SDXSvcAdminProto {
           requestId_ = other.requestId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -26115,17 +25391,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestMoveInstanceToOperationalEnvironmentResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                requestId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestMoveInstanceToOperationalEnvironmentResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -26257,7 +25551,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RequestMoveInstanceToOperationalEnvironmentResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -26420,9 +25725,11 @@ public final class SDXSvcAdminProto {
      * <code>map&lt;string, string&gt; serviceVersions = 6;</code>
      */
 
-    java.lang.String getServiceVersionsOrDefault(
+    /* nullable */
+java.lang.String getServiceVersionsOrDefault(
         java.lang.String key,
-        java.lang.String defaultValue);
+        /* nullable */
+java.lang.String defaultValue);
     /**
      * <pre>
      * Requested SDX Service versions for creation.
@@ -26511,99 +25818,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CreateInstanceRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              name_ = s;
-              break;
-            }
-            case 16: {
-              int rawValue = input.readEnum();
-
-              cloudPlatform_ = rawValue;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cloudRegion_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              environment_ = s;
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            case 50: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                serviceVersions_ = com.google.protobuf.MapField.newMapField(
-                    ServiceVersionsDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000001;
-              }
-              com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
-              serviceVersions__ = input.readMessage(
-                  ServiceVersionsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-              serviceVersions_.getMutableMap().put(
-                  serviceVersions__.getKey(), serviceVersions__.getValue());
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              operationalEnvironment_ = s;
-              break;
-            }
-            case 66: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              description_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -27071,7 +26285,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, description_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -27112,7 +26326,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, description_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -27142,7 +26356,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getOperationalEnvironment())) return false;
       if (!getDescription()
           .equals(other.getDescription())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -27171,7 +26385,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getOperationalEnvironment().hashCode();
       hash = (37 * hash) + DESCRIPTION_FIELD_NUMBER;
       hash = (53 * hash) + getDescription().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -27314,18 +26528,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateInstanceRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -27458,7 +26667,7 @@ public final class SDXSvcAdminProto {
           description_ = other.description_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -27473,17 +26682,73 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateInstanceRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                cloudPlatform_ = input.readEnum();
+
+                break;
+              } // case 16
+              case 26: {
+                cloudRegion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                environment_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 42: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              case 50: {
+                com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+                serviceVersions__ = input.readMessage(
+                    ServiceVersionsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+                internalGetMutableServiceVersions().getMutableMap().put(
+                    serviceVersions__.getKey(), serviceVersions__.getValue());
+                break;
+              } // case 50
+              case 58: {
+                operationalEnvironment_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 58
+              case 66: {
+                description_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 66
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateInstanceRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -28329,7 +27594,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CreateInstanceRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -28411,56 +27687,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private CreateInstanceResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Instance.Builder subBuilder = null;
-              if (instance_ != null) {
-                subBuilder = instance_.toBuilder();
-              }
-              instance_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Instance.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(instance_);
-                instance_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_CreateInstanceResponse_descriptor;
@@ -28529,7 +27755,7 @@ public final class SDXSvcAdminProto {
       if (instance_ != null) {
         output.writeMessage(1, getInstance());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -28542,7 +27768,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getInstance());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -28562,7 +27788,7 @@ public final class SDXSvcAdminProto {
         if (!getInstance()
             .equals(other.getInstance())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -28577,7 +27803,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + INSTANCE_FIELD_NUMBER;
         hash = (53 * hash) + getInstance().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -28698,18 +27924,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateInstanceResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -28802,7 +28023,7 @@ public final class SDXSvcAdminProto {
         if (other.hasInstance()) {
           mergeInstance(other.getInstance());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -28817,17 +28038,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateInstanceResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getInstanceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateInstanceResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -29018,7 +28259,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CreateInstanceResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -29093,49 +28345,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CheckInstanceRequestRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -29213,7 +28422,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -29225,7 +28434,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -29242,7 +28451,7 @@ public final class SDXSvcAdminProto {
 
       if (!getRequestId()
           .equals(other.getRequestId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -29255,7 +28464,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + REQUESTID_FIELD_NUMBER;
       hash = (53 * hash) + getRequestId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -29376,18 +28585,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckInstanceRequestRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -29473,7 +28677,7 @@ public final class SDXSvcAdminProto {
           requestId_ = other.requestId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -29488,17 +28692,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckInstanceRequestRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                requestId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckInstanceRequestRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -29630,7 +28852,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CheckInstanceRequestRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -29705,49 +28938,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CheckInstanceRequestResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              requestStatus_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -29825,7 +29015,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestStatus_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestStatus_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -29837,7 +29027,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestStatus_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestStatus_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -29854,7 +29044,7 @@ public final class SDXSvcAdminProto {
 
       if (!getRequestStatus()
           .equals(other.getRequestStatus())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -29867,7 +29057,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + REQUESTSTATUS_FIELD_NUMBER;
       hash = (53 * hash) + getRequestStatus().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -29988,18 +29178,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckInstanceRequestResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -30085,7 +29270,7 @@ public final class SDXSvcAdminProto {
           requestStatus_ = other.requestStatus_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -30100,17 +29285,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckInstanceRequestResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                requestStatus_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckInstanceRequestResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -30242,7 +29445,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CheckInstanceRequestResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -30338,55 +29552,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DeleteInstanceRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -30513,7 +29678,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -30528,7 +29693,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -30547,7 +29712,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getInstance())) return false;
       if (!getAccountId()
           .equals(other.getAccountId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -30562,7 +29727,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getInstance().hashCode();
       hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
       hash = (53 * hash) + getAccountId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -30683,18 +29848,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteInstanceRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -30787,7 +29947,7 @@ public final class SDXSvcAdminProto {
           accountId_ = other.accountId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -30802,17 +29962,40 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteInstanceRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteInstanceRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -31040,7 +30223,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DeleteInstanceRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -31122,56 +30316,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private DeleteInstanceResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Instance.Builder subBuilder = null;
-              if (instance_ != null) {
-                subBuilder = instance_.toBuilder();
-              }
-              instance_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Instance.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(instance_);
-                instance_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_DeleteInstanceResponse_descriptor;
@@ -31240,7 +30384,7 @@ public final class SDXSvcAdminProto {
       if (instance_ != null) {
         output.writeMessage(1, getInstance());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -31253,7 +30397,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getInstance());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -31273,7 +30417,7 @@ public final class SDXSvcAdminProto {
         if (!getInstance()
             .equals(other.getInstance())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -31288,7 +30432,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + INSTANCE_FIELD_NUMBER;
         hash = (53 * hash) + getInstance().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -31409,18 +30553,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteInstanceResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -31513,7 +30652,7 @@ public final class SDXSvcAdminProto {
         if (other.hasInstance()) {
           mergeInstance(other.getInstance());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -31528,17 +30667,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteInstanceResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getInstanceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteInstanceResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -31729,7 +30888,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DeleteInstanceResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -31825,55 +30995,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DescribeInstanceRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -32000,7 +31121,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -32015,7 +31136,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -32034,7 +31155,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getInstance())) return false;
       if (!getAccountId()
           .equals(other.getAccountId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -32049,7 +31170,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getInstance().hashCode();
       hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
       hash = (53 * hash) + getAccountId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -32170,18 +31291,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeInstanceRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -32274,7 +31390,7 @@ public final class SDXSvcAdminProto {
           accountId_ = other.accountId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -32289,17 +31405,40 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeInstanceRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeInstanceRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -32527,7 +31666,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DescribeInstanceRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -32609,56 +31759,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private DescribeInstanceResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Instance.Builder subBuilder = null;
-              if (instance_ != null) {
-                subBuilder = instance_.toBuilder();
-              }
-              instance_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Instance.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(instance_);
-                instance_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_DescribeInstanceResponse_descriptor;
@@ -32727,7 +31827,7 @@ public final class SDXSvcAdminProto {
       if (instance_ != null) {
         output.writeMessage(1, getInstance());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -32740,7 +31840,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getInstance());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -32760,7 +31860,7 @@ public final class SDXSvcAdminProto {
         if (!getInstance()
             .equals(other.getInstance())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -32775,7 +31875,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + INSTANCE_FIELD_NUMBER;
         hash = (53 * hash) + getInstance().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -32896,18 +31996,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeInstanceResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -33000,7 +32095,7 @@ public final class SDXSvcAdminProto {
         if (other.hasInstance()) {
           mergeInstance(other.getInstance());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -33015,17 +32110,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeInstanceResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getInstanceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeInstanceResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -33216,7 +32331,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DescribeInstanceResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -33322,60 +32448,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListInstancesRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            case 800: {
-
-              pageSize_ = input.readInt32();
-              break;
-            }
-            case 810: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              pageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -33520,7 +32592,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 101, pageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -33539,7 +32611,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(101, pageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -33560,7 +32632,7 @@ public final class SDXSvcAdminProto {
           != other.getPageSize()) return false;
       if (!getPageToken()
           .equals(other.getPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -33577,7 +32649,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getPageSize();
       hash = (37 * hash) + PAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -33698,18 +32770,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListInstancesRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -33808,7 +32875,7 @@ public final class SDXSvcAdminProto {
           pageToken_ = other.pageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -33823,17 +32890,45 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListInstancesRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 800: {
+                pageSize_ = input.readInt32();
+
+                break;
+              } // case 800
+              case 810: {
+                pageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 810
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListInstancesRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -34104,7 +33199,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListInstancesRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -34224,62 +33330,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListInstancesResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                instances_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Instance>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              instances_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Instance.parser(), extensionRegistry));
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              nextToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          instances_ = java.util.Collections.unmodifiableList(instances_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -34420,7 +33470,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, nextToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -34436,7 +33486,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, nextToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -34455,7 +33505,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getInstancesList())) return false;
       if (!getNextToken()
           .equals(other.getNextToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -34472,7 +33522,7 @@ public final class SDXSvcAdminProto {
       }
       hash = (37 * hash) + NEXTTOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getNextToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -34593,29 +33643,24 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListInstancesResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getInstancesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (instancesBuilder_ == null) {
           instances_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          instances_ = null;
           instancesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         nextToken_ = "";
 
         return this;
@@ -34733,7 +33778,7 @@ public final class SDXSvcAdminProto {
           nextToken_ = other.nextToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -34748,17 +33793,48 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListInstancesResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Instance m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Instance.parser(),
+                        extensionRegistry);
+                if (instancesBuilder_ == null) {
+                  ensureInstancesIsMutable();
+                  instances_.add(m);
+                } else {
+                  instancesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 18: {
+                nextToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListInstancesResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -35203,7 +34279,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListInstancesResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -35398,110 +34485,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private FindInstancesRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByEnvironment.Builder subBuilder = null;
-              if (searchByCase_ == 1) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByEnvironment) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByEnvironment.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByEnvironment) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 1;
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform.Builder subBuilder = null;
-              if (searchByCase_ == 2) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 2;
-              break;
-            }
-            case 26: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion.Builder subBuilder = null;
-              if (searchByCase_ == 3) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 3;
-              break;
-            }
-            case 34: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByOperationalEnvironment.Builder subBuilder = null;
-              if (searchByCase_ == 4) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByOperationalEnvironment) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByOperationalEnvironment.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByOperationalEnvironment) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 4;
-              break;
-            }
-            case 800: {
-
-              pageSize_ = input.readInt32();
-              break;
-            }
-            case 810: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              pageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -35826,7 +34809,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 101, pageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -35858,7 +34841,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(101, pageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -35898,7 +34881,7 @@ public final class SDXSvcAdminProto {
         case 0:
         default:
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -35933,7 +34916,7 @@ public final class SDXSvcAdminProto {
         case 0:
         default:
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -36054,22 +35037,29 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindInstancesRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        if (searchByEnvironmentBuilder_ != null) {
+          searchByEnvironmentBuilder_.clear();
+        }
+        if (searchByCloudPlatformBuilder_ != null) {
+          searchByCloudPlatformBuilder_.clear();
+        }
+        if (searchByCloudRegionBuilder_ != null) {
+          searchByCloudRegionBuilder_.clear();
+        }
+        if (searchByOperationalEnvironmentBuilder_ != null) {
+          searchByOperationalEnvironmentBuilder_.clear();
+        }
         pageSize_ = 0;
 
         pageToken_ = "";
@@ -36209,7 +35199,7 @@ public final class SDXSvcAdminProto {
             break;
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -36224,17 +35214,68 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindInstancesRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getSearchByEnvironmentFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 1;
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getSearchByCloudPlatformFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 2;
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getSearchByCloudRegionFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 3;
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getSearchByOperationalEnvironmentFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 4;
+                break;
+              } // case 34
+              case 800: {
+                pageSize_ = input.readInt32();
+
+                break;
+              } // case 800
+              case 810: {
+                pageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 810
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindInstancesRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int searchByCase_ = 0;
@@ -36347,8 +35388,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 1) {
             searchByEnvironmentBuilder_.mergeFrom(value);
+          } else {
+            searchByEnvironmentBuilder_.setMessage(value);
           }
-          searchByEnvironmentBuilder_.setMessage(value);
         }
         searchByCase_ = 1;
         return this;
@@ -36524,8 +35566,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 2) {
             searchByCloudPlatformBuilder_.mergeFrom(value);
+          } else {
+            searchByCloudPlatformBuilder_.setMessage(value);
           }
-          searchByCloudPlatformBuilder_.setMessage(value);
         }
         searchByCase_ = 2;
         return this;
@@ -36701,8 +35744,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 3) {
             searchByCloudRegionBuilder_.mergeFrom(value);
+          } else {
+            searchByCloudRegionBuilder_.setMessage(value);
           }
-          searchByCloudRegionBuilder_.setMessage(value);
         }
         searchByCase_ = 3;
         return this;
@@ -36878,8 +35922,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 4) {
             searchByOperationalEnvironmentBuilder_.mergeFrom(value);
+          } else {
+            searchByOperationalEnvironmentBuilder_.setMessage(value);
           }
-          searchByOperationalEnvironmentBuilder_.setMessage(value);
         }
         searchByCase_ = 4;
         return this;
@@ -37132,7 +36177,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new FindInstancesRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -37252,62 +36308,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private FindInstancesResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                instances_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Instance>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              instances_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Instance.parser(), extensionRegistry));
-              break;
-            }
-            case 802: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              nextPageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          instances_ = java.util.Collections.unmodifiableList(instances_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -37448,7 +36448,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 100, nextPageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -37464,7 +36464,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(100, nextPageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -37483,7 +36483,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getInstancesList())) return false;
       if (!getNextPageToken()
           .equals(other.getNextPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -37500,7 +36500,7 @@ public final class SDXSvcAdminProto {
       }
       hash = (37 * hash) + NEXTPAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getNextPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -37621,29 +36621,24 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindInstancesResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getInstancesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (instancesBuilder_ == null) {
           instances_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          instances_ = null;
           instancesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         nextPageToken_ = "";
 
         return this;
@@ -37761,7 +36756,7 @@ public final class SDXSvcAdminProto {
           nextPageToken_ = other.nextPageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -37776,17 +36771,48 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindInstancesResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Instance m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Instance.parser(),
+                        extensionRegistry);
+                if (instancesBuilder_ == null) {
+                  ensureInstancesIsMutable();
+                  instances_.add(m);
+                } else {
+                  instancesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 802: {
+                nextPageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 802
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindInstancesResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -38231,7 +37257,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new FindInstancesResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -38508,109 +37545,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CreateAwsPrivatelinkConnectionRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              name_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              region_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              vpcId_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            case 40: {
-
-              privateDnsEnabled_ = input.readBool();
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                securityGroupIds_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              securityGroupIds_.add(s);
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                subnetIds_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              subnetIds_.add(s);
-              break;
-            }
-            case 66: {
-              if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-                tags_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KeyValuePair>();
-                mutable_bitField0_ |= 0x00000004;
-              }
-              tags_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KeyValuePair.parser(), extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          securityGroupIds_ = securityGroupIds_.getUnmodifiableView();
-        }
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          subnetIds_ = subnetIds_.getUnmodifiableView();
-        }
-        if (((mutable_bitField0_ & 0x00000004) != 0)) {
-          tags_ = java.util.Collections.unmodifiableList(tags_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -39024,7 +37958,7 @@ public final class SDXSvcAdminProto {
       for (int i = 0; i < tags_.size(); i++) {
         output.writeMessage(8, tags_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -39069,7 +38003,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(8, tags_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -39100,7 +38034,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getSubnetIdsList())) return false;
       if (!getTagsList()
           .equals(other.getTagsList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -39134,7 +38068,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + TAGS_FIELD_NUMBER;
         hash = (53 * hash) + getTagsList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -39255,19 +38189,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getTagsFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -39288,10 +38216,11 @@ public final class SDXSvcAdminProto {
         bitField0_ = (bitField0_ & ~0x00000002);
         if (tagsBuilder_ == null) {
           tags_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
         } else {
+          tags_ = null;
           tagsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -39456,7 +38385,7 @@ public final class SDXSvcAdminProto {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -39471,17 +38400,80 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                region_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                vpcId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 40: {
+                privateDnsEnabled_ = input.readBool();
+
+                break;
+              } // case 40
+              case 50: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureSecurityGroupIdsIsMutable();
+                securityGroupIds_.add(s);
+                break;
+              } // case 50
+              case 58: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureSubnetIdsIsMutable();
+                subnetIds_.add(s);
+                break;
+              } // case 58
+              case 66: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KeyValuePair m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KeyValuePair.parser(),
+                        extensionRegistry);
+                if (tagsBuilder_ == null) {
+                  ensureTagsIsMutable();
+                  tags_.add(m);
+                } else {
+                  tagsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 66
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -40549,7 +39541,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CreateAwsPrivatelinkConnectionRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -40631,56 +39634,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private CreateAwsPrivatelinkConnectionResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Connection.Builder subBuilder = null;
-              if (connection_ != null) {
-                subBuilder = connection_.toBuilder();
-              }
-              connection_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Connection.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(connection_);
-                connection_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_CreateAwsPrivatelinkConnectionResponse_descriptor;
@@ -40749,7 +39702,7 @@ public final class SDXSvcAdminProto {
       if (connection_ != null) {
         output.writeMessage(1, getConnection());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -40762,7 +39715,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getConnection());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -40782,7 +39735,7 @@ public final class SDXSvcAdminProto {
         if (!getConnection()
             .equals(other.getConnection())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -40797,7 +39750,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + CONNECTION_FIELD_NUMBER;
         hash = (53 * hash) + getConnection().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -40918,18 +39871,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -41022,7 +39970,7 @@ public final class SDXSvcAdminProto {
         if (other.hasConnection()) {
           mergeConnection(other.getConnection());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -41037,17 +39985,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getConnectionFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -41238,7 +40206,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CreateAwsPrivatelinkConnectionResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -41536,115 +40515,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CreateAwsPrivatelinkConnectionForHmsDatabaseRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              name_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              region_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              vpcId_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            case 40: {
-
-              privateDnsEnabled_ = input.readBool();
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                securityGroupIds_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              securityGroupIds_.add(s);
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                subnetIds_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              subnetIds_.add(s);
-              break;
-            }
-            case 66: {
-              if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-                tags_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KeyValuePair>();
-                mutable_bitField0_ |= 0x00000004;
-              }
-              tags_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KeyValuePair.parser(), extensionRegistry));
-              break;
-            }
-            case 74: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              instance_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          securityGroupIds_ = securityGroupIds_.getUnmodifiableView();
-        }
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          subnetIds_ = subnetIds_.getUnmodifiableView();
-        }
-        if (((mutable_bitField0_ & 0x00000004) != 0)) {
-          tags_ = java.util.Collections.unmodifiableList(tags_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -42107,7 +40977,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instance_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, instance_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -42155,7 +41025,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instance_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, instance_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -42188,7 +41058,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getTagsList())) return false;
       if (!getInstance()
           .equals(other.getInstance())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -42224,7 +41094,7 @@ public final class SDXSvcAdminProto {
       }
       hash = (37 * hash) + INSTANCE_FIELD_NUMBER;
       hash = (53 * hash) + getInstance().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -42345,19 +41215,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionForHmsDatabaseRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getTagsFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -42378,10 +41242,11 @@ public final class SDXSvcAdminProto {
         bitField0_ = (bitField0_ & ~0x00000002);
         if (tagsBuilder_ == null) {
           tags_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
         } else {
+          tags_ = null;
           tagsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000004);
         instance_ = "";
 
         return this;
@@ -42553,7 +41418,7 @@ public final class SDXSvcAdminProto {
           instance_ = other.instance_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -42568,17 +41433,85 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionForHmsDatabaseRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                region_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                vpcId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 40: {
+                privateDnsEnabled_ = input.readBool();
+
+                break;
+              } // case 40
+              case 50: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureSecurityGroupIdsIsMutable();
+                securityGroupIds_.add(s);
+                break;
+              } // case 50
+              case 58: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureSubnetIdsIsMutable();
+                subnetIds_.add(s);
+                break;
+              } // case 58
+              case 66: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KeyValuePair m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.KeyValuePair.parser(),
+                        extensionRegistry);
+                if (tagsBuilder_ == null) {
+                  ensureTagsIsMutable();
+                  tags_.add(m);
+                } else {
+                  tagsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 66
+              case 74: {
+                instance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 74
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionForHmsDatabaseRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -43742,7 +42675,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CreateAwsPrivatelinkConnectionForHmsDatabaseRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -43824,56 +42768,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private CreateAwsPrivatelinkConnectionForHmsDatabaseResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Connection.Builder subBuilder = null;
-              if (connection_ != null) {
-                subBuilder = connection_.toBuilder();
-              }
-              connection_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Connection.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(connection_);
-                connection_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_CreateAwsPrivatelinkConnectionForHmsDatabaseResponse_descriptor;
@@ -43942,7 +42836,7 @@ public final class SDXSvcAdminProto {
       if (connection_ != null) {
         output.writeMessage(1, getConnection());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -43955,7 +42849,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getConnection());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -43975,7 +42869,7 @@ public final class SDXSvcAdminProto {
         if (!getConnection()
             .equals(other.getConnection())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -43990,7 +42884,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + CONNECTION_FIELD_NUMBER;
         hash = (53 * hash) + getConnection().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -44111,18 +43005,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionForHmsDatabaseResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -44215,7 +43104,7 @@ public final class SDXSvcAdminProto {
         if (other.hasConnection()) {
           mergeConnection(other.getConnection());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -44230,17 +43119,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionForHmsDatabaseResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getConnectionFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionForHmsDatabaseResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -44431,7 +43340,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CreateAwsPrivatelinkConnectionForHmsDatabaseResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -44527,55 +43447,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DescribeConnectionRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              connection_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -44702,7 +43573,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountId_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -44717,7 +43588,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountId_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -44736,7 +43607,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getConnection())) return false;
       if (!getAccountId()
           .equals(other.getAccountId())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -44751,7 +43622,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getConnection().hashCode();
       hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
       hash = (53 * hash) + getAccountId().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -44872,18 +43743,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeConnectionRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -44976,7 +43842,7 @@ public final class SDXSvcAdminProto {
           accountId_ = other.accountId_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -44991,17 +43857,40 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeConnectionRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                connection_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeConnectionRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -45229,7 +44118,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DescribeConnectionRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -45311,56 +44211,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private DescribeConnectionResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Connection.Builder subBuilder = null;
-              if (connection_ != null) {
-                subBuilder = connection_.toBuilder();
-              }
-              connection_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Connection.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(connection_);
-                connection_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_DescribeConnectionResponse_descriptor;
@@ -45429,7 +44279,7 @@ public final class SDXSvcAdminProto {
       if (connection_ != null) {
         output.writeMessage(1, getConnection());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -45442,7 +44292,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getConnection());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -45462,7 +44312,7 @@ public final class SDXSvcAdminProto {
         if (!getConnection()
             .equals(other.getConnection())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -45477,7 +44327,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + CONNECTION_FIELD_NUMBER;
         hash = (53 * hash) + getConnection().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -45598,18 +44448,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeConnectionResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -45702,7 +44547,7 @@ public final class SDXSvcAdminProto {
         if (other.hasConnection()) {
           mergeConnection(other.getConnection());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -45717,17 +44562,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeConnectionResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getConnectionFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeConnectionResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -45918,7 +44783,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DescribeConnectionResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -46024,60 +44900,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListConnectionsRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accountId_ = s;
-              break;
-            }
-            case 800: {
-
-              pageSize_ = input.readInt32();
-              break;
-            }
-            case 810: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              pageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -46222,7 +45044,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 101, pageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -46241,7 +45063,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(101, pageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -46262,7 +45084,7 @@ public final class SDXSvcAdminProto {
           != other.getPageSize()) return false;
       if (!getPageToken()
           .equals(other.getPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -46279,7 +45101,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getPageSize();
       hash = (37 * hash) + PAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -46400,18 +45222,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListConnectionsRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -46510,7 +45327,7 @@ public final class SDXSvcAdminProto {
           pageToken_ = other.pageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -46525,17 +45342,45 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListConnectionsRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 800: {
+                pageSize_ = input.readInt32();
+
+                break;
+              } // case 800
+              case 810: {
+                pageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 810
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListConnectionsRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -46806,7 +45651,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListConnectionsRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -46926,62 +45782,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListConnectionsResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                connections_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Connection>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              connections_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Connection.parser(), extensionRegistry));
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              nextToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          connections_ = java.util.Collections.unmodifiableList(connections_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -47122,7 +45922,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, nextToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -47138,7 +45938,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, nextToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -47157,7 +45957,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getConnectionsList())) return false;
       if (!getNextToken()
           .equals(other.getNextToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -47174,7 +45974,7 @@ public final class SDXSvcAdminProto {
       }
       hash = (37 * hash) + NEXTTOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getNextToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -47295,29 +46095,24 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListConnectionsResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getConnectionsFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (connectionsBuilder_ == null) {
           connections_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          connections_ = null;
           connectionsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         nextToken_ = "";
 
         return this;
@@ -47435,7 +46230,7 @@ public final class SDXSvcAdminProto {
           nextToken_ = other.nextToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -47450,17 +46245,48 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListConnectionsResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Connection m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Connection.parser(),
+                        extensionRegistry);
+                if (connectionsBuilder_ == null) {
+                  ensureConnectionsIsMutable();
+                  connections_.add(m);
+                } else {
+                  connectionsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 18: {
+                nextToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListConnectionsResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -47905,7 +46731,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListConnectionsResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -47980,49 +46817,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DeleteConnectionRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              connection_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -48100,7 +46894,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(connection_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, connection_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -48112,7 +46906,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(connection_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, connection_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -48129,7 +46923,7 @@ public final class SDXSvcAdminProto {
 
       if (!getConnection()
           .equals(other.getConnection())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -48142,7 +46936,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + CONNECTION_FIELD_NUMBER;
       hash = (53 * hash) + getConnection().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -48263,18 +47057,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteConnectionRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -48360,7 +47149,7 @@ public final class SDXSvcAdminProto {
           connection_ = other.connection_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -48375,17 +47164,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteConnectionRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                connection_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteConnectionRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -48517,7 +47324,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DeleteConnectionRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -48599,56 +47417,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private DeleteConnectionResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Connection.Builder subBuilder = null;
-              if (connection_ != null) {
-                subBuilder = connection_.toBuilder();
-              }
-              connection_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Connection.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(connection_);
-                connection_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_DeleteConnectionResponse_descriptor;
@@ -48717,7 +47485,7 @@ public final class SDXSvcAdminProto {
       if (connection_ != null) {
         output.writeMessage(1, getConnection());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -48730,7 +47498,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getConnection());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -48750,7 +47518,7 @@ public final class SDXSvcAdminProto {
         if (!getConnection()
             .equals(other.getConnection())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -48765,7 +47533,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + CONNECTION_FIELD_NUMBER;
         hash = (53 * hash) + getConnection().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -48886,18 +47654,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteConnectionResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -48990,7 +47753,7 @@ public final class SDXSvcAdminProto {
         if (other.hasConnection()) {
           mergeConnection(other.getConnection());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -49005,17 +47768,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteConnectionResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getConnectionFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteConnectionResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -49206,7 +47989,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DeleteConnectionResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -49469,103 +48263,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RegisterOperationalEnvironmentRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              name_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cloudId_ = s;
-              break;
-            }
-            case 24: {
-              int rawValue = input.readEnum();
-
-              cloudPlatform_ = rawValue;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cloudRegion_ = s;
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              sdxTrafficHostname_ = s;
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              adminTrafficHostname_ = s;
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              kubeConfig_ = s;
-              break;
-            }
-            case 66: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              apiServerEndpoint_ = s;
-              break;
-            }
-            case 74: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              openIdProviderEndpoint_ = s;
-              break;
-            }
-            case 82: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              caCert_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -50065,7 +48762,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(caCert_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, caCert_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -50105,7 +48802,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(caCert_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, caCert_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -50139,7 +48836,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getOpenIdProviderEndpoint())) return false;
       if (!getCaCert()
           .equals(other.getCaCert())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -50170,7 +48867,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getOpenIdProviderEndpoint().hashCode();
       hash = (37 * hash) + CACERT_FIELD_NUMBER;
       hash = (53 * hash) + getCaCert().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -50291,18 +48988,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterOperationalEnvironmentRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -50450,7 +49142,7 @@ public final class SDXSvcAdminProto {
           caCert_ = other.caCert_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -50465,17 +49157,80 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterOperationalEnvironmentRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                cloudId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 24: {
+                cloudPlatform_ = input.readEnum();
+
+                break;
+              } // case 24
+              case 34: {
+                cloudRegion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 42: {
+                sdxTrafficHostname_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              case 50: {
+                adminTrafficHostname_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              case 58: {
+                kubeConfig_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 58
+              case 66: {
+                apiServerEndpoint_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 66
+              case 74: {
+                openIdProviderEndpoint_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 74
+              case 82: {
+                caCert_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 82
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterOperationalEnvironmentRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -51449,7 +50204,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RegisterOperationalEnvironmentRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -51531,56 +50297,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private RegisterOperationalEnvironmentResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.OperationalEnvironment.Builder subBuilder = null;
-              if (operationalEnvironment_ != null) {
-                subBuilder = operationalEnvironment_.toBuilder();
-              }
-              operationalEnvironment_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.OperationalEnvironment.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(operationalEnvironment_);
-                operationalEnvironment_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_RegisterOperationalEnvironmentResponse_descriptor;
@@ -51649,7 +50365,7 @@ public final class SDXSvcAdminProto {
       if (operationalEnvironment_ != null) {
         output.writeMessage(1, getOperationalEnvironment());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -51662,7 +50378,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getOperationalEnvironment());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -51682,7 +50398,7 @@ public final class SDXSvcAdminProto {
         if (!getOperationalEnvironment()
             .equals(other.getOperationalEnvironment())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -51697,7 +50413,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + OPERATIONALENVIRONMENT_FIELD_NUMBER;
         hash = (53 * hash) + getOperationalEnvironment().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -51818,18 +50534,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterOperationalEnvironmentResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -51922,7 +50633,7 @@ public final class SDXSvcAdminProto {
         if (other.hasOperationalEnvironment()) {
           mergeOperationalEnvironment(other.getOperationalEnvironment());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -51937,17 +50648,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterOperationalEnvironmentResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getOperationalEnvironmentFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterOperationalEnvironmentResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -52138,7 +50869,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RegisterOperationalEnvironmentResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -52213,49 +50955,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private UnregisterOperationalEnvironmentRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              operationalEnvironment_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -52333,7 +51032,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(operationalEnvironment_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, operationalEnvironment_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -52345,7 +51044,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(operationalEnvironment_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, operationalEnvironment_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -52362,7 +51061,7 @@ public final class SDXSvcAdminProto {
 
       if (!getOperationalEnvironment()
           .equals(other.getOperationalEnvironment())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -52375,7 +51074,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + OPERATIONALENVIRONMENT_FIELD_NUMBER;
       hash = (53 * hash) + getOperationalEnvironment().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -52496,18 +51195,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterOperationalEnvironmentRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -52593,7 +51287,7 @@ public final class SDXSvcAdminProto {
           operationalEnvironment_ = other.operationalEnvironment_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -52608,17 +51302,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterOperationalEnvironmentRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                operationalEnvironment_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterOperationalEnvironmentRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -52750,7 +51462,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UnregisterOperationalEnvironmentRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -52832,56 +51555,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private UnregisterOperationalEnvironmentResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.OperationalEnvironment.Builder subBuilder = null;
-              if (operationalEnvironment_ != null) {
-                subBuilder = operationalEnvironment_.toBuilder();
-              }
-              operationalEnvironment_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.OperationalEnvironment.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(operationalEnvironment_);
-                operationalEnvironment_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_UnregisterOperationalEnvironmentResponse_descriptor;
@@ -52950,7 +51623,7 @@ public final class SDXSvcAdminProto {
       if (operationalEnvironment_ != null) {
         output.writeMessage(1, getOperationalEnvironment());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -52963,7 +51636,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getOperationalEnvironment());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -52983,7 +51656,7 @@ public final class SDXSvcAdminProto {
         if (!getOperationalEnvironment()
             .equals(other.getOperationalEnvironment())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -52998,7 +51671,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + OPERATIONALENVIRONMENT_FIELD_NUMBER;
         hash = (53 * hash) + getOperationalEnvironment().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -53119,18 +51792,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterOperationalEnvironmentResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -53223,7 +51891,7 @@ public final class SDXSvcAdminProto {
         if (other.hasOperationalEnvironment()) {
           mergeOperationalEnvironment(other.getOperationalEnvironment());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -53238,17 +51906,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterOperationalEnvironmentResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getOperationalEnvironmentFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterOperationalEnvironmentResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -53439,7 +52127,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UnregisterOperationalEnvironmentResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -53514,49 +52213,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DescribeOperationalEnvironmentRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              operationalInstance_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -53634,7 +52290,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(operationalInstance_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, operationalInstance_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -53646,7 +52302,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(operationalInstance_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, operationalInstance_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -53663,7 +52319,7 @@ public final class SDXSvcAdminProto {
 
       if (!getOperationalInstance()
           .equals(other.getOperationalInstance())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -53676,7 +52332,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + OPERATIONALINSTANCE_FIELD_NUMBER;
       hash = (53 * hash) + getOperationalInstance().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -53797,18 +52453,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeOperationalEnvironmentRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -53894,7 +52545,7 @@ public final class SDXSvcAdminProto {
           operationalInstance_ = other.operationalInstance_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -53909,17 +52560,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeOperationalEnvironmentRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                operationalInstance_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeOperationalEnvironmentRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -54051,7 +52720,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DescribeOperationalEnvironmentRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -54133,56 +52813,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private DescribeOperationalEnvironmentResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.OperationalEnvironment.Builder subBuilder = null;
-              if (operationalEnvironment_ != null) {
-                subBuilder = operationalEnvironment_.toBuilder();
-              }
-              operationalEnvironment_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.OperationalEnvironment.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(operationalEnvironment_);
-                operationalEnvironment_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_DescribeOperationalEnvironmentResponse_descriptor;
@@ -54251,7 +52881,7 @@ public final class SDXSvcAdminProto {
       if (operationalEnvironment_ != null) {
         output.writeMessage(1, getOperationalEnvironment());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -54264,7 +52894,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getOperationalEnvironment());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -54284,7 +52914,7 @@ public final class SDXSvcAdminProto {
         if (!getOperationalEnvironment()
             .equals(other.getOperationalEnvironment())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -54299,7 +52929,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + OPERATIONALENVIRONMENT_FIELD_NUMBER;
         hash = (53 * hash) + getOperationalEnvironment().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -54420,18 +53050,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeOperationalEnvironmentResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -54524,7 +53149,7 @@ public final class SDXSvcAdminProto {
         if (other.hasOperationalEnvironment()) {
           mergeOperationalEnvironment(other.getOperationalEnvironment());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -54539,17 +53164,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeOperationalEnvironmentResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getOperationalEnvironmentFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeOperationalEnvironmentResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -54740,7 +53385,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DescribeOperationalEnvironmentResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -54846,60 +53502,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListOperationalEnvironmentsRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cloudRegion_ = s;
-              break;
-            }
-            case 800: {
-
-              pageSize_ = input.readInt32();
-              break;
-            }
-            case 810: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              pageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -55044,7 +53646,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 101, pageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -55063,7 +53665,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(101, pageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -55084,7 +53686,7 @@ public final class SDXSvcAdminProto {
           != other.getPageSize()) return false;
       if (!getPageToken()
           .equals(other.getPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -55101,7 +53703,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getPageSize();
       hash = (37 * hash) + PAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -55222,18 +53824,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListOperationalEnvironmentsRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -55332,7 +53929,7 @@ public final class SDXSvcAdminProto {
           pageToken_ = other.pageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -55347,17 +53944,45 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListOperationalEnvironmentsRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                cloudRegion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 800: {
+                pageSize_ = input.readInt32();
+
+                break;
+              } // case 800
+              case 810: {
+                pageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 810
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListOperationalEnvironmentsRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -55628,7 +54253,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListOperationalEnvironmentsRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -55748,62 +54384,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListOperationalEnvironmentsResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                operationalEnvironments_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.OperationalEnvironment>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              operationalEnvironments_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.OperationalEnvironment.parser(), extensionRegistry));
-              break;
-            }
-            case 802: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              nextPageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          operationalEnvironments_ = java.util.Collections.unmodifiableList(operationalEnvironments_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -55944,7 +54524,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 100, nextPageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -55960,7 +54540,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(100, nextPageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -55979,7 +54559,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getOperationalEnvironmentsList())) return false;
       if (!getNextPageToken()
           .equals(other.getNextPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -55996,7 +54576,7 @@ public final class SDXSvcAdminProto {
       }
       hash = (37 * hash) + NEXTPAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getNextPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -56117,29 +54697,24 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListOperationalEnvironmentsResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getOperationalEnvironmentsFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (operationalEnvironmentsBuilder_ == null) {
           operationalEnvironments_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          operationalEnvironments_ = null;
           operationalEnvironmentsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         nextPageToken_ = "";
 
         return this;
@@ -56257,7 +54832,7 @@ public final class SDXSvcAdminProto {
           nextPageToken_ = other.nextPageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -56272,17 +54847,48 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListOperationalEnvironmentsResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.OperationalEnvironment m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.OperationalEnvironment.parser(),
+                        extensionRegistry);
+                if (operationalEnvironmentsBuilder_ == null) {
+                  ensureOperationalEnvironmentsIsMutable();
+                  operationalEnvironments_.add(m);
+                } else {
+                  operationalEnvironmentsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 802: {
+                nextPageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 802
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListOperationalEnvironmentsResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -56727,7 +55333,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListOperationalEnvironmentsResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -56922,110 +55539,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private FindOperationalEnvironmentsRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByInstance.Builder subBuilder = null;
-              if (searchByCase_ == 1) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByInstance) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByInstance.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByInstance) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 1;
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform.Builder subBuilder = null;
-              if (searchByCase_ == 2) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 2;
-              break;
-            }
-            case 26: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion.Builder subBuilder = null;
-              if (searchByCase_ == 3) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 3;
-              break;
-            }
-            case 34: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByAssignability.Builder subBuilder = null;
-              if (searchByCase_ == 4) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByAssignability) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByAssignability.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByAssignability) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 4;
-              break;
-            }
-            case 800: {
-
-              pageSize_ = input.readInt32();
-              break;
-            }
-            case 810: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              pageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -57350,7 +55863,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 101, pageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -57382,7 +55895,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(101, pageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -57422,7 +55935,7 @@ public final class SDXSvcAdminProto {
         case 0:
         default:
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -57457,7 +55970,7 @@ public final class SDXSvcAdminProto {
         case 0:
         default:
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -57578,22 +56091,29 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindOperationalEnvironmentsRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        if (searchByInstanceBuilder_ != null) {
+          searchByInstanceBuilder_.clear();
+        }
+        if (searchByCloudPlatformBuilder_ != null) {
+          searchByCloudPlatformBuilder_.clear();
+        }
+        if (searchByCloudRegionBuilder_ != null) {
+          searchByCloudRegionBuilder_.clear();
+        }
+        if (searchByAssignabilityBuilder_ != null) {
+          searchByAssignabilityBuilder_.clear();
+        }
         pageSize_ = 0;
 
         pageToken_ = "";
@@ -57733,7 +56253,7 @@ public final class SDXSvcAdminProto {
             break;
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -57748,17 +56268,68 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindOperationalEnvironmentsRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getSearchByInstanceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 1;
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getSearchByCloudPlatformFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 2;
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getSearchByCloudRegionFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 3;
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getSearchByAssignabilityFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 4;
+                break;
+              } // case 34
+              case 800: {
+                pageSize_ = input.readInt32();
+
+                break;
+              } // case 800
+              case 810: {
+                pageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 810
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindOperationalEnvironmentsRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int searchByCase_ = 0;
@@ -57871,8 +56442,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 1) {
             searchByInstanceBuilder_.mergeFrom(value);
+          } else {
+            searchByInstanceBuilder_.setMessage(value);
           }
-          searchByInstanceBuilder_.setMessage(value);
         }
         searchByCase_ = 1;
         return this;
@@ -58048,8 +56620,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 2) {
             searchByCloudPlatformBuilder_.mergeFrom(value);
+          } else {
+            searchByCloudPlatformBuilder_.setMessage(value);
           }
-          searchByCloudPlatformBuilder_.setMessage(value);
         }
         searchByCase_ = 2;
         return this;
@@ -58225,8 +56798,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 3) {
             searchByCloudRegionBuilder_.mergeFrom(value);
+          } else {
+            searchByCloudRegionBuilder_.setMessage(value);
           }
-          searchByCloudRegionBuilder_.setMessage(value);
         }
         searchByCase_ = 3;
         return this;
@@ -58402,8 +56976,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 4) {
             searchByAssignabilityBuilder_.mergeFrom(value);
+          } else {
+            searchByAssignabilityBuilder_.setMessage(value);
           }
-          searchByAssignabilityBuilder_.setMessage(value);
         }
         searchByCase_ = 4;
         return this;
@@ -58656,7 +57231,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new FindOperationalEnvironmentsRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -58776,62 +57362,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private FindOperationalEnvironmentsResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                operationalEnvironments_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.OperationalEnvironment>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              operationalEnvironments_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.OperationalEnvironment.parser(), extensionRegistry));
-              break;
-            }
-            case 802: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              nextPageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          operationalEnvironments_ = java.util.Collections.unmodifiableList(operationalEnvironments_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -58972,7 +57502,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 100, nextPageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -58988,7 +57518,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(100, nextPageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -59007,7 +57537,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getOperationalEnvironmentsList())) return false;
       if (!getNextPageToken()
           .equals(other.getNextPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -59024,7 +57554,7 @@ public final class SDXSvcAdminProto {
       }
       hash = (37 * hash) + NEXTPAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getNextPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -59145,29 +57675,24 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindOperationalEnvironmentsResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getOperationalEnvironmentsFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (operationalEnvironmentsBuilder_ == null) {
           operationalEnvironments_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          operationalEnvironments_ = null;
           operationalEnvironmentsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         nextPageToken_ = "";
 
         return this;
@@ -59285,7 +57810,7 @@ public final class SDXSvcAdminProto {
           nextPageToken_ = other.nextPageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -59300,17 +57825,48 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindOperationalEnvironmentsResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.OperationalEnvironment m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.OperationalEnvironment.parser(),
+                        extensionRegistry);
+                if (operationalEnvironmentsBuilder_ == null) {
+                  ensureOperationalEnvironmentsIsMutable();
+                  operationalEnvironments_.add(m);
+                } else {
+                  operationalEnvironmentsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 802: {
+                nextPageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 802
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindOperationalEnvironmentsResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -59755,7 +58311,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new FindOperationalEnvironmentsResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -59840,54 +58407,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private SetOperationalEnvironmentAssignabilityRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              operationalEnvironmentId_ = s;
-              break;
-            }
-            case 16: {
-
-              assignable_ = input.readBool();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -59983,7 +58502,7 @@ public final class SDXSvcAdminProto {
       if (assignable_ != false) {
         output.writeBool(2, assignable_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -59999,7 +58518,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, assignable_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -60018,7 +58537,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getOperationalEnvironmentId())) return false;
       if (getAssignable()
           != other.getAssignable()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -60034,7 +58553,7 @@ public final class SDXSvcAdminProto {
       hash = (37 * hash) + ASSIGNABLE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getAssignable());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -60155,18 +58674,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetOperationalEnvironmentAssignabilityRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -60258,7 +58772,7 @@ public final class SDXSvcAdminProto {
         if (other.getAssignable() != false) {
           setAssignable(other.getAssignable());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -60273,17 +58787,40 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetOperationalEnvironmentAssignabilityRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                operationalEnvironmentId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                assignable_ = input.readBool();
+
+                break;
+              } // case 16
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetOperationalEnvironmentAssignabilityRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -60458,7 +58995,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SetOperationalEnvironmentAssignabilityRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -60540,56 +59088,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private SetOperationalEnvironmentAssignabilityResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.OperationalEnvironment.Builder subBuilder = null;
-              if (operationalEnvironment_ != null) {
-                subBuilder = operationalEnvironment_.toBuilder();
-              }
-              operationalEnvironment_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.OperationalEnvironment.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(operationalEnvironment_);
-                operationalEnvironment_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_SetOperationalEnvironmentAssignabilityResponse_descriptor;
@@ -60658,7 +59156,7 @@ public final class SDXSvcAdminProto {
       if (operationalEnvironment_ != null) {
         output.writeMessage(1, getOperationalEnvironment());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -60671,7 +59169,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getOperationalEnvironment());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -60691,7 +59189,7 @@ public final class SDXSvcAdminProto {
         if (!getOperationalEnvironment()
             .equals(other.getOperationalEnvironment())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -60706,7 +59204,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + OPERATIONALENVIRONMENT_FIELD_NUMBER;
         hash = (53 * hash) + getOperationalEnvironment().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -60827,18 +59325,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetOperationalEnvironmentAssignabilityResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -60931,7 +59424,7 @@ public final class SDXSvcAdminProto {
         if (other.hasOperationalEnvironment()) {
           mergeOperationalEnvironment(other.getOperationalEnvironment());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -60946,17 +59439,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetOperationalEnvironmentAssignabilityResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getOperationalEnvironmentFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetOperationalEnvironmentAssignabilityResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -61147,7 +59660,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SetOperationalEnvironmentAssignabilityResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -61378,96 +59902,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RegisterAwsOpenSearchIndexerRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              name_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cloudId_ = s;
-              break;
-            }
-            case 24: {
-              int rawValue = input.readEnum();
-
-              cloudPlatform_ = rawValue;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cloudRegion_ = s;
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accessHostname_ = s;
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accessPort_ = s;
-              break;
-            }
-            case 56: {
-
-              tlsEnabled_ = input.readBool();
-              break;
-            }
-            case 66: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              adminUsernameVaultPath_ = s;
-              break;
-            }
-            case 74: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              adminPasswordVaultPath_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -61887,7 +60321,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(adminPasswordVaultPath_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, adminPasswordVaultPath_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -61925,7 +60359,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(adminPasswordVaultPath_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, adminPasswordVaultPath_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -61957,7 +60391,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getAdminUsernameVaultPath())) return false;
       if (!getAdminPasswordVaultPath()
           .equals(other.getAdminPasswordVaultPath())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -61987,7 +60421,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getAdminUsernameVaultPath().hashCode();
       hash = (37 * hash) + ADMINPASSWORDVAULTPATH_FIELD_NUMBER;
       hash = (53 * hash) + getAdminPasswordVaultPath().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -62108,18 +60542,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsOpenSearchIndexerRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -62259,7 +60688,7 @@ public final class SDXSvcAdminProto {
           adminPasswordVaultPath_ = other.adminPasswordVaultPath_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -62274,17 +60703,75 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsOpenSearchIndexerRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                cloudId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 24: {
+                cloudPlatform_ = input.readEnum();
+
+                break;
+              } // case 24
+              case 34: {
+                cloudRegion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 42: {
+                accessHostname_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              case 50: {
+                accessPort_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              case 56: {
+                tlsEnabled_ = input.readBool();
+
+                break;
+              } // case 56
+              case 66: {
+                adminUsernameVaultPath_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 66
+              case 74: {
+                adminPasswordVaultPath_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 74
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsOpenSearchIndexerRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -63109,7 +61596,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RegisterAwsOpenSearchIndexerRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -63191,56 +61689,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private RegisterAwsOpenSearchIndexerResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer.Builder subBuilder = null;
-              if (indexerInstance_ != null) {
-                subBuilder = indexerInstance_.toBuilder();
-              }
-              indexerInstance_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(indexerInstance_);
-                indexerInstance_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_RegisterAwsOpenSearchIndexerResponse_descriptor;
@@ -63309,7 +61757,7 @@ public final class SDXSvcAdminProto {
       if (indexerInstance_ != null) {
         output.writeMessage(1, getIndexerInstance());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -63322,7 +61770,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getIndexerInstance());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -63342,7 +61790,7 @@ public final class SDXSvcAdminProto {
         if (!getIndexerInstance()
             .equals(other.getIndexerInstance())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -63357,7 +61805,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + INDEXERINSTANCE_FIELD_NUMBER;
         hash = (53 * hash) + getIndexerInstance().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -63478,18 +61926,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsOpenSearchIndexerResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -63582,7 +62025,7 @@ public final class SDXSvcAdminProto {
         if (other.hasIndexerInstance()) {
           mergeIndexerInstance(other.getIndexerInstance());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -63597,17 +62040,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsOpenSearchIndexerResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getIndexerInstanceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsOpenSearchIndexerResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -63798,7 +62261,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RegisterAwsOpenSearchIndexerResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -63873,49 +62347,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private UnregisterIndexerRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              indexer_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -63993,7 +62424,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(indexer_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, indexer_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -64005,7 +62436,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(indexer_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, indexer_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -64022,7 +62453,7 @@ public final class SDXSvcAdminProto {
 
       if (!getIndexer()
           .equals(other.getIndexer())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -64035,7 +62466,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + INDEXER_FIELD_NUMBER;
       hash = (53 * hash) + getIndexer().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -64156,18 +62587,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterIndexerRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -64253,7 +62679,7 @@ public final class SDXSvcAdminProto {
           indexer_ = other.indexer_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -64268,17 +62694,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterIndexerRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                indexer_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterIndexerRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -64410,7 +62854,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UnregisterIndexerRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -64492,56 +62947,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private UnregisterIndexerResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer.Builder subBuilder = null;
-              if (indexerInstance_ != null) {
-                subBuilder = indexerInstance_.toBuilder();
-              }
-              indexerInstance_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(indexerInstance_);
-                indexerInstance_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_UnregisterIndexerResponse_descriptor;
@@ -64610,7 +63015,7 @@ public final class SDXSvcAdminProto {
       if (indexerInstance_ != null) {
         output.writeMessage(1, getIndexerInstance());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -64623,7 +63028,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getIndexerInstance());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -64643,7 +63048,7 @@ public final class SDXSvcAdminProto {
         if (!getIndexerInstance()
             .equals(other.getIndexerInstance())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -64658,7 +63063,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + INDEXERINSTANCE_FIELD_NUMBER;
         hash = (53 * hash) + getIndexerInstance().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -64779,18 +63184,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterIndexerResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -64883,7 +63283,7 @@ public final class SDXSvcAdminProto {
         if (other.hasIndexerInstance()) {
           mergeIndexerInstance(other.getIndexerInstance());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -64898,17 +63298,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterIndexerResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getIndexerInstanceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterIndexerResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -65099,7 +63519,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UnregisterIndexerResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -65174,49 +63605,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DescribeIndexerRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              indexer_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -65294,7 +63682,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(indexer_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, indexer_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -65306,7 +63694,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(indexer_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, indexer_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -65323,7 +63711,7 @@ public final class SDXSvcAdminProto {
 
       if (!getIndexer()
           .equals(other.getIndexer())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -65336,7 +63724,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + INDEXER_FIELD_NUMBER;
       hash = (53 * hash) + getIndexer().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -65457,18 +63845,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeIndexerRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -65554,7 +63937,7 @@ public final class SDXSvcAdminProto {
           indexer_ = other.indexer_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -65569,17 +63952,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeIndexerRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                indexer_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeIndexerRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -65711,7 +64112,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DescribeIndexerRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -65793,56 +64205,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private DescribeIndexerResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer.Builder subBuilder = null;
-              if (indexerInstance_ != null) {
-                subBuilder = indexerInstance_.toBuilder();
-              }
-              indexerInstance_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(indexerInstance_);
-                indexerInstance_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_DescribeIndexerResponse_descriptor;
@@ -65911,7 +64273,7 @@ public final class SDXSvcAdminProto {
       if (indexerInstance_ != null) {
         output.writeMessage(1, getIndexerInstance());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -65924,7 +64286,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getIndexerInstance());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -65944,7 +64306,7 @@ public final class SDXSvcAdminProto {
         if (!getIndexerInstance()
             .equals(other.getIndexerInstance())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -65959,7 +64321,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + INDEXERINSTANCE_FIELD_NUMBER;
         hash = (53 * hash) + getIndexerInstance().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -66080,18 +64442,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeIndexerResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -66184,7 +64541,7 @@ public final class SDXSvcAdminProto {
         if (other.hasIndexerInstance()) {
           mergeIndexerInstance(other.getIndexerInstance());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -66199,17 +64556,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeIndexerResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getIndexerInstanceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeIndexerResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -66400,7 +64777,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DescribeIndexerResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -66527,66 +64915,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListIndexersRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cloudPlatform_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cloudRegion_ = s;
-              break;
-            }
-            case 800: {
-
-              pageSize_ = input.readInt32();
-              break;
-            }
-            case 810: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              pageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -66780,7 +65108,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 101, pageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -66802,7 +65130,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(101, pageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -66825,7 +65153,7 @@ public final class SDXSvcAdminProto {
           != other.getPageSize()) return false;
       if (!getPageToken()
           .equals(other.getPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -66844,7 +65172,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getPageSize();
       hash = (37 * hash) + PAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -66965,18 +65293,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListIndexersRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -67082,7 +65405,7 @@ public final class SDXSvcAdminProto {
           pageToken_ = other.pageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -67097,17 +65420,50 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListIndexersRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                cloudPlatform_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                cloudRegion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 800: {
+                pageSize_ = input.readInt32();
+
+                break;
+              } // case 800
+              case 810: {
+                pageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 810
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListIndexersRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -67474,7 +65830,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListIndexersRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -67594,62 +65961,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListIndexersResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                indexerInstances_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              indexerInstances_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer.parser(), extensionRegistry));
-              break;
-            }
-            case 802: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              nextPageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          indexerInstances_ = java.util.Collections.unmodifiableList(indexerInstances_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -67790,7 +66101,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 100, nextPageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -67806,7 +66117,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(100, nextPageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -67825,7 +66136,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getIndexerInstancesList())) return false;
       if (!getNextPageToken()
           .equals(other.getNextPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -67842,7 +66153,7 @@ public final class SDXSvcAdminProto {
       }
       hash = (37 * hash) + NEXTPAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getNextPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -67963,29 +66274,24 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListIndexersResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getIndexerInstancesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (indexerInstancesBuilder_ == null) {
           indexerInstances_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          indexerInstances_ = null;
           indexerInstancesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         nextPageToken_ = "";
 
         return this;
@@ -68103,7 +66409,7 @@ public final class SDXSvcAdminProto {
           nextPageToken_ = other.nextPageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -68118,17 +66424,48 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListIndexersResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer.parser(),
+                        extensionRegistry);
+                if (indexerInstancesBuilder_ == null) {
+                  ensureIndexerInstancesIsMutable();
+                  indexerInstances_.add(m);
+                } else {
+                  indexerInstancesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 802: {
+                nextPageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 802
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListIndexersResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -68573,7 +66910,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListIndexersResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -68795,124 +67143,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private FindIndexersRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByInstance.Builder subBuilder = null;
-              if (searchByCase_ == 1) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByInstance) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByInstance.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByInstance) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 1;
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform.Builder subBuilder = null;
-              if (searchByCase_ == 2) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 2;
-              break;
-            }
-            case 26: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion.Builder subBuilder = null;
-              if (searchByCase_ == 3) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 3;
-              break;
-            }
-            case 34: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByService.Builder subBuilder = null;
-              if (searchByCase_ == 4) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByService) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByService.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByService) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 4;
-              break;
-            }
-            case 42: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByAssignability.Builder subBuilder = null;
-              if (searchByCase_ == 5) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByAssignability) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByAssignability.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByAssignability) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 5;
-              break;
-            }
-            case 800: {
-
-              pageSize_ = input.readInt32();
-              break;
-            }
-            case 810: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              pageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -69285,7 +67515,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 101, pageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -69321,7 +67551,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(101, pageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -69365,7 +67595,7 @@ public final class SDXSvcAdminProto {
         case 0:
         default:
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -69404,7 +67634,7 @@ public final class SDXSvcAdminProto {
         case 0:
         default:
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -69525,22 +67755,32 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindIndexersRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        if (searchByInstanceBuilder_ != null) {
+          searchByInstanceBuilder_.clear();
+        }
+        if (searchByCloudPlatformBuilder_ != null) {
+          searchByCloudPlatformBuilder_.clear();
+        }
+        if (searchByCloudRegionBuilder_ != null) {
+          searchByCloudRegionBuilder_.clear();
+        }
+        if (searchByServiceBuilder_ != null) {
+          searchByServiceBuilder_.clear();
+        }
+        if (searchByAssignabilityBuilder_ != null) {
+          searchByAssignabilityBuilder_.clear();
+        }
         pageSize_ = 0;
 
         pageToken_ = "";
@@ -69691,7 +67931,7 @@ public final class SDXSvcAdminProto {
             break;
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -69706,17 +67946,75 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindIndexersRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getSearchByInstanceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 1;
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getSearchByCloudPlatformFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 2;
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getSearchByCloudRegionFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 3;
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getSearchByServiceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 4;
+                break;
+              } // case 34
+              case 42: {
+                input.readMessage(
+                    getSearchByAssignabilityFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 5;
+                break;
+              } // case 42
+              case 800: {
+                pageSize_ = input.readInt32();
+
+                break;
+              } // case 800
+              case 810: {
+                pageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 810
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindIndexersRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int searchByCase_ = 0;
@@ -69829,8 +68127,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 1) {
             searchByInstanceBuilder_.mergeFrom(value);
+          } else {
+            searchByInstanceBuilder_.setMessage(value);
           }
-          searchByInstanceBuilder_.setMessage(value);
         }
         searchByCase_ = 1;
         return this;
@@ -70006,8 +68305,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 2) {
             searchByCloudPlatformBuilder_.mergeFrom(value);
+          } else {
+            searchByCloudPlatformBuilder_.setMessage(value);
           }
-          searchByCloudPlatformBuilder_.setMessage(value);
         }
         searchByCase_ = 2;
         return this;
@@ -70183,8 +68483,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 3) {
             searchByCloudRegionBuilder_.mergeFrom(value);
+          } else {
+            searchByCloudRegionBuilder_.setMessage(value);
           }
-          searchByCloudRegionBuilder_.setMessage(value);
         }
         searchByCase_ = 3;
         return this;
@@ -70360,8 +68661,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 4) {
             searchByServiceBuilder_.mergeFrom(value);
+          } else {
+            searchByServiceBuilder_.setMessage(value);
           }
-          searchByServiceBuilder_.setMessage(value);
         }
         searchByCase_ = 4;
         return this;
@@ -70537,8 +68839,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 5) {
             searchByAssignabilityBuilder_.mergeFrom(value);
+          } else {
+            searchByAssignabilityBuilder_.setMessage(value);
           }
-          searchByAssignabilityBuilder_.setMessage(value);
         }
         searchByCase_ = 5;
         return this;
@@ -70791,7 +69094,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new FindIndexersRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -70911,62 +69225,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private FindIndexersResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                indexerInstances_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              indexerInstances_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer.parser(), extensionRegistry));
-              break;
-            }
-            case 802: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              nextPageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          indexerInstances_ = java.util.Collections.unmodifiableList(indexerInstances_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -71107,7 +69365,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 100, nextPageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -71123,7 +69381,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(100, nextPageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -71142,7 +69400,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getIndexerInstancesList())) return false;
       if (!getNextPageToken()
           .equals(other.getNextPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -71159,7 +69417,7 @@ public final class SDXSvcAdminProto {
       }
       hash = (37 * hash) + NEXTPAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getNextPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -71280,29 +69538,24 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindIndexersResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getIndexerInstancesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (indexerInstancesBuilder_ == null) {
           indexerInstances_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          indexerInstances_ = null;
           indexerInstancesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         nextPageToken_ = "";
 
         return this;
@@ -71420,7 +69673,7 @@ public final class SDXSvcAdminProto {
           nextPageToken_ = other.nextPageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -71435,17 +69688,48 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindIndexersResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer.parser(),
+                        extensionRegistry);
+                if (indexerInstancesBuilder_ == null) {
+                  ensureIndexerInstancesIsMutable();
+                  indexerInstances_.add(m);
+                } else {
+                  indexerInstancesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 802: {
+                nextPageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 802
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindIndexersResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -71890,7 +70174,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new FindIndexersResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -71975,54 +70270,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private SetIndexerAssignabilityRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              indexerId_ = s;
-              break;
-            }
-            case 16: {
-
-              assignable_ = input.readBool();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -72118,7 +70365,7 @@ public final class SDXSvcAdminProto {
       if (assignable_ != false) {
         output.writeBool(2, assignable_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -72134,7 +70381,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, assignable_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -72153,7 +70400,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getIndexerId())) return false;
       if (getAssignable()
           != other.getAssignable()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -72169,7 +70416,7 @@ public final class SDXSvcAdminProto {
       hash = (37 * hash) + ASSIGNABLE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getAssignable());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -72290,18 +70537,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetIndexerAssignabilityRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -72393,7 +70635,7 @@ public final class SDXSvcAdminProto {
         if (other.getAssignable() != false) {
           setAssignable(other.getAssignable());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -72408,17 +70650,40 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetIndexerAssignabilityRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                indexerId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                assignable_ = input.readBool();
+
+                break;
+              } // case 16
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetIndexerAssignabilityRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -72593,7 +70858,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SetIndexerAssignabilityRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -72675,56 +70951,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private SetIndexerAssignabilityResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer.Builder subBuilder = null;
-              if (indexer_ != null) {
-                subBuilder = indexer_.toBuilder();
-              }
-              indexer_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.Indexer.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(indexer_);
-                indexer_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_SetIndexerAssignabilityResponse_descriptor;
@@ -72793,7 +71019,7 @@ public final class SDXSvcAdminProto {
       if (indexer_ != null) {
         output.writeMessage(1, getIndexer());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -72806,7 +71032,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getIndexer());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -72826,7 +71052,7 @@ public final class SDXSvcAdminProto {
         if (!getIndexer()
             .equals(other.getIndexer())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -72841,7 +71067,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + INDEXER_FIELD_NUMBER;
         hash = (53 * hash) + getIndexer().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -72962,18 +71188,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetIndexerAssignabilityResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -73066,7 +71287,7 @@ public final class SDXSvcAdminProto {
         if (other.hasIndexer()) {
           mergeIndexer(other.getIndexer());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -73081,17 +71302,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetIndexerAssignabilityResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getIndexerFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetIndexerAssignabilityResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -73282,7 +71523,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SetIndexerAssignabilityResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -73399,61 +71651,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RegisterAwsObjectStorageRootRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              name_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              account_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cloudRegion_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -73629,7 +71826,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, cloudRegion_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -73647,7 +71844,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cloudRegion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, cloudRegion_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -73668,7 +71865,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getAccount())) return false;
       if (!getCloudRegion()
           .equals(other.getCloudRegion())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -73685,7 +71882,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getAccount().hashCode();
       hash = (37 * hash) + CLOUDREGION_FIELD_NUMBER;
       hash = (53 * hash) + getCloudRegion().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -73806,18 +72003,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsObjectStorageRootRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -73917,7 +72109,7 @@ public final class SDXSvcAdminProto {
           cloudRegion_ = other.cloudRegion_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -73932,17 +72124,45 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsObjectStorageRootRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                account_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                cloudRegion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsObjectStorageRootRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -74266,7 +72486,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RegisterAwsObjectStorageRootRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -74348,56 +72579,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private RegisterAwsObjectStorageRootResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot.Builder subBuilder = null;
-              if (storageRoot_ != null) {
-                subBuilder = storageRoot_.toBuilder();
-              }
-              storageRoot_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(storageRoot_);
-                storageRoot_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_RegisterAwsObjectStorageRootResponse_descriptor;
@@ -74466,7 +72647,7 @@ public final class SDXSvcAdminProto {
       if (storageRoot_ != null) {
         output.writeMessage(1, getStorageRoot());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -74479,7 +72660,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getStorageRoot());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -74499,7 +72680,7 @@ public final class SDXSvcAdminProto {
         if (!getStorageRoot()
             .equals(other.getStorageRoot())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -74514,7 +72695,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + STORAGEROOT_FIELD_NUMBER;
         hash = (53 * hash) + getStorageRoot().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -74635,18 +72816,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsObjectStorageRootResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -74739,7 +72915,7 @@ public final class SDXSvcAdminProto {
         if (other.hasStorageRoot()) {
           mergeStorageRoot(other.getStorageRoot());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -74754,17 +72930,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsObjectStorageRootResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getStorageRootFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsObjectStorageRootResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -74955,7 +73151,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RegisterAwsObjectStorageRootResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -75030,49 +73237,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private UnregisterStorageRootRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              storageRoot_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -75150,7 +73314,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storageRoot_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, storageRoot_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -75162,7 +73326,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storageRoot_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, storageRoot_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -75179,7 +73343,7 @@ public final class SDXSvcAdminProto {
 
       if (!getStorageRoot()
           .equals(other.getStorageRoot())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -75192,7 +73356,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + STORAGEROOT_FIELD_NUMBER;
       hash = (53 * hash) + getStorageRoot().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -75313,18 +73477,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterStorageRootRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -75410,7 +73569,7 @@ public final class SDXSvcAdminProto {
           storageRoot_ = other.storageRoot_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -75425,17 +73584,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterStorageRootRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                storageRoot_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterStorageRootRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -75567,7 +73744,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UnregisterStorageRootRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -75649,56 +73837,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private UnregisterStorageRootResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot.Builder subBuilder = null;
-              if (storageRoot_ != null) {
-                subBuilder = storageRoot_.toBuilder();
-              }
-              storageRoot_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(storageRoot_);
-                storageRoot_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_UnregisterStorageRootResponse_descriptor;
@@ -75767,7 +73905,7 @@ public final class SDXSvcAdminProto {
       if (storageRoot_ != null) {
         output.writeMessage(1, getStorageRoot());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -75780,7 +73918,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getStorageRoot());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -75800,7 +73938,7 @@ public final class SDXSvcAdminProto {
         if (!getStorageRoot()
             .equals(other.getStorageRoot())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -75815,7 +73953,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + STORAGEROOT_FIELD_NUMBER;
         hash = (53 * hash) + getStorageRoot().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -75936,18 +74074,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterStorageRootResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -76040,7 +74173,7 @@ public final class SDXSvcAdminProto {
         if (other.hasStorageRoot()) {
           mergeStorageRoot(other.getStorageRoot());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -76055,17 +74188,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterStorageRootResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getStorageRootFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterStorageRootResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -76256,7 +74409,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UnregisterStorageRootResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -76331,49 +74495,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DescribeStorageRootRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              storageRoot_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -76451,7 +74572,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storageRoot_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, storageRoot_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -76463,7 +74584,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storageRoot_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, storageRoot_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -76480,7 +74601,7 @@ public final class SDXSvcAdminProto {
 
       if (!getStorageRoot()
           .equals(other.getStorageRoot())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -76493,7 +74614,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + STORAGEROOT_FIELD_NUMBER;
       hash = (53 * hash) + getStorageRoot().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -76614,18 +74735,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeStorageRootRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -76711,7 +74827,7 @@ public final class SDXSvcAdminProto {
           storageRoot_ = other.storageRoot_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -76726,17 +74842,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeStorageRootRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                storageRoot_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeStorageRootRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -76868,7 +75002,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DescribeStorageRootRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -76950,56 +75095,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private DescribeStorageRootResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot.Builder subBuilder = null;
-              if (storageRoot_ != null) {
-                subBuilder = storageRoot_.toBuilder();
-              }
-              storageRoot_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(storageRoot_);
-                storageRoot_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_DescribeStorageRootResponse_descriptor;
@@ -77068,7 +75163,7 @@ public final class SDXSvcAdminProto {
       if (storageRoot_ != null) {
         output.writeMessage(1, getStorageRoot());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -77081,7 +75176,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getStorageRoot());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -77101,7 +75196,7 @@ public final class SDXSvcAdminProto {
         if (!getStorageRoot()
             .equals(other.getStorageRoot())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -77116,7 +75211,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + STORAGEROOT_FIELD_NUMBER;
         hash = (53 * hash) + getStorageRoot().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -77237,18 +75332,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeStorageRootResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -77341,7 +75431,7 @@ public final class SDXSvcAdminProto {
         if (other.hasStorageRoot()) {
           mergeStorageRoot(other.getStorageRoot());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -77356,17 +75446,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeStorageRootResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getStorageRootFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeStorageRootResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -77557,7 +75667,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DescribeStorageRootResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -77684,66 +75805,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListStorageRootsRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cloudPlatform_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cloudRegion_ = s;
-              break;
-            }
-            case 800: {
-
-              pageSize_ = input.readInt32();
-              break;
-            }
-            case 810: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              pageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -77937,7 +75998,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 101, pageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -77959,7 +76020,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(101, pageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -77982,7 +76043,7 @@ public final class SDXSvcAdminProto {
           != other.getPageSize()) return false;
       if (!getPageToken()
           .equals(other.getPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -78001,7 +76062,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getPageSize();
       hash = (37 * hash) + PAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -78122,18 +76183,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListStorageRootsRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -78239,7 +76295,7 @@ public final class SDXSvcAdminProto {
           pageToken_ = other.pageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -78254,17 +76310,50 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListStorageRootsRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                cloudPlatform_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                cloudRegion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 800: {
+                pageSize_ = input.readInt32();
+
+                break;
+              } // case 800
+              case 810: {
+                pageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 810
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListStorageRootsRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -78631,7 +76720,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListStorageRootsRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -78751,62 +76851,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListStorageRootsResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                storageRoots_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              storageRoots_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot.parser(), extensionRegistry));
-              break;
-            }
-            case 802: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              nextPageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          storageRoots_ = java.util.Collections.unmodifiableList(storageRoots_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -78947,7 +76991,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 100, nextPageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -78963,7 +77007,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(100, nextPageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -78982,7 +77026,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getStorageRootsList())) return false;
       if (!getNextPageToken()
           .equals(other.getNextPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -78999,7 +77043,7 @@ public final class SDXSvcAdminProto {
       }
       hash = (37 * hash) + NEXTPAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getNextPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -79120,29 +77164,24 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListStorageRootsResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getStorageRootsFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (storageRootsBuilder_ == null) {
           storageRoots_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          storageRoots_ = null;
           storageRootsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         nextPageToken_ = "";
 
         return this;
@@ -79260,7 +77299,7 @@ public final class SDXSvcAdminProto {
           nextPageToken_ = other.nextPageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -79275,17 +77314,48 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListStorageRootsResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot.parser(),
+                        extensionRegistry);
+                if (storageRootsBuilder_ == null) {
+                  ensureStorageRootsIsMutable();
+                  storageRoots_.add(m);
+                } else {
+                  storageRootsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 802: {
+                nextPageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 802
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListStorageRootsResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -79730,7 +77800,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListStorageRootsResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -79952,124 +78033,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private FindStorageRootsRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByInstance.Builder subBuilder = null;
-              if (searchByCase_ == 1) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByInstance) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByInstance.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByInstance) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 1;
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform.Builder subBuilder = null;
-              if (searchByCase_ == 2) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 2;
-              break;
-            }
-            case 26: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion.Builder subBuilder = null;
-              if (searchByCase_ == 3) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 3;
-              break;
-            }
-            case 34: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByService.Builder subBuilder = null;
-              if (searchByCase_ == 4) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByService) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByService.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByService) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 4;
-              break;
-            }
-            case 42: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByAssignability.Builder subBuilder = null;
-              if (searchByCase_ == 5) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByAssignability) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByAssignability.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByAssignability) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 5;
-              break;
-            }
-            case 800: {
-
-              pageSize_ = input.readInt32();
-              break;
-            }
-            case 810: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              pageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -80442,7 +78405,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 101, pageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -80478,7 +78441,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(101, pageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -80522,7 +78485,7 @@ public final class SDXSvcAdminProto {
         case 0:
         default:
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -80561,7 +78524,7 @@ public final class SDXSvcAdminProto {
         case 0:
         default:
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -80682,22 +78645,32 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindStorageRootsRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        if (searchByInstanceBuilder_ != null) {
+          searchByInstanceBuilder_.clear();
+        }
+        if (searchByCloudPlatformBuilder_ != null) {
+          searchByCloudPlatformBuilder_.clear();
+        }
+        if (searchByCloudRegionBuilder_ != null) {
+          searchByCloudRegionBuilder_.clear();
+        }
+        if (searchByServiceBuilder_ != null) {
+          searchByServiceBuilder_.clear();
+        }
+        if (searchByAssignabilityBuilder_ != null) {
+          searchByAssignabilityBuilder_.clear();
+        }
         pageSize_ = 0;
 
         pageToken_ = "";
@@ -80848,7 +78821,7 @@ public final class SDXSvcAdminProto {
             break;
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -80863,17 +78836,75 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindStorageRootsRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getSearchByInstanceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 1;
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getSearchByCloudPlatformFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 2;
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getSearchByCloudRegionFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 3;
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getSearchByServiceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 4;
+                break;
+              } // case 34
+              case 42: {
+                input.readMessage(
+                    getSearchByAssignabilityFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 5;
+                break;
+              } // case 42
+              case 800: {
+                pageSize_ = input.readInt32();
+
+                break;
+              } // case 800
+              case 810: {
+                pageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 810
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindStorageRootsRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int searchByCase_ = 0;
@@ -80986,8 +79017,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 1) {
             searchByInstanceBuilder_.mergeFrom(value);
+          } else {
+            searchByInstanceBuilder_.setMessage(value);
           }
-          searchByInstanceBuilder_.setMessage(value);
         }
         searchByCase_ = 1;
         return this;
@@ -81163,8 +79195,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 2) {
             searchByCloudPlatformBuilder_.mergeFrom(value);
+          } else {
+            searchByCloudPlatformBuilder_.setMessage(value);
           }
-          searchByCloudPlatformBuilder_.setMessage(value);
         }
         searchByCase_ = 2;
         return this;
@@ -81340,8 +79373,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 3) {
             searchByCloudRegionBuilder_.mergeFrom(value);
+          } else {
+            searchByCloudRegionBuilder_.setMessage(value);
           }
-          searchByCloudRegionBuilder_.setMessage(value);
         }
         searchByCase_ = 3;
         return this;
@@ -81517,8 +79551,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 4) {
             searchByServiceBuilder_.mergeFrom(value);
+          } else {
+            searchByServiceBuilder_.setMessage(value);
           }
-          searchByServiceBuilder_.setMessage(value);
         }
         searchByCase_ = 4;
         return this;
@@ -81694,8 +79729,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 5) {
             searchByAssignabilityBuilder_.mergeFrom(value);
+          } else {
+            searchByAssignabilityBuilder_.setMessage(value);
           }
-          searchByAssignabilityBuilder_.setMessage(value);
         }
         searchByCase_ = 5;
         return this;
@@ -81948,7 +79984,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new FindStorageRootsRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -82068,62 +80115,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private FindStorageRootsResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                storageRoots_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              storageRoots_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot.parser(), extensionRegistry));
-              break;
-            }
-            case 802: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              nextPageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          storageRoots_ = java.util.Collections.unmodifiableList(storageRoots_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -82264,7 +80255,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 100, nextPageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -82280,7 +80271,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(100, nextPageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -82299,7 +80290,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getStorageRootsList())) return false;
       if (!getNextPageToken()
           .equals(other.getNextPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -82316,7 +80307,7 @@ public final class SDXSvcAdminProto {
       }
       hash = (37 * hash) + NEXTPAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getNextPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -82437,29 +80428,24 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindStorageRootsResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getStorageRootsFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (storageRootsBuilder_ == null) {
           storageRoots_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          storageRoots_ = null;
           storageRootsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         nextPageToken_ = "";
 
         return this;
@@ -82577,7 +80563,7 @@ public final class SDXSvcAdminProto {
           nextPageToken_ = other.nextPageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -82592,17 +80578,48 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindStorageRootsResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot.parser(),
+                        extensionRegistry);
+                if (storageRootsBuilder_ == null) {
+                  ensureStorageRootsIsMutable();
+                  storageRoots_.add(m);
+                } else {
+                  storageRootsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 802: {
+                nextPageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 802
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindStorageRootsResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -83047,7 +81064,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new FindStorageRootsResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -83132,54 +81160,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private SetStorageRootAssignabilityRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              storageRoot_ = s;
-              break;
-            }
-            case 16: {
-
-              assignable_ = input.readBool();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -83275,7 +81255,7 @@ public final class SDXSvcAdminProto {
       if (assignable_ != false) {
         output.writeBool(2, assignable_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -83291,7 +81271,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, assignable_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -83310,7 +81290,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getStorageRoot())) return false;
       if (getAssignable()
           != other.getAssignable()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -83326,7 +81306,7 @@ public final class SDXSvcAdminProto {
       hash = (37 * hash) + ASSIGNABLE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getAssignable());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -83447,18 +81427,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetStorageRootAssignabilityRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -83550,7 +81525,7 @@ public final class SDXSvcAdminProto {
         if (other.getAssignable() != false) {
           setAssignable(other.getAssignable());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -83565,17 +81540,40 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetStorageRootAssignabilityRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                storageRoot_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                assignable_ = input.readBool();
+
+                break;
+              } // case 16
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetStorageRootAssignabilityRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -83750,7 +81748,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SetStorageRootAssignabilityRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -83832,56 +81841,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private SetStorageRootAssignabilityResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot.Builder subBuilder = null;
-              if (storageRoot_ != null) {
-                subBuilder = storageRoot_.toBuilder();
-              }
-              storageRoot_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.StorageRoot.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(storageRoot_);
-                storageRoot_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_SetStorageRootAssignabilityResponse_descriptor;
@@ -83950,7 +81909,7 @@ public final class SDXSvcAdminProto {
       if (storageRoot_ != null) {
         output.writeMessage(1, getStorageRoot());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -83963,7 +81922,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getStorageRoot());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -83983,7 +81942,7 @@ public final class SDXSvcAdminProto {
         if (!getStorageRoot()
             .equals(other.getStorageRoot())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -83998,7 +81957,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + STORAGEROOT_FIELD_NUMBER;
         hash = (53 * hash) + getStorageRoot().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -84119,18 +82078,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetStorageRootAssignabilityResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -84223,7 +82177,7 @@ public final class SDXSvcAdminProto {
         if (other.hasStorageRoot()) {
           mergeStorageRoot(other.getStorageRoot());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -84238,17 +82192,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetStorageRootAssignabilityResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getStorageRootFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetStorageRootAssignabilityResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -84439,7 +82413,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SetStorageRootAssignabilityResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -84650,90 +82635,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private RegisterAwsRdbmsRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              name_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cloudId_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cloudRegion_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accessHostname_ = s;
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              accessPort_ = s;
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              adminUsernameVaultPath_ = s;
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              adminPasswordVaultPath_ = s;
-              break;
-            }
-            case 64: {
-
-              tlsEnabled_ = input.readBool();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -85123,7 +83024,7 @@ public final class SDXSvcAdminProto {
       if (tlsEnabled_ != false) {
         output.writeBool(8, tlsEnabled_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -85157,7 +83058,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(8, tlsEnabled_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -85188,7 +83089,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getAdminPasswordVaultPath())) return false;
       if (getTlsEnabled()
           != other.getTlsEnabled()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -85216,7 +83117,7 @@ public final class SDXSvcAdminProto {
       hash = (37 * hash) + TLSENABLED_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getTlsEnabled());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -85337,18 +83238,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsRdbmsRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -85482,7 +83378,7 @@ public final class SDXSvcAdminProto {
         if (other.getTlsEnabled() != false) {
           setTlsEnabled(other.getTlsEnabled());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -85497,17 +83393,70 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsRdbmsRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                cloudId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                cloudRegion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                accessHostname_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 42: {
+                accessPort_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              case 50: {
+                adminUsernameVaultPath_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              case 58: {
+                adminPasswordVaultPath_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 58
+              case 64: {
+                tlsEnabled_ = input.readBool();
+
+                break;
+              } // case 64
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsRdbmsRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -86258,7 +84207,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RegisterAwsRdbmsRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -86340,56 +84300,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private RegisterAwsRdbmsResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.RdbmsInstance.Builder subBuilder = null;
-              if (rdbmsInstance_ != null) {
-                subBuilder = rdbmsInstance_.toBuilder();
-              }
-              rdbmsInstance_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.RdbmsInstance.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(rdbmsInstance_);
-                rdbmsInstance_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_RegisterAwsRdbmsResponse_descriptor;
@@ -86458,7 +84368,7 @@ public final class SDXSvcAdminProto {
       if (rdbmsInstance_ != null) {
         output.writeMessage(1, getRdbmsInstance());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -86471,7 +84381,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getRdbmsInstance());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -86491,7 +84401,7 @@ public final class SDXSvcAdminProto {
         if (!getRdbmsInstance()
             .equals(other.getRdbmsInstance())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -86506,7 +84416,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + RDBMSINSTANCE_FIELD_NUMBER;
         hash = (53 * hash) + getRdbmsInstance().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -86627,18 +84537,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsRdbmsResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -86731,7 +84636,7 @@ public final class SDXSvcAdminProto {
         if (other.hasRdbmsInstance()) {
           mergeRdbmsInstance(other.getRdbmsInstance());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -86746,17 +84651,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsRdbmsResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getRdbmsInstanceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsRdbmsResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -86947,7 +84872,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new RegisterAwsRdbmsResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -87022,49 +84958,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private UnregisterRdbmsRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              rdbms_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -87142,7 +85035,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(rdbms_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, rdbms_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -87154,7 +85047,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(rdbms_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, rdbms_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -87171,7 +85064,7 @@ public final class SDXSvcAdminProto {
 
       if (!getRdbms()
           .equals(other.getRdbms())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -87184,7 +85077,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + RDBMS_FIELD_NUMBER;
       hash = (53 * hash) + getRdbms().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -87305,18 +85198,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterRdbmsRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -87402,7 +85290,7 @@ public final class SDXSvcAdminProto {
           rdbms_ = other.rdbms_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -87417,17 +85305,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterRdbmsRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                rdbms_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterRdbmsRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -87559,7 +85465,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UnregisterRdbmsRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -87641,56 +85558,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private UnregisterRdbmsResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.RdbmsInstance.Builder subBuilder = null;
-              if (rdbmsInstance_ != null) {
-                subBuilder = rdbmsInstance_.toBuilder();
-              }
-              rdbmsInstance_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.RdbmsInstance.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(rdbmsInstance_);
-                rdbmsInstance_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_UnregisterRdbmsResponse_descriptor;
@@ -87759,7 +85626,7 @@ public final class SDXSvcAdminProto {
       if (rdbmsInstance_ != null) {
         output.writeMessage(1, getRdbmsInstance());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -87772,7 +85639,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getRdbmsInstance());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -87792,7 +85659,7 @@ public final class SDXSvcAdminProto {
         if (!getRdbmsInstance()
             .equals(other.getRdbmsInstance())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -87807,7 +85674,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + RDBMSINSTANCE_FIELD_NUMBER;
         hash = (53 * hash) + getRdbmsInstance().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -87928,18 +85795,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterRdbmsResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -88032,7 +85894,7 @@ public final class SDXSvcAdminProto {
         if (other.hasRdbmsInstance()) {
           mergeRdbmsInstance(other.getRdbmsInstance());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -88047,17 +85909,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterRdbmsResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getRdbmsInstanceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterRdbmsResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -88248,7 +86130,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new UnregisterRdbmsResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -88323,49 +86216,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DescribeRdbmsRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              rdbms_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -88443,7 +86293,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(rdbms_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, rdbms_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -88455,7 +86305,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(rdbms_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, rdbms_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -88472,7 +86322,7 @@ public final class SDXSvcAdminProto {
 
       if (!getRdbms()
           .equals(other.getRdbms())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -88485,7 +86335,7 @@ public final class SDXSvcAdminProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + RDBMS_FIELD_NUMBER;
       hash = (53 * hash) + getRdbms().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -88606,18 +86456,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeRdbmsRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -88703,7 +86548,7 @@ public final class SDXSvcAdminProto {
           rdbms_ = other.rdbms_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -88718,17 +86563,35 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeRdbmsRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                rdbms_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeRdbmsRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -88860,7 +86723,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DescribeRdbmsRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -88942,56 +86816,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private DescribeRdbmsResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.RdbmsInstance.Builder subBuilder = null;
-              if (rdbms_ != null) {
-                subBuilder = rdbms_.toBuilder();
-              }
-              rdbms_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.RdbmsInstance.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(rdbms_);
-                rdbms_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_DescribeRdbmsResponse_descriptor;
@@ -89060,7 +86884,7 @@ public final class SDXSvcAdminProto {
       if (rdbms_ != null) {
         output.writeMessage(1, getRdbms());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -89073,7 +86897,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getRdbms());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -89093,7 +86917,7 @@ public final class SDXSvcAdminProto {
         if (!getRdbms()
             .equals(other.getRdbms())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -89108,7 +86932,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + RDBMS_FIELD_NUMBER;
         hash = (53 * hash) + getRdbms().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -89229,18 +87053,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeRdbmsResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -89333,7 +87152,7 @@ public final class SDXSvcAdminProto {
         if (other.hasRdbms()) {
           mergeRdbms(other.getRdbms());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -89348,17 +87167,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeRdbmsResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getRdbmsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeRdbmsResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -89549,7 +87388,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DescribeRdbmsResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -89771,124 +87621,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private FindRdbmsRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByInstance.Builder subBuilder = null;
-              if (searchByCase_ == 1) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByInstance) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByInstance.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByInstance) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 1;
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform.Builder subBuilder = null;
-              if (searchByCase_ == 2) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudPlatform) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 2;
-              break;
-            }
-            case 26: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion.Builder subBuilder = null;
-              if (searchByCase_ == 3) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByCloudRegion) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 3;
-              break;
-            }
-            case 34: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByService.Builder subBuilder = null;
-              if (searchByCase_ == 4) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByService) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByService.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByService) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 4;
-              break;
-            }
-            case 42: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByAssignability.Builder subBuilder = null;
-              if (searchByCase_ == 5) {
-                subBuilder = ((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByAssignability) searchBy_).toBuilder();
-              }
-              searchBy_ =
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByAssignability.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.SearchByAssignability) searchBy_);
-                searchBy_ = subBuilder.buildPartial();
-              }
-              searchByCase_ = 5;
-              break;
-            }
-            case 800: {
-
-              pageSize_ = input.readInt32();
-              break;
-            }
-            case 810: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              pageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -90261,7 +87993,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 101, pageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -90297,7 +88029,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(101, pageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -90341,7 +88073,7 @@ public final class SDXSvcAdminProto {
         case 0:
         default:
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -90380,7 +88112,7 @@ public final class SDXSvcAdminProto {
         case 0:
         default:
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -90501,22 +88233,32 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindRdbmsRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        if (searchByInstanceBuilder_ != null) {
+          searchByInstanceBuilder_.clear();
+        }
+        if (searchByCloudPlatformBuilder_ != null) {
+          searchByCloudPlatformBuilder_.clear();
+        }
+        if (searchByCloudRegionBuilder_ != null) {
+          searchByCloudRegionBuilder_.clear();
+        }
+        if (searchByServiceBuilder_ != null) {
+          searchByServiceBuilder_.clear();
+        }
+        if (searchByAssignabilityBuilder_ != null) {
+          searchByAssignabilityBuilder_.clear();
+        }
         pageSize_ = 0;
 
         pageToken_ = "";
@@ -90667,7 +88409,7 @@ public final class SDXSvcAdminProto {
             break;
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -90682,17 +88424,75 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindRdbmsRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getSearchByInstanceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 1;
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getSearchByCloudPlatformFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 2;
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getSearchByCloudRegionFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 3;
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getSearchByServiceFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 4;
+                break;
+              } // case 34
+              case 42: {
+                input.readMessage(
+                    getSearchByAssignabilityFieldBuilder().getBuilder(),
+                    extensionRegistry);
+                searchByCase_ = 5;
+                break;
+              } // case 42
+              case 800: {
+                pageSize_ = input.readInt32();
+
+                break;
+              } // case 800
+              case 810: {
+                pageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 810
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindRdbmsRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int searchByCase_ = 0;
@@ -90805,8 +88605,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 1) {
             searchByInstanceBuilder_.mergeFrom(value);
+          } else {
+            searchByInstanceBuilder_.setMessage(value);
           }
-          searchByInstanceBuilder_.setMessage(value);
         }
         searchByCase_ = 1;
         return this;
@@ -90982,8 +88783,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 2) {
             searchByCloudPlatformBuilder_.mergeFrom(value);
+          } else {
+            searchByCloudPlatformBuilder_.setMessage(value);
           }
-          searchByCloudPlatformBuilder_.setMessage(value);
         }
         searchByCase_ = 2;
         return this;
@@ -91159,8 +88961,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 3) {
             searchByCloudRegionBuilder_.mergeFrom(value);
+          } else {
+            searchByCloudRegionBuilder_.setMessage(value);
           }
-          searchByCloudRegionBuilder_.setMessage(value);
         }
         searchByCase_ = 3;
         return this;
@@ -91336,8 +89139,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 4) {
             searchByServiceBuilder_.mergeFrom(value);
+          } else {
+            searchByServiceBuilder_.setMessage(value);
           }
-          searchByServiceBuilder_.setMessage(value);
         }
         searchByCase_ = 4;
         return this;
@@ -91513,8 +89317,9 @@ public final class SDXSvcAdminProto {
         } else {
           if (searchByCase_ == 5) {
             searchByAssignabilityBuilder_.mergeFrom(value);
+          } else {
+            searchByAssignabilityBuilder_.setMessage(value);
           }
-          searchByAssignabilityBuilder_.setMessage(value);
         }
         searchByCase_ = 5;
         return this;
@@ -91767,7 +89572,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new FindRdbmsRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -91887,62 +89703,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private FindRdbmsResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                rdbmsInstances_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.RdbmsInstance>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              rdbmsInstances_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.RdbmsInstance.parser(), extensionRegistry));
-              break;
-            }
-            case 802: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              nextPageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          rdbmsInstances_ = java.util.Collections.unmodifiableList(rdbmsInstances_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -92083,7 +89843,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 100, nextPageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -92099,7 +89859,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(100, nextPageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -92118,7 +89878,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getRdbmsInstancesList())) return false;
       if (!getNextPageToken()
           .equals(other.getNextPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -92135,7 +89895,7 @@ public final class SDXSvcAdminProto {
       }
       hash = (37 * hash) + NEXTPAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getNextPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -92256,29 +90016,24 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindRdbmsResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getRdbmsInstancesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (rdbmsInstancesBuilder_ == null) {
           rdbmsInstances_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          rdbmsInstances_ = null;
           rdbmsInstancesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         nextPageToken_ = "";
 
         return this;
@@ -92396,7 +90151,7 @@ public final class SDXSvcAdminProto {
           nextPageToken_ = other.nextPageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -92411,17 +90166,48 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindRdbmsResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.RdbmsInstance m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.RdbmsInstance.parser(),
+                        extensionRegistry);
+                if (rdbmsInstancesBuilder_ == null) {
+                  ensureRdbmsInstancesIsMutable();
+                  rdbmsInstances_.add(m);
+                } else {
+                  rdbmsInstancesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 802: {
+                nextPageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 802
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindRdbmsResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -92866,7 +90652,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new FindRdbmsResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -92993,66 +90790,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListRdbmsRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cloudPlatform_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cloudRegion_ = s;
-              break;
-            }
-            case 800: {
-
-              pageSize_ = input.readInt32();
-              break;
-            }
-            case 810: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              pageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -93246,7 +90983,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 101, pageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -93268,7 +91005,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(101, pageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -93291,7 +91028,7 @@ public final class SDXSvcAdminProto {
           != other.getPageSize()) return false;
       if (!getPageToken()
           .equals(other.getPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -93310,7 +91047,7 @@ public final class SDXSvcAdminProto {
       hash = (53 * hash) + getPageSize();
       hash = (37 * hash) + PAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -93431,18 +91168,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListRdbmsRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -93548,7 +91280,7 @@ public final class SDXSvcAdminProto {
           pageToken_ = other.pageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -93563,17 +91295,50 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListRdbmsRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                cloudPlatform_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                cloudRegion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 800: {
+                pageSize_ = input.readInt32();
+
+                break;
+              } // case 800
+              case 810: {
+                pageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 810
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListRdbmsRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -93940,7 +91705,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListRdbmsRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -94060,62 +91836,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ListRdbmsResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                rdbmsInstances_ = new java.util.ArrayList<com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.RdbmsInstance>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              rdbmsInstances_.add(
-                  input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.RdbmsInstance.parser(), extensionRegistry));
-              break;
-            }
-            case 802: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              nextPageToken_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          rdbmsInstances_ = java.util.Collections.unmodifiableList(rdbmsInstances_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -94256,7 +91976,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 100, nextPageToken_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -94272,7 +91992,7 @@ public final class SDXSvcAdminProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(100, nextPageToken_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -94291,7 +92011,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getRdbmsInstancesList())) return false;
       if (!getNextPageToken()
           .equals(other.getNextPageToken())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -94308,7 +92028,7 @@ public final class SDXSvcAdminProto {
       }
       hash = (37 * hash) + NEXTPAGETOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getNextPageToken().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -94429,29 +92149,24 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListRdbmsResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getRdbmsInstancesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (rdbmsInstancesBuilder_ == null) {
           rdbmsInstances_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          rdbmsInstances_ = null;
           rdbmsInstancesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         nextPageToken_ = "";
 
         return this;
@@ -94569,7 +92284,7 @@ public final class SDXSvcAdminProto {
           nextPageToken_ = other.nextPageToken_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -94584,17 +92299,48 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListRdbmsResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.RdbmsInstance m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.RdbmsInstance.parser(),
+                        extensionRegistry);
+                if (rdbmsInstancesBuilder_ == null) {
+                  ensureRdbmsInstancesIsMutable();
+                  rdbmsInstances_.add(m);
+                } else {
+                  rdbmsInstancesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 802: {
+                nextPageToken_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 802
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListRdbmsResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -95039,7 +92785,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ListRdbmsResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -95124,54 +92881,6 @@ public final class SDXSvcAdminProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private SetRdbmsAssignabilityRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              rdbms_ = s;
-              break;
-            }
-            case 16: {
-
-              assignable_ = input.readBool();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -95267,7 +92976,7 @@ public final class SDXSvcAdminProto {
       if (assignable_ != false) {
         output.writeBool(2, assignable_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -95283,7 +92992,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, assignable_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -95302,7 +93011,7 @@ public final class SDXSvcAdminProto {
           .equals(other.getRdbms())) return false;
       if (getAssignable()
           != other.getAssignable()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -95318,7 +93027,7 @@ public final class SDXSvcAdminProto {
       hash = (37 * hash) + ASSIGNABLE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getAssignable());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -95439,18 +93148,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetRdbmsAssignabilityRequest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -95542,7 +93246,7 @@ public final class SDXSvcAdminProto {
         if (other.getAssignable() != false) {
           setAssignable(other.getAssignable());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -95557,17 +93261,40 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetRdbmsAssignabilityRequest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                rdbms_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                assignable_ = input.readBool();
+
+                break;
+              } // case 16
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetRdbmsAssignabilityRequest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -95742,7 +93469,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SetRdbmsAssignabilityRequest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -95824,56 +93562,6 @@ public final class SDXSvcAdminProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private SetRdbmsAssignabilityResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.RdbmsInstance.Builder subBuilder = null;
-              if (rdbms_ != null) {
-                subBuilder = rdbms_.toBuilder();
-              }
-              rdbms_ = input.readMessage(com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto.RdbmsInstance.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(rdbms_);
-                rdbms_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.internal_static_sdxsvcadmin_SetRdbmsAssignabilityResponse_descriptor;
@@ -95942,7 +93630,7 @@ public final class SDXSvcAdminProto {
       if (rdbms_ != null) {
         output.writeMessage(1, getRdbms());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -95955,7 +93643,7 @@ public final class SDXSvcAdminProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getRdbms());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -95975,7 +93663,7 @@ public final class SDXSvcAdminProto {
         if (!getRdbms()
             .equals(other.getRdbms())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -95990,7 +93678,7 @@ public final class SDXSvcAdminProto {
         hash = (37 * hash) + RDBMS_FIELD_NUMBER;
         hash = (53 * hash) + getRdbms().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -96111,18 +93799,13 @@ public final class SDXSvcAdminProto {
 
       // Construct using com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetRdbmsAssignabilityResponse.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -96215,7 +93898,7 @@ public final class SDXSvcAdminProto {
         if (other.hasRdbms()) {
           mergeRdbms(other.getRdbms());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -96230,17 +93913,37 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetRdbmsAssignabilityResponse parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getRdbmsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetRdbmsAssignabilityResponse) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -96431,7 +94134,18 @@ public final class SDXSvcAdminProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SetRdbmsAssignabilityResponse(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
