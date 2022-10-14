@@ -375,7 +375,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public FlowIdentifier putVerticalScalingByName(@ResourceName String name, @Valid DistroXVerticalScaleV1Request updateRequest) {
+    public FlowIdentifier verticalScalingByName(@ResourceName String name, @Valid DistroXVerticalScaleV1Request updateRequest) {
         StackVerticalScaleV4Request stackVerticalScaleV4Request = verticalScaleV4RequestConverter.convert(updateRequest);
         stackVerticalScaleV4Request.setStackId(stackOperations.getResourceIdByResourceName(name));
         return stackOperations.putVerticalScaling(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), stackVerticalScaleV4Request);
@@ -383,7 +383,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public FlowIdentifier putVerticalScalingByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn,
+    public FlowIdentifier verticalScalingByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn,
             @Valid DistroXVerticalScaleV1Request updateRequest) {
         StackVerticalScaleV4Request stackVerticalScaleV4Request = verticalScaleV4RequestConverter.convert(updateRequest);
         stackVerticalScaleV4Request.setStackId(stackOperations.getResourceIdByResourceCrn(crn));
