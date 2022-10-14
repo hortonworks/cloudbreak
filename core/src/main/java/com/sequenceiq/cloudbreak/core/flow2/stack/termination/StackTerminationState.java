@@ -10,6 +10,7 @@ public enum StackTerminationState implements FlowState {
     PRE_TERMINATION_STATE(StackPreTerminationAction.class),
     CLUSTER_PROXY_DEREGISTER_STATE(ClusterProxyDeregisterAction.class),
     CCM_KEY_DEREGISTER_STATE(CcmKeyDeregisterAction.class),
+    ATTACHED_VOLUME_CONSUMPTION_COLLECTION_UNSCHEDULING_STATE(AttachedVolumeConsumptionCollectionUnschedulingAction.class),
     TERMINATION_STATE(StackTerminationAction.class),
     TERMINATION_FAILED_STATE(StackTerminationFailureAction.class),
     TERMINATION_FINISHED_STATE(StackTerminationFinishedAction.class),

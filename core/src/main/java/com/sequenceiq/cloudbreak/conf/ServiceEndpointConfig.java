@@ -59,6 +59,15 @@ public class ServiceEndpointConfig {
     @Value("${cb.sdx.serviceid:}")
     private String sdxServiceId;
 
+    @Value("${cb.consumption.url:}")
+    private String consumptionServiceUrl;
+
+    @Value("${cb.consumption.serviceId:}")
+    private String consumptionServiceId;
+
+    @Value("${cb.consumption.contextPath}")
+    private String consumptionRootContextPath;
+
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
         return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
@@ -87,5 +96,10 @@ public class ServiceEndpointConfig {
     @Bean
     public String sdxServerUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver().resolveUrl(sdxServiceUrl + sdxContextPath, "http", sdxServiceId);
+    }
+
+    @Bean
+    public String consumptionServerUrl() throws ServiceAddressResolvingException {
+        return serviceAddressResolver().resolveUrl(consumptionServiceUrl + consumptionRootContextPath, "http", consumptionServiceId);
     }
 }

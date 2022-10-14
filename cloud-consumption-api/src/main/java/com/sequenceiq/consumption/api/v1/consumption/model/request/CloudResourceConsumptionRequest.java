@@ -31,19 +31,17 @@ public class CloudResourceConsumptionRequest extends ConsumptionBaseRequest {
     }
 
     public String getCloudResourceId() {
-
         return cloudResourceId;
     }
 
     public void setCloudResourceId(String cloudResourceId) {
-
         this.cloudResourceId = cloudResourceId;
     }
 
     @Override
     public String toString() {
         return super.toString() +
-                ", StorageConsumptionRequest{" +
+                ", CloudResourceConsumptionRequest{" +
                 "cloudResourceId='" + cloudResourceId + "' " +
                 "consumptionType='" + consumptionType + '\'' +
                 '}';

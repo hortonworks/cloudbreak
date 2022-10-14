@@ -11,6 +11,8 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataSuccess;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -44,6 +46,8 @@ public enum StackCreationEvent implements FlowEvent {
     GET_TLS_INFO_FINISHED_EVENT(CloudPlatformResult.selector(GetTlsInfoResult.class)),
     GET_TLS_INFO_FAILED_EVENT(CloudPlatformResult.failureSelector(GetTlsInfoResult.class)),
     TLS_SETUP_FINISHED_EVENT("TLS_SETUP_FINISHED_EVENT"),
+    ATTACHED_VOLUME_CONSUMPTION_COLLECTION_SCHEDULING_FINISHED_EVENT(EventSelectorUtil.selector(AttachedVolumeConsumptionCollectionSchedulingSuccess.class)),
+    ATTACHED_VOLUME_CONSUMPTION_COLLECTION_SCHEDULING_FAILED_EVENT(EventSelectorUtil.selector(AttachedVolumeConsumptionCollectionSchedulingFailed.class)),
     STACK_CREATION_FAILED_EVENT("STACK_CREATION_FAILED"),
     STACK_CREATION_FINISHED_EVENT("STACK_CREATION_FINISHED"),
     STACKCREATION_FAILURE_HANDLED_EVENT("STACK_CREATION_FAILHANDLED");

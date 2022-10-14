@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
+import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.ATTACHED_VOLUME_CONSUMPTION_COLLECTION_UNSCHEDULING_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.ATTACHED_VOLUME_CONSUMPTION_COLLECTION_UNSCHEDULING_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.CCM_KEY_DEREGISTER_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.CCM_KEY_DEREGISTER_SUCCEEDED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.CLUSTER_PROXY_DEREGISTER_FAILED_EVENT;
@@ -11,6 +13,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTermin
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.TERMINATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.TERMINATION_FINALIZED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.TERMINATION_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.ATTACHED_VOLUME_CONSUMPTION_COLLECTION_UNSCHEDULING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.CCM_KEY_DEREGISTER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.CLUSTER_PROXY_DEREGISTER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState.FINAL_STATE;
@@ -46,9 +49,13 @@ public class StackTerminationFlowConfig extends StackStatusFinalizerAbstractFlow
                     .event(CLUSTER_PROXY_DEREGISTER_SUCCEEDED_EVENT)
                     .failureEvent(CLUSTER_PROXY_DEREGISTER_FAILED_EVENT)
 
-                    .from(CCM_KEY_DEREGISTER_STATE).to(TERMINATION_STATE)
+                    .from(CCM_KEY_DEREGISTER_STATE).to(ATTACHED_VOLUME_CONSUMPTION_COLLECTION_UNSCHEDULING_STATE)
                     .event(CCM_KEY_DEREGISTER_SUCCEEDED_EVENT)
                     .failureEvent(CCM_KEY_DEREGISTER_FAILED_EVENT)
+
+                    .from(ATTACHED_VOLUME_CONSUMPTION_COLLECTION_UNSCHEDULING_STATE).to(TERMINATION_STATE)
+                    .event(ATTACHED_VOLUME_CONSUMPTION_COLLECTION_UNSCHEDULING_FINISHED_EVENT)
+                    .failureEvent(ATTACHED_VOLUME_CONSUMPTION_COLLECTION_UNSCHEDULING_FAILED_EVENT)
 
                     .from(TERMINATION_STATE).to(TERMINATION_FINISHED_STATE)
                     .event(TERMINATION_FINISHED_EVENT)

@@ -66,7 +66,7 @@ public interface ConsumptionInternalEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConsumptionOpDescription.SCHEDULE_CLOUD_RESOURCE, produces = MediaType.APPLICATION_JSON,
             nickname = "scheduleConsumtpionCollection")
-    void scheduleConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
+    void scheduleCloudResourceConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
             @Valid @NotNull CloudResourceConsumptionRequest request,
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
             @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
@@ -76,7 +76,7 @@ public interface ConsumptionInternalEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConsumptionOpDescription.UNSCHEDULE_CLOUD_RESOURCE, produces = MediaType.APPLICATION_JSON,
             nickname = "unscheduleConsumptionCollection")
-    void unscheduleConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
+    void unscheduleCloudResourceConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
             @NotNull @ValidCrn(resource = {CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.ENVIRONMENT})
             @PathParam("monitoredResourceCrn") String monitoredResourceCrn,
             @NotEmpty @QueryParam("cloudResourceId") String cloudResourceId,
@@ -88,7 +88,7 @@ public interface ConsumptionInternalEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConsumptionOpDescription.CLOUD_RESOURCE_EXISTS, produces = MediaType.APPLICATION_JSON,
             nickname = "ConsumptionCollectionExists")
-    ConsumptionExistenceResponse doesConsumptionCollectionExist(@AccountId @QueryParam("accountId") String accountId,
+    ConsumptionExistenceResponse doesCloudResourceConsumptionCollectionExist(@AccountId @QueryParam("accountId") String accountId,
             @NotNull @ValidCrn(resource = {CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.ENVIRONMENT})
             @PathParam("monitoredResourceCrn") String monitoredResourceCrn,
             @NotEmpty @QueryParam("cloudResourceId") String cloudResourceId,
