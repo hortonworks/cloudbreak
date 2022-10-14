@@ -58,8 +58,10 @@ public class NifiUpgradeValidator implements ServiceUpgradeValidator {
             LOGGER.debug("Nifi working directory validation was successful");
         } else {
             throw new UpgradeValidationFailedException(
-                    String.format("Nifi working directory validation failed. The current directory %s is not eligible for upgrade.",
-                            nifiWorkingDirectory.get()));
+                    String.format("Nifi working directory validation failed. The current directory %s is not eligible for upgrade because it is located "
+                                    + "on the root disk. The Nifi working directory should be under the %s path. During upgrade or repair "
+                                    + "the Nifi directory would get deleted as the root disk is not kept during these operations.",
+                            nifiWorkingDirectory.get(), VolumeUtils.VOLUME_PREFIX));
         }
     }
 }
