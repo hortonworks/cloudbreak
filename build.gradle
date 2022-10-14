@@ -94,6 +94,7 @@ allprojects {
         force "io.swagger:swagger-jersey2-jaxrs:$swaggerVersion"
         force "io.swagger:swagger-annotations:$swaggerVersion"
         force "com.google.protobuf:protobuf-java:$protobufVersion"
+        force "com.google.guava:guava:$guavaVersion"
         force "junit:junit:$junitVersion"
       }
     }

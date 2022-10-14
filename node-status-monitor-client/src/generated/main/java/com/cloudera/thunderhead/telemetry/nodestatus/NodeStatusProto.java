@@ -329,108 +329,6 @@ public final class NodeStatusProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private NodeStatus(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails.Builder subBuilder = null;
-              if (statusDetails_ != null) {
-                subBuilder = statusDetails_.toBuilder();
-              }
-              statusDetails_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(statusDetails_);
-                statusDetails_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails.Builder subBuilder = null;
-              if (servicesDetails_ != null) {
-                subBuilder = servicesDetails_.toBuilder();
-              }
-              servicesDetails_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(servicesDetails_);
-                servicesDetails_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 26: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails.Builder subBuilder = null;
-              if (networkDetails_ != null) {
-                subBuilder = networkDetails_.toBuilder();
-              }
-              networkDetails_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(networkDetails_);
-                networkDetails_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 34: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails.Builder subBuilder = null;
-              if (meteringDetails_ != null) {
-                subBuilder = meteringDetails_.toBuilder();
-              }
-              meteringDetails_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(meteringDetails_);
-                meteringDetails_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 42: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetrics.Builder subBuilder = null;
-              if (systemMetrics_ != null) {
-                subBuilder = systemMetrics_.toBuilder();
-              }
-              systemMetrics_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetrics.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(systemMetrics_);
-                systemMetrics_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_NodeStatus_descriptor;
@@ -663,7 +561,7 @@ public final class NodeStatusProto {
       if (systemMetrics_ != null) {
         output.writeMessage(5, getSystemMetrics());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -692,7 +590,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, getSystemMetrics());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -732,7 +630,7 @@ public final class NodeStatusProto {
         if (!getSystemMetrics()
             .equals(other.getSystemMetrics())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -763,7 +661,7 @@ public final class NodeStatusProto {
         hash = (37 * hash) + SYSTEMMETRICS_FIELD_NUMBER;
         hash = (53 * hash) + getSystemMetrics().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -884,18 +782,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -1044,7 +937,7 @@ public final class NodeStatusProto {
         if (other.hasSystemMetrics()) {
           mergeSystemMetrics(other.getSystemMetrics());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -1059,17 +952,65 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getStatusDetailsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getServicesDetailsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getNetworkDetailsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getMeteringDetailsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 34
+              case 42: {
+                input.readMessage(
+                    getSystemMetricsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 42
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -1880,7 +1821,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new NodeStatus(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -2037,80 +1989,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private NodeStatusReport(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                nodes_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              nodes_.add(
-                  input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus.parser(), extensionRegistry));
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder subBuilder = null;
-              if (clusterDetails_ != null) {
-                subBuilder = clusterDetails_.toBuilder();
-              }
-              clusterDetails_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(clusterDetails_);
-                clusterDetails_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 24: {
-
-              timestamp_ = input.readInt64();
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cdpTelemetryVersion_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          nodes_ = java.util.Collections.unmodifiableList(nodes_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -2310,7 +2188,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, cdpTelemetryVersion_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -2334,7 +2212,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, cdpTelemetryVersion_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -2360,7 +2238,7 @@ public final class NodeStatusProto {
           != other.getTimestamp()) return false;
       if (!getCdpTelemetryVersion()
           .equals(other.getCdpTelemetryVersion())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -2384,7 +2262,7 @@ public final class NodeStatusProto {
           getTimestamp());
       hash = (37 * hash) + CDPTELEMETRYVERSION_FIELD_NUMBER;
       hash = (53 * hash) + getCdpTelemetryVersion().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -2505,29 +2383,24 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatusReport.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getNodesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (nodesBuilder_ == null) {
           nodes_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          nodes_ = null;
           nodesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         if (clusterDetailsBuilder_ == null) {
           clusterDetails_ = null;
         } else {
@@ -2665,7 +2538,7 @@ public final class NodeStatusProto {
           cdpTelemetryVersion_ = other.cdpTelemetryVersion_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -2680,17 +2553,60 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatusReport parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus.parser(),
+                        extensionRegistry);
+                if (nodesBuilder_ == null) {
+                  ensureNodesIsMutable();
+                  nodes_.add(m);
+                } else {
+                  nodesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getClusterDetailsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 18
+              case 24: {
+                timestamp_ = input.readInt64();
+
+                break;
+              } // case 24
+              case 34: {
+                cdpTelemetryVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatusReport) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -3333,7 +3249,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new NodeStatusReport(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -3428,55 +3355,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ServiceStatus(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              name_ = s;
-              break;
-            }
-            case 16: {
-              int rawValue = input.readEnum();
-
-              status_ = rawValue;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -3584,7 +3462,7 @@ public final class NodeStatusProto {
       if (status_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
         output.writeEnum(2, status_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -3600,7 +3478,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, status_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -3618,7 +3496,7 @@ public final class NodeStatusProto {
       if (!getName()
           .equals(other.getName())) return false;
       if (status_ != other.status_) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -3633,7 +3511,7 @@ public final class NodeStatusProto {
       hash = (53 * hash) + getName().hashCode();
       hash = (37 * hash) + STATUS_FIELD_NUMBER;
       hash = (53 * hash) + status_;
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -3754,18 +3632,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -3857,7 +3730,7 @@ public final class NodeStatusProto {
         if (other.status_ != 0) {
           setStatusValue(other.getStatusValue());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -3872,17 +3745,40 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                status_ = input.readEnum();
+
+                break;
+              } // case 16
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -4088,7 +3984,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ServiceStatus(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -4353,103 +4260,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ServicesDetails(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                services_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              services_.add(
-                  input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus.parser(), extensionRegistry));
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                infraServices_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus>();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              infraServices_.add(
-                  input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus.parser(), extensionRegistry));
-              break;
-            }
-            case 26: {
-              if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-                cmServices_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus>();
-                mutable_bitField0_ |= 0x00000004;
-              }
-              cmServices_.add(
-                  input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus.parser(), extensionRegistry));
-              break;
-            }
-            case 34: {
-              if (!((mutable_bitField0_ & 0x00000008) != 0)) {
-                freeipaServices_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus>();
-                mutable_bitField0_ |= 0x00000008;
-              }
-              freeipaServices_.add(
-                  input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus.parser(), extensionRegistry));
-              break;
-            }
-            case 40: {
-
-              timestamp_ = input.readInt64();
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cdpTelemetryVersion_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          services_ = java.util.Collections.unmodifiableList(services_);
-        }
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          infraServices_ = java.util.Collections.unmodifiableList(infraServices_);
-        }
-        if (((mutable_bitField0_ & 0x00000004) != 0)) {
-          cmServices_ = java.util.Collections.unmodifiableList(cmServices_);
-        }
-        if (((mutable_bitField0_ & 0x00000008) != 0)) {
-          freeipaServices_ = java.util.Collections.unmodifiableList(freeipaServices_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -4797,7 +4607,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, cdpTelemetryVersion_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -4829,7 +4639,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, cdpTelemetryVersion_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -4856,7 +4666,7 @@ public final class NodeStatusProto {
           != other.getTimestamp()) return false;
       if (!getCdpTelemetryVersion()
           .equals(other.getCdpTelemetryVersion())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -4888,7 +4698,7 @@ public final class NodeStatusProto {
           getTimestamp());
       hash = (37 * hash) + CDPTELEMETRYVERSION_FIELD_NUMBER;
       hash = (53 * hash) + getCdpTelemetryVersion().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -5009,50 +4819,45 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getServicesFieldBuilder();
-          getInfraServicesFieldBuilder();
-          getCmServicesFieldBuilder();
-          getFreeipaServicesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (servicesBuilder_ == null) {
           services_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          services_ = null;
           servicesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         if (infraServicesBuilder_ == null) {
           infraServices_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
         } else {
+          infraServices_ = null;
           infraServicesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000002);
         if (cmServicesBuilder_ == null) {
           cmServices_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
         } else {
+          cmServices_ = null;
           cmServicesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000004);
         if (freeipaServicesBuilder_ == null) {
           freeipaServices_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
         } else {
+          freeipaServices_ = null;
           freeipaServicesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000008);
         timestamp_ = 0L;
 
         cdpTelemetryVersion_ = "";
@@ -5281,7 +5086,7 @@ public final class NodeStatusProto {
           cdpTelemetryVersion_ = other.cdpTelemetryVersion_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -5296,17 +5101,92 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus.parser(),
+                        extensionRegistry);
+                if (servicesBuilder_ == null) {
+                  ensureServicesIsMutable();
+                  services_.add(m);
+                } else {
+                  servicesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 18: {
+                com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus.parser(),
+                        extensionRegistry);
+                if (infraServicesBuilder_ == null) {
+                  ensureInfraServicesIsMutable();
+                  infraServices_.add(m);
+                } else {
+                  infraServicesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 18
+              case 26: {
+                com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus.parser(),
+                        extensionRegistry);
+                if (cmServicesBuilder_ == null) {
+                  ensureCmServicesIsMutable();
+                  cmServices_.add(m);
+                } else {
+                  cmServicesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 26
+              case 34: {
+                com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus.parser(),
+                        extensionRegistry);
+                if (freeipaServicesBuilder_ == null) {
+                  ensureFreeipaServicesIsMutable();
+                  freeipaServices_.add(m);
+                } else {
+                  freeipaServicesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 34
+              case 40: {
+                timestamp_ = input.readInt64();
+
+                break;
+              } // case 40
+              case 50: {
+                cdpTelemetryVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -6730,7 +6610,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ServicesDetails(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -6841,61 +6732,6 @@ public final class NodeStatusProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private SaltMasterHealth(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                services_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              services_.add(
-                  input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus.parser(), extensionRegistry));
-              break;
-            }
-            case 16: {
-
-              timestamp_ = input.readInt64();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          services_ = java.util.Collections.unmodifiableList(services_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_SaltMasterHealth_descriptor;
@@ -7004,7 +6840,7 @@ public final class NodeStatusProto {
       if (timestamp_ != 0L) {
         output.writeInt64(2, timestamp_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -7021,7 +6857,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(2, timestamp_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -7040,7 +6876,7 @@ public final class NodeStatusProto {
           .equals(other.getServicesList())) return false;
       if (getTimestamp()
           != other.getTimestamp()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -7058,7 +6894,7 @@ public final class NodeStatusProto {
       hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getTimestamp());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -7180,29 +7016,24 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getServicesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (servicesBuilder_ == null) {
           services_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          services_ = null;
           servicesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         timestamp_ = 0L;
 
         return this;
@@ -7319,7 +7150,7 @@ public final class NodeStatusProto {
         if (other.getTimestamp() != 0L) {
           setTimestamp(other.getTimestamp());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -7334,17 +7165,48 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus.parser(),
+                        extensionRegistry);
+                if (servicesBuilder_ == null) {
+                  ensureServicesIsMutable();
+                  services_.add(m);
+                } else {
+                  servicesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 16: {
+                timestamp_ = input.readInt64();
+
+                break;
+              } // case 16
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -7736,7 +7598,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SaltMasterHealth(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -7846,61 +7719,6 @@ public final class NodeStatusProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private SaltMinionsHealth(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                pingResponses_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              pingResponses_.add(
-                  input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails.parser(), extensionRegistry));
-              break;
-            }
-            case 16: {
-
-              timestamp_ = input.readInt64();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          pingResponses_ = java.util.Collections.unmodifiableList(pingResponses_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_SaltMinionsHealth_descriptor;
@@ -8009,7 +7827,7 @@ public final class NodeStatusProto {
       if (timestamp_ != 0L) {
         output.writeInt64(2, timestamp_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -8026,7 +7844,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(2, timestamp_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -8045,7 +7863,7 @@ public final class NodeStatusProto {
           .equals(other.getPingResponsesList())) return false;
       if (getTimestamp()
           != other.getTimestamp()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -8063,7 +7881,7 @@ public final class NodeStatusProto {
       hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getTimestamp());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -8184,29 +8002,24 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getPingResponsesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (pingResponsesBuilder_ == null) {
           pingResponses_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          pingResponses_ = null;
           pingResponsesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         timestamp_ = 0L;
 
         return this;
@@ -8323,7 +8136,7 @@ public final class NodeStatusProto {
         if (other.getTimestamp() != 0L) {
           setTimestamp(other.getTimestamp());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -8338,17 +8151,48 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails.parser(),
+                        extensionRegistry);
+                if (pingResponsesBuilder_ == null) {
+                  ensurePingResponsesIsMutable();
+                  pingResponses_.add(m);
+                } else {
+                  pingResponsesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 16: {
+                timestamp_ = input.readInt64();
+
+                break;
+              } // case 16
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -8740,7 +8584,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SaltMinionsHealth(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -8972,97 +8827,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private SaltKeys(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                unaccepted_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              unaccepted_.add(s);
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                accepted_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              accepted_.add(s);
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-                rejected_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000004;
-              }
-              rejected_.add(s);
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000008) != 0)) {
-                denied_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000008;
-              }
-              denied_.add(s);
-              break;
-            }
-            case 40: {
-
-              timestamp_ = input.readInt64();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          unaccepted_ = unaccepted_.getUnmodifiableView();
-        }
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          accepted_ = accepted_.getUnmodifiableView();
-        }
-        if (((mutable_bitField0_ & 0x00000004) != 0)) {
-          rejected_ = rejected_.getUnmodifiableView();
-        }
-        if (((mutable_bitField0_ & 0x00000008) != 0)) {
-          denied_ = denied_.getUnmodifiableView();
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -9325,7 +9089,7 @@ public final class NodeStatusProto {
       if (timestamp_ != 0L) {
         output.writeInt64(5, timestamp_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -9370,7 +9134,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(5, timestamp_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -9395,7 +9159,7 @@ public final class NodeStatusProto {
           .equals(other.getDeniedList())) return false;
       if (getTimestamp()
           != other.getTimestamp()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -9425,7 +9189,7 @@ public final class NodeStatusProto {
       hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getTimestamp());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -9546,18 +9310,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -9711,7 +9470,7 @@ public final class NodeStatusProto {
         if (other.getTimestamp() != 0L) {
           setTimestamp(other.getTimestamp());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -9726,17 +9485,59 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureUnacceptedIsMutable();
+                unaccepted_.add(s);
+                break;
+              } // case 10
+              case 18: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureAcceptedIsMutable();
+                accepted_.add(s);
+                break;
+              } // case 18
+              case 26: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureRejectedIsMutable();
+                rejected_.add(s);
+                break;
+              } // case 26
+              case 34: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureDeniedIsMutable();
+                denied_.add(s);
+                break;
+              } // case 34
+              case 40: {
+                timestamp_ = input.readInt64();
+
+                break;
+              } // case 40
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -10400,7 +10201,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SaltKeys(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -10566,93 +10378,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private SaltHealthReport(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth.Builder subBuilder = null;
-              if (master_ != null) {
-                subBuilder = master_.toBuilder();
-              }
-              master_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(master_);
-                master_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth.Builder subBuilder = null;
-              if (minions_ != null) {
-                subBuilder = minions_.toBuilder();
-              }
-              minions_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(minions_);
-                minions_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 24: {
-
-              timestamp_ = input.readInt64();
-              break;
-            }
-            case 34: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.Builder subBuilder = null;
-              if (keys_ != null) {
-                subBuilder = keys_.toBuilder();
-              }
-              keys_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(keys_);
-                keys_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cdpTelemetryVersion_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -10871,7 +10596,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, cdpTelemetryVersion_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -10899,7 +10624,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, cdpTelemetryVersion_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -10933,7 +10658,7 @@ public final class NodeStatusProto {
       }
       if (!getCdpTelemetryVersion()
           .equals(other.getCdpTelemetryVersion())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -10961,7 +10686,7 @@ public final class NodeStatusProto {
       }
       hash = (37 * hash) + CDPTELEMETRYVERSION_FIELD_NUMBER;
       hash = (53 * hash) + getCdpTelemetryVersion().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -11082,18 +10807,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltHealthReport.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -11227,7 +10947,7 @@ public final class NodeStatusProto {
           cdpTelemetryVersion_ = other.cdpTelemetryVersion_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -11242,17 +10962,61 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltHealthReport parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getMasterFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getMinionsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 18
+              case 24: {
+                timestamp_ = input.readInt64();
+
+                break;
+              } // case 24
+              case 34: {
+                input.readMessage(
+                    getKeysFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 34
+              case 42: {
+                cdpTelemetryVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltHealthReport) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -11892,7 +11656,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SaltHealthReport(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -12018,66 +11793,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private StatusDetails(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              host_ = s;
-              break;
-            }
-            case 16: {
-              int rawValue = input.readEnum();
-
-              status_ = rawValue;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              statusReason_ = s;
-              break;
-            }
-            case 32: {
-
-              timestamp_ = input.readInt64();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -12252,7 +11967,7 @@ public final class NodeStatusProto {
       if (timestamp_ != 0L) {
         output.writeInt64(4, timestamp_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -12275,7 +11990,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(4, timestamp_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -12297,7 +12012,7 @@ public final class NodeStatusProto {
           .equals(other.getStatusReason())) return false;
       if (getTimestamp()
           != other.getTimestamp()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -12317,7 +12032,7 @@ public final class NodeStatusProto {
       hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getTimestamp());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -12438,18 +12153,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -12554,7 +12264,7 @@ public final class NodeStatusProto {
         if (other.getTimestamp() != 0L) {
           setTimestamp(other.getTimestamp());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -12569,17 +12279,50 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                host_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                status_ = input.readEnum();
+
+                break;
+              } // case 16
+              case 26: {
+                statusReason_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 32: {
+                timestamp_ = input.readInt64();
+
+                break;
+              } // case 32
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -12924,7 +12667,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new StatusDetails(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -12988,9 +12742,11 @@ public final class NodeStatusProto {
      * <code>map&lt;string, string&gt; databusDetails = 1;</code>
      */
 
-    java.lang.String getDatabusDetailsOrDefault(
+    /* nullable */
+java.lang.String getDatabusDetailsOrDefault(
         java.lang.String key,
-        java.lang.String defaultValue);
+        /* nullable */
+java.lang.String defaultValue);
     /**
      * <pre>
      * Databus related configuration data.
@@ -13042,9 +12798,11 @@ public final class NodeStatusProto {
      * <code>map&lt;string, string&gt; eventDetails = 2;</code>
      */
 
-    java.lang.String getEventDetailsOrDefault(
+    /* nullable */
+java.lang.String getEventDetailsOrDefault(
         java.lang.String key,
-        java.lang.String defaultValue);
+        /* nullable */
+java.lang.String defaultValue);
     /**
      * <pre>
      * Heartbeat event related configuration data.
@@ -13267,132 +13025,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private MeteringDetails(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                databusDetails_ = com.google.protobuf.MapField.newMapField(
-                    DatabusDetailsDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000001;
-              }
-              com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
-              databusDetails__ = input.readMessage(
-                  DatabusDetailsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-              databusDetails_.getMutableMap().put(
-                  databusDetails__.getKey(), databusDetails__.getValue());
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                eventDetails_ = com.google.protobuf.MapField.newMapField(
-                    EventDetailsDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000002;
-              }
-              com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
-              eventDetails__ = input.readMessage(
-                  EventDetailsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-              eventDetails_.getMutableMap().put(
-                  eventDetails__.getKey(), eventDetails__.getValue());
-              break;
-            }
-            case 24: {
-
-              firstHeartbeatEventTimestamp_ = input.readInt64();
-              break;
-            }
-            case 32: {
-
-              systemBootTimestamp_ = input.readInt64();
-              break;
-            }
-            case 40: {
-
-              heartbeatEventCount_ = input.readInt32();
-              break;
-            }
-            case 48: {
-              int rawValue = input.readEnum();
-
-              heartbeatAgentRunning_ = rawValue;
-              break;
-            }
-            case 56: {
-              int rawValue = input.readEnum();
-
-              heartbeatConfig_ = rawValue;
-              break;
-            }
-            case 64: {
-              int rawValue = input.readEnum();
-
-              databusReachable_ = rawValue;
-              break;
-            }
-            case 72: {
-              int rawValue = input.readEnum();
-
-              databusTestResponse_ = rawValue;
-              break;
-            }
-            case 80: {
-              int rawValue = input.readEnum();
-
-              loggingAgentConfig_ = rawValue;
-              break;
-            }
-            case 88: {
-              int rawValue = input.readEnum();
-
-              loggingServiceRunning_ = rawValue;
-              break;
-            }
-            case 96: {
-
-              timestamp_ = input.readInt64();
-              break;
-            }
-            case 106: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cdpTelemetryVersion_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -13942,7 +13574,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 13, cdpTelemetryVersion_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -14014,7 +13646,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, cdpTelemetryVersion_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -14049,7 +13681,7 @@ public final class NodeStatusProto {
           != other.getTimestamp()) return false;
       if (!getCdpTelemetryVersion()
           .equals(other.getCdpTelemetryVersion())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -14093,7 +13725,7 @@ public final class NodeStatusProto {
           getTimestamp());
       hash = (37 * hash) + CDPTELEMETRYVERSION_FIELD_NUMBER;
       hash = (53 * hash) + getCdpTelemetryVersion().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -14240,18 +13872,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -14408,7 +14035,7 @@ public final class NodeStatusProto {
           cdpTelemetryVersion_ = other.cdpTelemetryVersion_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -14423,17 +14050,101 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+                databusDetails__ = input.readMessage(
+                    DatabusDetailsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+                internalGetMutableDatabusDetails().getMutableMap().put(
+                    databusDetails__.getKey(), databusDetails__.getValue());
+                break;
+              } // case 10
+              case 18: {
+                com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+                eventDetails__ = input.readMessage(
+                    EventDetailsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+                internalGetMutableEventDetails().getMutableMap().put(
+                    eventDetails__.getKey(), eventDetails__.getValue());
+                break;
+              } // case 18
+              case 24: {
+                firstHeartbeatEventTimestamp_ = input.readInt64();
+
+                break;
+              } // case 24
+              case 32: {
+                systemBootTimestamp_ = input.readInt64();
+
+                break;
+              } // case 32
+              case 40: {
+                heartbeatEventCount_ = input.readInt32();
+
+                break;
+              } // case 40
+              case 48: {
+                heartbeatAgentRunning_ = input.readEnum();
+
+                break;
+              } // case 48
+              case 56: {
+                heartbeatConfig_ = input.readEnum();
+
+                break;
+              } // case 56
+              case 64: {
+                databusReachable_ = input.readEnum();
+
+                break;
+              } // case 64
+              case 72: {
+                databusTestResponse_ = input.readEnum();
+
+                break;
+              } // case 72
+              case 80: {
+                loggingAgentConfig_ = input.readEnum();
+
+                break;
+              } // case 80
+              case 88: {
+                loggingServiceRunning_ = input.readEnum();
+
+                break;
+              } // case 88
+              case 96: {
+                timestamp_ = input.readInt64();
+
+                break;
+              } // case 96
+              case 106: {
+                cdpTelemetryVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 106
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -15500,7 +15211,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new MeteringDetails(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -15980,178 +15702,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private NetworkDetails(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              host_ = s;
-              break;
-            }
-            case 16: {
-
-              ccmEnabled_ = input.readBool();
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                dnsResolvers_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              dnsResolvers_.add(s);
-              break;
-            }
-            case 32: {
-
-              neighbourScan_ = input.readBool();
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                neighbours_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              neighbours_.add(s);
-              break;
-            }
-            case 48: {
-              int rawValue = input.readEnum();
-
-              anyNeighboursAccessible_ = rawValue;
-              break;
-            }
-            case 56: {
-
-              numberOfNeighbours_ = input.readInt32();
-              break;
-            }
-            case 64: {
-
-              timestamp_ = input.readInt64();
-              break;
-            }
-            case 72: {
-              int rawValue = input.readEnum();
-
-              ccmAccessible_ = rawValue;
-              break;
-            }
-            case 80: {
-              int rawValue = input.readEnum();
-
-              clouderaComAccessible_ = rawValue;
-              break;
-            }
-            case 88: {
-              int rawValue = input.readEnum();
-
-              databusAccessible_ = rawValue;
-              break;
-            }
-            case 96: {
-              int rawValue = input.readEnum();
-
-              databusS3Accessible_ = rawValue;
-              break;
-            }
-            case 104: {
-              int rawValue = input.readEnum();
-
-              s3Accessible_ = rawValue;
-              break;
-            }
-            case 112: {
-              int rawValue = input.readEnum();
-
-              adlsV2Accessible_ = rawValue;
-              break;
-            }
-            case 120: {
-              int rawValue = input.readEnum();
-
-              gcsAccessible_ = rawValue;
-              break;
-            }
-            case 128: {
-              int rawValue = input.readEnum();
-
-              stsAccessible_ = rawValue;
-              break;
-            }
-            case 136: {
-              int rawValue = input.readEnum();
-
-              azureManagementAccessible_ = rawValue;
-              break;
-            }
-            case 146: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cdpTelemetryVersion_ = s;
-              break;
-            }
-            case 152: {
-              int rawValue = input.readEnum();
-
-              archiveClouderaComAccessible_ = rawValue;
-              break;
-            }
-            case 160: {
-              int rawValue = input.readEnum();
-
-              serviceDeliveryCacheS3Accessible_ = rawValue;
-              break;
-            }
-            case 168: {
-              int rawValue = input.readEnum();
-
-              computeMonitoringAccessible_ = rawValue;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          dnsResolvers_ = dnsResolvers_.getUnmodifiableView();
-        }
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          neighbours_ = neighbours_.getUnmodifiableView();
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -16848,7 +16398,7 @@ public final class NodeStatusProto {
       if (computeMonitoringAccessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
         output.writeEnum(21, computeMonitoringAccessible_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -16947,7 +16497,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(21, computeMonitoringAccessible_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -16991,7 +16541,7 @@ public final class NodeStatusProto {
       if (archiveClouderaComAccessible_ != other.archiveClouderaComAccessible_) return false;
       if (serviceDeliveryCacheS3Accessible_ != other.serviceDeliveryCacheS3Accessible_) return false;
       if (computeMonitoringAccessible_ != other.computeMonitoringAccessible_) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -17051,7 +16601,7 @@ public final class NodeStatusProto {
       hash = (53 * hash) + serviceDeliveryCacheS3Accessible_;
       hash = (37 * hash) + COMPUTEMONITORINGACCESSIBLE_FIELD_NUMBER;
       hash = (53 * hash) + computeMonitoringAccessible_;
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -17172,18 +16722,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -17413,7 +16958,7 @@ public final class NodeStatusProto {
         if (other.computeMonitoringAccessible_ != 0) {
           setComputeMonitoringAccessibleValue(other.getComputeMonitoringAccessibleValue());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -17428,17 +16973,137 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                host_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                ccmEnabled_ = input.readBool();
+
+                break;
+              } // case 16
+              case 26: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureDnsResolversIsMutable();
+                dnsResolvers_.add(s);
+                break;
+              } // case 26
+              case 32: {
+                neighbourScan_ = input.readBool();
+
+                break;
+              } // case 32
+              case 42: {
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureNeighboursIsMutable();
+                neighbours_.add(s);
+                break;
+              } // case 42
+              case 48: {
+                anyNeighboursAccessible_ = input.readEnum();
+
+                break;
+              } // case 48
+              case 56: {
+                numberOfNeighbours_ = input.readInt32();
+
+                break;
+              } // case 56
+              case 64: {
+                timestamp_ = input.readInt64();
+
+                break;
+              } // case 64
+              case 72: {
+                ccmAccessible_ = input.readEnum();
+
+                break;
+              } // case 72
+              case 80: {
+                clouderaComAccessible_ = input.readEnum();
+
+                break;
+              } // case 80
+              case 88: {
+                databusAccessible_ = input.readEnum();
+
+                break;
+              } // case 88
+              case 96: {
+                databusS3Accessible_ = input.readEnum();
+
+                break;
+              } // case 96
+              case 104: {
+                s3Accessible_ = input.readEnum();
+
+                break;
+              } // case 104
+              case 112: {
+                adlsV2Accessible_ = input.readEnum();
+
+                break;
+              } // case 112
+              case 120: {
+                gcsAccessible_ = input.readEnum();
+
+                break;
+              } // case 120
+              case 128: {
+                stsAccessible_ = input.readEnum();
+
+                break;
+              } // case 128
+              case 136: {
+                azureManagementAccessible_ = input.readEnum();
+
+                break;
+              } // case 136
+              case 146: {
+                cdpTelemetryVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 146
+              case 152: {
+                archiveClouderaComAccessible_ = input.readEnum();
+
+                break;
+              } // case 152
+              case 160: {
+                serviceDeliveryCacheS3Accessible_ = input.readEnum();
+
+                break;
+              } // case 160
+              case 168: {
+                computeMonitoringAccessible_ = input.readEnum();
+
+                break;
+              } // case 168
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -19093,7 +18758,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new NetworkDetails(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -19313,119 +18989,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private SystemMetrics(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics.Builder subBuilder = null;
-              if (cpu_ != null) {
-                subBuilder = cpu_.toBuilder();
-              }
-              cpu_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(cpu_);
-                cpu_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics.Builder subBuilder = null;
-              if (disk_ != null) {
-                subBuilder = disk_.toBuilder();
-              }
-              disk_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(disk_);
-                disk_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 26: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetrics.Builder subBuilder = null;
-              if (memory_ != null) {
-                subBuilder = memory_.toBuilder();
-              }
-              memory_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetrics.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(memory_);
-                memory_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 34: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetrics.Builder subBuilder = null;
-              if (network_ != null) {
-                subBuilder = network_.toBuilder();
-              }
-              network_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetrics.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(network_);
-                network_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 40: {
-
-              timestamp_ = input.readInt64();
-              break;
-            }
-            case 50: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder subBuilder = null;
-              if (clusterDetails_ != null) {
-                subBuilder = clusterDetails_.toBuilder();
-              }
-              clusterDetails_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(clusterDetails_);
-                clusterDetails_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cdpTelemetryVersion_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -19726,7 +19289,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, cdpTelemetryVersion_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -19762,7 +19325,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, cdpTelemetryVersion_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -19806,7 +19369,7 @@ public final class NodeStatusProto {
       }
       if (!getCdpTelemetryVersion()
           .equals(other.getCdpTelemetryVersion())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -19842,7 +19405,7 @@ public final class NodeStatusProto {
       }
       hash = (37 * hash) + CDPTELEMETRYVERSION_FIELD_NUMBER;
       hash = (53 * hash) + getCdpTelemetryVersion().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -19963,18 +19526,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetrics.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -20136,7 +19694,7 @@ public final class NodeStatusProto {
           cdpTelemetryVersion_ = other.cdpTelemetryVersion_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -20151,17 +19709,75 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetrics parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getCpuFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getDiskFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getMemoryFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getNetworkFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 34
+              case 40: {
+                timestamp_ = input.readInt64();
+
+                break;
+              } // case 40
+              case 50: {
+                input.readMessage(
+                    getClusterDetailsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 50
+              case 58: {
+                cdpTelemetryVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 58
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetrics) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -21111,7 +20727,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SystemMetrics(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -21258,75 +20885,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CmMetricsReport(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                metrics_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              metrics_.add(
-                  input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.parser(), extensionRegistry));
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder subBuilder = null;
-              if (clusterDetails_ != null) {
-                subBuilder = clusterDetails_.toBuilder();
-              }
-              clusterDetails_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(clusterDetails_);
-                clusterDetails_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cdpTelemetryVersion_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          metrics_ = java.util.Collections.unmodifiableList(metrics_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -21508,7 +21066,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, cdpTelemetryVersion_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -21528,7 +21086,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, cdpTelemetryVersion_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -21552,7 +21110,7 @@ public final class NodeStatusProto {
       }
       if (!getCdpTelemetryVersion()
           .equals(other.getCdpTelemetryVersion())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -21573,7 +21131,7 @@ public final class NodeStatusProto {
       }
       hash = (37 * hash) + CDPTELEMETRYVERSION_FIELD_NUMBER;
       hash = (53 * hash) + getCdpTelemetryVersion().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -21694,29 +21252,24 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getMetricsFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (metricsBuilder_ == null) {
           metrics_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          metrics_ = null;
           metricsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         if (clusterDetailsBuilder_ == null) {
           clusterDetails_ = null;
         } else {
@@ -21848,7 +21401,7 @@ public final class NodeStatusProto {
           cdpTelemetryVersion_ = other.cdpTelemetryVersion_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -21863,17 +21416,55 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.parser(),
+                        extensionRegistry);
+                if (metricsBuilder_ == null) {
+                  ensureMetricsIsMutable();
+                  metrics_.add(m);
+                } else {
+                  metricsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getClusterDetailsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 18
+              case 26: {
+                cdpTelemetryVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -22473,7 +22064,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CmMetricsReport(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -22620,75 +22222,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CmHealthChecksReport(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                healthChecks_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              healthChecks_.add(
-                  input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.parser(), extensionRegistry));
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder subBuilder = null;
-              if (clusterDetails_ != null) {
-                subBuilder = clusterDetails_.toBuilder();
-              }
-              clusterDetails_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(clusterDetails_);
-                clusterDetails_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              cdpTelemetryVersion_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          healthChecks_ = java.util.Collections.unmodifiableList(healthChecks_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -22870,7 +22403,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, cdpTelemetryVersion_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -22890,7 +22423,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, cdpTelemetryVersion_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -22914,7 +22447,7 @@ public final class NodeStatusProto {
       }
       if (!getCdpTelemetryVersion()
           .equals(other.getCdpTelemetryVersion())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -22935,7 +22468,7 @@ public final class NodeStatusProto {
       }
       hash = (37 * hash) + CDPTELEMETRYVERSION_FIELD_NUMBER;
       hash = (53 * hash) + getCdpTelemetryVersion().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -23056,29 +22589,24 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getHealthChecksFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (healthChecksBuilder_ == null) {
           healthChecks_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          healthChecks_ = null;
           healthChecksBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         if (clusterDetailsBuilder_ == null) {
           clusterDetails_ = null;
         } else {
@@ -23210,7 +22738,7 @@ public final class NodeStatusProto {
           cdpTelemetryVersion_ = other.cdpTelemetryVersion_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -23225,17 +22753,55 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.parser(),
+                        extensionRegistry);
+                if (healthChecksBuilder_ == null) {
+                  ensureHealthChecksIsMutable();
+                  healthChecks_.add(m);
+                } else {
+                  healthChecksBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getClusterDetailsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 18
+              case 26: {
+                cdpTelemetryVersion_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -23835,7 +23401,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CmHealthChecksReport(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -24020,117 +23597,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CpuMetrics(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              count_ = input.readInt32();
-              break;
-            }
-            case 16: {
-
-              logicalCount_ = input.readInt32();
-              break;
-            }
-            case 29: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                loadAvg_ = newFloatList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              loadAvg_.addFloat(input.readFloat());
-              break;
-            }
-            case 26: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000001) != 0) && input.getBytesUntilLimit() > 0) {
-                loadAvg_ = newFloatList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                loadAvg_.addFloat(input.readFloat());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            case 34: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimes.Builder subBuilder = null;
-              if (times_ != null) {
-                subBuilder = times_.toBuilder();
-              }
-              times_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimes.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(times_);
-                times_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 42: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStats.Builder subBuilder = null;
-              if (stats_ != null) {
-                subBuilder = stats_.toBuilder();
-              }
-              stats_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStats.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(stats_);
-                stats_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 50: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequency.Builder subBuilder = null;
-              if (freq_ != null) {
-                subBuilder = freq_.toBuilder();
-              }
-              freq_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequency.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(freq_);
-                freq_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          loadAvg_.makeImmutable(); // C
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -24366,7 +23832,7 @@ public final class NodeStatusProto {
       if (freq_ != null) {
         output.writeMessage(6, getFreq());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -24406,7 +23872,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, getFreq());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -24442,7 +23908,7 @@ public final class NodeStatusProto {
         if (!getFreq()
             .equals(other.getFreq())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -24473,7 +23939,7 @@ public final class NodeStatusProto {
         hash = (37 * hash) + FREQ_FIELD_NUMBER;
         hash = (53 * hash) + getFreq().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -24594,18 +24060,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -24756,7 +24217,7 @@ public final class NodeStatusProto {
         if (other.hasFreq()) {
           mergeFreq(other.getFreq());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -24771,17 +24232,77 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                count_ = input.readInt32();
+
+                break;
+              } // case 8
+              case 16: {
+                logicalCount_ = input.readInt32();
+
+                break;
+              } // case 16
+              case 29: {
+                float v = input.readFloat();
+                ensureLoadAvgIsMutable();
+                loadAvg_.addFloat(v);
+                break;
+              } // case 29
+              case 26: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureLoadAvgIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  loadAvg_.addFloat(input.readFloat());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getTimesFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 34
+              case 42: {
+                input.readMessage(
+                    getStatsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 42
+              case 50: {
+                input.readMessage(
+                    getFreqFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 50
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -25476,7 +24997,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CpuMetrics(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -25570,63 +25102,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CpuStats(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              ctxSwitches_ = input.readInt64();
-              break;
-            }
-            case 16: {
-
-              interrupts_ = input.readInt64();
-              break;
-            }
-            case 24: {
-
-              softInterrupts_ = input.readInt64();
-              break;
-            }
-            case 32: {
-
-              syscalls_ = input.readInt64();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -25727,7 +25202,7 @@ public final class NodeStatusProto {
       if (syscalls_ != 0L) {
         output.writeInt64(4, syscalls_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -25752,7 +25227,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(4, syscalls_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -25775,7 +25250,7 @@ public final class NodeStatusProto {
           != other.getSoftInterrupts()) return false;
       if (getSyscalls()
           != other.getSyscalls()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -25798,7 +25273,7 @@ public final class NodeStatusProto {
       hash = (37 * hash) + SYSCALLS_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getSyscalls());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -25919,18 +25394,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStats.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -26033,7 +25503,7 @@ public final class NodeStatusProto {
         if (other.getSyscalls() != 0L) {
           setSyscalls(other.getSyscalls());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -26048,17 +25518,50 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStats parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                ctxSwitches_ = input.readInt64();
+
+                break;
+              } // case 8
+              case 16: {
+                interrupts_ = input.readInt64();
+
+                break;
+              } // case 16
+              case 24: {
+                softInterrupts_ = input.readInt64();
+
+                break;
+              } // case 24
+              case 32: {
+                syscalls_ = input.readInt64();
+
+                break;
+              } // case 32
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStats) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -26266,7 +25769,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CpuStats(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -26360,63 +25874,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CpuTimes(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 9: {
-
-              idle_ = input.readDouble();
-              break;
-            }
-            case 17: {
-
-              nice_ = input.readDouble();
-              break;
-            }
-            case 25: {
-
-              system_ = input.readDouble();
-              break;
-            }
-            case 33: {
-
-              user_ = input.readDouble();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -26517,7 +25974,7 @@ public final class NodeStatusProto {
       if (java.lang.Double.doubleToRawLongBits(user_) != 0) {
         output.writeDouble(4, user_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -26542,7 +25999,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, user_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -26569,7 +26026,7 @@ public final class NodeStatusProto {
       if (java.lang.Double.doubleToLongBits(getUser())
           != java.lang.Double.doubleToLongBits(
               other.getUser())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -26592,7 +26049,7 @@ public final class NodeStatusProto {
       hash = (37 * hash) + USER_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getUser()));
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -26713,18 +26170,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimes.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -26827,7 +26279,7 @@ public final class NodeStatusProto {
         if (other.getUser() != 0D) {
           setUser(other.getUser());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -26842,17 +26294,50 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimes parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 9: {
+                idle_ = input.readDouble();
+
+                break;
+              } // case 9
+              case 17: {
+                nice_ = input.readDouble();
+
+                break;
+              } // case 17
+              case 25: {
+                system_ = input.readDouble();
+
+                break;
+              } // case 25
+              case 33: {
+                user_ = input.readDouble();
+
+                break;
+              } // case 33
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimes) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -27060,7 +26545,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CpuTimes(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -27145,58 +26641,6 @@ public final class NodeStatusProto {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private CpuFrequency(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              current_ = input.readInt64();
-              break;
-            }
-            case 16: {
-
-              min_ = input.readInt64();
-              break;
-            }
-            case 24: {
-
-              max_ = input.readInt64();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_CpuFrequency_descriptor;
@@ -27278,7 +26722,7 @@ public final class NodeStatusProto {
       if (max_ != 0L) {
         output.writeInt64(3, max_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -27299,7 +26743,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(3, max_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -27320,7 +26764,7 @@ public final class NodeStatusProto {
           != other.getMin()) return false;
       if (getMax()
           != other.getMax()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -27340,7 +26784,7 @@ public final class NodeStatusProto {
       hash = (37 * hash) + MAX_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getMax());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -27461,18 +26905,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequency.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -27569,7 +27008,7 @@ public final class NodeStatusProto {
         if (other.getMax() != 0L) {
           setMax(other.getMax());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -27584,17 +27023,45 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequency parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                current_ = input.readInt64();
+
+                break;
+              } // case 8
+              case 16: {
+                min_ = input.readInt64();
+
+                break;
+              } // case 16
+              case 24: {
+                max_ = input.readInt64();
+
+                break;
+              } // case 24
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequency) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -27759,7 +27226,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CpuFrequency(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -27930,81 +27408,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DiskMetrics(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                partitions_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              partitions_.add(
-                  input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition.parser(), extensionRegistry));
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                topVarlog_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLog>();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              topVarlog_.add(
-                  input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLog.parser(), extensionRegistry));
-              break;
-            }
-            case 26: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIO.Builder subBuilder = null;
-              if (io_ != null) {
-                subBuilder = io_.toBuilder();
-              }
-              io_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIO.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(io_);
-                io_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          partitions_ = java.util.Collections.unmodifiableList(partitions_);
-        }
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          topVarlog_ = java.util.Collections.unmodifiableList(topVarlog_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -28200,7 +27603,7 @@ public final class NodeStatusProto {
       if (io_ != null) {
         output.writeMessage(3, getIo());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -28221,7 +27624,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getIo());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -28245,7 +27648,7 @@ public final class NodeStatusProto {
         if (!getIo()
             .equals(other.getIo())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -28268,7 +27671,7 @@ public final class NodeStatusProto {
         hash = (37 * hash) + IO_FIELD_NUMBER;
         hash = (53 * hash) + getIo().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -28389,36 +27792,31 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getPartitionsFieldBuilder();
-          getTopVarlogFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (partitionsBuilder_ == null) {
           partitions_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          partitions_ = null;
           partitionsBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         if (topVarlogBuilder_ == null) {
           topVarlog_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
         } else {
+          topVarlog_ = null;
           topVarlogBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000002);
         if (ioBuilder_ == null) {
           io_ = null;
         } else {
@@ -28578,7 +27976,7 @@ public final class NodeStatusProto {
         if (other.hasIo()) {
           mergeIo(other.getIo());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -28593,17 +27991,63 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition.parser(),
+                        extensionRegistry);
+                if (partitionsBuilder_ == null) {
+                  ensurePartitionsIsMutable();
+                  partitions_.add(m);
+                } else {
+                  partitionsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 18: {
+                com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLog m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLog.parser(),
+                        extensionRegistry);
+                if (topVarlogBuilder_ == null) {
+                  ensureTopVarlogIsMutable();
+                  topVarlog_.add(m);
+                } else {
+                  topVarlogBuilder_.addMessage(m);
+                }
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    getIoFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -29419,7 +28863,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DiskMetrics(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -29515,55 +28970,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private VmLog(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              path_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              size_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -29690,7 +29096,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(size_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, size_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -29705,7 +29111,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(size_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, size_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -29724,7 +29130,7 @@ public final class NodeStatusProto {
           .equals(other.getPath())) return false;
       if (!getSize()
           .equals(other.getSize())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -29739,7 +29145,7 @@ public final class NodeStatusProto {
       hash = (53 * hash) + getPath().hashCode();
       hash = (37 * hash) + SIZE_FIELD_NUMBER;
       hash = (53 * hash) + getSize().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -29860,18 +29266,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLog.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -29964,7 +29365,7 @@ public final class NodeStatusProto {
           size_ = other.size_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -29979,17 +29380,40 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLog parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                path_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                size_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLog) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -30217,7 +29641,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new VmLog(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -30402,90 +29837,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DiskPartition(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsage.Builder subBuilder = null;
-              if (usage_ != null) {
-                subBuilder = usage_.toBuilder();
-              }
-              usage_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsage.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(usage_);
-                usage_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              device_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              fstype_ = s;
-              break;
-            }
-            case 32: {
-
-              maxfile_ = input.readInt32();
-              break;
-            }
-            case 40: {
-
-              maxpath_ = input.readInt32();
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              mountpoint_ = s;
-              break;
-            }
-            case 58: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              opts_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -30787,7 +30138,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(opts_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, opts_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -30820,7 +30171,7 @@ public final class NodeStatusProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(opts_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, opts_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -30852,7 +30203,7 @@ public final class NodeStatusProto {
           .equals(other.getMountpoint())) return false;
       if (!getOpts()
           .equals(other.getOpts())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -30879,7 +30230,7 @@ public final class NodeStatusProto {
       hash = (53 * hash) + getMountpoint().hashCode();
       hash = (37 * hash) + OPTS_FIELD_NUMBER;
       hash = (53 * hash) + getOpts().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -31000,18 +30351,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -31144,7 +30490,7 @@ public final class NodeStatusProto {
           opts_ = other.opts_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -31159,17 +30505,67 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getUsageFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              case 18: {
+                device_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                fstype_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 32: {
+                maxfile_ = input.readInt32();
+
+                break;
+              } // case 32
+              case 40: {
+                maxpath_ = input.readInt32();
+
+                break;
+              } // case 40
+              case 50: {
+                mountpoint_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              case 58: {
+                opts_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 58
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -31830,7 +31226,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DiskPartition(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -31924,63 +31331,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DiskUsage(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              free_ = input.readInt64();
-              break;
-            }
-            case 16: {
-
-              total_ = input.readInt64();
-              break;
-            }
-            case 24: {
-
-              used_ = input.readInt64();
-              break;
-            }
-            case 33: {
-
-              percent_ = input.readDouble();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -32081,7 +31431,7 @@ public final class NodeStatusProto {
       if (java.lang.Double.doubleToRawLongBits(percent_) != 0) {
         output.writeDouble(4, percent_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -32106,7 +31456,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, percent_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -32130,7 +31480,7 @@ public final class NodeStatusProto {
       if (java.lang.Double.doubleToLongBits(getPercent())
           != java.lang.Double.doubleToLongBits(
               other.getPercent())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -32153,7 +31503,7 @@ public final class NodeStatusProto {
       hash = (37 * hash) + PERCENT_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           java.lang.Double.doubleToLongBits(getPercent()));
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -32274,18 +31624,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsage.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -32388,7 +31733,7 @@ public final class NodeStatusProto {
         if (other.getPercent() != 0D) {
           setPercent(other.getPercent());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -32403,17 +31748,50 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsage parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                free_ = input.readInt64();
+
+                break;
+              } // case 8
+              case 16: {
+                total_ = input.readInt64();
+
+                break;
+              } // case 16
+              case 24: {
+                used_ = input.readInt64();
+
+                break;
+              } // case 24
+              case 33: {
+                percent_ = input.readDouble();
+
+                break;
+              } // case 33
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsage) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -32621,7 +31999,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DiskUsage(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -32735,73 +32124,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private DiskIO(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              readBytes_ = input.readInt64();
-              break;
-            }
-            case 16: {
-
-              readCount_ = input.readInt64();
-              break;
-            }
-            case 24: {
-
-              readTime_ = input.readInt64();
-              break;
-            }
-            case 32: {
-
-              writeBytes_ = input.readInt64();
-              break;
-            }
-            case 40: {
-
-              writeCount_ = input.readInt64();
-              break;
-            }
-            case 48: {
-
-              writeTime_ = input.readInt64();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -32938,7 +32260,7 @@ public final class NodeStatusProto {
       if (writeTime_ != 0L) {
         output.writeInt64(6, writeTime_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -32971,7 +32293,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(6, writeTime_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -32998,7 +32320,7 @@ public final class NodeStatusProto {
           != other.getWriteCount()) return false;
       if (getWriteTime()
           != other.getWriteTime()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -33027,7 +32349,7 @@ public final class NodeStatusProto {
       hash = (37 * hash) + WRITE_TIME_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getWriteTime());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -33148,18 +32470,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIO.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -33274,7 +32591,7 @@ public final class NodeStatusProto {
         if (other.getWriteTime() != 0L) {
           setWriteTime(other.getWriteTime());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -33289,17 +32606,60 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIO parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                readBytes_ = input.readInt64();
+
+                break;
+              } // case 8
+              case 16: {
+                readCount_ = input.readInt64();
+
+                break;
+              } // case 16
+              case 24: {
+                readTime_ = input.readInt64();
+
+                break;
+              } // case 24
+              case 32: {
+                writeBytes_ = input.readInt64();
+
+                break;
+              } // case 32
+              case 40: {
+                writeCount_ = input.readInt64();
+
+                break;
+              } // case 40
+              case 48: {
+                writeTime_ = input.readInt64();
+
+                break;
+              } // case 48
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIO) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -33593,7 +32953,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new DiskIO(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -33701,69 +33072,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private NetworkMetrics(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnections.Builder subBuilder = null;
-              if (connections_ != null) {
-                subBuilder = connections_.toBuilder();
-              }
-              connections_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnections.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(connections_);
-                connections_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIO.Builder subBuilder = null;
-              if (io_ != null) {
-                subBuilder = io_.toBuilder();
-              }
-              io_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIO.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(io_);
-                io_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -33874,7 +33182,7 @@ public final class NodeStatusProto {
       if (io_ != null) {
         output.writeMessage(2, getIo());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -33891,7 +33199,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, getIo());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -33916,7 +33224,7 @@ public final class NodeStatusProto {
         if (!getIo()
             .equals(other.getIo())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -33935,7 +33243,7 @@ public final class NodeStatusProto {
         hash = (37 * hash) + IO_FIELD_NUMBER;
         hash = (53 * hash) + getIo().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -34056,18 +33364,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetrics.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -34174,7 +33477,7 @@ public final class NodeStatusProto {
         if (other.hasIo()) {
           mergeIo(other.getIo());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -34189,17 +33492,44 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetrics parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getConnectionsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getIoFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetrics) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -34545,7 +33875,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new NetworkMetrics(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -34679,83 +34020,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private NetworkIO(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              bytesRecv_ = input.readInt64();
-              break;
-            }
-            case 16: {
-
-              bytesSent_ = input.readInt64();
-              break;
-            }
-            case 24: {
-
-              dropin_ = input.readInt64();
-              break;
-            }
-            case 32: {
-
-              dropout_ = input.readInt64();
-              break;
-            }
-            case 40: {
-
-              errin_ = input.readInt64();
-              break;
-            }
-            case 48: {
-
-              errout_ = input.readInt64();
-              break;
-            }
-            case 56: {
-
-              packetsRecv_ = input.readInt64();
-              break;
-            }
-            case 64: {
-
-              packetsSent_ = input.readInt64();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -34928,7 +34192,7 @@ public final class NodeStatusProto {
       if (packetsSent_ != 0L) {
         output.writeInt64(8, packetsSent_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -34969,7 +34233,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(8, packetsSent_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -35000,7 +34264,7 @@ public final class NodeStatusProto {
           != other.getPacketsRecv()) return false;
       if (getPacketsSent()
           != other.getPacketsSent()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -35035,7 +34299,7 @@ public final class NodeStatusProto {
       hash = (37 * hash) + PACKETS_SENT_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getPacketsSent());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -35156,18 +34420,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIO.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -35294,7 +34553,7 @@ public final class NodeStatusProto {
         if (other.getPacketsSent() != 0L) {
           setPacketsSent(other.getPacketsSent());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -35309,17 +34568,70 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIO parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                bytesRecv_ = input.readInt64();
+
+                break;
+              } // case 8
+              case 16: {
+                bytesSent_ = input.readInt64();
+
+                break;
+              } // case 16
+              case 24: {
+                dropin_ = input.readInt64();
+
+                break;
+              } // case 24
+              case 32: {
+                dropout_ = input.readInt64();
+
+                break;
+              } // case 32
+              case 40: {
+                errin_ = input.readInt64();
+
+                break;
+              } // case 40
+              case 48: {
+                errout_ = input.readInt64();
+
+                break;
+              } // case 48
+              case 56: {
+                packetsRecv_ = input.readInt64();
+
+                break;
+              } // case 56
+              case 64: {
+                packetsSent_ = input.readInt64();
+
+                break;
+              } // case 64
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIO) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -35699,7 +35011,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new NetworkIO(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -35853,93 +35176,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private NetworkConnections(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              lISTEN_ = input.readInt32();
-              break;
-            }
-            case 16: {
-
-              eSTABLISHED_ = input.readInt32();
-              break;
-            }
-            case 24: {
-
-              tIMEWAIT_ = input.readInt32();
-              break;
-            }
-            case 32: {
-
-              cLOSEWAIT_ = input.readInt32();
-              break;
-            }
-            case 40: {
-
-              cLOSED_ = input.readInt32();
-              break;
-            }
-            case 48: {
-
-              sYNSEND_ = input.readInt32();
-              break;
-            }
-            case 56: {
-
-              sYNRECEIVED_ = input.readInt32();
-              break;
-            }
-            case 64: {
-
-              fINWAIT1_ = input.readInt32();
-              break;
-            }
-            case 72: {
-
-              fINWAIT2_ = input.readInt32();
-              break;
-            }
-            case 80: {
-
-              lASTACK_ = input.readInt32();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -36148,7 +35384,7 @@ public final class NodeStatusProto {
       if (lASTACK_ != 0) {
         output.writeInt32(10, lASTACK_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -36197,7 +35433,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(10, lASTACK_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -36232,7 +35468,7 @@ public final class NodeStatusProto {
           != other.getFINWAIT2()) return false;
       if (getLASTACK()
           != other.getLASTACK()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -36263,7 +35499,7 @@ public final class NodeStatusProto {
       hash = (53 * hash) + getFINWAIT2();
       hash = (37 * hash) + LAST_ACK_FIELD_NUMBER;
       hash = (53 * hash) + getLASTACK();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -36384,18 +35620,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnections.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -36534,7 +35765,7 @@ public final class NodeStatusProto {
         if (other.getLASTACK() != 0) {
           setLASTACK(other.getLASTACK());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -36549,17 +35780,80 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnections parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                lISTEN_ = input.readInt32();
+
+                break;
+              } // case 8
+              case 16: {
+                eSTABLISHED_ = input.readInt32();
+
+                break;
+              } // case 16
+              case 24: {
+                tIMEWAIT_ = input.readInt32();
+
+                break;
+              } // case 24
+              case 32: {
+                cLOSEWAIT_ = input.readInt32();
+
+                break;
+              } // case 32
+              case 40: {
+                cLOSED_ = input.readInt32();
+
+                break;
+              } // case 40
+              case 48: {
+                sYNSEND_ = input.readInt32();
+
+                break;
+              } // case 48
+              case 56: {
+                sYNRECEIVED_ = input.readInt32();
+
+                break;
+              } // case 56
+              case 64: {
+                fINWAIT1_ = input.readInt32();
+
+                break;
+              } // case 64
+              case 72: {
+                fINWAIT2_ = input.readInt32();
+
+                break;
+              } // case 72
+              case 80: {
+                lASTACK_ = input.readInt32();
+
+                break;
+              } // case 80
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnections) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -37025,7 +36319,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new NetworkConnections(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -37133,69 +36438,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private MemoryMetrics(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemory.Builder subBuilder = null;
-              if (virtualMemory_ != null) {
-                subBuilder = virtualMemory_.toBuilder();
-              }
-              virtualMemory_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemory.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(virtualMemory_);
-                virtualMemory_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 18: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemory.Builder subBuilder = null;
-              if (swapMemory_ != null) {
-                subBuilder = swapMemory_.toBuilder();
-              }
-              swapMemory_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemory.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(swapMemory_);
-                swapMemory_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -37306,7 +36548,7 @@ public final class NodeStatusProto {
       if (swapMemory_ != null) {
         output.writeMessage(2, getSwapMemory());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -37323,7 +36565,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, getSwapMemory());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -37348,7 +36590,7 @@ public final class NodeStatusProto {
         if (!getSwapMemory()
             .equals(other.getSwapMemory())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -37367,7 +36609,7 @@ public final class NodeStatusProto {
         hash = (37 * hash) + SWAP_MEMORY_FIELD_NUMBER;
         hash = (53 * hash) + getSwapMemory().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -37488,18 +36730,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetrics.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -37606,7 +36843,7 @@ public final class NodeStatusProto {
         if (other.hasSwapMemory()) {
           mergeSwapMemory(other.getSwapMemory());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -37621,17 +36858,44 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetrics parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getVirtualMemoryFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              case 18: {
+                input.readMessage(
+                    getSwapMemoryFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetrics) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -37977,7 +37241,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new MemoryMetrics(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -38141,98 +37416,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private VirtualMemory(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              total_ = input.readInt64();
-              break;
-            }
-            case 16: {
-
-              used_ = input.readInt64();
-              break;
-            }
-            case 24: {
-
-              free_ = input.readInt64();
-              break;
-            }
-            case 33: {
-
-              percent_ = input.readDouble();
-              break;
-            }
-            case 40: {
-
-              available_ = input.readInt64();
-              break;
-            }
-            case 48: {
-
-              active_ = input.readInt64();
-              break;
-            }
-            case 56: {
-
-              inactive_ = input.readInt64();
-              break;
-            }
-            case 64: {
-
-              buffers_ = input.readInt64();
-              break;
-            }
-            case 72: {
-
-              cached_ = input.readInt64();
-              break;
-            }
-            case 80: {
-
-              shared_ = input.readInt64();
-              break;
-            }
-            case 88: {
-
-              slab_ = input.readInt64();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -38459,7 +37642,7 @@ public final class NodeStatusProto {
       if (slab_ != 0L) {
         output.writeInt64(11, slab_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -38512,7 +37695,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(11, slab_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -38550,7 +37733,7 @@ public final class NodeStatusProto {
           != other.getShared()) return false;
       if (getSlab()
           != other.getSlab()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -38594,7 +37777,7 @@ public final class NodeStatusProto {
       hash = (37 * hash) + SLAB_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getSlab());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -38715,18 +37898,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemory.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -38871,7 +38049,7 @@ public final class NodeStatusProto {
         if (other.getSlab() != 0L) {
           setSlab(other.getSlab());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -38886,17 +38064,85 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemory parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                total_ = input.readInt64();
+
+                break;
+              } // case 8
+              case 16: {
+                used_ = input.readInt64();
+
+                break;
+              } // case 16
+              case 24: {
+                free_ = input.readInt64();
+
+                break;
+              } // case 24
+              case 33: {
+                percent_ = input.readDouble();
+
+                break;
+              } // case 33
+              case 40: {
+                available_ = input.readInt64();
+
+                break;
+              } // case 40
+              case 48: {
+                active_ = input.readInt64();
+
+                break;
+              } // case 48
+              case 56: {
+                inactive_ = input.readInt64();
+
+                break;
+              } // case 56
+              case 64: {
+                buffers_ = input.readInt64();
+
+                break;
+              } // case 64
+              case 72: {
+                cached_ = input.readInt64();
+
+                break;
+              } // case 72
+              case 80: {
+                shared_ = input.readInt64();
+
+                break;
+              } // case 80
+              case 88: {
+                slab_ = input.readInt64();
+
+                break;
+              } // case 88
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemory) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -39405,7 +38651,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new VirtualMemory(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -39519,73 +38776,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private SwapMemory(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              free_ = input.readInt64();
-              break;
-            }
-            case 17: {
-
-              percent_ = input.readDouble();
-              break;
-            }
-            case 24: {
-
-              sin_ = input.readInt64();
-              break;
-            }
-            case 32: {
-
-              sout_ = input.readInt64();
-              break;
-            }
-            case 40: {
-
-              total_ = input.readInt64();
-              break;
-            }
-            case 48: {
-
-              used_ = input.readInt64();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -39722,7 +38912,7 @@ public final class NodeStatusProto {
       if (used_ != 0L) {
         output.writeInt64(6, used_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -39755,7 +38945,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(6, used_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -39783,7 +38973,7 @@ public final class NodeStatusProto {
           != other.getTotal()) return false;
       if (getUsed()
           != other.getUsed()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -39812,7 +39002,7 @@ public final class NodeStatusProto {
       hash = (37 * hash) + USED_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getUsed());
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -39933,18 +39123,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemory.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -40059,7 +39244,7 @@ public final class NodeStatusProto {
         if (other.getUsed() != 0L) {
           setUsed(other.getUsed());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -40074,17 +39259,60 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemory parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                free_ = input.readInt64();
+
+                break;
+              } // case 8
+              case 17: {
+                percent_ = input.readDouble();
+
+                break;
+              } // case 17
+              case 24: {
+                sin_ = input.readInt64();
+
+                break;
+              } // case 24
+              case 32: {
+                sout_ = input.readInt64();
+
+                break;
+              } // case 32
+              case 40: {
+                total_ = input.readInt64();
+
+                break;
+              } // case 40
+              case 48: {
+                used_ = input.readInt64();
+
+                break;
+              } // case 48
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemory) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -40378,7 +39606,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SwapMemory(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -40574,91 +39813,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CmServiceHealthCheckEvent(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              serviceName_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              serviceType_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              name_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              value_ = s;
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              explanation_ = s;
-              break;
-            }
-            case 48: {
-
-              timestamp_ = input.readInt64();
-              break;
-            }
-            case 58: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder subBuilder = null;
-              if (clusterDetails_ != null) {
-                subBuilder = clusterDetails_.toBuilder();
-              }
-              clusterDetails_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(clusterDetails_);
-                clusterDetails_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -40991,7 +40145,7 @@ public final class NodeStatusProto {
       if (clusterDetails_ != null) {
         output.writeMessage(7, getClusterDetails());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -41023,7 +40177,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(7, getClusterDetails());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -41055,7 +40209,7 @@ public final class NodeStatusProto {
         if (!getClusterDetails()
             .equals(other.getClusterDetails())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -41083,7 +40237,7 @@ public final class NodeStatusProto {
         hash = (37 * hash) + CLUSTERDETAILS_FIELD_NUMBER;
         hash = (53 * hash) + getClusterDetails().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -41204,18 +40358,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -41349,7 +40498,7 @@ public final class NodeStatusProto {
         if (other.hasClusterDetails()) {
           mergeClusterDetails(other.getClusterDetails());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -41364,17 +40513,67 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                serviceName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                serviceType_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                name_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                value_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 42: {
+                explanation_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              case 48: {
+                timestamp_ = input.readInt64();
+
+                break;
+              } // case 48
+              case 58: {
+                input.readMessage(
+                    getClusterDetailsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 58
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -42088,7 +41287,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CmServiceHealthCheckEvent(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -42252,84 +41462,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private CmServiceMetricEvent(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              serviceName_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              serviceType_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              name_ = s;
-              break;
-            }
-            case 33: {
-
-              value_ = input.readDouble();
-              break;
-            }
-            case 40: {
-
-              timestamp_ = input.readInt64();
-              break;
-            }
-            case 50: {
-              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder subBuilder = null;
-              if (clusterDetails_ != null) {
-                subBuilder = clusterDetails_.toBuilder();
-              }
-              clusterDetails_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(clusterDetails_);
-                clusterDetails_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -42582,7 +41714,7 @@ public final class NodeStatusProto {
       if (clusterDetails_ != null) {
         output.writeMessage(6, getClusterDetails());
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -42612,7 +41744,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, getClusterDetails());
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -42643,7 +41775,7 @@ public final class NodeStatusProto {
         if (!getClusterDetails()
             .equals(other.getClusterDetails())) return false;
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -42670,7 +41802,7 @@ public final class NodeStatusProto {
         hash = (37 * hash) + CLUSTERDETAILS_FIELD_NUMBER;
         hash = (53 * hash) + getClusterDetails().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -42791,18 +41923,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -42928,7 +42055,7 @@ public final class NodeStatusProto {
         if (other.hasClusterDetails()) {
           mergeClusterDetails(other.getClusterDetails());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -42943,17 +42070,62 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                serviceName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                serviceType_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                name_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 33: {
+                value_ = input.readDouble();
+
+                break;
+              } // case 33
+              case 40: {
+                timestamp_ = input.readInt64();
+
+                break;
+              } // case 40
+              case 50: {
+                input.readMessage(
+                    getClusterDetailsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 50
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -43518,7 +42690,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new CmServiceMetricEvent(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -43675,73 +42858,6 @@ public final class NodeStatusProto {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ClusterDetails(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              crn_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              name_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              version_ = s;
-              break;
-            }
-            case 32: {
-              int rawValue = input.readEnum();
-
-              type_ = rawValue;
-              break;
-            }
-            case 40: {
-              int rawValue = input.readEnum();
-
-              platform_ = rawValue;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -44293,7 +43409,7 @@ public final class NodeStatusProto {
       if (platform_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.CloudPlatform.UNKNOWN.getNumber()) {
         output.writeEnum(5, platform_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -44319,7 +43435,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(5, platform_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -44342,7 +43458,7 @@ public final class NodeStatusProto {
           .equals(other.getVersion())) return false;
       if (type_ != other.type_) return false;
       if (platform_ != other.platform_) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -44363,7 +43479,7 @@ public final class NodeStatusProto {
       hash = (53 * hash) + type_;
       hash = (37 * hash) + PLATFORM_FIELD_NUMBER;
       hash = (53 * hash) + platform_;
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -44484,18 +43600,13 @@ public final class NodeStatusProto {
 
       // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -44607,7 +43718,7 @@ public final class NodeStatusProto {
         if (other.platform_ != 0) {
           setPlatformValue(other.getPlatformValue());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -44622,17 +43733,55 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                crn_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                name_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                version_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 32: {
+                type_ = input.readEnum();
+
+                break;
+              } // case 32
+              case 40: {
+                platform_ = input.readEnum();
+
+                break;
+              } // case 40
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -45104,7 +44253,18 @@ public final class NodeStatusProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ClusterDetails(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
