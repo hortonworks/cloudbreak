@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -133,11 +132,9 @@ public class SdxRepairService {
     }
 
     public void waitCloudbreakClusterRepair(Long id, PollingConfig pollingConfig) {
-        sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
-            cloudbreakPoller.pollUpdateUntilAvailable("Repair", sdxCluster, pollingConfig);
-            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.SDX_REPAIR_FINISHED, "Datalake is running", sdxCluster);
-        }, () -> {
-            throw notFound("SDX cluster", id).get();
+        sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster ->
+            cloudbreakPoller.pollUpdateUntilAvailable("Repair", sdxCluster, pollingConfig), () -> {
+                throw notFound("SDX cluster", id).get();
         });
     }
 }
