@@ -18,7 +18,7 @@ public class DistroXVerticalScaleV1RequestToStackVerticalScaleV4RequestConverter
         StackVerticalScaleV4Request stackVerticalScaleV4Request = new StackVerticalScaleV4Request();
 
         InstanceTemplateV4Request instanceTemplateV4Request = instanceTemplateV1ToInstanceTemplateV4Converter
-                .convert(source.getInstanceTemplateV1Request(), null);
+                .convert(source.getTemplate(), null);
 
         stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
         stackVerticalScaleV4Request.setGroup(source.getGroup());

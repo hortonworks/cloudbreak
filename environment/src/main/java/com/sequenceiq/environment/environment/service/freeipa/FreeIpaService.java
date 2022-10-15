@@ -233,7 +233,7 @@ public class FreeIpaService {
             LOGGER.debug("Calling FreeIPA CCM upgrade for environment {}", environmentCrn);
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> freeIpaV1Endpoint.putVerticalScalingFreeIpaV1ByEnvironmentCrn(environmentCrn, freeIPAVerticalScaleRequest));
+                    () -> freeIpaV1Endpoint.verticalScalingByCrn(environmentCrn, freeIPAVerticalScaleRequest));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to vertical scale on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);

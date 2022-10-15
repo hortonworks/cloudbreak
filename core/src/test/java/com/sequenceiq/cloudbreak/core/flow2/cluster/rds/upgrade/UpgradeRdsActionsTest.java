@@ -110,17 +110,7 @@ class UpgradeRdsActionsTest {
     }
 
     @Test
-    public void testShouldNotStopServicesIfEntitlementIsGranted() throws Exception {
-        AbstractAction action = (AbstractAction) upgradeRdsActions.stopServicesAndCm();
-        UpgradeRdsTriggerRequest triggerEvent =
-                new UpgradeRdsTriggerRequest(UpgradeRdsEvent.UPGRADE_RDS_EVENT.event(), STACK_ID, TargetMajorVersion.VERSION_11, "aLocation");
-        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, false);
-
-        verify(upgradeRdsService, never()).stopServicesState(STACK_ID);
-    }
-
-    @Test
-    public void testShouldStopServicesIfEntitlementIsNotGranted() throws Exception {
+    public void testShouldStopServicesAlways() throws Exception {
         AbstractAction action = (AbstractAction) upgradeRdsActions.stopServicesAndCm();
         UpgradeRdsTriggerRequest triggerEvent =
                 new UpgradeRdsTriggerRequest(UpgradeRdsEvent.UPGRADE_RDS_EVENT.event(), STACK_ID, TargetMajorVersion.VERSION_11, "aLocation");
