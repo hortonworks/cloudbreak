@@ -320,14 +320,14 @@ public interface EnvironmentEndpoint {
     @Path("/name/{name}/vertical_scaling")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.VERTICAL_SCALING, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
-            nickname = "verticalScalingByEnvironmentNameV1")
+            nickname = "verticalScalingByName")
     void verticalScalingByName(@PathParam("name") String name, @Valid VerticalScaleRequest updateRequest);
 
     @PUT
     @Path("/crn/{crn}/vertical_scaling")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.VERTICAL_SCALING, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
-            nickname = "verticalScalingByEnvironmentCrnV1")
+            nickname = "verticalScalingByCrn")
     void verticalScalingByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
         @Valid VerticalScaleRequest updateRequest);
 

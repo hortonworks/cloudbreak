@@ -441,7 +441,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @InternalOnly
-    public VerticalScaleResponse putVerticalScalingFreeIpaV1ByEnvironmentCrn(
+    public VerticalScaleResponse verticalScalingByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn,
             @RequestObject @Valid @NotNull VerticalScaleRequest updateRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
