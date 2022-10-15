@@ -346,13 +346,13 @@ public interface SdxEndpoint {
     @Path("/crn/{crn}/vertical_scaling")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Initiates the vertical scaling on Data Lake", produces = MediaType.APPLICATION_JSON,
-            nickname = "verticalScalingByCrnV1")
+            nickname = "verticalScalingByCrn")
     FlowIdentifier verticalScalingByCrn(@PathParam("crn") String crn, @Valid StackVerticalScaleV4Request updateRequest);
 
     @PUT
     @Path("/name/{name}/vertical_scaling")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Initiates the vertical scaling on Data Lake", produces = MediaType.APPLICATION_JSON,
-            nickname = "verticalScalingByNameV1")
+            nickname = "verticalScalingByName")
     FlowIdentifier verticalScalingByName(@PathParam("name") String name, @Valid StackVerticalScaleV4Request updateRequest);
 }
