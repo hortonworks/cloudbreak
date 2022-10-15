@@ -277,16 +277,16 @@ public interface DistroXV1Endpoint {
     @PUT
     @Path("name/{name}/vertical_scaling")
     @ApiOperation(value = VERTICAL_SCALE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "putVerticalScalingDistroXV1ByName")
-    FlowIdentifier putVerticalScalingByName(
+            nickname = "verticalScalingByName")
+    FlowIdentifier verticalScalingByName(
             @PathParam("name") String name,
             @Valid DistroXVerticalScaleV1Request updateRequest);
 
     @PUT
     @Path("crn/{crn}/vertical_scaling")
     @ApiOperation(value = VERTICAL_SCALE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "putVerticalScalingDistroXV1ByCrn")
-    FlowIdentifier putVerticalScalingByCrn(
+            nickname = "verticalScalingByCrn")
+    FlowIdentifier verticalScalingByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @Valid DistroXVerticalScaleV1Request updateRequest);
 

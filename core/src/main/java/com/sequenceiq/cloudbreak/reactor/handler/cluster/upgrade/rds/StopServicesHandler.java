@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds;
 
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -49,6 +52,9 @@ public class StopServicesHandler extends ExceptionCatcherEventHandler<UpgradeRds
     @Inject
     private HostOrchestrator hostOrchestrator;
 
+    @Inject
+    private UpgradeRdsService upgradeRdsService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(UpgradeRdsStopServicesRequest.class);
@@ -68,8 +74,12 @@ public class StopServicesHandler extends ExceptionCatcherEventHandler<UpgradeRds
         ClusterView cluster = stackDto.getCluster();
         StackView stack = stackDto.getStack();
         try {
-            LOGGER.info("Stopping services before RDS upgrade...");
-            clusterApiConnectors.getConnector(stackDto).stopCluster(true);
+            if (upgradeRdsService.shouldStopStartServices(stackDto.getStack())) {
+                LOGGER.info("Stopping services before RDS upgrade...");
+                clusterApiConnectors.getConnector(stackDto).stopCluster(true);
+            } else {
+                LOGGER.info("Skip stopping services as {} entitlement is enabled.", CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP);
+            }
             InstanceMetadataView gatewayInstance = stackDto.getPrimaryGatewayInstance();
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, stackDto.getSecurityConfig(), gatewayInstance, stackDto.hasGateway());
             ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), cluster.getId());

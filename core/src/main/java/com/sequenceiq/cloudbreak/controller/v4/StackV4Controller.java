@@ -588,7 +588,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public FlowIdentifier putVerticalScalingByNameInternal(
+    public FlowIdentifier verticalScalingByName(
             Long workspaceId,
             String name,
             @InitiatorUserCrn String initiatorUserCrn,
