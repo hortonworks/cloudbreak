@@ -667,7 +667,7 @@ public interface StackV4Endpoint {
     @Path("internal/{name}/vertical_scaling")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = VERTICAL_SCALE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
-            nickname = "verticalScalingByName")
+            nickname = "verticalScalingInternalByName")
     FlowIdentifier verticalScalingByName(
             @PathParam("workspaceId") Long workspaceId,
             @PathParam("name") String name,
