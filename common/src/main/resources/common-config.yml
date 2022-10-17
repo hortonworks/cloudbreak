@@ -95,7 +95,7 @@ telemetry:
     cdp-request-signer:
       desired-version: 0.1.1
     metering-agent:
-      desired-date: 2022-01-18
+      desired-date: '2022-01-18'
   usage:
     messagebroker:
       enabled: false
