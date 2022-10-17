@@ -42,6 +42,14 @@ sonarqube {
   }
 }
 
+configurations {
+  all {
+    resolutionStrategy {
+      force "org.yaml:snakeyaml:$snakeYamlVersion"
+    }
+  }
+}
+
 dependencies {
   implementation project(':authorization-common')
   implementation project(':common')

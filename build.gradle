@@ -62,6 +62,10 @@ allprojects {
   ext['commons-codec.version'] = commonsCodecVersion
   ext['hibernate-validator.version'] = hibernateValidatorVersion
   ext['jackson.version'] = jacksonVersion
+  ext['snakeyaml.version'] = snakeYamlVersion
+  ext['spring-framework.version'] = springFrameworkVersion
+  ext['spring-security.version'] = springSecurityVersion
+  ext['jersey.version'] = jerseyCoreVersion
 
   // override AWS SDK Depenendencies
   ext['netty.version'] = nettyVersion
