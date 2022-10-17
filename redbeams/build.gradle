@@ -111,15 +111,14 @@ dependencies {
     implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',   version: springBootVersion
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   }
-  implementation project(':authorization-common')
 
+  implementation project(':authorization-common')
   implementation project(':flow')
   implementation project(':cloud-reactor')
   implementation project(':cloud-reactor-api')
   implementation project(':environment-api')
   implementation project(':datalake-api')
   implementation project(':status-checker')
-
   implementation project(':cloud-common')
   implementation project(':secret-engine')
   implementation project(':common')
@@ -127,6 +126,8 @@ dependencies {
   implementation project(':core-api')
   implementation project(':redbeams-api')
   implementation project(':template-manager-tag')
+  implementation project(':structuredevent-service-cdp')
+
   runtimeOnly project(':cloud-gcp')
   runtimeOnly project(':cloud-aws-cloudformation')
   runtimeOnly project(':cloud-mock')

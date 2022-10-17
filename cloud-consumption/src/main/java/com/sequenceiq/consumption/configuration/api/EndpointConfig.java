@@ -14,6 +14,7 @@ import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
 import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPStructuredEventV1Controller;
+import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPRestAuditFilter;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPStructuredEventFilter;
 import com.sequenceiq.consumption.api.v1.ConsumptionApi;
 import com.sequenceiq.consumption.endpoint.ConsumptionInternalV1Controller;
@@ -53,6 +54,7 @@ public class EndpointConfig extends ResourceConfig {
         this.applicationVersion = applicationVersion;
         this.auditEnabled = auditEnabled;
         this.exceptionMappers = exceptionMappers;
+        registerFilters();
         registerEndpoints();
         registerExceptionMappers();
         registerSwagger();
@@ -85,14 +87,17 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerEndpoints() {
-        if (auditEnabled) {
-            register(CDPStructuredEventFilter.class);
-        }
-
         CONTROLLERS.forEach(this::register);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
         register(io.swagger.jaxrs.listing.AcceptHeaderApiListingResource.class);
+    }
+
+    private void registerFilters() {
+        register(CDPRestAuditFilter.class);
+        if (auditEnabled) {
+            register(CDPStructuredEventFilter.class);
+        }
     }
 }

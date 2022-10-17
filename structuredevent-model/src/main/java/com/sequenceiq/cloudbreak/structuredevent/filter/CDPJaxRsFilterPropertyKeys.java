@@ -5,9 +5,9 @@ public class CDPJaxRsFilterPropertyKeys {
 
     public static final String REQUEST_TIME = "REQUEST_TIME";
 
-    public static final String REQUEST_DETAILS = "REQUEST_DETAIS";
+    public static final String REQUEST_DETAILS = "REQUEST_DETAILS";
 
-    public static final String RESPONSE_DETAILS = "RESPONSE_DETAIS";
+    public static final String RESPONSE_DETAILS = "RESPONSE_DETAILS";
 
     private CDPJaxRsFilterPropertyKeys() {
     }
