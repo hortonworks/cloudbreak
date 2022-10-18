@@ -41,4 +41,13 @@ public class SaltMaster {
     public void setHostName(String hostName) {
         this.hostName = hostName;
     }
+
+    @Override
+    public String toString() {
+        return "SaltMaster{" +
+                "address='" + address + '\'' +
+                ", domain='" + domain + '\'' +
+                ", hostName='" + hostName + '\'' +
+                '}';
+    }
 }

@@ -118,4 +118,15 @@ public class SaltAction {
     public void setOs(Os os) {
         this.os = os;
     }
+
+    @Override
+    public String toString() {
+        return "SaltAction{" +
+                "action=" + action +
+                ", masters=" + masters +
+                ", minions=" + minions +
+                ", cloud=" + cloud +
+                ", os=" + os +
+                '}';
+    }
 }

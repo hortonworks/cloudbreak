@@ -48,6 +48,7 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -106,6 +107,9 @@ class SaltOrchestratorTest {
     private GatewayConfig gatewayConfig;
 
     private Set<Node> targets;
+
+    @Mock
+    private GenericResponses genericResponses;
 
     @Mock
     private SaltConnector saltConnector;
@@ -177,7 +181,8 @@ class SaltOrchestratorTest {
         saltConnectors = List.of(saltConnector);
         lenient().when(saltService.createSaltConnector(anyCollection())).thenReturn(saltConnectors);
         lenient().when(saltService.getPrimaryGatewayConfig(anyList())).thenReturn(gatewayConfig);
-        lenient().when(saltBootstrapFactory.of(any(), any(), anyCollection(), anyList(), anySet(), any())).thenReturn(saltBootstrap);
+        lenient().when(saltBootstrapFactory.of(any(), anyCollection(), anyList(), anySet(), any())).thenReturn(saltBootstrap);
+        lenient().when(saltStateService.bootstrap(eq(saltConnector), any(), any(), eq(targets))).thenReturn(genericResponses);
     }
 
     @Test
@@ -191,7 +196,7 @@ class SaltOrchestratorTest {
 
         verify(saltRunner, times(4)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         // salt.zip, master_sign.pem, master_sign.pub
-        verify(saltBootstrapFactory, times(1)).of(eq(saltStateService), eq(saltConnector), eq(saltConnectors), eq(allGatewayConfigs), eq(targets),
+        verify(saltBootstrapFactory, times(1)).of(eq(saltConnector), eq(saltConnectors), eq(allGatewayConfigs), eq(targets),
                 eq(bootstrapParams));
     }
 
@@ -265,7 +270,31 @@ class SaltOrchestratorTest {
 
         verify(saltRunner, times(4)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         verify(saltBootstrapFactory, times(1))
-                .of(eq(saltStateService), eq(saltConnector), eq(saltConnectors), eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
+                .of(eq(saltConnector), eq(saltConnectors), eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
+    }
+
+    @Test
+    void reBootstrapExistingNodesTest() throws Exception {
+        BootstrapParams bootstrapParams = mock(BootstrapParams.class);
+        List<GatewayConfig> gatewayConfigs = List.of(gatewayConfig);
+
+        saltOrchestrator.reBootstrapExistingNodes(gatewayConfigs, targets, bootstrapParams, exitCriteriaModel);
+
+        verify(saltStateService).bootstrap(saltConnector, bootstrapParams, gatewayConfigs, targets);
+    }
+
+    @Test
+    void reBootstrapExistingNodesFailureTest() throws Exception {
+        BootstrapParams bootstrapParams = mock(BootstrapParams.class);
+        List<GatewayConfig> gatewayConfigs = List.of(gatewayConfig);
+        GenericResponse genericResponse = mock(GenericResponse.class);
+        when(genericResponse.getStatusCode()).thenReturn(HttpStatus.UNAUTHORIZED.value());
+        when(genericResponse.getAddress()).thenReturn("127.0.0.1");
+        when(genericResponses.getResponses()).thenReturn(List.of(genericResponse));
+
+        assertThatThrownBy(() -> saltOrchestrator.reBootstrapExistingNodes(gatewayConfigs, targets, bootstrapParams, exitCriteriaModel))
+                .isInstanceOf(CloudbreakOrchestratorFailedException.class)
+                .hasMessage("Failed to rebootstrap existing nodes [127.0.0.1]");
     }
 
     @Test

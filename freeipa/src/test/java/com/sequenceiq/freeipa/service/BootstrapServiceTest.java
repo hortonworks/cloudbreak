@@ -252,7 +252,8 @@ class BootstrapServiceTest {
         ArgumentCaptor<Set<Node>> targetCaptor = ArgumentCaptor.forClass((Class) Set.class);
         ArgumentCaptor<BootstrapParams> bootstrapParamsCaptor = ArgumentCaptor.forClass(BootstrapParams.class);
         ArgumentCaptor<ExitCriteriaModel> exitCriteriaModelCaptor = ArgumentCaptor.forClass(ExitCriteriaModel.class);
-        verify(hostOrchestrator).bootstrap(eq(gatewayConfigs), targetCaptor.capture(), bootstrapParamsCaptor.capture(), exitCriteriaModelCaptor.capture());
+        verify(hostOrchestrator).reBootstrapExistingNodes(eq(gatewayConfigs), targetCaptor.capture(), bootstrapParamsCaptor.capture(),
+                exitCriteriaModelCaptor.capture());
         Set<Node> targetNodes = targetCaptor.getValue();
         assertEquals(1, targetNodes.size());
         assertTrue(targetNodes.stream().allMatch(node -> node.getPrivateIp().equals(instanceMetaData.getPrivateIp())));
