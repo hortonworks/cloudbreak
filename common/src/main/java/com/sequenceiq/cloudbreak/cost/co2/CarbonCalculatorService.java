@@ -21,6 +21,10 @@ public class CarbonCalculatorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CarbonCalculatorService.class);
 
+    private static final double ONE_THOUSAND = 1000.0;
+
+    private static final double ONE_MILLION = 1_000_000.0;
+
     //AWS min/max avg 2.12 Wh/vCPU
     private static final double AWS_AVG_VCPU = 2.12;
 
@@ -31,7 +35,7 @@ public class CarbonCalculatorService {
 
     // Wh / GB
     // Watts per terabyte = Watts per disk / Terabytes per disk: 6 W / 5 TB = 1.2 Watt-Hours per Terabyte-Hour for SSD
-    private static final double AWS_DISK_GB = 1.2 / 1000.0;
+    private static final double AWS_DISK_GB = 1.2 / ONE_THOUSAND;
 
     @Inject
     private RegionEmissionFactorService regionEmissionFactorService;
@@ -39,13 +43,13 @@ public class CarbonCalculatorService {
     public double getHourlyEnergyConsumptionkWhByCrn(ClusterCostDto instanceTypeList) {
         LOGGER.info("Collected instance types: {}", instanceTypeList);
         double summarizedWhConsumption = calculateCpuInWh(instanceTypeList) + calculateMemoryInWh(instanceTypeList) + calculateDiskInWh(instanceTypeList);
-        return summarizedWhConsumption / 1000.0;
+        return summarizedWhConsumption / ONE_THOUSAND;
     }
 
     public double getHourlyCarbonFootPrintByCrn(ClusterCostDto instanceTypeList) {
         RegionEmissionFactor emissionFactor = getCo2RateForRegion(instanceTypeList);
         LOGGER.info("RegionEmissionFactor for region {} is: {}", instanceTypeList.getRegion(), emissionFactor);
-        return getHourlyEnergyConsumptionkWhByCrn(instanceTypeList) * emissionFactor.getCo2e() * 1000000.0;
+        return getHourlyEnergyConsumptionkWhByCrn(instanceTypeList) * emissionFactor.getCo2e() * ONE_MILLION;
     }
 
     private double calculateCpuInWh(ClusterCostDto dto) {
@@ -71,7 +75,8 @@ public class CarbonCalculatorService {
         if (!dto.isComputeRunning()) {
             return 0.0;
         }
-        IntSummaryStatistics totalMemoryCountInGb = dto.getInstanceGroups().stream().collect(Collectors.summarizingInt(InstanceGroupCostDto::getTotalMemoryInGb));
+        IntSummaryStatistics totalMemoryCountInGb = dto.getInstanceGroups().stream()
+                .collect(Collectors.summarizingInt(InstanceGroupCostDto::getTotalMemoryInGb));
         LOGGER.info("Cluster memorySize in GB: {}", totalMemoryCountInGb);
         return totalMemoryCountInGb.getSum() * AWS_MEMORY_GB;
     }

@@ -8,6 +8,7 @@ public class ClusterCostDto {
     private String region;
 
     private String status;
+
     private List<InstanceGroupCostDto> instanceGroups;
 
     public List<InstanceGroupCostDto> getInstanceGroups() {

@@ -1,5 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cost.co2;
-// CHECKSTYLE:OFF
+package com.sequenceiq.cloudbreak.cost.co2;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -16,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.cost.model.RegionEmissionFactor;
 import com.sequenceiq.cloudbreak.common.cost.service.RegionEmissionFactorService;
-import com.sequenceiq.cloudbreak.cost.co2.CarbonCalculatorService;
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
 import com.sequenceiq.cloudbreak.cost.model.InstanceGroupCostDto;
 

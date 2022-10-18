@@ -97,6 +97,7 @@ public class EnvironmentRealTimeCost implements Serializable {
                 case "WORKLOAD":
                     datahubs.put(resourceCrn, o1);
                     break;
+                default:
             }
 
         }
