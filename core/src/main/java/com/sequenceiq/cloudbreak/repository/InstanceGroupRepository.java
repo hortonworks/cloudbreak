@@ -26,6 +26,16 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 @Transactional(TxType.REQUIRED)
 public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, Long> {
 
+    String PROJECTION = "ig.id as id, " +
+            "ig.groupName as groupName, " +
+            "ig.instanceGroupType as instanceGroupType, " +
+            "t as template, " +
+            "sg as securityGroup, " +
+            "ig.attributes as attributes, " +
+            "ig.minimumNodeCount as minimumNodeCount, " +
+            "ig.instanceGroupNetwork as instanceGroupNetwork, " +
+            "ig.scalabilityOption as scalabilityOption ";
+
     @EntityGraph(value = "InstanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
     @Query("SELECT i from InstanceGroup i WHERE i.stack.id = :stackId AND i.groupName = :groupName")
     Optional<InstanceGroup> findOneWithInstanceMetadataByGroupNameInStack(@Param("stackId") Long stackId, @Param("groupName") String groupName);
@@ -45,18 +55,11 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
             "WHERE i.instanceGroup.stack.id= :stackId AND i.discoveryFQDN= :hostName AND i.instanceStatus <> 'TERMINATED'")
     Optional<InstanceGroup> findInstanceGroupInStackByHostName(@Param("stackId") Long stackId, @Param("hostName") String hostName);
 
-    @Query("SELECT ig.id as id, " +
-            "ig.groupName as groupName, " +
-            "ig.instanceGroupType as instanceGroupType, " +
-            "ig.template as template, " +
-            "sg as securityGroup, " +
-            "ig.attributes as attributes, " +
-            "ig.minimumNodeCount as minimumNodeCount, " +
-            "ig.instanceGroupNetwork as instanceGroupNetwork, " +
-            "ig.scalabilityOption as scalabilityOption " +
+    @Query("SELECT " + PROJECTION +
             "FROM InstanceGroup ig " +
             "LEFT JOIN ig.targetGroups tg " +
             "LEFT JOIN ig.securityGroup sg " +
+            "LEFT JOIN ig.template t " +
             "WHERE tg.id= :targetGroupId")
     List<InstanceGroupViewDelegate> findByTargetGroupId(@Param("targetGroupId") Long targetGroupId);
 
@@ -67,50 +70,29 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
     @Query("SELECT i FROM InstanceGroup i JOIN FETCH i.template WHERE i.stack.id = :stackId")
     Set<InstanceGroup> getByStackAndFetchTemplates(@Param("stackId") Long stackId);
 
-    @Query("SELECT ig.id as id, " +
-            "ig.groupName as groupName, " +
-            "ig.instanceGroupType as instanceGroupType, " +
-            "ig.template as template, " +
-            "sg as securityGroup, " +
-            "ig.attributes as attributes, " +
-            "ig.minimumNodeCount as minimumNodeCount, " +
-            "ig.instanceGroupNetwork as instanceGroupNetwork, " +
-            "ig.scalabilityOption as scalabilityOption " +
+    @Query("SELECT " + PROJECTION +
             "FROM InstanceGroup ig " +
             "LEFT JOIN ig.stack s " +
             "LEFT JOIN ig.securityGroup sg " +
+            "LEFT JOIN ig.template t " +
             "WHERE s.id= :stackId "
     )
     List<InstanceGroupViewDelegate> findInstanceGroupViewByStackId(@Param("stackId") Long stackId);
 
-    @Query("SELECT ig.id as id, " +
-            "ig.groupName as groupName, " +
-            "ig.instanceGroupType as instanceGroupType, " +
-            "ig.template as template, " +
-            "sg as securityGroup, " +
-            "ig.attributes as attributes, " +
-            "ig.minimumNodeCount as minimumNodeCount, " +
-            "ig.instanceGroupNetwork as instanceGroupNetwork, " +
-            "ig.scalabilityOption as scalabilityOption " +
+    @Query("SELECT " + PROJECTION +
             "FROM InstanceGroup ig " +
             "LEFT JOIN ig.securityGroup sg " +
             "LEFT JOIN ig.stack s " +
+            "LEFT JOIN ig.template t " +
             "WHERE s.id= :stackId " +
             "AND ig.groupName = :groupName")
     Optional<InstanceGroupViewDelegate> findInstanceGroupViewByStackIdAndGroupName(@Param("stackId") Long stackId, @Param("groupName") String groupName);
 
-    @Query("SELECT ig.id as id, " +
-            "ig.groupName as groupName, " +
-            "ig.instanceGroupType as instanceGroupType, " +
-            "ig.template as template, " +
-            "sg as securityGroup, " +
-            "ig.attributes as attributes, " +
-            "ig.minimumNodeCount as minimumNodeCount, " +
-            "ig.instanceGroupNetwork as instanceGroupNetwork, " +
-            "ig.scalabilityOption as scalabilityOption " +
+    @Query("SELECT " + PROJECTION +
             "FROM InstanceGroup ig " +
             "LEFT JOIN ig.stack s " +
             "LEFT JOIN ig.securityGroup sg " +
+            "LEFT JOIN ig.template t " +
             "WHERE s.id= :stackId " +
             "AND ig.groupName in :groupNames")
     List<InstanceGroupViewDelegate> findAllInstanceGroupViewByStackIdAndGroupNames(@Param("stackId") Long stackId,
