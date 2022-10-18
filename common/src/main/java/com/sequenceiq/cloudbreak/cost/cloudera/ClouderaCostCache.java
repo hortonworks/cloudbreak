@@ -23,6 +23,8 @@ public class ClouderaCostCache {
 
     private static final String CLOUDERA_PRICE_LOCATION = "cost/cloudera-price.json";
 
+    private static final double DEFAULT_PRICE = 0.69;
+
     private Map<String, Double> priceCache;
 
     @PostConstruct
@@ -36,14 +38,14 @@ public class ClouderaCostCache {
 
     public Double getPriceByType(String instanceType) {
         Double price = priceCache.get(instanceType);
-        return price == null ? 0.69 : price;
+        return price == null ? DEFAULT_PRICE : price;
     }
 
     private List<ClouderaPrice> loadPriceList() throws IOException {
         ClassPathResource classPathResource = new ClassPathResource(CLOUDERA_PRICE_LOCATION);
         if (classPathResource.exists()) {
             String json = FileReaderUtils.readFileFromClasspath(CLOUDERA_PRICE_LOCATION);
-            return JsonUtil.readValue(json, new TypeReference<List<ClouderaPrice>>() {});
+            return JsonUtil.readValue(json, new TypeReference<>() { });
         }
         throw new RuntimeException("Failed to load price cache!");
     }

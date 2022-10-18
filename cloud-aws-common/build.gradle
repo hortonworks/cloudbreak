@@ -40,6 +40,7 @@ dependencies {
   api group: 'com.amazonaws', name: 'aws-java-sdk-efs', version: awsSdkVersion
   api group: 'com.amazonaws', name: 'aws-java-sdk-ebs', version: awsSdkVersion
   api group: 'com.amazonaws', name: 'aws-java-sdk-networkfirewall', version: awsSdkVersion
+  api group: 'com.amazonaws', name: 'aws-java-sdk-pricing', version: awsSdkVersion
 
   // legacy
   api group: 'com.amazonaws', name: 'aws-java-sdk-autoscaling', version: awsSdkVersion

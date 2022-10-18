@@ -17,10 +17,6 @@ import com.sequenceiq.cloudbreak.cost.usd.UsdCalculatorService;
 @Service
 public class ClusterCostService {
 
-    private static final double MAGIC_PROVIDER_COST = 5.3;
-
-    private static final double MAGIC_CLOUDERA_COST = 1.3;
-
     @Inject
     private CarbonCalculatorService carbonCalculatorService;
 
