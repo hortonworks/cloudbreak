@@ -142,11 +142,13 @@ public enum Status {
             case START_IN_PROGRESS:
             case UPGRADE_REQUESTED:
             case UPGRADE_IN_PROGRESS:
+            case WAIT_FOR_SYNC:
                 return true;
             default:
                 return false;
         }
     }
+    //CHECKSTYLE:ON: CyclomaticComplexity
 
     public Status mapToFailedIfInProgress() {
         if (isInProgress()) {
