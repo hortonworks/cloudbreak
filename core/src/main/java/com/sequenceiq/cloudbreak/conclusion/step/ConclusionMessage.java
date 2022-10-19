@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.conclusion.step;
 
-public class ConclusionMessage {
+class ConclusionMessage {
 
     public static final String NODE_STATUS_MONITOR_UNREACHABLE = "conclusion.node.status.monitor.unreachable";
 

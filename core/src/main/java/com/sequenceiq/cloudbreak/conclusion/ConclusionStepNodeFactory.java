@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.conclusion.step.NodeServicesCheckerConclusionSt
 import com.sequenceiq.cloudbreak.conclusion.step.SaltCheckerConclusionStep;
 import com.sequenceiq.cloudbreak.conclusion.step.VmStatusCheckerConclusionStep;
 
-public class ConclusionStepNodeFactory {
+class ConclusionStepNodeFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConclusionStepNodeFactory.class);
 

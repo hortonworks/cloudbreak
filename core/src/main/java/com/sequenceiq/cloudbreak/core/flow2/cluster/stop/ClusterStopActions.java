@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopFailedRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopResult;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
@@ -78,7 +79,7 @@ public class ClusterStopActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterStopEvent.FINALIZED_EVENT.event(), context.getStackId());
+                return new ClusterStopFailedRequest(context.getStackId());
             }
 
             @Override
