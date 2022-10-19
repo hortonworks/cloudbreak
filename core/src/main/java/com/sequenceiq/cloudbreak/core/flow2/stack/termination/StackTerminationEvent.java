@@ -5,6 +5,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.recipe.CcmKeyDeregisterSucces
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.ClusterProxyDeregisterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionUnschedulingFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionUnschedulingSuccess;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
@@ -17,6 +19,8 @@ public enum StackTerminationEvent implements FlowEvent {
     CLUSTER_PROXY_DEREGISTER_FAILED_EVENT("CLUSTER_PROXY_DEREGISTER_FAILED_EVENT"),
     CCM_KEY_DEREGISTER_SUCCEEDED_EVENT(EventSelectorUtil.selector(CcmKeyDeregisterSuccess.class)),
     CCM_KEY_DEREGISTER_FAILED_EVENT("CCM_KEY_DEREGISTER_FAILED_EVENT"),
+    ATTACHED_VOLUME_CONSUMPTION_COLLECTION_UNSCHEDULING_FINISHED_EVENT(EventSelectorUtil.selector(AttachedVolumeConsumptionCollectionUnschedulingSuccess.class)),
+    ATTACHED_VOLUME_CONSUMPTION_COLLECTION_UNSCHEDULING_FAILED_EVENT(EventSelectorUtil.selector(AttachedVolumeConsumptionCollectionUnschedulingFailed.class)),
     TERMINATION_FINISHED_EVENT(EventSelectorUtil.selector(TerminateStackResult.class)),
     TERMINATION_FAILED_EVENT(EventSelectorUtil.failureSelector(TerminateStackResult.class)),
     TERMINATION_FINALIZED_EVENT("TERMINATESTACKFINALIZED"),

@@ -145,6 +145,10 @@ cb:
   redbeams:
     url: http://localhost:8087
     contextPath: /redbeams
+  consumption:
+    url: http://localhost:8099
+    contextPath: /consumption
+    enabled: false
   runtimes:
     latest: "7.2.16"
 

@@ -79,28 +79,28 @@ public class ConsumptionInternalV1Controller implements ConsumptionInternalEndpo
 
     @Override
     @InternalOnly
-    public void scheduleConsumptionCollection(@AccountId String accountId,
+    public void scheduleCloudResourceConsumptionCollection(@AccountId String accountId,
             @Valid @NotNull CloudResourceConsumptionRequest request,
             @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER}) @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
-        LOGGER.info("Registering consumption collection for resource with CRN [{}] and location [{}]",
+        LOGGER.info("Registering cloud resource consumption collection for CDP resource with CRN [{}] and cloud resource [{}]",
                 request.getMonitoredResourceCrn(), request.getCloudResourceId());
         scheduleCloudResourceConsumption(request, request.getConsumptionType());
     }
 
     @Override
     @InternalOnly
-    public void unscheduleConsumptionCollection(@AccountId String accountId,
+    public void unscheduleCloudResourceConsumptionCollection(@AccountId String accountId,
             @NotNull @ValidCrn(resource = {CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.ENVIRONMENT})
                     String monitoredResourceCrn, @NotEmpty String cloudResourceId,
             @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER}) @NotEmpty String initiatorUserCrn) {
-        LOGGER.info("Unregistering consumption collection for resource with CRN [{}] and location [{}]",
+        LOGGER.info("Unregistering cloud resource consumption collection for CDP resource with CRN [{}] and cloud resource [{}]",
                 monitoredResourceCrn, cloudResourceId);
         unscheduleConsumption(monitoredResourceCrn, cloudResourceId);
     }
 
     @Override
     @InternalOnly
-    public ConsumptionExistenceResponse doesConsumptionCollectionExist(@AccountId String accountId,
+    public ConsumptionExistenceResponse doesCloudResourceConsumptionCollectionExist(@AccountId String accountId,
             @NotNull @ValidCrn(resource = {CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.ENVIRONMENT})
                     String monitoredResourceCrn, @NotEmpty String cloudResourceId,
             @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER}) @NotEmpty String initiatorUserCrn) {

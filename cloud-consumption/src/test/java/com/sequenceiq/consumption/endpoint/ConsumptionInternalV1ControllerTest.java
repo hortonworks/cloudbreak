@@ -15,6 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
+import com.sequenceiq.consumption.api.v1.consumption.model.request.CloudResourceConsumptionRequest;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionRequest;
 import com.sequenceiq.consumption.api.v1.consumption.model.response.ConsumptionExistenceResponse;
 import com.sequenceiq.consumption.domain.Consumption;
@@ -29,6 +31,8 @@ public class ConsumptionInternalV1ControllerTest {
     private static final String MONITORED_CRN = "crn:cdp:datalake:us-west-1:hortonworks:datalake:guid";
 
     private static final String LOCATION = "s3a://location";
+
+    private static final String CLOUD_RESOURCE_ID = "cloudResourceId";
 
     private static final String ACCOUNT_ID = "123";
 
@@ -116,6 +120,76 @@ public class ConsumptionInternalV1ControllerTest {
         verify(consumptionService).delete(consumption);
     }
 
+    @Test
+    void doesCloudResourceConsumptionCollectionExistTestWhenExists() {
+        when(consumptionService.isConsumptionPresentForLocationAndMonitoredCrn(MONITORED_CRN, CLOUD_RESOURCE_ID)).thenReturn(true);
+
+        ConsumptionExistenceResponse response = underTest.doesCloudResourceConsumptionCollectionExist(ACCOUNT_ID, MONITORED_CRN, CLOUD_RESOURCE_ID,
+                INITIATOR_USER_CRN);
+
+        verify(consumptionService).isConsumptionPresentForLocationAndMonitoredCrn(MONITORED_CRN, CLOUD_RESOURCE_ID);
+        assertTrue(response.isExists());
+    }
+
+    @Test
+    void doesCloudResourceConsumptionCollectionExistTestWhenDoesNotExist() {
+        when(consumptionService.isConsumptionPresentForLocationAndMonitoredCrn(MONITORED_CRN, CLOUD_RESOURCE_ID)).thenReturn(false);
+
+        ConsumptionExistenceResponse response = underTest.doesCloudResourceConsumptionCollectionExist(ACCOUNT_ID, MONITORED_CRN, CLOUD_RESOURCE_ID,
+                INITIATOR_USER_CRN);
+
+        verify(consumptionService).isConsumptionPresentForLocationAndMonitoredCrn(MONITORED_CRN, CLOUD_RESOURCE_ID);
+        assertFalse(response.isExists());
+    }
+
+    @Test
+    void scheduleCloudResourceConsumptionCollectionTestWhenSuccessAndConsumptionNotCreated() {
+        CloudResourceConsumptionRequest request = cloudResourceConsumptionRequest();
+        ConsumptionCreationDto consumptionCreationDto = consumptionCreationDto(CLOUD_RESOURCE_ID);
+
+        when(consumptionApiConverter.initCreationDtoForCloudResource(request, ConsumptionType.EBS)).thenReturn(consumptionCreationDto);
+        when(consumptionService.create(consumptionCreationDto)).thenReturn(Optional.empty());
+
+        underTest.scheduleCloudResourceConsumptionCollection(ACCOUNT_ID, request, INITIATOR_USER_CRN);
+
+        verify(jobService, never()).schedule(any(Consumption.class));
+    }
+
+    @Test
+    void scheduleCloudResourceConsumptionCollectionTestWhenSuccessAndConsumptionCreated() {
+        CloudResourceConsumptionRequest request = cloudResourceConsumptionRequest();
+        ConsumptionCreationDto consumptionCreationDto = consumptionCreationDto(CLOUD_RESOURCE_ID);
+
+        when(consumptionApiConverter.initCreationDtoForCloudResource(request, ConsumptionType.EBS)).thenReturn(consumptionCreationDto);
+        Consumption consumption = consumption();
+        when(consumptionService.create(consumptionCreationDto)).thenReturn(Optional.of(consumption));
+
+        underTest.scheduleCloudResourceConsumptionCollection(ACCOUNT_ID, request, INITIATOR_USER_CRN);
+
+        verify(jobService).schedule(consumption);
+    }
+
+    @Test
+    void unscheduleCloudResourceConsumptionCollectionWhenConsumptionAbsent() {
+        when(consumptionService.findStorageConsumptionByMonitoredResourceCrnAndLocation(MONITORED_CRN, CLOUD_RESOURCE_ID)).thenReturn(Optional.empty());
+
+        underTest.unscheduleCloudResourceConsumptionCollection(ACCOUNT_ID, MONITORED_CRN, CLOUD_RESOURCE_ID, INITIATOR_USER_CRN);
+
+        verify(jobService, never()).unschedule(any(Consumption.class));
+        verify(consumptionService, never()).delete(any(Consumption.class));
+    }
+
+    @Test
+    void unscheduleCloudResourceConsumptionCollectionWhenConsumptionPresent() {
+        Consumption consumption = consumption();
+        when(consumptionService.findStorageConsumptionByMonitoredResourceCrnAndLocation(MONITORED_CRN, CLOUD_RESOURCE_ID)).thenReturn(Optional.of(consumption));
+
+        underTest.unscheduleCloudResourceConsumptionCollection(ACCOUNT_ID, MONITORED_CRN, CLOUD_RESOURCE_ID, INITIATOR_USER_CRN);
+
+        verify(jobService).unschedule(consumption);
+        verify(consumptionService).delete(consumption);
+    }
+
     private ConsumptionCreationDto consumptionCreationDto(String location) {
         return ConsumptionCreationDto.builder()
                 .withStorageLocation(location)
@@ -127,6 +201,12 @@ public class ConsumptionInternalV1ControllerTest {
         Consumption consumption = new Consumption();
         consumption.setId(CONSUMPTION_ID);
         return consumption;
+    }
+
+    private CloudResourceConsumptionRequest cloudResourceConsumptionRequest() {
+        CloudResourceConsumptionRequest request = new CloudResourceConsumptionRequest();
+        request.setConsumptionType(ConsumptionType.EBS);
+        return request;
     }
 
 }

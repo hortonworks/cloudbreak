@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.provision.action;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackProvisionConstants.START_DATE;
 
@@ -61,6 +62,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.StackWithFingerprintsEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataSuccess;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -352,12 +355,29 @@ public class StackCreationActions {
         };
     }
 
-    @Bean(name = "STACK_CREATION_FINISHED_STATE")
-    public Action<?, ?> stackCreationFinishedAction() {
+    @Bean(name = "ATTACHED_VOLUME_CONSUMPTION_COLLECTION_SCHEDULING_STATE")
+    public Action<?, ?> attachedVolumeConsumptionCollectionSchedulingAction() {
         return new AbstractStackCreationAction<>(StackWithFingerprintsEvent.class) {
-
             @Override
             protected void doExecute(StackCreationContext context, StackWithFingerprintsEvent payload, Map<Object, Object> variables) {
+                eventService.fireCloudbreakEvent(payload.getResourceId(), CREATE_IN_PROGRESS.name(),
+                        ResourceEvent.STACK_ATTACHED_VOLUME_CONSUMPTION_COLLECTION_SCHEDULING_STARTED);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackCreationContext context) {
+                return new AttachedVolumeConsumptionCollectionSchedulingRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "STACK_CREATION_FINISHED_STATE")
+    public Action<?, ?> stackCreationFinishedAction() {
+        return new AbstractStackCreationAction<>(AttachedVolumeConsumptionCollectionSchedulingSuccess.class) {
+
+            @Override
+            protected void doExecute(StackCreationContext context, AttachedVolumeConsumptionCollectionSchedulingSuccess payload, Map<Object, Object> variables) {
                 stackCreationService.stackCreationFinished(context.getStackId());
                 StackView stackView = context.getStack();
                 getMetricService().incrementMetricCounter(MetricType.STACK_CREATION_SUCCESSFUL, stackView);
