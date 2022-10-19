@@ -4,7 +4,6 @@ package com.sequenceiq.periscope.monitor.handler;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy.STOPSTART;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -25,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.distrox.api.v1.distrox.model.MultipleInstanceDeleteRequest;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.SecurityConfig;
@@ -65,50 +65,42 @@ public class CloudbreakCommunicator {
         return cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getStatusByCrn(stackCrn);
     }
 
-    public void decommissionInstancesForCluster(Cluster cluster, List<String> decommissionNodeIds) {
+    public FlowIdentifier decommissionInstancesForCluster(Cluster cluster, List<String> decommissionNodeIds) {
         ScalingStrategy scalingStrategy = STOPSTART;
-        requestLogging.logResponseTime(() -> {
-            cloudbreakInternalCrnClient.withInternalCrn()
-                    .autoscaleEndpoint().decommissionInternalInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false);
-            return Optional.empty();
-        }, String.format("DecommissionInstancesForCluster query for cluster crn %s, Scaling strategy %s, NodeIds %s",
+        return requestLogging.logResponseTime(() -> cloudbreakInternalCrnClient.withInternalCrn()
+                .autoscaleEndpoint().decommissionInternalInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false),
+                String.format("DecommissionInstancesForCluster query for cluster crn %s, Scaling strategy %s, NodeIds %s",
                 cluster.getStackCrn(), scalingStrategy, decommissionNodeIds));
     }
 
-    public void stopInstancesForCluster(Cluster cluster, List<String> decommissionNodeIds) {
+    public FlowIdentifier stopInstancesForCluster(Cluster cluster, List<String> decommissionNodeIds) {
         ScalingStrategy scalingStrategy = STOPSTART;
-        requestLogging.logResponseTime(() -> {
-            cloudbreakInternalCrnClient.withInternalCrn()
-                    .autoscaleEndpoint().stopInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false, scalingStrategy);
-            return Optional.empty();
-        }, String.format("StopInstancesForCluster query for cluster crn: %s, Scaling strategy: %s, NodeIds: %s", cluster.getStackCrn(),
-                scalingStrategy, decommissionNodeIds));
+        return requestLogging.logResponseTime(() -> cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().stopInstancesForClusterCrn(
+                cluster.getStackCrn(), decommissionNodeIds, false, scalingStrategy),
+                String.format("StopInstancesForCluster query for cluster crn: %s, Scaling strategy: %s, NodeIds: %s", cluster.getStackCrn(), scalingStrategy,
+                        decommissionNodeIds));
     }
 
-    public void putStackForCluster(Cluster cluster, UpdateStackV4Request updateStackJson) {
-        requestLogging.logResponseTime(() -> {
-            cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().putStack(cluster.getStackCrn(), cluster.getClusterPertain().getUserId(),
-                    updateStackJson);
-            return Optional.empty();
-        }, String.format("PutStack query for cluster crn: %s, Scaling adjustment: %s, Host group: %s", cluster.getStackCrn(),
+    public FlowIdentifier putStackForCluster(Cluster cluster, UpdateStackV4Request updateStackJson) {
+        return requestLogging.logResponseTime(() -> cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().putStack(cluster.getStackCrn(),
+                cluster.getClusterPertain().getUserId(), updateStackJson),
+                String.format("PutStack query for cluster crn: %s, Scaling adjustment: %s, Host group: %s", cluster.getStackCrn(),
                 updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment(), updateStackJson.getInstanceGroupAdjustment().getInstanceGroup()));
     }
 
-    public void putStackStartInstancesForCluster(Cluster cluster, UpdateStackV4Request updateStackJson) {
-        requestLogging.logResponseTime(() -> {
-            cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().putStackStartInstancesByCrn(cluster.getStackCrn(), updateStackJson);
-            return Optional.empty();
-        }, String.format("PutStackStartInstances query for cluster crn: %s, Scaling adjustment: %s, Host group: %s", cluster.getStackCrn(),
+    public FlowIdentifier putStackStartInstancesForCluster(Cluster cluster, UpdateStackV4Request updateStackJson) {
+        return requestLogging.logResponseTime(() ->
+                cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().putStackStartInstancesByCrn(cluster.getStackCrn(), updateStackJson),
+                String.format("PutStackStartInstances query for cluster crn: %s, Scaling adjustment: %s, Host group: %s", cluster.getStackCrn(),
                 updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment(), updateStackJson.getInstanceGroupAdjustment().getInstanceGroup()));
     }
 
-    public void deleteInstancesForCluster(Cluster cluster, List<String> instanceIds) {
-        requestLogging.logResponseTime(() -> {
+    public FlowIdentifier deleteInstancesForCluster(Cluster cluster, List<String> instanceIds) {
+        return requestLogging.logResponseTime(() -> {
             MultipleInstanceDeleteRequest multiDeleteRequest = new MultipleInstanceDeleteRequest();
             multiDeleteRequest.setInstances(instanceIds);
-            cloudbreakInternalCrnClient.withInternalCrn().distroXV1Endpoint().deleteInstancesByCrn(cluster.getStackCrn(), instanceIds, multiDeleteRequest,
+            return cloudbreakInternalCrnClient.withInternalCrn().distroXV1Endpoint().deleteInstancesByCrn(cluster.getStackCrn(), instanceIds, multiDeleteRequest,
                     false);
-            return Optional.empty();
         }, String.format("DeleteInstancesForCluster query for cluster crn: %s, InstanceIds: %s", cluster.getStackCrn(), instanceIds));
     }
 
