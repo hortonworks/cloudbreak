@@ -139,11 +139,8 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         MonitoringContext.Builder builder = MonitoringContext.builder();
         Telemetry telemetry = telemetryContext.getTelemetry();
         NodeStatusContext nodeStatusContext = telemetryContext.getNodeStatusContext();
-        boolean cdpSaasEnabled = entitlementService.isCdpSaasEnabled(accountId);
-        boolean computeMonitoring = entitlementService.isComputeMonitoringEnabled(accountId);
-        boolean monitoringEnabled = monitoringConfigService.isMonitoringEnabled(cdpSaasEnabled, computeMonitoring);
         builder.withClusterType(MonitoringClusterType.CLOUDERA_MANAGER);
-        if (monitoringEnabled && telemetry.isComputeMonitoringEnabled()) {
+        if (entitlementService.isComputeMonitoringEnabled(accountId) && telemetry.isComputeMonitoringEnabled()) {
             builder.enabled();
             MonitoringCredential credential = getOrRefreshMonitoringCredential(stack, accountId, telemetry, monitoringCredential, cdpAccessKeyType);
             builder.withCredential(credential);
@@ -157,7 +154,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
             }
             builder.withCmAuth(cmAuthConfig);
         }
-        if (cdpSaasEnabled) {
+        if (entitlementService.isCdpSaasEnabled(accountId)) {
             builder.withServiceType(MonitoringServiceType.SAAS);
         }
         builder.withSharedPassword(nodeStatusContext.getPassword());

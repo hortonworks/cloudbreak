@@ -3,8 +3,6 @@ package com.sequenceiq.environment.environment.v1.converter;
 import java.util.HashMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -35,15 +33,9 @@ import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParame
 @Component
 public class TelemetryApiConverter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TelemetryApiConverter.class);
-
     private static final String ACCOUNT_ID_TEMPLATE = "$accountid";
 
     private final boolean clusterLogsCollection;
-
-    private final boolean monitoringEnabled;
-
-    private final boolean paasMonitoringEnabled;
 
     private final boolean useSharedAltusCredential;
 
@@ -56,8 +48,6 @@ public class TelemetryApiConverter {
     public TelemetryApiConverter(TelemetryConfiguration configuration, EntitlementService entitlementService) {
         this.clusterLogsCollection = configuration.getClusterLogsCollectionConfiguration().isEnabled();
         this.entitlementService = entitlementService;
-        this.monitoringEnabled = configuration.getMonitoringConfiguration().isEnabled();
-        this.paasMonitoringEnabled = configuration.getMonitoringConfiguration().isPaasSupport();
         this.monitoringEndpointConfig = configuration.getMonitoringConfiguration().getRemoteWriteUrl();
         this.monitoringPaasEndpointConfig = configuration.getMonitoringConfiguration().getPaasRemoteWriteUrl();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
@@ -76,7 +66,7 @@ public class TelemetryApiConverter {
         return telemetry;
     }
 
-    public TelemetryResponse convert(EnvironmentTelemetry telemetry) {
+    public TelemetryResponse convert(EnvironmentTelemetry telemetry, String accountId) {
         TelemetryResponse response = null;
         if (telemetry != null) {
             response = new TelemetryResponse();
@@ -84,20 +74,20 @@ public class TelemetryApiConverter {
             response.setMonitoring(createMonitoringResponseFromSource(telemetry.getMonitoring()));
             response.setWorkloadAnalytics(createWorkloadAnalyticsResponseFromSource(telemetry.getWorkloadAnalytics()));
             response.setFluentAttributes(telemetry.getFluentAttributes());
-            response.setFeatures(createFeaturesResponseFromSource(telemetry.getFeatures()));
+            response.setFeatures(createFeaturesResponseFromSource(telemetry.getFeatures(), accountId));
             response.setFluentAttributes(telemetry.getFluentAttributes());
         }
         return response;
     }
 
-    public TelemetryRequest convertToRequest(EnvironmentTelemetry telemetry) {
+    public TelemetryRequest convertToRequest(EnvironmentTelemetry telemetry, String accountId) {
         TelemetryRequest telemetryRequest = null;
         if (telemetry != null) {
             telemetryRequest = new TelemetryRequest();
             telemetryRequest.setFluentAttributes(telemetry.getFluentAttributes());
             telemetryRequest.setLogging(createLoggingRequestFromEnvSource(telemetry.getLogging()));
             telemetryRequest.setMonitoring(createMonitoringRequestFromEnvSource(telemetry.getMonitoring()));
-            telemetryRequest.setFeatures(createFeaturesRequestEnvSource(telemetry.getFeatures()));
+            telemetryRequest.setFeatures(createFeaturesRequestEnvSource(telemetry.getFeatures(), accountId));
         }
         return telemetryRequest;
     }
@@ -124,19 +114,19 @@ public class TelemetryApiConverter {
         return monitoringRequest;
     }
 
-    private FeaturesRequest createFeaturesRequestEnvSource(EnvironmentFeatures features) {
+    private FeaturesRequest createFeaturesRequestEnvSource(EnvironmentFeatures features, String accountId) {
         FeaturesRequest featuresRequest = null;
         if (features != null) {
             featuresRequest = new FeaturesRequest();
             featuresRequest.setClusterLogsCollection(features.getClusterLogsCollection());
             featuresRequest.setMonitoring(features.getMonitoring());
             setCloudStorageLoggingOnFeaturesModel(features, featuresRequest);
-            setMonitoringOnFeaturesModel(features, featuresRequest);
+            setMonitoringOnFeaturesModel(features, featuresRequest, accountId);
         }
         return featuresRequest;
     }
 
-    private FeaturesResponse createFeaturesResponseFromSource(EnvironmentFeatures features) {
+    private FeaturesResponse createFeaturesResponseFromSource(EnvironmentFeatures features, String accountId) {
         FeaturesResponse featuresResponse = null;
         if (features != null) {
             featuresResponse = new FeaturesResponse();
@@ -144,7 +134,7 @@ public class TelemetryApiConverter {
             featuresResponse.setWorkloadAnalytics(features.getWorkloadAnalytics());
             featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
             setCloudStorageLoggingOnFeaturesModel(features, featuresResponse);
-            setMonitoringOnFeaturesModel(features, featuresResponse);
+            setMonitoringOnFeaturesModel(features, featuresResponse, accountId);
         }
         return featuresResponse;
     }
@@ -164,9 +154,8 @@ public class TelemetryApiConverter {
 
     private EnvironmentMonitoring createMonitoringFromRequest(MonitoringRequest monitoringRequest, String accountId) {
         EnvironmentMonitoring monitoring = new EnvironmentMonitoring();
-        boolean saas = isSaas(accountId);
-        if (isMonitoringEnabled(accountId, saas)) {
-            String unformattedMonitoringEndpoint = getUnformattedMonitoringEndpoint(saas);
+        if (entitlementService.isComputeMonitoringEnabled(accountId)) {
+            String unformattedMonitoringEndpoint = getUnformattedMonitoringEndpoint(accountId);
             if (monitoringRequest != null) {
                 String preEndpoint = StringUtils.isNotBlank(monitoringRequest.getRemoteWriteUrl())
                         ? monitoringRequest.getRemoteWriteUrl() : unformattedMonitoringEndpoint;
@@ -180,14 +169,13 @@ public class TelemetryApiConverter {
 
     private EnvironmentFeatures createEnvironmentFeaturesFromRequest(FeaturesRequest featuresRequest, Features accountFeatures, String accountId) {
         EnvironmentFeatures features = null;
-        boolean cdpSaas = entitlementService.isCdpSaasEnabled(accountId);
         if (featuresRequest != null) {
             features = new EnvironmentFeatures();
             if (useSharedAltusCredential) {
                 features.addUseSharedAltusredential(true);
             }
             setClusterLogsCollectionFromAccountAndRequest(featuresRequest, accountFeatures, features);
-            setMonitoringFromAccountAndRequest(featuresRequest, accountFeatures, features, cdpSaas);
+            setMonitoringFromAccountAndRequest(featuresRequest, accountFeatures, features, accountId);
             setCloudStorageLoggingFromAccountAndRequest(featuresRequest, accountFeatures, features);
             if (accountFeatures.getWorkloadAnalytics() != null) {
                 features.setWorkloadAnalytics(accountFeatures.getWorkloadAnalytics());
@@ -223,8 +211,8 @@ public class TelemetryApiConverter {
         }
     }
 
-    private void setMonitoringFromAccountAndRequest(FeaturesRequest featuresRequest, Features accountFeatures, EnvironmentFeatures features, boolean cdpSaas) {
-        if (monitoringEnabled) {
+    private void setMonitoringFromAccountAndRequest(FeaturesRequest featuresRequest, Features accountFeatures, EnvironmentFeatures features, String accountId) {
+        if (entitlementService.isComputeMonitoringEnabled(accountId)) {
             if (accountFeatures.getMonitoring() != null) {
                 features.setMonitoring(accountFeatures.getMonitoring());
             }
@@ -236,8 +224,8 @@ public class TelemetryApiConverter {
         }
     }
 
-    private void setMonitoringOnFeaturesModel(EnvironmentFeatures features, FeaturesBase featureModel) {
-        if (monitoringEnabled) {
+    private void setMonitoringOnFeaturesModel(EnvironmentFeatures features, FeaturesBase featureModel, String accountId) {
+        if (entitlementService.isComputeMonitoringEnabled(accountId)) {
             if (features.getMonitoring() != null) {
                 featureModel.setMonitoring(features.getMonitoring());
             } else {
@@ -342,18 +330,8 @@ public class TelemetryApiConverter {
         return endpoint;
     }
 
-    private boolean isMonitoringEnabled(String accountId, boolean saas) {
-        boolean computeMonitoring = entitlementService.isComputeMonitoringEnabled(accountId);
-        LOGGER.debug("Checking monitoring is set with the following inputs: computeMonitoringFromEntitlement (overrides global setting): {}, "
-                + "globalMonitoringEnabled: {}, saas: {}, paas: {}", computeMonitoring, monitoringEnabled, saas, paasMonitoringEnabled);
-        return computeMonitoring || (monitoringEnabled && (saas || paasMonitoringEnabled));
-    }
-
-    private boolean isSaas(String accountId) {
-        return entitlementService.isCdpSaasEnabled(accountId);
-    }
-
-    private String getUnformattedMonitoringEndpoint(boolean saas) {
-        return saas || StringUtils.isBlank(monitoringPaasEndpointConfig) ? monitoringEndpointConfig : monitoringPaasEndpointConfig;
+    private String getUnformattedMonitoringEndpoint(String accountId) {
+        return entitlementService.isCdpSaasEnabled(accountId) || StringUtils.isBlank(monitoringPaasEndpointConfig)
+                ? monitoringEndpointConfig : monitoringPaasEndpointConfig;
     }
 }

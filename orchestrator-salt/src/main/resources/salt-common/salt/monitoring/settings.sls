@@ -14,7 +14,6 @@
     {% set is_systemd = True %}
 {% endif %}
 
-{% set use_dev_stack = salt['pillar.get']('monitoring:useDevStack') %}
 {% set type = salt['pillar.get']('monitoring:type') %}
 {% set cm_username = salt['pillar.get']('monitoring:cmUsername') %}
 {% set cm_password = salt['pillar.get']('monitoring:cmPassword') %}
@@ -55,15 +54,7 @@
 {% set monitoring_access_key_id = salt['pillar.get']('monitoring:monitoringAccessKeyId') %}
 {% set monitoring_access_key_secret = salt['pillar.get']('monitoring:monitoringPrivateKey') %}
 {% set monitoring_access_key_type = salt['pillar.get']('monitoring:monitoringAccessKeyType', 'Ed25519') %}
-{%- if use_dev_stack %}
-  {%- if salt['pillar.get']('cloudera-manager:address') %}
-    {% set remote_write_url = "http://" + salt['pillar.get']('cloudera-manager:address') + ":9090/api/v1/write" %}
-  {%- else %}
-    {% set remote_write_url = "http://" + salt['grains.get']('master')[0] + ":9090/api/v1/write" %}
-  {%- endif %}
-{%- else %}
-  {% set remote_write_url = salt['pillar.get']('monitoring:remoteWriteUrl') %}
-{%- endif %}
+{% set remote_write_url = salt['pillar.get']('monitoring:remoteWriteUrl') %}
 
 {% if salt['pillar.get']('telemetry:clusterType') == "datalake" %}
   {% set cm_cluster_type = "BASE_CLUSTER" %}
@@ -104,7 +95,6 @@
     "blackboxExporterCheckOnAllNodes": blackbox_exporter_check_on_all_nodes,
     "blackboxExporterExists" : blackbox_exporter_exists,
     "localPassword": local_password,
-    "useDevStack": use_dev_stack,
     "requestSignerEnabled" : request_signer_enabled,
     "requestSignerPort" : request_signer_port,
     "requestSignerUseToken" : request_signer_use_token,

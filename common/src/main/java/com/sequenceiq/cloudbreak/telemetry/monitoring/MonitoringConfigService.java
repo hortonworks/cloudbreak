@@ -38,10 +38,7 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
         }
         fillCMAuthConfigs(monitoringContext.getClusterType(), monitoringContext.getCmAuth(), builder);
         builder.withCmAutoTls(monitoringContext.isCmAutoTls());
-        builder.withUseDevStack(monitoringConfiguration.isDevStack());
-        if (!monitoringConfiguration.isDevStack()) {
-            builder.withRemoteWriteUrl(monitoringContext.getRemoteWriteUrl());
-        }
+        builder.withRemoteWriteUrl(monitoringContext.getRemoteWriteUrl());
         builder.withScrapeIntervalSeconds(monitoringConfiguration.getScrapeIntervalSeconds());
         builder.withAgentPort(monitoringConfiguration.getAgent().getPort());
         builder.withAgentUser(monitoringConfiguration.getAgent().getUser());
@@ -126,10 +123,6 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
             LOGGER.debug("Request signer is enabled, filling it for monitoring: {}", requestSignerConfigView);
             builder.withRequestSigner(requestSignerConfigView);
         }
-    }
-
-    public boolean isMonitoringEnabled(boolean cdpSaasEnabled, boolean computeMonitoringEnabled) {
-        return computeMonitoringEnabled || (monitoringConfiguration.isEnabled() && (cdpSaasEnabled || monitoringConfiguration.isPaasSupport()));
     }
 
     private boolean areAuthConfigsValid(MonitoringAuthConfig authConfig) {

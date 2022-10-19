@@ -25,14 +25,11 @@ telemetry:
     gpg-key: https://archive.cloudera.com/cdp-infra-tools/latest/redhat7/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     gpg-check: 1
   monitoring:
-    enabled: false
     remote-write-url: ""
     remote-write-internal-url: ""
-    paas-support: false
     paas-remote-write-url: ""
     paas-remote-write-internal-url: ""
     scrape-interval-seconds: 60
-    dev-stack: false
     status-processor:
       enabled: false
       workers: 1

@@ -108,7 +108,7 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
     private void validateCloudStorage(EnvironmentDto environmentDto) {
         EnvironmentCloudStorageValidationRequest cloudStorageValidationRequest = new EnvironmentCloudStorageValidationRequest();
         cloudStorageValidationRequest.setCredentialCrn(environmentDto.getCredential().getResourceCrn());
-        TelemetryRequest telemetryRequest = telemetryApiConverter.convertToRequest(environmentDto.getTelemetry());
+        TelemetryRequest telemetryRequest = telemetryApiConverter.convertToRequest(environmentDto.getTelemetry(), environmentDto.getAccountId());
         BackupRequest backupRequest = backupConverter.convertToRequest(environmentDto.getBackup());
         cloudStorageValidationRequest.setTelemetry(telemetryRequest);
         cloudStorageValidationRequest.setBackup(backupRequest);

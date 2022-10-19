@@ -40,6 +40,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -165,6 +167,9 @@ public class StackV4RequestToStackConverter {
     @Inject
     private AutoTlsFlagPreparatory autoTlsFlagPreparatory;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public Stack convert(StackV4Request source) {
         Workspace workspace = workspaceService.getForCurrentUser();
 
@@ -259,7 +264,7 @@ public class StackV4RequestToStackConverter {
     }
 
     private com.sequenceiq.cloudbreak.domain.stack.Component getTelemetryComponent(Stack stack, StackV4Request source) {
-        Telemetry telemetry = telemetryConverter.convert(source.getTelemetry(), source.getType());
+        Telemetry telemetry = telemetryConverter.convert(source.getTelemetry(), source.getType(), ThreadBasedUserCrnProvider.getAccountId());
         try {
             return new com.sequenceiq.cloudbreak.domain.stack.Component(ComponentType.TELEMETRY, ComponentType.TELEMETRY.name(), Json.silent(telemetry), stack);
         } catch (Exception e) {
@@ -400,8 +405,7 @@ public class StackV4RequestToStackConverter {
             cluster.setPassword(source.getCluster().getPassword());
             cluster.setCloudbreakUser(ambariUserName);
             cluster.setCloudbreakPassword(PasswordUtil.generatePassword());
-            if (source.getTelemetry() != null && source.getTelemetry().getMonitoring() != null
-                    && StringUtils.isNotEmpty(source.getTelemetry().getMonitoring().getRemoteWriteUrl())
+            if (entitlementService.isComputeMonitoringEnabled(ThreadBasedUserCrnProvider.getAccountId())
                     && monitoringConfiguration.getClouderaManagerExporter() != null) {
                 cluster.setCloudbreakClusterManagerMonitoringUser(monitoringConfiguration.getClouderaManagerExporter().getUser());
                 cluster.setCloudbreakClusterManagerMonitoringPassword(PasswordUtil.generatePassword());
@@ -448,7 +452,7 @@ public class StackV4RequestToStackConverter {
     }
 
     private void setNetworkByProvider(StackV4Request source, InstanceGroupV4Request instanceGroup,
-        InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
+            InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
         switch (source.getCloudPlatform()) {
             case AWS:
                 setUpAws(instanceGroup, instanceGroupNetworkV4Request, subnetId);

@@ -78,8 +78,6 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private final Integer scrapeIntervalSeconds;
 
-    private final boolean useDevStack;
-
     private final String username;
 
     private final char[] password;
@@ -117,7 +115,6 @@ public class MonitoringConfigView implements TelemetryConfigView {
         this.clusterDetails = builder.clusterDetails;
         this.remoteWriteUrl = builder.remoteWriteUrl;
         this.scrapeIntervalSeconds = builder.scrapeIntervalSeconds;
-        this.useDevStack = builder.useDevStack;
         this.username = builder.username;
         this.password = builder.password;
         this.token = builder.token;
@@ -201,10 +198,6 @@ public class MonitoringConfigView implements TelemetryConfigView {
         return agentMaxDiskUsage;
     }
 
-    public boolean isUseDevStack() {
-        return useDevStack;
-    }
-
     public String getUsername() {
         return username;
     }
@@ -255,7 +248,6 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("enabled", this.enabled);
         map.put("remoteWriteUrl", this.remoteWriteUrl);
         map.put("scrapeIntervalSeconds", this.scrapeIntervalSeconds);
-        map.put("useDevStack", this.useDevStack);
         map.put("type", defaultIfNull(this.type, EMPTY_CONFIG_DEFAULT));
         map.put("cmUsername", defaultIfNull(this.cmUsername, EMPTY_CONFIG_DEFAULT));
         map.put("cmPassword", defaultIfNull(this.cmPassword, EMPTY_CONFIG_DEFAULT));
@@ -300,8 +292,6 @@ public class MonitoringConfigView implements TelemetryConfigView {
         private String remoteWriteUrl;
 
         private Integer scrapeIntervalSeconds;
-
-        private boolean useDevStack;
 
         private String type;
 
@@ -379,11 +369,6 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         public Builder withScrapeIntervalSeconds(Integer scrapeIntervalSeconds) {
             this.scrapeIntervalSeconds = scrapeIntervalSeconds;
-            return this;
-        }
-
-        public Builder withUseDevStack(boolean useDevStack) {
-            this.useDevStack = useDevStack;
             return this;
         }
 

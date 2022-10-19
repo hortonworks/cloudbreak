@@ -55,13 +55,9 @@ public class MetricsClient {
             LOGGER.debug("Processing stack status (compute monitoring) is disabled.");
             return;
         }
-        if (!configuration.isComputeMonitoringSupported()) {
-            LOGGER.debug("Compute metrics processing is skipped (disabled).");
-            return;
-        }
         Crn crn = Crn.safeFromString(resourceCrn);
         boolean saas = entitlementService.isCdpSaasEnabled(crn.getAccountId());
-        if (configuration.isPaasSupported() || saas) {
+        if (entitlementService.isComputeMonitoringEnabled(crn.getAccountId()) || saas) {
             processRequest(resourceCrn, platform, status, statusOrdinal, crn, computeMonitoringEnabled, saas);
         } else {
             LOGGER.debug("Compute metrics processing is skipped (no paas or entitlement support )");

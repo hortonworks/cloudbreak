@@ -44,7 +44,6 @@ public class TelemetryConverterTest {
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null, false);
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null, false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
-        monitoringConfig.setEnabled(true);
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
         underTest = new TelemetryConverter(telemetryConfiguration, true);
