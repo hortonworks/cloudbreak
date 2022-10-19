@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
 public class ClusterStopService {
+
     @Inject
     private ClusterService clusterService;
 
@@ -47,8 +48,8 @@ public class ClusterStopService {
         flowMessageService.fireEventAndLog(stackId, Status.STOPPED.name(), CLUSTER_STOPPED);
     }
 
-    public void handleClusterStopFailure(Long stackId, String errorReason) {
-        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.STOP_FAILED, errorReason);
+    public void handleClusterStopFailureAndContinue(Long stackId, String errorReason) {
+        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_STOP_FAILED, errorReason);
         flowMessageService.fireEventAndLog(stackId, Status.STOP_FAILED.name(), CLUSTER_STOP_FAILED, errorReason);
     }
 }

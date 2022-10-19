@@ -71,7 +71,7 @@ public class ClusterStopActions {
         return new AbstractStackFailureAction<ClusterStopState, ClusterStopEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                clusterStopService.handleClusterStopFailure(context.getStackId(), payload.getException().getMessage());
+                clusterStopService.handleClusterStopFailureAndContinue(context.getStackId(), payload.getException().getMessage());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_STOP_FAILED, context.getStack(), payload.getException());
                 sendEvent(context);
             }
