@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.conclusion;
 
-public enum ConclusionCheckerType {
+enum ConclusionCheckerType {
 
     DEFAULT;
 

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.conclusion.step.ConclusionStep;
 
 @Component
-public class ConclusionCheckerFactory {
+class ConclusionCheckerFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConclusionCheckerFactory.class);
 
