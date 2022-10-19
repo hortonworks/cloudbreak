@@ -447,6 +447,10 @@ message DatalakeBackupRestoreStatus {
     SUCCESSFUL = 1;
     // Failed result for a backup/restore operation.
     FAILED = 2;
+    // Failed validations for a backup/restore operation.
+    VALIDATION_FAILED = 3;
+    // Successful only validations for backup/restore operation.
+    VALIDATION_SUCCESSFUL = 4;
   }
 }
 
@@ -710,6 +714,7 @@ message CDPCMLWorkspaceStatus {
     VALIDATION_SUCCEEDED = 24;
     // The status when the pre-flight validation of a workspace results in validation failure.
     VALIDATION_FAILED = 25;
+
 
     // The status when the pre-install validation of a workspace request is started.
     PRE_INSTALL_VALIDATION_STARTED = 26;

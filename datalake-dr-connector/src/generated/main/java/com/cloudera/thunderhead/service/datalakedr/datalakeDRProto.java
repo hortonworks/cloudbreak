@@ -202,6 +202,26 @@ public final class datalakeDRProto {
      */
     com.google.protobuf.ByteString
         getFailureReasonBytes();
+
+    /**
+     * <pre>
+     * The duration of each step of the operation.
+     * </pre>
+     *
+     * <code>string durationInMinutes = 3;</code>
+     * @return The durationInMinutes.
+     */
+    java.lang.String getDurationInMinutes();
+    /**
+     * <pre>
+     * The duration of each step of the operation.
+     * </pre>
+     *
+     * <code>string durationInMinutes = 3;</code>
+     * @return The bytes for durationInMinutes.
+     */
+    com.google.protobuf.ByteString
+        getDurationInMinutesBytes();
   }
   /**
    * <pre>
@@ -222,6 +242,7 @@ public final class datalakeDRProto {
     private BackupRestoreOperationStatus() {
       status_ = "";
       failureReason_ = "";
+      durationInMinutes_ = "";
     }
 
     @java.lang.Override
@@ -264,6 +285,12 @@ public final class datalakeDRProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               failureReason_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              durationInMinutes_ = s;
               break;
             }
             default: {
@@ -390,6 +417,52 @@ public final class datalakeDRProto {
       }
     }
 
+    public static final int DURATIONINMINUTES_FIELD_NUMBER = 3;
+    private volatile java.lang.Object durationInMinutes_;
+    /**
+     * <pre>
+     * The duration of each step of the operation.
+     * </pre>
+     *
+     * <code>string durationInMinutes = 3;</code>
+     * @return The durationInMinutes.
+     */
+    @java.lang.Override
+    public java.lang.String getDurationInMinutes() {
+      java.lang.Object ref = durationInMinutes_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        durationInMinutes_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The duration of each step of the operation.
+     * </pre>
+     *
+     * <code>string durationInMinutes = 3;</code>
+     * @return The bytes for durationInMinutes.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDurationInMinutesBytes() {
+      java.lang.Object ref = durationInMinutes_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        durationInMinutes_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -410,6 +483,9 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, failureReason_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(durationInMinutes_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, durationInMinutes_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -424,6 +500,9 @@ public final class datalakeDRProto {
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, failureReason_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(durationInMinutes_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, durationInMinutes_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -444,6 +523,8 @@ public final class datalakeDRProto {
           .equals(other.getStatus())) return false;
       if (!getFailureReason()
           .equals(other.getFailureReason())) return false;
+      if (!getDurationInMinutes()
+          .equals(other.getDurationInMinutes())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -459,6 +540,8 @@ public final class datalakeDRProto {
       hash = (53 * hash) + getStatus().hashCode();
       hash = (37 * hash) + FAILUREREASON_FIELD_NUMBER;
       hash = (53 * hash) + getFailureReason().hashCode();
+      hash = (37 * hash) + DURATIONINMINUTES_FIELD_NUMBER;
+      hash = (53 * hash) + getDurationInMinutes().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -600,6 +683,8 @@ public final class datalakeDRProto {
 
         failureReason_ = "";
 
+        durationInMinutes_ = "";
+
         return this;
       }
 
@@ -628,6 +713,7 @@ public final class datalakeDRProto {
         com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus result = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus(this);
         result.status_ = status_;
         result.failureReason_ = failureReason_;
+        result.durationInMinutes_ = durationInMinutes_;
         onBuilt();
         return result;
       }
@@ -682,6 +768,10 @@ public final class datalakeDRProto {
         }
         if (!other.getFailureReason().isEmpty()) {
           failureReason_ = other.failureReason_;
+          onChanged();
+        }
+        if (!other.getDurationInMinutes().isEmpty()) {
+          durationInMinutes_ = other.durationInMinutes_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -904,6 +994,102 @@ public final class datalakeDRProto {
         onChanged();
         return this;
       }
+
+      private java.lang.Object durationInMinutes_ = "";
+      /**
+       * <pre>
+       * The duration of each step of the operation.
+       * </pre>
+       *
+       * <code>string durationInMinutes = 3;</code>
+       * @return The durationInMinutes.
+       */
+      public java.lang.String getDurationInMinutes() {
+        java.lang.Object ref = durationInMinutes_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          durationInMinutes_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The duration of each step of the operation.
+       * </pre>
+       *
+       * <code>string durationInMinutes = 3;</code>
+       * @return The bytes for durationInMinutes.
+       */
+      public com.google.protobuf.ByteString
+          getDurationInMinutesBytes() {
+        java.lang.Object ref = durationInMinutes_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          durationInMinutes_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The duration of each step of the operation.
+       * </pre>
+       *
+       * <code>string durationInMinutes = 3;</code>
+       * @param value The durationInMinutes to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDurationInMinutes(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        durationInMinutes_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The duration of each step of the operation.
+       * </pre>
+       *
+       * <code>string durationInMinutes = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDurationInMinutes() {
+        
+        durationInMinutes_ = getDefaultInstance().getDurationInMinutes();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The duration of each step of the operation.
+       * </pre>
+       *
+       * <code>string durationInMinutes = 3;</code>
+       * @param value The bytes for durationInMinutes to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDurationInMinutesBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        durationInMinutes_ = value;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -1029,6 +1215,21 @@ public final class datalakeDRProto {
      * <code>.datalakedr.BackupRestoreOperationStatus precheckStoragePermission = 3;</code>
      */
     com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getPrecheckStoragePermissionOrBuilder();
+
+    /**
+     * <code>.datalakedr.BackupRestoreOperationStatus precheckRangerAuditValidation = 4;</code>
+     * @return Whether the precheckRangerAuditValidation field is set.
+     */
+    boolean hasPrecheckRangerAuditValidation();
+    /**
+     * <code>.datalakedr.BackupRestoreOperationStatus precheckRangerAuditValidation = 4;</code>
+     * @return The precheckRangerAuditValidation.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getPrecheckRangerAuditValidation();
+    /**
+     * <code>.datalakedr.BackupRestoreOperationStatus precheckRangerAuditValidation = 4;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getPrecheckRangerAuditValidationOrBuilder();
   }
   /**
    * <pre>
@@ -1114,6 +1315,19 @@ public final class datalakeDRProto {
               if (subBuilder != null) {
                 subBuilder.mergeFrom(precheckStoragePermission_);
                 precheckStoragePermission_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 34: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
+              if (precheckRangerAuditValidation_ != null) {
+                subBuilder = precheckRangerAuditValidation_.toBuilder();
+              }
+              precheckRangerAuditValidation_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(precheckRangerAuditValidation_);
+                precheckRangerAuditValidation_ = subBuilder.buildPartial();
               }
 
               break;
@@ -1252,6 +1466,32 @@ public final class datalakeDRProto {
       return getPrecheckStoragePermission();
     }
 
+    public static final int PRECHECKRANGERAUDITVALIDATION_FIELD_NUMBER = 4;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus precheckRangerAuditValidation_;
+    /**
+     * <code>.datalakedr.BackupRestoreOperationStatus precheckRangerAuditValidation = 4;</code>
+     * @return Whether the precheckRangerAuditValidation field is set.
+     */
+    @java.lang.Override
+    public boolean hasPrecheckRangerAuditValidation() {
+      return precheckRangerAuditValidation_ != null;
+    }
+    /**
+     * <code>.datalakedr.BackupRestoreOperationStatus precheckRangerAuditValidation = 4;</code>
+     * @return The precheckRangerAuditValidation.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getPrecheckRangerAuditValidation() {
+      return precheckRangerAuditValidation_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : precheckRangerAuditValidation_;
+    }
+    /**
+     * <code>.datalakedr.BackupRestoreOperationStatus precheckRangerAuditValidation = 4;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getPrecheckRangerAuditValidationOrBuilder() {
+      return getPrecheckRangerAuditValidation();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -1275,6 +1515,9 @@ public final class datalakeDRProto {
       if (precheckStoragePermission_ != null) {
         output.writeMessage(3, getPrecheckStoragePermission());
       }
+      if (precheckRangerAuditValidation_ != null) {
+        output.writeMessage(4, getPrecheckRangerAuditValidation());
+      }
       unknownFields.writeTo(output);
     }
 
@@ -1295,6 +1538,10 @@ public final class datalakeDRProto {
       if (precheckStoragePermission_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getPrecheckStoragePermission());
+      }
+      if (precheckRangerAuditValidation_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getPrecheckRangerAuditValidation());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1326,6 +1573,11 @@ public final class datalakeDRProto {
         if (!getPrecheckStoragePermission()
             .equals(other.getPrecheckStoragePermission())) return false;
       }
+      if (hasPrecheckRangerAuditValidation() != other.hasPrecheckRangerAuditValidation()) return false;
+      if (hasPrecheckRangerAuditValidation()) {
+        if (!getPrecheckRangerAuditValidation()
+            .equals(other.getPrecheckRangerAuditValidation())) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -1348,6 +1600,10 @@ public final class datalakeDRProto {
       if (hasPrecheckStoragePermission()) {
         hash = (37 * hash) + PRECHECKSTORAGEPERMISSION_FIELD_NUMBER;
         hash = (53 * hash) + getPrecheckStoragePermission().hashCode();
+      }
+      if (hasPrecheckRangerAuditValidation()) {
+        hash = (37 * hash) + PRECHECKRANGERAUDITVALIDATION_FIELD_NUMBER;
+        hash = (53 * hash) + getPrecheckRangerAuditValidation().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -1504,6 +1760,12 @@ public final class datalakeDRProto {
           precheckStoragePermission_ = null;
           precheckStoragePermissionBuilder_ = null;
         }
+        if (precheckRangerAuditValidationBuilder_ == null) {
+          precheckRangerAuditValidation_ = null;
+        } else {
+          precheckRangerAuditValidation_ = null;
+          precheckRangerAuditValidationBuilder_ = null;
+        }
         return this;
       }
 
@@ -1544,6 +1806,11 @@ public final class datalakeDRProto {
           result.precheckStoragePermission_ = precheckStoragePermission_;
         } else {
           result.precheckStoragePermission_ = precheckStoragePermissionBuilder_.build();
+        }
+        if (precheckRangerAuditValidationBuilder_ == null) {
+          result.precheckRangerAuditValidation_ = precheckRangerAuditValidation_;
+        } else {
+          result.precheckRangerAuditValidation_ = precheckRangerAuditValidationBuilder_.build();
         }
         onBuilt();
         return result;
@@ -1601,6 +1868,9 @@ public final class datalakeDRProto {
         }
         if (other.hasPrecheckStoragePermission()) {
           mergePrecheckStoragePermission(other.getPrecheckStoragePermission());
+        }
+        if (other.hasPrecheckRangerAuditValidation()) {
+          mergePrecheckRangerAuditValidation(other.getPrecheckRangerAuditValidation());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -2058,6 +2328,125 @@ public final class datalakeDRProto {
           precheckStoragePermission_ = null;
         }
         return precheckStoragePermissionBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus precheckRangerAuditValidation_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> precheckRangerAuditValidationBuilder_;
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckRangerAuditValidation = 4;</code>
+       * @return Whether the precheckRangerAuditValidation field is set.
+       */
+      public boolean hasPrecheckRangerAuditValidation() {
+        return precheckRangerAuditValidationBuilder_ != null || precheckRangerAuditValidation_ != null;
+      }
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckRangerAuditValidation = 4;</code>
+       * @return The precheckRangerAuditValidation.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getPrecheckRangerAuditValidation() {
+        if (precheckRangerAuditValidationBuilder_ == null) {
+          return precheckRangerAuditValidation_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : precheckRangerAuditValidation_;
+        } else {
+          return precheckRangerAuditValidationBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckRangerAuditValidation = 4;</code>
+       */
+      public Builder setPrecheckRangerAuditValidation(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (precheckRangerAuditValidationBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          precheckRangerAuditValidation_ = value;
+          onChanged();
+        } else {
+          precheckRangerAuditValidationBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckRangerAuditValidation = 4;</code>
+       */
+      public Builder setPrecheckRangerAuditValidation(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder builderForValue) {
+        if (precheckRangerAuditValidationBuilder_ == null) {
+          precheckRangerAuditValidation_ = builderForValue.build();
+          onChanged();
+        } else {
+          precheckRangerAuditValidationBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckRangerAuditValidation = 4;</code>
+       */
+      public Builder mergePrecheckRangerAuditValidation(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (precheckRangerAuditValidationBuilder_ == null) {
+          if (precheckRangerAuditValidation_ != null) {
+            precheckRangerAuditValidation_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder(precheckRangerAuditValidation_).mergeFrom(value).buildPartial();
+          } else {
+            precheckRangerAuditValidation_ = value;
+          }
+          onChanged();
+        } else {
+          precheckRangerAuditValidationBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckRangerAuditValidation = 4;</code>
+       */
+      public Builder clearPrecheckRangerAuditValidation() {
+        if (precheckRangerAuditValidationBuilder_ == null) {
+          precheckRangerAuditValidation_ = null;
+          onChanged();
+        } else {
+          precheckRangerAuditValidation_ = null;
+          precheckRangerAuditValidationBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckRangerAuditValidation = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder getPrecheckRangerAuditValidationBuilder() {
+        
+        onChanged();
+        return getPrecheckRangerAuditValidationFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckRangerAuditValidation = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getPrecheckRangerAuditValidationOrBuilder() {
+        if (precheckRangerAuditValidationBuilder_ != null) {
+          return precheckRangerAuditValidationBuilder_.getMessageOrBuilder();
+        } else {
+          return precheckRangerAuditValidation_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : precheckRangerAuditValidation_;
+        }
+      }
+      /**
+       * <code>.datalakedr.BackupRestoreOperationStatus precheckRangerAuditValidation = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> 
+          getPrecheckRangerAuditValidationFieldBuilder() {
+        if (precheckRangerAuditValidationBuilder_ == null) {
+          precheckRangerAuditValidationBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder>(
+                  getPrecheckRangerAuditValidation(),
+                  getParentForChildren(),
+                  isClean());
+          precheckRangerAuditValidation_ = null;
+        }
+        return precheckRangerAuditValidationBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -30948,138 +31337,141 @@ public final class datalakeDRProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\020datalakedr.proto\022\ndatalakedr\032\rversion." +
-      "proto\"E\n\034BackupRestoreOperationStatus\022\016\n" +
-      "\006status\030\001 \001(\t\022\025\n\rfailureReason\030\002 \001(\t\"\361\001\n" +
-      "!AdminOperationsBackupRestoreState\022>\n\014st" +
-      "opServices\030\001 \001(\0132(.datalakedr.BackupRest" +
-      "oreOperationStatus\022?\n\rstartServices\030\002 \001(" +
-      "\0132(.datalakedr.BackupRestoreOperationSta" +
-      "tus\022K\n\031precheckStoragePermission\030\003 \001(\0132(" +
-      ".datalakedr.BackupRestoreOperationStatus" +
-      "\"\252\001\n\027HbaseBackupRestoreState\022L\n\032atlasEnt" +
-      "ityAuditEventTable\030\001 \001(\0132(.datalakedr.Ba" +
-      "ckupRestoreOperationStatus\022A\n\017atlasJanus" +
-      "Table\030\002 \001(\0132(.datalakedr.BackupRestoreOp" +
-      "erationStatus\"\372\004\n\026SolrBackupRestoreState" +
-      "\022E\n\023edgeIndexCollection\030\001 \001(\0132(.datalake" +
-      "dr.BackupRestoreOperationStatus\022I\n\027fullt" +
-      "extIndexCollection\030\002 \001(\0132(.datalakedr.Ba" +
-      "ckupRestoreOperationStatus\022H\n\026rangerAudi" +
-      "tsCollection\030\003 \001(\0132(.datalakedr.BackupRe" +
-      "storeOperationStatus\022G\n\025vertexIndexColle" +
-      "ction\030\004 \001(\0132(.datalakedr.BackupRestoreOp" +
-      "erationStatus\022K\n\031edgeIndexCollectionDele" +
-      "te\030\005 \001(\0132(.datalakedr.BackupRestoreOpera" +
-      "tionStatus\022O\n\035fulltextIndexCollectionDel" +
-      "ete\030\006 \001(\0132(.datalakedr.BackupRestoreOper" +
-      "ationStatus\022N\n\034rangerAuditsCollectionDel" +
-      "ete\030\007 \001(\0132(.datalakedr.BackupRestoreOper" +
-      "ationStatus\022M\n\033vertexIndexCollectionDele" +
-      "te\030\010 \001(\0132(.datalakedr.BackupRestoreOpera" +
-      "tionStatus\"X\n\032DatabaseBackupRestoreState" +
-      "\022:\n\010database\030\001 \001(\0132(.datalakedr.BackupRe" +
-      "storeOperationStatus\"\204\002\n\032InternalBackupR" +
-      "estoreState\022F\n\017adminOperations\030\001 \001(\0132-.d" +
-      "atalakedr.AdminOperationsBackupRestoreSt" +
-      "ate\0222\n\005hbase\030\002 \001(\0132#.datalakedr.HbaseBac" +
-      "kupRestoreState\0220\n\004solr\030\003 \001(\0132\".datalake" +
-      "dr.SolrBackupRestoreState\0228\n\010database\030\004 " +
-      "\001(\0132&.datalakedr.DatabaseBackupRestoreSt" +
-      "ate\"\273\002\n\025BackupDatalakeRequest\022\024\n\014datalak" +
-      "eName\030\001 \001(\t\022\022\n\nbackupName\030\002 \001(\t\022\026\n\016backu" +
-      "pLocation\030\003 \001(\t\022\032\n\022closeDbConnections\030\004 " +
-      "\001(\010\0223\n\025skipRangerHmsMetadata\030\005 \001(\0162\024.dat" +
-      "alakedr.SkipFlag\022/\n\021skipAtlasMetadata\030\006 " +
-      "\001(\0162\024.datalakedr.SkipFlag\022.\n\020skipRangerA" +
-      "udits\030\007 \001(\0162\024.datalakedr.SkipFlag\022\026\n\016ski" +
-      "pValidation\030\010 \001(\010\022\026\n\016validationOnly\030\t \001(" +
-      "\010\"\305\002\n\026BackupDatalakeResponse\022\022\n\nbackupNa" +
-      "me\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\017\n\007userCrn\030\003" +
-      " \001(\t\022\020\n\010backupId\030\004 \001(\t\022\025\n\rinternalState\030" +
-      "\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016startTime" +
-      "stamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016bac" +
-      "kupLocation\030\t \001(\t\022\025\n\rfailureReason\030\n \001(\t" +
-      "\022?\n\017operationStates\030\013 \001(\0132&.datalakedr.I" +
-      "nternalBackupRestoreState\022\026\n\016runtimeVers" +
-      "ion\030\014 \001(\t\"\342\002\n\026RestoreDatalakeRequest\022\024\n\014" +
-      "datalakeName\030\001 \001(\t\022\022\n\nbackupName\030\002 \001(\t\022\020" +
-      "\n\010backupId\030\003 \001(\t\022\027\n\017includeDatabase\030\004 \001(" +
-      "\010\022\r\n\005force\030\005 \001(\010\022\036\n\026backupLocationOverri" +
-      "de\030\006 \001(\t\0223\n\025skipRangerHmsMetadata\030\007 \001(\0162" +
-      "\024.datalakedr.SkipFlag\022/\n\021skipAtlasMetada" +
-      "ta\030\010 \001(\0162\024.datalakedr.SkipFlag\022.\n\020skipRa" +
-      "ngerAudits\030\t \001(\0162\024.datalakedr.SkipFlag\022\026" +
-      "\n\016skipValidation\030\n \001(\010\022\026\n\016validationOnly" +
-      "\030\013 \001(\010\"\305\002\n\027RestoreDatalakeResponse\022\021\n\tac" +
-      "countId\030\001 \001(\t\022\020\n\010backupId\030\002 \001(\t\022\021\n\tresto" +
-      "reId\030\003 \001(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n\rinternalS" +
-      "tate\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016star" +
-      "tTimestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026" +
-      "\n\016backupLocation\030\t \001(\t\022\025\n\rfailureReason\030" +
-      "\n \001(\t\022?\n\017operationStates\030\013 \001(\0132&.datalak" +
-      "edr.InternalBackupRestoreState\022\026\n\016runtim" +
-      "eVersion\030\014 \001(\t\"Y\n\033BackupDatalakeStatusRe" +
-      "quest\022\024\n\014datalakeName\030\001 \001(\t\022\020\n\010backupId\030" +
-      "\002 \001(\t\022\022\n\nbackupName\030\003 \001(\t\"\313\002\n\034BackupData" +
-      "lakeStatusResponse\022\022\n\nbackupName\030\001 \001(\t\022\021" +
-      "\n\taccountId\030\002 \001(\t\022\017\n\007userCrn\030\003 \001(\t\022\020\n\010ba" +
-      "ckupId\030\004 \001(\t\022\025\n\rinternalState\030\005 \001(\t\022\024\n\014o" +
-      "verallState\030\006 \001(\t\022\026\n\016startTimestamp\030\007 \001(" +
-      "\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backupLocatio" +
-      "n\030\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\022?\n\017operat" +
-      "ionStates\030\013 \001(\0132&.datalakedr.InternalBac" +
-      "kupRestoreState\022\026\n\016runtimeVersion\030\014 \001(\t\"" +
-      "Y\n\034RestoreDatalakeStatusRequest\022\024\n\014datal" +
-      "akeName\030\001 \001(\t\022\021\n\trestoreId\030\002 \001(\tJ\004\010\003\020\004R\n" +
-      "backupName\"\313\002\n\035RestoreDatalakeStatusResp" +
-      "onse\022\021\n\taccountId\030\001 \001(\t\022\021\n\trestoreId\030\002 \001" +
-      "(\t\022\020\n\010backupId\030\003 \001(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n" +
-      "\rinternalState\030\005 \001(\t\022\024\n\014overallState\030\006 \001" +
-      "(\t\022\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTimesta" +
-      "mp\030\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfail" +
-      "ureReason\030\n \001(\t\022?\n\017operationStates\030\013 \001(\013" +
-      "2&.datalakedr.InternalBackupRestoreState" +
-      "\022\026\n\016runtimeVersion\030\014 \001(\t\"\301\002\n\022DatalakeBac" +
-      "kupInfo\022\022\n\nbackupName\030\001 \001(\t\022\021\n\taccountId" +
-      "\030\002 \001(\t\022\017\n\007userCrn\030\003 \001(\t\022\020\n\010backupId\030\004 \001(" +
-      "\t\022\025\n\rinternalState\030\005 \001(\t\022\024\n\014overallState" +
-      "\030\006 \001(\t\022\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTim" +
-      "estamp\030\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\r" +
-      "failureReason\030\n \001(\t\022?\n\017operationStates\030\013" +
-      " \001(\0132&.datalakedr.InternalBackupRestoreS" +
-      "tate\022\026\n\016runtimeVersion\030\014 \001(\t\"1\n\031ListData" +
-      "lakeBackupRequest\022\024\n\014datalakeName\030\001 \001(\t\"" +
-      "S\n\032ListDatalakeBackupResponse\0225\n\rdatalak" +
-      "e_info\030\001 \003(\0132\036.datalakedr.DatalakeBackup" +
-      "Info\"/\n\033CancelDatalakeBackupRequest\022\020\n\010b" +
-      "ackupId\030\001 \001(\t\".\n\034CancelDatalakeBackupRes" +
-      "ponse\022\016\n\006result\030\001 \001(\t\"1\n\034CancelDatalakeR" +
-      "estoreRequest\022\021\n\trestoreId\030\001 \001(\t\"/\n\035Canc" +
-      "elDatalakeRestoreResponse\022\016\n\006result\030\001 \001(" +
-      "\t*.\n\010SkipFlag\022\013\n\007NOT_SET\020\000\022\010\n\004SKIP\020\001\022\013\n\007" +
-      "INCLUDE\020\0022\252\006\n\ndatalakeDR\022A\n\nGetVersion\022\027" +
-      ".version.VersionRequest\032\030.version.Versio" +
-      "nResponse\"\000\022Y\n\016BackupDatalake\022!.datalake" +
-      "dr.BackupDatalakeRequest\032\".datalakedr.Ba" +
-      "ckupDatalakeResponse\"\000\022\\\n\017RestoreDatalak" +
-      "e\022\".datalakedr.RestoreDatalakeRequest\032#." +
-      "datalakedr.RestoreDatalakeResponse\"\000\022k\n\024" +
-      "BackupDatalakeStatus\022\'.datalakedr.Backup" +
-      "DatalakeStatusRequest\032(.datalakedr.Backu" +
-      "pDatalakeStatusResponse\"\000\022n\n\025RestoreData" +
-      "lakeStatus\022(.datalakedr.RestoreDatalakeS" +
-      "tatusRequest\032).datalakedr.RestoreDatalak" +
-      "eStatusResponse\"\000\022f\n\023ListDatalakeBackups" +
-      "\022%.datalakedr.ListDatalakeBackupRequest\032" +
-      "&.datalakedr.ListDatalakeBackupResponse\"" +
-      "\000\022k\n\024CancelDatalakeBackup\022\'.datalakedr.C" +
-      "ancelDatalakeBackupRequest\032(.datalakedr." +
-      "CancelDatalakeBackupResponse\"\000\022n\n\025Cancel" +
-      "DatalakeRestore\022(.datalakedr.CancelDatal" +
-      "akeRestoreRequest\032).datalakedr.CancelDat" +
-      "alakeRestoreResponse\"\000B>\n+com.cloudera.t" +
-      "hunderhead.service.datalakedrB\017datalakeD" +
-      "RProtob\006proto3"
+      "proto\"`\n\034BackupRestoreOperationStatus\022\016\n" +
+      "\006status\030\001 \001(\t\022\025\n\rfailureReason\030\002 \001(\t\022\031\n\021" +
+      "durationInMinutes\030\003 \001(\t\"\302\002\n!AdminOperati" +
+      "onsBackupRestoreState\022>\n\014stopServices\030\001 " +
+      "\001(\0132(.datalakedr.BackupRestoreOperationS" +
+      "tatus\022?\n\rstartServices\030\002 \001(\0132(.datalaked" +
+      "r.BackupRestoreOperationStatus\022K\n\031preche" +
+      "ckStoragePermission\030\003 \001(\0132(.datalakedr.B" +
+      "ackupRestoreOperationStatus\022O\n\035precheckR" +
+      "angerAuditValidation\030\004 \001(\0132(.datalakedr." +
+      "BackupRestoreOperationStatus\"\252\001\n\027HbaseBa" +
+      "ckupRestoreState\022L\n\032atlasEntityAuditEven" +
+      "tTable\030\001 \001(\0132(.datalakedr.BackupRestoreO" +
+      "perationStatus\022A\n\017atlasJanusTable\030\002 \001(\0132" +
+      "(.datalakedr.BackupRestoreOperationStatu" +
+      "s\"\372\004\n\026SolrBackupRestoreState\022E\n\023edgeInde" +
+      "xCollection\030\001 \001(\0132(.datalakedr.BackupRes" +
+      "toreOperationStatus\022I\n\027fulltextIndexColl" +
+      "ection\030\002 \001(\0132(.datalakedr.BackupRestoreO" +
+      "perationStatus\022H\n\026rangerAuditsCollection" +
+      "\030\003 \001(\0132(.datalakedr.BackupRestoreOperati" +
+      "onStatus\022G\n\025vertexIndexCollection\030\004 \001(\0132" +
+      "(.datalakedr.BackupRestoreOperationStatu" +
+      "s\022K\n\031edgeIndexCollectionDelete\030\005 \001(\0132(.d" +
+      "atalakedr.BackupRestoreOperationStatus\022O" +
+      "\n\035fulltextIndexCollectionDelete\030\006 \001(\0132(." +
+      "datalakedr.BackupRestoreOperationStatus\022" +
+      "N\n\034rangerAuditsCollectionDelete\030\007 \001(\0132(." +
+      "datalakedr.BackupRestoreOperationStatus\022" +
+      "M\n\033vertexIndexCollectionDelete\030\010 \001(\0132(.d" +
+      "atalakedr.BackupRestoreOperationStatus\"X" +
+      "\n\032DatabaseBackupRestoreState\022:\n\010database" +
+      "\030\001 \001(\0132(.datalakedr.BackupRestoreOperati" +
+      "onStatus\"\204\002\n\032InternalBackupRestoreState\022" +
+      "F\n\017adminOperations\030\001 \001(\0132-.datalakedr.Ad" +
+      "minOperationsBackupRestoreState\0222\n\005hbase" +
+      "\030\002 \001(\0132#.datalakedr.HbaseBackupRestoreSt" +
+      "ate\0220\n\004solr\030\003 \001(\0132\".datalakedr.SolrBacku" +
+      "pRestoreState\0228\n\010database\030\004 \001(\0132&.datala" +
+      "kedr.DatabaseBackupRestoreState\"\273\002\n\025Back" +
+      "upDatalakeRequest\022\024\n\014datalakeName\030\001 \001(\t\022" +
+      "\022\n\nbackupName\030\002 \001(\t\022\026\n\016backupLocation\030\003 " +
+      "\001(\t\022\032\n\022closeDbConnections\030\004 \001(\010\0223\n\025skipR" +
+      "angerHmsMetadata\030\005 \001(\0162\024.datalakedr.Skip" +
+      "Flag\022/\n\021skipAtlasMetadata\030\006 \001(\0162\024.datala" +
+      "kedr.SkipFlag\022.\n\020skipRangerAudits\030\007 \001(\0162" +
+      "\024.datalakedr.SkipFlag\022\026\n\016skipValidation\030" +
+      "\010 \001(\010\022\026\n\016validationOnly\030\t \001(\010\"\305\002\n\026Backup" +
+      "DatalakeResponse\022\022\n\nbackupName\030\001 \001(\t\022\021\n\t" +
+      "accountId\030\002 \001(\t\022\017\n\007userCrn\030\003 \001(\t\022\020\n\010back" +
+      "upId\030\004 \001(\t\022\025\n\rinternalState\030\005 \001(\t\022\024\n\014ove" +
+      "rallState\030\006 \001(\t\022\026\n\016startTimestamp\030\007 \001(\t\022" +
+      "\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backupLocation\030" +
+      "\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\022?\n\017operatio" +
+      "nStates\030\013 \001(\0132&.datalakedr.InternalBacku" +
+      "pRestoreState\022\026\n\016runtimeVersion\030\014 \001(\t\"\342\002" +
+      "\n\026RestoreDatalakeRequest\022\024\n\014datalakeName" +
+      "\030\001 \001(\t\022\022\n\nbackupName\030\002 \001(\t\022\020\n\010backupId\030\003" +
+      " \001(\t\022\027\n\017includeDatabase\030\004 \001(\010\022\r\n\005force\030\005" +
+      " \001(\010\022\036\n\026backupLocationOverride\030\006 \001(\t\0223\n\025" +
+      "skipRangerHmsMetadata\030\007 \001(\0162\024.datalakedr" +
+      ".SkipFlag\022/\n\021skipAtlasMetadata\030\010 \001(\0162\024.d" +
+      "atalakedr.SkipFlag\022.\n\020skipRangerAudits\030\t" +
+      " \001(\0162\024.datalakedr.SkipFlag\022\026\n\016skipValida" +
+      "tion\030\n \001(\010\022\026\n\016validationOnly\030\013 \001(\010\"\305\002\n\027R" +
+      "estoreDatalakeResponse\022\021\n\taccountId\030\001 \001(" +
+      "\t\022\020\n\010backupId\030\002 \001(\t\022\021\n\trestoreId\030\003 \001(\t\022\017" +
+      "\n\007userCrn\030\004 \001(\t\022\025\n\rinternalState\030\005 \001(\t\022\024" +
+      "\n\014overallState\030\006 \001(\t\022\026\n\016startTimestamp\030\007" +
+      " \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backupLoca" +
+      "tion\030\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\022?\n\017ope" +
+      "rationStates\030\013 \001(\0132&.datalakedr.Internal" +
+      "BackupRestoreState\022\026\n\016runtimeVersion\030\014 \001" +
+      "(\t\"Y\n\033BackupDatalakeStatusRequest\022\024\n\014dat" +
+      "alakeName\030\001 \001(\t\022\020\n\010backupId\030\002 \001(\t\022\022\n\nbac" +
+      "kupName\030\003 \001(\t\"\313\002\n\034BackupDatalakeStatusRe" +
+      "sponse\022\022\n\nbackupName\030\001 \001(\t\022\021\n\taccountId\030" +
+      "\002 \001(\t\022\017\n\007userCrn\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t" +
+      "\022\025\n\rinternalState\030\005 \001(\t\022\024\n\014overallState\030" +
+      "\006 \001(\t\022\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTime" +
+      "stamp\030\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rf" +
+      "ailureReason\030\n \001(\t\022?\n\017operationStates\030\013 " +
+      "\001(\0132&.datalakedr.InternalBackupRestoreSt" +
+      "ate\022\026\n\016runtimeVersion\030\014 \001(\t\"Y\n\034RestoreDa" +
+      "talakeStatusRequest\022\024\n\014datalakeName\030\001 \001(" +
+      "\t\022\021\n\trestoreId\030\002 \001(\tJ\004\010\003\020\004R\nbackupName\"\313" +
+      "\002\n\035RestoreDatalakeStatusResponse\022\021\n\tacco" +
+      "untId\030\001 \001(\t\022\021\n\trestoreId\030\002 \001(\t\022\020\n\010backup" +
+      "Id\030\003 \001(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n\rinternalSta" +
+      "te\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016startT" +
+      "imestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016" +
+      "backupLocation\030\t \001(\t\022\025\n\rfailureReason\030\n " +
+      "\001(\t\022?\n\017operationStates\030\013 \001(\0132&.datalaked" +
+      "r.InternalBackupRestoreState\022\026\n\016runtimeV" +
+      "ersion\030\014 \001(\t\"\301\002\n\022DatalakeBackupInfo\022\022\n\nb" +
+      "ackupName\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\017\n\007us" +
+      "erCrn\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022\025\n\rinterna" +
+      "lState\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016st" +
+      "artTimestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t" +
+      "\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfailureReaso" +
+      "n\030\n \001(\t\022?\n\017operationStates\030\013 \001(\0132&.datal" +
+      "akedr.InternalBackupRestoreState\022\026\n\016runt" +
+      "imeVersion\030\014 \001(\t\"1\n\031ListDatalakeBackupRe" +
+      "quest\022\024\n\014datalakeName\030\001 \001(\t\"S\n\032ListDatal" +
+      "akeBackupResponse\0225\n\rdatalake_info\030\001 \003(\013" +
+      "2\036.datalakedr.DatalakeBackupInfo\"/\n\033Canc" +
+      "elDatalakeBackupRequest\022\020\n\010backupId\030\001 \001(" +
+      "\t\".\n\034CancelDatalakeBackupResponse\022\016\n\006res" +
+      "ult\030\001 \001(\t\"1\n\034CancelDatalakeRestoreReques" +
+      "t\022\021\n\trestoreId\030\001 \001(\t\"/\n\035CancelDatalakeRe" +
+      "storeResponse\022\016\n\006result\030\001 \001(\t*.\n\010SkipFla" +
+      "g\022\013\n\007NOT_SET\020\000\022\010\n\004SKIP\020\001\022\013\n\007INCLUDE\020\0022\252\006" +
+      "\n\ndatalakeDR\022A\n\nGetVersion\022\027.version.Ver" +
+      "sionRequest\032\030.version.VersionResponse\"\000\022" +
+      "Y\n\016BackupDatalake\022!.datalakedr.BackupDat" +
+      "alakeRequest\032\".datalakedr.BackupDatalake" +
+      "Response\"\000\022\\\n\017RestoreDatalake\022\".datalake" +
+      "dr.RestoreDatalakeRequest\032#.datalakedr.R" +
+      "estoreDatalakeResponse\"\000\022k\n\024BackupDatala" +
+      "keStatus\022\'.datalakedr.BackupDatalakeStat" +
+      "usRequest\032(.datalakedr.BackupDatalakeSta" +
+      "tusResponse\"\000\022n\n\025RestoreDatalakeStatus\022(" +
+      ".datalakedr.RestoreDatalakeStatusRequest" +
+      "\032).datalakedr.RestoreDatalakeStatusRespo" +
+      "nse\"\000\022f\n\023ListDatalakeBackups\022%.datalaked" +
+      "r.ListDatalakeBackupRequest\032&.datalakedr" +
+      ".ListDatalakeBackupResponse\"\000\022k\n\024CancelD" +
+      "atalakeBackup\022\'.datalakedr.CancelDatalak" +
+      "eBackupRequest\032(.datalakedr.CancelDatala" +
+      "keBackupResponse\"\000\022n\n\025CancelDatalakeRest" +
+      "ore\022(.datalakedr.CancelDatalakeRestoreRe" +
+      "quest\032).datalakedr.CancelDatalakeRestore" +
+      "Response\"\000B>\n+com.cloudera.thunderhead.s" +
+      "ervice.datalakedrB\017datalakeDRProtob\006prot" +
+      "o3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -31091,13 +31483,13 @@ public final class datalakeDRProto {
     internal_static_datalakedr_BackupRestoreOperationStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_BackupRestoreOperationStatus_descriptor,
-        new java.lang.String[] { "Status", "FailureReason", });
+        new java.lang.String[] { "Status", "FailureReason", "DurationInMinutes", });
     internal_static_datalakedr_AdminOperationsBackupRestoreState_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_datalakedr_AdminOperationsBackupRestoreState_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_AdminOperationsBackupRestoreState_descriptor,
-        new java.lang.String[] { "StopServices", "StartServices", "PrecheckStoragePermission", });
+        new java.lang.String[] { "StopServices", "StartServices", "PrecheckStoragePermission", "PrecheckRangerAuditValidation", });
     internal_static_datalakedr_HbaseBackupRestoreState_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_datalakedr_HbaseBackupRestoreState_fieldAccessorTable = new
