@@ -4,6 +4,7 @@ import static com.sequenceiq.datalake.flow.dr.validation.DatalakeBackupValidatio
 import static com.sequenceiq.datalake.flow.dr.validation.DatalakeBackupValidationEvent.DATALAKE_BACKUP_VALIDATION_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.validation.DatalakeBackupValidationEvent.DATALAKE_BACKUP_VALIDATION_IN_PROGRESS_EVENT;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -139,7 +140,7 @@ public class DatalakeBackupValidationActions {
                         failureReason, exception
                 );
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
-                        ResourceEvent.DATALAKE_BACKUP_VALIDATION_FAILED,
+                        ResourceEvent.DATALAKE_BACKUP_VALIDATION_FAILED, Collections.singleton(failureReason),
                         failureReason, payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_VALIDATION_FAILED, sdxCluster);
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
