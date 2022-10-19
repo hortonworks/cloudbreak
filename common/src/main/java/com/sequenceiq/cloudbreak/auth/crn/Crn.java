@@ -138,10 +138,6 @@ public class Crn {
         NAVOPT("navopt", NON_ADMIN_SERVICE),
         DBUS("dbus", NON_ADMIN_SERVICE),
         AUTOSCALE("autoscale", NON_ADMIN_SERVICE),
-        /**
-         * @deprecated {@link #CLOUDBREAK} was replaced by {@link #DATAHUB} and is kept here for backward compatibility reasons (e.g., dynamodb serialized CRNs).
-         */
-        @Deprecated
         CLOUDBREAK("cloudbreak", NON_ADMIN_SERVICE),
         /**
          * @deprecated {@link #SDX} was replaced by {@link #DATALAKE} and is kept here for backward compatibility reasons (e.g., dynamodb serialized CRNs).
