@@ -153,7 +153,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                 instance.setHostname(hostname);
             }
         }
-        instance.setCanIpForward(Boolean.TRUE);
+        instance.setCanIpForward(Boolean.FALSE);
         instance.setNetworkInterfaces(getNetworkInterface(context, computeResources, group, cloudStack, cloudInstance));
         instance.setDisks(listOfDisks);
         instance.setServiceAccounts(extractServiceAccounts(group));
