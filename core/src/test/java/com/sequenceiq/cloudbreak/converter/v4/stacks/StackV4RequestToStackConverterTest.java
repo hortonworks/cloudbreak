@@ -37,6 +37,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -90,6 +92,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<StackV4Request> {
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     private static final Map<CloudPlatform, String> TEST_REGIONS = Map.of(
             AWS, "eu-west-2",
@@ -187,6 +191,9 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     @Mock
     private AutoTlsFlagPreparatory autoTlsFlagPreparatory;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     private Credential credential;
 
     @BeforeEach
@@ -222,11 +229,11 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         given(credentialClientService.getByName(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
-        given(telemetryConverter.convert(null, StackType.WORKLOAD)).willReturn(new Telemetry());
+        given(telemetryConverter.convert(eq(null), eq(StackType.WORKLOAD), anyString())).willReturn(new Telemetry());
         given(autoTlsFlagPreparatory.provideAutoTlsFlag(any(ClusterV4Request.class), any(Stack.class), any(Optional.class))).willReturn(Boolean.TRUE);
 
         // WHEN
-        Stack stack = underTest.convert(request);
+        Stack stack = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(request));
         // THEN
         assertAllFieldsNotNull(
                 stack,
@@ -238,7 +245,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         assertEquals("eu-west-1", stack.getRegion());
         assertEquals("AWS", stack.getCloudPlatform());
         assertEquals("mystack", stack.getName());
-        verify(telemetryConverter, times(1)).convert(null, StackType.WORKLOAD);
+        verify(telemetryConverter, times(1)).convert(eq(null), eq(StackType.WORKLOAD), anyString());
         verify(environmentClientService, times(1)).getByCrn(anyString());
         verify(gatewaySecurityGroupDecorator, times(1))
                 .extendGatewaySecurityGroupWithDefaultGatewayCidrs(any(Stack.class), any(Tunnel.class));
@@ -258,7 +265,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         given(autoTlsFlagPreparatory.provideAutoTlsFlag(any(ClusterV4Request.class), any(Stack.class), any(Optional.class))).willReturn(Boolean.TRUE);
 
         // WHEN
-        Stack stack = underTest.convert(request);
+        Stack stack = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(request));
         // THEN
         assertAllFieldsNotNull(
                 stack,
@@ -338,7 +345,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
         given(autoTlsFlagPreparatory.provideAutoTlsFlag(any(ClusterV4Request.class), any(Stack.class), any(Optional.class))).willReturn(Boolean.TRUE);
 
-        Stack result = underTest.convert(request);
+        Stack result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(request));
 
         assertEquals(TEST_REGIONS.get(MOCK), result.getRegion());
         assertTrue(result.getCluster().isAutoTlsEnabled());
@@ -360,10 +367,10 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         given(credentialClientService.getByName(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
-        given(telemetryConverter.convert(null, StackType.DATALAKE)).willReturn(new Telemetry());
+        given(telemetryConverter.convert(eq(null), eq(StackType.DATALAKE), anyString())).willReturn(new Telemetry());
         given(loadBalancerConfigService.createLoadBalancers(any(), any(), eq(request))).willReturn(Set.of(loadBalancer));
         // WHEN
-        Stack stack = underTest.convert(request);
+        Stack stack = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(request));
         // THEN
         assertEquals(1, stack.getLoadBalancers().size());
         assertEquals(1, stack.getLoadBalancers().iterator().next().getTargetGroupSet().size());
@@ -380,10 +387,10 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         given(credentialClientService.getByName(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
-        given(telemetryConverter.convert(null, StackType.DATALAKE)).willReturn(new Telemetry());
+        given(telemetryConverter.convert(eq(null), eq(StackType.DATALAKE), anyString())).willReturn(new Telemetry());
         given(loadBalancerConfigService.getKnoxGatewayGroups(any(Stack.class))).willReturn(Set.of("master"));
         // WHEN
-        Stack stack = underTest.convert(request);
+        Stack stack = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(request));
         // THEN
         assertEquals(0, stack.getLoadBalancers().size());
     }
@@ -392,7 +399,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     public void testNoEndpointGatewayLoadBalancerWhenEntitlementIsDisabled() {
         StackV4Request request = setupForEndpointGateway(true);
         // WHEN
-        Stack stack = underTest.convert(request);
+        Stack stack = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(request));
         // THEN
         assertTrue(stack.getLoadBalancers().isEmpty());
     }
@@ -401,7 +408,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     public void testNoEndpointGatewayLoadBalancerWhenFlagIsDisabled() {
         StackV4Request request = setupForEndpointGateway(false);
         // WHEN
-        Stack stack = underTest.convert(request);
+        Stack stack = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(request));
         // THEN
         assertTrue(stack.getLoadBalancers().isEmpty());
     }
@@ -418,7 +425,6 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         instanceGroup.setSecurityGroup(securityGroup);
         instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         instanceGroup.setGroupName("master");
-        given(monitoringConfiguration.isEnabled()).willReturn(true);
         given(stackAuthenticationV4RequestToStackAuthenticationConverter.convert(any(StackAuthenticationV4Request.class))).willReturn(new StackAuthentication());
         given(instanceGroupV4RequestToInstanceGroupConverter.convert(any(InstanceGroupV4Request.class), anyString())).willReturn(instanceGroup);
     }
@@ -443,7 +449,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         given(credentialClientService.getByName(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
-        given(telemetryConverter.convert(null, StackType.DATALAKE)).willReturn(new Telemetry());
+        given(telemetryConverter.convert(eq(null), eq(StackType.DATALAKE), anyString())).willReturn(new Telemetry());
         given(loadBalancerConfigService.getKnoxGatewayGroups(any(Stack.class))).willReturn(Set.of("master"));
 
         return request;

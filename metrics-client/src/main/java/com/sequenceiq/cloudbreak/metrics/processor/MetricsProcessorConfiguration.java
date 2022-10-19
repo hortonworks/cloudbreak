@@ -39,14 +39,6 @@ public class MetricsProcessorConfiguration extends AbstractStreamingConfiguratio
         return getRemoteWriteUrl();
     }
 
-    public boolean isComputeMonitoringSupported() {
-        return monitoringConfiguration.isEnabled() && StringUtils.isNotBlank(monitoringConfiguration.getRemoteWriteUrl());
-    }
-
-    public boolean isPaasSupported() {
-        return monitoringConfiguration.isPaasSupport();
-    }
-
     public Integer getHttpTimeout() {
         return httpTimeout;
     }
