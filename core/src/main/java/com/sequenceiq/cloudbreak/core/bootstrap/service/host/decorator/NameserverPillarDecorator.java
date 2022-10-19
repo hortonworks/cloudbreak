@@ -5,10 +5,12 @@ import static java.util.Collections.singletonMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.http.conn.util.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -32,14 +34,11 @@ public class NameserverPillarDecorator {
     @Inject
     private DatalakeService datalakeService;
 
-    private static List<InstanceMetadataView> getGatewayInstanceMetadata(Stack dataLakeStack) {
-        return dataLakeStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata();
-    }
-
     public void decorateServicePillarWithNameservers(StackDto stackDto, KerberosConfig kerberosConfig, Map<String, SaltPillarProperties> servicePillar) {
         if (kerberosConfig != null && StringUtils.hasText(kerberosConfig.getDomain()) && StringUtils.hasText(kerberosConfig.getNameServers())) {
             LOGGER.debug("Add nameserver config to pillar based on kerberos config.");
-            List<String> ipList = Lists.newArrayList(kerberosConfig.getNameServers().split(","));
+            List<String> ipList = getKerberosNameServerIps(kerberosConfig);
+            validateIpList(ipList);
             servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
                     singletonMap("forwarder-zones", singletonMap(kerberosConfig.getDomain(), singletonMap("nameservers", ipList)))));
         } else if (kerberosConfig == null || kerberosConfig.getType() != KerberosType.FREEIPA && kerberosConfig.getType() != KerberosType.ACTIVE_DIRECTORY) {
@@ -56,6 +55,7 @@ public class NameserverPillarDecorator {
             List<InstanceMetadataView> gatewayInstanceMetadata = getGatewayInstanceMetadata(datalakeStackOptional.get());
             String datalakeDomain = gatewayInstanceMetadata.get(0).getDomain();
             List<String> ipList = getDatalakeGatewayPrivateIps(gatewayInstanceMetadata);
+            validateIpList(ipList);
             servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
                     singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
         } else {
@@ -63,12 +63,34 @@ public class NameserverPillarDecorator {
         }
     }
 
+    private List<InstanceMetadataView> getGatewayInstanceMetadata(Stack dataLakeStack) {
+        return dataLakeStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata();
+    }
+
+    private List<String> getKerberosNameServerIps(KerberosConfig kerberosConfig) {
+        return Lists.newArrayList(kerberosConfig.getNameServers().split(","))
+                .stream()
+                .filter(filterValidIps())
+                .collect(Collectors.toList());
+    }
+
     private List<String> getDatalakeGatewayPrivateIps(List<InstanceMetadataView> gatewayInstanceMetadata) {
         return gatewayInstanceMetadata.stream()
                 .map(InstanceMetadataView::getPrivateIp)
-                .filter(StringUtils::hasText)
-                .collect(Collectors.collectingAndThen(Collectors.toList(), Optional::of))
-                .filter(ipList -> !ipList.isEmpty())
-                .orElseThrow(() -> new CloudbreakServiceException("Unable to setup nameservers because there is no IP address present."));
+                .filter(filterValidIps())
+                .collect(Collectors.toList());
     }
+
+    private Predicate<String> filterValidIps() {
+        return ip -> StringUtils.hasText(ip) && InetAddressUtils.isIPv4Address(ip);
+    }
+
+    private void validateIpList(List<String> ipList) {
+        if (ipList.isEmpty()) {
+            String message = "Unable to setup nameservers because there is no IP address present.";
+            LOGGER.error(message);
+            throw new CloudbreakServiceException(message);
+        }
+    }
+
 }
