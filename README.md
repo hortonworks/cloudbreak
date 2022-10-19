@@ -422,9 +422,11 @@ CB_AWS_GOV_ACCOUNT_ID=
 ### Running the Consumption Service in IDEA
 
 After importing the `cloudbreak` repo root, launch the Consumption application by executing the `com.sequenceiq.consumption.ConsumptionApplication` class (set `Use classpath of module` to `cloudbreak.cloud-consumption.main`) with the following JVM options:
+* Note: If `cloudbreak` is in the `CB_LOCAL_DEV_LIST` variable, the `consumption.cloudbreak.url` should be http://localhost:9091
 ```
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 -Dserver.port=8099
+-Dconsumption.cloudbreak.url=http://localhost:8080
 -Dinstance.node.id=<NODE_ID>
 ```
 
@@ -615,9 +617,11 @@ export CB_AWS_GOV_ACCOUNT_ID=...
 ```
 
 then run the following Gradle command:
+* Note: If `cloudbreak` is in the `CB_LOCAL_DEV_LIST` variable, the `consumption.cloudbreak.url` should be http://localhost:9091
 ```
 ./gradlew :cloud-consumption:bootRun -PjvmArgs="\
 -Dserver.port=8099 \
+-Dconsumption.cloudbreak.url=http://localhost:8080 \
 -Dvault.root.token=<VAULT_ROOT_TOKEN> \
 -Dspring.config.location=$(pwd)/cloud-consumption/src/main/resources/application.yml,$(pwd)/cloud-consumption/build/resources/main/application.properties"
 ```
