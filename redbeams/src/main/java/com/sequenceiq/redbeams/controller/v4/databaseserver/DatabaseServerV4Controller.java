@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
@@ -60,6 +61,7 @@ import com.sequenceiq.redbeams.service.stack.RedbeamsStartService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStopService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsUpgradeService;
+import com.sequenceiq.redbeams.service.validation.RedBeamsTagValidator;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -81,6 +83,9 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Inject
     private RedbeamsUpgradeService redbeamsUpgradeService;
+
+    @Inject
+    private RedBeamsTagValidator redBeamsTagValidator;
 
     @Inject
     private DatabaseServerConfigService databaseServerConfigService;
@@ -136,6 +141,10 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     public DatabaseServerStatusV4Response create(AllocateDatabaseServerV4Request request) {
         MDCBuilder.addEnvironmentCrn(request.getEnvironmentCrn());
         DBStack dbStack = dbStackConverter.convert(request, ThreadBasedUserCrnProvider.getUserCrn());
+        ValidationResult validationResult = redBeamsTagValidator.validateTags(dbStack.getCloudPlatform(), request.getTags());
+        if (validationResult.hasError()) {
+            throw new IllegalArgumentException(validationResult.getFormattedErrors());
+        }
         DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack, request.getClusterCrn());
         return dbStackToDatabaseServerStatusV4ResponseConverter.convert(savedDBStack);
     }

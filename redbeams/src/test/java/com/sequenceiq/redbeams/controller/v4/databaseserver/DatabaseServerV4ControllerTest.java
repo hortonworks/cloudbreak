@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
@@ -47,6 +48,7 @@ import com.sequenceiq.redbeams.service.stack.RedbeamsStartService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStopService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsUpgradeService;
+import com.sequenceiq.redbeams.service.validation.RedBeamsTagValidator;
 
 public class DatabaseServerV4ControllerTest {
 
@@ -114,6 +116,12 @@ public class DatabaseServerV4ControllerTest {
 
     @Mock
     private UpgradeDatabaseServerV4RequestToUpgradeDatabaseServerRequestConverter upgradeDatabaseServerV4RequestConverter;
+
+    @Mock
+    private RedBeamsTagValidator redBeamsTagValidator;
+
+    @Mock
+    private ValidationResult validationResult;
 
     private DatabaseServerConfig server;
 
@@ -218,6 +226,7 @@ public class DatabaseServerV4ControllerTest {
         when(creationService.launchDatabaseServer(dbStack, CLUSTER_CRN)).thenReturn(savedDBStack);
         when(dbStackToDatabaseServerStatusV4ResponseConverter.convert(savedDBStack))
             .thenReturn(allocateResponse);
+        when(redBeamsTagValidator.validateTags(any(), any())).thenReturn(validationResult);
 
         DatabaseServerStatusV4Response response = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->  underTest.create(allocateRequest));
 
