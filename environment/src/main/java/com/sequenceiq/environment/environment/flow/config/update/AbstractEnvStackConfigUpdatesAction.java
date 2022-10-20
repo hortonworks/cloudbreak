@@ -1,16 +1,18 @@
 package com.sequenceiq.environment.environment.flow.config.update;
 
+import java.util.Map;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.statemachine.StateContext;
+
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesStateSelectors;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
-import java.util.Map;
-import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.statemachine.StateContext;
 
 abstract class AbstractEnvStackConfigUpdatesAction<P extends ResourceCrnPayload> extends
     AbstractAction<EnvStackConfigUpdatesState, EnvStackConfigUpdatesStateSelectors, CommonContext, P> {

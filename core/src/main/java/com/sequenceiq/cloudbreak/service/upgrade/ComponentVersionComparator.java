@@ -4,8 +4,8 @@ import static com.sequenceiq.cloudbreak.cloud.PrefixMatchLength.MAJOR;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.VersionPrefix;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 
 @Component
 class ComponentVersionComparator {

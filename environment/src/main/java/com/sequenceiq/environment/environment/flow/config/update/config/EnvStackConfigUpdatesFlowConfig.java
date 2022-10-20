@@ -11,12 +11,14 @@ import static com.sequenceiq.environment.environment.flow.config.update.event.En
 import static com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesStateSelectors.FINISH_ENV_STACK_CONFIG_UPDATES_EVENT;
 import static com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesStateSelectors.HANDLE_FAILED_ENV_STACK_CONIFG_UPDATES_EVENT;
 
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.environment.environment.flow.config.update.EnvStackConfigUpdatesState;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesStateSelectors;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
-import java.util.List;
-import org.springframework.stereotype.Component;
 
 @Component
 public class EnvStackConfigUpdatesFlowConfig extends

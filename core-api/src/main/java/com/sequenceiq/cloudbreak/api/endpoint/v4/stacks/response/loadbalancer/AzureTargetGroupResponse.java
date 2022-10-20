@@ -5,9 +5,9 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+
+import io.swagger.annotations.ApiModelProperty;
 
 public class AzureTargetGroupResponse implements Serializable {
 

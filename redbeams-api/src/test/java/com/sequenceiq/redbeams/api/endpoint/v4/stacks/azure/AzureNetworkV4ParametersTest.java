@@ -2,12 +2,12 @@ package com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
 public class AzureNetworkV4ParametersTest {
 

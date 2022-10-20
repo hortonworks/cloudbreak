@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.common.api.type.ResourceType;
-
 import javax.persistence.AttributeConverter;
+
+import com.sequenceiq.common.api.type.ResourceType;
 
 public class ResourceTypeConverterTest extends DefaultEnumConverterBaseTest<ResourceType> {
 

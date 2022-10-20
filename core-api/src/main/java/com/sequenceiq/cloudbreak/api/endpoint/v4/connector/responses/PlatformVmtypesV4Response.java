@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VirtualMachinesV4Response;
+import com.sequenceiq.common.model.JsonEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformVmtypesV4Response implements JsonEntity {

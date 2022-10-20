@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.converter;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.common.model.PrivateEndpointType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
+import com.sequenceiq.common.model.PrivateEndpointType;
 
 @Component
 public class ServiceEndpointCreationToEndpointTypeConverter {

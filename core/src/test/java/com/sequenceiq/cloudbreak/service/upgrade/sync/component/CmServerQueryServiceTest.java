@@ -1,13 +1,12 @@
 package com.sequenceiq.cloudbreak.service.upgrade.sync.component;
 
+import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
+import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.DISTRIBUTED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-
-import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
-import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.DISTRIBUTED;
 
 import java.util.Collections;
 import java.util.Set;

@@ -24,10 +24,10 @@ import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHEntri
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.cm.ClouderaManagerProductToClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.RepositoryInfoToClouderaManagerInfoV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.StackInfoToClouderaManagerStackDescriptorV4ResponseConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
-import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.cm.ClouderaManagerProductToClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 
 @Service

@@ -15,10 +15,10 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExit
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadataFilter;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadataFilter;
 
 @Service
 public class CmDiagnosticsFlowService {

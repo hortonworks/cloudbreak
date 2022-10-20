@@ -1,14 +1,16 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.common.model.JsonEntity;
-import io.swagger.annotations.ApiModel;
-
-import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.common.model.JsonEntity;
+
+import io.swagger.annotations.ApiModel;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)

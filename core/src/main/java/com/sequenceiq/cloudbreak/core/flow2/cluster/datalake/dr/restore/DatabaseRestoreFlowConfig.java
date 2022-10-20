@@ -20,28 +20,28 @@ import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class DatabaseRestoreFlowConfig extends StackStatusFinalizerAbstractFlowConfig<DatabaseRestoreState, DatabaseRestoreEvent>
-    implements RetryableFlowConfiguration<DatabaseRestoreEvent> {
+        implements RetryableFlowConfiguration<DatabaseRestoreEvent> {
 
     private static final List<Transition<DatabaseRestoreState, DatabaseRestoreEvent>> TRANSITIONS =
-        new Transition.Builder<DatabaseRestoreState, DatabaseRestoreEvent>()
-            .defaultFailureEvent(DATABASE_RESTORE_FAILED_EVENT)
+            new Transition.Builder<DatabaseRestoreState, DatabaseRestoreEvent>()
+                    .defaultFailureEvent(DATABASE_RESTORE_FAILED_EVENT)
 
-            .from(INIT_STATE).to(DATABASE_RESTORE_STATE)
-            .event(DATABASE_RESTORE_EVENT)
-            .defaultFailureEvent()
+                    .from(INIT_STATE).to(DATABASE_RESTORE_STATE)
+                    .event(DATABASE_RESTORE_EVENT)
+                    .defaultFailureEvent()
 
-            .from(DATABASE_RESTORE_STATE).to(DATABASE_RESTORE_FINISHED_STATE)
-            .event(DATABASE_RESTORE_FINISHED_EVENT)
-            .defaultFailureEvent()
+                    .from(DATABASE_RESTORE_STATE).to(DATABASE_RESTORE_FINISHED_STATE)
+                    .event(DATABASE_RESTORE_FINISHED_EVENT)
+                    .defaultFailureEvent()
 
-            .from(DATABASE_RESTORE_FINISHED_STATE).to(FINAL_STATE)
-            .event(DATABASE_RESTORE_FINALIZED_EVENT)
-            .defaultFailureEvent()
+                    .from(DATABASE_RESTORE_FINISHED_STATE).to(FINAL_STATE)
+                    .event(DATABASE_RESTORE_FINALIZED_EVENT)
+                    .defaultFailureEvent()
 
-            .build();
+                    .build();
 
     private static final FlowEdgeConfig<DatabaseRestoreState, DatabaseRestoreEvent> EDGE_CONFIG =
-        new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, DATABASE_RESTORE_FAILED_STATE, DATABASE_RESTORE_FAIL_HANDLED_EVENT);
+            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, DATABASE_RESTORE_FAILED_STATE, DATABASE_RESTORE_FAIL_HANDLED_EVENT);
 
     public DatabaseRestoreFlowConfig() {
         super(DatabaseRestoreState.class, DatabaseRestoreEvent.class);
@@ -65,7 +65,7 @@ public class DatabaseRestoreFlowConfig extends StackStatusFinalizerAbstractFlowC
     @Override
     public DatabaseRestoreEvent[] getInitEvents() {
         return new DatabaseRestoreEvent[]{
-            DATABASE_RESTORE_EVENT
+                DATABASE_RESTORE_EVENT
         };
     }
 

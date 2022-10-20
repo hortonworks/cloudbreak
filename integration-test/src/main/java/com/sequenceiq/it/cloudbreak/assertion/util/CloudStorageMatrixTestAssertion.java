@@ -3,8 +3,8 @@ package com.sequenceiq.it.cloudbreak.assertion.util;
 import static org.junit.Assert.assertFalse;
 
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.dto.util.CloudStorageMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
+import com.sequenceiq.it.cloudbreak.dto.util.CloudStorageMatrixTestDto;
 
 public class CloudStorageMatrixTestAssertion {
 

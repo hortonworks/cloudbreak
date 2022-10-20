@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha;
 
-import com.sequenceiq.flow.core.FlowEvent;
-import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForAmbariServerFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForAmbariServerSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewayFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewaySuccess;
+import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public enum ChangePrimaryGatewayEvent implements FlowEvent {
     CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT("CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT"),

@@ -160,7 +160,7 @@ public class StackStartStopService {
                 results.getResults().stream().filter(r -> r.getStatus() == InstanceStatus.FAILED).collect(Collectors.toList());
         if (!failedInstances.isEmpty()) {
             String statusReason = failedInstances.stream().map(
-                            fi -> "Instance " + fi.getCloudInstance().getInstanceId() + ": " + fi.getStatus() + '(' + fi.getStatusReason() + ')')
+                    fi -> "Instance " + fi.getCloudInstance().getInstanceId() + ": " + fi.getStatus() + '(' + fi.getStatusReason() + ')')
                     .collect(Collectors.joining(","));
             throw new OperationException(format("Failed to %s the stack for %s due to: %s", action, cloudContext.getName(), statusReason));
         }

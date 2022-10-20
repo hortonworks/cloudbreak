@@ -83,7 +83,7 @@ public class ClusterStopActions {
 
             @Override
             protected StackFailureContext createFlowContext(FlowParameters flowParameters, StateContext<ClusterStopState, ClusterStopEvent> stateContext,
-                    StackFailureEvent payload) {
+                                                            StackFailureEvent payload) {
                 StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
                 MDCBuilder.buildMdcContext(stack);
                 return new StackFailureContext(flowParameters, stack, stack.getId());

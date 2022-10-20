@@ -1,14 +1,16 @@
 package com.sequenceiq.cloudbreak.service.customconfigs;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.domain.CustomConfigurationProperty;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.template.views.CustomConfigurationPropertyView;
 import com.sequenceiq.cloudbreak.template.views.CustomConfigurationsView;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.Nonnull;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 public class CustomConfigurationsViewProvider {

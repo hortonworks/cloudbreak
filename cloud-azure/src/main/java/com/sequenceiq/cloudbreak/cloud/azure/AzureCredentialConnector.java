@@ -14,15 +14,12 @@ import org.springframework.stereotype.Service;
 
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
-import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionExtractor;
-import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
-import com.sequenceiq.cloudbreak.cloud.response.AzureCredentialPrerequisites;
-import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AuthenticationContextProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.CBRefreshTokenClientProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.client.CbDelegatedTokenCredentials;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionExtractor;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -31,6 +28,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
+import com.sequenceiq.cloudbreak.cloud.response.AzureCredentialPrerequisites;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.common.model.CredentialType;
 
 @Service

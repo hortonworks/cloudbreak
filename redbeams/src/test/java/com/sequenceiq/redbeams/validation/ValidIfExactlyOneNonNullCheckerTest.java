@@ -2,12 +2,12 @@ package com.sequenceiq.redbeams.validation;
 
 import static org.junit.Assert.fail;
 
-import com.sequenceiq.cloudbreak.validation.ValidIfExactlyOneNonNull;
-
 import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
+
+import com.sequenceiq.cloudbreak.validation.ValidIfExactlyOneNonNull;
 
 public class ValidIfExactlyOneNonNullCheckerTest {
 

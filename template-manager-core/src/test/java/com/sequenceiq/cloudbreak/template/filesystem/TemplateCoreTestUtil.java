@@ -5,14 +5,14 @@ import java.util.Collection;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
-import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
-import com.sequenceiq.common.api.filesystem.GcsFileSystem;
-import com.sequenceiq.common.api.filesystem.S3FileSystem;
-import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.gcs.GcsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.wasb.WasbFileSystemConfigurationsView;
+import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
+import com.sequenceiq.common.api.filesystem.GcsFileSystem;
+import com.sequenceiq.common.api.filesystem.S3FileSystem;
+import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 
 public class TemplateCoreTestUtil {
 

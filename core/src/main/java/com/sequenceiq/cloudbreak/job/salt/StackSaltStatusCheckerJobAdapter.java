@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
-public class StackSaltStatusCheckerJobAdapter extends JobResourceAdapter<Stack>  {
+public class StackSaltStatusCheckerJobAdapter extends JobResourceAdapter<Stack> {
 
     public StackSaltStatusCheckerJobAdapter(Long id, ApplicationContext context) {
         super(id, context);

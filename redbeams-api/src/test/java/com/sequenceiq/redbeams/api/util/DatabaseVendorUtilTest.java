@@ -4,13 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-
 import java.util.EnumSet;
 import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 
 public class DatabaseVendorUtilTest {
 

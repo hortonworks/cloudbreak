@@ -53,7 +53,7 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
             //  when there are some STOPPED instances
         } else {
             clusterAvailable = Optional.ofNullable(statusResponse.getStatus()).map(Status::isAvailable).orElse(false)
-            && Optional.ofNullable(statusResponse.getClusterStatus()).map(Status::isAvailable).orElse(false);
+                    && Optional.ofNullable(statusResponse.getClusterStatus()).map(Status::isAvailable).orElse(false);
         }
 
         LOGGER.info("Computed clusterAvailable: {}", clusterAvailable);

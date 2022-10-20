@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.converter.v4.customimage;
 
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4GetResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4ImageListItemResponse;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -7,12 +13,6 @@ import com.sequenceiq.cloudbreak.converter.ConversionException;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-
-import org.springframework.stereotype.Component;
-
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 @Component
 public class ImageCatalogToCustomImageCatalogV4GetResponseConverter {

@@ -1,21 +1,20 @@
 package com.sequenceiq.datalake.flow.dr.backup;
 
-
+import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILED_EVENT;
+import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILURE_HANDLED_EVENT;
+import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_SUCCESS_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_COULD_NOT_START_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FAILED_EVENT;
-import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT;
-import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT;
-import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_SUCCESS_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_FULL_BACKUP_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_TRIGGER_BACKUP_EVENT;
-import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupState.DATALAKE_DATABASE_BACKUP_COULD_NOT_START_STATE;
-import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupState.DATALAKE_DATABASE_BACKUP_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupState.DATALAKE_BACKUP_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupState.DATALAKE_BACKUP_FINISHED_STATE;
+import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupState.DATALAKE_DATABASE_BACKUP_COULD_NOT_START_STATE;
+import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupState.DATALAKE_DATABASE_BACKUP_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupState.DATALAKE_DATABASE_BACKUP_IN_PROGRESS_STATE;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupState.DATALAKE_DATABASE_BACKUP_START_STATE;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupState.DATALAKE_FULL_BACKUP_IN_PROGRESS_STATE;

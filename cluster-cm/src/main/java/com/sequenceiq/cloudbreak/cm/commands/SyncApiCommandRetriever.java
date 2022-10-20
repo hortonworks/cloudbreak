@@ -21,8 +21,8 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cm.model.CommandResource;
-import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class SyncApiCommandRetriever {

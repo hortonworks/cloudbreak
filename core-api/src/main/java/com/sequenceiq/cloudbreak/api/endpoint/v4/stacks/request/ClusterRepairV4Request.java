@@ -5,8 +5,8 @@ import java.util.StringJoiner;
 
 import javax.validation.Valid;
 
-import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RepairClusterRequest;
+import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

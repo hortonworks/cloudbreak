@@ -115,7 +115,6 @@ public enum AuthorizationResourceAction {
     DATAHUB_READ("datahub/read", AuthorizationResourceType.DATAHUB),
     DATAHUB_WRITE("datahub/write", AuthorizationResourceType.DATAHUB);
 
-
     private static final Map<String, List<AuthorizationResourceAction>> BY_RIGHT = Stream.of(AuthorizationResourceAction.values())
             .collect(Collectors.groupingBy(AuthorizationResourceAction::getRight));
 

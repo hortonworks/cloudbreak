@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 import java.io.Serializable;
 
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
+
 import io.swagger.annotations.ApiModelProperty;
 
 public class FreeIpaImageResponse implements Serializable {

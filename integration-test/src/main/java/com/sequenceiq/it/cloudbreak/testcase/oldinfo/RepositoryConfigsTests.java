@@ -4,9 +4,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
-import com.sequenceiq.it.cloudbreak.RepositoryConfigs;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
+import com.sequenceiq.it.cloudbreak.RepositoryConfigs;
 
 public class RepositoryConfigsTests extends CloudbreakTest {
     private static final String VALID_AMBARI_BASE_URL = "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3";

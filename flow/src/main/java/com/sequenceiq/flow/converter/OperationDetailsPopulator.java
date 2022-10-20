@@ -9,13 +9,13 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.api.model.operation.OperationFlowsView;
-import com.sequenceiq.flow.api.model.operation.OperationResource;
-import com.sequenceiq.flow.api.model.operation.OperationView;
-import com.sequenceiq.flow.api.model.operation.OperationProgressStatus;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.api.model.FlowStateTransitionResponse;
 import com.sequenceiq.flow.api.model.StateStatus;
+import com.sequenceiq.flow.api.model.operation.OperationFlowsView;
+import com.sequenceiq.flow.api.model.operation.OperationProgressStatus;
+import com.sequenceiq.flow.api.model.operation.OperationResource;
+import com.sequenceiq.flow.api.model.operation.OperationView;
 
 @Component
 public class OperationDetailsPopulator {

@@ -12,8 +12,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
-import com.sequenceiq.datalake.converter.SdxOperationTypeEnumConverter;
 import com.sequenceiq.datalake.converter.SdxOperationStatusTypeEnumConverter;
+import com.sequenceiq.datalake.converter.SdxOperationTypeEnumConverter;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"operationId"}))

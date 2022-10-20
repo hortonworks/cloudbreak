@@ -2,12 +2,12 @@ package com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws;
 
 import static org.junit.Assert.assertEquals;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
 public class AwsNetworkV4ParametersTest {
 

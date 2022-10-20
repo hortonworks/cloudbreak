@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.config;
 
-import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.ExternalDatabaseCreationStartEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseSelectableEvent;
+import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.ExternalDatabaseCreationStartEvent;
 import com.sequenceiq.flow.core.FlowEvent;
 
 public enum ExternalDatabaseCreationEvent implements FlowEvent {

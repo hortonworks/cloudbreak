@@ -1,14 +1,14 @@
 package com.sequenceiq.cloudbreak.controller.validation.loadbalancer;
 
+import static com.sequenceiq.cloudbreak.controller.validation.loadbalancer.EndpointGatewayNetworkValidator.NO_BASE_SUBNET;
+import static com.sequenceiq.cloudbreak.controller.validation.loadbalancer.EndpointGatewayNetworkValidator.NO_BASE_SUBNET_META;
+import static com.sequenceiq.cloudbreak.controller.validation.loadbalancer.EndpointGatewayNetworkValidator.NO_USABLE_SUBNET_IN_CLUSTER;
+import static com.sequenceiq.cloudbreak.controller.validation.loadbalancer.EndpointGatewayNetworkValidator.NO_USABLE_SUBNET_IN_ENDPOINT_GATEWAY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static com.sequenceiq.cloudbreak.controller.validation.loadbalancer.EndpointGatewayNetworkValidator.NO_BASE_SUBNET;
-import static com.sequenceiq.cloudbreak.controller.validation.loadbalancer.EndpointGatewayNetworkValidator.NO_BASE_SUBNET_META;
-import static com.sequenceiq.cloudbreak.controller.validation.loadbalancer.EndpointGatewayNetworkValidator.NO_USABLE_SUBNET_IN_CLUSTER;
-import static com.sequenceiq.cloudbreak.controller.validation.loadbalancer.EndpointGatewayNetworkValidator.NO_USABLE_SUBNET_IN_ENDPOINT_GATEWAY;
 
 import java.util.Map;
 import java.util.Optional;

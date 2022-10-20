@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.domain.stack.cluster;
 
-import com.sequenceiq.cloudbreak.domain.converter.ClusterCommandTypeConverter;
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
@@ -13,6 +11,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
+
+import com.sequenceiq.cloudbreak.domain.converter.ClusterCommandTypeConverter;
 
 @Entity
 public class ClusterCommand {

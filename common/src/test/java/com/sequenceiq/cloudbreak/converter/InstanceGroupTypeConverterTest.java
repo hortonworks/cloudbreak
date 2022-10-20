@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.common.api.type.InstanceGroupType;
-
 import javax.persistence.AttributeConverter;
+
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public class InstanceGroupTypeConverterTest extends DefaultEnumConverterBaseTest<InstanceGroupType> {
 

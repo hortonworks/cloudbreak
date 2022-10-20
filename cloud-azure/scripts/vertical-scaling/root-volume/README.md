@@ -19,6 +19,7 @@ By default most of the root volumes are 100GB, but some older DL and DH may stil
 All the needed VMs need to be in stopped (VM deallocated) state.
 
 The following tools need to be installed:
+
 * az-cli
 * jq
 * all VMs have to be in stopped state

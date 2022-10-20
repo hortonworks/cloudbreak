@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.entity;
 
-import com.sequenceiq.datalake.converter.DatalakeStatusEnumConverter;
-
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,6 +11,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+
+import com.sequenceiq.datalake.converter.DatalakeStatusEnumConverter;
 
 @Entity
 @Table(name = "sdxstatus")

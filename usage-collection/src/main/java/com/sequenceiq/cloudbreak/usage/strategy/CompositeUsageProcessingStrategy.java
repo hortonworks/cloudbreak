@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.telemetry.messagebroker.MessageBrokerConfiguration;
-import com.sequenceiq.cloudbreak.usage.model.UsageContext;
 import com.sequenceiq.cloudbreak.usage.http.EdhHttpConfiguration;
+import com.sequenceiq.cloudbreak.usage.model.UsageContext;
 
 @Service
 public class CompositeUsageProcessingStrategy implements UsageProcessingStrategy {

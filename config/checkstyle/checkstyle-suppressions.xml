@@ -16,8 +16,6 @@
     <suppress checks="IllegalThrow" files="ResponseModifierAspect.java"/>
     <suppress checks="IllegalThrow" files="ResponseModifierService.java"/>
     <suppress checks="IllegalThrow" files="ResponseModifierServiceTest.java"/>
-    <suppress checks="IllegalThrow" files="HasPermissionAspects.java"/>
-    <suppress checks="IllegalThrow" files="HasPermissionService.java"/>
     <suppress checks="IllegalThrow" files="MeasureAspects.java|FlowParametersAspects.java"/>
     <suppress checks="RedundantModifier" files="CoreApi.java"/>
     <suppress checks="RegexpMultilineCheck" files="ShellConfiguration.java"/>
@@ -25,7 +23,9 @@
     <suppress checks="IllegalTypeCheck" files="AbstractFlowConfiguration.java|AbstractFlowConfigurationTest.java"/>
     <suppress checks="ParameterNumber" files="UserDataBuilder.java|ServiceEndpointCollector.java"/>
     <suppress checks="EmptyLineSeparator" files=".*Description.java|.*Descriptions.java|Notes.java"/>
-    <suppress checks=".*" files="PrometheusResponse.java"/>
+    <suppress checks="EmptyLineSeparator" files=".*Description.java|.*Descriptions.java|Notes.java"/>
+    <suppress checks="ImportOrder" files="EventSenderService.java"/>
+    <suppress checks="IllegalImport" files="DriverWithConnectivity.java"/>
     <suppress checks="CyclomaticComplexity" files="PrometheusEvaluator.java|MetadataSetupService.java|AzureRoleManager.java|DBStackToDatabaseStackConverter.java|ClusterServiceConfig.java"/>
     <suppress checks="ModifierOrderCheck" files="EncryptedJsonToString.java"/>
     <suppress checks="TrailingComment" files="HeartbeatServiceTest.java"/>
@@ -53,22 +53,15 @@
     <suppress id="sysout" files="VersionedApplication.java"/>
     <suppress checks="HideUtilityClassConstructor" files=".*Application.java"/>
 
-    <!-- suppress test classes in generated code -->
+    <!-- suppress test/dummy/mock classes -->
     <suppress checks="IllegalTypeImpl|IllegalCatch|AbstractClassName|EmptyBlock|MagicNumberCheck|ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="test|Dummy|Mock"/>
-
-    <!-- -->
-    <suppress checks="IllegalTypeCheck" files="MockSshServer.java"/>
 
     <!-- suppress everything in package level JavaDoc files -->
     <suppress checks=".*" files="package-info.java"/>
-
     <suppress checks=".*" files="yarn-service/src/main/java/org/apache/cb/yarn/service/api/.*"/>
 
     <!-- suppressing checks in Autoscale -->
     <suppress checks="HideUtilityClassConstructor" files="PeriscopeApplication.java" />
-    <suppress id="string-instantiation" files="AmbariConfigurationService.java"/>
-    <suppress id="string-instantiation" files="RemoteUserDetailsService.java"/>
-    <suppress checks="InnerAssignment" files="ScalingPolicyConverter.java" />
     <suppress id="sysout" files="VersionedApplication.java"/>
     <suppress checks="VisibilityModifierCheck" files=".*Test.java"/>
 

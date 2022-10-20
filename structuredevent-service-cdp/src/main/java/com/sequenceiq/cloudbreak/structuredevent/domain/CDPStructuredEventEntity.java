@@ -9,11 +9,11 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
-import com.sequenceiq.cloudbreak.structuredevent.service.converter.CDPStructuredEventTypeConverter;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
-import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
+import com.sequenceiq.cloudbreak.structuredevent.service.converter.CDPStructuredEventTypeConverter;
 
 @Entity
 @Table(name = "cdp_structured_event")

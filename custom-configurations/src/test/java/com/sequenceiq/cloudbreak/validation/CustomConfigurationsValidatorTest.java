@@ -4,6 +4,7 @@ package com.sequenceiq.cloudbreak.validation;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;

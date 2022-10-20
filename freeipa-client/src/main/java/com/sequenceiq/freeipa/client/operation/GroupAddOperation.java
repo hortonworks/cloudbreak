@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
-import com.sequenceiq.freeipa.client.FreeIpaGroupType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +12,7 @@ import com.sequenceiq.freeipa.client.FreeIpaChecks;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
+import com.sequenceiq.freeipa.client.FreeIpaGroupType;
 import com.sequenceiq.freeipa.client.model.Group;
 
 public class GroupAddOperation extends AbstractFreeipaOperation<Group> {

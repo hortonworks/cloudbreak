@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack;
 
+import java.util.Arrays;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.Arrays;
 
 @Service
 public class CloudbreakFlowMessageService implements FlowMessageService {

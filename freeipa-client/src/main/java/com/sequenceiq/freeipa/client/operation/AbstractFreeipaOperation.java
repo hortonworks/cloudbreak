@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.cloudbreak.client.RPCResponse;
 
 public abstract class AbstractFreeipaOperation<R> {
 

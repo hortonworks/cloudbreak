@@ -2,11 +2,6 @@ package com.sequenceiq.redbeams.service.drivers;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
-import com.sequenceiq.redbeams.domain.DatabaseConfig;
-import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
-
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverPropertyInfo;
@@ -14,8 +9,12 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Optional;
 import java.util.Properties;
-//CHECKSTYLE:OFF
 import java.util.logging.Logger;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
+import com.sequenceiq.redbeams.domain.DatabaseConfig;
+import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 //CHECKSTYLE:ON
 
 /**

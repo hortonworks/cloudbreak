@@ -10,17 +10,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.flow.component.sleep.event.SleepCompletedEvent;
+import com.sequenceiq.flow.component.sleep.event.SleepEvent;
+import com.sequenceiq.flow.component.sleep.event.SleepFailedEvent;
+import com.sequenceiq.flow.component.sleep.event.SleepStartEvent;
+import com.sequenceiq.flow.component.sleep.event.SleepWaitRequest;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.flow.component.sleep.event.SleepCompletedEvent;
-import com.sequenceiq.flow.component.sleep.event.SleepEvent;
-import com.sequenceiq.flow.component.sleep.event.SleepFailedEvent;
-import com.sequenceiq.flow.component.sleep.event.SleepStartEvent;
-import com.sequenceiq.flow.component.sleep.event.SleepWaitRequest;
 
 @Configuration
 public class SleepFlow {

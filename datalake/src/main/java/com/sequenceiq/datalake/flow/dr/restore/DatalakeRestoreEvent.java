@@ -2,10 +2,10 @@ package com.sequenceiq.datalake.flow.dr.restore;
 
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreCouldNotStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreFailedEvent;
-import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreFailedEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
-import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreInProgressEvent;
+import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreFailedEvent;
+import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreSuccessEvent;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 

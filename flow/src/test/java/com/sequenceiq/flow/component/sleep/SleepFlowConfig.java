@@ -4,11 +4,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.flow.component.sleep.event.SleepEvent;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
-import com.sequenceiq.flow.component.sleep.event.SleepEvent;
 
 public class SleepFlowConfig extends AbstractFlowConfiguration<SleepState, SleepEvent>
         implements RetryableFlowConfiguration<SleepEvent> {

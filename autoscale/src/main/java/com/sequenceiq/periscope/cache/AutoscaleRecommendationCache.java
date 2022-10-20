@@ -1,7 +1,9 @@
 package com.sequenceiq.periscope.cache;
 
 import java.util.concurrent.TimeUnit;
+
 import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cache.common.AbstractCacheDefinition;
 
 @Component

@@ -188,7 +188,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private void repairOneNodeFromEachHostGroupAtOnce(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
-            Map<String, Set<String>> repairableGroupsWithHostNames, StackView stackView) {
+        Map<String, Set<String>> repairableGroupsWithHostNames, StackView stackView) {
         Optional<String> primaryGwFQDN = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(event.getStackId())
                 .map(InstanceMetadataView::getDiscoveryFQDN);
         HashMultimap<String, String> repairableGroupsWithHostNameMultimap = HashMultimap.create();
@@ -199,14 +199,14 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private LinkedListMultimap<String, String> collectHostsByHostGroupAndSortByPgw(Optional<String> primaryGwFQDN,
-            HashMultimap<String, String> repairableGroupsWithHostNameMultimap) {
+        HashMultimap<String, String> repairableGroupsWithHostNameMultimap) {
         return repairableGroupsWithHostNameMultimap.entries().stream()
                 .sorted(Entry.comparingByValue(Comparator.comparing(s -> primaryGwFQDN.filter(s::equals).isEmpty())))
                 .collect(Multimaps.toMultimap(Entry::getKey, Entry::getValue, LinkedListMultimap::create));
     }
 
     private void addRepairFlowsForEachGroupsWithOneNode(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
-            Multimap<String, String> orderedHostMultimap, Optional<String> primaryGwFQDNOptional, StackView stackView) {
+        Multimap<String, String> orderedHostMultimap, Optional<String> primaryGwFQDNOptional, StackView stackView) {
         while (!orderedHostMultimap.values().isEmpty()) {
             Map<String, Set<String>> repairableGroupsWithOneHostName = new HashMap<>();
             for (String hostGroup : new HashSet<>(orderedHostMultimap.keySet())) {
@@ -225,7 +225,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private void addRepairFlows(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers, Map<String, Set<String>> repairableGroupsWithHostNames,
-            boolean singlePrimaryGW, StackView stackView) {
+        boolean singlePrimaryGW, StackView stackView) {
         if (!repairableGroupsWithHostNames.isEmpty()) {
             flowTriggers.add(downscaleEvent(singlePrimaryGW, event, repairableGroupsWithHostNames));
             LOGGER.info("Downscale event added for: {}", repairableGroupsWithHostNames);
@@ -271,7 +271,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private StackEvent downscaleEvent(boolean singlePrimaryGW, ClusterRepairTriggerEvent event,
-            Map<String, Set<String>> groupsWithHostNames) {
+        Map<String, Set<String>> groupsWithHostNames) {
         Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.getAllInstanceMetadataWithoutInstanceGroupByStackId(event.getStackId());
         Map<String, Set<Long>> groupsWithPrivateIds = new HashMap<>();
         Map<String, Integer> groupsWithAdjustment = new HashMap<>();
@@ -303,7 +303,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private StackAndClusterUpscaleTriggerEvent fullUpscaleEvent(ClusterRepairTriggerEvent event, Map<String, Set<String>> groupsWithHostNames,
-            boolean singlePrimaryGateway, boolean restartServices, boolean kerberosSecured) {
+        boolean singlePrimaryGateway, boolean restartServices, boolean kerberosSecured) {
         Set<com.sequenceiq.cloudbreak.domain.view.InstanceGroupView> instanceGroupViews = instanceGroupService.findViewByStackId(event.getStackId());
         boolean singleNodeCluster = isSingleNode(instanceGroupViews);
         Integer adjustmentSize = groupsWithHostNames.values().stream().map(Set::size).reduce(0, Integer::sum);

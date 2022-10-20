@@ -40,7 +40,7 @@ public class StackSyncFlowConfig extends StackStatusFinalizerAbstractFlowConfig<
 
     @Override
     public StackSyncEvent[] getInitEvents() {
-        return new StackSyncEvent[] {
+        return new StackSyncEvent[]{
                 STACK_SYNC_EVENT
         };
     }

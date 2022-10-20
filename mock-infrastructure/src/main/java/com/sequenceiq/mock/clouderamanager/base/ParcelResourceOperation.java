@@ -4,7 +4,6 @@ import static com.sequenceiq.mock.clouderamanager.CommandId.DEACTIVATE_PARCEL;
 import static com.sequenceiq.mock.clouderamanager.CommandId.REMOVE_PARCEL;
 import static com.sequenceiq.mock.clouderamanager.CommandId.START_PARCEL_DOWNLOAD;
 import static com.sequenceiq.mock.clouderamanager.CommandId.UNDISTRIBUTE_PARCEL;
-
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Optional;

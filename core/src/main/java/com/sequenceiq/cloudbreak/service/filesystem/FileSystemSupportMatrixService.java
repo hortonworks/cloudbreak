@@ -13,12 +13,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Response;
-import com.sequenceiq.cloudbreak.util.VersionComparator;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.service.filesystem.resource.definition.CloudFileSystemSupportConfigEntry;
 import com.sequenceiq.cloudbreak.service.filesystem.resource.definition.CloudFileSystemSupportMatrix;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 
 @Service
 public class FileSystemSupportMatrixService {

@@ -3,6 +3,14 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.impala;
 import static com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
@@ -13,14 +21,6 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 @ExtendWith(MockitoExtension.class)
 class ImpalaCloudStorageServiceConfigProviderTest {

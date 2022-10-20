@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DeregisterServicesResult;
-import com.sequenceiq.flow.core.FlowEvent;
-import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DisableKerberosResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTerminationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
+import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public enum ClusterTerminationEvent implements FlowEvent {
     TERMINATION_EVENT("CLUSTER_TERMINATION_TRIGGER_EVENT"),

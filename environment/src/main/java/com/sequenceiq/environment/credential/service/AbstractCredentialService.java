@@ -5,12 +5,12 @@ import java.util.Date;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakNotification;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.notification.Notification;
 import com.sequenceiq.notification.NotificationSender;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 public abstract class AbstractCredentialService {
 

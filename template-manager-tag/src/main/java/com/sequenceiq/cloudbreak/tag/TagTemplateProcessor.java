@@ -13,10 +13,10 @@ import org.springframework.stereotype.Component;
 
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
-import com.sequenceiq.cloudbreak.handlebar.HandlebarTemplate;
-import com.sequenceiq.cloudbreak.handlebar.HandlebarUtils;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.handlebar.HandlebarTemplate;
+import com.sequenceiq.cloudbreak.handlebar.HandlebarUtils;
 
 @Component
 public class TagTemplateProcessor {

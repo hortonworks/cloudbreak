@@ -41,59 +41,59 @@ import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class StackLoadBalancerUpdateFlowConfig extends StackStatusFinalizerAbstractFlowConfig<StackLoadBalancerUpdateState, StackLoadBalancerUpdateEvent>
-    implements RetryableFlowConfiguration<StackLoadBalancerUpdateEvent> {
+        implements RetryableFlowConfiguration<StackLoadBalancerUpdateEvent> {
 
     private static final List<Transition<StackLoadBalancerUpdateState, StackLoadBalancerUpdateEvent>> TRANSITIONS =
-        new Builder<StackLoadBalancerUpdateState, StackLoadBalancerUpdateEvent>().defaultFailureEvent(LOAD_BALANCER_UPDATE_FAILED)
+            new Builder<StackLoadBalancerUpdateState, StackLoadBalancerUpdateEvent>().defaultFailureEvent(LOAD_BALANCER_UPDATE_FAILED)
 
-        .from(INIT_STATE)
-            .to(CREATING_LOAD_BALANCER_ENTITY_STATE)
-            .event(STACK_LOAD_BALANCER_UPDATE_EVENT)
-            .noFailureEvent()
+                    .from(INIT_STATE)
+                    .to(CREATING_LOAD_BALANCER_ENTITY_STATE)
+                    .event(STACK_LOAD_BALANCER_UPDATE_EVENT)
+                    .noFailureEvent()
 
-        .from(CREATING_LOAD_BALANCER_ENTITY_STATE)
-            .to(CREATING_CLOUD_LOAD_BALANCERS_STATE)
-            .event(CREATE_LOAD_BALANCER_ENTITY_FINISHED_EVENT)
-            .failureEvent(CREATE_LOAD_BALANCER_ENTITY_FAILED_EVENT)
+                    .from(CREATING_LOAD_BALANCER_ENTITY_STATE)
+                    .to(CREATING_CLOUD_LOAD_BALANCERS_STATE)
+                    .event(CREATE_LOAD_BALANCER_ENTITY_FINISHED_EVENT)
+                    .failureEvent(CREATE_LOAD_BALANCER_ENTITY_FAILED_EVENT)
 
-        .from(CREATING_CLOUD_LOAD_BALANCERS_STATE)
-            .to(COLLECTING_LOAD_BALANCER_METADATA_STATE)
-            .event(CREATE_CLOUD_LOAD_BALANCERS_FINISHED_EVENT)
-            .failureEvent(CREATE_CLOUD_LOAD_BALANCERS_FAILED_EVENT)
+                    .from(CREATING_CLOUD_LOAD_BALANCERS_STATE)
+                    .to(COLLECTING_LOAD_BALANCER_METADATA_STATE)
+                    .event(CREATE_CLOUD_LOAD_BALANCERS_FINISHED_EVENT)
+                    .failureEvent(CREATE_CLOUD_LOAD_BALANCERS_FAILED_EVENT)
 
-        .from(COLLECTING_LOAD_BALANCER_METADATA_STATE)
-            .to(REGISTERING_PUBLIC_DNS_STATE)
-            .event(COLLECT_LOAD_BALANCER_METADATA_FINISHED_EVENT)
-            .failureEvent(COLLECT_LOAD_BALANCER_METADATA_FAILED_EVENT)
+                    .from(COLLECTING_LOAD_BALANCER_METADATA_STATE)
+                    .to(REGISTERING_PUBLIC_DNS_STATE)
+                    .event(COLLECT_LOAD_BALANCER_METADATA_FINISHED_EVENT)
+                    .failureEvent(COLLECT_LOAD_BALANCER_METADATA_FAILED_EVENT)
 
-        .from(REGISTERING_PUBLIC_DNS_STATE)
-            .to(REGISTERING_FREEIPA_DNS_STATE)
-            .event(REGISTER_PUBLIC_DNS_FINISHED_EVENT)
-            .failureEvent(REGISTER_PUBLIC_DNS_FAILED_EVENT)
+                    .from(REGISTERING_PUBLIC_DNS_STATE)
+                    .to(REGISTERING_FREEIPA_DNS_STATE)
+                    .event(REGISTER_PUBLIC_DNS_FINISHED_EVENT)
+                    .failureEvent(REGISTER_PUBLIC_DNS_FAILED_EVENT)
 
-        .from(REGISTERING_FREEIPA_DNS_STATE)
-            .to(UPDATING_SERVICE_CONFIG_STATE)
-            .event(REGISTER_FREEIPA_DNS_FINISHED_EVENT)
-            .failureEvent(REGISTER_FREEIPA_DNS_FAILED_EVENT)
+                    .from(REGISTERING_FREEIPA_DNS_STATE)
+                    .to(UPDATING_SERVICE_CONFIG_STATE)
+                    .event(REGISTER_FREEIPA_DNS_FINISHED_EVENT)
+                    .failureEvent(REGISTER_FREEIPA_DNS_FAILED_EVENT)
 
-        .from(UPDATING_SERVICE_CONFIG_STATE)
-            .to(RESTARTING_CM_STATE)
-            .event(UPDATE_SERVICE_CONFIG_FINISHED_EVENT)
-            .failureEvent(UPDATE_SERVICE_CONFIG_FAILED_EVENT)
+                    .from(UPDATING_SERVICE_CONFIG_STATE)
+                    .to(RESTARTING_CM_STATE)
+                    .event(UPDATE_SERVICE_CONFIG_FINISHED_EVENT)
+                    .failureEvent(UPDATE_SERVICE_CONFIG_FAILED_EVENT)
 
-        .from(RESTARTING_CM_STATE)
-            .to(LOAD_BALANCER_UPDATE_FINISHED_STATE)
-            .event(RESTART_CM_FINISHED_EVENT)
-            .failureEvent(RESTART_CM_FAILED_EVENT)
+                    .from(RESTARTING_CM_STATE)
+                    .to(LOAD_BALANCER_UPDATE_FINISHED_STATE)
+                    .event(RESTART_CM_FINISHED_EVENT)
+                    .failureEvent(RESTART_CM_FAILED_EVENT)
 
-        .from(LOAD_BALANCER_UPDATE_FINISHED_STATE)
-            .to(FINAL_STATE)
-            .event(LOAD_BALANCER_UPDATE_FINISHED_EVENT).defaultFailureEvent()
+                    .from(LOAD_BALANCER_UPDATE_FINISHED_STATE)
+                    .to(FINAL_STATE)
+                    .event(LOAD_BALANCER_UPDATE_FINISHED_EVENT).defaultFailureEvent()
 
-        .build();
+                    .build();
 
     private static final FlowEdgeConfig<StackLoadBalancerUpdateState, StackLoadBalancerUpdateEvent> EDGE_CONFIG =
-        new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, LOAD_BALANCER_UPDATE_FAILED_STATE, LOAD_BALANCER_UPDATE_FAIL_HANDLED_EVENT);
+            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, LOAD_BALANCER_UPDATE_FAILED_STATE, LOAD_BALANCER_UPDATE_FAIL_HANDLED_EVENT);
 
     public StackLoadBalancerUpdateFlowConfig() {
         super(StackLoadBalancerUpdateState.class, StackLoadBalancerUpdateEvent.class);
@@ -107,7 +107,7 @@ public class StackLoadBalancerUpdateFlowConfig extends StackStatusFinalizerAbstr
     @Override
     public StackLoadBalancerUpdateEvent[] getInitEvents() {
         return new StackLoadBalancerUpdateEvent[]{
-            STACK_LOAD_BALANCER_UPDATE_EVENT
+                STACK_LOAD_BALANCER_UPDATE_EVENT
         };
     }
 

@@ -16,7 +16,7 @@ public class YarnResponseUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(YarnResponseUtils.class);
 
     public List<String> getYarnRecommendedDecommissionHostsForHostGroup(YarnScalingServiceV1Response yarnResponse,
-            Map<String, String> hostFqdnsToInstanceId) {
+        Map<String, String> hostFqdnsToInstanceId) {
         // yarnResponse may not have maxAllowedDownscale candidates. This is expected when using LoadBasedDownscaling
         // where a force downscale is not required. In this case downscaling is done based on yarn recommended count.
 

@@ -162,7 +162,7 @@ public class CbDelegatedTokenCredentialsTest {
 
     @Test
     public void testGetTokenWhenAuthCodeGivenButNoTokenProvidedAndHttpUsedAsActiveDirectoryEndpointProtocolInsteadOfHttpsThenExceptionComes()
-                    throws IOException {
+            throws IOException {
         String authorityUrl = format("%s/%s", format(TEST_AD_ENDPOINT, HTTP), TEST_DOMAIN);
         when(applicationTokenCredentials.environment()).thenReturn(new AzureEnvironment(Map.of("activeDirectoryEndpointUrl", format(TEST_AD_ENDPOINT, HTTP))));
         doThrow(new IllegalArgumentException("'authority' should use the 'https' scheme")).when(authenticationContextProvider)
@@ -205,7 +205,7 @@ public class CbDelegatedTokenCredentialsTest {
 
     @Test
     public void testGetTokenClientSecretAndAuthorizationCodeGivenThroughConstructorThenNewAccessTokenReturns() throws IOException, ExecutionException,
-                    InterruptedException {
+            InterruptedException {
         String customAccessToken = "customAccessToken";
         String authorityUrl = format("%s/%s", format(TEST_AD_ENDPOINT, HTTPS), TEST_DOMAIN);
         AuthenticationResult authenticationResult = new AuthenticationResult("type", customAccessToken, REFRESH_TOKEN, 123456789L, "1", mock(UserInfo.class),
@@ -351,7 +351,7 @@ public class CbDelegatedTokenCredentialsTest {
 
     @Test
     public void testGetTokenWhenDifferentResourceGivenThanProvidedInTokensAndShouldRefreshThenNewAccessTokenReturnsAfterwards()
-                    throws IOException, ExecutionException, InterruptedException {
+            throws IOException, ExecutionException, InterruptedException {
         String expected = "someOtherAccessToken";
         String customResource = "someOtherResourceWhichIsNotInTheTokensMap";
 
@@ -386,7 +386,7 @@ public class CbDelegatedTokenCredentialsTest {
 
     @Test
     public void testGetTokenWhenDifferentResourceGivenThanProvidedInTokensAndShouldRefreshAndRefreshingTokenFailsThenAuthenticationExceptionComes()
-                    throws IOException, ExecutionException, InterruptedException {
+            throws IOException, ExecutionException, InterruptedException {
         String customResource = "someOtherResourceWhichIsNotInTheTokensMap";
 
         Map<String, AuthenticationResult> tokens = Map.of(RESOURCE, new AuthenticationResult("type", ACCESS_TOKEN, REFRESH_TOKEN, PAST_DATE,

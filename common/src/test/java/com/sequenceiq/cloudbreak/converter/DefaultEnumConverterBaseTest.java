@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import org.junit.jupiter.api.Test;
-
-import javax.persistence.AttributeConverter;
-import java.util.EnumSet;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.util.EnumSet;
+
+import javax.persistence.AttributeConverter;
+
+import org.junit.jupiter.api.Test;
 
 public abstract class DefaultEnumConverterBaseTest<E extends Enum<E>> {
 

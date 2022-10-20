@@ -44,7 +44,7 @@ abstract class AbstractAwsVariantMigrationAction<P extends Payload>
 
     @Override
     protected AwsVariantMigrationFlowContext createFlowContext(FlowParameters flowParameters,
-            StateContext<AwsVariantMigrationFlowState, AwsVariantMigrationEvent> stateContext, P payload) {
+        StateContext<AwsVariantMigrationFlowState, AwsVariantMigrationEvent> stateContext, P payload) {
         StackDto stack = stackDtoService.getById(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));

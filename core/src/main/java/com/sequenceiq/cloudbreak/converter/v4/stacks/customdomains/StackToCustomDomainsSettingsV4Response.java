@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.customdomains;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.CustomDomainSettingsV4Response;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class StackToCustomDomainsSettingsV4Response {

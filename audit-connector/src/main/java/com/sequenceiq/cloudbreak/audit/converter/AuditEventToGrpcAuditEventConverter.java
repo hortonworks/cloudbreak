@@ -1,5 +1,16 @@
 package com.sequenceiq.cloudbreak.audit.converter;
 
+import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.doIfTrue;
+import static com.sequenceiq.cloudbreak.util.UuidUtil.uuidSupplier;
+
+import java.util.Map;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.cloudera.thunderhead.service.audit.AuditProto;
 import com.google.common.base.CaseFormat;
 import com.sequenceiq.cloudbreak.audit.converter.builder.AuditEventBuilderProvider;
@@ -8,16 +19,6 @@ import com.sequenceiq.cloudbreak.audit.model.ActorCrn;
 import com.sequenceiq.cloudbreak.audit.model.ActorService;
 import com.sequenceiq.cloudbreak.audit.model.AuditEvent;
 import com.sequenceiq.cloudbreak.audit.model.EventData;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import java.util.Map;
-import java.util.Optional;
-
-import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.doIfTrue;
-import static com.sequenceiq.cloudbreak.util.UuidUtil.uuidSupplier;
 
 @Component
 public class AuditEventToGrpcAuditEventConverter {

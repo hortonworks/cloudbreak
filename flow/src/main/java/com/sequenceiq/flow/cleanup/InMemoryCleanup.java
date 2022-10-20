@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryResourceStateStore;
 import com.sequenceiq.flow.core.FlowRegister;
-import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.core.cache.FlowStatCache;
+import com.sequenceiq.flow.core.chain.FlowChains;
 
 @Component
 public class InMemoryCleanup {

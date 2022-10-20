@@ -18,7 +18,7 @@ public class StackTerminationContext extends StackContext {
     private final TerminationType terminationType;
 
     public StackTerminationContext(FlowParameters flowParameters, StackDtoDelegate stack, CloudContext cloudContext, CloudCredential cloudCredential,
-            CloudStack cloudStack, List<CloudResource> cloudResources, TerminationType terminationType) {
+        CloudStack cloudStack, List<CloudResource> cloudResources, TerminationType terminationType) {
         super(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
         this.cloudResources = cloudResources;
         this.terminationType = terminationType;

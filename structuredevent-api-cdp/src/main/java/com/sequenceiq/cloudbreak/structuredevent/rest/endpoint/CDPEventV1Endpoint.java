@@ -19,9 +19,9 @@ import javax.ws.rs.core.Response;
 import org.springframework.data.domain.Page;
 
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEventContainer;
 import com.sequenceiq.cloudbreak.structuredevent.rest.model.CDPEventV1Response;
 import com.sequenceiq.cloudbreak.structuredevent.rest.model.CDPEventV1Responses;
-import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEventContainer;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

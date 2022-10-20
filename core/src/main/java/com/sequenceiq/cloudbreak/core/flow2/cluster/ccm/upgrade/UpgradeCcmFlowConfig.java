@@ -137,7 +137,7 @@ public class UpgradeCcmFlowConfig extends StackStatusFinalizerAbstractFlowConfig
 
     @Override
     public UpgradeCcmEvent[] getInitEvents() {
-        return new UpgradeCcmEvent[] {
+        return new UpgradeCcmEvent[]{
                 UPGRADE_CCM_EVENT
         };
     }

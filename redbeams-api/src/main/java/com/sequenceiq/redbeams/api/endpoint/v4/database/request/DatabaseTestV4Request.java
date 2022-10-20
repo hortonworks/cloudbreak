@@ -1,14 +1,14 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.database.request;
 
+import java.io.Serializable;
+
+import javax.validation.Valid;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.validation.ValidIfExactlyOneNonNull;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.base.DatabaseV4Identifiers;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseTest;
-
-import java.io.Serializable;
-
-import javax.validation.Valid;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

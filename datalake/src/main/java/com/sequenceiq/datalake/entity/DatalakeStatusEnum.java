@@ -69,7 +69,6 @@ public enum DatalakeStatusEnum {
     DATALAKE_UPGRADE_DATABASE_SERVER_FAILED(ResourceEvent.DATALAKE_UPGRADE_DATABASE_SERVER_FAILED),
     DATALAKE_UPGRADE_DATABASE_SERVER_FINISHED(ResourceEvent.DATALAKE_UPGRADE_DATABASE_SERVER_FINISHED);
 
-
     private final ResourceEvent resourceEvent;
 
     DatalakeStatusEnum(ResourceEvent resourceEvent) {

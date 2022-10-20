@@ -42,7 +42,7 @@ public class DistroXUpgradeImageSelector {
     }
 
     private void validateThereIsMatchingRuntime(List<ImageInfoV4Response> upgradeCandidates, List<ImageInfoV4Response> imagesWithMatchingRuntime,
-            String runtime) {
+                                                String runtime) {
         if (imagesWithMatchingRuntime.isEmpty()) {
             String availableRuntimes = collectAvailableRuntimes(upgradeCandidates);
             if (StringUtils.isEmpty(availableRuntimes)) {

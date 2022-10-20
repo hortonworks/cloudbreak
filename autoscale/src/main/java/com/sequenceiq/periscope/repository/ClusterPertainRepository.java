@@ -1,12 +1,14 @@
 package com.sequenceiq.periscope.repository;
 
-import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
-import com.sequenceiq.periscope.domain.ClusterPertain;
+import java.util.Optional;
+
+import javax.transaction.Transactional;
+
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import javax.transaction.Transactional;
-import java.util.Optional;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.periscope.domain.ClusterPertain;
 
 @EntityType(entityClass = ClusterPertain.class)
 @Transactional(Transactional.TxType.REQUIRED)

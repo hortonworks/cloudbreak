@@ -41,7 +41,7 @@ public class CloudbreakUMSCleanupJob extends UMSCleanupJob {
     private final StackService stackService;
 
     public CloudbreakUMSCleanupJob(UMSCleanupConfig umsCleanupConfig, AltusMachineUserService altusMachineUserService,
-            StackService stackService, Tracer tracer) {
+        StackService stackService, Tracer tracer) {
         super(tracer, "UMS Cleanup");
         this.umsCleanupConfig = umsCleanupConfig;
         this.altusMachineUserService = altusMachineUserService;
@@ -84,10 +84,10 @@ public class CloudbreakUMSCleanupJob extends UMSCleanupJob {
     }
 
     private boolean shouldDeleteMachineUser(String name,
-            Set<String> datalakeMachineUsers,
-            Set<String> datahubFluentMachineUsers,
-            Set<String> datahubTPMachineUsers,
-            Set<String> datahubMonitoringMachineUsers) {
+                                            Set<String> datalakeMachineUsers,
+                                            Set<String> datahubFluentMachineUsers,
+                                            Set<String> datahubTPMachineUsers,
+                                            Set<String> datahubMonitoringMachineUsers) {
         if ((name.startsWith("datalake-fluent") || name.startsWith("datalake-monitoring")) && !datalakeMachineUsers.contains(name)) {
             return true;
         } else if (name.startsWith("datahub-fluent") && !datahubFluentMachineUsers.contains(name)) {

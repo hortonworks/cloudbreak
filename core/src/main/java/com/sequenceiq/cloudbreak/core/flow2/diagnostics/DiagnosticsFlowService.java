@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.diagnostics;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkCheckType.Value;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
-import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkCheckType.Value;
 
 import java.lang.module.ModuleDescriptor;
 import java.util.ArrayList;
@@ -34,11 +34,11 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadata;
+import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadataProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
-import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadata;
-import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadataProvider;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;

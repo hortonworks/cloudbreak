@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.periscope.doc.ApiDescription;
+
 import io.swagger.annotations.ApiModelProperty;
 
 public class AutoscaleClusterHistoryActivity {

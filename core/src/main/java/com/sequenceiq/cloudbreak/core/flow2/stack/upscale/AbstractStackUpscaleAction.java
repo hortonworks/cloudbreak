@@ -71,7 +71,7 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
 
     @Override
     protected StackScalingFlowContext createFlowContext(FlowParameters flowParameters,
-            StateContext<StackUpscaleState, StackUpscaleEvent> stateContext, P payload) {
+                                                        StateContext<StackUpscaleState, StackUpscaleEvent> stateContext, P payload) {
         Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
         StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);

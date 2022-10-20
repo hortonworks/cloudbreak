@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.CheckImageAction;
+import com.sequenceiq.flow.core.FlowEvent;
 
 @Component("CheckImageAfterUpdateAction")
 public class CheckImageAfterUpdateAction extends CheckImageAction {

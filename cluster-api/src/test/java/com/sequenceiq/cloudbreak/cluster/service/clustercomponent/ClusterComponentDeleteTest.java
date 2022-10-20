@@ -8,13 +8,14 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.cluster.common.TestUtil;
-import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+
+import com.sequenceiq.cloudbreak.cluster.common.TestUtil;
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 
 class ClusterComponentDeleteTest extends ClusterComponentConfigProviderTestBase {
 

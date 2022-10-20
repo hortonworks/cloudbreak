@@ -1,5 +1,12 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
+
+import javax.inject.Inject;
+
+import org.testng.annotations.Test;
+
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -7,12 +14,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
 public class FreeIpaRebuildTests extends AbstractE2ETest {
 

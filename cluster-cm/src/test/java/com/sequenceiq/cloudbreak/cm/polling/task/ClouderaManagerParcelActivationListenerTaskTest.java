@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cm.util.TestUtil.CDH;
 import static com.sequenceiq.cloudbreak.cm.util.TestUtil.CDH_VERSION;
 import static com.sequenceiq.cloudbreak.cm.util.TestUtil.CDSW;
 import static com.sequenceiq.cloudbreak.cm.util.TestUtil.CDSW_VERSION;
-
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;

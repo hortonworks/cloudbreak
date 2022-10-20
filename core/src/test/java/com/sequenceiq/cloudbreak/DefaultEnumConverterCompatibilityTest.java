@@ -1,12 +1,7 @@
 package com.sequenceiq.cloudbreak;
 
-import com.sequenceiq.cloudbreak.converter.DefaultEnumConverter;
-import org.junit.Assert;
-import org.junit.Test;
-import org.reflections.Reflections;
-import org.reflections.scanners.FieldAnnotationsScanner;
+import static java.lang.System.lineSeparator;
 
-import javax.persistence.Convert;
 import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +10,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.lang.System.lineSeparator;
+import javax.persistence.Convert;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.reflections.Reflections;
+import org.reflections.scanners.FieldAnnotationsScanner;
+
+import com.sequenceiq.cloudbreak.converter.DefaultEnumConverter;
 
 public class DefaultEnumConverterCompatibilityTest {
 

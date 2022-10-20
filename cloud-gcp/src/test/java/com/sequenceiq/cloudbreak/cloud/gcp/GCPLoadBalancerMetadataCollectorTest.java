@@ -23,8 +23,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.api.services.compute.Compute;
-import com.google.api.services.compute.model.BackendService;
 import com.google.api.services.compute.model.Backend;
+import com.google.api.services.compute.model.BackendService;
 import com.google.api.services.compute.model.ForwardingRule;
 import com.google.api.services.compute.model.ForwardingRuleList;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;

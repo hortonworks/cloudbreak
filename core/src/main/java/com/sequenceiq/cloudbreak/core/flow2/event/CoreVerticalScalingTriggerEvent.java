@@ -28,7 +28,7 @@ public class CoreVerticalScalingTriggerEvent extends StackEvent {
 
         private StackVerticalScaleV4Request request;
 
-        private  Long stackId;
+        private Long stackId;
 
         private String selector;
 

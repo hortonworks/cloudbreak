@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.cloud.NoSqlConnector;
 import com.sequenceiq.cloudbreak.cloud.RegionAware;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -9,7 +11,6 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableDeleteRequest;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableDeleteResponse;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableMetadataResponse;
-import org.springframework.stereotype.Service;
 
 @Service
 public class AzureNoSqlConnector implements NoSqlConnector {

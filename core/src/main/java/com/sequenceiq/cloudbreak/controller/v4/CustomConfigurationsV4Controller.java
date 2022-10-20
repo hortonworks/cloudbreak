@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.springframework.stereotype.Controller;
+
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
@@ -13,19 +15,17 @@ import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.RoleTypeV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.ServiceTypeV4Response;
-import com.sequenceiq.cloudbreak.converter.CustomConfigurationsToCustomConfigurationsV4ResponseConverter;
-import com.sequenceiq.cloudbreak.converter.CustomConfigurationsV4RequestToCustomConfigurationsConverter;
-import org.springframework.stereotype.Controller;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.CustomConfigurationsV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.requests.CloneCustomConfigurationsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.requests.CustomConfigurationsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.CustomConfigurationsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.CustomConfigurationsV4Responses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.RoleTypeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.ServiceTypeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.converter.CustomConfigurationsToCustomConfigurationsV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.CustomConfigurationsV4RequestToCustomConfigurationsConverter;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
 import com.sequenceiq.cloudbreak.validation.AllRoleTypes;

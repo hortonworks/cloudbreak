@@ -3,15 +3,15 @@ package com.sequenceiq.redbeams.flow.redbeams.common;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mock;
 
 public class RedbeamsContextTest {
 

@@ -8,13 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import reactor.bus.Event;
-import reactor.bus.EventBus;
-
 import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.handler.service.LoadBalancerMetadataService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
+
+import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class CollectLoadBalancerMetadataHandler implements CloudPlatformEventHandler<CollectLoadBalancerMetadataRequest> {

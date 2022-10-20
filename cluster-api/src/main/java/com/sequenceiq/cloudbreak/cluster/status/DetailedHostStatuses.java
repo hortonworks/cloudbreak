@@ -5,11 +5,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
-import com.sequenceiq.cloudbreak.cluster.model.stopstart.DetailedHostHealthCheck;
 import com.sequenceiq.cloudbreak.cluster.model.stopstart.DetailedCertHealthCheck;
+import com.sequenceiq.cloudbreak.cluster.model.stopstart.DetailedHostHealthCheck;
 import com.sequenceiq.cloudbreak.cluster.model.stopstart.DetailedServicesHealthCheck;
-import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
 import com.sequenceiq.cloudbreak.cluster.model.stopstart.HostCommissionState;
+import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
 
 /**
  * DetailedHostStatuses keeps track of HOST (maintenanceMode, commissionStatus), SERVICES and CERTIFICATE health on the cluster using info retrieved via CM APIs

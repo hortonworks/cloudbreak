@@ -1,17 +1,18 @@
 package com.sequenceiq.cloudbreak.audit.converter;
 
-import com.cloudera.thunderhead.service.audit.AuditProto;
-import com.sequenceiq.cloudbreak.audit.converter.builder.AttemptAuditEventResultBuilderProvider;
-import com.sequenceiq.cloudbreak.audit.model.AttemptAuditEventResult;
-import com.sequenceiq.cloudbreak.audit.model.ResultEventData;
+import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.doIfTrue;
+
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
-import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.doIfTrue;
+import com.cloudera.thunderhead.service.audit.AuditProto;
+import com.sequenceiq.cloudbreak.audit.converter.builder.AttemptAuditEventResultBuilderProvider;
+import com.sequenceiq.cloudbreak.audit.model.AttemptAuditEventResult;
+import com.sequenceiq.cloudbreak.audit.model.ResultEventData;
 
 @Component
 public class AttemptAuditEventResultToGrpcAttemptAuditEventResultConverter {
@@ -23,7 +24,7 @@ public class AttemptAuditEventResultToGrpcAttemptAuditEventResultConverter {
     private final AttemptAuditEventResultBuilderProvider builderProvider;
 
     public AttemptAuditEventResultToGrpcAttemptAuditEventResultConverter(Map<Class, AttemptAuditEventResultBuilderUpdater> builderUpdaters,
-                    AttemptAuditEventResultBuilderProvider builderProvider) {
+        AttemptAuditEventResultBuilderProvider builderProvider) {
         this.builderUpdaters = builderUpdaters;
         this.builderProvider = builderProvider;
     }

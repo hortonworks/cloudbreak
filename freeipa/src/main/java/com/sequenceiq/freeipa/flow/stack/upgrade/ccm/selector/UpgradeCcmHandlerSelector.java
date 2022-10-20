@@ -18,7 +18,6 @@ public enum UpgradeCcmHandlerSelector implements UpgradeCcmFlowEvent {
     UPGRADE_CCM_REVERT_FAILURE_EVENT,
     UPGRADE_CCM_REVERT_ALL_FAILURE_EVENT;
 
-
     private final String event;
 
     UpgradeCcmHandlerSelector(Class<?> aClass) {

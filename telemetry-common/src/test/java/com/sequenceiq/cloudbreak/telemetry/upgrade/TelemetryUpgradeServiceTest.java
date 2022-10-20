@@ -31,12 +31,12 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadata;
+import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadataProvider;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentType;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentUpgradeConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryUpgradeConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryConfigProvider;
-import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadata;
-import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadataProvider;
 import com.sequenceiq.cloudbreak.util.CompressUtil;
 
 @ExtendWith(MockitoExtension.class)

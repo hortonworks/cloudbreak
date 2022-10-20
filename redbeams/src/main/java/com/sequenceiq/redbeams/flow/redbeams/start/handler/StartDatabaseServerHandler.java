@@ -1,5 +1,13 @@
 package com.sequenceiq.redbeams.flow.redbeams.start.handler;
 
+import static com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus.STARTED;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -17,16 +25,8 @@ import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerFail
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerSuccess;
 
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-
-import static com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus.STARTED;
 
 @Component
 public class StartDatabaseServerHandler implements EventHandler<StartDatabaseServerRequest> {

@@ -172,7 +172,7 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     }
 
     private void populateDecommissionCandidates(ScalingEvent event, StackV4Response stackV4Response, Cluster cluster,
-            ScalingPolicy policy, int mandatoryDownScaleCount) {
+        ScalingPolicy policy, int mandatoryDownScaleCount) {
         try {
             String pollingUserCrn = Optional.ofNullable(getMachineUserCrnIfApplicable(cluster)).orElse(cluster.getClusterPertain().getUserCrn());
             YarnScalingServiceV1Response yarnResponse = yarnMetricsClient.getYarnMetricsForCluster(cluster,

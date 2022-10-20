@@ -50,14 +50,14 @@ public class AzureImageTermsSignerServiceTest {
     private AzureMarketplaceImage azureMarketplaceImage = new AzureMarketplaceImage("cloudera", "my-offer", "my-plan", "my-version");
 
     static Object[][] exceptionsFromHttpMethod() {
-        return new Object[][] {
-                { new AzureRestResponseException("myMessage"), "myMessage" },
-                { new RestClientException("myMessage"), "myMessage" }
+        return new Object[][]{
+                {new AzureRestResponseException("myMessage"), "myMessage"},
+                {new RestClientException("myMessage"), "myMessage"}
         };
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = { true, false })
+    @ValueSource(booleans = {true, false})
     void testIsSignedReturnsSignedFromRestResponseBody(boolean signedFromRestResponse) {
         when(azureClient.getAccessToken()).thenReturn(Optional.of(ACCESS_TOKEN));
         when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenReturn(setupAzureImageTerms(signedFromRestResponse));

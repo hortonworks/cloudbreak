@@ -53,7 +53,7 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
 
     @Override
     protected InstanceTerminationContext createFlowContext(FlowParameters flowParameters,
-            StateContext<InstanceTerminationState, InstanceTerminationEvent> stateContext, P payload) {
+        StateContext<InstanceTerminationState, InstanceTerminationEvent> stateContext, P payload) {
         StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));

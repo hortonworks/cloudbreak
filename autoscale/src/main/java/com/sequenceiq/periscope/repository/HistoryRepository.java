@@ -1,13 +1,15 @@
 package com.sequenceiq.periscope.repository;
 
-import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
-import com.sequenceiq.periscope.domain.History;
+import java.util.List;
+
+import javax.transaction.Transactional;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import javax.transaction.Transactional;
-import java.util.List;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.periscope.domain.History;
 
 @EntityType(entityClass = History.class)
 @Transactional(Transactional.TxType.REQUIRED)

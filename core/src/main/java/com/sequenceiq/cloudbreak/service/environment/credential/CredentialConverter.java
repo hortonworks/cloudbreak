@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.vault.VaultException;
 
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.dto.credential.aws.AwsCredentialAttributes;
@@ -20,7 +21,6 @@ import com.sequenceiq.cloudbreak.dto.credential.aws.AwsKeyBasedAttributes;
 import com.sequenceiq.cloudbreak.dto.credential.aws.AwsRoleBasedAttributes;
 import com.sequenceiq.cloudbreak.dto.credential.azure.AzureCredentialAttributes;
 import com.sequenceiq.cloudbreak.dto.credential.azure.AzureRoleBasedAttributes;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBasedParameters;

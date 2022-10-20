@@ -8,17 +8,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.sequenceiq.cloudbreak.cloud.azure.util.AzureVirtualMachineTypeProvider;
-import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureVirtualMachineTypeProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-
-import javax.inject.Inject;
 
 @Component
 public class AzureAcceleratedNetworkValidator {

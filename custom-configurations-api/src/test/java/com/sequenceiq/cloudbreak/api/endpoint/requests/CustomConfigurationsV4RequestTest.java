@@ -6,8 +6,6 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.requests.CustomConfigurationsV4Request;
-
 import org.hibernate.validator.HibernateValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +13,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.requests.CustomConfigurationsV4Request;
 
 @ExtendWith(MockitoExtension.class)
 class CustomConfigurationsV4RequestTest {

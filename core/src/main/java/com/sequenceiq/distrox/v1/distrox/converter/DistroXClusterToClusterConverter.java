@@ -29,8 +29,8 @@ public class DistroXClusterToClusterConverter {
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public DistroXClusterToClusterConverter(ClouderaManagerV1ToClouderaManagerV4Converter cmConverter, CloudStorageDecorator cloudStorageDecorator,
-            GatewayV1ToGatewayV4Converter gatewayConverter, ProxyEndpoint proxyEndpoint,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+                                            GatewayV1ToGatewayV4Converter gatewayConverter, ProxyEndpoint proxyEndpoint,
+                                            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.cmConverter = cmConverter;
         this.cloudStorageDecorator = cloudStorageDecorator;
         this.gatewayConverter = gatewayConverter;

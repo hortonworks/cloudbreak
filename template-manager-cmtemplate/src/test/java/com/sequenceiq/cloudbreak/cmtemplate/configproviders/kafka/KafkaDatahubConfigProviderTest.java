@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigProviderUtilsTest.cdhParcelVersion;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigs.GENERATED_RANGER_SERVICE_NAME;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigs.KAFKA_DECOMMISSION_HOOK_ENABLED;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigs.PRODUCER_METRICS_ENABLE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigs.RANGER_PLUGIN_KAFKA_SERVICE_NAME;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigs.KAFKA_DECOMMISSION_HOOK_ENABLED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 

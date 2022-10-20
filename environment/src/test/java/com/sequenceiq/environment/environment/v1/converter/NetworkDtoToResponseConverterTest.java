@@ -17,11 +17,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.common.api.type.LoadBalancerCreation;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
-import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
-import com.sequenceiq.environment.network.service.domain.ProvidedSubnetIds;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -29,6 +28,7 @@ import com.sequenceiq.environment.network.dto.MockParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.dto.YarnParams;
 import com.sequenceiq.environment.network.service.SubnetIdProvider;
+import com.sequenceiq.environment.network.service.domain.ProvidedSubnetIds;
 
 @ExtendWith(SpringExtension.class)
 public class NetworkDtoToResponseConverterTest {

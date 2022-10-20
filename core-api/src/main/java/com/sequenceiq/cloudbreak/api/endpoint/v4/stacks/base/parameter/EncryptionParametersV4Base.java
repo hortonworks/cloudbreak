@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 import com.sequenceiq.common.api.type.EncryptionType;
+import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import org.junit.Test;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.StreamingAppRdsRoleConfigProviderUtil.dataBaseTypeForCM;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.EnumMap;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.StreamingAppRdsRoleConfigProviderUtil.dataBaseTypeForCM;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 
 public class StreamingAppRdsRoleConfigProviderUtilTest {
 

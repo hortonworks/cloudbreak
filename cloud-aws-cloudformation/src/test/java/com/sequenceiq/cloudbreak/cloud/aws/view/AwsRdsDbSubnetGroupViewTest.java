@@ -5,12 +5,12 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
+
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 
 public class AwsRdsDbSubnetGroupViewTest {
 

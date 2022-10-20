@@ -1,15 +1,16 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
 @Component
 public class DataDiscoveryServiceCloudStorageRoleConfigProvider extends AbstractRoleConfigProvider {

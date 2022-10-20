@@ -91,7 +91,7 @@ public class DistroXUpgradeService {
     }
 
     private UpgradeV4Response initUpgrade(UpgradeV4Response upgradeV4Response, ImageChangeDto imageChangeDto, String userCrn,
-            ImageInfoV4Response targetImage, boolean lockComponents, StackView stack, boolean enableRollingUpgrade) {
+        ImageInfoV4Response targetImage, boolean lockComponents, StackView stack, boolean enableRollingUpgrade) {
         boolean replaceVms = determineReplaceVmsParam(upgradeV4Response, lockComponents, stack);
         LOGGER.debug("Initializing cluster upgrade. Target image: {}, lockComponents: {}, replaceVms: {}, enableRollingUpgrade: {}",
                 targetImage.getImageId(), lockComponents, replaceVms, enableRollingUpgrade);
@@ -102,7 +102,7 @@ public class DistroXUpgradeService {
     }
 
     private UpgradeV4Response initUpgradePreparation(ImageChangeDto imageChangeDto, ImageInfoV4Response targetImage,
-            List<ImageInfoV4Response> upgradeCandidates, boolean lockComponents, StackView stack) {
+        List<ImageInfoV4Response> upgradeCandidates, boolean lockComponents, StackView stack) {
         LOGGER.debug("Initializing cluster upgrade preparation. Target image: {}, lockComponents: {}", targetImage.getImageId(), lockComponents);
         if (lockComponents) {
             return new UpgradeV4Response(targetImage, upgradeCandidates, "Upgrade preparation is not necessary in case of OS upgrade.");

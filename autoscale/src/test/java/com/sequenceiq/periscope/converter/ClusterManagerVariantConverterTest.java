@@ -1,9 +1,9 @@
 package com.sequenceiq.periscope.converter;
 
+import javax.persistence.AttributeConverter;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
-
-import javax.persistence.AttributeConverter;
 
 public class ClusterManagerVariantConverterTest extends DefaultEnumConverterBaseTest<ClusterManagerVariant> {
 

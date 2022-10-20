@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -7,11 +13,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfi
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
 @Component
 public class ProfilerMetricsRoleConfigProvider extends AbstractRdsRoleConfigProvider {

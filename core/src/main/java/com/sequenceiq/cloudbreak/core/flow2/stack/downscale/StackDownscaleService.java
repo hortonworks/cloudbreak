@@ -125,7 +125,7 @@ public class StackDownscaleService {
     }
 
     private void fillDiscoveryFQDNInVolumeSetIfEmpty(List<InstanceMetadataView> removableInstances, List<String> removeableInstanceIds, Resource volumeSet,
-            VolumeSetAttributes volumeSetAttributes) {
+        VolumeSetAttributes volumeSetAttributes) {
         if (removeableInstanceIds.contains(volumeSet.getInstanceId())
                 && StringUtils.isNullOrEmpty(volumeSetAttributes.getDiscoveryFQDN())) {
             Optional<InstanceMetadataView> metaData = removableInstances.stream()

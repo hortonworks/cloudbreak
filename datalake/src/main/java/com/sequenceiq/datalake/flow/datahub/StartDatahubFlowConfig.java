@@ -1,7 +1,7 @@
 package com.sequenceiq.datalake.flow.datahub;
 
-import static com.sequenceiq.datalake.flow.datahub.StartDatahubFlowEvent.START_DATAHUB_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.datahub.StartDatahubFlowEvent.START_DATAHUB_EVENT;
+import static com.sequenceiq.datalake.flow.datahub.StartDatahubFlowEvent.START_DATAHUB_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.datahub.StartDatahubFlowEvent.START_DATAHUB_SUCCESS_EVENT;
 import static com.sequenceiq.datalake.flow.datahub.StartDatahubFlowState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.datahub.StartDatahubFlowState.INIT_STATE;

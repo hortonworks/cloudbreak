@@ -2,10 +2,10 @@ package com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure;
 
 import static org.junit.Assert.assertEquals;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-
 import org.junit.Before;
 import org.junit.Test;
+
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
 public class AzureDBStackV4ParametersTest {
 

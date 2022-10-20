@@ -1,5 +1,20 @@
 package com.sequenceiq.cloudbreak.service.image.catalog;
 
+import static com.sequenceiq.cloudbreak.service.image.StatedImages.statedImages;
+import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
@@ -7,20 +22,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageFilter;
 import com.sequenceiq.cloudbreak.service.image.LatestDefaultImageUuidProvider;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
 import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import static com.sequenceiq.cloudbreak.service.image.StatedImages.statedImages;
-import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.toList;
 
 @Component
 public class AdvertisedImageProvider {

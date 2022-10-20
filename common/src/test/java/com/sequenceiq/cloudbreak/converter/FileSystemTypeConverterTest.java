@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.common.model.FileSystemType;
-
 import javax.persistence.AttributeConverter;
+
+import com.sequenceiq.common.model.FileSystemType;
 
 public class FileSystemTypeConverterTest extends DefaultEnumConverterBaseTest<FileSystemType> {
 

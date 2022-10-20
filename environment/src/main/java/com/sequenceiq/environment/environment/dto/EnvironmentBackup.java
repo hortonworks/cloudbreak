@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.common.api.backup.model.BackupCloudwatchParams;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
-import com.sequenceiq.common.api.backup.model.BackupCloudwatchParams;
 import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParameters;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

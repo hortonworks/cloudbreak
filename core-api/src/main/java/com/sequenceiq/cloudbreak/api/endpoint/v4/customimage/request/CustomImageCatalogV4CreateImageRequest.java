@@ -1,20 +1,22 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.request;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.validation.customimage.UniqueRegion;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-import java.util.HashSet;
-import java.util.Set;
-
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.CustomImageDescription.BASE_PARCEL_URL;
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.CustomImageDescription.IMAGE_TYPE;
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.CustomImageDescription.SOURCE_IMAGE_ID;
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.CustomImageDescription.VM_IMAGES;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.validation.customimage.UniqueRegion;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)

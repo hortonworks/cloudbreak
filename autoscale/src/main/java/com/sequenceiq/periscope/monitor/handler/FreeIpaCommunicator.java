@@ -38,7 +38,7 @@ public class FreeIpaCommunicator {
                 () -> userV1Endpoint.getLastSyncOperationStatus(envCrn));
         if (SynchronizationStatus.RUNNING.equals(lastSyncStatus.getStatus())) {
             LOGGER.info("There is a user sync operation already running for environment: {} with operationId: {}, " +
-                            "skipping request to trigger another user sync", envCrn, lastSyncStatus.getOperationId());
+                    "skipping request to trigger another user sync", envCrn, lastSyncStatus.getOperationId());
             return lastSyncStatus;
         } else {
             return ThreadBasedUserCrnProvider.doAsInternalActor(

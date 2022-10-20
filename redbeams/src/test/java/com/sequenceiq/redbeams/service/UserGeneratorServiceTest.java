@@ -3,11 +3,12 @@ package com.sequenceiq.redbeams.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-
 import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
+
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
 public class UserGeneratorServiceTest {
 

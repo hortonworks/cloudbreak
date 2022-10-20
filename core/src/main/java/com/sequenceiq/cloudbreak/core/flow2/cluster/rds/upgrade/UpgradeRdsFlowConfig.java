@@ -100,7 +100,7 @@ public class UpgradeRdsFlowConfig extends StackStatusFinalizerAbstractFlowConfig
 
     @Override
     public UpgradeRdsEvent[] getInitEvents() {
-        return new UpgradeRdsEvent[] {
+        return new UpgradeRdsEvent[]{
                 UPGRADE_RDS_EVENT
         };
     }

@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.network.v1.converter;
 
-import static com.sequenceiq.cloudbreak.cloud.azure.AzureUtils.NETWORK_ID;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureUtils.DATABASE_PRIVATE_DS_ZONE_ID;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureUtils.NETWORK_ID;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureUtils.RG_NAME;
 
 import java.util.HashMap;

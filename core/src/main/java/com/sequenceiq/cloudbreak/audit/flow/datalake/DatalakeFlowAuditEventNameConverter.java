@@ -7,8 +7,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.structuredevent.auditeventname.flow.FlowResourceAuditEventConverter;
 import com.sequenceiq.cloudbreak.audit.model.AuditEventName;
+import com.sequenceiq.cloudbreak.structuredevent.auditeventname.flow.FlowResourceAuditEventConverter;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 

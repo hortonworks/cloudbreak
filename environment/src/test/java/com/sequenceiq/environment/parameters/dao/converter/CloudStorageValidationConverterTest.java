@@ -1,9 +1,9 @@
 package com.sequenceiq.environment.parameters.dao.converter;
 
+import javax.persistence.AttributeConverter;
+
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
-
-import javax.persistence.AttributeConverter;
 
 public class CloudStorageValidationConverterTest extends DefaultEnumConverterBaseTest<CloudStorageValidation> {
 

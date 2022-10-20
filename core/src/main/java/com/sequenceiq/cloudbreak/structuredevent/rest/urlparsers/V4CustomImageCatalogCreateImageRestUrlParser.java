@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers;
 
-import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser;
 
 @Component
 public class V4CustomImageCatalogCreateImageRestUrlParser extends LegacyRestUrlParser {

@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.util;
 
+import javax.persistence.AttributeConverter;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
-
-import javax.persistence.AttributeConverter;
 
 public class OnFailureActionConverterTest extends DefaultEnumConverterBaseTest<OnFailureAction> {
 

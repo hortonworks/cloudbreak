@@ -69,7 +69,7 @@ public class RangerRazDatahubConfigProvider extends RangerRazBaseConfigProvider 
                 .filter(hg -> zkServerGroups.contains(hg.getName()))
                 .collect(Collectors.toSet());
         int numOfZKServers = groupsWhichHasZK.stream().mapToInt(HostgroupView::getNodeCount).sum();
-        return numOfZKServers >= MIN_ZK_SERVER_COUNT ? true : false;
+        return numOfZKServers >= MIN_ZK_SERVER_COUNT;
     }
 
     private boolean isProperHostGroupForRaz(HostgroupView hg, Set<String> zookeeperGroups, boolean weHaveMoreThan2ZKServer) {

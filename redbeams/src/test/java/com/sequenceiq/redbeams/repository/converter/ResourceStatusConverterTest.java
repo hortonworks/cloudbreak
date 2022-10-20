@@ -1,9 +1,9 @@
 package com.sequenceiq.redbeams.repository.converter;
 
+import javax.persistence.AttributeConverter;
+
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
-
-import javax.persistence.AttributeConverter;
 
 public class ResourceStatusConverterTest extends DefaultEnumConverterBaseTest<ResourceStatus> {
 

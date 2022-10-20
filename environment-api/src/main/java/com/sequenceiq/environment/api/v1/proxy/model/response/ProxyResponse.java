@@ -2,10 +2,10 @@ package com.sequenceiq.environment.api.v1.proxy.model.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.proxy.ProxyConfigDescription;
 import com.sequenceiq.environment.api.v1.proxy.model.ProxyBase;
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

@@ -20,7 +20,7 @@ public class StackCreationContext extends CommonContext {
     private final CloudCredential cloudCredential;
 
     public StackCreationContext(FlowParameters flowParameters, StackView stack, String cloudPlatform, CloudContext cloudContext,
-            CloudCredential cloudCredential, ProvisionType provisionType) {
+                                CloudCredential cloudCredential, ProvisionType provisionType) {
         super(flowParameters);
         this.provisionType = provisionType;
         this.stack = stack;
@@ -30,7 +30,7 @@ public class StackCreationContext extends CommonContext {
     }
 
     public StackCreationContext(FlowParameters flowParameters, StackView stack, String cloudPlatform, CloudContext cloudContext,
-            CloudCredential cloudCredential) {
+                                CloudCredential cloudCredential) {
         super(flowParameters);
         this.provisionType = ProvisionType.REGULAR;
         this.stack = stack;

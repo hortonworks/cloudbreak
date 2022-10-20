@@ -18,7 +18,7 @@ public class RotateSaltPasswordContext extends CommonContext {
     private final RotateSaltPasswordType type;
 
     public RotateSaltPasswordContext(FlowParameters flowParameters, StackView stack, StackStatus previousStackStatus,
-            RotateSaltPasswordReason reason, RotateSaltPasswordType type) {
+        RotateSaltPasswordReason reason, RotateSaltPasswordType type) {
         super(flowParameters);
         this.stack = stack;
         this.previousStackStatus = previousStackStatus;

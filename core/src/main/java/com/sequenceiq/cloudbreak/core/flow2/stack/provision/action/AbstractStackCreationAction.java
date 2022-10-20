@@ -45,7 +45,7 @@ public abstract class AbstractStackCreationAction<P extends Payload> extends
 
     @Override
     protected StackCreationContext createFlowContext(FlowParameters flowParameters,
-            StateContext<StackCreationState, StackCreationEvent> stateContext, P payload) {
+        StateContext<StackCreationState, StackCreationEvent> stateContext, P payload) {
         StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
         Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
         ProvisionType provisionType = (ProvisionType) variables.getOrDefault(PROVISION_TYPE, ProvisionType.REGULAR);

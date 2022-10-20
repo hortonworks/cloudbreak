@@ -2,10 +2,10 @@ package com.sequenceiq.redbeams.api.endpoint.v4.database.request;
 
 import static org.junit.Assert.assertEquals;
 
-import com.sequenceiq.redbeams.api.endpoint.v4.database.base.DatabaseV4Identifiers;
-
 import org.junit.Before;
 import org.junit.Test;
+
+import com.sequenceiq.redbeams.api.endpoint.v4.database.base.DatabaseV4Identifiers;
 
 public class DatabaseTestV4RequestTest {
 

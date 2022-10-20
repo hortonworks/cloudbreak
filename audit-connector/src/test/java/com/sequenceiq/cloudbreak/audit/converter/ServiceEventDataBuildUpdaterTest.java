@@ -1,19 +1,20 @@
 package com.sequenceiq.cloudbreak.audit.converter;
 
-import com.cloudera.thunderhead.service.audit.AuditProto;
-import com.sequenceiq.cloudbreak.audit.converter.builder.ServiceEventDataBuilderProvider;
-import com.sequenceiq.cloudbreak.audit.model.ServiceEventData;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.cloudera.thunderhead.service.audit.AuditProto;
+import com.sequenceiq.cloudbreak.audit.converter.builder.ServiceEventDataBuilderProvider;
+import com.sequenceiq.cloudbreak.audit.model.ServiceEventData;
 
 class ServiceEventDataBuildUpdaterTest {
 

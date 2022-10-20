@@ -4,12 +4,12 @@ import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_CREATE_FAIL
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_CREATE_FAILED_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.INIT_STATE;
-import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STATE;
-import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_VALIDATION_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_FINISHED_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_START_STATE;
+import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_STORAGE_VALIDATION_STATE;
+import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_VALIDATION_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_WAIT_ENV_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_WAIT_RDS_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_STACK_CREATION_IN_PROGRESS_STATE;

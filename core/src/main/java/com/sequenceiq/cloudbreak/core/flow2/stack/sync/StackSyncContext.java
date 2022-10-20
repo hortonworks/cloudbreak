@@ -22,7 +22,7 @@ public class StackSyncContext extends CommonContext {
     private final Boolean statusUpdateEnabled;
 
     public StackSyncContext(FlowParameters flowParameters, StackView stack, List<InstanceMetadataView> instanceMetaData, CloudContext cloudContext,
-            CloudCredential cloudCredential, Boolean statusUpdateEnabled) {
+                            CloudCredential cloudCredential, Boolean statusUpdateEnabled) {
         super(flowParameters);
         this.stack = stack;
         this.instanceMetaData = instanceMetaData;

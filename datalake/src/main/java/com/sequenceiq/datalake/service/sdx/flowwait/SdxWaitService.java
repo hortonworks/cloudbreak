@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
-import com.sequenceiq.datalake.service.sdx.flowwait.task.factory.SdxWaitTaskFactory;
 import com.sequenceiq.datalake.service.sdx.flowwait.task.SdxWaitTaskForCloudbreakFlow;
 import com.sequenceiq.datalake.service.sdx.flowwait.task.SdxWaitTaskService;
+import com.sequenceiq.datalake.service.sdx.flowwait.task.factory.SdxWaitTaskFactory;
 
 @Service
 public class SdxWaitService {

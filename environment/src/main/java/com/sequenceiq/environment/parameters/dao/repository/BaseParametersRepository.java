@@ -6,9 +6,10 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.jpa.repository.JpaRepository;
+
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 
 @Transactional(TxType.REQUIRED)

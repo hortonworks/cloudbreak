@@ -24,11 +24,11 @@ public class CmSyncFlowConfig extends StackStatusFinalizerAbstractFlowConfig<CmS
             new Builder<CmSyncState, CmSyncEvent>()
                     .defaultFailureEvent(CM_SYNC_FAILURE_EVENT)
                     .from(INIT_STATE).to(CM_SYNC_STATE).event(CM_SYNC_TRIGGER_EVENT)
-                        .defaultFailureEvent()
+                    .defaultFailureEvent()
                     .from(CM_SYNC_STATE).to(CmSyncState.CM_SYNC_FINISHED_STATE).event(CmSyncEvent.CM_SYNC_FINISHED_EVENT)
-                        .failureEvent(CM_SYNC_FINISHED_FAILURE_EVENT)
+                    .failureEvent(CM_SYNC_FINISHED_FAILURE_EVENT)
                     .from(CmSyncState.CM_SYNC_FINISHED_STATE).to(FINAL_STATE).event(CM_SYNC_FINALIZED_EVENT)
-                        .defaultFailureEvent()
+                    .defaultFailureEvent()
                     .build();
 
     private static final FlowEdgeConfig<CmSyncState, CmSyncEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,

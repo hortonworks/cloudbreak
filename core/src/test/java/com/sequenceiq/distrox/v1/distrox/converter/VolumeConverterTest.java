@@ -1,11 +1,11 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.volume.VolumeV1Request;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VolumeConverterTest {
 

@@ -1,17 +1,18 @@
 package com.sequenceiq.cloudbreak;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.reflections.Reflections;
-import org.reflections.scanners.FieldAnnotationsScanner;
+import static java.lang.System.lineSeparator;
 
-import javax.persistence.Enumerated;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static java.lang.System.lineSeparator;
+import javax.persistence.Enumerated;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.reflections.Reflections;
+import org.reflections.scanners.FieldAnnotationsScanner;
 
 public class EnumeratedTest {
 

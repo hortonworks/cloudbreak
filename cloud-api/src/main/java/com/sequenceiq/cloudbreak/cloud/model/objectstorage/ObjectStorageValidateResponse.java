@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.model.objectstorage;
 
-import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
-
 import java.util.Objects;
+
+import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 
 public class ObjectStorageValidateResponse {
 

@@ -2,10 +2,10 @@ package com.sequenceiq.redbeams.domain.stack;
 
 import static org.junit.Assert.assertEquals;
 
-import com.sequenceiq.cloudbreak.common.json.Json;
-
 import org.junit.Before;
 import org.junit.Test;
+
+import com.sequenceiq.cloudbreak.common.json.Json;
 
 public class NetworkTest {
 

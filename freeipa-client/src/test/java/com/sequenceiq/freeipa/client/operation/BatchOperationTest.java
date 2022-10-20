@@ -21,10 +21,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
+import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaErrorCodes;
-import com.sequenceiq.cloudbreak.client.RPCResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class BatchOperationTest {

@@ -8,7 +8,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
 
-
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.CustomConfigurationPropertyParameters;

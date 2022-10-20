@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.kerberos;
 
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

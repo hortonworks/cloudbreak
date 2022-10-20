@@ -269,6 +269,7 @@ public class Crn {
         USG_1("usg-1");
 
         private static final ImmutableMap<String, Region> FROM_STRING;
+
         static {
             ImmutableMap.Builder<String, Region> builder = ImmutableMap.builder();
             Arrays.stream(Region.values()).forEach(region -> {
@@ -295,6 +296,7 @@ public class Crn {
         /**
          * Get a region from a string. 'null' if 'input' is not a valid
          * region name.
+         *
          * @param input the input string
          * @return the region
          */
@@ -305,6 +307,7 @@ public class Crn {
 
         /**
          * Get a region from a string. This will never return null.
+         *
          * @param input the input string
          * @return the region
          */
@@ -446,11 +449,11 @@ public class Crn {
      * @param resource     the name of this Altus resource
      */
     Crn(Partition partition,
-            Service service,
-            Region region,
-            String accountId,
-            ResourceType resourceType,
-            String resource) {
+        Service service,
+        Region region,
+        String accountId,
+        ResourceType resourceType,
+        String resource) {
         this.partition = checkNotNull(partition, "partition should not be null.");
         this.service = checkNotNull(service, "service should not be null.");
         this.region = checkNotNull(region, "region should not be null.");

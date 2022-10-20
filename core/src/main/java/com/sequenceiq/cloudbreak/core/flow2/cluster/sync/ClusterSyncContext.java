@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.sync;
 
-import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
 
 public class ClusterSyncContext extends CommonContext {

@@ -2,19 +2,19 @@ package com.sequenceiq.environment.network.service.extended;
 
 import static com.sequenceiq.environment.network.service.Cidrs.cidrs;
 import static com.sequenceiq.environment.network.service.extended.DwxSubnetConstants.DWX_SUBNET_IP_COUNT;
-import static com.sequenceiq.environment.network.service.extended.DwxSubnetConstants.DWX_SUBNET_MASK;
 import static com.sequenceiq.environment.network.service.extended.DwxSubnetConstants.DWX_SUBNET_IP_OFFSET;
+import static com.sequenceiq.environment.network.service.extended.DwxSubnetConstants.DWX_SUBNET_MASK;
 import static com.sequenceiq.environment.network.service.extended.ExtendedSubnetTypeProvider.PLUS_BITS_FOR_19_MASK;
 import static com.sequenceiq.environment.network.service.extended.ExtendedSubnetTypeProvider.PLUS_BITS_FOR_24_MASK;
 import static com.sequenceiq.environment.network.service.extended.MlxSubnetConstants.MLX_SUBNET_IP_COUNT;
-import static com.sequenceiq.environment.network.service.extended.MlxSubnetConstants.MLX_SUBNET_MASK;
 import static com.sequenceiq.environment.network.service.extended.MlxSubnetConstants.MLX_SUBNET_IP_OFFSET;
+import static com.sequenceiq.environment.network.service.extended.MlxSubnetConstants.MLX_SUBNET_MASK;
 import static com.sequenceiq.environment.network.service.extended.PrivateSubnetConstants.PRIVATE_SUBNET_IP_COUNT;
 import static com.sequenceiq.environment.network.service.extended.PrivateSubnetConstants.PRIVATE_SUBNET_IP_OFFSET;
 import static com.sequenceiq.environment.network.service.extended.PrivateSubnetConstants.PRIVATE_SUBNET_MASK;
 import static com.sequenceiq.environment.network.service.extended.PublicSubnetConstants.PUBLIC_SUBNET_IP_COUNT;
-import static com.sequenceiq.environment.network.service.extended.PublicSubnetConstants.PUBLIC_SUBNET_MASK;
 import static com.sequenceiq.environment.network.service.extended.PublicSubnetConstants.PUBLIC_SUBNET_IP_OFFSET;
+import static com.sequenceiq.environment.network.service.extended.PublicSubnetConstants.PUBLIC_SUBNET_MASK;
 
 import java.util.HashSet;
 import java.util.Set;

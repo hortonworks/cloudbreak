@@ -117,7 +117,7 @@ public class AzureCredentialAppCreationCommandTest {
 
     @Test
     public void testEnvironmentWhenFreemarkerConfigGetTemplateThrowsIOExceptionThenCloudConnectorExceptionComesForAppCreationCommandTemplate()
-                    throws IOException, TemplateException {
+            throws IOException, TemplateException {
         doThrow(new IOException()).when(freemarkerConfiguration).getTemplate(APP_CREATION_COMMAND_TEMPLATE_PATH, ENCODING);
 
         thrown.expect(CloudConnectorException.class);
@@ -317,7 +317,7 @@ public class AzureCredentialAppCreationCommandTest {
 
     @Test
     public void testGenerateWhenFreemarkerConfigGetTemplateThrowsIOExceptionThenCloudConnectorExceptionComesForAppCreationJsonTemplate()
-                    throws IOException, TemplateException {
+            throws IOException, TemplateException {
         doThrow(new IOException()).when(freemarkerConfiguration).getTemplate(APP_CREATION_JSON_TEMPLATE_PATH, ENCODING);
 
         thrown.expect(CloudConnectorException.class);

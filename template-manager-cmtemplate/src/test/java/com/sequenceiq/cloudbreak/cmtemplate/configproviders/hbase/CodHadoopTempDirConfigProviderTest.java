@@ -1,18 +1,19 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase;
 
-import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import static org.junit.Assert.assertEquals;
+
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
+import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CodHadoopTempDirConfigProviderTest extends AbstractHbaseConfigProviderTest {

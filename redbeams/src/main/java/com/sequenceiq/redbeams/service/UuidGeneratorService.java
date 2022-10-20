@@ -1,7 +1,5 @@
 package com.sequenceiq.redbeams.service;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,6 +7,8 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
+import com.google.common.annotations.VisibleForTesting;
 
 @Service
 public class UuidGeneratorService {

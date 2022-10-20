@@ -1,8 +1,8 @@
 package com.sequenceiq.consumption.endpoint.mapper;
 
+import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
-import javax.ws.rs.core.Response.Status;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;

@@ -173,7 +173,9 @@ public class GcpPlatformParameters implements PlatformParameters {
         HDD("pd-standard", "Standard persistent disks (HDD)");
 
         private final String value;
+
         private final String displayName;
+
         GcpDiskType(String value, String displayName) {
             this.value = value;
             this.displayName = displayName;

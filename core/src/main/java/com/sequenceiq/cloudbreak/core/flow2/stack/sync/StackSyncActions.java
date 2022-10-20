@@ -139,7 +139,7 @@ public class StackSyncActions {
 
         @Override
         protected StackSyncContext createFlowContext(FlowParameters flowParameters, StateContext<StackSyncState, StackSyncEvent> stateContext,
-                P payload) {
+            P payload) {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
             Long stackId = payload.getResourceId();
             StackView stack = stackDtoService.getStackViewById(stackId);

@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.common.database;
 
-import static com.sequenceiq.cloudbreak.common.database.MajorVersion.VERSION_FAMILY_9;
 import static com.sequenceiq.cloudbreak.common.database.MajorVersion.VERSION_10;
 import static com.sequenceiq.cloudbreak.common.database.MajorVersion.VERSION_11;
 import static com.sequenceiq.cloudbreak.common.database.MajorVersion.VERSION_12;
 import static com.sequenceiq.cloudbreak.common.database.MajorVersion.VERSION_13;
 import static com.sequenceiq.cloudbreak.common.database.MajorVersion.VERSION_14;
 import static com.sequenceiq.cloudbreak.common.database.MajorVersion.VERSION_9_6;
+import static com.sequenceiq.cloudbreak.common.database.MajorVersion.VERSION_FAMILY_9;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Optional;

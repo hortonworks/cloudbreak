@@ -7,10 +7,10 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
-import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 public class BlueprintToBlueprintV4ResponseConverterTest extends AbstractEntityConverterTest<Blueprint> {
 

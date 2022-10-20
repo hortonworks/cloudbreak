@@ -142,7 +142,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
     }
 
     NetworkV4Request getNetwork(NetworkV1Request networkRequest, DetailedEnvironmentResponse environment,
-            Set<InstanceGroupV1Request> instanceGroupRequests) {
+                                Set<InstanceGroupV1Request> instanceGroupRequests) {
         Set<String> subnetIds = new HashSet<>();
         if (instanceGroupRequests != null) {
             subnetIds.addAll(instanceGroupRequests.stream()

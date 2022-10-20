@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CDPD_VERSION_7_2_11;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants.ATTRIBUTE_NAME_NODE_INSTANCE_TYPE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants.ATTRIBUTE_NODE_INSTANCE_TYPE_COMPUTE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants.ATTRIBUTE_NODE_INSTANCE_TYPE_WORKER;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CDPD_VERSION_7_2_11;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
 import java.util.LinkedList;
 import java.util.List;

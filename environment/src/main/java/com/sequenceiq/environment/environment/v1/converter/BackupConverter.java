@@ -1,16 +1,16 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
-import com.sequenceiq.common.api.backup.request.BackupRequest;
-import com.sequenceiq.common.api.backup.response.BackupResponse;
-import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
-import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
-import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.common.api.backup.model.BackupCloudwatchParams;
+import com.sequenceiq.common.api.backup.request.BackupRequest;
+import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
-import com.sequenceiq.common.api.backup.model.BackupCloudwatchParams;
+import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
+import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
+import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
 import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParameters;
 

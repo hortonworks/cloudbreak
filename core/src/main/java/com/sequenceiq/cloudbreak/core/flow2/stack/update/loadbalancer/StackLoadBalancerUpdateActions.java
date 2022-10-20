@@ -105,7 +105,7 @@ public class StackLoadBalancerUpdateActions {
             @Override
             protected Selectable createRequest(StackContext context) {
                 return new CreateCloudLoadBalancersRequest(context.getStack().getId(), context.getCloudContext(), context.getCloudCredential(),
-                    context.getCloudStack());
+                        context.getCloudStack());
             }
         };
     }
@@ -123,13 +123,13 @@ public class StackLoadBalancerUpdateActions {
             protected Selectable createRequest(StackContext context) {
                 StackDtoDelegate stack = context.getStack();
                 List<LoadBalancerType> loadBalancerTypes = loadBalancerPersistenceService.findByStackId(stack.getId()).stream()
-                    .map(LoadBalancer::getType)
-                    .collect(Collectors.toList());
+                        .map(LoadBalancer::getType)
+                        .collect(Collectors.toList());
                 List<CloudResource> cloudResources = resourceService.getAllByStackId(stack.getId()).stream()
                         .map(r -> cloudResourceConverter.convert(r))
                         .collect(Collectors.toList());
                 return new LoadBalancerMetadataRequest(stack.getId(), context.getCloudContext(), context.getCloudCredential(),
-                    context.getCloudStack(), loadBalancerTypes, cloudResources);
+                        context.getCloudStack(), loadBalancerTypes, cloudResources);
             }
         };
     }
@@ -231,7 +231,7 @@ public class StackLoadBalancerUpdateActions {
     }
 
     private abstract static class AbstractStackLoadBalancerUpdateAction<P extends Payload>
-        extends AbstractStackAction<StackLoadBalancerUpdateState, StackLoadBalancerUpdateEvent, StackContext, P> {
+            extends AbstractStackAction<StackLoadBalancerUpdateState, StackLoadBalancerUpdateEvent, StackContext, P> {
         private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStackLoadBalancerUpdateAction.class);
 
         @Inject
@@ -252,22 +252,22 @@ public class StackLoadBalancerUpdateActions {
 
         @Override
         protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<StackLoadBalancerUpdateState,
-            StackLoadBalancerUpdateEvent> stateContext, P payload) {
+                StackLoadBalancerUpdateEvent> stateContext, P payload) {
             Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
             stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
             MDCBuilder.buildMdcContext(stack);
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
             CloudContext cloudContext = CloudContext.Builder.builder()
-                .withId(stack.getId())
-                .withName(stack.getName())
-                .withCrn(stack.getResourceCrn())
-                .withPlatform(stack.getCloudPlatform())
-                .withVariant(stack.getPlatformVariant())
-                .withLocation(location)
-                .withUserName(stack.getCreator().getUserName())
-                .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
-                .withTenantId(stack.getWorkspace().getId())
-                .build();
+                    .withId(stack.getId())
+                    .withName(stack.getName())
+                    .withCrn(stack.getResourceCrn())
+                    .withPlatform(stack.getCloudPlatform())
+                    .withVariant(stack.getPlatformVariant())
+                    .withLocation(location)
+                    .withUserName(stack.getCreator().getUserName())
+                    .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
+                    .withTenantId(stack.getWorkspace().getId())
+                    .build();
             CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
             CloudStack cloudStack = cloudStackConverter.convert(stack);
             return new StackContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack);

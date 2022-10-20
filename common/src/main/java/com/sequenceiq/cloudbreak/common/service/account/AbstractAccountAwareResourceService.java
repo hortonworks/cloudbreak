@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 public abstract class AbstractAccountAwareResourceService<T extends AccountAwareResource> implements AccountAwareResourceService<T> {
 

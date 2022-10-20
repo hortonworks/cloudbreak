@@ -3,12 +3,12 @@ package com.sequenceiq.it.cloudbreak.v4;
 import java.io.IOException;
 
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.dto.ClusterTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.util.ClusterTemplateUtil;
 import com.sequenceiq.it.cloudbreak.Entity;
+import com.sequenceiq.it.cloudbreak.dto.ClusterTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.util.ClusterTemplateUtil;
 
 public class ClusterTemplateV4Action {
 

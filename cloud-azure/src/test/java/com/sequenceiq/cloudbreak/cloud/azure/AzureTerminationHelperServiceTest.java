@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.InOrder;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -160,7 +160,7 @@ class AzureTerminationHelperServiceTest {
                 createCloudResource(ResourceType.AZURE_RESOURCE_GROUP, RESOURCE_GROUP_NAME),
                 createCloudResource(ResourceType.AZURE_SECURITY_GROUP, "anNSG", NSG_ID),
                 createCloudResource(ResourceType.AZURE_NETWORK, "aNetwork", NETWORK_ID)
-                );
+        );
     }
 
     private CloudResource createCloudResource(ResourceType resourceType, String name) {

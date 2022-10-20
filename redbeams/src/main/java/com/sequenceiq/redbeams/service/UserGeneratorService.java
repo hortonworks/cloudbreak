@@ -1,7 +1,5 @@
 package com.sequenceiq.redbeams.service;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -9,6 +7,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
 @Service
 public class UserGeneratorService {

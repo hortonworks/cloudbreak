@@ -265,7 +265,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private void reportHealthAndSyncInstances(StackDto stack, Collection<InstanceMetadataView> runningInstances,
-            Map<InstanceMetadataView, Optional<String>> failedInstances, Set<String> newHealthyHostNames, boolean hostCertExpiring) {
+        Map<InstanceMetadataView, Optional<String>> failedInstances, Set<String> newHealthyHostNames, boolean hostCertExpiring) {
         Map<String, Optional<String>> newFailedNodeNamesWithReason = failedInstances.entrySet()
                 .stream()
                 .filter(e -> !Set.of(SERVICES_UNHEALTHY, STOPPED)
@@ -277,7 +277,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private void updateStates(StackDto stack, Collection<InstanceMetadataView> failedInstances, Map<String, Optional<String>> newFailedNodeNamesWithReason,
-            Set<String> newHealthyHostNames, boolean hostCertExpiring) {
+        Set<String> newHealthyHostNames, boolean hostCertExpiring) {
         LOGGER.info("Updating status: Failed instances: {} New failed node names: {} New healthy host name: {} Host cert expiring: {}",
                 failedInstances, newFailedNodeNamesWithReason.keySet(), newHealthyHostNames, hostCertExpiring);
         clusterService.updateClusterCertExpirationState(stack.getCluster(), hostCertExpiring);
@@ -334,7 +334,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private void syncInstances(StackDto stack, Collection<InstanceMetadataView> runningInstances,
-            Collection<InstanceMetadataView> instanceMetaData, InstanceSyncState defaultState, boolean cmServerRunning) {
+        Collection<InstanceMetadataView> instanceMetaData, InstanceSyncState defaultState, boolean cmServerRunning) {
         List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(instanceMetaData, stack.getStack());
         List<CloudVmInstanceStatus> instanceStatuses = stackInstanceStatusChecker.queryInstanceStatuses(stack, cloudInstances);
         LOGGER.debug("Cluster '{}' state check on provider, instances: {}", stack.getId(), instanceStatuses);
@@ -377,7 +377,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private Map<InstanceMetadataView, Optional<String>> getFailedInstancesInstanceMetadata(ExtendedHostStatuses hostStatuses,
-            Collection<InstanceMetadataView> runningInstances) {
+        Collection<InstanceMetadataView> runningInstances) {
         Map<String, Optional<String>> failedHosts = hostStatuses.getHostsHealth().entrySet().stream()
                 .filter(e -> !hostStatuses.isHostHealthy(e.getKey()))
                 .collect(Collectors.toMap(e -> e.getKey().value(), e -> Optional.ofNullable(hostStatuses.statusReasonForHost(e.getKey()))));

@@ -11,6 +11,7 @@ public class PrometheusResponse {
 
     @JsonProperty("status")
     private String status;
+
     @JsonProperty("data")
     private Data data;
 
@@ -39,6 +40,7 @@ public class PrometheusResponse {
 
         @JsonProperty("resultType")
         private String resultType;
+
         @JsonProperty("result")
         private List<Result> result;
 
@@ -68,6 +70,7 @@ public class PrometheusResponse {
 
         @JsonProperty("metric")
         private Metric metric;
+
         @JsonProperty("values")
         private List<List<Object>> values;
 
@@ -97,10 +100,13 @@ public class PrometheusResponse {
 
         @JsonProperty("__name__")
         private String name;
+
         @JsonProperty("alertname")
         private String alertname;
+
         @JsonProperty("alertstate")
         private String alertstate;
+
         @JsonProperty("severity")
         private String severity;
 
