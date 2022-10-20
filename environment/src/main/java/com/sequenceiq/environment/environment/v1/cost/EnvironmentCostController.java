@@ -7,10 +7,15 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.cost.EnvironmentRealTimeCostResponse;
+import com.sequenceiq.cloudbreak.cost.CostCalculationNotEnabledException;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentCostV1Endpoint;
 import com.sequenceiq.environment.authorization.EnvironmentFiltering;
@@ -23,16 +28,30 @@ import com.sequenceiq.environment.environment.service.cost.EnvironmentCostServic
 @AccountEntityType(Environment.class)
 public class EnvironmentCostController implements EnvironmentCostV1Endpoint {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentCostController.class);
+
     @Inject
     private EnvironmentFiltering environmentFiltering;
 
     @Inject
     private EnvironmentCostService environmentCostService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     @FilterListBasedOnPermissions
     public EnvironmentRealTimeCostResponse list() {
+        checkIfCostCalculationIsEnabled();
         List<EnvironmentDto> environmentDtos = environmentFiltering.filterEnvironments(DESCRIBE_ENVIRONMENT);
         return new EnvironmentRealTimeCostResponse(environmentCostService.getCosts(environmentDtos));
     }
+
+    private void checkIfCostCalculationIsEnabled() {
+        if (!entitlementService.isCostCalculationEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            LOGGER.info("Cost calculation feature is not enabled!");
+            throw new CostCalculationNotEnabledException("Cost calculation feature is not enabled!");
+        }
+    }
+
 }
