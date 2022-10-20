@@ -134,7 +134,7 @@ public class StackStopActions {
 
         @Override
         protected StackStartStopContext createFlowContext(FlowParameters flowParameters, StateContext<StackStopState, StackStopEvent> stateContext,
-                P payload) {
+            P payload) {
             Long stackId = payload.getResourceId();
             StackDto stackDto = stackDtoService.getById(stackId);
             StackView stack = stackDto.getStack();

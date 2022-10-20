@@ -1,5 +1,10 @@
 package com.sequenceiq.redbeams.service.validation;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -8,11 +13,6 @@ import org.springframework.validation.Validator;
 
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import javax.inject.Inject;
 
 @Component
 public class DatabaseConnectionValidator implements Validator {

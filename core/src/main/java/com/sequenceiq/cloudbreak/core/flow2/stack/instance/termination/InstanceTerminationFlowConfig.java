@@ -59,8 +59,8 @@ public class InstanceTerminationFlowConfig extends StackStatusFinalizerAbstractF
 
     @Override
     public InstanceTerminationEvent[] getInitEvents() {
-        return new InstanceTerminationEvent[] {
-            TERMINATION_EVENT
+        return new InstanceTerminationEvent[]{
+                TERMINATION_EVENT
         };
     }
 

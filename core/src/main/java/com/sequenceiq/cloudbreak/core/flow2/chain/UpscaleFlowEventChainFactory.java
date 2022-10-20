@@ -14,10 +14,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import org.apache.commons.collections4.MapUtils;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
@@ -72,7 +72,7 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
     }
 
     private void addClusterScaleTriggerEventIfNeeded(StackAndClusterUpscaleTriggerEvent event, StackView stackView, ClusterView clusterView,
-            Queue<Selectable> flowEventChain) {
+        Queue<Selectable> flowEventChain) {
         if (ScalingType.isClusterUpScale(event.getScalingType()) && clusterView != null) {
             flowEventChain.add(
                     new ClusterScaleTriggerEvent(CLUSTER_UPSCALE_TRIGGER_EVENT.event(),

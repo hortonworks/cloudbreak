@@ -3,7 +3,6 @@ package com.sequenceiq.environment.api.v1.proxy.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;

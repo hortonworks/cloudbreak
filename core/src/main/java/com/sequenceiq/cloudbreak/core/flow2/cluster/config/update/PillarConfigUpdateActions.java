@@ -72,15 +72,15 @@ public class PillarConfigUpdateActions {
                 Map<Object, Object> variables) {
                 LOGGER.warn("Pillar configuration update failed.", payload.getException());
                 pillarConfigUpdateService
-                    .handleConfigUpdateFailure(context.getStack(), payload.getException());
+                        .handleConfigUpdateFailure(context.getStack(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
                 return new StackEvent(PillarConfigurationUpdateEvent.PILLAR_CONFIG_UPDATE_FAILURE_HANDLED_EVENT
-                    .event(),
-                    context.getStackId());
+                        .event(),
+                        context.getStackId());
             }
         };
     }

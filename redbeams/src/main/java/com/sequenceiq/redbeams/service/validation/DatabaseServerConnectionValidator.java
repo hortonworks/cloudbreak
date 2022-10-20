@@ -1,16 +1,16 @@
 package com.sequenceiq.redbeams.service.validation;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
 
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;

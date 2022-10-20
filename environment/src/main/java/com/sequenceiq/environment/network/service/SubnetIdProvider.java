@@ -17,8 +17,8 @@ import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.environment.network.service.domain.ProvidedSubnetIds;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.network.service.domain.ProvidedSubnetIds;
 
 @Component
 public class SubnetIdProvider {

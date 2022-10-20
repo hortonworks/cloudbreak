@@ -89,8 +89,8 @@ public class AzureStackViewProviderTest {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-                { true, null }, {false, "id" }
+        return Arrays.asList(new Object[][]{
+                {true, null}, {false, "id"}
         });
     }
 

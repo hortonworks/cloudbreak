@@ -1,8 +1,8 @@
 package com.sequenceiq.freeipa.client;
 
-import com.sequenceiq.freeipa.client.model.Config;
-
 import java.util.Set;
+
+import com.sequenceiq.freeipa.client.model.Config;
 
 public class FreeIpaCapabilities {
 

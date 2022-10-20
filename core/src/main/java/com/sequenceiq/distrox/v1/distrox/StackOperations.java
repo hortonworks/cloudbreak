@@ -30,9 +30,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
@@ -180,9 +180,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         LOGGER.info("List for Stack in workspace {} and environmentCrn {}.", workspaceId, environmentCrn);
         Set<StackViewV4Response> stackViewResponses =
                 stackApiViewService.retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, environmentCrn, stackTypes)
-                .stream()
-                .map(s -> stackApiViewToStackViewV4ResponseConverter.convert(s))
-                .collect(Collectors.toSet());
+                        .stream()
+                        .map(s -> stackApiViewToStackViewV4ResponseConverter.convert(s))
+                        .collect(Collectors.toSet());
         LOGGER.info("Adding environment name and credential to the responses.");
         NameOrCrn nameOrCrn = StringUtils.isEmpty(environmentCrn) ? NameOrCrn.empty() : NameOrCrn.ofCrn(environmentCrn);
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
@@ -400,7 +400,7 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     }
 
     public FlowIdentifier backupClusterDatabase(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String location, String backupId,
-            boolean closeConnections, List<String> skipDatabaseNames) {
+                                                boolean closeConnections, List<String> skipDatabaseNames) {
         databaseBackupRestoreService.validate(workspaceId, nameOrCrn, location, backupId);
         LOGGER.debug("Starting cluster database backup: " + nameOrCrn);
         return databaseBackupRestoreService.backupDatabase(workspaceId, nameOrCrn, location, backupId, closeConnections, skipDatabaseNames);
@@ -453,7 +453,7 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     }
 
     public CertificatesRotationV4Response rotateAutoTlsCertificates(@NotNull NameOrCrn nameOrCrn, String accountId,
-            CertificatesRotationV4Request certificatesRotationV4Request) {
+                                                                    CertificatesRotationV4Request certificatesRotationV4Request) {
         LOGGER.debug("Starting cluster autotls certificates rotation: " + nameOrCrn);
         return clusterCommonService.rotateAutoTlsCertificates(nameOrCrn, accountId, certificatesRotationV4Request);
     }

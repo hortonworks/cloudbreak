@@ -30,7 +30,7 @@ public class StackScaleTriggerEvent extends StackEvent {
     private final AdjustmentTypeWithThreshold adjustmentTypeWithThreshold;
 
     public StackScaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupsWithAdjustment, Map<String, Set<Long>> hostGroupsWithPrivateIds,
-            Map<String, Set<String>> hostGroupsWithHostNames, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant) {
+        Map<String, Set<String>> hostGroupsWithHostNames, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant) {
         this(selector, stackId, hostGroupsWithAdjustment, hostGroupsWithPrivateIds, hostGroupsWithHostNames, NetworkScaleDetails.getEmpty(),
                 adjustmentTypeWithThreshold, triggeredStackVariant);
     }
@@ -56,8 +56,8 @@ public class StackScaleTriggerEvent extends StackEvent {
     }
 
     public StackScaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupsWithAdjustment, Map<String, Set<Long>> hostGroupsWithPrivateIds,
-            Map<String, Set<String>> hostGroupsWithHostNames, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant,
-            Promise<AcceptResult> accepted) {
+        Map<String, Set<String>> hostGroupsWithHostNames, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant,
+        Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.hostGroupsWithAdjustment = hostGroupsWithAdjustment == null ? Collections.emptyMap() : hostGroupsWithAdjustment;
         this.hostGroupsWithPrivateIds = hostGroupsWithPrivateIds;

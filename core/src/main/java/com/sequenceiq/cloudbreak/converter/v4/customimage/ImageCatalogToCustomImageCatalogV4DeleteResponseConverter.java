@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.converter.v4.customimage;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4DeleteResponse;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
-import org.springframework.stereotype.Component;
 
 @Component
 public class ImageCatalogToCustomImageCatalogV4DeleteResponseConverter {

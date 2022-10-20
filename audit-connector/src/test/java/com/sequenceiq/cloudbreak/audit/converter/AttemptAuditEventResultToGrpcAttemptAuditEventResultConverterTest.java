@@ -1,18 +1,5 @@
 package com.sequenceiq.cloudbreak.audit.converter;
 
-import com.cloudera.thunderhead.service.audit.AuditProto;
-import com.sequenceiq.cloudbreak.audit.converter.builder.AttemptAuditEventResultBuilderProvider;
-import com.sequenceiq.cloudbreak.audit.model.AttemptAuditEventResult;
-import com.sequenceiq.cloudbreak.audit.model.ResultApiRequestData;
-import com.sequenceiq.cloudbreak.audit.model.ResultEventData;
-import com.sequenceiq.cloudbreak.audit.model.ResultServiceEventData;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
@@ -22,6 +9,20 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import com.cloudera.thunderhead.service.audit.AuditProto;
+import com.sequenceiq.cloudbreak.audit.converter.builder.AttemptAuditEventResultBuilderProvider;
+import com.sequenceiq.cloudbreak.audit.model.AttemptAuditEventResult;
+import com.sequenceiq.cloudbreak.audit.model.ResultApiRequestData;
+import com.sequenceiq.cloudbreak.audit.model.ResultEventData;
+import com.sequenceiq.cloudbreak.audit.model.ResultServiceEventData;
 
 class AttemptAuditEventResultToGrpcAttemptAuditEventResultConverterTest {
 

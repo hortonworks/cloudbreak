@@ -15,9 +15,9 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.domain.projection.HostGroupRepairView;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
-import com.sequenceiq.cloudbreak.domain.projection.HostGroupRepairView;
 
 @EntityType(entityClass = HostGroup.class)
 @Transactional(TxType.REQUIRED)

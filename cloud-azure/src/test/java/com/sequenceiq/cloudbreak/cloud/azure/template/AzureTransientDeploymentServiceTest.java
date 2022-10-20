@@ -87,7 +87,7 @@ public class AzureTransientDeploymentServiceTest {
         List<CloudResource> deployedResources = underTest.handleTransientDeployment(client, RESOURCE_GROUP, DEPLOYMENT_NAME);
 
         verify(client).getTemplateDeploymentStatus(RESOURCE_GROUP, DEPLOYMENT_NAME);
-        verify(client,  times(0)).getTemplateDeployment(RESOURCE_GROUP, DEPLOYMENT_NAME);
+        verify(client, times(0)).getTemplateDeployment(RESOURCE_GROUP, DEPLOYMENT_NAME);
         verify(deployment, times(0)).cancel();
         assertEquals(0, deployedResources.size());
     }

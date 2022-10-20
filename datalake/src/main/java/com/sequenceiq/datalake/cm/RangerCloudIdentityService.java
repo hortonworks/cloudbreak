@@ -1,5 +1,15 @@
 package com.sequenceiq.datalake.cm;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.google.common.collect.Iterables;
@@ -10,14 +20,6 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncState;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class RangerCloudIdentityService {

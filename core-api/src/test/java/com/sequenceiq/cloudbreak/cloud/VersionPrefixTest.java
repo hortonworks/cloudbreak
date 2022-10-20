@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud;
 
-import static com.sequenceiq.cloudbreak.cloud.PrefixMatchLength.MINOR;
-import static com.sequenceiq.cloudbreak.cloud.PrefixMatchLength.MAJOR;
 import static com.sequenceiq.cloudbreak.cloud.PrefixMatchLength.MAINTENANCE;
+import static com.sequenceiq.cloudbreak.cloud.PrefixMatchLength.MAJOR;
+import static com.sequenceiq.cloudbreak.cloud.PrefixMatchLength.MINOR;
 
 import org.junit.Assert;
 import org.junit.Before;

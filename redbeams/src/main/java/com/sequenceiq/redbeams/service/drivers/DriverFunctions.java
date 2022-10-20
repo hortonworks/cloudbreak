@@ -1,15 +1,15 @@
 package com.sequenceiq.redbeams.service.drivers;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.redbeams.domain.DatabaseConfig;
-import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
-
 import java.sql.Driver;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.redbeams.domain.DatabaseConfig;
+import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 
 /**
  * Caches and retrieves database drivers.

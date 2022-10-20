@@ -8,8 +8,8 @@ import static com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsEvent.SDX_D
 import static com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsEvent.SDX_DIAGNOSTICS_COLLECTION_SUCCESS_EVENT;
 import static com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsState.DIAGNOSTICS_COLLECTION_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsState.DIAGNOSTICS_COLLECTION_FINISHED_STATE;
-import static com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsState.DIAGNOSTICS_COLLECTION_START_STATE;
 import static com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsState.DIAGNOSTICS_COLLECTION_IN_PROGRESS_STATE;
+import static com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsState.DIAGNOSTICS_COLLECTION_START_STATE;
 import static com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsState.INIT_STATE;
 

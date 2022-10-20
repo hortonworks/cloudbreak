@@ -1,6 +1,13 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
+import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.AVAILABLE_REMOTELY;
+import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.DISTRIBUTED;
+import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.DOWNLOADED;
 import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.UNKNOWN;
+import static com.sequenceiq.cloudbreak.cm.util.TestUtil.CDH;
+import static com.sequenceiq.cloudbreak.cm.util.TestUtil.FLINK;
+import static com.sequenceiq.cloudbreak.cm.util.TestUtil.SPARK3;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,14 +16,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
-import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.AVAILABLE_REMOTELY;
-import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.DISTRIBUTED;
-import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.DOWNLOADED;
-import static com.sequenceiq.cloudbreak.cm.util.TestUtil.CDH;
-import static com.sequenceiq.cloudbreak.cm.util.TestUtil.FLINK;
-import static com.sequenceiq.cloudbreak.cm.util.TestUtil.SPARK3;
 
 import java.math.BigDecimal;
 import java.util.Collections;

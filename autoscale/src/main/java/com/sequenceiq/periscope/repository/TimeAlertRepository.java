@@ -1,12 +1,14 @@
 package com.sequenceiq.periscope.repository;
 
-import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
-import com.sequenceiq.periscope.domain.TimeAlert;
+import java.util.List;
+
+import javax.transaction.Transactional;
+
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import javax.transaction.Transactional;
-import java.util.List;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.periscope.domain.TimeAlert;
 
 @EntityType(entityClass = TimeAlert.class)
 @Transactional(Transactional.TxType.REQUIRED)

@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.mock.experience.response.liftie.LiftieClusterView;
 import com.sequenceiq.mock.experience.response.liftie.DeleteClusterResponse;
+import com.sequenceiq.mock.experience.response.liftie.LiftieClusterView;
 import com.sequenceiq.mock.experience.response.liftie.ListClustersResponse;
 
 @RestController

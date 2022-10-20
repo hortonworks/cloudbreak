@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation;
 
 import static java.util.Collections.emptySet;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;

@@ -30,6 +30,7 @@ public enum StructuredEventType {
     }
 
     private final Class<? extends StructuredEvent> clazz;
+
     private final Class<? extends CDPStructuredEvent> cdpClazz;
 
     StructuredEventType(Class<? extends StructuredEvent> clazz, Class<? extends CDPStructuredEvent> cdpClazz) {

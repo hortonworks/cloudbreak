@@ -3,7 +3,6 @@ package com.sequenceiq.environment.environment.validation;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
-
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.HashSet;

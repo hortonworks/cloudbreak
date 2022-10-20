@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RecipeModelDescription;
+import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModelProperty;
 

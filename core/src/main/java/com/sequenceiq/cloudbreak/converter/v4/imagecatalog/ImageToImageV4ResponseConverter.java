@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.converter.v4.imagecatalog;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
-
-import org.springframework.stereotype.Component;
 
 @Component
 public class ImageToImageV4ResponseConverter {

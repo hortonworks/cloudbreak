@@ -70,7 +70,7 @@ public class ValidateRdsUpgradeFlowConfig
 
     @Override
     public ValidateRdsUpgradeEvent[] getInitEvents() {
-        return new ValidateRdsUpgradeEvent[] {
+        return new ValidateRdsUpgradeEvent[]{
                 VALIDATE_RDS_UPGRADE_EVENT
         };
     }

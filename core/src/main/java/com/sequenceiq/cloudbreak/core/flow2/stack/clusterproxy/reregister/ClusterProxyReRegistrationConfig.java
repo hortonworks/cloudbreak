@@ -13,8 +13,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
@@ -25,7 +25,7 @@ public class ClusterProxyReRegistrationConfig
             new Builder<ClusterProxyReRegistrationState, ClusterProxyReRegistrationEvent>()
                     .from(INIT_STATE).to(CLUSTER_PROXY_RE_REGISTRATION_STATE).event(CLUSTER_PROXY_RE_REGISTRATION_EVENT).noFailureEvent()
                     .from(CLUSTER_PROXY_RE_REGISTRATION_STATE).to(FINAL_STATE).event(CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT)
-                            .failureEvent(CLUSTER_PROXY_RE_REGISTRATION_FAILED_EVENT)
+                    .failureEvent(CLUSTER_PROXY_RE_REGISTRATION_FAILED_EVENT)
                     .build();
 
     private static final FlowEdgeConfig<ClusterProxyReRegistrationState, ClusterProxyReRegistrationEvent> EDGE_CONFIG =
@@ -52,7 +52,7 @@ public class ClusterProxyReRegistrationConfig
 
     @Override
     public ClusterProxyReRegistrationEvent[] getInitEvents() {
-        return new ClusterProxyReRegistrationEvent[] {
+        return new ClusterProxyReRegistrationEvent[]{
                 CLUSTER_PROXY_RE_REGISTRATION_EVENT
         };
     }

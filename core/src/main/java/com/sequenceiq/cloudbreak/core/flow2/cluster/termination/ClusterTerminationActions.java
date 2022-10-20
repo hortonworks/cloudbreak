@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.DisableKerberosResultToStackEventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.DisableKerberosResultToStackFailureEventConverter;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DeregisterServicesRequest;
@@ -27,7 +28,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminat
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
 import com.sequenceiq.cloudbreak.structuredevent.job.StructuredSynchronizerJobService;
 import com.sequenceiq.flow.core.PayloadConverter;
-import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @Configuration
 public class ClusterTerminationActions {

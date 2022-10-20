@@ -9,7 +9,6 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.model.CustomConfigurationPropertyParameters;
 import com.sequenceiq.cloudbreak.doc.ApiDescription.CustomConfigurationsJsonProperties;

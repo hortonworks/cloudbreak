@@ -2,11 +2,11 @@ package com.sequenceiq.redbeams.api.endpoint.v4.database.responses;
 
 import static org.junit.Assert.assertEquals;
 
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
-import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
-
 import org.junit.Before;
 import org.junit.Test;
+
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 
 public class DatabaseV4ResponseTest {
 

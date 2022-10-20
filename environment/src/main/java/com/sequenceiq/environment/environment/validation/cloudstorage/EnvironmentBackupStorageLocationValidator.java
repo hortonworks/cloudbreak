@@ -2,11 +2,11 @@ package com.sequenceiq.environment.environment.validation.cloudstorage;
 
 import java.util.Optional;
 
-import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
 
 @Component
 public class EnvironmentBackupStorageLocationValidator {

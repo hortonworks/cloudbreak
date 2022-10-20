@@ -1,5 +1,24 @@
 package com.sequenceiq.cloudbreak.service.image.catalog;
 
+import static com.sequenceiq.cloudbreak.service.image.StatedImages.statedImages;
+import static java.util.stream.Collectors.toList;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -12,24 +31,6 @@ import com.sequenceiq.cloudbreak.service.image.PrefixMatchImages;
 import com.sequenceiq.cloudbreak.service.image.PrefixMatcherService;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
 import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.sequenceiq.cloudbreak.service.image.StatedImages.statedImages;
-import static java.util.stream.Collectors.toList;
 
 @Component
 public class VersionBasedImageProvider {

@@ -40,7 +40,7 @@ public class StackTerminationFailureAction extends AbstractStackFailureAction<St
 
     @Override
     protected StackFailureContext createFlowContext(FlowParameters flowParameters, StateContext<StackTerminationState, StackTerminationEvent> stateContext,
-            StackFailureEvent payload) {
+                                                    StackFailureEvent payload) {
         Flow flow = getFlow(flowParameters.getFlowId());
         StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);

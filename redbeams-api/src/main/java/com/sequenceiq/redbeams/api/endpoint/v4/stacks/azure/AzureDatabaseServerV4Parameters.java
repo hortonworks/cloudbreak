@@ -1,5 +1,10 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure;
 
+import java.util.Map;
+
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Pattern;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -10,11 +15,6 @@ import com.sequenceiq.redbeams.doc.ModelDescriptions.AzureDatabaseServerModelDes
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
-import java.util.Map;
-
-import javax.validation.constraints.Min;
-import javax.validation.constraints.Pattern;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.YarnComponent;
+import com.sequenceiq.common.model.JsonEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CreateApplicationRequest implements JsonEntity {

@@ -91,7 +91,7 @@ public class ValidateRdsUpgradeService {
     }
 
     private void setStatusAndNotify(Long stackId, Status status, DetailedStackStatus detailedStackStatus, String statusReason, ResourceEvent resourceEvent,
-            String... args) {
+                                    String... args) {
         LOGGER.debug(statusReason);
         updateStatus(stackId, detailedStackStatus, statusReason);
         flowMessageService.fireEventAndLog(stackId, status.name(), resourceEvent, args);

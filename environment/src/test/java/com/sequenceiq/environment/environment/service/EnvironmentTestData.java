@@ -18,8 +18,8 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
-import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
+import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 
 public class EnvironmentTestData {
     public static final String ENVIRONMENT_NAME = "envname";

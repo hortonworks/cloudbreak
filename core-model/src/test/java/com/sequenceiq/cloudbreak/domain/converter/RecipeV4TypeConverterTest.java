@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.domain.converter;
 
+import javax.persistence.AttributeConverter;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
-
-import javax.persistence.AttributeConverter;
 
 public class RecipeV4TypeConverterTest extends DefaultEnumConverterBaseTest<RecipeV4Type> {
 

@@ -24,9 +24,9 @@ public class RotateSaltPasswordFlowConfig extends StackStatusFinalizerAbstractFl
 
                     .from(INIT_STATE).to(ROTATE_SALT_PASSWORD_STATE).event(RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT).noFailureEvent()
                     .from(ROTATE_SALT_PASSWORD_STATE).to(ROTATE_SALT_PASSWORD_SUCCESS_STATE).event(RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_SUCCESS_EVENT)
-                        .defaultFailureEvent()
+                    .defaultFailureEvent()
                     .from(ROTATE_SALT_PASSWORD_SUCCESS_STATE).to(FINAL_STATE).event(RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_FINISHED_EVENT)
-                        .defaultFailureEvent()
+                    .defaultFailureEvent()
 
                     .build();
 

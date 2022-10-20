@@ -29,7 +29,7 @@ public class SdxConverter {
                             "If your Data Lake has failed to provision please check our documentation " +
                             "https://docs.cloudera.com/management-console/cloud/data-lakes/topics/mc-data-lake.html or contact " +
                             "the Cloudera support to get some help or try to provision a new Data Lake with the " +
-                            "correct configuration.", sdx.getEnvironmentName(),  sdx.getName(), sdx.getStatus()));
+                            "correct configuration.", sdx.getEnvironmentName(), sdx.getName(), sdx.getStatus()));
         }
         return getSharedServiceV4Request(sdx);
     }

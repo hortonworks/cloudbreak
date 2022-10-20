@@ -3,7 +3,6 @@ package com.sequenceiq.it.cloudbreak.util.wait.service.datalake;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.CERT_RENEWAL_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.CERT_ROTATION_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.CLUSTER_UNREACHABLE;
-import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.RECOVERY_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DATALAKE_RESTORE_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DATALAKE_UPGRADE_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
@@ -12,6 +11,7 @@ import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETE_REQUE
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.EXTERNAL_DATABASE_DELETION_IN_PROGRESS;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.NODE_FAILURE;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.PROVISIONING_FAILED;
+import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.RECOVERY_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.REPAIR_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.STACK_DELETION_IN_PROGRESS;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.START_FAILED;

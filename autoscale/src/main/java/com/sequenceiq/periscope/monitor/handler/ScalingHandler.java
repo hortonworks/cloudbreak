@@ -71,7 +71,7 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
             LOGGER.info("Autoscaling activity not required for config '{}', cluster '{}'.", alert.getName(), cluster.getStackCrn());
             if (alert instanceof TimeAlert) {
                 historyService.createEntry(ScalingStatus.SUCCESS, messagesService.getMessage(MessageCode.AUTOSCALING_ACTIVITY_NOT_REQUIRED,
-                                        List.of(alert.getAlertType(), alert.getName(), alert.getScalingPolicy().getHostGroup(), hostGroupNodeCount)),
+                        List.of(alert.getAlertType(), alert.getName(), alert.getScalingPolicy().getHostGroup(), hostGroupNodeCount)),
                         hostGroupNodeCount, 0, policy);
             }
         }

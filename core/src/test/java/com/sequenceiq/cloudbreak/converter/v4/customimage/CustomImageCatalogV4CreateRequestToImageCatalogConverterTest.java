@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter.v4.customimage;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.request.CustomImageCatalogV4CreateRequest;
-import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.request.CustomImageCatalogV4CreateRequest;
+import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 
 public class CustomImageCatalogV4CreateRequestToImageCatalogConverterTest {
 

@@ -1,15 +1,17 @@
 package com.sequenceiq.redbeams.flow.redbeams.start.actions;
 
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartContext;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerRequest;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.Map;
 
 @Component("START_DATABASE_SERVER_STATE")
 public class StartDatabaseServerAction extends AbstractRedbeamsStartAction<RedbeamsEvent> {

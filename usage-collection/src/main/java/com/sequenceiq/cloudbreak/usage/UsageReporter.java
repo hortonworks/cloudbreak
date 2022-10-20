@@ -18,6 +18,7 @@ public interface UsageReporter {
      *        or SFDC contact ID set.
      */
     int USAGE_VERSION = 3;
+
     /**
      * Reports that a CDP Datahub cluster has been requested.
      * @param timestamp the cluster creation date which will be used as the

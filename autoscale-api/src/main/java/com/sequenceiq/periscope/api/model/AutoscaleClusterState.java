@@ -1,7 +1,7 @@
 package com.sequenceiq.periscope.api.model;
 
-import com.sequenceiq.periscope.doc.ApiDescription.ClusterStopStartScalingState;
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterAutoscaleState;
+import com.sequenceiq.periscope.doc.ApiDescription.ClusterStopStartScalingState;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

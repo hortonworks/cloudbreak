@@ -23,11 +23,11 @@ public class ManualStackRepairTriggerFlowConfig extends StackStatusFinalizerAbst
 
     private static final List<Transition<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent>> TRANSITIONS =
             new Builder<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent>()
-                .defaultFailureEvent(MANUAL_STACK_REPAIR_TRIGGER_FAILURE_EVENT)
-                .from(INIT_STATE).to(UNHEALTHY_INSTANCES_DETECTION_STATE).event(MANUAL_STACK_REPAIR_TRIGGER_EVENT).defaultFailureEvent()
-                .from(UNHEALTHY_INSTANCES_DETECTION_STATE).to(NOTIFY_STACK_REPAIR_SERVICE_STATE).event(NOTIFY_REPAIR_SERVICE_EVENT).defaultFailureEvent()
-                .from(NOTIFY_STACK_REPAIR_SERVICE_STATE).to(FINAL_STATE).event(REPAIR_SERVICE_NOTIFIED_EVENT).defaultFailureEvent()
-                .build();
+                    .defaultFailureEvent(MANUAL_STACK_REPAIR_TRIGGER_FAILURE_EVENT)
+                    .from(INIT_STATE).to(UNHEALTHY_INSTANCES_DETECTION_STATE).event(MANUAL_STACK_REPAIR_TRIGGER_EVENT).defaultFailureEvent()
+                    .from(UNHEALTHY_INSTANCES_DETECTION_STATE).to(NOTIFY_STACK_REPAIR_SERVICE_STATE).event(NOTIFY_REPAIR_SERVICE_EVENT).defaultFailureEvent()
+                    .from(NOTIFY_STACK_REPAIR_SERVICE_STATE).to(FINAL_STATE).event(REPAIR_SERVICE_NOTIFIED_EVENT).defaultFailureEvent()
+                    .build();
 
     private static final FlowEdgeConfig<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, MANUAL_STACK_REPAIR_TRIGGER_FAILED_STATE, MANUAL_STACK_REPAIR_TRIGGER_FAILURE_HANDLED_EVENT);
@@ -53,7 +53,7 @@ public class ManualStackRepairTriggerFlowConfig extends StackStatusFinalizerAbst
 
     @Override
     public ManualStackRepairTriggerEvent[] getInitEvents() {
-        return new ManualStackRepairTriggerEvent[] {
+        return new ManualStackRepairTriggerEvent[]{
                 MANUAL_STACK_REPAIR_TRIGGER_EVENT
         };
     }

@@ -239,6 +239,21 @@ Set Gradle JVM
 IntelliJ IDEA -> Preferences -> Build, Execution, Deployment -> Gradle -> Gradle JVM -> 11
 ```
 
+Set Import Order
+```
+Import static all other imports
+<blank line>
+import java.*
+<blank line>
+import javax.*
+<blank line>
+import org.*
+<blank line>
+import com.*
+<blank line>
+import all other imports
+```
+
 ### Import Project
 
 Cloudbreak can be imported into IDEA as a Gradle project by specifying the `cloudbreak` repo root under Import Project. Once it is done, you need to import the proper code formatter by using the `File -> Import Settings...` menu and selecting the `idea_settings.jar` located in the `config/idea` directory in the Cloudbreak git repository.

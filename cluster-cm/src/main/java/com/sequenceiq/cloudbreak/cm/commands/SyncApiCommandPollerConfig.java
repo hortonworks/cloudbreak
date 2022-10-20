@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.cm.commands;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 @Component
 public class SyncApiCommandPollerConfig {

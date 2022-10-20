@@ -2,11 +2,11 @@ package com.sequenceiq.redbeams.domain.stack;
 
 import static org.junit.Assert.assertEquals;
 
-import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
-import com.sequenceiq.redbeams.api.model.common.Status;
-
 import org.junit.Before;
 import org.junit.Test;
+
+import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
+import com.sequenceiq.redbeams.api.model.common.Status;
 
 public class DBStackStatusTest {
 

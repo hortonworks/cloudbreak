@@ -1,13 +1,13 @@
 package com.sequenceiq.periscope.repository;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.periscope.domain.SecurityConfig;
-
-import javax.transaction.Transactional;
 
 @EntityType(entityClass = SecurityConfig.class)
 @Transactional(Transactional.TxType.REQUIRED)

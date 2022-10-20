@@ -3,9 +3,10 @@ package com.sequenceiq.environment.environment.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import com.sequenceiq.flow.converter.OperationDetailsPopulator;
+
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
+import com.sequenceiq.flow.converter.OperationDetailsPopulator;
 import com.sequenceiq.flow.service.FlowService;
 
 @Service

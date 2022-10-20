@@ -25,13 +25,13 @@ import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Buil
 public class StackDownscaleConfig extends StackStatusFinalizerAbstractFlowConfig<StackDownscaleState, StackDownscaleEvent> {
     private static final List<Transition<StackDownscaleState, StackDownscaleEvent>> TRANSITIONS =
             new Builder<StackDownscaleState, StackDownscaleEvent>()
-                .from(INIT_STATE).to(DOWNSCALE_COLLECT_RESOURCES_STATE).event(STACK_DOWNSCALE_EVENT).noFailureEvent()
-                .from(DOWNSCALE_COLLECT_RESOURCES_STATE).to(DOWNSCALE_STATE).event(DOWNSCALE_RESOURCES_COLLECTED_EVENT)
+                    .from(INIT_STATE).to(DOWNSCALE_COLLECT_RESOURCES_STATE).event(STACK_DOWNSCALE_EVENT).noFailureEvent()
+                    .from(DOWNSCALE_COLLECT_RESOURCES_STATE).to(DOWNSCALE_STATE).event(DOWNSCALE_RESOURCES_COLLECTED_EVENT)
                     .failureEvent(DOWNSCALE_RESOURCES_FAILURE_EVENT)
-                .from(DOWNSCALE_STATE).to(DOWNSCALE_FINISHED_STATE).event(DOWNSCALE_FINISHED_EVENT)
+                    .from(DOWNSCALE_STATE).to(DOWNSCALE_FINISHED_STATE).event(DOWNSCALE_FINISHED_EVENT)
                     .failureEvent(DOWNSCALE_FAILURE_EVENT)
-                .from(DOWNSCALE_FINISHED_STATE).to(FINAL_STATE).event(DOWNSCALE_FINALIZED_EVENT).noFailureEvent()
-                .build();
+                    .from(DOWNSCALE_FINISHED_STATE).to(FINAL_STATE).event(DOWNSCALE_FINALIZED_EVENT).noFailureEvent()
+                    .build();
 
     private static final FlowEdgeConfig<StackDownscaleState, StackDownscaleEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, DOWNSCALE_FAILED_STATE, DOWNSCALE_FAIL_HANDLED_EVENT);
@@ -47,7 +47,7 @@ public class StackDownscaleConfig extends StackStatusFinalizerAbstractFlowConfig
 
     @Override
     public StackDownscaleEvent[] getInitEvents() {
-        return new StackDownscaleEvent[] {
+        return new StackDownscaleEvent[]{
                 STACK_DOWNSCALE_EVENT
         };
     }

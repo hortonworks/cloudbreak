@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.client.target;
 
 import java.util.Collection;
+import java.util.Objects;
 
 public class HostList implements Target<String> {
 
@@ -23,7 +24,7 @@ public class HostList implements Target<String> {
     @Override
     public String toString() {
         return "HostList{" +
-                "targets=" + targets == null ? "null" : String.join(", ", targets) +
+                "targets=" + (Objects.equals(targets, null) ? "null" : String.join(", ", targets)) +
                 '}';
     }
 }

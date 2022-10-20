@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.assertion.kerberos;
 
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
+import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 
 public class KerberosTestAssertion {
 

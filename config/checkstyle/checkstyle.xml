@@ -126,6 +126,15 @@
             <property name="file" value="${config_loc}/import-control.xml"/>
             <property name="path" value="cloud-aws-cloudformation/src/main/java.*$"/>
         </module>
+        <module name="ImportOrder">
+            <property name="staticGroups" value="com,io,java,javax,org"/>
+            <property name="groups" value="java,javax,org,com"/>
+            <property name="ordered" value="true"/>
+            <property name="separated" value="true"/>
+            <property name="option" value="top"/>
+            <property name="sortStaticImportsAlphabetically" value="true"/>
+        </module>
+
         <module name="PackageAnnotation" />
         <module name="ExecutableStatementCount">
             <property name="max" value="6"/>
@@ -149,7 +158,6 @@
             <property name="message" value="Remove auto-generated comments." />
             <property name="illegalPattern" value="true" />
         </module>
-        <module name="UnnecessaryParentheses" />
         <module name="RedundantImport" />
         <module name="UnusedImports" />
         <module name="SimplifyBooleanExpression" />

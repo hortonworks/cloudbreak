@@ -15,7 +15,9 @@ public enum AzureDiskType {
     PREMIUM_LOCALLY_REDUNDANT("Premium_LRS", "p", "Premium locally-redundant storage");
 
     private final String value;
+
     private final String abbreviation;
+
     private final String displayName;
 
     AzureDiskType(String value, String abbreviation, String displayName) {

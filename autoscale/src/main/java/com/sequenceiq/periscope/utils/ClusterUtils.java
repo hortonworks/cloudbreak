@@ -8,7 +8,7 @@ public class ClusterUtils {
 
     public static final int MAX_CAPACITY = 100;
 
-    public static final long  MEGABYTE = 1024L * 1024L;
+    public static final long MEGABYTE = 1024L * 1024L;
 
     private ClusterUtils() {
     }

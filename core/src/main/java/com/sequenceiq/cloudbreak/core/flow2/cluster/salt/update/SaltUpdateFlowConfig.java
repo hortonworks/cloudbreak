@@ -33,16 +33,17 @@ public class SaltUpdateFlowConfig extends StackStatusFinalizerAbstractFlowConfig
 
     private static final List<Transition<SaltUpdateState, SaltUpdateEvent>> TRANSITIONS =
             new Builder<SaltUpdateState, SaltUpdateEvent>().defaultFailureEvent(SALT_UPDATE_FAILED_EVENT)
-            .from(INIT_STATE).to(UPDATE_SALT_STATE_FILES_STATE).event(SALT_UPDATE_EVENT).defaultFailureEvent()
-            .from(UPDATE_SALT_STATE_FILES_STATE).to(UPLOAD_RECIPES_FOR_SU_STATE).event(BOOTSTRAP_MACHINES_FINISHED_EVENT)
+                    .from(INIT_STATE).to(UPDATE_SALT_STATE_FILES_STATE).event(SALT_UPDATE_EVENT).defaultFailureEvent()
+                    .from(UPDATE_SALT_STATE_FILES_STATE).to(UPLOAD_RECIPES_FOR_SU_STATE).event(BOOTSTRAP_MACHINES_FINISHED_EVENT)
                     .failureEvent(BOOTSTRAP_MACHINES_FAILED_EVENT)
-            .from(UPLOAD_RECIPES_FOR_SU_STATE).to(RECONFIGURE_KEYTABS_FOR_SU_STATE).event(UPLOAD_RECIPES_FINISHED_EVENT)
+                    .from(UPLOAD_RECIPES_FOR_SU_STATE).to(RECONFIGURE_KEYTABS_FOR_SU_STATE).event(UPLOAD_RECIPES_FINISHED_EVENT)
                     .failureEvent(UPLOAD_RECIPES_FAILED_EVENT)
-            .from(RECONFIGURE_KEYTABS_FOR_SU_STATE).to(RUN_HIGHSTATE_STATE).event(CONFIGURE_KEYTABS_FINISHED_EVENT).failureEvent(CONFIGURE_KEYTABS_FAILED_EVENT)
-            .from(RUN_HIGHSTATE_STATE).to(SALT_UPDATE_FINISHED_STATE).event(START_AMBARI_SERVICES_FINISHED_EVENT)
+                    .from(RECONFIGURE_KEYTABS_FOR_SU_STATE).to(RUN_HIGHSTATE_STATE).event(CONFIGURE_KEYTABS_FINISHED_EVENT)
+                    .failureEvent(CONFIGURE_KEYTABS_FAILED_EVENT)
+                    .from(RUN_HIGHSTATE_STATE).to(SALT_UPDATE_FINISHED_STATE).event(START_AMBARI_SERVICES_FINISHED_EVENT)
                     .failureEvent(START_AMBARI_SERVICES_FAILED_EVENT)
-            .from(SALT_UPDATE_FINISHED_STATE).to(FINAL_STATE).event(SALT_UPDATE_FINISHED_EVENT).noFailureEvent()
-            .build();
+                    .from(SALT_UPDATE_FINISHED_STATE).to(FINAL_STATE).event(SALT_UPDATE_FINISHED_EVENT).noFailureEvent()
+                    .build();
 
     public SaltUpdateFlowConfig() {
         super(SaltUpdateState.class, SaltUpdateEvent.class);

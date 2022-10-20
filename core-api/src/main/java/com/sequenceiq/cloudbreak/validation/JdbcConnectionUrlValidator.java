@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.validation;
 
-import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.common.api.util.ValidatorUtil;
 
 public class JdbcConnectionUrlValidator implements ConstraintValidator<ValidJdbcConnectionUrl, String> {

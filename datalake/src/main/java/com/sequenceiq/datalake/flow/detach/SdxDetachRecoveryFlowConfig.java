@@ -4,10 +4,10 @@ import static com.sequenceiq.datalake.flow.detach.SdxDetachRecoveryEvent.SDX_DET
 import static com.sequenceiq.datalake.flow.detach.SdxDetachRecoveryEvent.SDX_DETACH_RECOVERY_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachRecoveryEvent.SDX_DETACH_RECOVERY_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachRecoveryEvent.SDX_DETACH_RECOVERY_SUCCESS_EVENT;
-import static com.sequenceiq.datalake.flow.detach.SdxDetachRecoveryState.SDX_DETACH_RECOVERY_FAILED_STATE;
-import static com.sequenceiq.datalake.flow.detach.SdxDetachRecoveryState.SDX_DETACH_RECOVERY_STATE;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachRecoveryState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachRecoveryState.INIT_STATE;
+import static com.sequenceiq.datalake.flow.detach.SdxDetachRecoveryState.SDX_DETACH_RECOVERY_FAILED_STATE;
+import static com.sequenceiq.datalake.flow.detach.SdxDetachRecoveryState.SDX_DETACH_RECOVERY_STATE;
 
 import java.util.List;
 

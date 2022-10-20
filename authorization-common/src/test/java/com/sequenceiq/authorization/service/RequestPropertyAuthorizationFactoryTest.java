@@ -178,7 +178,7 @@ public class RequestPropertyAuthorizationFactoryTest {
     }
 
     private CheckPermissionByRequestProperty getAnnotation(AuthorizationVariableType type, AuthorizationResourceAction action,
-            Boolean skipOnNull, String path) {
+        Boolean skipOnNull, String path) {
         return new CheckPermissionByRequestProperty() {
 
             @Override

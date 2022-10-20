@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.common.api.type.AdjustmentType;
-
 import javax.persistence.AttributeConverter;
+
+import com.sequenceiq.common.api.type.AdjustmentType;
 
 public class AdjustmentTypeConverterTest extends DefaultEnumConverterBaseTest<AdjustmentType> {
 

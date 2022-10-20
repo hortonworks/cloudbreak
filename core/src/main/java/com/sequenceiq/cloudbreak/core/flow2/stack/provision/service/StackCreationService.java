@@ -288,7 +288,7 @@ public class StackCreationService {
                 Integer instanceStorageSize = instanceStoreMetadata.mapInstanceTypeToInstanceSizeNullHandled(template.getInstanceType());
                 if (ephemeralVolumeChecker.instanceGroupContainsOnlyDatabaseAndEphemeralVolumes(instanceGroup)) {
                     LOGGER.debug("Instance storage was already requested. Setting temporary storage in template to: {}. " +
-                            "Group name: {}, Template id: {}, instance type: {}",
+                                    "Group name: {}, Template id: {}, instance type: {}",
                             TemporaryStorage.EPHEMERAL_VOLUMES_ONLY.name(), instanceGroup.getGroupName(), template.getId(), template.getInstanceType());
                     template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES_ONLY);
                 } else if (instanceStorageCount > 0 && stack.getType().equals(StackType.WORKLOAD)) {

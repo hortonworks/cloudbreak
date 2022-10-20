@@ -2,14 +2,14 @@ package com.sequenceiq.redbeams.service.drivers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.redbeams.domain.DatabaseConfig;
-import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.redbeams.domain.DatabaseConfig;
+import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 
 public class DriverFunctionsTest {
 

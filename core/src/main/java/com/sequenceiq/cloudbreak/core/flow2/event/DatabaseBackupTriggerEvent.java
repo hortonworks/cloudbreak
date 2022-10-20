@@ -15,7 +15,7 @@ import reactor.rx.Promise;
 public class DatabaseBackupTriggerEvent extends BackupRestoreEvent {
 
     public DatabaseBackupTriggerEvent(String selector, Long stackId, String backupLocation, String backupId,
-            boolean closeConnections, List<String> skipDatabaseNames) {
+        boolean closeConnections, List<String> skipDatabaseNames) {
         super(selector, stackId, backupLocation, backupId, closeConnections, skipDatabaseNames);
     }
 

@@ -23,7 +23,7 @@ public class InstanceTerminationContext extends CommonContext {
     private final List<InstanceMetadataView> instanceMetaDataList;
 
     public InstanceTerminationContext(FlowParameters flowParameters, StackView stack, CloudContext cloudContext, CloudCredential cloudCredential,
-            List<CloudInstance> cloudInstances, List<InstanceMetadataView> instanceMetaDataList) {
+        List<CloudInstance> cloudInstances, List<InstanceMetadataView> instanceMetaDataList) {
         super(flowParameters);
         this.stack = stack;
         this.cloudContext = cloudContext;

@@ -116,7 +116,7 @@ public class ScalingRequest implements Runnable {
         try {
             int scalingAdjustment =
                     desiredHostGroupNodeCount - (STOPSTART.equals(scalingAdjustmentType)
-                    ? existingServiceHealthyHostGroupCount : existingHostGroupNodeCount);
+                            ? existingServiceHealthyHostGroupCount : existingHostGroupNodeCount);
 
             if (!decommissionNodeIds.isEmpty()) {
                 scaleDownByNodeIds(decommissionNodeIds);

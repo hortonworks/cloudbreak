@@ -13,14 +13,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.consumption.api.doc.ConsumptionOpDescription;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.CloudResourceConsumptionRequest;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionRequest;
-import com.sequenceiq.consumption.api.doc.ConsumptionOpDescription;
 import com.sequenceiq.consumption.api.v1.consumption.model.response.ConsumptionExistenceResponse;
 
 import io.swagger.annotations.Api;

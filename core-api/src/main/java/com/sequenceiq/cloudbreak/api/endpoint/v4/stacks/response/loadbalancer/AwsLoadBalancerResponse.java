@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+
+import io.swagger.annotations.ApiModelProperty;
 
 public class AwsLoadBalancerResponse implements Serializable {
 

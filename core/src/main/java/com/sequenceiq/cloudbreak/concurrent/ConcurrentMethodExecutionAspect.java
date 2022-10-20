@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.util.concurrent.Striped;
-import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.common.event.Payload;
 
 @Component
 @Aspect

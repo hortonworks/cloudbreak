@@ -17,8 +17,8 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
-import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerRequest;
+import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 

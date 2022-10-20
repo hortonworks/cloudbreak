@@ -131,7 +131,7 @@ public class NodeStatusCheckerJob extends StatusCheckerJob {
     }
 
     private <T extends GeneratedMessageV3> void processNodeStatusReport(Optional<RPCResponse<NodeStatusProto.NodeStatusReport>> nodeStatusReport,
-            Function<NodeStatusProto.NodeStatus, T> nodeStatusDetails, Stack stack, String type) {
+                                                                        Function<NodeStatusProto.NodeStatus, T> nodeStatusDetails, Stack stack, String type) {
         if (nodeStatusReport.isPresent()) {
             LOGGER.debug("{} report: {}", type, nodeStatusReport.get().getFirstTextMessage());
             if (isStatusReportNotEmpty(nodeStatusReport.get())) {

@@ -1,20 +1,21 @@
 package com.sequenceiq.cloudbreak.audit.converter;
 
-import com.cloudera.thunderhead.service.audit.AuditProto;
-import com.sequenceiq.cloudbreak.audit.converter.builder.ApiRequestDataBuilderProvider;
-import com.sequenceiq.cloudbreak.audit.model.ApiRequestData;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import com.cloudera.thunderhead.service.audit.AuditProto;
+import com.sequenceiq.cloudbreak.audit.converter.builder.ApiRequestDataBuilderProvider;
+import com.sequenceiq.cloudbreak.audit.model.ApiRequestData;
 
 class ApiRequestDataBuildUpdaterTest {
 

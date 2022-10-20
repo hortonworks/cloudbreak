@@ -37,7 +37,7 @@ public class ClusterProxyReRegistrationActions {
         return new AbstractStackAction<ClusterProxyReRegistrationState, ClusterProxyReRegistrationEvent, StackContext, StackEvent>(StackEvent.class) {
             @Override
             protected StackContext createFlowContext(FlowParameters flowParameters,
-                    StateContext<ClusterProxyReRegistrationState, ClusterProxyReRegistrationEvent> stateContext, StackEvent payload) {
+                StateContext<ClusterProxyReRegistrationState, ClusterProxyReRegistrationEvent> stateContext, StackEvent payload) {
                 return new StackContext(flowParameters, stackService.getById(payload.getResourceId()), null, null, null);
             }
 

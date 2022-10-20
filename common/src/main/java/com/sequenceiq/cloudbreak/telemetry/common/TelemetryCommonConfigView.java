@@ -8,8 +8,8 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfigView;
-import com.sequenceiq.common.api.telemetry.model.VmLog;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
+import com.sequenceiq.common.api.telemetry.model.VmLog;
 
 public class TelemetryCommonConfigView implements TelemetryConfigView {
 

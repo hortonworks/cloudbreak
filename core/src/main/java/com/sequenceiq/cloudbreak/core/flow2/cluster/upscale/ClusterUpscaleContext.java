@@ -23,7 +23,7 @@ public class ClusterUpscaleContext extends ClusterViewContext {
     private final Boolean restartServices;
 
     public ClusterUpscaleContext(FlowParameters flowParameters, StackView stack, ClusterView cluster, Map<String, Integer> hostGroupWithAdjustment,
-            Boolean singlePrimaryGateway, String hostName, ClusterManagerType clusterManagerType, Boolean repair, Boolean restartServices) {
+        Boolean singlePrimaryGateway, String hostName, ClusterManagerType clusterManagerType, Boolean repair, Boolean restartServices) {
         super(flowParameters, stack, cluster);
         this.hostGroupWithAdjustment = hostGroupWithAdjustment;
         this.singlePrimaryGateway = singlePrimaryGateway;

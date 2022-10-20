@@ -3,10 +3,10 @@ package com.sequenceiq.flow.component.sleep;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
-import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
-import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.component.sleep.event.SleepChainTriggerEvent;
 import com.sequenceiq.flow.component.sleep.event.SleepStartEvent;
+import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 public class SleepChainEventFactory implements FlowEventChainFactory<SleepChainTriggerEvent> {
 

@@ -48,30 +48,30 @@ public class StackUpscaleConfig extends StackStatusFinalizerAbstractFlowConfig<S
             new Builder<StackUpscaleState, StackUpscaleEvent>()
                     .from(INIT_STATE).to(UPDATE_DOMAIN_DNS_RESOLVER_STATE).event(ADD_INSTANCES_EVENT).noFailureEvent()
                     .from(UPDATE_DOMAIN_DNS_RESOLVER_STATE).to(UPSCALE_PREVALIDATION_STATE).event(UPDATE_DOMAIN_DNS_RESOLVER_FINISHED_EVENT)
-                                    .failureEvent(UPDATE_DOMAIN_DNS_RESOLVER_FAILED_EVENT)
+                    .failureEvent(UPDATE_DOMAIN_DNS_RESOLVER_FAILED_EVENT)
                     .from(UPSCALE_PREVALIDATION_STATE).to(ADD_INSTANCES_STATE).event(UPSCALE_VALID_EVENT).failureEvent(UPSCALE_INVALID_EVENT)
                     .from(UPSCALE_PREVALIDATION_STATE).to(EXTEND_METADATA_STATE).event(EXTEND_METADATA_EVENT).failureEvent(UPSCALE_INVALID_EVENT)
                     .from(ADD_INSTANCES_STATE).to(ADD_INSTANCES_FINISHED_STATE).event(ADD_INSTANCES_FINISHED_EVENT).failureEvent(ADD_INSTANCES_FAILURE_EVENT)
                     .from(ADD_INSTANCES_FINISHED_STATE).to(EXTEND_METADATA_STATE).event(EXTEND_METADATA_EVENT)
-                                    .failureEvent(ADD_INSTANCES_FINISHED_FAILURE_EVENT)
+                    .failureEvent(ADD_INSTANCES_FINISHED_FAILURE_EVENT)
                     .from(EXTEND_METADATA_STATE).to(EXTEND_METADATA_FINISHED_STATE).event(EXTEND_METADATA_FINISHED_EVENT)
-                                    .failureEvent(EXTEND_METADATA_FAILURE_EVENT)
+                    .failureEvent(EXTEND_METADATA_FAILURE_EVENT)
                     .from(EXTEND_METADATA_FINISHED_STATE).to(RE_REGISTER_WITH_CLUSTER_PROXY_STATE).event(StackUpscaleEvent.BOOTSTRAP_NEW_NODES_EVENT)
-                                    .failureEvent(StackUpscaleEvent.EXTEND_METADATA_FINISHED_FAILURE_EVENT)
+                    .failureEvent(StackUpscaleEvent.EXTEND_METADATA_FINISHED_FAILURE_EVENT)
                     .from(EXTEND_METADATA_FINISHED_STATE).to(GATEWAY_TLS_SETUP_STATE).event(StackUpscaleEvent.SSHFINGERPRINTS_EVENT)
-                                    .failureEvent(StackUpscaleEvent.EXTEND_METADATA_FINISHED_FAILURE_EVENT)
+                    .failureEvent(StackUpscaleEvent.EXTEND_METADATA_FINISHED_FAILURE_EVENT)
                     .from(GATEWAY_TLS_SETUP_STATE).to(RE_REGISTER_WITH_CLUSTER_PROXY_STATE).event(StackUpscaleEvent.TLS_SETUP_FINISHED_EVENT)
-                                    .failureEvent(StackUpscaleEvent.TLS_SETUP_FINISHED_FAILED_EVENT)
+                    .failureEvent(StackUpscaleEvent.TLS_SETUP_FINISHED_FAILED_EVENT)
                     .from(RE_REGISTER_WITH_CLUSTER_PROXY_STATE).to(BOOTSTRAP_NEW_NODES_STATE).event(CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT)
-                                    .failureEvent(CLUSTER_PROXY_RE_REGISTRATION_FAILED_EVENT)
+                    .failureEvent(CLUSTER_PROXY_RE_REGISTRATION_FAILED_EVENT)
                     .from(BOOTSTRAP_NEW_NODES_STATE).to(EXTEND_HOST_METADATA_STATE).event(StackUpscaleEvent.EXTEND_HOST_METADATA_EVENT)
-                                    .failureEvent(StackUpscaleEvent.BOOTSTRAP_NEW_NODES_FAILURE_EVENT)
+                    .failureEvent(StackUpscaleEvent.BOOTSTRAP_NEW_NODES_FAILURE_EVENT)
                     .from(EXTEND_HOST_METADATA_STATE).to(CLEANUP_FREEIPA_UPSCALE_STATE).event(StackUpscaleEvent.EXTEND_HOST_METADATA_FINISHED_EVENT)
-                                    .failureEvent(StackUpscaleEvent.EXTEND_HOST_METADATA_FAILURE_EVENT)
+                    .failureEvent(StackUpscaleEvent.EXTEND_HOST_METADATA_FAILURE_EVENT)
                     .from(CLEANUP_FREEIPA_UPSCALE_STATE).to(EXTEND_HOST_METADATA_FINISHED_STATE).event(CLEANUP_FREEIPA_FINISHED_EVENT)
-                                    .failureEvent(CLEANUP_FREEIPA_FAILED_EVENT)
+                    .failureEvent(CLEANUP_FREEIPA_FAILED_EVENT)
                     .from(EXTEND_HOST_METADATA_FINISHED_STATE).to(FINAL_STATE).event(UPSCALE_FINALIZED_EVENT)
-                                    .failureEvent(StackUpscaleEvent.EXTEND_HOST_METADATA_FINISHED_FAILURE_EVENT)
+                    .failureEvent(StackUpscaleEvent.EXTEND_HOST_METADATA_FINISHED_FAILURE_EVENT)
                     .build();
 
     private static final FlowEdgeConfig<StackUpscaleState, StackUpscaleEvent> EDGE_CONFIG =
@@ -98,7 +98,7 @@ public class StackUpscaleConfig extends StackStatusFinalizerAbstractFlowConfig<S
 
     @Override
     public StackUpscaleEvent[] getInitEvents() {
-        return new StackUpscaleEvent[] {
+        return new StackUpscaleEvent[]{
                 ADD_INSTANCES_EVENT
         };
     }

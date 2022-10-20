@@ -78,8 +78,8 @@ import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
-import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.cloudbreak.util.Version;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -92,23 +92,23 @@ import freemarker.template.Configuration;
 
 /**
  * Validates that ARM template can be created from Free Marker Template {@code .ftl} files.
- *
+ * <p>
  * This checks that:
  * <ul>
  *     <li>{@code .ftl} files are properly formatted</li>
  *     <li>Valid Json is produced</li>
  *     <li>Certain values are contained in the Json</li>
  * </ul>
- *
+ * <p>
  * This class is parameterized, so a single test will be used to run against multiple template files.
  * The template files are in {@code main/resources} and {@code test/resources}.
- *
+ * <p>
  * To opt out of running a test for <em>older</em> versions of the template, place the {@code assumeTrue()} method at
  * the beginning of your test.
  * <pre>{@code
  *     assumeTrue(isTemplateVersionGreaterOrEqualThan("2.7.3.0"));
  * }</pre>
- *
+ * <p>
  * It's useful to capture the JSON strings printed to the console, then provide them to the Azure CLI's template deployment
  * validation commands.
  * Example:
@@ -754,7 +754,7 @@ public class AzureTemplateBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
 
         groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
-            instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
                 instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
 
         List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
@@ -766,7 +766,7 @@ public class AzureTemplateBuilderTest {
         loadBalancers.add(privateLb);
 
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
-            instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, loadBalancers);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, loadBalancers);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
@@ -775,8 +775,8 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
 
         String templateString =
-            azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                AzureInstanceTemplateOperation.PROVISION, null);
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION, null);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("\"type\": \"Microsoft.Network/loadBalancers\","));
@@ -787,15 +787,15 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"type\": \"Microsoft.Network/publicIPAddresses\","));
         assertTrue(templateString.contains("\"name\": \"" + LoadBalancerSku.getDefault().getTemplateName() + "\""));
         assertEquals(2, StringUtils.countMatches(templateString,
-            "\"[resourceId('Microsoft.Network/loadBalancers'"));
+                "\"[resourceId('Microsoft.Network/loadBalancers'"));
         assertEquals(2, StringUtils.countMatches(templateString,
-            "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'LoadBalancertestStackPUBLIC', 'gateway-group-pool')]"));
+                "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'LoadBalancertestStackPUBLIC', 'gateway-group-pool')]"));
         assertEquals(2, StringUtils.countMatches(templateString,
-            "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'LoadBalancertestStackPRIVATE', 'gateway-group-pool')]"));
+                "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'LoadBalancertestStackPRIVATE', 'gateway-group-pool')]"));
         assertEquals(2, StringUtils.countMatches(templateString,
-            "\"type\": \"Microsoft.Network/loadBalancers\","));
+                "\"type\": \"Microsoft.Network/loadBalancers\","));
         assertEquals(1, StringUtils.countMatches(templateString,
-            "\"id\": \"[resourceId('Microsoft.Network/publicIPAddresses', 'LoadBalancertestStackPUBLIC-publicIp')]\""));
+                "\"id\": \"[resourceId('Microsoft.Network/publicIPAddresses', 'LoadBalancertestStackPUBLIC-publicIp')]\""));
         assertFalse(StringUtils.contains(templateString, "\"name\": \"group-gateway-group-outbound-rule\","));
     }
 

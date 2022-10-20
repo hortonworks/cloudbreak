@@ -3,11 +3,11 @@ package com.sequenceiq.cloudbreak.template.filesystem;
 import java.util.Collections;
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.common.type.ExecutionType;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
+import com.sequenceiq.cloudbreak.common.type.ExecutionType;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
+import com.sequenceiq.common.model.FileSystemType;
 
 public class AbstractFileSystemConfiguratorImpl extends AbstractFileSystemConfigurator<AdlsFileSystemConfigurationsView> {
 

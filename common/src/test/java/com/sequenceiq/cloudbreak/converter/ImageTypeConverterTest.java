@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.common.api.type.ImageType;
-
 import javax.persistence.AttributeConverter;
+
+import com.sequenceiq.common.api.type.ImageType;
 
 public class ImageTypeConverterTest extends DefaultEnumConverterBaseTest<ImageType> {
 

@@ -22,11 +22,17 @@ public enum DatabaseVendor {
     EMBEDDED("embedded", "", "", "", "", "");
 
     private final String fancyName;
+
     private final String displayName;
+
     private final String connectionDriver;
+
     private final String jdbcUrlDriverId;
+
     private final String connectorJarName;
+
     private final String databaseType;
+
     private final Set<String> versions;
 
     DatabaseVendor(String databaseType, String displayName, String fancyName, String connectionDriver, String jdbcUrlDriverId,

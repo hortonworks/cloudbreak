@@ -10,7 +10,7 @@ import com.sequenceiq.flow.core.FlowParameters;
 public class AwsVariantMigrationFlowContext extends StackContext {
 
     public AwsVariantMigrationFlowContext(FlowParameters flowParameters, StackDtoDelegate stack, CloudContext cloudContext, CloudCredential cloudCredential,
-            CloudStack cloudStack) {
+        CloudStack cloudStack) {
         super(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
     }
 }

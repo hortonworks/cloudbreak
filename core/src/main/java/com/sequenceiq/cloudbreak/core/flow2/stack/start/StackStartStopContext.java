@@ -19,7 +19,7 @@ public class StackStartStopContext extends CommonContext {
     private final CloudCredential cloudCredential;
 
     public StackStartStopContext(FlowParameters flowParameters, StackDto stack, List<InstanceGroupDto> instanceGroupDtos,
-            CloudContext cloudContext, CloudCredential cloudCredential) {
+        CloudContext cloudContext, CloudCredential cloudCredential) {
         super(flowParameters);
         this.stack = stack;
         this.instanceGroupDtos = instanceGroupDtos;

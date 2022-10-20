@@ -52,9 +52,9 @@ public class CloudStorageDecorator {
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
     public CloudStorageRequest decorate(String blueprintName,
-            String clusterName,
-            CloudStorageRequest request,
-            DetailedEnvironmentResponse environment) {
+                                        String clusterName,
+                                        CloudStorageRequest request,
+                                        DetailedEnvironmentResponse environment) {
         if (environment != null) {
             if (request == null) {
                 request = new CloudStorageRequest();
@@ -101,7 +101,7 @@ public class CloudStorageDecorator {
     }
 
     public CloudStorageRequest updateCloudStorageLocations(String blueprintName, String clusterName,
-            CloudStorageRequest request, List<SdxClusterResponse> datalakes) {
+        CloudStorageRequest request, List<SdxClusterResponse> datalakes) {
         if (hasDatalake(datalakes)) {
             Pair<String, FileSystemType> sdxBaseLocationFileSystemType = getBaseLocationWithFileSystemTypeFromSdx(datalakes.get(0));
             Set<ConfigQueryEntry> recommendations = getRecommendations(blueprintName, clusterName, sdxBaseLocationFileSystemType);
@@ -145,7 +145,7 @@ public class CloudStorageDecorator {
     }
 
     private Set<ConfigQueryEntry> queryParameters(Set<ConfigQueryEntry> filtered, String blueprintName, String clusterName,
-            Pair<String, FileSystemType> sdxBaseLocationFileSystemType) {
+        Pair<String, FileSystemType> sdxBaseLocationFileSystemType) {
         Pair<Blueprint, String> bt = blueprintService.getBlueprintAndText(blueprintName, 0L);
         FileSystemConfigQueryObject fsConfigO = blueprintService.createFileSystemConfigQueryObject(bt, clusterName,
                 sdxBaseLocationFileSystemType.getLeft(), sdxBaseLocationFileSystemType.getRight().name(), "", true, false);
@@ -168,7 +168,7 @@ public class CloudStorageDecorator {
     }
 
     private void replaceTemplatedLocationValuesWithFilledValues(CloudStorageRequest request, Set<ConfigQueryEntry> recommendations,
-            Map<CloudStorageCdpService, String> templatedLocations) {
+                                                                Map<CloudStorageCdpService, String> templatedLocations) {
         recommendations
                 .stream()
                 .filter(entry -> templatedLocations.containsKey(entry.getType()))

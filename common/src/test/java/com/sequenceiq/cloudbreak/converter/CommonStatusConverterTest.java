@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.common.api.type.CommonStatus;
-
 import javax.persistence.AttributeConverter;
+
+import com.sequenceiq.common.api.type.CommonStatus;
 
 public class CommonStatusConverterTest extends DefaultEnumConverterBaseTest<CommonStatus> {
 

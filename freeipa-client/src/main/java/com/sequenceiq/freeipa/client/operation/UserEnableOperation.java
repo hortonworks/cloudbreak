@@ -1,13 +1,14 @@
 package com.sequenceiq.freeipa.client.operation;
 
-import com.sequenceiq.freeipa.client.FreeIpaChecks;
-import com.sequenceiq.freeipa.client.FreeIpaClient;
-import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import java.util.List;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Optional;
+import com.sequenceiq.freeipa.client.FreeIpaChecks;
+import com.sequenceiq.freeipa.client.FreeIpaClient;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
 
 public class UserEnableOperation extends AbstractFreeipaOperation<Object> {
 

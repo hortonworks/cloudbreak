@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 
 @Service
 public class MixedPackageVersionComparator {

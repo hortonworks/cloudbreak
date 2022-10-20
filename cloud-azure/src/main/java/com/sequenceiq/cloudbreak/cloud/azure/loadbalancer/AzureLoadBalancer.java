@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.azure.loadbalancer;
 
-import com.sequenceiq.common.api.type.LoadBalancerSku;
-import com.sequenceiq.common.api.type.LoadBalancerType;
+import static java.util.stream.Collectors.toSet;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import static java.util.stream.Collectors.toSet;
+import com.sequenceiq.common.api.type.LoadBalancerSku;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 
 public class AzureLoadBalancer {
     private static final String LOAD_BALANCER_NAME_PREFIX = "LoadBalancer";

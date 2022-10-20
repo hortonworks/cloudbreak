@@ -97,7 +97,7 @@ public class StackUpscaleService {
     }
 
     public void addInstanceFireEventAndLog(StackView stack, Map<String, Integer> hostGroupWithAdjustment,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         Integer scalingAdjustment = hostGroupWithAdjustment.values().stream().reduce(0, Integer::sum);
         flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_ADDING_INSTANCES, String.valueOf(scalingAdjustment),
                 String.join(", ", hostGroupWithAdjustment.keySet()), String.valueOf(adjustmentTypeWithThreshold.getAdjustmentType()),
@@ -169,7 +169,7 @@ public class StackUpscaleService {
     }
 
     public void handleStackUpscaleFailure(Boolean upscaleForRepair, Map<String, Set<String>> hostgroupWithHostnames, Exception exception, Long stackId,
-            Map<String, Integer> hostGroupWithAdjustment) {
+        Map<String, Integer> hostGroupWithAdjustment) {
         LOGGER.info("Exception during the upscale of stack", exception);
         try {
             String errorReason = exception.getMessage();
@@ -219,7 +219,7 @@ public class StackUpscaleService {
     }
 
     public List<CloudResourceStatus> verticalScale(AuthenticatedContext ac, CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
-            CloudConnector connector) throws Exception {
+        CloudConnector connector) throws Exception {
         CloudStack cloudStack = request.getCloudStack();
         try {
             return connector.resources().update(ac, cloudStack, request.getResourceList());
@@ -229,8 +229,8 @@ public class StackUpscaleService {
     }
 
     private List<CloudResourceStatus> handleQuotaExceptionAndRetryUpscale(UpscaleStackRequest<UpscaleStackResult> request, CloudConnector connector,
-            AuthenticatedContext ac, CloudStack cloudStack, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold,
-            QuotaExceededException quotaExceededException) throws QuotaExceededException {
+        AuthenticatedContext ac, CloudStack cloudStack, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold,
+        QuotaExceededException quotaExceededException) throws QuotaExceededException {
         flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 quotaExceededException.getQuotaErrorMessage());
         List<Group> groups = cloudStack.getGroups();
@@ -241,16 +241,14 @@ public class StackUpscaleService {
     }
 
     private List<CloudResourceStatus> handleExceptionAndRetryUpdate(CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
-                                                                    CloudConnector connector,
-                                                                    AuthenticatedContext ac, CloudStack cloudStack,
-                                                                    Exception e) throws Exception {
+        CloudConnector connector, AuthenticatedContext ac, CloudStack cloudStack, Exception e) throws Exception {
         flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 e.getMessage());
         return connector.resources().update(ac, cloudStack, request.getResourceList());
     }
 
     private int getRemovableNodeCount(AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, QuotaExceededException quotaExceededException,
-            List<Group> groups) {
+        List<Group> groups) {
         int additionalRequired = quotaExceededException.getAdditionalRequired();
         int originalRequestedNodeCount = groups.stream().flatMap(group -> group.getInstances().stream())
                 .filter(cloudInstance -> cloudInstance.getInstanceId() == null)

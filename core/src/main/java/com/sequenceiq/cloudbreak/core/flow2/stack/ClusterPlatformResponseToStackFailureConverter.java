@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack;
 
-import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.flow.core.PayloadConverter;
 
 public class ClusterPlatformResponseToStackFailureConverter implements PayloadConverter<StackFailureEvent> {
     @Override

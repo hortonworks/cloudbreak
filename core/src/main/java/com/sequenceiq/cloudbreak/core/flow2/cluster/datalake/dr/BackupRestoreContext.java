@@ -19,7 +19,7 @@ public class BackupRestoreContext extends CommonContext {
     private final List<String> skipDatabaseNames;
 
     public BackupRestoreContext(FlowParameters flowParameters, StackEvent event, String backupLocation, String backupId,
-            boolean closeConnections, List<String> skipDatabaseNames) {
+                                boolean closeConnections, List<String> skipDatabaseNames) {
         super(flowParameters);
         this.stackId = event.getResourceId();
         this.backupLocation = backupLocation;
@@ -29,7 +29,7 @@ public class BackupRestoreContext extends CommonContext {
     }
 
     public static BackupRestoreContext from(FlowParameters flowParameters, StackEvent event, String backupLocation, String backupId,
-            boolean closeConnections, List<String> skipDatabaseNames) {
+                                            boolean closeConnections, List<String> skipDatabaseNames) {
         return new BackupRestoreContext(flowParameters, event, backupLocation, backupId, closeConnections, skipDatabaseNames);
     }
 

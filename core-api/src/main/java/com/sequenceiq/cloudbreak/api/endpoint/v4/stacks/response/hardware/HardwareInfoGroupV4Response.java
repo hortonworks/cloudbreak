@@ -5,10 +5,10 @@ import java.util.Set;
 import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HardwareModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
+import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

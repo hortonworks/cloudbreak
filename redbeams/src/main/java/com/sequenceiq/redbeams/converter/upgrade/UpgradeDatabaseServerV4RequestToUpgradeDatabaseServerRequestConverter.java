@@ -2,9 +2,9 @@ package com.sequenceiq.redbeams.converter.upgrade;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTargetMajorVersion;
-import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
 
 @Component

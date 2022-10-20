@@ -26,16 +26,16 @@ public class StackScalingFlowContext extends StackViewContext {
     private final AdjustmentTypeWithThreshold adjustmentTypeWithThreshold;
 
     public StackScalingFlowContext(FlowParameters flowParameters, StackView stack, CloudContext cloudContext, CloudCredential cloudCredential,
-            Map<String, Integer> hostGroupWithAdjustment, Map<String, Set<Long>> hostGroupWithPrivateIds,
-            Map<String, Set<String>> hostgroupWithHostnames, boolean repair, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
+        Map<String, Integer> hostGroupWithAdjustment, Map<String, Set<Long>> hostGroupWithPrivateIds,
+        Map<String, Set<String>> hostgroupWithHostnames, boolean repair, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         this(flowParameters, stack, cloudContext, cloudCredential, hostGroupWithAdjustment, hostGroupWithPrivateIds, hostgroupWithHostnames, repair,
                 NetworkScaleDetails.getEmpty(), adjustmentTypeWithThreshold);
     }
 
     public StackScalingFlowContext(FlowParameters flowParameters, StackView stack, CloudContext cloudContext, CloudCredential cloudCredential,
-            Map<String, Integer> hostGroupWithAdjustment, Map<String, Set<Long>> hostGroupWithPrivateIds,
-            Map<String, Set<String>> hostgroupWithHostnames, boolean repair, NetworkScaleDetails networkScaleDetails,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
+        Map<String, Integer> hostGroupWithAdjustment, Map<String, Set<Long>> hostGroupWithPrivateIds,
+        Map<String, Set<String>> hostgroupWithHostnames, boolean repair, NetworkScaleDetails networkScaleDetails,
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         super(flowParameters, stack, cloudContext, cloudCredential);
         this.hostGroupWithAdjustment = hostGroupWithAdjustment;
         this.hostGroupWithPrivateIds = hostGroupWithPrivateIds;

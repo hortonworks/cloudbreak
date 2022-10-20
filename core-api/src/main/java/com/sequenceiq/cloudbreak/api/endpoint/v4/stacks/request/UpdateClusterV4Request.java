@@ -3,10 +3,10 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
-import com.sequenceiq.common.model.annotations.TransformGetterType;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
+import com.sequenceiq.common.model.JsonEntity;
+import com.sequenceiq.common.model.annotations.TransformGetterType;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

@@ -35,7 +35,7 @@ public abstract class RotateSaltPasswordAction<P extends Payload>
 
     @Override
     protected RotateSaltPasswordContext createFlowContext(FlowParameters flowParameters,
-            StateContext<RotateSaltPasswordState, RotateSaltPasswordEvent> stateContext, P payload) {
+        StateContext<RotateSaltPasswordState, RotateSaltPasswordEvent> stateContext, P payload) {
         StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
         Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
         StackStatus previousStackStatus = (StackStatus) variables.computeIfAbsent(PREVIOUS_STACK_STATUS, o -> stack.getStackStatus());

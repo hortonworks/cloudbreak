@@ -4,8 +4,8 @@ import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_DATABASE_SERVER_REQUESTED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.RUNNING;
 
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 

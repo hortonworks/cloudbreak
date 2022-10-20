@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.sequenceiq.common.model.PrivateEndpointType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.common.model.PrivateEndpointType;
 
 public class NetworkCreationRequest {
 

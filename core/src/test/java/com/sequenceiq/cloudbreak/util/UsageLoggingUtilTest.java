@@ -9,9 +9,9 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.usage.UsageReportProcessor;
 import com.sequenceiq.cloudbreak.usage.strategy.CompositeUsageProcessingStrategy;
 import com.sequenceiq.cloudbreak.usage.strategy.LoggingUsageProcessingStrategy;
-import com.sequenceiq.cloudbreak.usage.UsageReportProcessor;
 
 // This test makes sure that we do not blow-up on null values during usage logging.
 public class UsageLoggingUtilTest {

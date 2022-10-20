@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.authorization.service.list.ResourceListProvider;
 import com.sequenceiq.authorization.service.list.Resource;
+import com.sequenceiq.authorization.service.list.ResourceListProvider;
 
 @Component
 public class EnvironmentAuthorizationResourceProvider implements ResourceListProvider {

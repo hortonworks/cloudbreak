@@ -131,7 +131,7 @@ public class StackUpgradeOperations {
     }
 
     private void validateAttachedDataHubsForDataLake(String accountId, Stack stack, UpgradeV4Response upgradeResponse,
-            UpgradeV4Request request) {
+        UpgradeV4Request request) {
         InternalUpgradeSettings internalUpgradeSettings = request.getInternalUpgradeSettings();
         if (entitlementService.runtimeUpgradeEnabled(accountId) && StackType.DATALAKE == stack.getType()
                 && (internalUpgradeSettings == null || !internalUpgradeSettings.isUpgradePreparation())) {

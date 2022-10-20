@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
 
+import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
-import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 
 public enum ClusterCreationState implements FlowState {
     INIT_STATE,

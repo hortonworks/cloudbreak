@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.repair;
 
-import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
 
 public class StackRepairTriggerContext extends CommonContext {

@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.repair;
 
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionResult;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionResult;
 
 public enum ManualStackRepairTriggerEvent implements FlowEvent {
     MANUAL_STACK_REPAIR_TRIGGER_EVENT("MANUAL_STACK_REPAIR_TRIGGER_EVENT"),

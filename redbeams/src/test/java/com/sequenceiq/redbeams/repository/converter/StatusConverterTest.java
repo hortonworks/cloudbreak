@@ -1,9 +1,9 @@
 package com.sequenceiq.redbeams.repository.converter;
 
+import javax.persistence.AttributeConverter;
+
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
 import com.sequenceiq.redbeams.api.model.common.Status;
-
-import javax.persistence.AttributeConverter;
 
 public class StatusConverterTest extends DefaultEnumConverterBaseTest<Status> {
 

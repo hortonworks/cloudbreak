@@ -6,12 +6,12 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
-import com.sequenceiq.it.cloudbreak.request.ums.AssignResourceRequest;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
+import com.sequenceiq.it.cloudbreak.request.ums.AssignResourceRequest;
 
 @Prototype
 public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, UserManagementProto.User, UmsTestDto, UmsClient> {

@@ -6,9 +6,9 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.list.AbstractAuthorizationFiltering;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.common.model.CredentialType;

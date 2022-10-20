@@ -202,7 +202,7 @@ public class AzureMetadataCollectorTest {
 
         final String loadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PUBLIC, STACK_NAME);
         when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, loadBalancerName, LoadBalancerType.PUBLIC))
-            .thenReturn(List.of(PUBLIC_IP));
+                .thenReturn(List.of(PUBLIC_IP));
 
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureLbMetadataCollector.getParameters(any(), anyString(), anyString())).thenReturn(Map.of());

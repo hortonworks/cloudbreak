@@ -29,7 +29,7 @@ public abstract class AbstractUpgradeEmbeddedDBPreparationAction<P extends Abstr
 
     @Override
     protected UpgradeEmbeddedDBPreparationContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> clusterContext,
-            P payload) {
+                                                                    P payload) {
         StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
         ClusterView cluster = stackDtoService.getClusterViewByStackId(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);

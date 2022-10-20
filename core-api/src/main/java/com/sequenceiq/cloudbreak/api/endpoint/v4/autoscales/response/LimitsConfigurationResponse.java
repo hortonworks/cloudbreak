@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import io.swagger.annotations.ApiModel;
 
 @ApiModel

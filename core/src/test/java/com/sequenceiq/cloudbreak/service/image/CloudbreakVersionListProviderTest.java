@@ -1,20 +1,20 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.List;
-
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CloudbreakVersionListProviderTest {

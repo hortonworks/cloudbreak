@@ -1,8 +1,8 @@
 package com.sequenceiq.freeipa.api.v1.kerberosmgmt.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.freeipa.api.v1.kerberosmgmt.doc.KeytabModelDescription;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.freeipa.api.v1.kerberosmgmt.doc.KeytabModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

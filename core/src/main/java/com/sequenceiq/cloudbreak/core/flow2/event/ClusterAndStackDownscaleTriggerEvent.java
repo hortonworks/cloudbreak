@@ -21,20 +21,20 @@ public class ClusterAndStackDownscaleTriggerEvent extends ClusterDownscaleTrigge
     }
 
     public ClusterAndStackDownscaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupWithAdjustment,
-            Map<String, Set<Long>> hostGroupWithPrivateIds, Map<String, Set<String>> hostGroupWithHostNames, ScalingType scalingType) {
+        Map<String, Set<Long>> hostGroupWithPrivateIds, Map<String, Set<String>> hostGroupWithHostNames, ScalingType scalingType) {
         super(selector, stackId, hostGroupWithAdjustment, hostGroupWithPrivateIds, hostGroupWithHostNames);
         this.scalingType = scalingType;
     }
 
     public ClusterAndStackDownscaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupWithAdjustment,
-            Map<String, Set<Long>> hostGroupWithPrivateIds, ScalingType scalingType,
-            Promise<AcceptResult> accepted, ClusterDownscaleDetails details) {
+                                                Map<String, Set<Long>> hostGroupWithPrivateIds, ScalingType scalingType,
+                                                Promise<AcceptResult> accepted, ClusterDownscaleDetails details) {
         super(selector, stackId, hostGroupWithAdjustment, hostGroupWithPrivateIds, Collections.emptyMap(), accepted, details);
         this.scalingType = scalingType;
     }
 
     public ClusterAndStackDownscaleTriggerEvent(String selector, Long stackId, Map<String, Set<Long>> hostGroupWithPrivateIds, ScalingType scalingType,
-            Promise<AcceptResult> accepted, ClusterDownscaleDetails details) {
+                                                Promise<AcceptResult> accepted, ClusterDownscaleDetails details) {
         super(selector, stackId, Collections.emptyMap(), hostGroupWithPrivateIds, Collections.emptyMap(), accepted, details);
         this.scalingType = scalingType;
     }

@@ -10,17 +10,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.structuredevent.service.audit.LegacyEventDataExtractor;
-import com.sequenceiq.cloudbreak.structuredevent.auditeventname.flow.FlowResourceAuditEventConverter;
 import com.sequenceiq.cloudbreak.audit.model.AuditEventName;
 import com.sequenceiq.cloudbreak.audit.model.EventData;
 import com.sequenceiq.cloudbreak.audit.model.ServiceEventData;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.structuredevent.auditeventname.flow.FlowResourceAuditEventConverter;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
+import com.sequenceiq.cloudbreak.structuredevent.service.audit.LegacyEventDataExtractor;
 
 @Component
 public class FlowLegacyEventDataExtractor implements LegacyEventDataExtractor<StructuredFlowEvent> {

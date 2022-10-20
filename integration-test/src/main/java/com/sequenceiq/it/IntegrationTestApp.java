@@ -41,13 +41,13 @@ import org.testng.xml.XmlSuite;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
 import com.sequenceiq.it.cloudbreak.listener.ReportListener;
+import com.sequenceiq.it.cloudbreak.listener.TestCaseTimeoutListener;
 import com.sequenceiq.it.cloudbreak.listener.TestInvocationListener;
 import com.sequenceiq.it.cloudbreak.listener.TestNgListener;
 import com.sequenceiq.it.cloudbreak.listener.ThreadLocalTestListener;
 import com.sequenceiq.it.cloudbreak.search.CustomHTMLReporter;
 import com.sequenceiq.it.cloudbreak.search.CustomJUnitXMLReporter;
 import com.sequenceiq.it.config.ITProps;
-import com.sequenceiq.it.cloudbreak.listener.TestCaseTimeoutListener;
 import com.sequenceiq.it.util.cleanup.CleanupUtil;
 
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class,

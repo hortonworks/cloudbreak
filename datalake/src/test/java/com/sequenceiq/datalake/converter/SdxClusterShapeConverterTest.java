@@ -1,9 +1,9 @@
 package com.sequenceiq.datalake.converter;
 
+import javax.persistence.AttributeConverter;
+
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
-
-import javax.persistence.AttributeConverter;
 
 public class SdxClusterShapeConverterTest extends DefaultEnumConverterBaseTest<SdxClusterShape> {
 

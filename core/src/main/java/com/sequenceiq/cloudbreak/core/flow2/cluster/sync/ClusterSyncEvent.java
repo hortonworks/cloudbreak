@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.sync;
 
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterSyncResult;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterSyncResult;
 
 public enum ClusterSyncEvent implements FlowEvent {
     CLUSTER_SYNC_EVENT("CLUSTER_SYNC_TRIGGER_EVENT"),

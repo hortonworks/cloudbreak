@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.audit.converter;
 
-import com.cloudera.thunderhead.service.audit.AuditProto;
-import com.sequenceiq.cloudbreak.audit.converter.builder.ResultApiRequestDataBuilderProvider;
-import com.sequenceiq.cloudbreak.audit.model.ResultApiRequestData;
+import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.doIfTrue;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.doIfTrue;
+import com.cloudera.thunderhead.service.audit.AuditProto;
+import com.sequenceiq.cloudbreak.audit.converter.builder.ResultApiRequestDataBuilderProvider;
+import com.sequenceiq.cloudbreak.audit.model.ResultApiRequestData;
 
 @Component
 public class ResultApiRequestDataBuildUpdater implements AttemptAuditEventResultBuilderUpdater<ResultApiRequestData> {

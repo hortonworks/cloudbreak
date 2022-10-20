@@ -1,19 +1,10 @@
 package com.sequenceiq.redbeams.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
-import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
-import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
-import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialResponseParameters;
-import com.sequenceiq.redbeams.dto.Credential;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,6 +12,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.retry.support.RetryTemplate;
+
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialResponseParameters;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.redbeams.dto.Credential;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class CredentialServiceTest {
 

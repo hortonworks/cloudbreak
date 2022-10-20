@@ -20,7 +20,7 @@ import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.FlowTriggerConditionResult;
 
 @Component
-    public class StackLoadBalancerUpdateTriggerCondition implements FlowTriggerCondition {
+public class StackLoadBalancerUpdateTriggerCondition implements FlowTriggerCondition {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackLoadBalancerUpdateTriggerCondition.class);
 
     @Inject

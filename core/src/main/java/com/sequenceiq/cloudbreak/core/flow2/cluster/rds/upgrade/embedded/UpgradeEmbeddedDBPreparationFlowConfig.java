@@ -65,7 +65,7 @@ public class UpgradeEmbeddedDBPreparationFlowConfig
 
     @Override
     public UpgradeEmbeddedDBPreparationEvent[] getInitEvents() {
-        return new UpgradeEmbeddedDBPreparationEvent[] {
+        return new UpgradeEmbeddedDBPreparationEvent[]{
                 UPGRADE_EMBEDDEDDB_PREPARATION_EVENT
         };
     }

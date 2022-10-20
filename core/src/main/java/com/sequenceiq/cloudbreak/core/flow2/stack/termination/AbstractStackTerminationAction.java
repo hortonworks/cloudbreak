@@ -57,7 +57,7 @@ abstract class AbstractStackTerminationAction<P extends Payload>
 
     @Override
     protected StackTerminationContext createFlowContext(FlowParameters flowParameters,
-            StateContext<StackTerminationState, StackTerminationEvent> stateContext, P payload) {
+                                                        StateContext<StackTerminationState, StackTerminationEvent> stateContext, P payload) {
         Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
         TerminationType terminationType = (TerminationType) variables.getOrDefault(TERMINATION_TYPE, TerminationType.REGULAR);
         StackDto stack = stackDtoService.getById(payload.getResourceId());
@@ -84,7 +84,7 @@ abstract class AbstractStackTerminationAction<P extends Payload>
     }
 
     protected StackTerminationContext createStackTerminationContext(FlowParameters flowParameters, StackDto stack, CloudContext cloudContext,
-            CloudCredential cloudCredential, CloudStack cloudStack, List<CloudResource> resources, TerminationType terminationType) {
+        CloudCredential cloudCredential, CloudStack cloudStack, List<CloudResource> resources, TerminationType terminationType) {
         return new StackTerminationContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, resources, terminationType);
     }
 

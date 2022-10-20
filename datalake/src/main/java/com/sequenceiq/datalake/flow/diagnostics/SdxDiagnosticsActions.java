@@ -17,8 +17,8 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.datalake.flow.SdxContext;
-import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsFailedEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsCollectionEvent;
+import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsFailedEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsSuccessEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;

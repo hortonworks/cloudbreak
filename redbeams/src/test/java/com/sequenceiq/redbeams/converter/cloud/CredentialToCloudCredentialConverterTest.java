@@ -4,13 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.redbeams.dto.Credential;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
-import org.junit.Before;
-import org.junit.Test;
 
 public class CredentialToCloudCredentialConverterTest {
 

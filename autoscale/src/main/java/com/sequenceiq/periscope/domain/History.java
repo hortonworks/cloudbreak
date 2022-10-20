@@ -1,10 +1,10 @@
 package com.sequenceiq.periscope.domain;
 
 import static com.sequenceiq.periscope.common.AlertConstants.ALERT_NAME;
-import static com.sequenceiq.periscope.common.AlertConstants.SCALING_TARGET;
-import static com.sequenceiq.periscope.common.AlertConstants.TIME_ZONE;
 import static com.sequenceiq.periscope.common.AlertConstants.CRON;
 import static com.sequenceiq.periscope.common.AlertConstants.PARAMETERS;
+import static com.sequenceiq.periscope.common.AlertConstants.SCALING_TARGET;
+import static com.sequenceiq.periscope.common.AlertConstants.TIME_ZONE;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -108,7 +108,7 @@ public class History {
             properties.put(CRON, ta.getCron());
             properties.put(SCALING_TARGET, "" + ta.getScalingPolicy().getScalingAdjustment());
             alertType = AlertType.TIME;
-        } else if (alert instanceof  LoadAlert) {
+        } else if (alert instanceof LoadAlert) {
             LoadAlert la = (LoadAlert) alert;
             properties.put(PARAMETERS, la.getLoadAlertConfiguration().toString());
             alertType = AlertType.LOAD;

@@ -1,9 +1,9 @@
 package com.sequenceiq.environment.parameters.dao.converter;
 
+import javax.persistence.AttributeConverter;
+
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
-
-import javax.persistence.AttributeConverter;
 
 public class EnvironmentStatusConverterTest extends DefaultEnumConverterBaseTest<EnvironmentStatus> {
 

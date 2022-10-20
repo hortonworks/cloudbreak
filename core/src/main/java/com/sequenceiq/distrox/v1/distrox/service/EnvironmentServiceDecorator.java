@@ -55,7 +55,7 @@ public class EnvironmentServiceDecorator {
     }
 
     public void prepareEnvironmentAndCredential(Set<StackViewV4Response> stackViewResponses,
-        DetailedEnvironmentResponse detailedEnvironmentResponse) {
+                                                DetailedEnvironmentResponse detailedEnvironmentResponse) {
         for (StackViewV4Response stackViewResponse : stackViewResponses) {
             if (detailedEnvironmentResponse != null) {
                 CredentialResponse credential = detailedEnvironmentResponse.getCredential();

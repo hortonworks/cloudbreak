@@ -10,11 +10,11 @@ import java.util.function.BiConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.freeipa.client.FreeIpaChecks;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Group;
-import com.sequenceiq.cloudbreak.client.RPCResponse;
 
 public class GroupRemoveMemberOperation extends AbstractFreeipaOperation<Group> {
 

@@ -7,6 +7,7 @@ public enum GcpLoadBalancerScheme {
     EXTERNAL("EXTERNAL", LoadBalancerType.PUBLIC);
 
     private final String gcpType;
+
     private final LoadBalancerType cbType;
 
     GcpLoadBalancerScheme(String gcpType, LoadBalancerType cbType) {

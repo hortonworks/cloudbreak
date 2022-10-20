@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.domain;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,7 +27,7 @@ public class RunningJobsResponse {
     @Override
     public String toString() {
         return "RunningJobsResponse{" +
-                "result=" + result == null ? "null" : AnonymizerUtil.anonymize(result.toString()) +
+                "result=" + (Objects.equals(result, null) ? "null" : AnonymizerUtil.anonymize(result.toString())) +
                 '}';
     }
 }

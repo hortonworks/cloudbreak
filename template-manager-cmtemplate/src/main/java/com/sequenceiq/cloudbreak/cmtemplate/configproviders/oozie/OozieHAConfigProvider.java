@@ -4,8 +4,8 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie.OozieRoleConfigProvider.isOozieHA;
 
 import java.util.List;
-
 import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;

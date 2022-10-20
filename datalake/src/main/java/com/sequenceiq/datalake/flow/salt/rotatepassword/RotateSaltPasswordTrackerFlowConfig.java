@@ -7,8 +7,8 @@ import static com.sequenceiq.datalake.flow.salt.rotatepassword.RotateSaltPasswor
 import static com.sequenceiq.datalake.flow.salt.rotatepassword.RotateSaltPasswordTrackerState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.salt.rotatepassword.RotateSaltPasswordTrackerState.INIT_STATE;
 import static com.sequenceiq.datalake.flow.salt.rotatepassword.RotateSaltPasswordTrackerState.ROTATE_SALT_PASSWORD_FAILED_STATE;
-import static com.sequenceiq.datalake.flow.salt.rotatepassword.RotateSaltPasswordTrackerState.ROTATE_SALT_PASSWORD_WAITING_STATE;
 import static com.sequenceiq.datalake.flow.salt.rotatepassword.RotateSaltPasswordTrackerState.ROTATE_SALT_PASSWORD_SUCCESS_STATE;
+import static com.sequenceiq.datalake.flow.salt.rotatepassword.RotateSaltPasswordTrackerState.ROTATE_SALT_PASSWORD_WAITING_STATE;
 
 import java.util.List;
 

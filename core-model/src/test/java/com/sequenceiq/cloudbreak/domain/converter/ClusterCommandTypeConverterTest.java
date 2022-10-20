@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.domain.converter;
 
+import javax.persistence.AttributeConverter;
+
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
-
-import javax.persistence.AttributeConverter;
 
 public class ClusterCommandTypeConverterTest extends DefaultEnumConverterBaseTest<ClusterCommandType> {
 

@@ -14,11 +14,11 @@ import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.client.RPCMessage;
+import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.client.RpcListener;
 import com.sequenceiq.freeipa.client.healthcheckmodel.CheckResult;
 import com.sequenceiq.freeipa.client.healthcheckmodel.ClusterCheckResult;
-import com.sequenceiq.cloudbreak.client.RPCMessage;
-import com.sequenceiq.cloudbreak.client.RPCResponse;
 
 public class FreeIpaHealthCheckClient implements AutoCloseable {
 

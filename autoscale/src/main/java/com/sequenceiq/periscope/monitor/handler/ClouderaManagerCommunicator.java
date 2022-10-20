@@ -52,7 +52,7 @@ public class ClouderaManagerCommunicator {
     private CmRequestIdProviderInterceptor cmRequestIdProviderInterceptor;
 
     public Map<String, ApiConfig> getRoleConfigPropertiesFromCM(Cluster cluster, String serviceName,
-            String roleGroupRef, Set roleConfigPropertyNames) {
+        String roleGroupRef, Set roleConfigPropertyNames) {
         LOGGER.debug("Retrieving roleConfigProperties for cluster '{}', service '{}', roleGroupRef '{}'",
                 cluster.getStackCrn(), serviceName, roleGroupRef);
 

@@ -31,7 +31,7 @@ public class UpgradeEmbeddedDBPreparationActions {
         return new AbstractUpgradeEmbeddedDBPreparationAction<>(UpgradeEmbeddedDBPreparationTriggerRequest.class) {
             @Override
             protected void doExecute(UpgradeEmbeddedDBPreparationContext context, UpgradeEmbeddedDBPreparationTriggerRequest payload,
-                    Map<Object, Object> variables) {
+                Map<Object, Object> variables) {
                 upgradeRdsService.prepareEmbeddedDbUpgrade(payload.getResourceId());
                 sendEvent(context);
             }

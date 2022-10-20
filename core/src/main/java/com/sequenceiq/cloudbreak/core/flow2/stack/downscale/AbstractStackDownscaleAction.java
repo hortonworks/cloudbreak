@@ -86,7 +86,7 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
 
     @Override
     protected StackScalingFlowContext createFlowContext(FlowParameters flowParameters, StateContext<StackDownscaleState, StackDownscaleEvent> stateContext,
-            P payload) {
+        P payload) {
         Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
         LOGGER.info("Variables in AbstractStackDownscaleAction: {}", variables);
         StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
@@ -117,7 +117,7 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
     }
 
     private StackScalingFlowContext createStackScalingFlowContextFromPayload(FlowParameters flowParameters, StackDownscaleTriggerEvent payload,
-            Map<Object, Object> variables, StackView stack, CloudContext cloudContext, CloudCredential cloudCredential) {
+        Map<Object, Object> variables, StackView stack, CloudContext cloudContext, CloudCredential cloudCredential) {
         LOGGER.info("Payload type is StackDownscaleTriggerEvent");
         boolean repair = payload.isRepair();
 
@@ -142,7 +142,7 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
     }
 
     private Map<String, Set<Long>> createHostGroupsWithPrivateIdsFromUnusedPrivateIds(List<InstanceGroupDto> instanceGroupDtos,
-            Map<String, Integer> hostGroupsWithAdjustment) {
+        Map<String, Integer> hostGroupsWithAdjustment) {
         Map<String, Set<Long>> hostGroupsWithPrivateIds;
         LOGGER.info("No private ids for hostgroups, lets fill it with unused ones");
         hostGroupsWithPrivateIds = new HashMap<>();
@@ -165,16 +165,16 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
 
         hostGroupsWithPrivateIds = instanceGroupDtos.stream().collect(Collectors.toMap(ig -> ig.getInstanceGroup().getGroupName(),
                 instanceGroup -> instanceGroup.getInstanceMetadataViews().stream()
-                                    .map(InstanceMetadataView::getPrivateId)
-                                    .filter(privateIds::contains)
-                                    .collect(Collectors.toSet())
-                )).entrySet().stream().filter(entry -> entry.getValue().size() > 0)
+                        .map(InstanceMetadataView::getPrivateId)
+                        .filter(privateIds::contains)
+                        .collect(Collectors.toSet())
+        )).entrySet().stream().filter(entry -> entry.getValue().size() > 0)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return hostGroupsWithPrivateIds;
     }
 
     private StackScalingFlowContext createStackScalingFlowContextFromVariables(FlowParameters flowParameters, Map<Object, Object> variables, StackView stack,
-            CloudContext cloudContext, CloudCredential cloudCredential) {
+        CloudContext cloudContext, CloudCredential cloudCredential) {
         Map<String, Integer> hostGroupWithAdjustment = getHostGroupWithAdjustment(variables);
         Map<String, Set<Long>> hostGroupWithPrivateIds = getHostGroupWithPrivateIds(stack.getId(), variables);
         Map<String, Set<String>> hostgroupWithHostnames = getHostGroupWithHostnames(stack.getId(), variables);

@@ -20,28 +20,28 @@ import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class DatabaseBackupFlowConfig extends StackStatusFinalizerAbstractFlowConfig<DatabaseBackupState, DatabaseBackupEvent>
-    implements RetryableFlowConfiguration<DatabaseBackupEvent> {
+        implements RetryableFlowConfiguration<DatabaseBackupEvent> {
 
     private static final List<Transition<DatabaseBackupState, DatabaseBackupEvent>> TRANSITIONS =
-        new Transition.Builder<DatabaseBackupState, DatabaseBackupEvent>()
-            .defaultFailureEvent(DATABASE_BACKUP_FAILED_EVENT)
+            new Transition.Builder<DatabaseBackupState, DatabaseBackupEvent>()
+                    .defaultFailureEvent(DATABASE_BACKUP_FAILED_EVENT)
 
-            .from(INIT_STATE).to(DATABASE_BACKUP_STATE)
-            .event(DATABASE_BACKUP_EVENT)
-            .defaultFailureEvent()
+                    .from(INIT_STATE).to(DATABASE_BACKUP_STATE)
+                    .event(DATABASE_BACKUP_EVENT)
+                    .defaultFailureEvent()
 
-            .from(DATABASE_BACKUP_STATE).to(DATABASE_BACKUP_FINISHED_STATE)
-            .event(DATABASE_BACKUP_FINISHED_EVENT)
-            .defaultFailureEvent()
+                    .from(DATABASE_BACKUP_STATE).to(DATABASE_BACKUP_FINISHED_STATE)
+                    .event(DATABASE_BACKUP_FINISHED_EVENT)
+                    .defaultFailureEvent()
 
-            .from(DATABASE_BACKUP_FINISHED_STATE).to(FINAL_STATE)
-            .event(DATABASE_BACKUP_FINALIZED_EVENT)
-            .defaultFailureEvent()
+                    .from(DATABASE_BACKUP_FINISHED_STATE).to(FINAL_STATE)
+                    .event(DATABASE_BACKUP_FINALIZED_EVENT)
+                    .defaultFailureEvent()
 
-            .build();
+                    .build();
 
     private static final FlowEdgeConfig<DatabaseBackupState, DatabaseBackupEvent> EDGE_CONFIG =
-        new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, DATABASE_BACKUP_FAILED_STATE, DATABASE_BACKUP_FAIL_HANDLED_EVENT);
+            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, DATABASE_BACKUP_FAILED_STATE, DATABASE_BACKUP_FAIL_HANDLED_EVENT);
 
     public DatabaseBackupFlowConfig() {
         super(DatabaseBackupState.class, DatabaseBackupEvent.class);
@@ -65,7 +65,7 @@ public class DatabaseBackupFlowConfig extends StackStatusFinalizerAbstractFlowCo
     @Override
     public DatabaseBackupEvent[] getInitEvents() {
         return new DatabaseBackupEvent[]{
-            DATABASE_BACKUP_EVENT
+                DATABASE_BACKUP_EVENT
         };
     }
 

@@ -18,7 +18,7 @@ public class StackContext extends CommonContext {
     private final CloudStack cloudStack;
 
     public StackContext(FlowParameters flowParameters, StackDtoDelegate stack, CloudContext cloudContext, CloudCredential cloudCredential,
-            CloudStack cloudStack) {
+                        CloudStack cloudStack) {
         super(flowParameters);
         this.stack = stack;
         this.cloudContext = cloudContext;

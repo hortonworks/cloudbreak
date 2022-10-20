@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.downscale;
 
-import com.sequenceiq.flow.core.FlowEvent;
-import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
+import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public enum ClusterDownscaleEvent implements FlowEvent {
     DECOMMISSION_EVENT("CLUSTER_DOWNSCALE_TRIGGER_EVENT"),

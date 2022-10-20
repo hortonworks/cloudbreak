@@ -4,14 +4,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.sequenceiq.cloudbreak.logger.LogContextService;
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.CodeSignature;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import com.sequenceiq.cloudbreak.logger.LogContextService;
 
 public class ControllerLogContextAspectsTest {
 

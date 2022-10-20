@@ -1,14 +1,14 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 
+import java.io.Serializable;
+
+import javax.validation.constraints.NotNull;
+
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServerTest;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
-import java.io.Serializable;
-
-import javax.validation.constraints.NotNull;
 
 @ApiModel(description = ModelDescriptions.DATABASE_SERVER_TEST_RESPONSE)
 @NotNull

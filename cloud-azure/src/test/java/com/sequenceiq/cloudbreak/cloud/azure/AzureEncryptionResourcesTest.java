@@ -345,9 +345,9 @@ public class AzureEncryptionResourcesTest {
                 .filter(cloudResource -> cloudResource.getType().equals(type))
                 .findFirst()
                 .ifPresent(cloudResource -> {
-                            assertThat(cloudResource.getReference()).isEqualTo(expectedReference);
-                            assertThat(cloudResource.getStatus()).isEqualTo(expectedStatus);
-                        });
+                    assertThat(cloudResource.getReference()).isEqualTo(expectedReference);
+                    assertThat(cloudResource.getStatus()).isEqualTo(expectedStatus);
+                });
     }
 
     private void initRetry() {

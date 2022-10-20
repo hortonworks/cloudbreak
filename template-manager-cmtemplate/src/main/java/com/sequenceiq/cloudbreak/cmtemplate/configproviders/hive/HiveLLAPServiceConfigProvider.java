@@ -3,13 +3,15 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreCloudStorageServiceConfigProvider.HMS_METASTORE_EXTERNAL_DIR;
 
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import java.util.List;
-import org.springframework.stereotype.Component;
 
 @Component
 public class HiveLLAPServiceConfigProvider implements CmTemplateComponentConfigProvider {

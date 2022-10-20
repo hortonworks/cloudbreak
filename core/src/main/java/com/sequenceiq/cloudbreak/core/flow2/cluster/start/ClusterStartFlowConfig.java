@@ -89,7 +89,7 @@ public class ClusterStartFlowConfig extends StackStatusFinalizerAbstractFlowConf
 
     @Override
     public ClusterStartEvent[] getInitEvents() {
-        return new ClusterStartEvent[] {
+        return new ClusterStartEvent[]{
                 CLUSTER_START_EVENT
         };
     }

@@ -1,9 +1,9 @@
 package com.sequenceiq.periscope.converter;
 
+import javax.persistence.AttributeConverter;
+
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
 import com.sequenceiq.periscope.api.model.AlertType;
-
-import javax.persistence.AttributeConverter;
 
 public class AlertTypeConverterTest extends DefaultEnumConverterBaseTest<AlertType> {
 

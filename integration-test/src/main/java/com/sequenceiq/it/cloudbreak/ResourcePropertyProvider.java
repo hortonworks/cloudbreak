@@ -6,9 +6,9 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 
 @Component

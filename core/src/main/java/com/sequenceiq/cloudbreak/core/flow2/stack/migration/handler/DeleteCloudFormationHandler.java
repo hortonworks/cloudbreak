@@ -95,7 +95,7 @@ public class DeleteCloudFormationHandler implements CloudPlatformEventHandler<De
     }
 
     private void terminateCfStackAndResource(CloudContext cloudContext, CloudStack cloudStack, AuthenticatedContext ac,
-            CloudResource cfCloudResource) {
+        CloudResource cfCloudResource) {
         List<CloudResourceStatus> terminateResult = awsTerminateService.terminate(ac, cloudStack, List.of(cfCloudResource));
         ResourcePersisted resourceDeletionResult = resourceNotifier.notifyDeletion(cfCloudResource, cloudContext);
         LOGGER.debug("resource deletion result: {}", resourceDeletionResult);

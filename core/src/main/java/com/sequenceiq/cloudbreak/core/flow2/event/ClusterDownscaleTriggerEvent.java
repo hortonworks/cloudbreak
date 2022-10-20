@@ -18,7 +18,7 @@ public class ClusterDownscaleTriggerEvent extends ClusterScaleTriggerEvent {
     private final Set<String> zombieHostGroups;
 
     public ClusterDownscaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupWithAdjustment,
-            Map<String, Set<Long>> hostGroupWithPrivateIds, Map<String, Set<String>> hostGroupWithHostNames) {
+                                        Map<String, Set<Long>> hostGroupWithPrivateIds, Map<String, Set<String>> hostGroupWithHostNames) {
         super(selector, stackId, hostGroupWithAdjustment, hostGroupWithPrivateIds, hostGroupWithHostNames);
         details = null;
         zombieHostGroups = null;
@@ -39,7 +39,7 @@ public class ClusterDownscaleTriggerEvent extends ClusterScaleTriggerEvent {
     }
 
     public ClusterDownscaleTriggerEvent(String selector, Long stackId, Set<String> zombieHostGroups, Promise<AcceptResult> accepted,
-            ClusterDownscaleDetails details) {
+                                        ClusterDownscaleDetails details) {
         super(selector, stackId, Collections.emptyMap(), Collections.emptyMap(), Collections.emptyMap(), accepted);
         this.details = details;
         this.zombieHostGroups = zombieHostGroups;

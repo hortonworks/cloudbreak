@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.stop;
 
+import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
-import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 
 public enum ClusterStopState implements FlowState {
     INIT_STATE,
