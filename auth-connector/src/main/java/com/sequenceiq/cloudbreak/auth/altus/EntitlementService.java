@@ -21,6 +21,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VERTICAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ENCRYPTION_AT_HOST;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE;
@@ -586,6 +587,10 @@ public class EntitlementService {
 
     public boolean isSDXOptimizedConfigurationEnabled(String accountId) {
         return isEntitlementRegistered(accountId, SDX_CONFIGURATION_OPTIMIZATION);
+    }
+
+    public boolean isCostCalculationEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_COST_CALCULATION);
     }
 
     public List<String> getEntitlements(String accountId) {
