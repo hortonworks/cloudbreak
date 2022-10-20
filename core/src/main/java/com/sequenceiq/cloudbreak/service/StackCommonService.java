@@ -165,11 +165,11 @@ public class StackCommonService {
         return stackService.getByCrnInWorkspaceWithEntries(crn, entries, stackType);
     }
 
-    public void putInDefaultWorkspace(String crn, UpdateStackV4Request updateRequest) {
+    public FlowIdentifier putInDefaultWorkspace(String crn, UpdateStackV4Request updateRequest) {
         LOGGER.info("Received putStack on crn: {}, updateRequest: {}", crn, updateRequest);
         StackDto stack = stackDtoService.getByCrn(crn);
         MDCBuilder.buildMdcContext(stack);
-        put(stack, updateRequest);
+        return put(stack, updateRequest);
     }
 
     public FlowIdentifier putStartInstancesInDefaultWorkspace(NameOrCrn nameOrCrn, String accountId, UpdateStackV4Request updateRequest,
