@@ -53,11 +53,11 @@ class SdxReactorFlowManagerTest {
 
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:460c0d8f-ae8e-4dce-9cd7-2351762eb9ac:environment:6b2b1600-8ac6-4c26-aa34-dab36f4bd243";
 
-    private static final String BACKUP_LOCATION = "s3a://path/to/backup";
-
     private static final String IMAGE_ID = "image-id-first";
 
     private static final boolean SKIP_BACKUP = false;
+
+    private static final boolean ROLLING_UPGRADE_ENABLED = true;
 
     private static final DatalakeDrSkipOptions SKIP_OPTIONS = new DatalakeDrSkipOptions(false, false, false);
 
@@ -105,7 +105,7 @@ class SdxReactorFlowManagerTest {
         when(sdxBackupRestoreService.shouldSdxBackupBePerformed(any(), eq(true))).thenReturn(true);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
-                        SKIP_OPTIONS));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED));
         verify(reactor, times(1)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
     }
 
@@ -115,13 +115,13 @@ class SdxReactorFlowManagerTest {
         when(sdxBackupRestoreService.shouldSdxBackupBePerformed(any(), eq(true))).thenReturn(false);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
-                        SKIP_OPTIONS));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED));
         verify(reactor, times(0)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
 
         when(sdxBackupRestoreService.shouldSdxBackupBePerformed(any(), eq(true))).thenReturn(false);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
-                        SKIP_OPTIONS));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED));
         verify(reactor, times(0)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
     }
 
@@ -132,7 +132,7 @@ class SdxReactorFlowManagerTest {
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
-                        SKIP_OPTIONS));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED));
         verify(reactor, times(0)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
     }
 
@@ -144,7 +144,7 @@ class SdxReactorFlowManagerTest {
         when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(false);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP,
-                        SKIP_OPTIONS));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED));
         verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_EVENT.event()), any(Event.class));
     }
 
@@ -155,7 +155,7 @@ class SdxReactorFlowManagerTest {
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, true,
-                        SKIP_OPTIONS));
+                        SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED));
         verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_EVENT.event()), any(Event.class));
     }
 

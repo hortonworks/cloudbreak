@@ -19,6 +19,8 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
 
     private final DatalakeDrSkipOptions skipOptions;
 
+    private final boolean rollingUpgradeEnabled;
+
     @JsonCreator
     public DatalakeUpgradeFlowChainStartEvent(
             @JsonProperty("selector") String selector,
@@ -27,12 +29,14 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
             @JsonProperty("imageId") String imageId,
             @JsonProperty("replaceVms") boolean replaceVms,
             @JsonProperty("backupLocation") String backupLocation,
-            @JsonProperty("skipOptions") DatalakeDrSkipOptions skipOptions) {
+            @JsonProperty("skipOptions") DatalakeDrSkipOptions skipOptions,
+            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled) {
         super(selector, sdxId, userId);
         this.imageId = imageId;
         this.replaceVms = replaceVms;
         this.backupLocation = backupLocation;
         this.skipOptions = skipOptions;
+        this.rollingUpgradeEnabled = rollingUpgradeEnabled;
     }
 
     public String getImageId() {
@@ -49,6 +53,10 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
 
     public DatalakeDrSkipOptions getSkipOptions() {
         return skipOptions;
+    }
+
+    public boolean isRollingUpgradeEnabled() {
+        return rollingUpgradeEnabled;
     }
 
     @Override
@@ -70,6 +78,7 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
                 "imageId='" + imageId + '\'' +
                 ", replaceVms=" + replaceVms +
                 ", backupLocation='" + backupLocation + '\'' +
+                ", rollingUpgradeEnabled='" + rollingUpgradeEnabled + '\'' +
                 "} " + super.toString();
     }
 }

@@ -59,6 +59,8 @@ class StackUpgradeOperationsTest {
 
     private static final String IMAGE_ID = "image-id";
 
+    private static final boolean ROLLING_UPGRADE_ENABLED = true;
+
     private static final int INSTANCE_COUNT = 10;
 
     private static final int NODE_LIMIT = 15;
@@ -116,8 +118,8 @@ class StackUpgradeOperationsTest {
 
     @Test
     void testUpgradeClusterShouldCallUpgradeService() {
-        underTest.upgradeCluster(nameOrCrn, ACCOUNT_ID, IMAGE_ID);
-        verify(upgradeService).upgradeCluster(ACCOUNT_ID, nameOrCrn, IMAGE_ID);
+        underTest.upgradeCluster(nameOrCrn, ACCOUNT_ID, IMAGE_ID, ROLLING_UPGRADE_ENABLED);
+        verify(upgradeService).upgradeCluster(ACCOUNT_ID, nameOrCrn, IMAGE_ID, ROLLING_UPGRADE_ENABLED);
     }
 
     @Test

@@ -439,7 +439,8 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = STACK_UPGRADE_INTERNAL, nickname = "upgradeClusterByNameInternal")
     FlowIdentifier upgradeClusterByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("imageId") String imageId, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("imageId") String imageId, @QueryParam("initiatorUserCrn") String initiatorUserCrn,
+            @QueryParam("rollingUpgradeEnabled") Boolean rollingUpgradeEnabled);
 
     @POST
     @Path("internal/{crn}/prepare_cluster_upgrade")

@@ -33,6 +33,9 @@ public class SdxUpgradeRequest {
     @ApiModelProperty(ModelDescriptions.SKIP_DATAHUB_VALIDATION)
     private Boolean skipDataHubValidation;
 
+    @ApiModelProperty(ModelDescriptions.ROLLING_UPGRADE_ENABLED)
+    private Boolean rollingUpgradeEnabled;
+
     @ApiModelProperty(ModelDescriptions.SKIP_ATLAS)
     private boolean skipAtlasMetadata;
 
@@ -98,6 +101,14 @@ public class SdxUpgradeRequest {
 
     public void setSkipDataHubValidation(Boolean skipDataHubValidation) {
         this.skipDataHubValidation = skipDataHubValidation;
+    }
+
+    public Boolean getRollingUpgradeEnabled() {
+        return rollingUpgradeEnabled;
+    }
+
+    public void setRollingUpgradeEnabled(Boolean rollingUpgradeEnabled) {
+        this.rollingUpgradeEnabled = rollingUpgradeEnabled;
     }
 
     public SdxUpgradeShowAvailableImages getShowAvailableImages() {
