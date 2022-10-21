@@ -54,7 +54,7 @@ public class RdsUpgradeOrchestratorService {
 
     private static final int MAX_RETRY_ON_ERROR = 3;
 
-    private static final int MAX_RETRY = 200;
+    private static final int MAX_RETRY = 500;
 
     @Inject
     private StackDtoService stackDtoService;
