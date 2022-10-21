@@ -56,7 +56,7 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConver
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.network.instancegroup.InstanceGroupNetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
-import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.SharedServiceValidator;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
