@@ -43,6 +43,8 @@ public class RdsUpgradeOrchestratorService {
 
     private static final String PG11_INSTALL_STATE = "postgresql/pg11-install";
 
+    private static final String PG11_ALTERNATIVES_STATE = "postgresql/pg11-alternatives";
+
     private static final String UPGRADE_EMBEDDED_DATABASE = "postgresql/upgrade/embedded";
 
     private static final String PREPARE_UPGRADE_EMBEDDED_DATABASE = "postgresql/upgrade/prepare-embedded";
@@ -103,6 +105,12 @@ public class RdsUpgradeOrchestratorService {
     public void installPostgresPackages(Long stackId) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = createStateParams(stackId, PG11_INSTALL_STATE, false);
         LOGGER.debug("Calling installPostgresPackages with state params '{}'", stateParams);
+        hostOrchestrator.runOrchestratorState(stateParams);
+    }
+
+    public void updatePostgresAlternatives(Long stackId) throws CloudbreakOrchestratorException {
+        OrchestratorStateParams stateParams = createStateParams(stackId, PG11_ALTERNATIVES_STATE, false);
+        LOGGER.debug("Calling updatePostgresAlternatives with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 

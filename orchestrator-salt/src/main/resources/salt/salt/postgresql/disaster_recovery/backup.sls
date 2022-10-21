@@ -2,6 +2,9 @@
 
 include:
   - postgresql.disaster_recovery
+{ %- if salt[ 'pillar.get' ]('postgres:postgres_version', '10') | int == 11 % }
+  - postgresql.pg11-alternatives
+{ %- endif % }
 
 {% if 'None' != configure_remote_db %}
 backup_postgresql_db:
