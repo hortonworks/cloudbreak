@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,8 +15,10 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -51,6 +55,8 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 public class StackDtoService {
+
+    private static final Logger LOGGER = getLogger(StackDtoService.class);
 
     private static final List<ComponentType> COMPONENT_TYPES_TO_FETCH = List.of(ComponentType.CDH_PRODUCT_DETAILS, ComponentType.CM_REPO_DETAILS);
 
@@ -125,6 +131,23 @@ public class StackDtoService {
         Map<Long, Map<InstanceGroupView, List<InstanceMetadataView>>> group = new HashMap<>();
         List<InstanceGroupView> instanceGroups = instanceGroupService.getInstanceGroupViewByStackId(stackView.getId());
         instanceGroups.forEach(it -> group.put(it.getId(), new HashMap<>()));
+        List<String> groupString = instanceGroups.stream()
+                .map(ig -> String.format("%s: %s, %s, %s, %s",
+                        ig.getId(),
+                        ig.getGroupName(),
+                        ig.getSecurityGroup(),
+                        ig.getTemplate(),
+                        ig.getInstanceGroupNetwork()))
+                .collect(Collectors.toList());
+        LOGGER.debug("Fetched groups: {} by stack: {}", Joiner.on(",").join(groupString), stackView.getId());
+        List<String> instanceMetadataString = imDto.stream()
+                .map(im -> String.format("The %s with id: %s add to group of %s with id: %s",
+                        im.getInstanceName(),
+                        im.getId(),
+                        im.getInstanceGroupName(),
+                        im.getInstanceGroupId()))
+                .collect(Collectors.toList());
+        LOGGER.debug("Fetched instance metadata: {} by stack: {}", Joiner.on(",").join(instanceMetadataString), stackView.getId());
         imDto.forEach(im -> {
             var imByIg = group.computeIfAbsent(im.getInstanceGroupId(), key -> new HashMap<>());
             if (imByIg.isEmpty()) {
