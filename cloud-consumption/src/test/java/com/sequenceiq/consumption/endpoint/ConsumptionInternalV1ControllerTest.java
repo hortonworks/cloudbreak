@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -24,6 +25,7 @@ import com.sequenceiq.consumption.dto.ConsumptionCreationDto;
 import com.sequenceiq.consumption.endpoint.converter.ConsumptionApiConverter;
 import com.sequenceiq.consumption.job.storage.StorageConsumptionJobService;
 import com.sequenceiq.consumption.service.ConsumptionService;
+import com.sequenceiq.consumption.service.ConsumptionStructuredEventCleanupService;
 
 @ExtendWith(MockitoExtension.class)
 public class ConsumptionInternalV1ControllerTest {
@@ -38,6 +40,8 @@ public class ConsumptionInternalV1ControllerTest {
 
     private static final Long CONSUMPTION_ID = 123L;
 
+    private static final String RESOURCE_CRN = "crn:cdp:consumption:us-west-1:hortonworks:consumption:guid";
+
     private static final String INITIATOR_USER_CRN = "initiatorUserCrn";
 
     @Mock
@@ -48,6 +52,9 @@ public class ConsumptionInternalV1ControllerTest {
 
     @Mock
     private StorageConsumptionJobService jobService;
+
+    @Mock
+    private ConsumptionStructuredEventCleanupService mockStructuredEventCleanupService;
 
     @InjectMocks
     private ConsumptionInternalV1Controller underTest;
@@ -118,6 +125,8 @@ public class ConsumptionInternalV1ControllerTest {
 
         verify(jobService).unschedule(consumption);
         verify(consumptionService).delete(consumption);
+        verify(mockStructuredEventCleanupService).cleanUpStructuredEvents(consumption.getResourceCrn());
+        verifyNoMoreInteractions(mockStructuredEventCleanupService);
     }
 
     @Test
@@ -200,6 +209,7 @@ public class ConsumptionInternalV1ControllerTest {
     private Consumption consumption() {
         Consumption consumption = new Consumption();
         consumption.setId(CONSUMPTION_ID);
+        consumption.setResourceCrn(RESOURCE_CRN);
         return consumption;
     }
 

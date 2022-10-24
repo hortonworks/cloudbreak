@@ -27,6 +27,7 @@ import com.sequenceiq.consumption.dto.ConsumptionCreationDto;
 import com.sequenceiq.consumption.endpoint.converter.ConsumptionApiConverter;
 import com.sequenceiq.consumption.job.storage.StorageConsumptionJobService;
 import com.sequenceiq.consumption.service.ConsumptionService;
+import com.sequenceiq.consumption.service.ConsumptionStructuredEventCleanupService;
 
 @Controller
 @Transactional(Transactional.TxType.NEVER)
@@ -41,11 +42,14 @@ public class ConsumptionInternalV1Controller implements ConsumptionInternalEndpo
 
     private final StorageConsumptionJobService jobService;
 
+    private final ConsumptionStructuredEventCleanupService structuredEventCleanupService;
+
     public ConsumptionInternalV1Controller(ConsumptionService consumptionService, ConsumptionApiConverter consumptionApiConverter,
-            StorageConsumptionJobService jobService) {
+            StorageConsumptionJobService jobService, ConsumptionStructuredEventCleanupService structuredEventCleanupService) {
         this.consumptionService = consumptionService;
         this.consumptionApiConverter = consumptionApiConverter;
         this.jobService = jobService;
+        this.structuredEventCleanupService = structuredEventCleanupService;
     }
 
     @Override
@@ -119,6 +123,7 @@ public class ConsumptionInternalV1Controller implements ConsumptionInternalEndpo
         consumptionOpt.ifPresent(consumption -> {
             jobService.unschedule(consumption);
             consumptionService.delete(consumption);
+            structuredEventCleanupService.cleanUpStructuredEvents(consumption.getResourceCrn());
         });
     }
 
