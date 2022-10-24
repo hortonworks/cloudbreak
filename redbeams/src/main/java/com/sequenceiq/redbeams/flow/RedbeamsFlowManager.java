@@ -11,9 +11,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
+import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
-import com.sequenceiq.flow.core.model.ResultType;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.service.FlowNameFormatService;
 
@@ -34,21 +37,34 @@ public class RedbeamsFlowManager {
     @Inject
     private FlowNameFormatService flowNameFormatService;
 
-    public void notify(String selector, Acceptable acceptable) {
+    public FlowIdentifier notify(String selector, Acceptable acceptable) {
         Map<String, Object> headerWithUserCrn = getHeaderWithUserCrn(null);
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(headerWithUserCrn, acceptable);
-        notify(selector, event);
+        return notify(selector, event);
     }
 
-    private void notify(String selector, Event<Acceptable> event) {
+    private FlowIdentifier notify(String selector, Event<Acceptable> event) {
         reactor.notify(selector, event);
         try {
             FlowAcceptResult accepted = (FlowAcceptResult) event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
-            if (accepted == null || ResultType.ALREADY_EXISTING_FLOW.equals(accepted.getResultType())) {
-                throw new RuntimeException(String.format("Request not allowed, external database already has a running operation. " +
-                                "Running operation(s): [%s]",
-                        flowNameFormatService.formatFlows(accepted.getAlreadyRunningFlows())));
+            if (accepted == null) {
+                throw new FlowNotAcceptedException(String.format("Timeout happened when trying to start the flow for database %s.",
+                        event.getData().getResourceId()));
+            } else {
+                switch (accepted.getResultType()) {
+                    case ALREADY_EXISTING_FLOW:
+                        throw new FlowsAlreadyRunningException(String.format(
+                                "Request not allowed, external database already has a running operation. Running operation(s): [%s]",
+                                flowNameFormatService.formatFlows(accepted.getAlreadyRunningFlows())));
+                    case RUNNING_IN_FLOW:
+                        return new FlowIdentifier(FlowType.FLOW, accepted.getAsFlowId());
+                    case RUNNING_IN_FLOW_CHAIN:
+                        return new FlowIdentifier(FlowType.FLOW_CHAIN, accepted.getAsFlowChainId());
+                    default:
+                        throw new IllegalStateException("Unsupported accept result type: " + accepted.getClass());
+                }
             }
+
         } catch (InterruptedException e) {
             throw new RuntimeException(e.getMessage());
         }

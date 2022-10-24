@@ -24,15 +24,15 @@ import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConver
 import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.dto.Credential;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
-import com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopContext;
 import com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopEvent;
 import com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopState;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 public abstract class AbstractRedbeamsStopAction<P extends Payload>
-        extends AbstractAction<RedbeamsStopState, RedbeamsStopEvent, RedbeamsStopContext, P> {
+        extends AbstractAction<RedbeamsStopState, RedbeamsStopEvent, RedbeamsContext, P> {
 
     @Inject
     private DBStackService dbStackService;
@@ -56,12 +56,12 @@ public abstract class AbstractRedbeamsStopAction<P extends Payload>
     }
 
     @Override
-    protected void doExecute(RedbeamsStopContext context, P payload, Map<Object, Object> variables) throws Exception {
+    protected void doExecute(RedbeamsContext context, P payload, Map<Object, Object> variables) throws Exception {
         sendEvent(context);
     }
 
     @Override
-    protected RedbeamsStopContext createFlowContext(FlowParameters flowParameters,
+    protected RedbeamsContext createFlowContext(FlowParameters flowParameters,
             StateContext<RedbeamsStopState, RedbeamsStopEvent> stateContext, P payload) {
         DBStack dbStack = dbStackService.getById(payload.getResourceId());
         MDCBuilder.buildMdcContext(dbStack);
@@ -82,11 +82,11 @@ public abstract class AbstractRedbeamsStopAction<P extends Payload>
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         DatabaseStack databaseStack = databaseStackConverter.convert(dbStack);
 
-        return new RedbeamsStopContext(flowParameters, cloudContext, cloudCredential, databaseStack);
+        return new RedbeamsContext(flowParameters, cloudContext, cloudCredential, databaseStack, dbStack);
     }
 
     @Override
-    protected Object getFailurePayload(P payload, Optional<RedbeamsStopContext> flowContext, Exception ex) {
+    protected Object getFailurePayload(P payload, Optional<RedbeamsContext> flowContext, Exception ex) {
         return new RedbeamsFailureEvent(payload.getResourceId(), ex);
     }
 }

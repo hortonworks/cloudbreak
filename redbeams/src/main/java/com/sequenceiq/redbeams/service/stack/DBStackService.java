@@ -11,13 +11,14 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.flow.core.PayloadContextProvider;
+import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.repository.DBStackRepository;
 
 @Service
-public class DBStackService implements PayloadContextProvider {
+public class DBStackService implements PayloadContextProvider, ResourceIdProvider {
 
     @Inject
     private DBStackRepository dbStackRepository;
@@ -43,6 +44,11 @@ public class DBStackService implements PayloadContextProvider {
     public DBStack getByCrn(String crn) {
         return dbStackRepository.findByResourceCrn(crn)
                 .orElseThrow(() -> new NotFoundException(String.format("Stack with crn [%s] not found", crn)));
+    }
+
+    @Override
+    public Long getResourceIdByResourceCrn(String resourceCrn) {
+        return getByCrn(resourceCrn).getId();
     }
 
     public Set<Long> findAllDeleting() {
