@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.vali
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_EXISTING_UPGRADE_COMMAND_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_IMAGE_VALIDATION_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_S3GUARD_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_SERVICE_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_VALIDATION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState.CLUSTER_UPGRADE_VALIDATION_FINISHED_STATE;
@@ -21,6 +22,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.vali
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.HANDLED_FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_S3GUARD_DISABLED_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT;
 
 import java.util.List;
@@ -45,7 +47,11 @@ public class ClusterUpgradeValidationFlowConfig
                     .event(START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT)
                     .defaultFailureEvent()
 
-                    .from(CLUSTER_UPGRADE_VALIDATION_INIT_STATE).to(CLUSTER_UPGRADE_IMAGE_VALIDATION_STATE)
+                    .from(CLUSTER_UPGRADE_VALIDATION_INIT_STATE).to(CLUSTER_UPGRADE_S3GUARD_VALIDATION_STATE)
+                    .event(START_CLUSTER_UPGRADE_S3GUARD_DISABLED_VALIDATION_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(CLUSTER_UPGRADE_S3GUARD_VALIDATION_STATE).to(CLUSTER_UPGRADE_IMAGE_VALIDATION_STATE)
                     .event(START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT)
                     .defaultFailureEvent()
 

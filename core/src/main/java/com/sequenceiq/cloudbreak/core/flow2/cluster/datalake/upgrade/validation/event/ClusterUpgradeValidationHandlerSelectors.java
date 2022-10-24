@@ -9,7 +9,8 @@ public enum ClusterUpgradeValidationHandlerSelectors implements FlowEvent {
     VALIDATE_SERVICES_EVENT,
     VALIDATE_EXISTING_UPGRADE_COMMAND_EVENT,
     VALIDATE_FREEIPA_STATUS_EVENT,
-    VALIDATE_IMAGE_EVENT;
+    VALIDATE_IMAGE_EVENT,
+    VALIDATE_S3GUARD_DISABLED_EVENT;
 
     @Override
     public String event() {

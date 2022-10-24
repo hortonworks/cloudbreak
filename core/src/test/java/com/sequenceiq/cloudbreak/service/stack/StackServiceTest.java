@@ -510,4 +510,18 @@ public class StackServiceTest {
         return stackImageView;
     }
 
+    @Test
+    public void testFindEnvironmentCrnByStackId() {
+        when(stackRepository.findEnvironmentCrnByStackId(WORKSPACE_ID)).thenReturn(Optional.of("ENVIRONMENT_CRN"));
+        String environmentCrn = underTest.findEnvironmentCrnByStackId(WORKSPACE_ID);
+        assertEquals("ENVIRONMENT_CRN", environmentCrn);
+    }
+
+    @Test
+    public void testFindEnvironmentCrnByStackIdException() {
+        when(stackRepository.findEnvironmentCrnByStackId(WORKSPACE_ID)).thenReturn(Optional.empty());
+        RuntimeException exception = assertThrows(NotFoundException.class, () -> underTest.findEnvironmentCrnByStackId(WORKSPACE_ID));
+        assertEquals(exception.getMessage(), "Stack '1' not found.");
+    }
+
 }
