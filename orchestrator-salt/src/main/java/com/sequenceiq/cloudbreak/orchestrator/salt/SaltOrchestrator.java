@@ -811,14 +811,22 @@ public class SaltOrchestrator implements HostOrchestrator {
             String errorMsg) throws CloudbreakOrchestratorException {
         Set<String> targets = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
-            saltCommandRunner.runModifyGrainCommand(sc,
-                    new GrainAddRunner(saltStateService, targets, allNodes, role), exitCriteriaModel, exitCriteria);
-            runNewService(sc, new HighStateRunner(saltStateService, targets, allNodes), exitCriteriaModel);
-            saltCommandRunner.runModifyGrainCommand(sc,
-                    new GrainRemoveRunner(saltStateService, targets, allNodes, role), exitCriteriaModel, exitCriteria);
+            runHighStateWithSpecificRole(allNodes, exitCriteriaModel, role, targets, sc);
         } catch (Exception e) {
             LOGGER.error(errorMsg, e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    private void runHighStateWithSpecificRole(Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, String role, Set<String> targets, SaltConnector sc)
+            throws Exception {
+        try {
+            saltCommandRunner.runModifyGrainCommand(sc,
+                    new GrainAddRunner(saltStateService, targets, allNodes, role), exitCriteriaModel, exitCriteria);
+            runNewService(sc, new HighStateRunner(saltStateService, targets, allNodes), exitCriteriaModel);
+        } finally {
+            saltCommandRunner.runModifyGrainCommand(sc,
+                    new GrainRemoveRunner(saltStateService, targets, allNodes, role), exitCriteriaModel, exitCriteria);
         }
     }
 

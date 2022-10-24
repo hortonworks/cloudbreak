@@ -12,7 +12,7 @@ import "version.proto";
 service datalakeDR {
   // Get the service version.
   rpc GetVersion (version.VersionRequest)
-    returns (version.VersionResponse) {}
+      returns (version.VersionResponse) {}
 
   /**
    * Backup datalake
@@ -71,6 +71,7 @@ enum SkipFlag {
 message BackupRestoreOperationStatus {
   string status = 1; // The operation status
   string failureReason = 2; // Reason for operation failure. Only set if operation fails.
+  string durationInMinutes = 3; // The duration of each step of the operation.
 }
 
 // AdminOperationsBackupRestoreState
@@ -78,6 +79,7 @@ message AdminOperationsBackupRestoreState {
   BackupRestoreOperationStatus stopServices = 1; // Stopping services before a backup or restore.
   BackupRestoreOperationStatus startServices = 2; // Restarting services after the backup or restore is complete.
   BackupRestoreOperationStatus precheckStoragePermission = 3;
+  BackupRestoreOperationStatus precheckRangerAuditValidation = 4;
 }
 
 // HbaseBackupRestoreState
