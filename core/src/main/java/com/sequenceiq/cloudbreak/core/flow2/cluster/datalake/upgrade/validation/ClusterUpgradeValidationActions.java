@@ -5,8 +5,9 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAI
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_CLOUDPROVIDER_UPDATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_DISK_SPACE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_S3GUARD_DISABLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.HANDLED_FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_S3GUARD_DISABLED_VALIDATION_EVENT;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeFreeIpaStatusValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeFreeIpaStatusValidationFinishedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeS3guardValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeServiceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeUpdateCheckFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeUpdateCheckRequest;
@@ -111,7 +113,26 @@ public class ClusterUpgradeValidationActions {
                 stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.CLUSTER_UPGRADE_VALIDATION_STARTED, getEventMessage(resourceEvent));
                 cloudbreakEventService.fireCloudbreakEvent(payload.getResourceId(), UPDATE_IN_PROGRESS.name(), resourceEvent);
                 variables.put(LOCK_COMPONENTS, payload.isLockComponents());
-                ClusterUpgradeValidationEvent event = new ClusterUpgradeValidationEvent(START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT.name(),
+                ClusterUpgradeValidationEvent event = new ClusterUpgradeValidationEvent(START_CLUSTER_UPGRADE_S3GUARD_DISABLED_VALIDATION_EVENT.name(),
+                        payload.getResourceId(), payload.getImageId());
+                sendEvent(context, event.selector(), event);
+            }
+
+            @Override
+            protected Object getFailurePayload(ClusterUpgradeValidationTriggerEvent payload, Optional<StackContext> flowContext, Exception ex) {
+                return new ClusterUpgradeValidationFinishedEvent(payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTER_UPGRADE_S3GUARD_VALIDATION_STATE")
+    public Action<?, ?> clusterUpgradeS3guardDisabledValidation() {
+        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeValidationTriggerEvent.class) {
+
+            @Override
+            protected void doExecute(StackContext context, ClusterUpgradeValidationTriggerEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Starting S3guard validation. Target image: {}", payload.getImageId());
+                ClusterUpgradeS3guardValidationEvent event = new ClusterUpgradeS3guardValidationEvent(VALIDATE_S3GUARD_DISABLED_EVENT.name(),
                         payload.getResourceId(), payload.getImageId());
                 sendEvent(context, event.selector(), event);
             }
