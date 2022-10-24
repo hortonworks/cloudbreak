@@ -1059,4 +1059,8 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             return Optional.empty();
         }
     }
+
+    public String findEnvironmentCrnByStackId(Long id) {
+        return stackRepository.findEnvironmentCrnByStackId(id).orElseThrow(notFound("Stack", id));
+    }
 }
