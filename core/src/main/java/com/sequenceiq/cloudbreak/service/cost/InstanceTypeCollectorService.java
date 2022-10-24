@@ -61,16 +61,16 @@ public class InstanceTypeCollectorService {
 
     public ClusterCostDto getAllInstanceTypesByCrn(String crn) {
         Optional<StackViewDelegate> stackViewDelegate = stackRepository.findByCrn(crn);
-        //get list of all instancetype
-        List<InstanceGroupView> instanceGroupList = instanceGroupService.getInstanceGroupViewByStackId(stackViewDelegate.get().getId());
-        ClusterCostDto clusterCostDto = new ClusterCostDto();
-        clusterCostDto.setStatus(stackViewDelegate.get().getStackStatus().getStatus().name());
         String region = stackViewDelegate.get().getRegion();
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(stackViewDelegate.get().getCloudPlatform());
         Credential credential = credentialClientService.getByEnvironmentCrn(stackViewDelegate.get().getEnvironmentCrn());
+
+        ClusterCostDto clusterCostDto = new ClusterCostDto();
+        clusterCostDto.setStatus(stackViewDelegate.get().getStackStatus().getStatus().name());
         clusterCostDto.setRegion(region);
+
         List<InstanceGroupCostDto> instanceGroupCostDtos = new ArrayList<>();
-        for (InstanceGroupView instanceGroupView : instanceGroupList) {
+        for (InstanceGroupView instanceGroupView : instanceGroupService.getInstanceGroupViewByStackId(stackViewDelegate.get().getId())) {
             int count = instanceMetaDataService.countByInstanceGroupId(instanceGroupView.getId());
             String instanceType = instanceGroupView.getTemplate().getInstanceType();
             InstanceGroupCostDto instanceGroupCostDto = new InstanceGroupCostDto();
