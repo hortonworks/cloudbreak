@@ -2,7 +2,7 @@
 
 set -ex
 
-: ${SECRET_VERSION:="9fb177df00f0419aa0658ad18a041ee4"}
+: ${SECRET_VERSION:="e556a55296e349f993d324680baa3350"}
 : ${USER_JSON_LOCATION:="./src/main/resources/ums-users/api-credentials.json"}
 : ${USER_JSON_SECRET:="real-ums-users-dev"}
 

@@ -123,6 +123,7 @@ Related test cases are present at [testcase/authorization](src/main/java/com/seq
     - [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) on your local machine if it has not been installed yet. Read through the [Sign in with Azure CLI](https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli?view=azure-cli-latest) documentation.
 - follow [internal wiki](https://cloudera.atlassian.net/wiki/spaces/ENG/pages/626622557/Local+CB+with+Remote+UMS) about setting up remote UMS for your local setup
 - use `INTEGRATIONTEST_UMS_HOST` environment variable with proper value based on wiki mentioned here about UMS setup
+- use `INTEGRATIONTEST_UMS_PORT` environment variable with proper value based on wiki mentioned here about UMS setup
 
 ## L0 Promotion tests
 Cloudbreak related [promotion tests](src/main/java/com/sequenceiq/it/cloudbreak/testcase/e2e/l0promotion) from [Management Console/Control Plane test repository](https://github.infra.cloudera.com/CDH/cdpmc-qe).

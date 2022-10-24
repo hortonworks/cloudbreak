@@ -39,13 +39,14 @@ integrationtest:
     server: http://localhost
   ums:
     host: ums.thunderhead-dev.cloudera.com
-    # Possible values: default, legacy
-    accountKey: default
+    port: 8982
+    # Possible values: default, legacy, e2e, e2e_eu
+    accountKey: e2e_eu
     # Possible values: dev, int, stage, prod
     deploymentKey: dev
     jsonSecret:
       name: real-ums-users-dev
-      version: 9fb177df00f0419aa0658ad18a041ee4
+      version: e556a55296e349f993d324680baa3350
       destinationPath: "./src/main/resources/ums-users/api-credentials.json"
   user:
     accesskey: Y3JuOmFsdHVzOmlhbTp1cy13ZXN0LTE6Y2xvdWRlcmE6dXNlcjptb2NrdXNlckB1bXMubW9jaw==
