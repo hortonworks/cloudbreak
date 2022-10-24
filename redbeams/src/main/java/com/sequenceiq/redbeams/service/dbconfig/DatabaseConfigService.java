@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
@@ -48,7 +47,7 @@ import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
 import com.sequenceiq.redbeams.service.validation.DatabaseConnectionValidator;
 
 @Service
-public class DatabaseConfigService extends AbstractArchivistService<DatabaseConfig> implements ResourceIdProvider, CompositeAuthResourcePropertyProvider {
+public class DatabaseConfigService extends AbstractArchivistService<DatabaseConfig> implements CompositeAuthResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseConfigService.class);
 
@@ -277,16 +276,6 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     }
 
     @Override
-    public Long getResourceIdByResourceCrn(String resourceCrn) {
-        return getByCrn(resourceCrn).getId();
-    }
-
-    @Override
-    public Long getResourceIdByResourceName(String resourceName) {
-        return getByName(resourceName).getId();
-    }
-
-    @Override
     public AuthorizationResourceType getSupportedAuthorizationResourceType() {
         return AuthorizationResourceType.DATABASE;
     }
@@ -305,7 +294,7 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     @Override
     public Map<String, Optional<String>> getNamesByCrnsForMessage(Collection<String> crnStrings) {
         Map<String, Optional<String>> result = new HashMap<>();
-        List<Crn> crns = crnStrings.stream().map(crnString -> Crn.safeFromString(crnString)).collect(Collectors.toList());
+        List<Crn> crns = crnStrings.stream().map(Crn::safeFromString).collect(Collectors.toList());
         repository.findByResourceCrnIn(crns)
                 .forEach(nameAndCrn -> result.put(nameAndCrn.getResourceCrn().toString(), Optional.ofNullable(nameAndCrn.getName())));
         return result;

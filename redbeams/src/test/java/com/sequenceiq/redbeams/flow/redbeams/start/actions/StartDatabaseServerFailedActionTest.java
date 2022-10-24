@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.flow.redbeams.start.actions;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +15,7 @@ import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.flow.core.Flow;
@@ -25,9 +26,9 @@ import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConver
 import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.dto.Credential;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
-import com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartContext;
 import com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent;
 import com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartState;
 import com.sequenceiq.redbeams.metrics.MetricType;
@@ -112,6 +113,9 @@ public class StartDatabaseServerFailedActionTest {
     @Mock
     private DatabaseStack databaseStack;
 
+    @Mock
+    private CloudContext cloudContext;
+
     @InjectMocks
     private StartDatabaseServerFailedAction victim;
 
@@ -162,7 +166,7 @@ public class StartDatabaseServerFailedActionTest {
         when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
         when(databaseStackConverter.convert(dbStack)).thenReturn(databaseStack);
 
-        RedbeamsStartContext redbeamsStartContext = victim.createFlowContext(flowParameters, stateContext, payload);
+        RedbeamsContext redbeamsStartContext = victim.createFlowContext(flowParameters, stateContext, payload);
 
         verify(flow).setFlowFailed(exception);
 
@@ -181,7 +185,9 @@ public class StartDatabaseServerFailedActionTest {
 
     @Test
     public void shouldCreateRequest() {
-        RedbeamsEvent request = (RedbeamsEvent) victim.createRequest(null);
+        RedbeamsContext context = new RedbeamsContext(flowParameters, cloudContext, cloudCredential, databaseStack, dbStack);
+
+        RedbeamsEvent request = (RedbeamsEvent) victim.createRequest(context);
         assertEquals(RedbeamsStartEvent.REDBEAMS_START_FAILURE_HANDLED_EVENT.event(), request.selector());
     }
 }

@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.flow.redbeams.stop.actions;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
@@ -14,8 +14,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
-import com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopContext;
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerRequest;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 
@@ -39,6 +40,9 @@ public class StopDatabaseServerActionTest {
     @Mock
     private DatabaseStack databaseStack;
 
+    @Mock
+    private DBStack dbStack;
+
     @InjectMocks
     private StopDatabaseServerAction victim;
 
@@ -53,7 +57,7 @@ public class StopDatabaseServerActionTest {
 
     @Test
     public void createRequestShouldReturnStopDatabaseServerRequest() {
-        RedbeamsStopContext context = new RedbeamsStopContext(flowParameters, cloudContext, cloudCredential, databaseStack);
+        RedbeamsContext context = new RedbeamsContext(flowParameters, cloudContext, cloudCredential, databaseStack, dbStack);
 
         StopDatabaseServerRequest stopDatabaseServerRequest = (StopDatabaseServerRequest) victim.createRequest(context);
 

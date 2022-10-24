@@ -5,6 +5,7 @@ public final class ModelDescriptions {
     public static final String ALLOCATE_DATABASE_SERVER_REQUEST = "Request for allocating a new database server in a provider";
 
     public static final String UPGRADE_DATABASE_SERVER_REQUEST = "Request for upgrading a database server in a provider to a higher major version";
+    public static final String UPGRADE_DATABASE_SERVER_RESPONSE = "Response for upgrading a database server";
     public static final String SSL_CONFIG_REQUEST = "Request for the SSL config of a database server";
     public static final String CREATE_DATABASE_REQUEST = "Request for creating a new database on a registered database server";
     public static final String CREATE_DATABASE_RESPONSE = "Response for creating a new database on a registered database server";
@@ -22,6 +23,8 @@ public final class ModelDescriptions {
     public static final String DATABASE_SERVER_TEST_RESPONSE = "Response for testing connectivity to a database server";
     public static final String DATABASE_TEST_REQUEST = "Request for testing connectivity to a database";
     public static final String DATABASE_TEST_RESPONSE = "Response for testing connectivity to a database";
+
+    public static final String FLOW_IDENTIFIER = "The id of the flow or flow chain that was triggered as part of the process.";
 
     private ModelDescriptions() {
     }
@@ -160,6 +163,8 @@ public final class ModelDescriptions {
 
     public static class UpgradeModelDescriptions {
         public static final String MAJOR_VERSION = "The major version to which the database server should be upgraded";
+        public static final String CURRENT_VERSION = "The current version of the database server";
+        public static final String UPGRADE_REASON = "The status reason if upgrade flow is not started due to some validation";
     }
 
 }

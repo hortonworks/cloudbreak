@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
@@ -33,7 +34,9 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTa
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
 import com.sequenceiq.redbeams.converter.stack.AllocateDatabaseServerV4RequestToDBStackConverter;
+import com.sequenceiq.redbeams.converter.upgrade.UpgradeDatabaseResponseToUpgradeDatabaseServerV4ResponseConverter;
 import com.sequenceiq.redbeams.converter.upgrade.UpgradeDatabaseServerV4RequestToUpgradeDatabaseServerRequestConverter;
 import com.sequenceiq.redbeams.converter.v4.databaseserver.DBStackToDatabaseServerStatusV4ResponseConverter;
 import com.sequenceiq.redbeams.converter.v4.databaseserver.DatabaseServerConfigToDatabaseServerV4ResponseConverter;
@@ -41,6 +44,7 @@ import com.sequenceiq.redbeams.converter.v4.databaseserver.DatabaseServerV4Reque
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
+import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseResponse;
 import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
@@ -122,6 +126,9 @@ public class DatabaseServerV4ControllerTest {
 
     @Mock
     private ValidationResult validationResult;
+
+    @Mock
+    private UpgradeDatabaseResponseToUpgradeDatabaseServerV4ResponseConverter upgradeDatabaseServerV4ResponseConverter;
 
     private DatabaseServerConfig server;
 
@@ -346,20 +353,33 @@ public class DatabaseServerV4ControllerTest {
     public void testUpgrade() {
         UpgradeDatabaseServerV4Request request = new UpgradeDatabaseServerV4Request();
         request.setUpgradeTargetMajorVersion(UpgradeTargetMajorVersion.VERSION_11);
-        when(upgradeDatabaseServerV4RequestConverter.convert(request)).thenReturn(getUpgradeDatabaseRequest());
+        UpgradeDatabaseServerV4Response response = new UpgradeDatabaseServerV4Response();
+        response.setCurrentVersion(MajorVersion.VERSION_10);
 
-        underTest.upgrade(SERVER_CRN, request);
+        UpgradeDatabaseRequest upgradeDatabaseRequest = getUpgradeDatabaseRequest();
+        when(upgradeDatabaseServerV4RequestConverter.convert(request)).thenReturn(upgradeDatabaseRequest);
+        when(redbeamsUpgradeService.upgradeDatabaseServer(eq(SERVER_CRN), eq(upgradeDatabaseRequest))).thenReturn(getUpgradeDatabaseResponse());
+        when(upgradeDatabaseServerV4ResponseConverter.convert(getUpgradeDatabaseResponse())).thenReturn(response);
+
+        UpgradeDatabaseServerV4Response actualResponse = underTest.upgrade(SERVER_CRN, request);
 
         ArgumentCaptor<UpgradeDatabaseRequest> upgradeDatabaseRequestArgumentCaptor = ArgumentCaptor.forClass(UpgradeDatabaseRequest.class);
         verify(redbeamsUpgradeService).upgradeDatabaseServer(eq(SERVER_CRN), upgradeDatabaseRequestArgumentCaptor.capture());
-        UpgradeDatabaseRequest upgradeDatabaseRequest = upgradeDatabaseRequestArgumentCaptor.getValue();
-        assertEquals(upgradeDatabaseRequest.getTargetMajorVersion(), TargetMajorVersion.VERSION_11);
+        UpgradeDatabaseRequest actualUpgradeDatabaseRequest = upgradeDatabaseRequestArgumentCaptor.getValue();
+        assertEquals(actualUpgradeDatabaseRequest.getTargetMajorVersion(), TargetMajorVersion.VERSION_11);
+        assertEquals(response.getCurrentVersion(), actualResponse.getCurrentVersion());
     }
 
     private UpgradeDatabaseRequest getUpgradeDatabaseRequest() {
         UpgradeDatabaseRequest upgradeDatabaseRequest = new UpgradeDatabaseRequest();
         upgradeDatabaseRequest.setTargetMajorVersion(TargetMajorVersion.VERSION_11);
         return upgradeDatabaseRequest;
+    }
+
+    private UpgradeDatabaseResponse getUpgradeDatabaseResponse() {
+        UpgradeDatabaseResponse upgradeDatabaseResponse = new UpgradeDatabaseResponse();
+        upgradeDatabaseResponse.setCurrentVersion(MajorVersion.VERSION_10);
+        return upgradeDatabaseResponse;
     }
 
 }
