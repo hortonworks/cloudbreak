@@ -1,32 +1,34 @@
 package com.sequenceiq.it.cloudbreak.request.ums;
 
+import com.sequenceiq.cloudbreak.auth.altus.service.UmsResourceRole;
+
 public class AssignResourceRequest {
 
     private String resourceCrn;
 
-    private String roleCrn;
+    private UmsResourceRole umsResourceRole;
 
     public AssignResourceRequest() {
     }
 
-    public AssignResourceRequest(String resourceCrn, String roleCrn) {
+    public AssignResourceRequest(String resourceCrn, UmsResourceRole umsResourceRole) {
         this.resourceCrn = resourceCrn;
-        this.roleCrn = roleCrn;
+        this.umsResourceRole = umsResourceRole;
     }
 
     public String getResourceCrn() {
         return resourceCrn;
     }
 
-    public String getRoleCrn() {
-        return roleCrn;
+    public UmsResourceRole getUmsResourceRole() {
+        return umsResourceRole;
     }
 
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
     }
 
-    public void setRoleCrn(String roleCrn) {
-        this.roleCrn = roleCrn;
+    public void setUmsResourceRole(UmsResourceRole umsResourceRole) {
+        this.umsResourceRole = umsResourceRole;
     }
 }

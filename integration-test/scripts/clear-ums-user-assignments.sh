@@ -27,8 +27,13 @@ get_admin_access() {
   SECRET_KEY=$(jq "[.${DEPLOYMENT}.${ACCOUNT}[] | select(.admin == true)][0].secretKey " -r $USERS_FILE)
   ~/cdpclienv/bin/cdp configure set cdp_access_key_id "$ACCESS_KEY" --profile ums_cleanup
   ~/cdpclienv/bin/cdp configure set cdp_private_key "$SECRET_KEY" --profile ums_cleanup
-  ~/cdpclienv/bin/cdp configure set cdp_endpoint_url "https://api.dps.mow-dev.cloudera.com/" --profile ums_cleanup
-  ~/cdpclienv/bin/cdp configure set endpoint_url "https://%sapi.thunderhead-dev.cloudera.com/" --profile ums_cleanup
+  if [[ "$ACCOUNT" =~ .*"eu".* ]]; then
+    ~/cdpclienv/bin/cdp configure set cdp_endpoint_url "https://api.eu-1.cdp.mow-dev.cloudera.com/" --profile ums_cleanup
+    ~/cdpclienv/bin/cdp configure set endpoint_url "https://api.eu-1.cdp.mow-dev.cloudera.com/" --profile ums_cleanup
+  else
+    ~/cdpclienv/bin/cdp configure set cdp_endpoint_url "https://api.dps.mow-dev.cloudera.com/" --profile ums_cleanup
+    ~/cdpclienv/bin/cdp configure set endpoint_url "https://%sapi.thunderhead-dev.cloudera.com/" --profile ums_cleanup
+  fi
 }
 
 cleanup_users() {

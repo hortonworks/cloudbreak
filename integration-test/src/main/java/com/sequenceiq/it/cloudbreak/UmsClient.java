@@ -46,7 +46,7 @@ public class UmsClient<E extends Enum<E>, W extends WaitObject> extends Microser
         return umsClient;
     }
 
-    public static synchronized UmsClient createProxyUmsClient(Tracer tracer, String umsHost) {
+    public static synchronized UmsClient createProxyUmsClient(Tracer tracer, String umsHost, int umsPort) {
         UmsClient clientEntity = new UmsClient();
         UmsClientConfig clientConfig = new UmsClientConfig();
         Field callingServiceName = ReflectionUtils.findField(UmsClientConfig.class, "callingServiceName");
@@ -56,7 +56,7 @@ public class UmsClient<E extends Enum<E>, W extends WaitObject> extends Microser
         ReflectionUtils.makeAccessible(grpcTimeoutSec);
         ReflectionUtils.setField(grpcTimeoutSec, clientConfig, 60L);
         clientEntity.umsClient = GrpcUmsClient.createClient(
-                UmsChannelConfig.newManagedChannelWrapper(umsHost, 8982), clientConfig, tracer);
+                UmsChannelConfig.newManagedChannelWrapper(umsHost, umsPort), clientConfig, tracer);
         return clientEntity;
     }
 
