@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.cost;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -23,12 +22,12 @@ import com.sequenceiq.cloudbreak.cost.model.DiskCostDto;
 import com.sequenceiq.cloudbreak.cost.model.InstanceGroupCostDto;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.repository.StackDtoRepository;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
-import com.sequenceiq.cloudbreak.view.delegate.StackViewDelegate;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class InstanceTypeCollectorService {
@@ -36,7 +35,7 @@ public class InstanceTypeCollectorService {
     private static final double MAGIC_PRICE_PER_DISK_GB = 0.000138;
 
     @Inject
-    private StackDtoRepository stackRepository;
+    private StackDtoService stackDtoService;
 
     @Inject
     private InstanceGroupService instanceGroupService;
@@ -60,17 +59,17 @@ public class InstanceTypeCollectorService {
     private ClouderaCostCache clouderaCostCache;
 
     public ClusterCostDto getAllInstanceTypesByCrn(String crn) {
-        Optional<StackViewDelegate> stackViewDelegate = stackRepository.findByCrn(crn);
-        //get list of all instancetype
-        List<InstanceGroupView> instanceGroupList = instanceGroupService.getInstanceGroupViewByStackId(stackViewDelegate.get().getId());
+        StackView stackView = stackDtoService.getStackViewByCrn(crn);
+        String region = stackView.getRegion();
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(stackView.getCloudPlatform());
+        Credential credential = credentialClientService.getByEnvironmentCrn(stackView.getEnvironmentCrn());
+
         ClusterCostDto clusterCostDto = new ClusterCostDto();
-        clusterCostDto.setStatus(stackViewDelegate.get().getStackStatus().getStatus().name());
-        String region = stackViewDelegate.get().getRegion();
-        CloudPlatform cloudPlatform = CloudPlatform.valueOf(stackViewDelegate.get().getCloudPlatform());
-        Credential credential = credentialClientService.getByEnvironmentCrn(stackViewDelegate.get().getEnvironmentCrn());
+        clusterCostDto.setStatus(stackView.getStackStatus().getStatus().name());
         clusterCostDto.setRegion(region);
+
         List<InstanceGroupCostDto> instanceGroupCostDtos = new ArrayList<>();
-        for (InstanceGroupView instanceGroupView : instanceGroupList) {
+        for (InstanceGroupView instanceGroupView : instanceGroupService.getInstanceGroupViewByStackId(stackView.getId())) {
             int count = instanceMetaDataService.countByInstanceGroupId(instanceGroupView.getId());
             String instanceType = instanceGroupView.getTemplate().getInstanceType();
             InstanceGroupCostDto instanceGroupCostDto = new InstanceGroupCostDto();

@@ -45,9 +45,20 @@ public class FreeIpaCostV1Controller implements FreeIpaCostV1Endpoint {
     }
 
     private void checkIfCostCalculationIsEnabled() {
-        if (!entitlementService.isCostCalculationEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            LOGGER.info("Cost calculation feature is not enabled!");
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        boolean usdCalculationEnabled = entitlementService.isUsdCostCalculationEnabled(accountId);
+        boolean co2CalculationEnabled = entitlementService.isCO2CalculationEnabled(accountId);
+
+        if (!usdCalculationEnabled && !co2CalculationEnabled) {
+            LOGGER.info("Both USD cost calculation and CO2 cost calculation features are disable!");
             throw new CostCalculationNotEnabledException("Cost calculation feature is not enabled!");
+        }
+
+        if (!usdCalculationEnabled) {
+            LOGGER.info("USD cost calculation feature is disabled!");
+        }
+        if (!co2CalculationEnabled) {
+            LOGGER.info("CO2 cost calculation feature is disabled");
         }
     }
 }

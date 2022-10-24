@@ -36,7 +36,7 @@ public class ClouderaCostCache {
         }
     }
 
-    public Double getPriceByType(String instanceType) {
+    public double getPriceByType(String instanceType) {
         Double price = priceCache.get(instanceType);
         return price == null ? DEFAULT_PRICE : price;
     }

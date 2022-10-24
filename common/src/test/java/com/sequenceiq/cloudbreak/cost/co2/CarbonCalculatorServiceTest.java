@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.common.cost.model.RegionEmissionFactor;
 import com.sequenceiq.cloudbreak.common.cost.service.RegionEmissionFactorService;
 import com.sequenceiq.cloudbreak.cost.model.ClusterCostDto;
+import com.sequenceiq.cloudbreak.cost.model.DiskCostDto;
 import com.sequenceiq.cloudbreak.cost.model.InstanceGroupCostDto;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,7 +31,6 @@ class CarbonCalculatorServiceTest {
     @Test
     void getHourlyCarbonFootPrintByCrn() {
         //TODO: add some usecases
-        ClusterCostDto testDto = new ClusterCostDto();
         RegionEmissionFactor emissionFactor = new RegionEmissionFactor();
         emissionFactor.setCo2e(0.0001234);
         when(regionEmissionFactorService.get(any())).thenReturn(emissionFactor);
@@ -41,12 +41,15 @@ class CarbonCalculatorServiceTest {
     private ClusterCostDto createClusterCostDto(int instanceCount, int memorySize) {
         ClusterCostDto testDto = new ClusterCostDto();
         testDto.setRegion("us-west-1");
+        testDto.setStatus("AVAILABLE");
         List<InstanceGroupCostDto> instanceGroupCostDtos = new ArrayList<>();
         InstanceGroupCostDto singleDto = new InstanceGroupCostDto();
         singleDto.setCount(instanceCount);
         singleDto.setCoresPerInstance(8);
         singleDto.setType("m5.xlarge");
         singleDto.setMemoryPerInstance(memorySize);
+        List<DiskCostDto> diskCostDtos = new ArrayList<>();
+        singleDto.setDisksPerInstance(diskCostDtos);
         instanceGroupCostDtos.add(singleDto);
         testDto.setInstanceGroups(instanceGroupCostDtos);
         return testDto;

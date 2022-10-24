@@ -55,12 +55,14 @@ public class FreeIpaInstanceTypeCollectorService {
 
     public ClusterCostDto getAllInstanceTypesByCrn(String crn) {
         Optional<Stack> stackViewDelegate = stackRepository.findOneWithListsByResourceCrn(crn);
-        ClusterCostDto clusterCostDto = new ClusterCostDto();
-        clusterCostDto.setStatus(stackViewDelegate.get().getStackStatus().getStatus().name());
         String region = stackViewDelegate.get().getRegion();
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(stackViewDelegate.get().getCloudPlatform());
         Credential credential = credentialService.getCredentialByEnvCrn(stackViewDelegate.get().getEnvironmentCrn());
+
+        ClusterCostDto clusterCostDto = new ClusterCostDto();
+        clusterCostDto.setStatus(stackViewDelegate.get().getStackStatus().getStatus().name());
         clusterCostDto.setRegion(region);
+
         List<InstanceGroupCostDto> instanceGroupCostDtos = new ArrayList<>();
         for (InstanceGroup instanceGroup : stackViewDelegate.get().getInstanceGroups()) {
             String instanceType = instanceGroup.getTemplate().getInstanceType();

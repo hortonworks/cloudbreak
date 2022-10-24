@@ -13,6 +13,12 @@ public class Product {
 
     private String sku;
 
+    public Product(String productFamily, Attributes attributes, String sku) {
+        this.productFamily = productFamily;
+        this.attributes = attributes;
+        this.sku = sku;
+    }
+
     public String getProductFamily() {
         return productFamily;
     }
