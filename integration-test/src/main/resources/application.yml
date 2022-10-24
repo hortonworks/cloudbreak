@@ -296,10 +296,11 @@ integrationtest:
   mock:
     region: London
     location: London
-    availabilityZone: London
+    availabilityZone: london-a
     vpcId: vpc1
+    networkCidr: 192.168.0.0/16
     verticalScale:
-      supported: false
+      supported: true
     subnetIds:
       - net1
       - net2

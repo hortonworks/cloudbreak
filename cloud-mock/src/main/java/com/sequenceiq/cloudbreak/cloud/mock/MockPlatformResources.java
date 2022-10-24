@@ -29,10 +29,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
+import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
@@ -53,9 +55,9 @@ import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 @Service
 public class MockPlatformResources implements PlatformResources {
 
-    private static final String[] EUROPE_AVAILABILITY_ZONES = {"europe-a", "europe-b"};
+    static final String[] LONDON_AVAILABILITY_ZONES = {"london-a", "london-b"};
 
-    private static final String[] USA_AVAILABILITY_ZONES = {"usa-a", "usa-b", "usa-c"};
+    static final String[] USA_AVAILABILITY_ZONES = {"usa-a", "usa-b", "usa-c"};
 
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
@@ -169,7 +171,7 @@ public class MockPlatformResources implements PlatformResources {
     private Map<Region, List<AvailabilityZone>> readRegionsMock() {
         Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
         regions.put(region("USA"), getAvailabilityZones(USA_AVAILABILITY_ZONES));
-        regions.put(region("Europe"), getAvailabilityZones(EUROPE_AVAILABILITY_ZONES));
+        regions.put(region("Europe"), getAvailabilityZones(LONDON_AVAILABILITY_ZONES));
         return regions;
     }
 
@@ -198,7 +200,26 @@ public class MockPlatformResources implements PlatformResources {
 
     @Override
     public CloudNetworks networks(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        return new CloudNetworks();
+        Map<String, Set<CloudNetwork>> result = new HashMap<>();
+        String network1Id = "vpc1";
+        result.put(network1Id, getCloudNetworks(network1Id, LONDON_AVAILABILITY_ZONES));
+        return new CloudNetworks(result);
+    }
+
+    private Set<CloudNetwork> getCloudNetworks(String name, String[] azs) {
+        Set<CloudSubnet> subnets = new HashSet<>();
+
+        for (int i = 0; i < azs.length; i++) {
+            String londonAvailabilityZone = azs[i];
+            String subnetId = name + "-subnet" + i;
+            subnets.add(new CloudSubnet(
+                    subnetId,
+                    subnetId,
+                    londonAvailabilityZone,
+                    "192.168.0.0/16"
+            ));
+        }
+        return Set.of(new CloudNetwork(name, name, subnets, new HashMap<>()));
     }
 
     @Override

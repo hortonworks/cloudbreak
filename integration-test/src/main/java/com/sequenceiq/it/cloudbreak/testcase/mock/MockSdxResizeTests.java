@@ -6,13 +6,11 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
@@ -32,17 +30,14 @@ public class MockSdxResizeTests extends AbstractMockTest {
 
     protected void setupTest(TestContext testContext) {
         sdxName = resourcePropertyProvider().getName();
-        String networkKey = "someNetwork";
 
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
 
         testContext
-                .given(networkKey, EnvironmentNetworkTestDto.class)
-                .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
-                .withNetwork(networkKey)
+                .withNetwork()
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .withBackup("mock://location/of/the/backup")

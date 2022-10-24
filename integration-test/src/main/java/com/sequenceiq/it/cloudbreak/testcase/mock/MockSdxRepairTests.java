@@ -16,7 +16,6 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
-import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -24,7 +23,6 @@ import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mock.Method;
@@ -91,7 +89,6 @@ public class MockSdxRepairTests extends AbstractMockTest {
     )
     public void repairTerminatedMasterAndItFailedButInstanceShouldBeDeletedOnProviderSide(MockedTestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();
-        String networkKey = "someOtherNetwork";
 
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
@@ -101,10 +98,8 @@ public class MockSdxRepairTests extends AbstractMockTest {
         customDomain.setClusterNameAsSubdomain(true);
         customDomain.setHostgroupNameAsHostname(true);
         testContext
-                .given(networkKey, EnvironmentNetworkTestDto.class)
-                .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
-                .withNetwork(networkKey)
+                .withNetwork()
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
@@ -158,7 +153,6 @@ public class MockSdxRepairTests extends AbstractMockTest {
             SdxClusterStatusResponse stateBeforeRepair
     ) {
         String sdxInternal = resourcePropertyProvider().getName();
-        String networkKey = "someOtherNetwork";
 
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
@@ -168,10 +162,8 @@ public class MockSdxRepairTests extends AbstractMockTest {
         customDomain.setClusterNameAsSubdomain(true);
         customDomain.setHostgroupNameAsHostname(true);
         testContext
-                .given(networkKey, EnvironmentNetworkTestDto.class)
-                .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
-                .withNetwork(networkKey)
+                .withNetwork()
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.mock;
 
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED;
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.DELETED;
+import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.UPDATED;
 import static java.util.Collections.emptyList;
 
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -137,11 +139,15 @@ public class MockResourceConnector implements ResourceConnector {
 
     @Override
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
-        stack.getGroups().forEach(g -> {
-            mockUrlFactory.get(authenticatedContext, "/spi/update/" + g.getName() + "/instance_type/" + g.getReferenceInstanceTemplate().getFlavor())
-                    .post(Entity.entity(stack, MediaType.APPLICATION_JSON_TYPE), CloudVmInstanceStatus[].class);
-        });
-        return emptyList();
+        List<CloudResourceStatus> cloudResourceStatuses = resources.stream().map(r -> {
+                    Group group = stack.getGroups().stream().filter(g -> g.getName().equals(r.getGroup())).findFirst()
+                            .orElseThrow(NotFoundException.notFound("Group", r.getGroup()));
+                    String path = "/spi/update/" + r.getGroup() + "/instance_type/" + group.getReferenceInstanceTemplate().getFlavor();
+                    mockUrlFactory.get(authenticatedContext, path).post(Entity.entity(stack, MediaType.APPLICATION_JSON_TYPE), CloudVmInstanceStatus[].class);
+                    return new CloudResourceStatus(r, UPDATED);
+                })
+                .collect(Collectors.toList());
+        return cloudResourceStatuses;
     }
 
     @Override

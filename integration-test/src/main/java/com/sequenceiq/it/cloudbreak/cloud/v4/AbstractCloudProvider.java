@@ -33,6 +33,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentAuthenticationTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
@@ -360,5 +361,10 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     public boolean isMultiAZ() {
         return false;
+    }
+
+    @Override
+    public EnvironmentNetworkTestDto newNetwork(EnvironmentNetworkTestDto network) {
+        return network;
     }
 }

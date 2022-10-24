@@ -11,7 +11,6 @@ import org.json.JSONObject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
-import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -23,7 +22,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
@@ -63,13 +61,10 @@ public class MockSdxTests extends AbstractMockTest {
     )
     public void testCustomSDXCanBeCreatedThenDeletedSuccessfully(MockedTestContext testContext) {
         String sdxCustom = resourcePropertyProvider().getName();
-        String networkKey = "someNetwork";
 
         testContext
-                .given(networkKey, EnvironmentNetworkTestDto.class)
-                .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
-                .withNetwork(networkKey)
+                .withNetwork()
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
@@ -92,13 +87,10 @@ public class MockSdxTests extends AbstractMockTest {
     )
     public void testDefaultSDXCanBeCreatedThenDeletedSuccessfully(MockedTestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();
-        String networkKey = "someNetwork";
 
         testContext
-                .given(networkKey, EnvironmentNetworkTestDto.class)
-                .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
-                .withNetwork(networkKey)
+                .withNetwork()
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
@@ -119,14 +111,11 @@ public class MockSdxTests extends AbstractMockTest {
     )
     public void testSDXFromTemplateCanBeCreatedThenDeletedSuccessfully(MockedTestContext testContext) throws IOException {
         String sdxInternal = resourcePropertyProvider().getName();
-        String networkKey = "someOtherNetwork";
         JSONObject jsonObject = ResourceUtil.readResourceAsJson(applicationContext, TEMPLATE_JSON);
 
         testContext
-                .given(networkKey, EnvironmentNetworkTestDto.class)
-                .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
-                .withNetwork(networkKey)
+                .withNetwork()
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
@@ -197,13 +186,10 @@ public class MockSdxTests extends AbstractMockTest {
     )
     public void testSdxStopStart(MockedTestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();
-        String networkKey = "someOtherNetwork";
 
         testContext
-                .given(networkKey, EnvironmentNetworkTestDto.class)
-                .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
-                .withNetwork(networkKey)
+                .withNetwork()
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
@@ -229,13 +215,10 @@ public class MockSdxTests extends AbstractMockTest {
     )
     public void testSDXCreateWithInvalidCustomInstanceTypesShouldFail(MockedTestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
-        String networkKey = "someNetwork";
 
         testContext
-                .given(networkKey, EnvironmentNetworkTestDto.class)
-                .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
-                .withNetwork(networkKey)
+                .withNetwork()
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())

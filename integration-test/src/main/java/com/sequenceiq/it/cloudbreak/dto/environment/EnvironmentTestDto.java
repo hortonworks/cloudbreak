@@ -267,6 +267,11 @@ public class EnvironmentTestDto
         return withNetwork(environmentNetwork.getRequest());
     }
 
+    public EnvironmentTestDto withNewNetwork() {
+        EnvironmentNetworkTestDto environmentNetwork = getCloudProvider().newNetwork(given(EnvironmentNetworkTestDto.class));
+        return withNetwork(environmentNetwork.getRequest());
+    }
+
     public EnvironmentTestDto withNetwork(String key) {
         EnvironmentNetworkTestDto environmentNetwork = getTestContext().get(key);
         if (environmentNetwork == null) {

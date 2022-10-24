@@ -178,6 +178,10 @@ public class MockCloudProvider extends AbstractCloudProvider {
         return subnetIDs.iterator().next();
     }
 
+    public String getNetworkCidr() {
+        return mockProperties.getNetworkCidr();
+    }
+
     public String getInternetGatewayId() {
         return mockProperties.getInternetGateway();
     }
@@ -331,6 +335,18 @@ public class MockCloudProvider extends AbstractCloudProvider {
         return network
                 .withSubnetIDs(getSubnetIDs())
                 .withMock(getMockNetworkParams());
+    }
+
+    @Override
+    public EnvironmentNetworkTestDto newNetwork(EnvironmentNetworkTestDto network) {
+        EnvironmentNetworkMockParams environmentNetworkMockParams = new EnvironmentNetworkMockParams();
+        environmentNetworkMockParams.setInternetGatewayId(getInternetGatewayId());
+        environmentNetworkMockParams.setVpcId(null);
+        network
+                .withSubnetIDs(getSubnetIDs())
+                .withMock(environmentNetworkMockParams)
+                .withNetworkCIDR(getNetworkCidr());
+        return network;
     }
 
     private EnvironmentNetworkMockParams getMockNetworkParams() {
