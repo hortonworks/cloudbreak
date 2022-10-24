@@ -39,13 +39,15 @@ public class GcpPricingCache {
     }
 
     public int getCpuCountForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential) {
-        VmTypeMeta instanceTypeMetadata = getVmMetadata(region, instanceType, extendedCloudCredential);
-        return instanceTypeMetadata.getCPU();
+//        VmTypeMeta instanceTypeMetadata = getVmMetadata(region, instanceType, extendedCloudCredential);
+//        return instanceTypeMetadata.getCPU();
+        return 0;
     }
 
     public int getMemoryForInstanceType(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential) {
-        VmTypeMeta instanceTypeMetadata = getVmMetadata(region, instanceType, extendedCloudCredential);
-        return instanceTypeMetadata.getMemoryInGb().intValue();
+//        VmTypeMeta instanceTypeMetadata = getVmMetadata(region, instanceType, extendedCloudCredential);
+//        return instanceTypeMetadata.getMemoryInGb().intValue();
+        return 0;
     }
 
     private VmTypeMeta getVmMetadata(String region, String instanceType, ExtendedCloudCredential extendedCloudCredential) {
