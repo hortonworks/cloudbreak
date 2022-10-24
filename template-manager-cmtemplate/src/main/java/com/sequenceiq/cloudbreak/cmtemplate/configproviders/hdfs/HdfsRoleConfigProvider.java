@@ -44,7 +44,7 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
                 configs.add(
                         config(FAILED_VOLUMES_TOLERATED, NUM_FAILED_VOLUMES_TOLERATED.toString())
                 );
-                if (isDfsReplicaControlled(source)) {
+                if (isSDXOptimizationEnabled(source)) {
                     configs.add(
                             config(DFS_REPLICATION, DFS_REPLICATION_VALUE.toString())
                     );
@@ -59,12 +59,22 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
                     );
                 }
                 return List.of();
+            case HdfsRoles.GATEWAY:
+                if (isSDXOptimizationEnabled(source)) {
+                    //CHECKSTYLE:OFF
+                    return List.of(config(
+                            "hdfs_client_config_safety_valve",
+                            "<property><name>dfs.client.block.write.replace-datanode-on-failure.policy</name><value>NEVER</value></property><property><name>dfs.client.block.write.replace-datanode-on-failure.enable</name><value>false</value></property>")
+                    );
+                    //CHECKSTYLE:ON
+                }
+                return List.of();
             default:
                 return List.of();
         }
     }
 
-    private boolean isDfsReplicaControlled(TemplatePreparationObject source) {
+    private boolean isSDXOptimizationEnabled(TemplatePreparationObject source) {
         return entitlementService.isSDXOptimizedConfigurationEnabled(ThreadBasedUserCrnProvider.getAccountId())
                 && isNamenodeHA(source)
                 && null != source.getStackType()
@@ -78,7 +88,7 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     public List<String> getRoleTypes() {
-        return List.of(HdfsRoles.NAMENODE, HdfsRoles.DATANODE);
+        return List.of(HdfsRoles.NAMENODE, HdfsRoles.DATANODE, HdfsRoles.GATEWAY);
     }
 
     public static boolean isNamenodeHA(TemplatePreparationObject source) {
