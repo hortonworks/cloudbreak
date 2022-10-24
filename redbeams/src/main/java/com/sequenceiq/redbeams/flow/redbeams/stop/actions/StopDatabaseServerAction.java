@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
-import com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopContext;
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerRequest;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 
@@ -29,7 +29,7 @@ public class StopDatabaseServerAction extends AbstractRedbeamsStopAction<Redbeam
     }
 
     @Override
-    protected Selectable createRequest(RedbeamsStopContext context) {
+    protected Selectable createRequest(RedbeamsContext context) {
         return new StopDatabaseServerRequest(context.getCloudContext(), context.getCloudCredential(),
                 context.getDatabaseStack());
     }

@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
-import com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartContext;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerRequest;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
 
@@ -29,7 +29,7 @@ public class StartDatabaseServerAction extends AbstractRedbeamsStartAction<Redbe
     }
 
     @Override
-    protected Selectable createRequest(RedbeamsStartContext context) {
+    protected Selectable createRequest(RedbeamsContext context) {
         return new StartDatabaseServerRequest(context.getCloudContext(), context.getCloudCredential(),
             context.getDatabaseStack());
     }

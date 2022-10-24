@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.flow.redbeams.stop.actions;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,8 +18,8 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
-import com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopContext;
 import com.sequenceiq.redbeams.flow.redbeams.stop.RedbeamsStopEvent;
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerSuccess;
 import com.sequenceiq.redbeams.metrics.MetricType;
@@ -68,7 +68,7 @@ public class StopDatabaseServerFinishedActionTest {
 
     @Test
     public void shouldIncrementMetricOnCreateRequest() {
-        RedbeamsStopContext context = new RedbeamsStopContext(flowParameters, cloudContext, cloudCredential, databaseStack);
+        RedbeamsContext context = new RedbeamsContext(flowParameters, cloudContext, cloudCredential, databaseStack, dbStack);
 
         RedbeamsEvent redbeamsEvent = (RedbeamsEvent) victim.createRequest(context);
 

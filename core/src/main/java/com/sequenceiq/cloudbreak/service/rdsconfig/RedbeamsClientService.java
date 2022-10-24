@@ -101,7 +101,7 @@ public class RedbeamsClientService {
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> redbeamsServerEndpoint.upgrade(crn, request));
         } catch (WebApplicationException | ProcessingException e) {
-            String message = String.format("Failed to upgrade DatabaseServer with CRN %s to version %s", crn, request.getUpgradeTargetMajorVersion());
+            String message = String.format("Failed to upgrade DatabaseServer with CRN %s to version %s due to error: %s", crn, request.getUpgradeTargetMajorVersion(), e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }

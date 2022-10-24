@@ -395,7 +395,7 @@ public class FlowLogDBService implements FlowLogService {
         return new ArrayList<>();
     }
 
-    public Predicate<FlowLog> pendingFlowLogPredicate() {
+    private Predicate<FlowLog> pendingFlowLogPredicate() {
         return flowLog -> flowLog.getStateStatus().equals(StateStatus.PENDING) || !flowLog.getFinalized();
     }
 
