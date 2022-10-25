@@ -30,7 +30,7 @@ public interface ClusterStatusService {
 
     Optional<String> getClusterManagerVersion();
 
-    List<String> getActiveCommandsList();
+    List<ClusterManagerCommand> getActiveCommandsList();
 
     Optional<ClusterManagerCommand> findCommand(StackDtoDelegate stack, ClusterCommandType command);
 }
