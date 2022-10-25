@@ -1061,10 +1061,6 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     }
 
     public String findEnvironmentCrnByStackId(Long id) {
-        try {
-            return transactionService.required(() -> stackRepository.findEnvironmentCrnByStackId(id).orElseThrow(notFound("Stack", id)));
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
+        return stackRepository.findEnvironmentCrnByStackId(id).orElseThrow(notFound("Stack", id));
     }
 }

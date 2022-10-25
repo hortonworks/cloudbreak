@@ -123,8 +123,4 @@ public class StackUpdater {
         }
     }
 
-    public Stack  getStack(Long stackId) {
-        return stackService.get(stackId);
-    }
-
 }
