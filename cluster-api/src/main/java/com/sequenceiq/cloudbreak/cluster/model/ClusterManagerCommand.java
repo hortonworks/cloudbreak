@@ -86,4 +86,18 @@ public class ClusterManagerCommand {
     public void setRetryable(Boolean retryable) {
         this.retryable = retryable;
     }
+
+    @Override
+    public String toString() {
+        return "ClusterManagerCommand{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", startTime='" + startTime + '\'' +
+                ", endTime='" + endTime + '\'' +
+                ", active=" + active +
+                ", success=" + success +
+                ", resultMessage='" + resultMessage + '\'' +
+                ", retryable=" + retryable +
+                '}';
+    }
 }
