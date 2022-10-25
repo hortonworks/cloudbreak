@@ -67,7 +67,7 @@ class NameserverPillarDecoratorTest {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
                 .withDomain(DOMAIN)
-                .withNameServers(KERBEROS_NAMESERVER_1 + "," + KERBEROS_NAMESERVER_2)
+                .withNameServers(String.join(",", "null", KERBEROS_NAMESERVER_1, KERBEROS_NAMESERVER_2))
                 .build();
         underTest.decorateServicePillarWithNameservers(stackDto, kerberosConfig, servicePillar);
 
@@ -77,7 +77,23 @@ class NameserverPillarDecoratorTest {
         assertEquals(SERVICE_PATH, pillarProperties.getPath());
         assertTrue(nameservers.get(kerberosConfig.getDomain()).get(NAMESERVERS_KEY).contains(KERBEROS_NAMESERVER_1));
         assertTrue(nameservers.get(kerberosConfig.getDomain()).get(NAMESERVERS_KEY).contains(KERBEROS_NAMESERVER_2));
+        assertEquals(2, nameservers.get(kerberosConfig.getDomain()).get(NAMESERVERS_KEY).size());
         verifyNoInteractions(datalakeService);
+    }
+
+    @Test
+    void testShouldThrowExceptionThenKerberosNameserverIpListIsEmpty() {
+        Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
+                .withDomain(DOMAIN)
+                .withNameServers(String.join(",", "null", null))
+                .build();
+
+        Exception exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.decorateServicePillarWithNameservers(stackDto, kerberosConfig, servicePillar));
+
+        assertEquals("Unable to setup nameservers because there is no IP address present.", exception.getMessage());
+        assertTrue(servicePillar.isEmpty());
     }
 
     @Test
@@ -99,7 +115,7 @@ class NameserverPillarDecoratorTest {
     }
 
     @Test
-    void testShouldPopulateThePillarShouldThrowExceptionWhenDatalakeNameserverAddressIsNull() {
+    void testShouldThrowExceptionWhenDatalakeNameserverAddressIsNull() {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
 
         when(stackDto.getStack()).thenReturn(stack);
@@ -115,7 +131,7 @@ class NameserverPillarDecoratorTest {
     }
 
     @Test
-    void testShouldPopulateThePillarShouldNotPopulateServicePillarWhenKerberosTypeIsFreeipaAndKerberosNameserverIsMissing() {
+    void testShouldNotPopulateServicePillarWhenKerberosTypeIsFreeipaAndKerberosNameserverIsMissing() {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().withType(KerberosType.FREEIPA).build();
 
@@ -126,7 +142,7 @@ class NameserverPillarDecoratorTest {
     }
 
     @Test
-    void testShouldPopulateThePillarShouldNotPopulateServicePillarWhenKerberosSettingsAreMissingAndDatalakeIsNotPresent() {
+    void testShouldNotPopulateServicePillarWhenKerberosSettingsAreMissingAndDatalakeIsNotPresent() {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         when(stackDto.getStack()).thenReturn(stack);
         when(datalakeService.getDatalakeStackByDatahubStack(stack)).thenReturn(Optional.empty());
