@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.mock;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 
 @Service
@@ -33,23 +35,27 @@ public class MockNetworkConnector implements DefaultNetworkConnector {
 
     @Override
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest request) {
-        CreatedSubnet subnet1 = new CreatedSubnet();
-        CreatedSubnet subnet2 = new CreatedSubnet();
-        subnet1.setAvailabilityZone("europe-a");
-        subnet2.setAvailabilityZone("europe-b");
-        subnet1.setCidr("172.16.0.0/16");
-        subnet2.setCidr("172.17.0.0/16");
-        subnet2.setPublicSubnet(true);
-        subnet1.setSubnetId("1");
-        subnet2.setSubnetId("2");
-        subnet1.setType(PUBLIC);
-        subnet2.setType(PUBLIC);
+        Set<CreatedSubnet> subnets = new HashSet<>();
+        request.getPublicSubnets().forEach(s -> {
+            createAndAddSubnet(subnets, s);
+        });
+        request.getPrivateSubnets().forEach(s -> {
+            createAndAddSubnet(subnets, s);
+        });
 
-        CreatedCloudNetwork result = new CreatedCloudNetwork(request.getStackName(),
-                "mockedNetwork1",
-                Set.of(subnet1, subnet2));
+        return new CreatedCloudNetwork(request.getStackName(), "vpc1", subnets);
+    }
 
-        return result;
+    private void createAndAddSubnet(Set<CreatedSubnet> subnets, NetworkSubnetRequest subnetRequest) {
+        int index = subnets.size();
+        CreatedSubnet subnet = new CreatedSubnet();
+        subnet.setCidr(subnetRequest.getCidr());
+        subnet.setPublicSubnet(subnetRequest.getType() == PUBLIC);
+        subnet.setSubnetId(subnetRequest.getType().name().toLowerCase() + "_" + index);
+        subnet.setType(subnetRequest.getType());
+        int azCount = MockPlatformResources.LONDON_AVAILABILITY_ZONES.length;
+        subnet.setAvailabilityZone(MockPlatformResources.LONDON_AVAILABILITY_ZONES[index % azCount]);
+        subnets.add(subnet);
     }
 
     @Override
@@ -59,7 +65,7 @@ public class MockNetworkConnector implements DefaultNetworkConnector {
 
     @Override
     public NetworkCidr getNetworkCidr(Network network, CloudCredential credential) {
-        return  new NetworkCidr("172.16.0.0/16");
+        return new NetworkCidr("192.168.0.0/16");
     }
 
     @Override

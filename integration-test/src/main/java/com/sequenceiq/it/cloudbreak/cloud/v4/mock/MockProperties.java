@@ -20,6 +20,8 @@ public class MockProperties {
 
     private String vpcId;
 
+    private String networkCidr;
+
     private Set<String> subnetIds;
 
     private String publicKeyId;
@@ -72,6 +74,14 @@ public class MockProperties {
 
     public String getVpcId() {
         return vpcId;
+    }
+
+    public String getNetworkCidr() {
+        return networkCidr;
+    }
+
+    public void setNetworkCidr(String networkCidr) {
+        this.networkCidr = networkCidr;
     }
 
     public void setVpcId(String vpcId) {

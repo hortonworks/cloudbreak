@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -92,7 +93,7 @@ public class MockEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
     }
 
     private boolean isExistingNetworkSpecified(NetworkDto networkDto) {
-        return networkDto.getMock() != null && networkDto.getMock().getVpcId() != null;
+        return networkDto.getMock() != null && StringUtils.hasLength(networkDto.getMock().getVpcId());
     }
 
     @Override
