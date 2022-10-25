@@ -3,6 +3,7 @@
   "blueprint": {
     "cdhVersion": "7.2.14",
     "displayName": "streaming-analytics",
+    "blueprintUpgradeOption": "GA",
     "hostTemplates": [
       {
         "refName": "manager",
