@@ -36,7 +36,7 @@ public class UpgradeRdsFlowEventChainFactory implements FlowEventChainFactory<Rd
         flowEventChain.add(new ValidateRdsUpgradeTriggerRequest(ValidateRdsUpgradeEvent.VALIDATE_RDS_UPGRADE_EVENT.event(),
                 event.getResourceId(), event.getVersion(), event.accepted()));
         flowEventChain.add(new UpgradeRdsTriggerRequest(UpgradeRdsEvent.UPGRADE_RDS_EVENT.event(),
-                event.getResourceId(), event.getVersion(), event.getBackupLocation()));
+                event.getResourceId(), event.getVersion(), event.getBackupLocation(), event.getBackupInstanceProfile()));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,6 +29,8 @@ class BackupRdsDataHandlerTest {
 
     private static final String BACKUP_LOCATION = "abfs://abcd@efgh.dfs.core.windows.net";
 
+    private static final String BACKUP_INSTANCE_PROFILE = "BACKUP_INSTANCE_PROFILE";
+
     @Mock
     private UpgradeRdsService upgradeRdsService;
 
@@ -46,22 +47,23 @@ class BackupRdsDataHandlerTest {
 
     @Test
     void doAccept() throws CloudbreakOrchestratorException {
-        UpgradeRdsDataBackupRequest request = new UpgradeRdsDataBackupRequest(STACK_ID, TARGET_MAJOR_VERSION, BACKUP_LOCATION);
+        UpgradeRdsDataBackupRequest request = new UpgradeRdsDataBackupRequest(STACK_ID, TARGET_MAJOR_VERSION, BACKUP_LOCATION, BACKUP_INSTANCE_PROFILE);
         when(event.getData()).thenReturn(request);
 
         Selectable result = underTest.doAccept(event);
-        verify(upgradeRdsService).backupRds(STACK_ID, BACKUP_LOCATION);
+        verify(upgradeRdsService).backupRds(STACK_ID, BACKUP_LOCATION, BACKUP_INSTANCE_PROFILE);
         assertThat(result.selector()).isEqualTo("UPGRADERDSDATABACKUPRESULT");
     }
 
     @Test
     void orchestrationException() throws CloudbreakOrchestratorException {
-        UpgradeRdsDataBackupRequest request = new UpgradeRdsDataBackupRequest(STACK_ID, TARGET_MAJOR_VERSION, BACKUP_LOCATION);
+        UpgradeRdsDataBackupRequest request = new UpgradeRdsDataBackupRequest(STACK_ID, TARGET_MAJOR_VERSION, BACKUP_LOCATION, BACKUP_INSTANCE_PROFILE);
         when(event.getData()).thenReturn(request);
-        doThrow(new CloudbreakOrchestratorFailedException("salt error")).when(upgradeRdsService).backupRds(eq(STACK_ID), eq(BACKUP_LOCATION));
+        doThrow(new CloudbreakOrchestratorFailedException("salt error"))
+                .when(upgradeRdsService).backupRds(STACK_ID, BACKUP_LOCATION, BACKUP_INSTANCE_PROFILE);
 
         Selectable result = underTest.doAccept(event);
-        verify(upgradeRdsService).backupRds(STACK_ID, BACKUP_LOCATION);
+        verify(upgradeRdsService).backupRds(STACK_ID, BACKUP_LOCATION, BACKUP_INSTANCE_PROFILE);
         assertThat(result.selector()).isEqualTo("UPGRADERDSFAILEDEVENT");
         assertThat(result).isInstanceOf(UpgradeRdsFailedEvent.class);
         UpgradeRdsFailedEvent failedEvent = (UpgradeRdsFailedEvent) result;

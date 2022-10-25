@@ -210,6 +210,10 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
         return backup != null ? backup.getStorageLocation() : null;
     }
 
+    public String getBackupInstanceProfile() {
+        return backup != null ? backup.getInstanceProfile() : null;
+    }
+
     public void setBackup(BackupResponse backup) {
         this.backup = backup;
     }
