@@ -120,6 +120,6 @@ public class StackCcmUpgradeService {
     }
 
     public int getNotUpgradedStackCount(String envCrn) {
-        return stackService.getNotUpgradedStackCount(envCrn, Tunnel.latestUpgradeTarget());
+        return stackService.getNotUpgradedStackCount(envCrn, Tunnel.getUpgradables());
     }
 }
