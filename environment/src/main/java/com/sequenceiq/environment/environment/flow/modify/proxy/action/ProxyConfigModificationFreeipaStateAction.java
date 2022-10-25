@@ -33,7 +33,7 @@ public class ProxyConfigModificationFreeipaStateAction extends AbstractEnvProxyM
         LOGGER.info("Env proxy modification freeipa step started");
 
         EnvironmentDto environmentDto = environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload,
-                EnvironmentStatus.PROXY_CONFIG_MODIFICATION_IN_PROGRESS, ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_STARTED,
+                EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_FREEIPA_IN_PROGRESS, ResourceEvent.ENVIRONMENT_PROXY_CONFIG_MODIFICATION_ON_FREEIPA_STARTED,
                 EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_START_STATE);
 
         String selector = EnvProxyModificationHandlerSelectors.TRACK_FREEIPA_PROXY_MODIFICATION_EVENT.selector();

@@ -26,6 +26,7 @@ import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalSc
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents;
 import com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent;
+import com.sequenceiq.freeipa.flow.stack.modify.proxy.selector.ModifyProxyConfigEvent;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.update.UpdateUserDataEvents;
@@ -51,7 +52,8 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
             AwsVariantMigrationEvent.CREATE_RESOURCES_EVENT.event(),
             UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event(),
             UpgradeCcmStateSelector.UPGRADE_CCM_TRIGGER_EVENT.event(),
-            RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.event());
+            RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.event(),
+            ModifyProxyConfigEvent.MODIFY_PROXY_TRIGGER_EVENT.event());
 
     private static final List<Class<? extends FlowConfiguration<?>>> TERMINATION_FLOWS = List.of(StackTerminationFlowConfig.class);
 

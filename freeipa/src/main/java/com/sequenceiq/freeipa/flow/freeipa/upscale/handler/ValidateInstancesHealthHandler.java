@@ -20,15 +20,13 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
-import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.ValidateInstancesHealthEvent;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
-import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceHealthDetailsService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaSafeInstanceHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
@@ -43,7 +41,7 @@ public class ValidateInstancesHealthHandler extends ExceptionCatcherEventHandler
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private FreeIpaInstanceHealthDetailsService healthService;
+    private FreeIpaSafeInstanceHealthDetailsService healthService;
 
     @Inject
     private StackService stackService;
@@ -102,26 +100,10 @@ public class ValidateInstancesHealthHandler extends ExceptionCatcherEventHandler
         Stack stack = stackService.getStackById(event.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataService.getNotTerminatedByInstanceIds(stack.getId(), event.getInstanceIds());
-        List<NodeHealthDetails> healthDetails = instanceMetaDatas.stream().map(im -> getInstanceHealthDetails(stack, im)).collect(Collectors.toList());
+        List<NodeHealthDetails> healthDetails = instanceMetaDatas.stream()
+                .map(im -> healthService.getInstanceHealthDetails(stack, im))
+                .collect(Collectors.toList());
         LOGGER.info("Fetched healthdetails for instances {} - {}", event.getInstanceIds(), healthDetails);
         return healthDetails;
-    }
-
-    private NodeHealthDetails getInstanceHealthDetails(Stack stack, InstanceMetaData im) {
-        try {
-            return healthService.getInstanceHealthDetails(stack, im);
-        } catch (FreeIpaClientException e) {
-            return handleExceptionWhileFetchingHealth(im, e);
-        }
-    }
-
-    private NodeHealthDetails handleExceptionWhileFetchingHealth(InstanceMetaData im, FreeIpaClientException e) {
-        LOGGER.error("Couldn't get health information for {}", im, e);
-        NodeHealthDetails nodeHealthDetails = new NodeHealthDetails();
-        nodeHealthDetails.setName(im.getDiscoveryFQDN());
-        nodeHealthDetails.setInstanceId(im.getInstanceId());
-        nodeHealthDetails.setStatus(InstanceStatus.UNREACHABLE);
-        nodeHealthDetails.setIssues(List.of(e.getMessage()));
-        return nodeHealthDetails;
     }
 }

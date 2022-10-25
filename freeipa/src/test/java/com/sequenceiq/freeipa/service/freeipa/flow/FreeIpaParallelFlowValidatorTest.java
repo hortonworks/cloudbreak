@@ -50,6 +50,7 @@ import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalSc
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents;
 import com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent;
+import com.sequenceiq.freeipa.flow.stack.modify.proxy.selector.ModifyProxyConfigEvent;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent;
 import com.sequenceiq.freeipa.flow.stack.update.UpdateUserDataEvents;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector;
@@ -140,7 +141,7 @@ class FreeIpaParallelFlowValidatorTest {
     @Test
     public void testNewParallelFlows() {
         List<String> allowedParallelFlows = new FreeIpaFlowInformation().getAllowedParallelFlows();
-        assertEquals(16, allowedParallelFlows.size(),
+        assertEquals(17, allowedParallelFlows.size(),
                 "You have changed parallel flows for FreeIPA. Please make sure 'FreeIpaParallelFlowValidator' is adjusted if necessary");
         assertTrue(Set.of(
                         FreeIpaCleanupEvent.CLEANUP_EVENT.event(),
@@ -158,7 +159,8 @@ class FreeIpaParallelFlowValidatorTest {
                         AwsVariantMigrationEvent.CREATE_RESOURCES_EVENT.event(),
                         UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event(),
                         UpgradeCcmStateSelector.UPGRADE_CCM_TRIGGER_EVENT.event(),
-                        RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.event()).containsAll(allowedParallelFlows),
+                        RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.event(),
+                        ModifyProxyConfigEvent.MODIFY_PROXY_TRIGGER_EVENT.event()).containsAll(allowedParallelFlows),
                 "You have changed parallel flows for FreeIPA. Please make sure 'FreeIpaParallelFlowValidator' is adjusted if necessary");
     }
 }
