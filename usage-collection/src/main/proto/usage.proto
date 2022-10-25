@@ -455,6 +455,8 @@ message DatalakeBackupRestoreStatus {
     FAILED = 2;
     // Failed validations for a backup/restore operation.
     VALIDATION_FAILED = 3;
+    // Successful only validations for backup/restore operation.
+    VALIDATION_SUCCESSFUL = 4;
   }
 }
 
