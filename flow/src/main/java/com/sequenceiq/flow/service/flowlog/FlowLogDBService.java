@@ -316,7 +316,7 @@ public class FlowLogDBService implements FlowLogService {
         boolean running = false;
         if (lastFlowLog.isPresent()) {
             FlowLog flowLog = lastFlowLog.get();
-            running = flowLog.getFlowType().getClassValue().equals(flowConfigurationClass)
+            running = flowLog.getFlowType() != null && flowLog.getFlowType().getClassValue().equals(flowConfigurationClass)
                     && flowLog.getStateStatus() == StateStatus.PENDING;
         }
         return running;
