@@ -21,7 +21,7 @@ public class CredentialCreateAction implements Action<CredentialTestDto, Environ
         testDto.setResponse(
                 environmentClient.getDefaultClient()
                         .credentialV1Endpoint()
-                        .post(testDto.getRequest()));
+                        .create(testDto.getRequest()));
         Log.whenJson(LOGGER, " Credential created successfully:\n", testDto.getResponse());
         Log.when(LOGGER, format(" CRN: %s", testDto.getResponse().getCrn()));
 

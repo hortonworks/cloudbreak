@@ -78,7 +78,7 @@ public interface CredentialEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.CREATE, produces = MediaType.APPLICATION_JSON, notes = CredentialDescriptor.CREDENTIAL_NOTES,
             nickname = "createCredentialV1", httpMethod = "POST")
-    CredentialResponse post(@Valid CredentialRequest request);
+    CredentialResponse create(@Valid CredentialRequest request);
 
     @DELETE
     @Path("name/{name}")
@@ -106,7 +106,7 @@ public interface CredentialEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.PUT, produces = MediaType.APPLICATION_JSON, notes = CredentialDescriptor.CREDENTIAL_NOTES,
             nickname = "putCredentialV1", httpMethod = "PUT")
-    CredentialResponse put(@Valid EditCredentialRequest credentialRequest);
+    CredentialResponse modify(@Valid EditCredentialRequest credentialRequest);
 
     @POST
     @Path("interactive_login")
