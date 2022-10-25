@@ -33,6 +33,8 @@ public class SdxVerticalScaleAction implements Action<SdxInternalTestDto, SdxCli
             FlowIdentifier flowIdentifier = client.getDefaultClient().sdxEndpoint().verticalScalingByCrn(testDto.getCrn(), verticalScaleRequest);
             testDto.setFlow("SDX vertical scale", flowIdentifier);
             Log.whenJson(LOGGER, format(" SDX vertical scale started: %n"), testDto.getCrn());
+        } else {
+            Log.when(LOGGER, "SDX vertical scale is not supported by now for the following cloud provider: " + testContext.getCloudPlatform());
         }
         return testDto;
     }
