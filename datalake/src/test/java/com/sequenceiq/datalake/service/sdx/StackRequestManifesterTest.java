@@ -1,10 +1,13 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,12 +33,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
@@ -47,6 +52,10 @@ import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.model.CloudIdentityType;
+import com.sequenceiq.datalake.converter.DatabaseRequestConverter;
+import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
@@ -55,6 +64,8 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureRe
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class StackRequestManifesterTest {
@@ -115,6 +126,18 @@ public class StackRequestManifesterTest {
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
+    @Mock
+    private GatewayManifester gatewayManifester;
+
+    @Mock
+    private CloudStorageValidator cloudStorageValidator;
+
+    @Mock
+    private DatabaseRequestConverter databaseRequestConverter;
+
+    @Mock
+    private MultiAzDecorator multiAzDecorator;
+
     @InjectMocks
     private StackRequestManifester underTest;
 
@@ -122,6 +145,83 @@ public class StackRequestManifesterTest {
     public void setUp() {
         clusterV4Request = new ClusterV4Request();
         cloudStorage = new CloudStorageRequest();
+    }
+
+    @Test
+    public void testSetupStackRequestForCloudbreakWhenAWSNativeAndNotGovCloudThenVariantMustBeAwsNative() throws IOException {
+        SdxCluster sdxCluster = new SdxCluster();
+        StackV4Request stackV4Request = new StackV4Request();
+        stackV4Request.setCluster(null);
+        stackV4Request.setVariant("AWS_NATIVE");
+        stackV4Request.setInstanceGroups(new ArrayList<>());
+
+        sdxCluster.setStackRequest(stackV4Request);
+        sdxCluster.setClusterName("sdxName");
+        sdxCluster.setEnvCrn("envcrn");
+        sdxCluster.setEnableMultiAz(true);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        EnvironmentAuthenticationResponse environmentAuthenticationResponse = new EnvironmentAuthenticationResponse();
+        environmentAuthenticationResponse.setLoginUserName("cb");
+        environmentAuthenticationResponse.setPublicKey("pubkey");
+        detailedEnvironmentResponse.setAuthentication(environmentAuthenticationResponse);
+        detailedEnvironmentResponse.setSecurityAccess(null);
+        detailedEnvironmentResponse.setTags(new TagResponse());
+        detailedEnvironmentResponse.setCloudPlatform("AWS");
+        detailedEnvironmentResponse.setTelemetry(null);
+        CredentialResponse credentialResponse = new CredentialResponse();
+        credentialResponse.setGovCloud(false);
+        detailedEnvironmentResponse.setCredential(credentialResponse);
+
+        when(gatewayManifester.configureGatewayForSdxCluster(any())).thenReturn(stackV4Request);
+        doNothing().when(cloudStorageValidator).validate(any(), any(), any());
+        when(entitlementService.awsNativeDataLakeEnabled(any())).thenReturn(true);
+        when(databaseRequestConverter.createExternalDbRequest(sdxCluster)).thenReturn(new DatabaseRequest());
+        doNothing().when(multiAzDecorator).decorateStackRequestWithAwsNative(any(), any());
+        doNothing().when(multiAzDecorator).decorateStackRequestWithMultiAz(any(), any(), any());
+
+        underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse);
+
+        String variant = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class).getVariant();
+        assertThat(variant).isEqualTo("AWS_NATIVE");
+    }
+
+    @Test
+    public void testSetupStackRequestForCloudbreakWhenAWSNativeAndNotGovCloudThenVariantMustBeAwsGovNative() throws IOException {
+        SdxCluster sdxCluster = new SdxCluster();
+        StackV4Request stackV4Request = new StackV4Request();
+        stackV4Request.setCluster(null);
+        stackV4Request.setVariant("AWS_NATIVE");
+        stackV4Request.setInstanceGroups(new ArrayList<>());
+
+        sdxCluster.setStackRequest(stackV4Request);
+        sdxCluster.setClusterName("sdxName");
+        sdxCluster.setEnvCrn("envcrn");
+        sdxCluster.setEnableMultiAz(true);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        EnvironmentAuthenticationResponse environmentAuthenticationResponse = new EnvironmentAuthenticationResponse();
+        environmentAuthenticationResponse.setLoginUserName("cb");
+        environmentAuthenticationResponse.setPublicKey("pubkey");
+        detailedEnvironmentResponse.setAuthentication(environmentAuthenticationResponse);
+        detailedEnvironmentResponse.setSecurityAccess(null);
+        detailedEnvironmentResponse.setTags(new TagResponse());
+        detailedEnvironmentResponse.setCloudPlatform("AWS");
+        detailedEnvironmentResponse.setTelemetry(null);
+        detailedEnvironmentResponse.setAccountId("accountId");
+        CredentialResponse credentialResponse = new CredentialResponse();
+        credentialResponse.setGovCloud(true);
+        detailedEnvironmentResponse.setCredential(credentialResponse);
+
+        when(gatewayManifester.configureGatewayForSdxCluster(any())).thenReturn(stackV4Request);
+        doNothing().when(cloudStorageValidator).validate(any(), any(), any());
+        when(entitlementService.awsNativeDataLakeEnabled(any())).thenReturn(true);
+        when(databaseRequestConverter.createExternalDbRequest(sdxCluster)).thenReturn(new DatabaseRequest());
+        doNothing().when(multiAzDecorator).decorateStackRequestWithAwsNative(any(), any());
+        doNothing().when(multiAzDecorator).decorateStackRequestWithMultiAz(any(), any(), any());
+
+        underTest.configureStackForSdxCluster(sdxCluster, detailedEnvironmentResponse);
+
+        String variant = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class).getVariant();
+        assertThat(variant).isEqualTo("AWS_NATIVE_GOV");
     }
 
     @Test
