@@ -35,6 +35,9 @@ public class FreeIpaPollerService {
     @Value("${env.upgradeccm.freeipa.polling.attempt:60}")
     private Integer upgradeccmAttempt;
 
+    @Value("${env.modifyproxy.freeipa.polling.attempt:60}")
+    private Integer modifyProxyAttempt;
+
     @Value("${env.verticalscale.freeipa.polling.attempt:60}")
     private Integer verticalscaleAttempt;
 
@@ -43,6 +46,9 @@ public class FreeIpaPollerService {
 
     @Value("${env.upgradeccm.freeipa.polling.sleeptime:20}")
     private Integer upgradeccmSleeptime;
+
+    @Value("${env.modifyproxy.freeipa.polling.sleeptime:20}")
+    private Integer modifyProxySleeptime;
 
     @Value("${env.verticalscale.freeipa.polling.sleeptime:30}")
     private Integer verticalscaleSleeptime;
@@ -78,8 +84,23 @@ public class FreeIpaPollerService {
                         .waitPeriodly(upgradeccmSleeptime, TimeUnit.SECONDS)
                         .run(() -> freeipaPollerProvider.upgradeCcmPoller(envId, envCrn, status.getOperationId()));
             } catch (PollerStoppedException e) {
-                LOGGER.info("FreeIPA Upgrade CCM timed out or error happened.", e);
+                LOGGER.warn("FreeIPA Upgrade CCM timed out or error happened.", e);
                 throw new FreeIpaOperationFailedException("FreeIPA upgrade of Cluster Connectivity Manager timed out or error happened: " + e.getMessage());
+            }
+        }
+    }
+
+    public void waitForModifyProxyConfig(Long envId, String envCrn) {
+        OperationStatus status = freeIpaService.modifyProxyConfig(envCrn);
+        if (status.getStatus() != OperationState.COMPLETED) {
+            try {
+                Polling.stopAfterAttempt(modifyProxyAttempt)
+                        .stopIfException(true)
+                        .waitPeriodly(modifyProxySleeptime, TimeUnit.SECONDS)
+                        .run(() -> freeipaPollerProvider.modifyProxyConfigPoller(envId, envCrn, status.getOperationId()));
+            } catch (PollerStoppedException e) {
+                LOGGER.warn("FreeIPA modify proxy config timed out or error happened.", e);
+                throw new FreeIpaOperationFailedException("FreeIPA proxy config modification timed out or error happened: " + e.getMessage());
             }
         }
     }
@@ -93,7 +114,7 @@ public class FreeIpaPollerService {
                         .waitPeriodly(verticalscaleSleeptime, TimeUnit.SECONDS)
                         .run(() -> freeipaPollerProvider.verticalScalePoller(envId, envCrn, response.getFlowIdentifier().getPollableId()));
             } catch (PollerStoppedException e) {
-                LOGGER.info("FreeIPA Vertical Scale timed out or error happened.", e);
+                LOGGER.warn("FreeIPA Vertical Scale timed out or error happened.", e);
                 throw new FreeIpaOperationFailedException("FreeIPA Vertical Scale timed out or error happened: " + e.getMessage());
             }
         }
@@ -111,7 +132,7 @@ public class FreeIpaPollerService {
                         .waitPeriodly(startStopSleeptime, TimeUnit.SECONDS)
                         .run(attemptMaker);
             } catch (PollerStoppedException e) {
-                LOGGER.info("Error while sending resource definition request", e);
+                LOGGER.warn("Error while sending resource definition request", e);
                 throw new FreeIpaOperationFailedException("FreeIPA operation is timed out", e);
             }
         }
@@ -130,7 +151,7 @@ public class FreeIpaPollerService {
                         .waitPeriodly(startStopSleeptime, TimeUnit.SECONDS)
                         .run(attemptMaker.apply(status.getOperationId()));
             } catch (PollerStoppedException e) {
-                LOGGER.info("FreeIPA syncing timed out", e);
+                LOGGER.warn("FreeIPA syncing timed out", e);
                 throw new FreeIpaOperationFailedException("FreeIPA syncing timed out");
             }
         }

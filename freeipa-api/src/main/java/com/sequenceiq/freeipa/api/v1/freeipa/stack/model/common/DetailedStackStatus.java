@@ -83,7 +83,11 @@ public enum DetailedStackStatus {
     // CCM upgrade statuses
     UPGRADE_CCM_REQUESTED(Status.UPGRADE_CCM_REQUESTED, AvailabilityStatus.AVAILABLE),
     UPGRADE_CCM_IN_PROGRESS(Status.UPGRADE_CCM_IN_PROGRESS, AvailabilityStatus.AVAILABLE),
-    UPGRADE_CCM_FAILED(Status.UPGRADE_CCM_FAILED, AvailabilityStatus.UNAVAILABLE);
+    UPGRADE_CCM_FAILED(Status.UPGRADE_CCM_FAILED, AvailabilityStatus.UNAVAILABLE),
+    // Modify proxy config statuses
+    MODIFY_PROXY_CONFIG_REQUESTED(Status.MODIFY_PROXY_CONFIG_REQUESTED, AvailabilityStatus.AVAILABLE),
+    MODIFY_PROXY_CONFIG_IN_PROGRESS(Status.MODIFY_PROXY_CONFIG_IN_PROGRESS, AvailabilityStatus.AVAILABLE),
+    MODIFY_PROXY_CONFIG_FAILED(Status.MODIFY_PROXY_CONFIG_FAILED, AvailabilityStatus.AVAILABLE);
 
     public static final Collection<DetailedStackStatus> AVAILABLE_STATUSES;
 

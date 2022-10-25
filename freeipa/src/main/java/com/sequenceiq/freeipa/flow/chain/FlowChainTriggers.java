@@ -9,6 +9,8 @@ public class FlowChainTriggers {
 
     public static final String UPGRADE_CCM_CHAIN_TRIGGER_EVENT = "UPGRADE_CCM_CHAIN_TRIGGER_EVENT";
 
+    public static final String MODIFY_PROXY_CHAIN_TRIGGER_EVENT = "MODIFY_PROXY_CHAIN_TRIGGER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

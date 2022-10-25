@@ -297,6 +297,16 @@ public interface FreeIpaV1Endpoint {
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
             @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
+    @PUT
+    @Path("/internal/modify_proxy")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.INTERNAL_MODIFY_PROXY_BY_ENV_ID, produces = MediaType.APPLICATION_JSON,
+            notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "internalModifyProxyConfigByEnvironmentV1")
+    OperationStatus modifyProxyConfigInternal(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
+            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+
     @GET
     @Path("get_recommendation")
     @Produces(MediaType.APPLICATION_JSON)

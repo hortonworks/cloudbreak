@@ -106,6 +106,8 @@ public enum EnvironmentStatus {
     VERTICAL_SCALE_FAILED("Vertical Scale failed"),
 
     PROXY_CONFIG_MODIFICATION_IN_PROGRESS("Starting proxy configuration modification"),
+    PROXY_CONFIG_MODIFICATION_ON_FREEIPA_IN_PROGRESS("Modifying proxy configuration on FreeIPA"),
+    PROXY_CONFIG_MODIFICATION_ON_FREEIPA_FAILED("Failed to modify proxy configuration on FreeIPA"),
     PROXY_CONFIG_MODIFICATION_FAILED("Proxy configuration modification failed");
 
     private static final Set<EnvironmentStatus> STARTABLE_STATUSES = Set.of(

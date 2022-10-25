@@ -6,6 +6,8 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_D
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_UNHEALTHY;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_UNREACHABLE;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_FREEIPA_FAILED;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_FREEIPA_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.START_FREEIPA_FAILED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.START_FREEIPA_STARTED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.START_SYNCHRONIZE_USERS_STARTED;
@@ -23,6 +25,9 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DE
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DIAGNOSTICS_COLLECTION_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DOWNSCALE_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MAINTENANCE_MODE_ENABLED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MODIFY_PROXY_CONFIG_FAILED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MODIFY_PROXY_CONFIG_IN_PROGRESS;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MODIFY_PROXY_CONFIG_REQUESTED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REPAIR_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REQUESTED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STACK_AVAILABLE;
@@ -90,6 +95,9 @@ public class EnvironmentSyncService {
             Map.entry(DELETED_ON_PROVIDER_SIDE, FREEIPA_DELETED_ON_PROVIDER_SIDE),
             Map.entry(UPGRADE_CCM_REQUESTED, UPGRADE_CCM_ON_FREEIPA_IN_PROGRESS),
             Map.entry(UPGRADE_CCM_IN_PROGRESS, UPGRADE_CCM_ON_FREEIPA_IN_PROGRESS),
+            Map.entry(MODIFY_PROXY_CONFIG_REQUESTED, PROXY_CONFIG_MODIFICATION_ON_FREEIPA_IN_PROGRESS),
+            Map.entry(MODIFY_PROXY_CONFIG_IN_PROGRESS, PROXY_CONFIG_MODIFICATION_ON_FREEIPA_IN_PROGRESS),
+            Map.entry(MODIFY_PROXY_CONFIG_FAILED, PROXY_CONFIG_MODIFICATION_ON_FREEIPA_FAILED),
             Map.entry(UPGRADE_CCM_FAILED, EnvironmentStatus.AVAILABLE),
             Map.entry(UNREACHABLE, FREEIPA_UNREACHABLE),
             Map.entry(UNHEALTHY, FREEIPA_UNHEALTHY),
