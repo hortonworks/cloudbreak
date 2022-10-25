@@ -38,6 +38,8 @@ import org.mockito.quality.Strictness;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.util.Pair;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.CreateVolumeRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
 import com.amazonaws.services.ec2.model.DescribeVolumesResult;
@@ -367,7 +369,51 @@ class AwsVolumeResourceBuilderTest {
         VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
         when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
                 .thenReturn(Pair.of(List.of(VOLUME_ID), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
-        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult());
+        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult(VolumeState.InUse));
+        when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
+        when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
+        when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.TRUE);
+
+        underTest.delete(awsContext, authenticatedContext, cloudResource);
+
+        verify(amazonEC2Client).modifyInstanceAttribute(modifyInstanceAttributeRequestCaptor.capture());
+        ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = modifyInstanceAttributeRequestCaptor.getValue();
+
+        assertTrue(modifyInstanceAttributeRequest.getBlockDeviceMappings().get(0).getEbs().getDeleteOnTermination());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void deleteTurnOnDeleteOnterminationEvenIfOneOfTheVolumesAreDetached() throws PreserveResourceException {
+        CloudResource cloudResource = mock(CloudResource.class);
+        VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
+
+        when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
+                .thenReturn(Pair.of(List.of(VOLUME_ID), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
+        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult(VolumeState.Available));
+        when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
+        when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
+        when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.TRUE);
+
+        underTest.delete(awsContext, authenticatedContext, cloudResource);
+
+        verify(amazonEC2Client).modifyInstanceAttribute(modifyInstanceAttributeRequestCaptor.capture());
+        ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = modifyInstanceAttributeRequestCaptor.getValue();
+
+        assertTrue(modifyInstanceAttributeRequest.getBlockDeviceMappings().get(0).getEbs().getDeleteOnTermination());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void deleteTurnOnDeleteOnterminationEvenIfOneOfTheVolumesAreDeleted() throws PreserveResourceException {
+        CloudResource cloudResource = mock(CloudResource.class);
+        VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
+
+        when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
+                .thenReturn(Pair.of(List.of(VOLUME_ID), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
+        AmazonServiceException deleted = new AmazonEC2Exception("");
+        deleted.setErrorCode("InvalidVolume.NotFound");
+        when(amazonEC2Client.describeVolumes(any())).thenThrow(deleted);
         when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
         when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
         when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.TRUE);
@@ -387,7 +433,7 @@ class AwsVolumeResourceBuilderTest {
         VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
         when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
                 .thenReturn(Pair.of(List.of(VOLUME_ID), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
-        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult());
+        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult(VolumeState.InUse));
         when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
         when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
         when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.FALSE);
@@ -407,7 +453,7 @@ class AwsVolumeResourceBuilderTest {
         VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
         when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
                 .thenReturn(Pair.of(List.of(VOLUME_ID), List.of()));
-        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult());
+        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult(VolumeState.InUse));
         when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
         when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
         when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.FALSE);
@@ -467,9 +513,9 @@ class AwsVolumeResourceBuilderTest {
         return new CreateVolumeResult().withVolume(new com.amazonaws.services.ec2.model.Volume().withVolumeId(VOLUME_ID));
     }
 
-    private DescribeVolumesResult describeVolumesResult() {
+    private DescribeVolumesResult describeVolumesResult(VolumeState state) {
         com.amazonaws.services.ec2.model.Volume volume = new com.amazonaws.services.ec2.model.Volume();
-        volume.setState(VolumeState.InUse);
+        volume.setState(state);
         return new DescribeVolumesResult().withVolumes(List.of(volume));
     }
 
