@@ -18,6 +18,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseReque
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.assertion.util.CloudProviderSideTagAssertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -29,6 +30,7 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -70,6 +72,12 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
     private static final String UPGRADED_DATALAKE_INSTANCE_TYPE = "m5.4xlarge";
 
     private static final String UPGRADED_DATAHUB_INSTANCE_TYPE = "m5.4xlarge";
+
+    private static final String FREEIPA_VERTICAL_SCALE_KEY = "freeipaVerticalScaleKey";
+
+    private static final String SDX_VERTICAL_SCALE_KEY = "sdxVerticalScaleKey";
+
+    private static final String DISTROX_VERTICAL_SCALE_KEY = "distroxVerticalScaleKey";
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -120,10 +128,6 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
         String filePath = "/pre-service-deployment";
         String fileName = "pre-service-deployment";
 
-        String freeipaVerticalScaleKey = "freeipaVerticalScaleKey";
-        String sdxVerticalScaleKey = "sdxVerticalScaleKey";
-        String distroxVerticalScaleKey = "distroxVerticalScaleKey";
-
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
@@ -171,30 +175,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .when(environmentTestClient.stop())
                 .await(EnvironmentStatus.ENV_STOPPED)
 
-                .given(freeipaVerticalScaleKey, VerticalScalingTestDto.class)
-                .withFreeipaVerticalScale()
-                .withGroup(TARGET_INSTANCE_GROUP_TYPE)
-                .withInstanceType(UPGRADED_FREEIPA_INSTANCE_TYPE)
-                .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.verticalScale(freeipaVerticalScaleKey))
-                .await(EnvironmentStatus.ENV_STOPPED)
-
-                .given(sdxVerticalScaleKey, VerticalScalingTestDto.class)
-                .withSdxVerticalScale()
-                .withGroup(TARGET_INSTANCE_GROUP_TYPE)
-                .withInstanceType(UPGRADED_DATALAKE_INSTANCE_TYPE)
-                .given(SdxInternalTestDto.class)
-                .when(sdxTestClient.verticalScale(sdxVerticalScaleKey))
-                .await(SdxClusterStatusResponse.STOPPED)
-
-                .given(distroxVerticalScaleKey, VerticalScalingTestDto.class)
-                .withDistroXVerticalScale()
-                .withInstanceType(UPGRADED_DATAHUB_INSTANCE_TYPE)
-                .withGroup(TARGET_INSTANCE_GROUP_TYPE)
-
-                .given("dx1", DistroXTestDto.class)
-                .when(distroXTestClient.verticalScale(distroxVerticalScaleKey))
-                .await(STACK_STOPPED, RunningParameter.key("dx1"))
+                .when(this::executeVerticalScaleIfSupported)
 
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.start())
@@ -204,20 +185,65 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .awaitForHealthyInstances()
                 .then(this::verifyCmServicesStartedSuccessfully)
 
-                // vertical scale validation start:
-                .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
-                .then(this::validateFreeIpaInstanceType)
-                .given(SdxInternalTestDto.class)
-                .when(sdxTestClient.detailedDescribeInternal())
-                .then(this::validateDataLakeInstanceType)
-                .given("dx1", DistroXTestDto.class)
-                .when(distroXTestClient.get())
-                .then(this::validateDataHubInstanceType)
-
+                .then(this::verifyVerticalScaleOutputsIfSupported)
                 .validate();
 
         LOGGER.info("Environment stop-start test execution has been finished....");
+    }
+
+    private <O extends CloudbreakTestDto, C extends MicroserviceClient<?, ?, ?, ?>> O executeVerticalScaleIfSupported(TestContext testContext, O testDto,
+            C client) {
+        if (testContext.getCloudProvider().verticalScalingSupported()) {
+            testContext
+                    .given(FREEIPA_VERTICAL_SCALE_KEY, VerticalScalingTestDto.class)
+                    .withFreeipaVerticalScale()
+                    .withGroup(TARGET_INSTANCE_GROUP_TYPE)
+                    .withInstanceType(UPGRADED_FREEIPA_INSTANCE_TYPE)
+                    .given(EnvironmentTestDto.class)
+                    .when(environmentTestClient.verticalScale(FREEIPA_VERTICAL_SCALE_KEY))
+                    .await(EnvironmentStatus.ENV_STOPPED)
+
+                    .given(SDX_VERTICAL_SCALE_KEY, VerticalScalingTestDto.class)
+                    .withSdxVerticalScale()
+                    .withGroup(TARGET_INSTANCE_GROUP_TYPE)
+                    .withInstanceType(UPGRADED_DATALAKE_INSTANCE_TYPE)
+                    .given(SdxInternalTestDto.class)
+                    .when(sdxTestClient.verticalScale(SDX_VERTICAL_SCALE_KEY))
+                    .await(SdxClusterStatusResponse.STOPPED)
+
+                    .given(DISTROX_VERTICAL_SCALE_KEY, VerticalScalingTestDto.class)
+                    .withDistroXVerticalScale()
+                    .withInstanceType(UPGRADED_DATAHUB_INSTANCE_TYPE)
+                    .withGroup(TARGET_INSTANCE_GROUP_TYPE)
+                    .given("dx1", DistroXTestDto.class)
+                    .when(distroXTestClient.verticalScale(DISTROX_VERTICAL_SCALE_KEY))
+                    .await(STACK_STOPPED, RunningParameter.key("dx1"));
+        } else {
+            LOGGER.debug("No vertical scale will happen this case because at this point Cloudbreak does not support vertical scale in case of the following " +
+                    "cloud platform: {}", testContext.getCloudPlatform());
+        }
+        return testDto;
+    }
+
+    private DistroXTestDto verifyVerticalScaleOutputsIfSupported(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
+        if (testContext.getCloudProvider().verticalScalingSupported()) {
+            LOGGER.debug("Vertical scaling verification result initiated since the cloud platform \'{}\' suppots such operation.",
+                    testContext.getCloudPlatform());
+            testContext
+                    .given(FreeIpaTestDto.class)
+                    .when(freeIpaTestClient.describe())
+                    .then(this::validateFreeIpaInstanceType)
+                    .given(SdxInternalTestDto.class)
+                    .when(sdxTestClient.detailedDescribeInternal())
+                    .then(this::validateDataLakeInstanceType)
+                    .given("dx1", DistroXTestDto.class)
+                    .when(distroXTestClient.get())
+                    .then(this::validateDataHubInstanceType);
+        } else {
+            LOGGER.debug("Since Cloudbreak right now does not support vertical scaling for cloud platform {}, hence no need for verification.",
+                    testContext.getCloudPlatform());
+        }
+        return testDto;
     }
 
     private DistroXTestDto verifyCmServicesStartedSuccessfully(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
