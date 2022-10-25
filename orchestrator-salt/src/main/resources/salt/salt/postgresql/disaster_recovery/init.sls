@@ -26,13 +26,6 @@
     - source: salt://postgresql/disaster_recovery/scripts/backup_and_restore_dh.sh
     - template: jinja
 
-/opt/salt/scripts/get_backup_data_sizes.sh:
-  file.managed:
-    - makedirs: True
-    - mode: 750
-    - source: salt://postgresql/disaster_recovery/scripts/get_backup_data_sizes.sh
-    - template: jinja
-
 /opt/salt/postgresql/.pgpass:
   file.managed:
     - makedirs: True
