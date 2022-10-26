@@ -25,6 +25,13 @@ public class CrnValidator extends AbstractCrnValidator<String> {
                 : isCrnAmongDenied(requestCrn);
     }
 
+    public boolean methodWithNoCoverage(String req, ValidCrn.Effect effect) {
+        Crn requestCrn = Crn.fromString(req);
+        return ValidCrn.Effect.ACCEPT.equals(effect)
+                ? isCrnNotInAllowed(requestCrn)
+                : isCrnAmongDenied(requestCrn);
+    }
+
     @Override
     protected String getInvalidCrnErrorMessage(String req) {
         return String.format("Invalid Crn was provided. '%s' does not match the Crn pattern", req);
