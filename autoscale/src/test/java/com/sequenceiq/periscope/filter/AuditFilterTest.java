@@ -27,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.logger.MDCContextFilter;
 import com.sequenceiq.periscope.service.AuditService;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,32 +58,42 @@ public class AuditFilterTest {
 
     @Test
     public void testDoFilterInternalWhenAuditAndMutating() throws Exception {
+        CloudbreakUser user = new CloudbreakUser("userid", "usercrn", "username", "useremail", "usertenant");
         when(authenticatedUserService.getCbUser(any(HttpServletRequest.class)))
-                .thenReturn(new CloudbreakUser("userid", "usercrn", "username", "useremail", "usertenant"));
+                .thenReturn(user);
         when(request.getRequestURI()).thenReturn("/as/api/v1/distrox/crn/testcrn/autoscale_config");
         when(request.getMethod()).thenReturn("POST");
         when(request.getHeader("x-real-ip")).thenReturn("127.0.0.1");
         when(request.getHeader("user-agent")).thenReturn("test-user-agent");
+        when(request.getHeader(MDCContextFilter.REQUEST_ID_HEADER)).thenReturn("requestId");
 
         underTest.doFilterInternal(request, response, filterChain);
 
-        verify(auditService, times(1)).auditRestApi(eq(Map.of("uri", "/as/api/v1/distrox/crn/testcrn/autoscale_config")), eq(true), eq("test-user-agent"),
-                eq("usercrn"), eq("usertenant"), eq("127.0.0.1"));
+        Map<String, Object> requestParameters = Map.of(
+                "method", "POST",
+                "uri", "/as/api/v1/distrox/crn/testcrn/autoscale_config");
+        verify(auditService, times(1)).auditRestApi(eq(requestParameters), eq(true), eq("test-user-agent"),
+                eq(user), eq("requestId"), eq("127.0.0.1"));
     }
 
     @Test
     public void testDoFilterInternalWhenAuditAndNotMutating() throws Exception {
+        CloudbreakUser user = new CloudbreakUser("userid", "usercrn", "username", "useremail", "usertenant");
         when(authenticatedUserService.getCbUser(any(HttpServletRequest.class)))
-                .thenReturn(new CloudbreakUser("userid", "usercrn", "username", "useremail", "usertenant"));
+                .thenReturn(user);
         when(request.getRequestURI()).thenReturn("/as/api/v1/distrox/crn/testcrn/autoscale_config");
         when(request.getMethod()).thenReturn("GET");
         when(request.getHeader("x-real-ip")).thenReturn("127.0.0.1");
         when(request.getHeader("user-agent")).thenReturn("test-user-agent");
+        when(request.getHeader(MDCContextFilter.REQUEST_ID_HEADER)).thenReturn("requestId");
 
         underTest.doFilterInternal(request, response, filterChain);
 
-        verify(auditService, times(1)).auditRestApi(eq(Map.of("uri", "/as/api/v1/distrox/crn/testcrn/autoscale_config")), eq(false), eq("test-user-agent"),
-                eq("usercrn"), eq("usertenant"), eq("127.0.0.1"));
+        Map<String, Object> requestParameters = Map.of(
+                "method", "GET",
+                "uri", "/as/api/v1/distrox/crn/testcrn/autoscale_config");
+        verify(auditService, times(1)).auditRestApi(eq(requestParameters), eq(false), eq("test-user-agent"),
+                eq(user), eq("requestId"), eq("127.0.0.1"));
     }
 
     @Test
