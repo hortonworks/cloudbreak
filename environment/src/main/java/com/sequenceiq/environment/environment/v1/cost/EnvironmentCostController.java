@@ -1,9 +1,5 @@
 package com.sequenceiq.environment.environment.v1.cost;
 
-import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
-
-import java.util.List;
-
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
@@ -18,9 +14,7 @@ import com.sequenceiq.cloudbreak.common.cost.EnvironmentRealTimeCostResponse;
 import com.sequenceiq.cloudbreak.cost.CostCalculationNotEnabledException;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentCostV1Endpoint;
-import com.sequenceiq.environment.authorization.EnvironmentFiltering;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.cost.EnvironmentCostService;
 
 @Controller
@@ -29,9 +23,6 @@ import com.sequenceiq.environment.environment.service.cost.EnvironmentCostServic
 public class EnvironmentCostController implements EnvironmentCostV1Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentCostController.class);
-
-    @Inject
-    private EnvironmentFiltering environmentFiltering;
 
     @Inject
     private EnvironmentCostService environmentCostService;
@@ -43,8 +34,7 @@ public class EnvironmentCostController implements EnvironmentCostV1Endpoint {
     @FilterListBasedOnPermissions
     public EnvironmentRealTimeCostResponse list() {
         checkIfCostCalculationIsEnabled();
-        List<EnvironmentDto> environmentDtos = environmentFiltering.filterEnvironments(DESCRIBE_ENVIRONMENT);
-        return new EnvironmentRealTimeCostResponse(environmentCostService.getCosts(environmentDtos));
+        return new EnvironmentRealTimeCostResponse(environmentCostService.getCosts());
     }
 
     private void checkIfCostCalculationIsEnabled() {
