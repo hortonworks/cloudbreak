@@ -42,9 +42,6 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.id= :id ")
     Optional<Stack> findOneWithLists(@Param("id") Long id);
 
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.resourceCrn = :resourceCrn")
-    Optional<Stack> findOneWithListsByResourceCrn(@Param("resourceCrn") String resourceCrn);
-
     @Query("SELECT s FROM Stack s "
             + "LEFT JOIN FETCH s.instanceGroups ig "
             + "LEFT JOIN FETCH ig.instanceMetaData "

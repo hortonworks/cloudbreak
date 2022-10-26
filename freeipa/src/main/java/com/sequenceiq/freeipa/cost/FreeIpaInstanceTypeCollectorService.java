@@ -53,8 +53,9 @@ public class FreeIpaInstanceTypeCollectorService {
     @Inject
     private ClouderaCostCache clouderaCostCache;
 
-    public ClusterCostDto getAllInstanceTypesByCrn(String crn) {
-        Optional<Stack> stackViewDelegate = stackRepository.findOneWithListsByResourceCrn(crn);
+    public ClusterCostDto getAllInstanceTypesByCrn(String environmentCrn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        Optional<Stack> stackViewDelegate = stackRepository.findByEnvironmentCrnAndAccountIdWithList(environmentCrn, accountId);
         String region = stackViewDelegate.get().getRegion();
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(stackViewDelegate.get().getCloudPlatform());
         Credential credential = credentialService.getCredentialByEnvCrn(stackViewDelegate.get().getEnvironmentCrn());

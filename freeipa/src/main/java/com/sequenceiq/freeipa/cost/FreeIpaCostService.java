@@ -39,7 +39,7 @@ public class FreeIpaCostService {
 
         if (usdCalculationEnabled || co2CalculationEnabled) {
             for (ListFreeIpaResponse stack : responses) {
-                ClusterCostDto clusterCost = instanceTypeCollectorService.getAllInstanceTypesByCrn(stack.getCrn());
+                ClusterCostDto clusterCost = instanceTypeCollectorService.getAllInstanceTypesByCrn(stack.getEnvironmentCrn());
                 RealTimeCost realTimeCost = new RealTimeCost();
                 realTimeCost.setEnvCrn(stack.getEnvironmentCrn());
                 realTimeCost.setType("FREEIPA");
