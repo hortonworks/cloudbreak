@@ -37,7 +37,7 @@ dependencies {
   implementation (group: 'com.microsoft.azure',         name: 'azure-mgmt-sql',             version: azureSdkVersion) { exclude group: 'org.slf4j' }
   implementation (group: 'com.microsoft.azure.privatedns.v2018_09_01',         name: 'azure-mgmt-privatedns',             version: '1.0.0-beta') { exclude group: 'org.slf4j' }
   implementation group: 'com.microsoft.azure',         name: 'azure-storage',              version: azureStorageSdkVersion
-  implementation (group: 'com.fasterxml.jackson.core', name: 'jackson-databind',           version: jacksonVersion) {
+  implementation (group: 'com.fasterxml.jackson.core', name: 'jackson-databind',           version: jacksonDatabindVersion) {
     force = true
   }
   implementation 'com.microsoft.azure.marketplaceordering.v2015_06_01:azure-mgmt-marketplaceordering:1.0.0-beta'

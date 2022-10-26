@@ -16,7 +16,7 @@ jar {
 }
 
 dependencies {
-  implementation group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonDatabindVersion
   api group: 'javax.validation',                      name: 'validation-api',                 version: javaxValidationVersion
   api group: 'org.apache.commons',                    name: 'commons-lang3',                  version: apacheCommonsLangVersion
 

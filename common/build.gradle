@@ -36,7 +36,7 @@ dependencies {
   api group: 'com.google.code.gson',                  name: 'gson',                           version: gsonVersion
   implementation group: 'io.projectreactor',                     name: 'reactor-stream',                 version: eventBusVersion
   implementation group: 'org.mybatis',                           name: 'mybatis-migrations',             version: mybatisMigrationVersion
-  implementation group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonDatabindVersion
   implementation group: 'com.fasterxml.jackson.datatype',        name: 'jackson-datatype-jdk8',          version: jacksonVersion
   implementation group: 'com.fasterxml.jackson.datatype',        name: 'jackson-datatype-jsr310',        version: jacksonVersion
   implementation group: 'com.fasterxml.jackson.datatype',        name: 'jackson-datatype-hibernate5',    version: jacksonVersion
@@ -83,7 +83,7 @@ dependencies {
     implementation 'io.jaegertracing:jaeger-client:1.8.1'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.6.21'
   }
-  implementation (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonVersion) {
+  implementation (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonDatabindVersion) {
     force = true
   }
   api group: 'org.springframework.security',        name: 'spring-security-jwt',              version: '1.0.8.RELEASE'
