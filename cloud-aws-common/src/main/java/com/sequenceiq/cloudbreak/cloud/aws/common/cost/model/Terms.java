@@ -16,11 +16,27 @@ public class Terms {
     @JsonProperty("Reserved")
     private Map<String, OfferTerm> reserved;
 
+    public Terms() {
+    }
+
+    public Terms(Map<String, OfferTerm> onDemand, Map<String, OfferTerm> reserved) {
+        this.onDemand = onDemand;
+        this.reserved = reserved;
+    }
+
     public Map<String, OfferTerm> getOnDemand() {
         return onDemand;
     }
 
+    public void setOnDemand(Map<String, OfferTerm> onDemand) {
+        this.onDemand = onDemand;
+    }
+
     public Map<String, OfferTerm> getReserved() {
         return reserved;
+    }
+
+    public void setReserved(Map<String, OfferTerm> reserved) {
+        this.reserved = reserved;
     }
 }

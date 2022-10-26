@@ -7,7 +7,6 @@ public class EnvironmentRealTimeCostResponse {
     private Map<String, EnvironmentRealTimeCost> cost;
 
     public EnvironmentRealTimeCostResponse() {
-
     }
 
     public EnvironmentRealTimeCostResponse(Map<String, EnvironmentRealTimeCost> cost) {

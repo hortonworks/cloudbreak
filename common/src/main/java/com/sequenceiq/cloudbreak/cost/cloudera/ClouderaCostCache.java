@@ -23,7 +23,7 @@ public class ClouderaCostCache {
 
     private static final String CLOUDERA_PRICE_LOCATION = "cost/cloudera-price.json";
 
-    private static final double DEFAULT_PRICE = 0.69;
+    private static final double MAGIC_DEFAULT_PRICE = 0.69;
 
     private Map<String, Double> priceCache;
 
@@ -38,7 +38,7 @@ public class ClouderaCostCache {
 
     public double getPriceByType(String instanceType) {
         Double price = priceCache.get(instanceType);
-        return price == null ? DEFAULT_PRICE : price;
+        return price == null ? MAGIC_DEFAULT_PRICE : price;
     }
 
     private List<ClouderaPrice> loadPriceList() throws IOException {

@@ -30,7 +30,6 @@ class CarbonCalculatorServiceTest {
 
     @Test
     void getHourlyCarbonFootPrintByCrn() {
-        //TODO: add some usecases
         RegionEmissionFactor emissionFactor = new RegionEmissionFactor();
         emissionFactor.setCo2e(0.0001234);
         when(regionEmissionFactorService.get(any())).thenReturn(emissionFactor);

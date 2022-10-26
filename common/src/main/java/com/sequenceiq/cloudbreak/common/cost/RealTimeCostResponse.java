@@ -7,7 +7,6 @@ public class RealTimeCostResponse {
     private Map<String, RealTimeCost> cost;
 
     public RealTimeCostResponse() {
-
     }
 
     public RealTimeCostResponse(Map<String, RealTimeCost> cost) {

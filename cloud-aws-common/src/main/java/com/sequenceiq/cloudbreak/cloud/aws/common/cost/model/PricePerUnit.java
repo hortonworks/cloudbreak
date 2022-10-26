@@ -11,7 +11,18 @@ public class PricePerUnit {
     @JsonProperty("USD")
     private double usd;
 
+    public PricePerUnit() {
+    }
+
+    public PricePerUnit(double usd) {
+        this.usd = usd;
+    }
+
     public double getUsd() {
         return usd;
+    }
+
+    public void setUsd(double usd) {
+        this.usd = usd;
     }
 }

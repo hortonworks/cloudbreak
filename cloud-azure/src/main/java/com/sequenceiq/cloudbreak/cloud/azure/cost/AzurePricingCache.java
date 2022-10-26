@@ -111,7 +111,7 @@ public class AzurePricingCache {
     }
 
     @Retryable(maxAttempts = MAX_ATTEMPTS, backoff = @Backoff(delay = BACKOFF_DELAY))
-    private PriceResponse retryableGetPriceResponse(Invocation.Builder invocationBuilder) {
+    public PriceResponse retryableGetPriceResponse(Invocation.Builder invocationBuilder) {
         LOGGER.info("Retryable GET for PriceResponse called with max retries [{}] and backoff delay [{}].", MAX_ATTEMPTS, BACKOFF_DELAY);
         return invocationBuilder.get(PriceResponse.class);
     }

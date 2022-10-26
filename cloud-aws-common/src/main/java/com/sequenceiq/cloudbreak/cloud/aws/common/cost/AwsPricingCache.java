@@ -26,9 +26,13 @@ public class AwsPricingCache {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private final AWSPricing awsPricing = AWSPricingClientBuilder.standard().withRegion(PRICING_API_ENDPOINT_REGION).build();
+    private AWSPricing awsPricing;
 
     private final Table<String, String, PriceListElement> cache = HashBasedTable.create();
+
+    public AwsPricingCache() {
+        this.awsPricing = AWSPricingClientBuilder.standard().withRegion(PRICING_API_ENDPOINT_REGION).build();
+    }
 
     public double getPriceForInstanceType(String region, String instanceType) {
         PriceListElement priceListElement = getPriceList(region, instanceType);

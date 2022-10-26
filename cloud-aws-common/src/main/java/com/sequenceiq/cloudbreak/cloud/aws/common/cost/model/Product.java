@@ -13,6 +13,9 @@ public class Product {
 
     private String sku;
 
+    public Product() {
+    }
+
     public Product(String productFamily, Attributes attributes, String sku) {
         this.productFamily = productFamily;
         this.attributes = attributes;
@@ -23,11 +26,23 @@ public class Product {
         return productFamily;
     }
 
+    public void setProductFamily(String productFamily) {
+        this.productFamily = productFamily;
+    }
+
     public Attributes getAttributes() {
         return attributes;
     }
 
+    public void setAttributes(Attributes attributes) {
+        this.attributes = attributes;
+    }
+
     public String getSku() {
         return sku;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
     }
 }

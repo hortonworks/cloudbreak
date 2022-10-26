@@ -80,26 +80,25 @@ public class EnvironmentRealTimeCost implements Serializable {
         this.hourlyEnergykWh = hourlyEnergykWh;
     }
 
-    public EnvironmentRealTimeCost add(String resourceCrn, RealTimeCost o1) {
-        this.hourlyProviderUsd += o1.getHourlyProviderUsd();
-        this.hourlyClouderaUsd += o1.getHourlyClouderaUsd();
-        this.hourlyCO2 += o1.getHourlyCO2();
-        this.hourlyEnergykWh += o1.getHourlyEnergykWh();
-        if (o1.getType() != null) {
+    public EnvironmentRealTimeCost add(String resourceCrn, RealTimeCost realTimeCost) {
+        this.hourlyProviderUsd += realTimeCost.getHourlyProviderUsd();
+        this.hourlyClouderaUsd += realTimeCost.getHourlyClouderaUsd();
+        this.hourlyCO2 += realTimeCost.getHourlyCO2();
+        this.hourlyEnergykWh += realTimeCost.getHourlyEnergykWh();
 
-            switch (o1.getType()) {
+        if (realTimeCost.getType() != null) {
+            switch (realTimeCost.getType()) {
                 case "FREEIPA":
-                    freeipa = o1;
+                    freeipa = realTimeCost;
                     break;
                 case "DATALAKE":
-                    datalake = o1;
+                    datalake = realTimeCost;
                     break;
                 case "WORKLOAD":
-                    datahubs.put(resourceCrn, o1);
+                    datahubs.put(resourceCrn, realTimeCost);
                     break;
                 default:
             }
-
         }
         return this;
     }

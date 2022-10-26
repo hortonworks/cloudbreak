@@ -44,8 +44,7 @@ public class RegionEmissionFactorService {
         ClassPathResource classPathResource = new ClassPathResource(EMISSION_FACTOR_LOCATION);
         if (classPathResource.exists()) {
             String json = FileReaderUtils.readFileFromClasspath(EMISSION_FACTOR_LOCATION);
-            return JsonUtil.readValue(json, new TypeReference<List<RegionEmissionFactor>>() {
-            });
+            return JsonUtil.readValue(json, new TypeReference<>() { });
         }
         throw new RuntimeException("Failed to load emission factor!");
     }

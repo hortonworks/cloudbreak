@@ -29,7 +29,6 @@ public class EnvironmentCostService {
 
     public Map<String, EnvironmentRealTimeCost> getCosts(List<EnvironmentDto> environmentDtos) {
         Map<String, EnvironmentRealTimeCost> environmentCost = new HashMap<>();
-
         Map<String, RealTimeCost> totalCosts = new HashMap<>();
         totalCosts.putAll(clusterCostV4Endpoint.list().getCost());
         totalCosts.putAll(freeIpaCostV1Endpoint.list().getCost());
@@ -40,7 +39,8 @@ public class EnvironmentCostService {
             String envCrn = costEntry.getValue().getEnvCrn();
 
             EnvironmentRealTimeCost cost = environmentCost.getOrDefault(envCrn, new EnvironmentRealTimeCost());
-            environmentCost.put(envCrn, cost.add(key, dhCost));
+            cost.add(key, dhCost);
+            environmentCost.put(envCrn, cost);
         }
         LOGGER.debug("Cost summed for environments: {}", environmentCost);
         return environmentCost;

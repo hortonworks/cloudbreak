@@ -448,8 +448,8 @@ public class InstanceMetaDataService {
         return repository.countByStackId(stackId);
     }
 
-    public int countByInstanceGroupId(Long igId) {
-        return repository.countByInstanceGroupId(igId);
+    public int countByInstanceGroupId(Long instanceGroupId) {
+        return repository.countByInstanceGroupId(instanceGroupId);
     }
 
     public List<InstanceMetaData> findAllByInstanceGroupAndInstanceStatus(InstanceGroup instanceGroup,
