@@ -154,7 +154,8 @@ public interface StackDtoRepository extends Repository<Stack, Long> {
 
     @Query(BASE_QUERY
             + "WHERE s.environmentCrn = :environmentCrn "
-            + "AND s.type in :stackTypes"
+            + "AND s.type in :stackTypes "
+            + "AND s.terminated IS null"
     )
     List<StackViewDelegate> findAllByEnvironmentCrnAndStackType(@Param("environmentCrn") String environmentCrn,
             @Param("stackTypes") List<StackType> stackTypes);
