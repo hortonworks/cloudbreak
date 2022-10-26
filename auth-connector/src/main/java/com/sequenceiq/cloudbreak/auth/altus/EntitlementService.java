@@ -86,6 +86,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS_SD
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_TARGETED_UPSCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_UNBOUND_ELIMINATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION;
@@ -574,6 +575,10 @@ public class EntitlementService {
 
     public boolean isPostgresUpgradeAttachedDatahubsCheckSkipped(String accountId) {
         return isEntitlementRegistered(accountId, CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK);
+    }
+
+    public boolean isUpgradeAttachedDatahubsCheckSkipped(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK);
     }
 
     public boolean isECDSABasedAccessKeyEnabled(String accountId) {

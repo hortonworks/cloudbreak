@@ -108,7 +108,7 @@ auth:
     postgres.upgrade.skip.attached.datahubs.check.enable: false
     postgres.upgrade.skip.service.stop.enable: false
     environment.edit.proxy.enable: true
-
+    upgrade.skip.attached.datahubs.check.enable: false
 crn:
   partition: cdp
   region: us-west-1
