@@ -30,7 +30,7 @@ class ConclusionCheckerFactory {
     }
 
     public ConclusionChecker getConclusionChecker(ConclusionCheckerType conclusionCheckerType) {
-        ConclusionStepNode rootNode = ConclusionStepNodeFactory.getConclusionStepNode(conclusionCheckerType);
+        ConclusionStepNode rootNode = ConclusionStepTreeFactory.getConclusionStepTree(conclusionCheckerType);
         Map<Class<? extends ConclusionStep>, ConclusionStep> conclusionStepInstances = getConclusionStepInstances(rootNode);
         return new ConclusionChecker(rootNode, conclusionStepInstances);
     }
