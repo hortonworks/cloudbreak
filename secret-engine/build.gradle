@@ -27,7 +27,7 @@ dependencies {
   api (group: 'org.springframework.vault', name: 'spring-vault-core', version: '2.1.0.RELEASE') {
     exclude group: 'org.springframework'
   }
-  implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion) {
+  implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonDatabindVersion) {
     force = true
   }
 

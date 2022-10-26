@@ -126,7 +126,7 @@ dependencyManagement {
         dependency (group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: swaggerVersion) {
           exclude 'org.yaml:snakeyaml'
         }
-        dependency group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
+        dependency group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonDatabindVersion
         dependency group: 'javax.mail',                    name: 'mail',                           version: '1.5.0-b01'
         dependency group: 'dnsjava',                       name: 'dnsjava',                        version: '2.1.7'
         dependency group: 'javax.xml.bind',                name: 'jaxb-api',                       version: '2.3.0'
