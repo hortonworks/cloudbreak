@@ -9,15 +9,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Service
 public class DependentRolesHealthCheckService {
+
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     public static final String UNDEFINED_DEPENDENCY = "UNDEFINED_DEPENDENCY";
 
@@ -38,7 +47,19 @@ public class DependentRolesHealthCheckService {
                 .collect(toSet());
     }
 
-    private boolean isDependentComponentPresentInHostGroup(Set<String> components, Set<String> dependentComponents) {
+    public Set<String> getDependentHostGroupsForHostGroup(StackDto stackDto, String hostGroup) {
+        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(stackDto.getBlueprint().getBlueprintText());
+        Set<String> dependentComponents = getDependentComponentsForHostGroup(processor, hostGroup);
+        return dependentComponents.contains(UNDEFINED_DEPENDENCY)
+                ? Collections.singleton(UNDEFINED_DEPENDENCY)
+                : processor.getNonGatewayComponentsByHostGroup()
+                .entrySet().stream()
+                .filter(e -> isDependentComponentPresentInHostGroup(e.getValue(), dependentComponents))
+                .map(Map.Entry::getKey)
+                .collect(toSet());
+    }
+
+    private boolean isDependentComponentPresentInHostGroup(Collection<String> components, Collection<String> dependentComponents) {
         return dependentComponents.stream().anyMatch(components::contains);
     }
 

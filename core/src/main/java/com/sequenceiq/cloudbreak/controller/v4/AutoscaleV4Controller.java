@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeFo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.DependentHostGroupsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.LimitsConfigurationResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -47,9 +48,12 @@ import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.AutoscaleRecommend
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToAutoscaleStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.stack.DependentRolesHealthCheckService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -63,6 +67,9 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     @Inject
     private StackOperations stackOperations;
@@ -81,6 +88,9 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Inject
     private BlueprintService blueprintService;
+
+    @Inject
+    private DependentRolesHealthCheckService dependentRolesHealthCheckService;
 
     @Inject
     private StackToAutoscaleStackV4ResponseConverter stackToAutoscaleStackV4ResponseConverter;
@@ -186,6 +196,15 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @InternalOnly
     public StackV4Response get(@TenantAwareParam String crn) {
         return stackCommonService.getByCrn(crn);
+    }
+
+    @Override
+    @InternalOnly
+    public DependentHostGroupsV4Response getDependentHostGroups(@TenantAwareParam String crn, String hostGroup) {
+        StackDto stackDto = stackDtoService.getByCrn(crn);
+        DependentHostGroupsV4Response response = new DependentHostGroupsV4Response();
+        response.setDependentHostGroups(dependentRolesHealthCheckService.getDependentHostGroupsForHostGroup(stackDto, hostGroup));
+        return response;
     }
 
     @Override

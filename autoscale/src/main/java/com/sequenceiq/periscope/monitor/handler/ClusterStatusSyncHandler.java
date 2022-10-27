@@ -2,8 +2,10 @@ package com.sequenceiq.periscope.monitor.handler;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
+import static com.sequenceiq.periscope.api.model.ClusterState.SUSPENDED;
 
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -12,13 +14,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.DependentHostGroupsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.LoadAlert;
+import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.monitor.event.ClusterStatusSyncEvent;
 import com.sequenceiq.periscope.service.AltusMachineUserService;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.service.DependentHostGroupsService;
 import com.sequenceiq.periscope.utils.LoggingUtils;
 
 @Component
@@ -26,11 +33,17 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterStatusSyncHandler.class);
 
+    // TODO: Better way to define such constants?
+    private static final String UNDEFINED_DEPENDENCY = "UNDEFINED_DEPENDENCY";
+
     @Inject
     private ClusterService clusterService;
 
     @Inject
     private CloudbreakCommunicator cloudbreakCommunicator;
+
+    @Inject
+    private DependentHostGroupsService dependentHostGroupsService;
 
     @Inject
     private AltusMachineUserService altusMachineUserService;
@@ -44,40 +57,69 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         }
         LoggingUtils.buildMdcContext(cluster);
 
-        StackStatusV4Response statusResponse = cloudbreakCommunicator.getStackStatusByCrn(cluster.getStackCrn());
+        StackV4Response stackResponse = cloudbreakCommunicator.getByCrn(cluster.getStackCrn());
+        DependentHostGroupsV4Response dependentHostGroupsResponse = dependentHostGroupsService.getDependentHostGroupsForPolicyHostGroup(cluster.getStackCrn(),
+                extractPolicyHostGroup(cluster));
 
-        boolean clusterAvailable;
-        if (Boolean.TRUE.equals(cluster.isStopStartScalingEnabled())) {
-            clusterAvailable = Optional.ofNullable(statusResponse.getStatus()).map(Status::isAvailable).orElse(false);
-            // TODO CB-15146: This may need to change depending on the final form of how we check which operations are to be allowed
-            //  when there are some STOPPED instances
-        } else {
-            clusterAvailable = Optional.ofNullable(statusResponse.getStatus()).map(Status::isAvailable).orElse(false)
-                    && Optional.ofNullable(statusResponse.getClusterStatus()).map(Status::isAvailable).orElse(false);
-        }
+        boolean clusterAvailable = determineClusterAvailability(stackResponse, dependentHostGroupsResponse);
 
         LOGGER.info("Computed clusterAvailable: {}", clusterAvailable);
-        LOGGER.info("Analysing CBCluster Status '{}' for Cluster '{}. Available(Determined)={}' ", statusResponse, cluster.getStackCrn(), clusterAvailable);
+        LOGGER.info("Analysing CBCluster Status '{}' for Cluster '{}. Available(Determined)={}' ", stackResponse, cluster.getStackCrn(), clusterAvailable);
 
-        updateClusterState(cluster, statusResponse, clusterAvailable);
+        updateClusterState(cluster, stackResponse, clusterAvailable);
     }
 
-    private void updateClusterState(Cluster cluster, StackStatusV4Response statusResponse, boolean clusterAvailable) {
-        if (DELETE_COMPLETED.equals(statusResponse.getStatus())) {
+    private void updateClusterState(Cluster cluster, StackV4Response stackResponse, boolean clusterAvailable) {
+        if (DELETE_COMPLETED.equals(stackResponse.getStatus())) {
             beforeDeleteCleanup(cluster);
             clusterService.removeById(cluster.getId());
-            LOGGER.info("Deleted cluster '{}', CB Stack Status '{}'.", cluster.getStackCrn(), statusResponse.getStatus());
+            LOGGER.info("Deleted cluster '{}', CB Stack Status '{}'.", cluster.getStackCrn(), stackResponse.getStatus());
         } else if (clusterAvailable && !RUNNING.equals(cluster.getState())) {
             clusterService.setState(cluster.getId(), ClusterState.RUNNING);
             LOGGER.info("Updated cluster '{}' to Running, CB Stack Status '{}', CB Cluster Status '{}'.",
-                    cluster.getStackCrn(), statusResponse.getStatus(), statusResponse.getClusterStatus());
+                    cluster.getStackCrn(), stackResponse.getStatus(), stackResponse.getCluster().getStatus());
         } else if (!clusterAvailable && RUNNING.equals(cluster.getState())) {
-            clusterService.setState(cluster.getId(), ClusterState.SUSPENDED);
-            LOGGER.info("Suspended cluster '{}', CB Stack Status '{}', CB Cluster Status '{}'",
-                    cluster.getStackCrn(), statusResponse.getStatus(), statusResponse.getClusterStatus());
+            clusterService.setState(cluster.getId(), SUSPENDED);
+            LOGGER.info("Suspended cluster '{}', CB Stack Status '{}', CB Cluster Status '{}'", cluster.getStackCrn(), stackResponse.getStatus(),
+                    stackResponse.getCluster().getStatus());
         } else if (RUNNING.equals(cluster.getState()) && (cluster.getMachineUserCrn() == null || cluster.getEnvironmentCrn() == null)) {
             populateEnvironmentAndMachineUserIfNotPresent(cluster);
         }
+    }
+
+    private boolean determineClusterAvailability(StackV4Response stackResponse, DependentHostGroupsV4Response dependentHostGroupsResponse) {
+        Set<String> dependentHostGroups = dependentHostGroupsResponse.getDependentHostGroups();
+        if (dependentHostGroups.contains(UNDEFINED_DEPENDENCY)) {
+            return stackResponse.getStatus().isAvailable();
+        }
+        return !(stackDeletionInProgress(stackResponse) || stackModificationInProgress(stackResponse)
+                || dependentHostsUnHealthy(dependentHostGroupsResponse, stackResponse));
+    }
+
+    private boolean dependentHostsUnHealthy(DependentHostGroupsV4Response dependentHostGroupsResponse, StackV4Response stackResponse) {
+        return stackResponse.getInstanceGroups().stream()
+                .flatMap(ig -> ig.getMetadata().stream())
+                .filter(im -> dependentHostGroupsResponse.getDependentHostGroups().contains(im.getInstanceGroup()))
+                .anyMatch(im -> !InstanceStatus.SERVICES_HEALTHY.equals(im.getInstanceStatus()));
+    }
+
+    private boolean stackModificationInProgress(StackV4Response stack) {
+        return stack.getStatus().isInProgress();
+    }
+
+    private boolean stackDeletionInProgress(StackV4Response stack) {
+        return stack.getStatus().isTerminatedOrDeletionInProgress();
+    }
+
+    // TODO: Only one policyHostGroup?
+    private String extractPolicyHostGroup(Cluster cluster) {
+        Set<TimeAlert> timeAlerts = cluster.getTimeAlerts();
+        Set<LoadAlert> loadAlerts = cluster.getLoadAlerts();
+
+        if (!timeAlerts.isEmpty()) {
+            return timeAlerts.stream().iterator().next().getScalingPolicy().getHostGroup();
+        }
+        return loadAlerts.stream().iterator().next().getScalingPolicy().getHostGroup();
     }
 
     protected void beforeDeleteCleanup(Cluster cluster) {

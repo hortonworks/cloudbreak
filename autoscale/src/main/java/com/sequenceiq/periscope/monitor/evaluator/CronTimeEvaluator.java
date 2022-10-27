@@ -113,7 +113,7 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
         return dateService.isTrigger(alert, MonitorUpdateRate.CRON_UPDATE_RATE_IN_MILLIS, zdt);
     }
 
-    private boolean isPolicyAttached(BaseAlert alert) {
+    private boolean  isPolicyAttached(BaseAlert alert) {
         return alert.getScalingPolicy() != null;
     }
 
