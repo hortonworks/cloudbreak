@@ -124,13 +124,9 @@ public class AzureClientCredentialsTest {
         assertTrue(result.isPresent());
         assertEquals(REFRESH_TOKEN, result.get());
 
-        verify(credentialView, times(1)).getAuthenticationType();
-        verify(credentialView, times(0)).getCertificate();
-        verify(credentialView, times(0)).getPrivateKeyForCertificate();
-        verify(credentialView, times(1)).getAuthenticationType();
-        verify(credentialView, times(2)).getTenantId();
-        verify(credentialView, times(2)).getAccessKey();
-        verify(credentialView, times(2)).getSecretKey();
+        verify(credentialView, times(1)).getTenantId();
+        verify(credentialView, times(1)).getAccessKey();
+        verify(credentialView, times(1)).getSecretKey();
         verify(credentialView, times(2)).codeGrantFlow();
         verify(credentialView, times(1)).getSubscriptionId();
         verify(cbRefreshTokenClientProvider, times(2)).getCBRefreshTokenClient(anyString());
@@ -150,12 +146,9 @@ public class AzureClientCredentialsTest {
 
         assertFalse(result.isPresent());
 
-        verify(credentialView, times(1)).getAuthenticationType();
-        verify(credentialView, times(0)).getCertificate();
-        verify(credentialView, times(0)).getPrivateKeyForCertificate();
-        verify(credentialView, times(2)).getTenantId();
-        verify(credentialView, times(2)).getAccessKey();
-        verify(credentialView, times(2)).getSecretKey();
+        verify(credentialView, times(1)).getTenantId();
+        verify(credentialView, times(1)).getAccessKey();
+        verify(credentialView, times(1)).getSecretKey();
         verify(credentialView, times(1)).getAppReplyUrl();
         verify(credentialView, times(1)).getRefreshToken();
         verify(credentialView, times(2)).codeGrantFlow();
@@ -200,12 +193,9 @@ public class AzureClientCredentialsTest {
         assertNotNull(result);
         assertEquals(SUBSCRIPTION_ID, result.subscriptionId());
 
-        verify(credentialView, times(1)).getAuthenticationType();
-        verify(credentialView, times(0)).getCertificate();
-        verify(credentialView, times(0)).getPrivateKeyForCertificate();
-        verify(credentialView, times(2)).getTenantId();
-        verify(credentialView, times(2)).getAccessKey();
-        verify(credentialView, times(2)).getSecretKey();
+        verify(credentialView, times(1)).getTenantId();
+        verify(credentialView, times(1)).getAccessKey();
+        verify(credentialView, times(1)).getSecretKey();
         verify(credentialView, times(0)).getAppReplyUrl();
         verify(credentialView, times(1)).getRefreshToken();
         verify(credentialView, times(1)).codeGrantFlow();

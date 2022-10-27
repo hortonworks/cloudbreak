@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.common.api.credential.AppAuthenticationType;
 
 import okhttp3.JavaNetAuthenticator;
 
@@ -93,68 +92,43 @@ public class AzureClientCredentials {
     }
 
     AzureTokenCredentials getAzureCredentials(Optional<Region> region) {
+        String tenantId = credentialView.getTenantId();
+        String clientId = credentialView.getAccessKey();
+        String secretKey = credentialView.getSecretKey();
         String subscriptionId = credentialView.getSubscriptionId();
         AzureEnvironment azureEnvironment = getAzureEnvironment(region);
+        ApplicationTokenCredentials applicationTokenCredentials = new ApplicationTokenCredentials(clientId, tenantId, secretKey, azureEnvironment);
+        Optional<Boolean> codeGrantFlow = Optional.ofNullable(credentialView.codeGrantFlow());
 
-        ApplicationTokenCredentials applicationTokenCredentials;
-        if (AppAuthenticationType.CERTIFICATE.name().equals(credentialView.getAuthenticationType())) {
-            applicationTokenCredentials = certificateBasedCredentials(azureEnvironment);
-        } else {
-            applicationTokenCredentials = secretBasedCredentials(azureEnvironment);
-        }
         AzureTokenCredentials result = applicationTokenCredentials;
+        if (codeGrantFlow.orElse(Boolean.FALSE)) {
+            String refreshToken = credentialView.getRefreshToken();
+            if (StringUtils.isNotEmpty(refreshToken)) {
+                LOGGER.info("Creating Azure credentials for a new delegated token with refresh token, credential: {}", credentialView.getName());
+                String resource = azureEnvironment.managementEndpoint();
+                CBRefreshTokenClient refreshTokenClient = cbRefreshTokenClientProvider.getCBRefreshTokenClient(azureEnvironment.activeDirectoryEndpoint());
+                AuthenticationResult authenticationResult = refreshTokenClient.refreshToken(tenantId, clientId, secretKey, resource, refreshToken, false);
 
-        if (credentialView.codeGrantFlow()) {
-            result = delegatedTokenCredentials(azureEnvironment, applicationTokenCredentials);
+                if (authenticationResult == null) {
+                    String msg = String.format("New token couldn't be obtain with refresh token for credential: %s", credentialView.getName());
+                    LOGGER.warn(msg);
+                    throw new CloudConnectorException(msg);
+                }
+
+                Map<String, AuthenticationResult> tokens = Map.of(resource, authenticationResult);
+                result = new CbDelegatedTokenCredentials(applicationTokenCredentials, resource, tokens, secretKey, authenticationContextProvider,
+                        cbRefreshTokenClientProvider);
+            } else {
+                LOGGER.info("Creating Azure credentials for a new delegated token with authorization code, credential: {}", credentialView.getName());
+                String appReplyUrl = credentialView.getAppReplyUrl();
+                String authorizationCode = credentialView.getAuthorizationCode();
+                result = new CbDelegatedTokenCredentials(applicationTokenCredentials, appReplyUrl, authorizationCode, secretKey, authenticationContextProvider,
+                        cbRefreshTokenClientProvider);
+            }
         } else {
             LOGGER.info("Creating Azure credentials with application token credentials, credential: {}", credentialView.getName());
         }
         return result.withDefaultSubscriptionId(subscriptionId);
-    }
-
-    private ApplicationTokenCredentials certificateBasedCredentials(AzureEnvironment azureEnvironment) {
-        LOGGER.info("Creating Azure credentials with certificate and private key: {}", credentialView.getName());
-        String auth = credentialView.getPrivateKeyForCertificate() + credentialView.getCertificate();
-        return new ApplicationTokenCredentials(credentialView.getAccessKey(), credentialView.getTenantId(),
-                auth.getBytes(), null, azureEnvironment);
-    }
-
-    private ApplicationTokenCredentials secretBasedCredentials(AzureEnvironment azureEnvironment) {
-        LOGGER.info("Creating Azure credentials with secret: {}", credentialView.getName());
-        return new ApplicationTokenCredentials(credentialView.getAccessKey(), credentialView.getTenantId(),
-                credentialView.getSecretKey(), azureEnvironment);
-    }
-
-    private AzureTokenCredentials delegatedTokenCredentials(AzureEnvironment azureEnvironment, ApplicationTokenCredentials applicationTokenCredentials) {
-        // Probably this is a dead code at the moment, since code grant flow is not supported, I just put it into a separate method
-        String tenantId = credentialView.getTenantId();
-        String clientId = credentialView.getAccessKey();
-        String secretKey = credentialView.getSecretKey();
-        AzureTokenCredentials result;
-        String refreshToken = credentialView.getRefreshToken();
-        if (StringUtils.isNotEmpty(refreshToken)) {
-            LOGGER.info("Creating Azure credentials for a new delegated token with refresh token, credential: {}", credentialView.getName());
-            String resource = azureEnvironment.managementEndpoint();
-            CBRefreshTokenClient refreshTokenClient = cbRefreshTokenClientProvider.getCBRefreshTokenClient(azureEnvironment.activeDirectoryEndpoint());
-            AuthenticationResult authenticationResult = refreshTokenClient.refreshToken(tenantId, clientId, secretKey, resource, refreshToken, false);
-
-            if (authenticationResult == null) {
-                String msg = String.format("New token couldn't be obtain with refresh token for credential: %s", credentialView.getName());
-                LOGGER.warn(msg);
-                throw new CloudConnectorException(msg);
-            }
-
-            Map<String, AuthenticationResult> tokens = Map.of(resource, authenticationResult);
-            result = new CbDelegatedTokenCredentials(applicationTokenCredentials, resource, tokens, secretKey, authenticationContextProvider,
-                    cbRefreshTokenClientProvider);
-        } else {
-            LOGGER.info("Creating Azure credentials for a new delegated token with authorization code, credential: {}", credentialView.getName());
-            String appReplyUrl = credentialView.getAppReplyUrl();
-            String authorizationCode = credentialView.getAuthorizationCode();
-            result = new CbDelegatedTokenCredentials(applicationTokenCredentials, appReplyUrl, authorizationCode, secretKey, authenticationContextProvider,
-                    cbRefreshTokenClientProvider);
-        }
-        return result;
     }
 
     private AzureEnvironment getAzureEnvironment(Optional<Region> region) {
