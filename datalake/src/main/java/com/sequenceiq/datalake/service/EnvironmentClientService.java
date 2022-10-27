@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionHandler
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -61,15 +62,21 @@ public class EnvironmentClientService {
      * @param envCrn Environemnt CRN.
      * @return backuplocation configured for the environment, If not, returns the log location.
      */
-    public String getBackupLocation(String environmentCrn) {
+    public String getBackupLocation(String environmentCrn, boolean isRangerRAZEnabled) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = getByCrn(environmentCrn);
         BackupResponse backupResponse = detailedEnvironmentResponse.getBackup();
         TelemetryResponse telemetryResponse = detailedEnvironmentResponse.getTelemetry();
         if (backupResponse != null && backupResponse.getStorageLocation() != null) {
             LOGGER.info("Using the backup location to store the datalake backup");
+            if (detailedEnvironmentResponse.getCloudPlatform() == "Azure" && isRangerRAZEnabled) {
+                return getUpdatedAzureRAZLocation(backupResponse.getStorageLocation());
+            }
             return backupResponse.getStorageLocation();
         } else if (telemetryResponse != null && telemetryResponse.getLogging() != null) {
             LOGGER.info("Backup location not configured. Using the log location to store the datalake backup");
+            if (detailedEnvironmentResponse.getCloudPlatform() == "Azure" && isRangerRAZEnabled) {
+                return getUpdatedAzureRAZLocation(telemetryResponse.getLogging().getStorageLocation());
+            }
             return telemetryResponse.getLogging().getStorageLocation();
         } else {
             LOGGER.error("Could not identify the location to store the backup");
@@ -85,5 +92,33 @@ public class EnvironmentClientService {
         } catch (WebApplicationException e) {
             throw webApplicationExceptionHandler.handleException(e);
         }
+    }
+
+    /**
+     * Check if an Azure storage location is a root directory. Below are the two kinds of root directories:
+     * abfs://test@mydatalake.dfs.core.windows.net
+     * abfs://test@mydatalake.dfs.core.windows.net/
+     * @param locationInput The storage location.
+     * @return The updated backup location.
+     */
+    public String getUpdatedAzureRAZLocation(String locationInput) {
+        String locationAfterScheme = locationInput;
+        locationAfterScheme = locationAfterScheme.replace("abfs://", "");
+        String updatedLocation;
+        //Example: test@mydatalake.dfs.core.windows.net
+        if (!locationAfterScheme.contains("/")) {
+            updatedLocation = locationInput + "/backups";
+        } else {
+            String[] locationAfterSchemeList = locationAfterScheme.split("/");
+            //Example: test@mydatalake.dfs.core.windows.net/, so no slash needs to be added
+            if (locationAfterSchemeList.length == 1) {
+                updatedLocation = locationInput + "backups";
+            } else {
+                //This is not a root directory, so it needn't append anything.
+                // Examples: test@mydatalake.dfs.core.windows.net/test; test@mydatalake.dfs.core.windows.net/test/
+                updatedLocation = locationInput;
+            }
+        }
+        return updatedLocation;
     }
 }

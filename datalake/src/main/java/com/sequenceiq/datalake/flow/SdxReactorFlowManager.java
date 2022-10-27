@@ -130,7 +130,7 @@ public class SdxReactorFlowManager {
         }
         eventSenderService.sendEventAndNotification(newSdxCluster, DATALAKE_RESIZE_TRIGGERED);
         return notify(SDX_RESIZE_FLOW_CHAIN_START_EVENT, new DatalakeResizeFlowChainStartEvent(sdxClusterId, newSdxCluster, userId,
-                environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn()), performBackup, performRestore,
+                environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn(), newSdxCluster.isRangerRazEnabled()), performBackup, performRestore,
                 skipOptions), newSdxCluster.getClusterName());
     }
 
@@ -171,8 +171,8 @@ public class SdxReactorFlowManager {
             LOGGER.info("Triggering backup before an upgrade");
             return notify(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT,
                     new DatalakeUpgradeFlowChainStartEvent(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT, cluster.getId(),
-                            userId, imageId, replaceVms.getBooleanValue(), environmentClientService.getBackupLocation(cluster.getEnvCrn()),
-                            skipOptions, rollingUpgradeEnabled),
+                            userId, imageId, replaceVms.getBooleanValue(), environmentClientService.getBackupLocation(cluster.getEnvCrn(),
+                            cluster.isRangerRazEnabled()), skipOptions, rollingUpgradeEnabled),
                     cluster.getClusterName());
         } else {
             return notify(DATALAKE_UPGRADE_EVENT.event(), new DatalakeUpgradeStartEvent(DATALAKE_UPGRADE_EVENT.event(), cluster.getId(),
@@ -197,7 +197,7 @@ public class SdxReactorFlowManager {
             LOGGER.info("Triggering backup/upgrade preparations");
             return notify(DatalakeUpgradePreparationFlowChainStartEvent.DATALAKE_UPGRADE_PREPARATION_FLOW_CHAIN_EVENT,
                     new DatalakeUpgradePreparationFlowChainStartEvent(cluster.getId(), userId, imageId,
-                            environmentClientService.getBackupLocation(cluster.getEnvCrn())),
+                            environmentClientService.getBackupLocation(cluster.getEnvCrn(), cluster.isRangerRazEnabled())),
                     cluster.getClusterName());
         } else {
             LOGGER.info("Triggering upgrade preparation");

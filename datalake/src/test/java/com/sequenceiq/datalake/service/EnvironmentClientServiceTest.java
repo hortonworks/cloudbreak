@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -56,7 +57,7 @@ public class EnvironmentClientServiceTest {
                 .build());
 
         when(environmentEndpoint.getByCrn(anyString())).thenReturn(environmentResponse);
-        Assert.assertEquals(BACKUP_LOCATION, underTest.getBackupLocation(ENV_CRN));
+        Assert.assertEquals(BACKUP_LOCATION, underTest.getBackupLocation(ENV_CRN, false));
     }
 
     @Test
@@ -75,7 +76,7 @@ public class EnvironmentClientServiceTest {
                 .build());
 
         when(environmentEndpoint.getByCrn(anyString())).thenReturn(environmentResponse);
-        Assert.assertEquals(LOG_LOCATION, underTest.getBackupLocation(ENV_CRN));
+        Assert.assertEquals(LOG_LOCATION, underTest.getBackupLocation(ENV_CRN, false));
     }
 
     @Test(expected = BadRequestException.class)
@@ -89,7 +90,59 @@ public class EnvironmentClientServiceTest {
                 .build());
 
         when(environmentEndpoint.getByCrn(anyString())).thenReturn(environmentResponse);
-        underTest.getBackupLocation(ENV_CRN);
+        underTest.getBackupLocation(ENV_CRN, false);
+    }
+
+    @Test
+    public void testAzureRAZBackupLocation() {
+        final String locationRootDir = "abfs://storagefs@mydatalake.dfs.core.windows.net";
+        final String locationRootDirEndsWithSlash = "abfs://storagefs@mydatalake.dfs.core.windows.net/";
+        final String locationSubDir = "abfs://storagefs@mydatalake.dfs.core.windows.net/data";
+        final String locationSubDirEndsWithSlash = "abfs://storagefs@mydatalake.dfs.core.windows.net/data/";
+        final String locationSubDirWithMultipleSlashes = "abfs://storagefs@mydatalake.dfs.core.windows.net/data/data2";
+        final String locationSubDirWithMultipleSlashesEndsWithSlash = "abfs://storagefs@mydatalake.dfs.core.windows.net/data/data2/data3/";
+
+        BackupResponse backupResponse = new BackupResponse();
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+
+        //Set up an AZURE environment with root directory backup location.
+        environmentResponse.setCrn(ENV_CRN);
+        environmentResponse.setCloudPlatform(CLOUD_PLATFORM);
+        environmentResponse.setBackup(backupResponse);
+        environmentResponse.getBackup().setStorageLocation(locationRootDir);
+        environmentResponse.setAzure(AzureEnvironmentParameters.builder()
+                .withAzureResourceGroup(AzureResourceGroup.builder()
+                        .withResourceGroupUsage(ResourceGroupUsage.MULTIPLE)
+                        .build())
+                .build());
+        when(environmentEndpoint.getByCrn(anyString())).thenReturn(environmentResponse);
+
+        Assert.assertEquals(locationRootDir + "/backups", underTest.getBackupLocation(ENV_CRN, true));
+
+        environmentResponse.getBackup().setStorageLocation(locationRootDirEndsWithSlash);
+        Assert.assertEquals(locationRootDirEndsWithSlash +"backups", underTest.getBackupLocation(ENV_CRN, true));
+
+        //Non-RAZ will not be appended with "/backups".
+        Assert.assertEquals(locationRootDirEndsWithSlash, underTest.getBackupLocation(ENV_CRN, false));
+
+        //Set up an AZURE environment with subdirectory backup location, which will not be appended with "/backups".
+        environmentResponse.getBackup().setStorageLocation(locationSubDir);
+        Assert.assertEquals(locationSubDir, underTest.getBackupLocation(ENV_CRN, true));
+
+        environmentResponse.getBackup().setStorageLocation(locationSubDirEndsWithSlash);
+        Assert.assertEquals(locationSubDirEndsWithSlash, underTest.getBackupLocation(ENV_CRN, true));
+
+        environmentResponse.getBackup().setStorageLocation(locationSubDirWithMultipleSlashes);
+        Assert.assertEquals(locationSubDirWithMultipleSlashes, underTest.getBackupLocation(ENV_CRN, true));
+
+        environmentResponse.getBackup().setStorageLocation(locationSubDirWithMultipleSlashesEndsWithSlash);
+        Assert.assertEquals(locationSubDirWithMultipleSlashesEndsWithSlash, underTest.getBackupLocation(ENV_CRN, true));
+
+        //Set up an AWS environment with root directory backup location, which will not be appended with "/backups".
+        environmentResponse.setCloudPlatform("AWS");
+        environmentResponse.getBackup().setStorageLocation(locationRootDir);
+        Assert.assertEquals(locationRootDir, underTest.getBackupLocation(ENV_CRN, true));
+
     }
 
 }
