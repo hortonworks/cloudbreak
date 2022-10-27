@@ -337,7 +337,7 @@ class CredentialServiceTest {
 
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any()))
                 .thenReturn(Optional.of(result));
-        when(credentialAdapter.verify(any(), anyString(), anyBoolean())).thenAnswer(i -> new CredentialVerification(i.getArgument(0), true));
+        when(credentialAdapter.verify(any(), anyString())).thenAnswer(i -> new CredentialVerification(i.getArgument(0), true));
         when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(credentialValidator.validateCredentialUpdate(any(Credential.class), any(Credential.class), any(CredentialType.class)))
                 .thenReturn(ValidationResult.builder().build());
@@ -360,7 +360,7 @@ class CredentialServiceTest {
 
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any()))
                 .thenReturn(Optional.of(result));
-        when(credentialAdapter.verify(any(), anyString(), anyBoolean())).thenAnswer(i -> new CredentialVerification(i.getArgument(0), true));
+        when(credentialAdapter.verify(any(), anyString())).thenAnswer(i -> new CredentialVerification(i.getArgument(0), true));
         when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(credentialValidator.validateCredentialUpdate(any(Credential.class), any(Credential.class), any(CredentialType.class)))
                 .thenReturn(ValidationResult.builder().build());

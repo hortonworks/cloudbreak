@@ -5,7 +5,6 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.common.api.credential.AppAuthenticationType;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -23,12 +22,6 @@ public class AzureCredentialResponseParameters implements Serializable {
 
     @ApiModelProperty
     private String accessKey;
-
-    @ApiModelProperty
-    private AppAuthenticationType authenticationType;
-
-    @ApiModelProperty
-    private AzureCredentialCertificateResponse certificate;
 
     @ApiModelProperty
     private RoleBasedResponse roleBased;
@@ -65,30 +58,12 @@ public class AzureCredentialResponseParameters implements Serializable {
         this.tenantId = tenantId;
     }
 
-    public AppAuthenticationType getAuthenticationType() {
-        return authenticationType;
-    }
-
-    public void setAuthenticationType(AppAuthenticationType authenticationType) {
-        this.authenticationType = authenticationType;
-    }
-
-    public AzureCredentialCertificateResponse getCertificate() {
-        return certificate;
-    }
-
-    public void setCertificate(AzureCredentialCertificateResponse certificate) {
-        this.certificate = certificate;
-    }
-
     @Override
     public String toString() {
         return "AzureCredentialResponseParameters{" +
                 "subscriptionId='" + subscriptionId + '\'' +
                 ", tenantId='" + tenantId + '\'' +
                 ", accessKey='" + accessKey + '\'' +
-                ", authenticationType='" + authenticationType + '\'' +
-                ", certificate=" + certificate +
                 ", roleBased=" + roleBased +
                 '}';
     }

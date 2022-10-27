@@ -25,9 +25,7 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialDeleteService;
 import com.sequenceiq.environment.credential.service.CredentialService;
-import com.sequenceiq.environment.credential.v1.converter.CreateCredentialRequestToCredentialConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
-import com.sequenceiq.environment.credential.v1.converter.EditCredentialRequestToCredentialConverter;
 import com.sequenceiq.notification.NotificationController;
 
 @Controller
@@ -35,24 +33,16 @@ public class AuditCredentialV1Controller extends NotificationController implemen
 
     private final CredentialService credentialService;
 
-    private final CreateCredentialRequestToCredentialConverter credentialRequestConverter;
-
-    private final EditCredentialRequestToCredentialConverter credentialEditConverter;
-
-    private final CredentialToCredentialV1ResponseConverter credentialResponseConverter;
+    private final CredentialToCredentialV1ResponseConverter credentialConverter;
 
     private final CredentialDeleteService credentialDeleteService;
 
     public AuditCredentialV1Controller(
             CredentialService credentialService,
-            CreateCredentialRequestToCredentialConverter credentialRequestConverter,
-            EditCredentialRequestToCredentialConverter credentialEditConverter,
-            CredentialToCredentialV1ResponseConverter credentialResponseConverter,
+            CredentialToCredentialV1ResponseConverter credentialConverter,
             CredentialDeleteService credentialDeleteService) {
         this.credentialService = credentialService;
-        this.credentialRequestConverter = credentialRequestConverter;
-        this.credentialEditConverter = credentialEditConverter;
-        this.credentialResponseConverter = credentialResponseConverter;
+        this.credentialConverter = credentialConverter;
         this.credentialDeleteService = credentialDeleteService;
     }
 
@@ -63,7 +53,7 @@ public class AuditCredentialV1Controller extends NotificationController implemen
         return new CredentialResponses(
                 credentialService.listAvailablesByAccountId(accountId, AUDIT)
                         .stream()
-                        .map(credentialResponseConverter::convert)
+                        .map(credentialConverter::convert)
                         .collect(Collectors.toSet()));
     }
 
@@ -71,14 +61,14 @@ public class AuditCredentialV1Controller extends NotificationController implemen
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_AUDIT_CREDENTIAL)
     public CredentialResponse getByResourceCrn(@TenantAwareParam String credentialCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        return credentialResponseConverter.convert(credentialService.getByCrnForAccountId(credentialCrn, accountId, AUDIT));
+        return credentialConverter.convert(credentialService.getByCrnForAccountId(credentialCrn, accountId, AUDIT));
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_AUDIT_CREDENTIAL)
     public CredentialResponse getByResourceName(String credentialName, @AccountId String accountId) {
         String userAccountId = ThreadBasedUserCrnProvider.getAccountId();
-        return credentialResponseConverter.convert(credentialService.getByNameForAccountId(credentialName, userAccountId, AUDIT));
+        return credentialConverter.convert(credentialService.getByNameForAccountId(credentialName, userAccountId, AUDIT));
     }
 
     @Override
@@ -86,7 +76,7 @@ public class AuditCredentialV1Controller extends NotificationController implemen
     public CredentialResponse post(@Valid CredentialRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
-        Credential credential = credentialRequestConverter.convert(request);
+        Credential credential = credentialConverter.convert(request);
         credential.setType(AUDIT);
         credential.setVerifyPermissions(false);
         notify(ResourceEvent.CREDENTIAL_CREATED);
@@ -96,7 +86,7 @@ public class AuditCredentialV1Controller extends NotificationController implemen
                 .filter(c -> c.getCloudPlatform().equals(credential.getCloudPlatform()))
                 .collect(Collectors.toSet());
         if (auditCredentialsByPlatfom.isEmpty()) {
-            return credentialResponseConverter.convert(credentialService.create(credential, accountId, creator, AUDIT));
+            return credentialConverter.convert(credentialService.create(credential, accountId, creator, AUDIT));
         } else {
             throw new BadRequestException(String.format("Audit credential already exist for %s cloud.", credential.getCloudPlatform()));
         }
@@ -105,13 +95,11 @@ public class AuditCredentialV1Controller extends NotificationController implemen
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.MODIFY_AUDIT_CREDENTIAL)
     public CredentialResponse put(@Valid EditCredentialRequest credentialRequest) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        Credential originalCredential = credentialService.getByNameForAccountId(credentialRequest.getName(), accountId, AUDIT);
-        Credential credential = credentialEditConverter.convert(credentialRequest, originalCredential);
+        Credential credential = credentialConverter.convert(credentialRequest);
         credential.setType(AUDIT);
         credential = credentialService.updateByAccountId(credential, ThreadBasedUserCrnProvider.getAccountId(), AUDIT);
         notify(ResourceEvent.CREDENTIAL_MODIFIED);
-        return credentialResponseConverter.convert(credential);
+        return credentialConverter.convert(credential);
     }
 
     @Override
@@ -127,7 +115,7 @@ public class AuditCredentialV1Controller extends NotificationController implemen
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential deleted = credentialDeleteService.deleteByName(name, accountId, AUDIT);
         notify(ResourceEvent.CREDENTIAL_DELETED);
-        return credentialResponseConverter.convert(deleted);
+        return credentialConverter.convert(deleted);
     }
 
     @Override
@@ -136,6 +124,6 @@ public class AuditCredentialV1Controller extends NotificationController implemen
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential deleted = credentialDeleteService.deleteByCrn(crn, accountId, AUDIT);
         notify(ResourceEvent.CREDENTIAL_DELETED);
-        return credentialResponseConverter.convert(deleted);
+        return credentialConverter.convert(deleted);
     }
 }

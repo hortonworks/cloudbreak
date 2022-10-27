@@ -182,8 +182,7 @@ public class CredentialService extends AbstractCredentialService implements Comp
         credential.setAccountId(accountId);
         credential.setResourceCrn(original.getResourceCrn());
         credential.setCreator(original.getCreator());
-
-        Credential updated = repository.save(credentialAdapter.verify(credential, accountId, true).getCredential());
+        Credential updated = repository.save(credentialAdapter.verify(credential, accountId).getCredential());
         secretService.delete(original.getAttributesSecret());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_MODIFIED);
         return updated;
@@ -238,7 +237,7 @@ public class CredentialService extends AbstractCredentialService implements Comp
     }
 
     public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, boolean govCloud,
-            String deploymentAddress, String userCrn, CredentialType type) {
+        String deploymentAddress, String userCrn, CredentialType type) {
         String cloudPlatformInUpperCase = cloudPlatform.toUpperCase();
         credentialValidator.validateCredentialCloudPlatform(cloudPlatformInUpperCase, userCrn, type);
         return credentialPrerequisiteService.getPrerequisites(cloudPlatformInUpperCase, govCloud, deploymentAddress, type);
@@ -305,7 +304,7 @@ public class CredentialService extends AbstractCredentialService implements Comp
     }
 
     Optional<Credential> findByCrnAndAccountId(String crn, String accountId, Collection<String> cloudPlatforms,
-            CredentialType type) {
+        CredentialType type) {
         return repository.findByCrnAndAccountId(crn, accountId, cloudPlatforms, type, false);
     }
 
