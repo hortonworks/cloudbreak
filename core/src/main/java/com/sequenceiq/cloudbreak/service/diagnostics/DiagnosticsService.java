@@ -89,12 +89,12 @@ public class DiagnosticsService {
     private FlowLogsToListDiagnosticsCollectionResponseConverter flowLogsToListDiagnosticsCollectionResponseConverter;
 
     public ListDiagnosticsCollectionResponse getDiagnosticsCollections(String stackCrn) {
-        List<FlowLog> flowLogs = flowLogDBService.getLatestFlowLogsByCrnAndType(stackCrn, ClassValue.of(DiagnosticsCollectionFlowConfig.class));
+        List<FlowLog> flowLogs = flowLogDBService.getLatestNotFinishedFlowLogsByCrnAndType(stackCrn, ClassValue.of(DiagnosticsCollectionFlowConfig.class));
         return flowLogsToListDiagnosticsCollectionResponseConverter.convert(flowLogs);
     }
 
     public void cancelDiagnosticsCollections(String stackCrn) {
-        List<FlowLog> flowLogs = flowLogDBService.getLatestFlowLogsByCrnAndType(stackCrn, ClassValue.of(DiagnosticsCollectionFlowConfig.class));
+        List<FlowLog> flowLogs = flowLogDBService.getLatestNotFinishedFlowLogsByCrnAndType(stackCrn, ClassValue.of(DiagnosticsCollectionFlowConfig.class));
         flowLogs.stream()
                 .filter(f -> !f.getFinalized())
                 .forEach(cancelFlow());
