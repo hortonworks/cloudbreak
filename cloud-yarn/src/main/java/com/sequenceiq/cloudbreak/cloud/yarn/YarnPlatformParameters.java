@@ -109,6 +109,7 @@ public class YarnPlatformParameters implements PlatformParameters {
         specialParameters.put(PlatformParametersConsts.STARTSTOP_SUPPORTED, Boolean.FALSE);
         specialParameters.put(PlatformParametersConsts.REGIONS_SUPPORTED, Boolean.FALSE);
         specialParameters.put(PlatformParametersConsts.VOLUME_ATTACHMENT_SUPPORTED, Boolean.FALSE);
+        specialParameters.put(PlatformParametersConsts.DB_SUBNETS_UPDATE_ENABLED, Boolean.FALSE);
         return new SpecialParameters(specialParameters);
     }
 

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack;
+package com.sequenceiq.cloudbreak.cloud.service;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -11,7 +11,6 @@ import com.google.common.base.Suppliers;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 
 @Component
 public class CloudParameterCache {
@@ -66,6 +65,10 @@ public class CloudParameterCache {
 
     public boolean isVolumeAttachmentSupported(String platform) {
         return getSpecialParameters(Platform.platform(platform)).get(PlatformParametersConsts.VOLUME_ATTACHMENT_SUPPORTED);
+    }
+
+    public boolean isDbSubnetsUpdateEnabled(String platform) {
+        return getSpecialParameters(Platform.platform(platform)).get(PlatformParametersConsts.DB_SUBNETS_UPDATE_ENABLED);
     }
 
     private Map<String, Boolean> getSpecialParameters(Platform platform) {

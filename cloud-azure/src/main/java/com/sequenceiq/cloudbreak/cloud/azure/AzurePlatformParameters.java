@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
+import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
@@ -175,6 +176,12 @@ public class AzurePlatformParameters implements PlatformParameters {
     @Override
     public boolean isAutoTlsSupported() {
         return true;
+    }
+
+    public SpecialParameters specialParameters() {
+        SpecialParameters specialParameters = PlatformParameters.super.specialParameters();
+        specialParameters.getSpecialParameters().put(PlatformParametersConsts.DB_SUBNETS_UPDATE_ENABLED, Boolean.TRUE);
+        return specialParameters;
     }
 
     @Override
