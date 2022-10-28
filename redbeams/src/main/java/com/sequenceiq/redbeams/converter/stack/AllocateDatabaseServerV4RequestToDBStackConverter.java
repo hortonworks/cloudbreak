@@ -6,7 +6,6 @@ import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.Al
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,7 +26,6 @@ import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
-import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -42,7 +40,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateD
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4StackRequest;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
@@ -50,7 +47,6 @@ import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
-import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
@@ -60,9 +56,7 @@ import com.sequenceiq.redbeams.service.PasswordGeneratorService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.UuidGeneratorService;
 import com.sequenceiq.redbeams.service.crn.CrnService;
-import com.sequenceiq.redbeams.service.network.NetworkParameterAdder;
-import com.sequenceiq.redbeams.service.network.SubnetChooserService;
-import com.sequenceiq.redbeams.service.network.SubnetListerService;
+import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 
 @Component
 public class AllocateDatabaseServerV4RequestToDBStackConverter {
@@ -90,12 +84,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     private Clock clock;
 
     @Inject
-    private SubnetListerService subnetListerService;
-
-    @Inject
-    private SubnetChooserService subnetChooserService;
-
-    @Inject
     private UserGeneratorService userGeneratorService;
 
     @Inject
@@ -103,9 +91,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     @Inject
     private UuidGeneratorService uuidGeneratorService;
-
-    @Inject
-    private NetworkParameterAdder networkParameterAdder;
 
     @Inject
     private CrnUserDetailsService crnUserDetailsService;
@@ -124,6 +109,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     @Inject
     private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
+
+    @Inject
+    private NetworkBuilderService networkBuilderService;
 
     @PostConstruct
     public void initSupportedPlatforms() {
@@ -156,7 +144,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
             asMap.forEach((key, value) -> parameter.put(key, value.toString()));
             dbStack.setParameters(parameter);
         }
-        dbStack.setNetwork(buildNetwork(source.getNetwork(), environment, cloudPlatform, dbStack));
+        dbStack.setNetwork(networkBuilderService.buildNetwork(source.getNetwork(), environment, cloudPlatform, dbStack));
 
         Instant now = clock.getCurrentInstant();
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.PROVISION_REQUESTED, now.toEpochMilli()));
@@ -337,44 +325,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         }
     }
 
-    private Map<String, Object> getSubnetsFromEnvironment(DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,
-            DBStack dbStack) {
-        List<CloudSubnet> subnets = subnetListerService.listSubnets(environmentResponse, cloudPlatform);
-        List<CloudSubnet> chosenSubnet = subnetChooserService.chooseSubnets(subnets, cloudPlatform, dbStack);
-
-        List<String> chosenSubnetIds = chosenSubnet
-                .stream()
-                .map(CloudSubnet::getId)
-                .collect(Collectors.toList());
-        List<String> chosenAzs = chosenSubnet
-                .stream()
-                .map(CloudSubnet::getAvailabilityZone)
-                .collect(Collectors.toList());
-
-        return networkParameterAdder.addSubnetIds(new HashMap<>(), chosenSubnetIds, chosenAzs, cloudPlatform);
-    }
-
-    private Network buildNetwork(NetworkV4StackRequest source, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,
-            DBStack dbStack) {
-        Network network = new Network();
-        network.setName(generateNetworkName());
-
-        Map<String, Object> parameters = source != null
-                ? providerParameterCalculator.get(source).asMap()
-                : getSubnetsFromEnvironment(environmentResponse, cloudPlatform, dbStack);
-
-        networkParameterAdder.addParameters(parameters, environmentResponse, cloudPlatform, dbStack);
-
-        if (parameters != null) {
-            try {
-                network.setAttributes(new Json(parameters));
-            } catch (IllegalArgumentException e) {
-                throw new BadRequestException("Invalid network parameters", e);
-            }
-        }
-        return network;
-    }
-
     private DatabaseServer buildDatabaseServer(DatabaseServerV4StackRequest source, CloudPlatform cloudPlatform, Crn ownerCrn,
             SecurityAccessResponse securityAccessResponse) {
         DatabaseServer server = new DatabaseServer();
@@ -439,10 +389,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     // Sorry, MissingResourceNameGenerator seems like overkill. Unlike other
     // converters, this converter generates names internally in the same format.
-
-    private String generateNetworkName() {
-        return String.format("n-%s", uuidGeneratorService.randomUuid());
-    }
 
     private String generateDatabaseServerName() {
         return String.format("dbsvr-%s", uuidGeneratorService.randomUuid());

@@ -235,7 +235,7 @@ class StackUpgradeOperationsTest {
         verify(clusterUpgradeAvailabilityService).checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings());
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponse, request, true);
         verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
-        verify(upgradePreconditionService).checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation());
+        verify(upgradePreconditionService).checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation(), ACCOUNT_ID);
         verify(upgradePreconditionService).checkForNonUpgradeableAttachedClusters(List.of(stackDto));
         verifyNoInteractions(clusterDBValidationService);
     }
@@ -285,7 +285,7 @@ class StackUpgradeOperationsTest {
         when(clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings()))
                 .thenReturn(upgradeResponseToReturn);
         when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
-        when(upgradePreconditionService.checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation()))
+        when(upgradePreconditionService.checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation(), ACCOUNT_ID))
                 .thenReturn("There are attached Data Hub clusters in incorrect state");
         when(upgradePreconditionService.checkForNonUpgradeableAttachedClusters(List.of(stackDto)))
                 .thenReturn("There are attached Data Hub clusters that are non-upgradeable");
@@ -301,7 +301,7 @@ class StackUpgradeOperationsTest {
         verify(clusterUpgradeAvailabilityService).checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings());
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponseToReturn, request, true);
         verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
-        verify(upgradePreconditionService).checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation());
+        verify(upgradePreconditionService).checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation(), ACCOUNT_ID);
         verify(upgradePreconditionService).checkForNonUpgradeableAttachedClusters(List.of(stackDto));
         verifyNoInteractions(clusterDBValidationService);
     }
@@ -324,7 +324,7 @@ class StackUpgradeOperationsTest {
                 .thenReturn(upgradeResponseToReturn);
         when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
         when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
-        when(upgradePreconditionService.checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation()))
+        when(upgradePreconditionService.checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation(), ACCOUNT_ID))
                 .thenReturn("There are attached Data Hub clusters in incorrect state");
         when(stackDtoService.findAllByEnvironmentCrnAndStackType(ENVIRONMENT_CRN, List.of(StackType.WORKLOAD))).thenReturn(List.of(stackDto));
 
@@ -338,7 +338,7 @@ class StackUpgradeOperationsTest {
         verify(clusterUpgradeAvailabilityService).checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings());
         verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponseToReturn, request, true);
         verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
-        verify(upgradePreconditionService).checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation());
+        verify(upgradePreconditionService).checkForRunningAttachedClusters(List.of(stackDto), request.isSkipDataHubValidation(), ACCOUNT_ID);
         verify(upgradePreconditionService, times(0)).checkForNonUpgradeableAttachedClusters(List.of(stackDto));
         verifyNoInteractions(clusterDBValidationService);
     }

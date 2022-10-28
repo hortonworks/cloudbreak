@@ -30,7 +30,7 @@ class CcmV2ManagementClientTest {
 
     private static final String TEST_ENVIRONMENT_CRN = "environmentCrn";
 
-    private static final String TEST_USER_CRN = "testUserCrn";
+    private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:ausername";
 
     private static final String TEST_AGENT_CRN = "testAgentCrn";
 
