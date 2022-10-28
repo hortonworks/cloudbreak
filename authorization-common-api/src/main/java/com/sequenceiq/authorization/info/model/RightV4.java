@@ -18,6 +18,7 @@ public enum RightV4 {
     CREATE_CREDENTIAL(AuthorizationResourceAction.CREATE_CREDENTIAL),
     CREATE_RECIPE(AuthorizationResourceAction.CREATE_RECIPE),
     CREATE_IMAGE_CATALOG(AuthorizationResourceAction.CREATE_IMAGE_CATALOG),
+    CREATE_PROXY(AuthorizationResourceAction.CREATE_PROXY),
     // env level
     ENV_START(AuthorizationResourceAction.START_ENVIRONMENT),
     ENV_STOP(AuthorizationResourceAction.STOP_ENVIRONMENT),
