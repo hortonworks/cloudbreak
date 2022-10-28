@@ -15,7 +15,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.freeipa.api.v1.ldap.doc.LdapConfigOpDescription;
 import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigResponse;
@@ -70,4 +72,12 @@ public interface LdapConfigV1Endpoint {
     @ApiOperation(value = LdapConfigOpDescription.GET_REQUEST, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
             nickname = "getLdapRequestByNameV1")
     CreateLdapConfigRequest getRequest(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
+
+    @GET
+    @Path("usersync")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = LdapConfigOpDescription.GET_BY_ENV_FOR_USERSYNC, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
+            nickname = "getLdapConfigForUserSyncV1")
+    DescribeLdapConfigResponse getForUserSync(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 }

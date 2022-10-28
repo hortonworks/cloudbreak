@@ -45,6 +45,10 @@ public class RoleCrnGenerator {
     public Crn getResourceRoleCrn(UmsResourceRole umsResourceRole, String accountId) {
         Set<String> resourceRoles = grpcUmsClient.getResourceRoles(accountId);
         LOGGER.info("Resource roles in account {} are {}", accountId, Joiner.on(",").join(resourceRoles));
+        return getCrnFromResourceRoles(umsResourceRole, resourceRoles);
+    }
+
+    public static Crn getCrnFromResourceRoles(UmsResourceRole umsResourceRole, Set<String> resourceRoles) {
         return resourceRoles.stream()
                 .map(Crn::safeFromString)
                 .filter(crn -> StringUtils.equals(crn.getResource(), umsResourceRole.getResourceRoleName()))
@@ -56,6 +60,10 @@ public class RoleCrnGenerator {
     public Crn getRoleCrn(UmsRole umsRole, String accountId) {
         Set<String> roles = grpcUmsClient.getRoles(accountId);
         LOGGER.info("Roles in account {} are {}", accountId, Joiner.on(",").join(roles));
+        return getCrnFromRoles(umsRole, roles);
+    }
+
+    public static Crn getCrnFromRoles(UmsRole umsRole, Set<String> roles) {
         return roles.stream()
                 .map(Crn::safeFromString)
                 .filter(crn -> StringUtils.equals(crn.getResource(), umsRole.getRoleName()))

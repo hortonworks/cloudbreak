@@ -78,7 +78,7 @@ public class DiagnosticsService {
 
     public void cancelDiagnosticsCollection(String stackCrn) {
         diagnosticsV4Endpoint.cancelCollections(stackCrn);
-        List<FlowLog> flowLogs = flowLogDBService.getLatestFlowLogsByCrnAndType(stackCrn, ClassValue.of(SdxDiagnosticsFlowConfig.class));
+        List<FlowLog> flowLogs = flowLogDBService.getLatestNotFinishedFlowLogsByCrnAndType(stackCrn, ClassValue.of(SdxDiagnosticsFlowConfig.class));
         flowLogs.stream()
                 .filter(f -> !f.getFinalized())
                 .forEach(cancelFlow());

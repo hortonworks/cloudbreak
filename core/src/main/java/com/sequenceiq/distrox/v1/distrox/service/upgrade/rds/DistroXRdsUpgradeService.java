@@ -24,7 +24,8 @@ public class DistroXRdsUpgradeService {
     public DistroXRdsUpgradeV1Response triggerUpgrade(NameOrCrn cluster, DistroXRdsUpgradeV1Request request) {
         TargetMajorVersion targetVersion = request.getTargetVersion();
         RdsUpgradeV4Response rdsUpgradeV4Response = rdsUpgradeService.upgradeRds(cluster, targetVersion);
-        DistroXRdsUpgradeV1Response response = new DistroXRdsUpgradeV1Response(rdsUpgradeV4Response.getFlowIdentifier(), targetVersion);
+        DistroXRdsUpgradeV1Response response = new DistroXRdsUpgradeV1Response(
+                rdsUpgradeV4Response.getFlowIdentifier(), rdsUpgradeV4Response.getTargetVersion());
         LOGGER.debug("Rds upgrade requested, response {}", response);
         return response;
     }

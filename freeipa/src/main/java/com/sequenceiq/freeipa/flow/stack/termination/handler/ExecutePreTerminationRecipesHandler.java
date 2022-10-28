@@ -61,7 +61,12 @@ public class ExecutePreTerminationRecipesHandler extends ExceptionCatcherEventHa
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ExecutePreTerminationRecipesRequest> event) {
-        return new StackFailureEvent(StackTerminationEvent.TERMINATION_FAILED_EVENT.event(), resourceId, e);
+        boolean forced = event.getData().getForced();
+        if (!forced) {
+            return new StackFailureEvent(StackTerminationEvent.TERMINATION_FAILED_EVENT.event(), resourceId, e);
+        } else {
+            return new ExecutePreTerminationRecipesFinished(event.getData().getResourceId(), forced);
+        }
     }
 
     @Override
@@ -92,11 +97,12 @@ public class ExecutePreTerminationRecipesHandler extends ExceptionCatcherEventHa
             } else {
                 LOGGER.info("We have no pre-termination recipes for this stack");
             }
-        } catch (CloudbreakOrchestratorFailedException e) {
+        } catch (CloudbreakOrchestratorFailedException | CloudbreakOrchestratorTimeoutException e) {
             LOGGER.error("Pre-termination recipe execution failed", e);
-            return new StackFailureEvent(EventSelectorUtil.failureSelector(TerminateStackResult.class), stackId, e);
-        } catch (CloudbreakOrchestratorTimeoutException e) {
-            LOGGER.error("Pre-termination recipe execution timed out", e);
+            if (request.getForced()) {
+                LOGGER.info("Force flag is true, don't care about pre-termination recipe fail");
+                return new ExecutePreTerminationRecipesFinished(stackId, request.getForced());
+            }
             return new StackFailureEvent(EventSelectorUtil.failureSelector(TerminateStackResult.class), stackId, e);
         }
         return new ExecutePreTerminationRecipesFinished(stackId, request.getForced());

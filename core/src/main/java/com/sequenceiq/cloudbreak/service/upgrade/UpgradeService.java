@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
@@ -100,11 +101,14 @@ public class UpgradeService {
     @Inject
     private BlueprintService blueprintService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public UpgradeOptionV4Response getOsUpgradeOptionByStackNameOrCrn(String accountId, NameOrCrn nameOrCrn, User user) {
         StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         try {
-            return getUpgradeOption(stack, user);
+            return getUpgradeOption(accountId, stack, user);
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
             LOGGER.warn("Error retrieving image", e);
             throw new BadRequestException(e.getMessage(), e);
@@ -158,7 +162,7 @@ public class UpgradeService {
         return Boolean.TRUE.equals(request.getLockComponents()) && StringUtils.isEmpty(request.getRuntime());
     }
 
-    private UpgradeOptionV4Response getUpgradeOption(StackView stack, User user)
+    private UpgradeOptionV4Response getUpgradeOption(String accountId, StackView stack, User user)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image image = componentConfigProviderService.getImage(stack.getId());
         UpgradeOptionV4Response upgradeResponse;
@@ -166,7 +170,7 @@ public class UpgradeService {
         if (repairResult.isSuccess()) {
             StatedImage latestImage = getLatestImage(stack.getWorkspaceId(), stack, image, user);
             if (!isLatestImage(stack, image, latestImage)) {
-                upgradeResponse = currentImageNotLatest(stack, image, latestImage);
+                upgradeResponse = currentImageNotLatest(accountId, stack, image, latestImage);
             } else {
                 upgradeResponse = notUpgradable(stack.getWorkspaceId(), image,
                         String.format("According to the image catalog, the current image %s is already the latest version.", image.getImageId()));
@@ -177,10 +181,10 @@ public class UpgradeService {
         return upgradeResponse;
     }
 
-    private UpgradeOptionV4Response currentImageNotLatest(StackView stack, Image image, StatedImage latestImage)
+    private UpgradeOptionV4Response currentImageNotLatest(String accountId, StackView stack, Image image, StatedImage latestImage)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         UpgradeOptionV4Response upgradeResponse;
-        if (attachedClustersStoppedOrDeleted(stack)) {
+        if (entitlementService.isUpgradeAttachedDatahubsCheckSkipped(accountId) || attachedClustersStoppedOrDeleted(stack)) {
             upgradeResponse = upgradeable(image, latestImage, stack);
         } else {
             upgradeResponse = upgradeableAfterAction(image, latestImage, stack, "Please stop connected DataHub clusters before upgrade.");

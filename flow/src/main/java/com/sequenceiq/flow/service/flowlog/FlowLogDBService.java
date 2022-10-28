@@ -316,7 +316,7 @@ public class FlowLogDBService implements FlowLogService {
         boolean running = false;
         if (lastFlowLog.isPresent()) {
             FlowLog flowLog = lastFlowLog.get();
-            running = flowLog.getFlowType().getClassValue().equals(flowConfigurationClass)
+            running = flowLog.getFlowType() != null && flowLog.getFlowType().getClassValue().equals(flowConfigurationClass)
                     && flowLog.getStateStatus() == StateStatus.PENDING;
         }
         return running;
@@ -376,9 +376,9 @@ public class FlowLogDBService implements FlowLogService {
         return flowLogs.stream().anyMatch(pendingFlowLogPredicate());
     }
 
-    public <T extends AbstractFlowConfiguration> List<FlowLog> getLatestFlowLogsByCrnAndType(String resourceCrn, ClassValue classValue) {
+    public <T extends AbstractFlowConfiguration> List<FlowLog> getLatestNotFinishedFlowLogsByCrnAndType(String resourceCrn, ClassValue classValue) {
         Long resourceId = getResourceIdByCrnOrName(resourceCrn);
-        return flowLogRepository.findLastFlowLogsByTypeAndResourceId(resourceId, classValue);
+        return flowLogRepository.findLastNotFinishedFlowLogsByTypeAndResourceId(resourceId, classValue);
     }
 
     public List<FlowLog> getLatestFlowLogsByCrnInFlowChain(String resourceCrn) {

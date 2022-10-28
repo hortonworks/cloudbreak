@@ -1,25 +1,23 @@
 package com.sequenceiq.freeipa.ldap.v1;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.service.secret.SecretTestUtil;
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
-import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
 import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigResponse;
 import com.sequenceiq.freeipa.ldap.LdapConfig;
+import com.sequenceiq.freeipa.ldap.LdapConfigConverter;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class LdapConfigV1ServiceTest {
     private static final String LDAPNAME = "ldapname";
 
@@ -67,52 +65,50 @@ public class LdapConfigV1ServiceTest {
     private LdapConfigService ldapConfigService;
 
     @Mock
-    private MissingResourceNameGenerator missingResourceNameGenerator;
-
-    @Mock
-    private StringToSecretResponseConverter stringToSecretResponseConverter;
+    private LdapConfigConverter ldapConfigConverter;
 
     @InjectMocks
     private LdapConfigV1Service underTest;
 
     @Test
     public void testPost() {
-        // GIVEN
-        CreateLdapConfigRequest createLdapConfigRequest = createCreateLdapConfigRequest();
-        LdapConfig ldapConfig = createLdapConfig();
-        ArgumentCaptor<LdapConfig> ldapConfigParam = ArgumentCaptor.forClass(LdapConfig.class);
-        Mockito.when(stringToSecretResponseConverter.convert(SECRET_BINDDN)).thenReturn(new SecretResponse("enginepath", "binddn-secretpath"));
-        Mockito.when(stringToSecretResponseConverter.convert(SECRET_PWD)).thenReturn(new SecretResponse("enginepath", "pwd-secretpath"));
-        Mockito.when(ldapConfigService.createLdapConfig(ldapConfigParam.capture())).thenReturn(ldapConfig);
-        // WHEN
-        DescribeLdapConfigResponse actualResponse = underTest.post(createLdapConfigRequest);
-        // THEN
-        checkInnerLdapConfig(ldapConfigParam.getValue());
-        checkResponse(actualResponse);
+        CreateLdapConfigRequest request = new CreateLdapConfigRequest();
+        LdapConfig ldapConfig = new LdapConfig();
+        when(ldapConfigConverter.convertCreateLdapConfigRequest(request)).thenReturn(ldapConfig);
+        LdapConfig persistedLdapConfig = new LdapConfig();
+        when(ldapConfigService.createLdapConfig(ldapConfig)).thenReturn(persistedLdapConfig);
+        DescribeLdapConfigResponse response = new DescribeLdapConfigResponse();
+        when(ldapConfigConverter.convertLdapConfigToDescribeLdapConfigResponse(persistedLdapConfig)).thenReturn(response);
+
+        DescribeLdapConfigResponse actualResponse = underTest.post(request);
+
+        assertEquals(response, actualResponse);
     }
 
     @Test
     public void testDescribe() {
         // GIVEN
         LdapConfig ldapConfig = createLdapConfig();
-        Mockito.when(ldapConfigService.get(ENVID)).thenReturn(ldapConfig);
-        Mockito.when(stringToSecretResponseConverter.convert(SECRET_BINDDN)).thenReturn(new SecretResponse("enginepath", "binddn-secretpath"));
-        Mockito.when(stringToSecretResponseConverter.convert(SECRET_PWD)).thenReturn(new SecretResponse("enginepath", "pwd-secretpath"));
+        when(ldapConfigService.get(ENVID)).thenReturn(ldapConfig);
+        DescribeLdapConfigResponse response = new DescribeLdapConfigResponse();
+        when(ldapConfigConverter.convertLdapConfigToDescribeLdapConfigResponse(ldapConfig)).thenReturn(response);
         // WHEN
         DescribeLdapConfigResponse actualResponse = underTest.describe(ENVID);
         // THEN
-        checkResponse(actualResponse);
+        assertEquals(response, actualResponse);
     }
 
     @Test
     public void testGetCreateRequest() {
         // GIVEN
         LdapConfig ldapConfig = createLdapConfig();
-        Mockito.when(ldapConfigService.get(ENVID)).thenReturn(ldapConfig);
+        when(ldapConfigService.get(ENVID)).thenReturn(ldapConfig);
+        CreateLdapConfigRequest request = new CreateLdapConfigRequest();
+        when(ldapConfigConverter.convertLdapConfigToCreateLdapConfigRequest(ldapConfig)).thenReturn(request);
         // WHEN
         CreateLdapConfigRequest actualRequest = underTest.getCreateLdapConfigRequest(ENVID);
         // THEN
-        checkCreateRequest(actualRequest);
+        assertEquals(request, actualRequest);
     }
 
     private LdapConfig createLdapConfig() {
@@ -138,99 +134,5 @@ public class LdapConfigV1ServiceTest {
         ldapConfig.setUserObjectClass(USEROBJCLASS);
         ldapConfig.setUserSearchBase(USERSEARCHBASE);
         return ldapConfig;
-    }
-
-    private CreateLdapConfigRequest createCreateLdapConfigRequest() {
-        CreateLdapConfigRequest createLdapConfigRequest = new CreateLdapConfigRequest();
-        createLdapConfigRequest.setName(LDAPNAME);
-        createLdapConfigRequest.setDescription(LDAPDESC);
-        createLdapConfigRequest.setEnvironmentCrn(ENVID);
-        createLdapConfigRequest.setProtocol(LDAP_PROTOCOL);
-        createLdapConfigRequest.setHost(HOST);
-        createLdapConfigRequest.setPort(PORT);
-        createLdapConfigRequest.setBindDn(BINDDN);
-        createLdapConfigRequest.setBindPassword(PWD);
-        createLdapConfigRequest.setAdminGroup(ADMIN);
-        createLdapConfigRequest.setCertificate(CERT);
-        createLdapConfigRequest.setDirectoryType(DirectoryType.LDAP);
-        createLdapConfigRequest.setDomain(DOMAIN);
-        createLdapConfigRequest.setGroupMemberAttribute(MEMBER);
-        createLdapConfigRequest.setGroupObjectClass(GROUPOBJCLASS);
-        createLdapConfigRequest.setGroupSearchBase(GROUPSEARCHBASE);
-        createLdapConfigRequest.setGroupNameAttribute(GROUPNAMEATTR);
-        createLdapConfigRequest.setUserDnPattern(USERDNPATTERN);
-        createLdapConfigRequest.setUserNameAttribute(USERNAMEATTR);
-        createLdapConfigRequest.setUserObjectClass(USEROBJCLASS);
-        createLdapConfigRequest.setUserSearchBase(USERSEARCHBASE);
-        return createLdapConfigRequest;
-    }
-
-    private void checkResponse(DescribeLdapConfigResponse response) {
-        Assert.assertEquals(LDAPNAME, response.getName());
-        Assert.assertEquals(LDAPDESC, response.getDescription());
-        Assert.assertEquals(ENVID, response.getEnvironmentCrn());
-        Assert.assertEquals(LDAP_PROTOCOL, response.getProtocol());
-        Assert.assertEquals(HOST, response.getHost());
-        Assert.assertEquals(PORT, response.getPort());
-        Assert.assertEquals(ADMIN, response.getAdminGroup());
-        Assert.assertEquals(CERT, response.getCertificate());
-        Assert.assertEquals(DirectoryType.LDAP, response.getDirectoryType());
-        Assert.assertEquals(DOMAIN, response.getDomain());
-        Assert.assertEquals(MEMBER, response.getGroupMemberAttribute());
-        Assert.assertEquals(GROUPOBJCLASS, response.getGroupObjectClass());
-        Assert.assertEquals(GROUPSEARCHBASE, response.getGroupSearchBase());
-        Assert.assertEquals(GROUPNAMEATTR, response.getGroupNameAttribute());
-        Assert.assertEquals(USERDNPATTERN, response.getUserDnPattern());
-        Assert.assertEquals(USERNAMEATTR, response.getUserNameAttribute());
-        Assert.assertEquals(USEROBJCLASS, response.getUserObjectClass());
-        Assert.assertEquals(USERSEARCHBASE, response.getUserSearchBase());
-        Assert.assertEquals(response.getBindDn().getSecretPath(), "binddn-secretpath");
-        Assert.assertEquals(response.getBindPassword().getSecretPath(), "pwd-secretpath");
-    }
-
-    private void checkInnerLdapConfig(LdapConfig innerLdapConfig) {
-        Assert.assertEquals(LDAPNAME, innerLdapConfig.getName());
-        Assert.assertEquals(LDAPDESC, innerLdapConfig.getDescription());
-        Assert.assertEquals(ENVID, innerLdapConfig.getEnvironmentCrn());
-        Assert.assertEquals(LDAP_PROTOCOL, innerLdapConfig.getProtocol());
-        Assert.assertEquals(HOST, innerLdapConfig.getServerHost());
-        Assert.assertEquals(PORT, innerLdapConfig.getServerPort());
-        Assert.assertEquals(ADMIN, innerLdapConfig.getAdminGroup());
-        Assert.assertEquals(CERT, innerLdapConfig.getCertificate());
-        Assert.assertEquals(DirectoryType.LDAP, innerLdapConfig.getDirectoryType());
-        Assert.assertEquals(DOMAIN, innerLdapConfig.getDomain());
-        Assert.assertEquals(MEMBER, innerLdapConfig.getGroupMemberAttribute());
-        Assert.assertEquals(GROUPOBJCLASS, innerLdapConfig.getGroupObjectClass());
-        Assert.assertEquals(GROUPSEARCHBASE, innerLdapConfig.getGroupSearchBase());
-        Assert.assertEquals(GROUPNAMEATTR, innerLdapConfig.getGroupNameAttribute());
-        Assert.assertEquals(USERDNPATTERN, innerLdapConfig.getUserDnPattern());
-        Assert.assertEquals(USERNAMEATTR, innerLdapConfig.getUserNameAttribute());
-        Assert.assertEquals(USEROBJCLASS, innerLdapConfig.getUserObjectClass());
-        Assert.assertEquals(USERSEARCHBASE, innerLdapConfig.getUserSearchBase());
-        Assert.assertEquals(BINDDN, innerLdapConfig.getBindDn());
-        Assert.assertEquals(PWD, innerLdapConfig.getBindPassword());
-    }
-
-    private void checkCreateRequest(CreateLdapConfigRequest createLdapConfigRequest) {
-        Assert.assertEquals(LDAPNAME, createLdapConfigRequest.getName());
-        Assert.assertEquals(LDAPDESC, createLdapConfigRequest.getDescription());
-        Assert.assertEquals(ENVID, createLdapConfigRequest.getEnvironmentCrn());
-        Assert.assertEquals(LDAP_PROTOCOL, createLdapConfigRequest.getProtocol());
-        Assert.assertEquals(HOST, createLdapConfigRequest.getHost());
-        Assert.assertEquals(PORT, createLdapConfigRequest.getPort());
-        Assert.assertEquals(ADMIN, createLdapConfigRequest.getAdminGroup());
-        Assert.assertEquals(CERT, createLdapConfigRequest.getCertificate());
-        Assert.assertEquals(DirectoryType.LDAP, createLdapConfigRequest.getDirectoryType());
-        Assert.assertEquals(DOMAIN, createLdapConfigRequest.getDomain());
-        Assert.assertEquals(MEMBER, createLdapConfigRequest.getGroupMemberAttribute());
-        Assert.assertEquals(GROUPOBJCLASS, createLdapConfigRequest.getGroupObjectClass());
-        Assert.assertEquals(GROUPSEARCHBASE, createLdapConfigRequest.getGroupSearchBase());
-        Assert.assertEquals(GROUPNAMEATTR, createLdapConfigRequest.getGroupNameAttribute());
-        Assert.assertEquals(USERDNPATTERN, createLdapConfigRequest.getUserDnPattern());
-        Assert.assertEquals(USERNAMEATTR, createLdapConfigRequest.getUserNameAttribute());
-        Assert.assertEquals(USEROBJCLASS, createLdapConfigRequest.getUserObjectClass());
-        Assert.assertEquals(USERSEARCHBASE, createLdapConfigRequest.getUserSearchBase());
-        Assert.assertEquals("fake-user", createLdapConfigRequest.getBindDn());
-        Assert.assertEquals("fake-password", createLdapConfigRequest.getBindPassword());
     }
 }

@@ -11,10 +11,13 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigResponse;
@@ -22,6 +25,7 @@ import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
+import com.sequenceiq.freeipa.service.binduser.UserSyncBindUserService;
 import com.sequenceiq.freeipa.util.CrnService;
 import com.sequenceiq.notification.NotificationController;
 
@@ -30,6 +34,9 @@ import com.sequenceiq.notification.NotificationController;
 public class LdapConfigV1Controller extends NotificationController implements LdapConfigV1Endpoint {
     @Inject
     private LdapConfigV1Service ldapConfigV1Service;
+
+    @Inject
+    private UserSyncBindUserService userSyncBindUserService;
 
     @Inject
     private CrnService crnService;
@@ -73,5 +80,12 @@ public class LdapConfigV1Controller extends NotificationController implements Ld
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public CreateLdapConfigRequest getRequest(@ResourceCrn String environmentCrn) {
         return ldapConfigV1Service.getCreateLdapConfigRequest(environmentCrn);
+    }
+
+    @Override
+    @InternalOnly
+    public DescribeLdapConfigResponse getForUserSync(@TenantAwareParam String environmentCrn) {
+        MDCBuilder.addEnvironmentCrn(environmentCrn);
+        return userSyncBindUserService.getUserSyncLdapConfigIfExistsOrThrowNotFound(environmentCrn, Crn.safeFromString(environmentCrn).getAccountId());
     }
 }

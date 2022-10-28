@@ -58,7 +58,6 @@ import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
@@ -148,17 +147,13 @@ public class PkiUtil {
         }
     }
 
-    public static X509Certificate cert(KeyPair identity, String publicAddress, KeyPair signKey, int validity) {
+    public static X509Certificate cert(KeyPair identity, String publicAddress, KeyPair signKey) {
         try {
             PKCS10CertificationRequest csr = generateCsr(identity, publicAddress);
-            return selfsign(csr, publicAddress, signKey, validity);
+            return selfsign(csr, publicAddress, signKey);
         } catch (Exception e) {
             throw new PkiException("Failed to create signed cert for the cluster!", e);
         }
-    }
-
-    public static X509Certificate cert(KeyPair identity, String publicAddress, KeyPair signKey) {
-        return cert(identity, publicAddress, signKey, CERT_VALIDITY_YEAR);
     }
 
     public static PKCS10CertificationRequest csr(KeyPair identity, String commonName, List<String> subjectAlternativeNames) {
@@ -177,19 +172,6 @@ public class PkiUtil {
     public static String convert(PrivateKey privateKey) {
         try {
             return convertToString(privateKey);
-        } catch (Exception e) {
-            throw new PkiException("Failed to convert Private Key for the cluster!", e);
-        }
-    }
-
-    public static String convertPrivateKeyToPKCSPEM(PrivateKey privateKey) {
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            OutputStreamWriter output = new OutputStreamWriter(bos);
-            try (JcaPEMWriter pem = new JcaPEMWriter(output)) {
-                pem.writeObject(new JcaPKCS8Generator(privateKey, null));
-            }
-            return bos.toString();
         } catch (Exception e) {
             throw new PkiException("Failed to convert Private Key for the cluster!", e);
         }
@@ -262,7 +244,7 @@ public class PkiUtil {
         }
     }
 
-    private static X509Certificate selfsign(PKCS10CertificationRequest inputCSR, String publicAddress, KeyPair signKey, int validity)
+    private static X509Certificate selfsign(PKCS10CertificationRequest inputCSR, String publicAddress, KeyPair signKey)
             throws Exception {
         AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()
                 .find("SHA256withRSA");
@@ -274,7 +256,7 @@ public class PkiUtil {
 
         Calendar cal = Calendar.getInstance();
         Date currentTime = cal.getTime();
-        cal.add(Calendar.YEAR, validity);
+        cal.add(Calendar.YEAR, CERT_VALIDITY_YEAR);
         Date expiryTime = cal.getTime();
 
         X509v3CertificateBuilder myCertificateGenerator = new X509v3CertificateBuilder(

@@ -377,6 +377,15 @@ class FlowLogDBServiceTest {
     }
 
     @Test
+    void testIsTerminatedFlowAlreadyRunningWhenShouldReturnFalseWhenTheFlowTypeIsNotPresent() {
+        FlowLog flowLog = mock(FlowLog.class);
+        when(flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(1L)).thenReturn(Optional.of(flowLog));
+        when(flowLog.getFlowType()).thenReturn(null);
+        boolean actual = underTest.isFlowConfigAlreadyRunning(1L, TerminationFlowConfig.class);
+        Assertions.assertFalse(actual);
+    }
+
+    @Test
     void testIsTerminatedFlowAlreadyRunningWhenNoLastFlow() {
         when(flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(1L)).thenReturn(Optional.empty());
         boolean actual = underTest.isFlowConfigAlreadyRunning(1L, TerminationFlowConfig.class);

@@ -47,6 +47,7 @@ import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiServiceState;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cluster.model.ClusterManagerCommand;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
@@ -397,11 +398,13 @@ public class ClouderaManagerClusterStatusServiceTest {
                 .thenReturn(new ApiCommandList()
                         .items(List.of(new ApiCommand().name("cmd").id(BigDecimal.ONE).startTime("starttime"))));
         // WHEN
-        List<String> actualResult = subject.getActiveCommandsList();
+        List<ClusterManagerCommand> actualResult = subject.getActiveCommandsList();
         // THEN
         assertEquals(1, actualResult.size());
-        String actualCmd = actualResult.get(0);
-        assertEquals("ApiCommand[id: 1, name: cmd, starttime: starttime]", actualCmd);
+        ClusterManagerCommand actualCmd = actualResult.get(0);
+        assertEquals(BigDecimal.ONE, actualCmd.getId());
+        assertEquals("cmd", actualCmd.getName());
+        assertEquals("starttime", actualCmd.getStartTime());
     }
 
     @Test
@@ -409,7 +412,7 @@ public class ClouderaManagerClusterStatusServiceTest {
         //GIVEN
         when(cmApi.listActiveCommands("SUMMARY")).thenReturn(new ApiCommandList().items(List.of()));
         // WHEN
-        List<String> actualResult = subject.getActiveCommandsList();
+        List<ClusterManagerCommand> actualResult = subject.getActiveCommandsList();
         // THEN
         assertEquals(0, actualResult.size());
     }
@@ -419,7 +422,7 @@ public class ClouderaManagerClusterStatusServiceTest {
         //GIVEN
         when(cmApi.listActiveCommands("SUMMARY")).thenReturn(new ApiCommandList());
         // WHEN
-        List<String> actualResult = subject.getActiveCommandsList();
+        List<ClusterManagerCommand> actualResult = subject.getActiveCommandsList();
         // THEN
         assertEquals(0, actualResult.size());
     }

@@ -26,10 +26,11 @@ public class AssignResourceRoleGroupAction extends AbstractUmsAction<UmsTestDto>
 
     @Override
     protected UmsTestDto umsAction(TestContext testContext, UmsTestDto testDto, UmsClient client) throws Exception {
-        String resourceRole = testDto.getRequest().getRoleCrn();
         String resourceCrn = testDto.getRequest().getResourceCrn();
+        String resourceRole = UmsClientUtils.getResourceRoleCrn(testDto, client, regionAwareInternalCrnGeneratorFactory);
         Log.when(LOGGER, format(" Assigning resource role '%s' at resource '%s' for group '%s' ", resourceRole, resourceCrn, groupCrn));
         Log.whenJson(LOGGER, format(" Assign resource role request:%n "), testDto.getRequest());
+
         client.getDefaultClient().assignResourceRole(groupCrn, resourceCrn, resourceRole, regionAwareInternalCrnGeneratorFactory);
         // wait for UmsRightsCache to expire
         Thread.sleep(7000);

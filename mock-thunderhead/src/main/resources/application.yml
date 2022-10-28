@@ -80,7 +80,6 @@ auth:
       disk:
         SSEWithCMK.enable: true
       encryptionAtHost.enable: false
-      certificate.auth.enable: true
     aws:
       native.variant.migration.enable: false
       disk:
@@ -108,7 +107,7 @@ auth:
     postgres.upgrade.skip.attached.datahubs.check.enable: false
     postgres.upgrade.skip.service.stop.enable: false
     environment.edit.proxy.enable: true
-
+    upgrade.skip.attached.datahubs.check.enable: false
 crn:
   partition: cdp
   region: us-west-1
