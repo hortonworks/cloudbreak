@@ -16,6 +16,7 @@ import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsUpgradeEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartUpgradeRequest;
+import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 
 @Service
 public class RedbeamsUpgradeService {
@@ -30,6 +31,9 @@ public class RedbeamsUpgradeService {
     @Inject
     private RedbeamsFlowManager flowManager;
 
+    @Inject
+    private NetworkBuilderService networkBuilderService;
+
     public void upgradeDatabaseServer(String crn, UpgradeDatabaseRequest upgradeDatabaseRequest) {
         DBStack dbStack = dbStackService.getByCrn(crn);
         MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
@@ -37,9 +41,7 @@ public class RedbeamsUpgradeService {
         MajorVersion currentVersion = dbStack.getMajorVersion();
         TargetMajorVersion targetVersion = upgradeDatabaseRequest.getTargetMajorVersion();
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Upgrade called for: {}, with target version: {}, current version is: {}", dbStack, targetVersion, currentVersion);
-        }
+        LOGGER.debug("Upgrade called for: {}, with target version: {}, current version is: {}", dbStack, targetVersion, currentVersion);
         if (dbStack.getStatus().isUpgradeInProgress()) {
             LOGGER.debug(String.format("DatabaseServer with crn %s is already being upgraded", crn));
             return;
@@ -49,6 +51,7 @@ public class RedbeamsUpgradeService {
             return;
         }
 
+        dbStack = networkBuilderService.updateNetworkSubnets(dbStack);
         dbStackStatusUpdater.updateStatus(dbStack.getId(), DetailedDBStackStatus.UPGRADE_REQUESTED);
         RedbeamsStartUpgradeRequest redbeamsStartUpgradeRequest = new RedbeamsStartUpgradeRequest(dbStack.getId(),
                 upgradeDatabaseRequest.getTargetMajorVersion());
