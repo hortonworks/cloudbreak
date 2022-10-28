@@ -277,7 +277,7 @@
              {% if 'SCHEMA-REGISTRY' in exposed and 'SCHEMA_REGISTRY_SERVER' in salt['pillar.get']('gateway:location') -%}
              <param>
                  <name>SCHEMA-REGISTRY</name>
-                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;enableLoadBalancing=true</value>
              </param>
              {%- endif %}
              {% if 'HBASEJARS' in exposed and 'MASTER' in salt['pillar.get']('gateway:location') -%}
