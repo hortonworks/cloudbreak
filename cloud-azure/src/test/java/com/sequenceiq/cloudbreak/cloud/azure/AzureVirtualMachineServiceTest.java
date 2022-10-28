@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -114,6 +116,28 @@ public class AzureVirtualMachineServiceTest {
 
         AzureVirtualMachinesWithStatuses result = underTest.getVmsAndVmStatusesFromAzure(ac, List.of(cloudInstance));
 
+        verify(azureClient, times(0)).getVirtualMachineByResourceGroup(any(), any());
+        assertNotNull(result);
+        assertEquals(1, result.getStatuses().size());
+        CloudVmInstanceStatus vmStatus = result.getStatuses().get(0);
+        assertEquals(cloudInstance, vmStatus.getCloudInstance());
+        assertEquals(InstanceStatus.STARTED, vmStatus.getStatus());
+    }
+
+    @Test
+    public void testGetVmStatusesIfVmsByResourceGroupReturnsWithEmptyList() {
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(ac.getCloudContext()).thenReturn(cloudContext);
+        CloudInstance cloudInstance = cloudInstance(INSTANCE_1);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudInstance)).thenReturn(RESOURCE_GROUP);
+        PagedList<VirtualMachine> virtualMachines = createEmptyPagedList();
+        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(virtualMachines);
+        VirtualMachine virtualMachine = createVirtualMachine(INSTANCE_1);
+        when(azureClient.getVirtualMachineByResourceGroup(RESOURCE_GROUP, INSTANCE_1)).thenReturn(virtualMachine);
+
+        AzureVirtualMachinesWithStatuses result = underTest.getVmsAndVmStatusesFromAzure(ac, List.of(cloudInstance));
+
+        verify(azureClient, times(1)).getVirtualMachineByResourceGroup(RESOURCE_GROUP, INSTANCE_1);
         assertNotNull(result);
         assertEquals(1, result.getStatuses().size());
         CloudVmInstanceStatus vmStatus = result.getStatuses().get(0);
