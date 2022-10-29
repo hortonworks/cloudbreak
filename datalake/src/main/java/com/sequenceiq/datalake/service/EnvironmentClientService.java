@@ -69,13 +69,13 @@ public class EnvironmentClientService {
         if (backupResponse != null && backupResponse.getStorageLocation() != null) {
             LOGGER.info("Using the backup location to store the datalake backup");
             if (detailedEnvironmentResponse.getCloudPlatform() == "Azure" && isRangerRAZEnabled) {
-                return getUpdatedAzureRAZLocation(backupResponse.getStorageLocation());
+                return appendBackupsToAzureRAZRootLocation(backupResponse.getStorageLocation());
             }
             return backupResponse.getStorageLocation();
         } else if (telemetryResponse != null && telemetryResponse.getLogging() != null) {
             LOGGER.info("Backup location not configured. Using the log location to store the datalake backup");
             if (detailedEnvironmentResponse.getCloudPlatform() == "Azure" && isRangerRAZEnabled) {
-                return getUpdatedAzureRAZLocation(telemetryResponse.getLogging().getStorageLocation());
+                return appendBackupsToAzureRAZRootLocation(telemetryResponse.getLogging().getStorageLocation());
             }
             return telemetryResponse.getLogging().getStorageLocation();
         } else {
@@ -95,30 +95,29 @@ public class EnvironmentClientService {
     }
 
     /**
-     * Check if an Azure storage location is a root directory. Below are the two kinds of root directories:
+     * Append "/backups" or "backups" to root directory for Azure and RAZ. Below are the two types of root directories:
      * abfs://test@mydatalake.dfs.core.windows.net
      * abfs://test@mydatalake.dfs.core.windows.net/
      * @param locationInput The storage location.
      * @return The updated backup location.
      */
-    public String getUpdatedAzureRAZLocation(String locationInput) {
-        String locationAfterScheme = locationInput;
-        locationAfterScheme = locationAfterScheme.replace("abfs://", "");
-        String updatedLocation;
-        //Example: test@mydatalake.dfs.core.windows.net
-        if (!locationAfterScheme.contains("/")) {
-            updatedLocation = locationInput + "/backups";
-        } else {
-            String[] locationAfterSchemeList = locationAfterScheme.split("/");
-            //Example: test@mydatalake.dfs.core.windows.net/, so no slash needs to be added
-            if (locationAfterSchemeList.length == 1) {
-                updatedLocation = locationInput + "backups";
-            } else {
-                //This is not a root directory, so it needn't append anything.
-                // Examples: test@mydatalake.dfs.core.windows.net/test; test@mydatalake.dfs.core.windows.net/test/
-                updatedLocation = locationInput;
-            }
+    public String appendBackupsToAzureRAZRootLocation(String locationInput) {
+        if(!locationInput.startsWith("abfs://")) {
+            return locationInput;
         }
-        return updatedLocation;
+
+        Long slashCount = locationInput.chars().filter(ch -> ch == '/').count();
+        if (slashCount == 2) {
+            // No "/" after Azure prefix, example: abfs://test@mydatalake.net.
+            LOGGER.info("Appending '/backups' to the backup location because it is an Azure RAZ and root directory location.");
+            return locationInput + "/backups";
+        } else if (slashCount == 3 && locationInput.endsWith("/")) {
+            // Contains "/" but "/" is the last char, example: abfs://test@mydatalake.net/, so no slash needs to be added.
+            LOGGER.info("Appending 'backups' to the backup location because it is an Azure RAZ and root directory location.");
+            return locationInput + "backups";
+        }
+        // Not a root directory, so no need to append anything.
+        // Examples: abfs://test@mydatalake.net/test; abfs://test@mydatalake.net/test/
+        return locationInput;
     }
 }

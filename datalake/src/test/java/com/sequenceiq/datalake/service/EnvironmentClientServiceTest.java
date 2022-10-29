@@ -101,6 +101,7 @@ public class EnvironmentClientServiceTest {
         final String locationSubDirEndsWithSlash = "abfs://storagefs@mydatalake.dfs.core.windows.net/data/";
         final String locationSubDirWithMultipleSlashes = "abfs://storagefs@mydatalake.dfs.core.windows.net/data/data2";
         final String locationSubDirWithMultipleSlashesEndsWithSlash = "abfs://storagefs@mydatalake.dfs.core.windows.net/data/data2/data3/";
+        final String locationNotStartsWithABFS = "abffs://storagefs@mydatalake.dfs.core.windows.net";
 
         BackupResponse backupResponse = new BackupResponse();
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
@@ -122,10 +123,10 @@ public class EnvironmentClientServiceTest {
         environmentResponse.getBackup().setStorageLocation(locationRootDirEndsWithSlash);
         Assert.assertEquals(locationRootDirEndsWithSlash +"backups", underTest.getBackupLocation(ENV_CRN, true));
 
-        //Non-RAZ will not be appended with "/backups".
+        //Non-RAZ will not be appended with "backups" or "/backups".
         Assert.assertEquals(locationRootDirEndsWithSlash, underTest.getBackupLocation(ENV_CRN, false));
 
-        //Set up an AZURE environment with subdirectory backup location, which will not be appended with "/backups".
+        //Set up an AZURE environment with subdirectory backup location, which will not be appended with "backups" or "/backups".
         environmentResponse.getBackup().setStorageLocation(locationSubDir);
         Assert.assertEquals(locationSubDir, underTest.getBackupLocation(ENV_CRN, true));
 
@@ -138,7 +139,11 @@ public class EnvironmentClientServiceTest {
         environmentResponse.getBackup().setStorageLocation(locationSubDirWithMultipleSlashesEndsWithSlash);
         Assert.assertEquals(locationSubDirWithMultipleSlashesEndsWithSlash, underTest.getBackupLocation(ENV_CRN, true));
 
-        //Set up an AWS environment with root directory backup location, which will not be appended with "/backups".
+        //Use a location that does not start with "abfs://", which will return the original path.
+        environmentResponse.getBackup().setStorageLocation(locationNotStartsWithABFS);
+        Assert.assertEquals(locationNotStartsWithABFS, underTest.getBackupLocation(ENV_CRN, true));
+
+        //Set up an AWS environment with root directory backup location, which will not be appended with "backups" or "/backups".
         environmentResponse.setCloudPlatform("AWS");
         environmentResponse.getBackup().setStorageLocation(locationRootDir);
         Assert.assertEquals(locationRootDir, underTest.getBackupLocation(ENV_CRN, true));
