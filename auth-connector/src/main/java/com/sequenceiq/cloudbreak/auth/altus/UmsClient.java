@@ -66,6 +66,7 @@ import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
+import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -923,33 +924,21 @@ public class UmsClient {
     }
 
     /**
-     * Creates a new stub with the appropriate metadata injecting interceptors (short timeout).
-     *
-     * @return the stub
-     */
-    private UserManagementBlockingStub newShortTimeoutStub() {
-        String requestId = RequestIdUtil.getOrGenerate(MDCUtils.getRequestId());
-        return UserManagementGrpc.newBlockingStub(channel)
-                .withInterceptors(
-                        GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcShortTimeoutSec()),
-                        GrpcUtil.getTracingInterceptor(tracer),
-                        new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()),
-                        new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName()));
-    }
-
-    /**
      * Creates a new stub with the appropriate metadata injecting interceptors.
      *
      * @return the stub
      */
     private UserManagementBlockingStub newStub() {
         String requestId = RequestIdUtil.getOrGenerate(MDCUtils.getRequestId());
+        Set<ClientInterceptor> clientInterceptors = Sets.newHashSet(
+                GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcTimeoutSec()),
+                new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()),
+                new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName()));
+        if (umsClientConfig.isTracingEnabled()) {
+            clientInterceptors.add(GrpcUtil.getTracingInterceptor(tracer));
+        }
         return UserManagementGrpc.newBlockingStub(channel)
-                .withInterceptors(
-                        GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcTimeoutSec()),
-                        GrpcUtil.getTracingInterceptor(tracer),
-                        new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()),
-                        new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName()));
+                .withInterceptors(clientInterceptors.toArray(new ClientInterceptor[0]));
     }
 
     /**
