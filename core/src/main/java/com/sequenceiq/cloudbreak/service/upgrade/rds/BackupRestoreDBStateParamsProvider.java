@@ -29,6 +29,8 @@ public class BackupRestoreDBStateParamsProvider {
 
     private static final String BACKUP_LOCATION_KEY = "backup_location";
 
+    private static final String BACKUP_INSTANCE_PROFILE = "backup_instance_profile";
+
     private static final String ABFS_ACCOUNT_NAME_KEY = "abfs_account_name";
 
     private static final String ABFS_FILE_SYSTEM_KEY = "abfs_file_system";
@@ -38,7 +40,7 @@ public class BackupRestoreDBStateParamsProvider {
     @Inject
     private AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
 
-    public Map<String, Object> createParamsForBackupRestore(String backupLocation) {
+    public Map<String, Object> createParamsForBackupRestore(String backupLocation, String backupInstanceProfile) {
         Map<String, Object> params = new HashMap<>();
         Map<String, Object> postgresParams = new HashMap<>();
         params.put("postgres", postgresParams);
@@ -48,17 +50,19 @@ public class BackupRestoreDBStateParamsProvider {
         upgradeParams.put(EMBEDDED_DB_PORT_KEY, "5432");
         upgradeParams.put(EMBEDDED_DB_USER_KEY, "postgres");
         upgradeParams.put(EMBEDDED_DB_PASSWORD_KEY, "postgres");
-        setCloudStorageBackupParameters(backupLocation, upgradeParams);
+        setCloudStorageBackupParameters(backupLocation, upgradeParams, backupInstanceProfile);
+        LOGGER.debug("Created parameters for RDS upgrade backup and restore: {}", upgradeParams);
         return params;
     }
 
-    private void setCloudStorageBackupParameters(String backupLocation, Map<String, String> upgradeParams) {
+    private void setCloudStorageBackupParameters(String backupLocation, Map<String, String> upgradeParams, String backupInstanceProfile) {
         if (StringUtils.isNotBlank(backupLocation) && backupLocation.startsWith(FileSystemType.ADLS_GEN_2.getProtocol())) {
             AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(backupLocation);
             upgradeParams.put(BACKUP_LOCATION_KEY, backupLocation);
             upgradeParams.put(ABFS_ACCOUNT_NAME_KEY, adlsGen2Config.getAccount());
             upgradeParams.put(ABFS_FILE_SYSTEM_KEY, adlsGen2Config.getFileSystem());
             upgradeParams.put(ABFS_FILE_SYSTEM_FOLDER_KEY, adlsGen2Config.getFolderPrefix());
+            upgradeParams.put(BACKUP_INSTANCE_PROFILE, backupInstanceProfile);
             LOGGER.debug("Pillars for cloud storage location {} have been set", backupLocation);
         }
     }

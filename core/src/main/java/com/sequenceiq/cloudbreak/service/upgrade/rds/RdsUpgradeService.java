@@ -95,7 +95,10 @@ public class RdsUpgradeService {
                 nameOrCrn.getNameOrCrn(), calculatedVersion, targetMajorVersion);
         validate(nameOrCrn, stack, calculatedVersion, accountId);
         LOGGER.info("External database for stack {} will be upgraded to version {}", stack.getName(), calculatedVersion.getMajorVersion());
-        return triggerRdsUpgradeFlow(stack, calculatedVersion, getBackupLocation(stack.getEnvironmentCrn()));
+        DetailedEnvironmentResponse environment = environmentService.getByCrn(stack.getEnvironmentCrn());
+        String backupLocation = getBackupLocation(environment);
+        String backupInstanceProfile = getBackupInstanceProfile(environment);
+        return triggerRdsUpgradeFlow(stack, calculatedVersion, backupLocation, backupInstanceProfile);
     }
 
     private void validate(NameOrCrn nameOrCrn, StackView stack, TargetMajorVersion targetMajorVersion, String accountId) {
@@ -158,19 +161,29 @@ public class RdsUpgradeService {
         }
     }
 
-    private String getBackupLocation(String environmentCrn) {
-        DetailedEnvironmentResponse environment = environmentService.getByCrn(environmentCrn);
+    private String getBackupLocation(DetailedEnvironmentResponse environment) {
         String backupStorageLocation = environment.getBackupLocation();
         boolean hasBackupLocation = Objects.nonNull(backupStorageLocation);
         LOGGER.debug("Backup location for CRN {} has {} been found {}",
-                environmentCrn,
+                environment.getCrn(),
                 hasBackupLocation ? "" : "NOT",
                 hasBackupLocation ? backupStorageLocation : "");
         return backupStorageLocation;
     }
 
-    private RdsUpgradeV4Response triggerRdsUpgradeFlow(StackView stack, TargetMajorVersion targetMajorVersion, String backupLocation) {
-        FlowIdentifier triggeredFlowId = reactorFlowManager.triggerRdsUpgrade(stack.getId(), targetMajorVersion, backupLocation);
+    private String getBackupInstanceProfile(DetailedEnvironmentResponse environment) {
+        String backupInstanceProfile = environment.getBackupInstanceProfile();
+        boolean hasBackupInstanceProfile = Objects.nonNull(backupInstanceProfile);
+        LOGGER.debug("Backup instance profile for CRN {} has {} been found {}",
+                environment.getCrn(),
+                hasBackupInstanceProfile ? "" : "NOT",
+                hasBackupInstanceProfile ? backupInstanceProfile : "");
+        return backupInstanceProfile;
+    }
+
+    private RdsUpgradeV4Response triggerRdsUpgradeFlow(StackView stack, TargetMajorVersion targetMajorVersion, String backupLocation,
+            String backupInstanceProfile) {
+        FlowIdentifier triggeredFlowId = reactorFlowManager.triggerRdsUpgrade(stack.getId(), targetMajorVersion, backupLocation, backupInstanceProfile);
         return new RdsUpgradeV4Response(triggeredFlowId, targetMajorVersion);
     }
 

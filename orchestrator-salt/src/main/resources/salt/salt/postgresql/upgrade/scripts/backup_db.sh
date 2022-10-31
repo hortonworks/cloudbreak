@@ -88,6 +88,7 @@ move_backup_to_cloud () {
   ABFS_FILE_SYSTEM_FOLDER={{salt['pillar.get']('postgres:upgrade:abfs_file_system_folder')}}
   ABFS_ACCOUNT_NAME={{salt['pillar.get']('postgres:upgrade:abfs_account_name')}}
   CLUSTER_NAME={{salt['pillar.get']('cluster:name')}}
+  AZURE_INSTANCE_MSI={{salt['pillar.get']('postgres:upgrade:backup_instance_profile')}}
 
   [ -z "$BACKUP_LOCATION" ] && doLog "WARN BACKUP_LOCATION variable is not defined, skipping the cloud storage upload!" && return 1
 
@@ -98,14 +99,31 @@ move_backup_to_cloud () {
   tar -czvf "$LOCAL_BACKUP_FILE_NAME" "${BACKUPS_DIR}"
   doLog "INFO Compressed file size is $(du -h $LOCAL_BACKUP_FILE_NAME)"
   TARGET_LOCATION="${ABFS_FILE_SYSTEM_FOLDER}/rds_backup/${CLUSTER_NAME}/"
+  CLOUD_TARGET_LOCATION=https://${ABFS_ACCOUNT_NAME}.blob.core.windows.net/${ABFS_FILE_SYSTEM}${TARGET_LOCATION}
 
-  doLog "INFO Detected ABFS configs: Account=$ABFS_ACCOUNT_NAME, Container=$ABFS_FILE_SYSTEM, BasePath=$ABFS_FILE_SYSTEM_FOLDER"
-  cdp-telemetry storage abfs upload --file "$LOCAL_BACKUP_FILE_NAME" --location "${TARGET_LOCATION}" --account "${ABFS_ACCOUNT_NAME}" --container "${ABFS_FILE_SYSTEM}"
-  local ABFS_UPLOAD_RESULT="$?"
-  if [[ "$ABFS_UPLOAD_RESULT" == "0" ]]; then
-    doLog "INFO ABFS upload COMPLETED: Account=$ABFS_ACCOUNT_NAME, Container=$ABFS_FILE_SYSTEM, Path=${TARGET_LOCATION}${LOCAL_BACKUP_FILE_NAME}"
-  else
-    errorExit "ABFS upload FAILED: Account=$ABFS_ACCOUNT_NAME, Container=$ABFS_FILE_SYSTEM, Path=${TARGET_LOCATION}${LOCAL_BACKUP_FILE_NAME}"
+  doLog "INFO Detected ABFS configs: Account=$ABFS_ACCOUNT_NAME, Container=$ABFS_FILE_SYSTEM, BasePath=$ABFS_FILE_SYSTEM_FOLDER, msi: ${AZURE_INSTANCE_MSI}"
+  /bin/keyctl new_session 2>&1 | tee -a "${LOGFILE}"
+  doLog "INFO setting up keyring"
+  if [[ "${PIPESTATUS[0]}" -ne "0" ]]; then
+      SESSION_PERMS=$(/bin/keyctl rdescribe @s)
+      SESSION_OWNER=$(echo "${SESSION_PERMS}" | cut -f2 -d";")
+      if [[ "${SESSION_OWNER}" != "${UID}" ]]; then
+          errorExit "Unable to setup keyring session. The keyring session permissions are ${SESSION_PERMS} but the UID is ${UID}. Was this command run with \"sudo\" or \"sudo su\"? If so, then try \"sudo su -\"."
+      else
+          errorExit "Unable to setup keyring session"
+      fi
+  fi
+
+  doLog "INFO Logging in with msi ${AZURE_INSTANCE_MSI}"
+  /usr/local/bin/azcopy login --identity --identity-resource-id "${AZURE_INSTANCE_MSI}"
+  if [[ "${PIPESTATUS[0]}" -ne "0" ]]; then
+      errorExit "Unable to login to Azure with msi ${AZURE_INSTANCE_MSI}"
+  fi
+
+  doLog "INFO uploading with azcopy ${LOCAL_BACKUP_FILE_NAME} to ${CLOUD_TARGET_LOCATION}"
+  /usr/local/bin/azcopy copy "$LOCAL_BACKUP_FILE_NAME" "${CLOUD_TARGET_LOCATION}" --recursive=true --check-length=false
+  if [[ "${PIPESTATUS[0]}" -ne "0" ]]; then
+      errorExit "ABFS upload FAILED: Account=$ABFS_ACCOUNT_NAME, Container=$ABFS_FILE_SYSTEM, Path=${TARGET_LOCATION}${LOCAL_BACKUP_FILE_NAME}"
   fi
 
   rm -f ${LOCAL_BACKUP_FILE_NAME}
@@ -117,7 +135,7 @@ run_backup() {
   [ -z "$BACKUPS_DIR" ] && errorExit "BACKUPS_DIR variable is not defined, check the pillar values!"
   rm -rfv ${BACKUPS_DIR}/* > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
   DATE_DIR=${BACKUPS_DIR}/$(date '+%Y-%m-%d_%H:%M:%S')
-  mkdir -p "$DATE_DIR" || error_exit "Could not create local directory for backups."
+  mkdir -p "$DATE_DIR" || errorExit "Could not create local directory for backups."
 
   dump_global_objects
   {% for service, values in pillar.get('postgres', {}).items()  %}
