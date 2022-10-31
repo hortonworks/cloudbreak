@@ -37,6 +37,9 @@ public class UmsClientConfig {
     @Value("${altus.ums.client.grpc.short.timeout.sec:5}")
     private long grpcShortTimeoutSec;
 
+    @Value("${altus.ums.tracing.enabled:false}")
+    private boolean tracingEnabled;
+
     @PostConstruct
     public void init() {
         checkNotNull(callingServiceName, "callingServiceName must not be null.");
@@ -79,4 +82,7 @@ public class UmsClientConfig {
         return grpcShortTimeoutSec;
     }
 
+    public boolean isTracingEnabled() {
+        return tracingEnabled;
+    }
 }
