@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeS3guardValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeS3guardValidationFinishedEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -23,7 +23,7 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import reactor.bus.Event;
 
 @Component
-public class ClusterUpgradeS3guardValidationHandler  extends ExceptionCatcherEventHandler<ClusterUpgradeValidationEvent> {
+public class ClusterUpgradeS3guardValidationHandler  extends ExceptionCatcherEventHandler<ClusterUpgradeS3guardValidationEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeS3guardValidationHandler.class);
 
@@ -40,16 +40,16 @@ public class ClusterUpgradeS3guardValidationHandler  extends ExceptionCatcherEve
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ClusterUpgradeValidationEvent> event) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ClusterUpgradeS3guardValidationEvent> event) {
         LOGGER.error("Cluster upgrade S3guard validation was unsuccessful due to an unexpected error", e);
         return new ClusterUpgradeS3guardValidationFinishedEvent(START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT.name(),
                 resourceId);
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent<ClusterUpgradeValidationEvent> event) {
+    protected Selectable doAccept(HandlerEvent<ClusterUpgradeS3guardValidationEvent> event) {
         LOGGER.debug("Accepting Cluster upgrade S3guard disabled validation event.");
-        ClusterUpgradeValidationEvent request = event.getData();
+        ClusterUpgradeS3guardValidationEvent request = event.getData();
         Long stackId = request.getResourceId();
         try {
             String environmentCrn = stackService.findEnvironmentCrnByStackId(stackId);
@@ -58,16 +58,16 @@ public class ClusterUpgradeS3guardValidationHandler  extends ExceptionCatcherEve
                     && environmentResponse.getAws().getS3guard().getDynamoDbTableName() != null;
             if (isS3guardEnabled) {
                 LOGGER.error("Upgrade validation failed for resource: {} as S3Guard is enabled", request.getResourceId());
-                throw new UpgradeValidationFailedException("S3Guard is enabled for the environment. " +
-                        "Please disable S3Guard by following: https://docs.cloudera.com/cdp-public-cloud-preview-features/cloud/disable-s3-guard/disable-s3-guard.pdf");
+                throw new UpgradeValidationFailedException("S3Guard is enabled. " +
+                        "Please disable it by following: https://docs.cloudera.com/cdp-public-cloud-preview-features/cloud/disable-s3-guard/disable-s3-guard.pdf");
             }
-            return new ClusterUpgradeValidationEvent(getNextSelector(), request.getResourceId(), request.getImageId());
+            return new ClusterUpgradeS3guardValidationEvent(getNextSelector(), request.getResourceId(), request.getImageId());
         } catch (UpgradeValidationFailedException ex) {
             LOGGER.warn("Cluster upgrade validation failed", ex);
             return new ClusterUpgradeValidationFailureEvent(stackId, ex);
         } catch (Exception ex) {
             LOGGER.error("Cluster upgrade validation was unsuccessful due to an internal error", ex);
-            return new ClusterUpgradeValidationEvent(getNextSelector(), request.getResourceId(), request.getImageId());
+            return new ClusterUpgradeS3guardValidationEvent(getNextSelector(), request.getResourceId(), request.getImageId());
         }
     }
 

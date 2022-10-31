@@ -15,7 +15,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeS3guardValidationEvent;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
@@ -74,7 +74,7 @@ public class ClusterUpgradeS3guardValidationHandlerTest {
         assertEquals(FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT.name(), nextFlowStepSelector.selector());
     }
 
-    private HandlerEvent<ClusterUpgradeValidationEvent> createEvent() {
-        return new HandlerEvent<>(new Event<>(new ClusterUpgradeValidationEvent(VALIDATE_DISK_SPACE_EVENT.selector(), STACK_ID, "1")));
+    private HandlerEvent<ClusterUpgradeS3guardValidationEvent> createEvent() {
+        return new HandlerEvent<>(new Event<>(new ClusterUpgradeS3guardValidationEvent(VALIDATE_DISK_SPACE_EVENT.selector(), STACK_ID, "1")));
     }
 }

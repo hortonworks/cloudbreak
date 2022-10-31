@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.vali
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_DISK_SPACE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_S3GUARD_DISABLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.HANDLED_FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_S3GUARD_DISABLED_VALIDATION_EVENT;
 
 import java.util.Collection;
@@ -102,6 +103,8 @@ public class ClusterUpgradeValidationActions {
     @Inject
     private StackUpdater stackUpdater;
 
+    private String V_7_2_16 = "7.2.16";
+
     @Bean(name = "CLUSTER_UPGRADE_VALIDATION_INIT_STATE")
     public Action<?, ?> initClusterUpgradeValidation() {
         return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeValidationTriggerEvent.class) {
@@ -127,18 +130,30 @@ public class ClusterUpgradeValidationActions {
 
     @Bean(name = "CLUSTER_UPGRADE_S3GUARD_VALIDATION_STATE")
     public Action<?, ?> clusterUpgradeS3guardDisabledValidation() {
-        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeValidationTriggerEvent.class) {
+        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeValidationEvent.class) {
 
             @Override
-            protected void doExecute(StackContext context, ClusterUpgradeValidationTriggerEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackContext context, ClusterUpgradeValidationEvent payload, Map<Object, Object> variables)
+                    throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
                 LOGGER.info("Starting S3guard validation. Target image: {}", payload.getImageId());
-                ClusterUpgradeS3guardValidationEvent event = new ClusterUpgradeS3guardValidationEvent(VALIDATE_S3GUARD_DISABLED_EVENT.name(),
-                        payload.getResourceId(), payload.getImageId());
-                sendEvent(context, event.selector(), event);
+                UpgradeImageInfo upgradeImageInfo = upgradeImageInfoFactory.create(payload.getImageId(), payload.getResourceId());
+                Image targetImage = stackImageService
+                        .getImageModelFromStatedImage(context.getStack().getStack(), upgradeImageInfo.getCurrentImage(),
+                                upgradeImageInfo.getTargetStatedImage());
+                String targetVersion = targetImage.getPackageVersions().getOrDefault("stack", "");
+                if (targetVersion.equals(V_7_2_16)) {
+                    ClusterUpgradeS3guardValidationEvent event = new ClusterUpgradeS3guardValidationEvent(VALIDATE_S3GUARD_DISABLED_EVENT.name(),
+                            payload.getResourceId(), payload.getImageId());
+                    sendEvent(context, event.selector(), event);
+                } else {
+                    ClusterUpgradeS3guardValidationEvent event = new ClusterUpgradeS3guardValidationEvent(START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT.name(),
+                            payload.getResourceId(), payload.getImageId());
+                    sendEvent(context, event.selector(), event);
+                }
             }
 
             @Override
-            protected Object getFailurePayload(ClusterUpgradeValidationTriggerEvent payload, Optional<StackContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(ClusterUpgradeValidationEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 return new ClusterUpgradeValidationFinishedEvent(payload.getResourceId(), ex);
             }
         };
@@ -146,10 +161,10 @@ public class ClusterUpgradeValidationActions {
 
     @Bean(name = "CLUSTER_UPGRADE_IMAGE_VALIDATION_STATE")
     public Action<?, ?> clusterUpgradeImageValidation() {
-        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeValidationEvent.class) {
+        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeS3guardValidationEvent.class) {
 
             @Override
-            protected void doExecute(StackContext context, ClusterUpgradeValidationEvent payload, Map<Object, Object> variables)
+            protected void doExecute(StackContext context, ClusterUpgradeS3guardValidationEvent payload, Map<Object, Object> variables)
                     throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
                 LOGGER.info("Starting cluster upgrade image validation.");
                 UpgradeImageInfo upgradeImageInfo = upgradeImageInfoFactory.create(payload.getImageId(), payload.getResourceId());
@@ -164,7 +179,7 @@ public class ClusterUpgradeValidationActions {
             }
 
             @Override
-            protected Object getFailurePayload(ClusterUpgradeValidationEvent payload, Optional<StackContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(ClusterUpgradeS3guardValidationEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 return new ClusterUpgradeValidationFailureEvent(payload.getResourceId(), ex);
             }
         };
