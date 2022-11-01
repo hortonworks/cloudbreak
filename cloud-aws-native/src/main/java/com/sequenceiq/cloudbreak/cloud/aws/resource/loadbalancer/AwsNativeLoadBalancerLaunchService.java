@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceRetriever;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -88,6 +89,9 @@ public class AwsNativeLoadBalancerLaunchService {
 
     @Inject
     private PersistenceRetriever persistenceRetriever;
+
+    @Inject
+    private ResourceRetriever resourceRetriever;
 
     @Inject
     private AwsResourceNameService resourceNameService;
@@ -131,18 +135,24 @@ public class AwsNativeLoadBalancerLaunchService {
 
     private void createLoadBalancer(ResourceCreationContext context, AwsLoadBalancer awsLoadBalancer) {
         CloudResource loadBalancerResource;
-        Optional<CloudResource> existingLoadBalancer = persistenceRetriever.retrieveFirstByTypeAndStatusForStack(ResourceType.ELASTIC_LOAD_BALANCER,
-                CommonStatus.CREATED, context.getStackId());
+        AwsLoadBalancerScheme scheme = awsLoadBalancer.getScheme();
+        String loadBalancerName = resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, context.getStackName(), scheme.resourceName());
+        String loadBalancerNameWithoutHash = resourceNameService.trimHash(loadBalancerName);
+        LOGGER.info("Looking for elastic load balancer resource for stack with resource name prefix '{}'", loadBalancerNameWithoutHash);
+        List<CloudResource> existingLoadBalancers = resourceRetriever
+                .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, context.getStackId());
+        LOGGER.info("Existing elastic load balancer resources for stack: {}", existingLoadBalancers);
+        Optional<CloudResource> existingLoadBalancer = existingLoadBalancers.stream()
+                .filter(cloudResource -> loadBalancerNameWithoutHash.equals(resourceNameService.trimHash(cloudResource.getName())))
+                .findFirst();
         String loadBalancerArn;
         if (existingLoadBalancer.isPresent()) {
             loadBalancerResource = existingLoadBalancer.get();
             loadBalancerArn = loadBalancerResource.getReference();
-            LOGGER.info("Elastic load balancer resource has already been created for stack proceeding forward with existing resource '{}'",
+            LOGGER.info("Elastic load balancer resource has already been created for stack, proceeding forward with existing resource '{}'",
                     loadBalancerArn);
         } else {
-            AwsLoadBalancerScheme scheme = awsLoadBalancer.getScheme();
             Set<String> subnetIds = awsLoadBalancer.getSubnetIds();
-            String loadBalancerName = resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER, context.getStackName(), scheme.resourceName());
             LOGGER.info("Creating load balancer with name '{}', subnet ids: '{}' and scheme: '{}'", loadBalancerName, String.join(",", subnetIds), scheme);
             CreateLoadBalancerRequest request = new CreateLoadBalancerRequest()
                     .withName(loadBalancerName)
@@ -193,19 +203,25 @@ public class AwsNativeLoadBalancerLaunchService {
 
     private void createTargetGroup(ResourceCreationContext context, AwsNetworkView awsNetworkView, AwsTargetGroup targetGroup) {
         CloudResource targetGroupResource;
-        Optional<CloudResource> existingLoadBalancer = persistenceRetriever.retrieveFirstByTypeAndStatusForStack(
-                ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, CommonStatus.CREATED, context.getStackId());
+        String targetGroupName = context.getTargetGroupName();
+        String targetGroupNameWithoutHash = resourceNameService.trimHash(targetGroupName);
+        LOGGER.info("Looking for elastic load balancer target group resource for stack with resource name prefix '{}'", targetGroupNameWithoutHash);
+        List<CloudResource> existingTargetGroups = resourceRetriever
+                .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, context.getStackId());
+        LOGGER.info("Existing elastic load balancer target group resources for stack: {}", existingTargetGroups);
+        Optional<CloudResource> existingTargetGroup = existingTargetGroups.stream()
+                .filter(cloudResource -> targetGroupNameWithoutHash.equals(resourceNameService.trimHash(cloudResource.getName())))
+                .findFirst();
         String targetGroupArn;
-        if (existingLoadBalancer.isPresent()) {
-            targetGroupResource = existingLoadBalancer.get();
+        if (existingTargetGroup.isPresent()) {
+            targetGroupResource = existingTargetGroup.get();
             targetGroupArn = targetGroupResource.getReference();
             targetGroup.setArn(targetGroupArn);
-            LOGGER.info("Elastic load balancer target group resource has already been created for stack proceeding forward with existing resource '{}'",
+            LOGGER.info("Elastic load balancer target group resource has already been created for stack, proceeding forward with existing resource '{}'",
                     targetGroupArn);
         } else {
             int targetGroupPort = targetGroup.getPort();
             String loadBalancerArn = context.getLoadBalancerArn();
-            String targetGroupName = context.getTargetGroupName();
             LOGGER.info("Creating target group for load balancer('{}') with name: '{}' port: '{}'", loadBalancerArn, targetGroupName,
                     targetGroupPort);
             CreateTargetGroupRequest targetGroupRequest = new CreateTargetGroupRequest()
@@ -262,11 +278,18 @@ public class AwsNativeLoadBalancerLaunchService {
 
     private void createListener(ResourceCreationContext context, AwsListener listener) {
         CloudResource listenerResource;
-        Optional<CloudResource> existingLoadBalancer = persistenceRetriever.retrieveFirstByTypeAndStatusForStack(
-                ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, CommonStatus.CREATED, context.getStackId());
-        if (existingLoadBalancer.isPresent()) {
-            listenerResource = existingLoadBalancer.get();
-            LOGGER.info("Elastic load balancer listener resource has already been created for stack proceeding forward with existing resource '{}'",
+        String targetGroupName = context.getTargetGroupName();
+        String targetGroupNameWithoutHash = resourceNameService.trimHash(targetGroupName);
+        LOGGER.info("Looking for elastic load balancer listener resource for stack with resource name prefix '{}'", targetGroupNameWithoutHash);
+        List<CloudResource> existingListeners = resourceRetriever
+                .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, context.getStackId());
+        LOGGER.info("Existing elastic load balancer listener resources for stack: {}", existingListeners);
+        Optional<CloudResource> existingListener = existingListeners.stream()
+                .filter(cloudResource -> targetGroupNameWithoutHash.equals(resourceNameService.trimHash(cloudResource.getName())))
+                .findFirst();
+        if (existingListener.isPresent()) {
+            listenerResource = existingListener.get();
+            LOGGER.info("Elastic load balancer listener resource has already been created for stack, proceeding forward with existing resource '{}'",
                     listenerResource.getReference());
         } else {
             String loadBalancerArn = context.getLoadBalancerArn();
@@ -289,7 +312,7 @@ public class AwsNativeLoadBalancerLaunchService {
                     .orElseThrow()
                     .getListenerArn();
             listenerResource = new CloudResource.Builder()
-                    .withName(context.getTargetGroupName())
+                    .withName(targetGroupName)
                     .withType(ResourceType.ELASTIC_LOAD_BALANCER_LISTENER)
                     .withReference(listenerArn)
                     .withStatus(CommonStatus.CREATED)
@@ -334,7 +357,6 @@ public class AwsNativeLoadBalancerLaunchService {
             Set<String> missingPrivateIds = new HashSet<>(privateIds);
             cloudResourceReferences.forEach(missingPrivateIds::remove);
             LOGGER.debug("The following resources are missing from DB: {}", missingPrivateIds);
-
         }
         Set<TargetDescription> targetDescriptions = cloudResources.stream()
                 .map(cloudResource -> {
@@ -347,7 +369,7 @@ public class AwsNativeLoadBalancerLaunchService {
         RegisterTargetsRequest registerTargetsRequest = new RegisterTargetsRequest()
                 .withTargetGroupArn(targetGroup.getArn())
                 .withTargets(targetDescriptions);
-        LOGGER.info("Registering target group of load balancer('{}') to instances: '{}'", targetGroup.getArn(),
+        LOGGER.info("Registering target group ('{}') of load balancer to instances: '{}'", targetGroup.getArn(),
                 String.join(",", targetGroup.getInstanceIds()));
         loadBalancingClient.registerTargets(registerTargetsRequest);
     }
@@ -371,7 +393,7 @@ public class AwsNativeLoadBalancerLaunchService {
 
         private String targetGroupArn;
 
-        private List<CloudResourceStatus> resourceStatuses = new ArrayList<>();
+        private final List<CloudResourceStatus> resourceStatuses = new ArrayList<>();
 
         ResourceCreationContext(Long stackId, String stackName, Collection<Tag> tags, PersistenceNotifier persistenceNotifier,
                 AmazonElasticLoadBalancingClient loadBalancingClient, CloudContext cloudContext) {
