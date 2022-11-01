@@ -68,13 +68,13 @@ public class EnvironmentClientService {
         TelemetryResponse telemetryResponse = detailedEnvironmentResponse.getTelemetry();
         if (backupResponse != null && backupResponse.getStorageLocation() != null) {
             LOGGER.info("Using the backup location to store the datalake backup");
-            if (detailedEnvironmentResponse.getCloudPlatform() == "Azure" && isRangerRAZEnabled) {
+            if (detailedEnvironmentResponse.getCloudPlatform() == "AZURE" && isRangerRAZEnabled) {
                 return appendBackupsToAzureRAZRootLocation(backupResponse.getStorageLocation());
             }
             return backupResponse.getStorageLocation();
         } else if (telemetryResponse != null && telemetryResponse.getLogging() != null) {
             LOGGER.info("Backup location not configured. Using the log location to store the datalake backup");
-            if (detailedEnvironmentResponse.getCloudPlatform() == "Azure" && isRangerRAZEnabled) {
+            if (detailedEnvironmentResponse.getCloudPlatform() == "AZURE" && isRangerRAZEnabled) {
                 return appendBackupsToAzureRAZRootLocation(telemetryResponse.getLogging().getStorageLocation());
             }
             return telemetryResponse.getLogging().getStorageLocation();

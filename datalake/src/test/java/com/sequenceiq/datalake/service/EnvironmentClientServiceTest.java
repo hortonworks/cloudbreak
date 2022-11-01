@@ -108,7 +108,7 @@ public class EnvironmentClientServiceTest {
 
         //Set up an AZURE environment with root directory backup location.
         environmentResponse.setCrn(ENV_CRN);
-        environmentResponse.setCloudPlatform(CLOUD_PLATFORM);
+        environmentResponse.setCloudPlatform("AZURE");
         environmentResponse.setBackup(backupResponse);
         environmentResponse.getBackup().setStorageLocation(locationRootDir);
         environmentResponse.setAzure(AzureEnvironmentParameters.builder()
