@@ -103,6 +103,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.EPHEMERAL_D
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.TARGETING_SUBNETS_FOR_LB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
 import static java.util.Collections.newSetFromMap;
@@ -582,6 +583,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.environment.edit.proxy.enable}")
     private boolean enableEditProxy;
 
+    @Value("${auth.mock.targeting.subnets.for.lb}")
+    private boolean enableTargetingSubnetsForLb;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -1059,6 +1063,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (skipPostgresUpgradeServicesAndCmStop) {
             builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP));
+        }
+        if (enableTargetingSubnetsForLb) {
+            builder.addEntitlements(createEntitlement(TARGETING_SUBNETS_FOR_LB));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
