@@ -49,6 +49,8 @@ class UpgradeRdsServiceTest {
 
     private static final String INSTALL_PG_STATE = "Installing Postgres packages if necessary.";
 
+    private static final String BACKUP_INSTANCE_PROFILE = "BACKUP_INSTANCE_PROFILE";
+
     @Mock
     private StackUpdater stackUpdater;
 
@@ -102,9 +104,9 @@ class UpgradeRdsServiceTest {
 
     @Test
     public void testBackupRds() throws CloudbreakOrchestratorException {
-        underTest.backupRds(STACK_ID, BACKUP_LOCATION);
+        underTest.backupRds(STACK_ID, BACKUP_LOCATION, BACKUP_INSTANCE_PROFILE);
 
-        verify(rdsUpgradeOrchestratorService).backupRdsData(eq(STACK_ID), eq(BACKUP_LOCATION));
+        verify(rdsUpgradeOrchestratorService).backupRdsData(eq(STACK_ID), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE));
     }
 
     @Test

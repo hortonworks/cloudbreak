@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
-import java.util.StringJoiner;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
@@ -13,14 +11,18 @@ public class RdsUpgradeChainTriggerEvent extends StackEvent {
 
     private final String backupLocation;
 
+    private final String backupInstanceProfile;
+
     @JsonCreator
     public RdsUpgradeChainTriggerEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("version") TargetMajorVersion version,
-            @JsonProperty("backupLocation") String backupLocation) {
+            @JsonProperty("backupLocation") String backupLocation,
+            @JsonProperty("backupInstanceProfile") String backupInstanceProfile) {
         super(selector, stackId);
         this.backupLocation = backupLocation;
+        this.backupInstanceProfile = backupInstanceProfile;
         this.version = version;
     }
 
@@ -32,11 +34,16 @@ public class RdsUpgradeChainTriggerEvent extends StackEvent {
         return backupLocation;
     }
 
+    public String getBackupInstanceProfile() {
+        return backupInstanceProfile;
+    }
+
     @Override
     public String toString() {
-        return new StringJoiner(", ", RdsUpgradeChainTriggerEvent.class.getSimpleName() + "[", "]")
-                .add("version=" + version)
-                .add("backupLocation='" + backupLocation + "'")
-                .toString();
+        return "RdsUpgradeChainTriggerEvent{" +
+                "version=" + version +
+                ", backupLocation='" + backupLocation + '\'' +
+                ", backupInstanceProfile='" + backupInstanceProfile + '\'' +
+                "} " + super.toString();
     }
 }
