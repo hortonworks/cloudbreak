@@ -1,6 +1,7 @@
 package com.sequenceiq.common.api.backup.base;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -74,6 +75,17 @@ public abstract class BackupBase implements Serializable {
 
     public BackupCloudwatchParams getCloudwatch() {
         return cloudwatch;
+    }
+
+    public String getInstanceProfile() {
+        if (Objects.nonNull(s3)) {
+            return s3.getInstanceProfile();
+        } else if (Objects.nonNull(adlsGen2)) {
+            return adlsGen2.getManagedIdentity();
+        } else if (Objects.nonNull(gcs)) {
+            return gcs.getServiceAccountEmail();
+        }
+        return null;
     }
 
     public void setCloudwatch(BackupCloudwatchParams cloudwatch) {

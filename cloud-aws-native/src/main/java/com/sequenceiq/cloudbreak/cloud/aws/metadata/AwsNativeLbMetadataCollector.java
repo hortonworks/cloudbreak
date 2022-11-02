@@ -49,7 +49,7 @@ public class AwsNativeLbMetadataCollector {
                     .map(CloudResource::getReference)
                     .findFirst().orElse(null);
 
-                LOGGER.debug("Found target group ARN {} and listern ARN {} associated with load balancer {}, port {}",
+                LOGGER.debug("Found target group ARN {} and listener ARN {} associated with load balancer {}, port {}",
                     targetGroupArn, listenerArn, loadBalancerArn, port);
                 targetGroupParameters.put(AwsLoadBalancerMetadataView.getTargetGroupParam(port.get()), targetGroupArn);
                 targetGroupParameters.put(AwsLoadBalancerMetadataView.getListenerParam(port.get()), listenerArn);
