@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.rds;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RDS_UPGRADE_NOT_AVAILABLE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -34,6 +35,7 @@ import org.springframework.util.ReflectionUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
@@ -149,6 +151,20 @@ class RdsUpgradeServiceTest {
         verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE));
         assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
         assertThat(response.getFlowIdentifier().getPollableId()).isEqualTo(FLOW_ID);
+    }
+
+    @Test
+    void testUpgradeRdsRejectedOnDataHubWithEmbeddedDB() {
+        Stack stack = createStack(Status.AVAILABLE);
+        stack.setType(StackType.WORKLOAD);
+        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.ON_ROOT_VOLUME);
+
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
+        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION));
+
+        assertThat(exception.getMessage()).isEqualTo("Database upgrade is not allowed for DataHubs with embedded database");
     }
 
     @Test
@@ -394,6 +410,7 @@ class RdsUpgradeServiceTest {
         workspace.setTenant(tenant);
         stack.setWorkspace(workspace);
         stack.setStackStatus(new StackStatus(stack, status, null, null));
+        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.HA);
         Cluster cluster = new Cluster();
         cluster.setId(CLUSTER_ID);
         stack.setCluster(cluster);
