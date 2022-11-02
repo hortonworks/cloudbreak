@@ -133,6 +133,7 @@ public class SaltConnector implements Closeable {
     @Measure(SaltConnector.class)
     @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public GenericResponses pillar(Iterable<String> targets, Pillar pillar) {
+        LOGGER.debug("Executing salt pillar targets: {}", targets);
         Response distributeResponse = postSignedJsonSaltRequest(SaltEndpoint.BOOT_PILLAR_DISTRIBUTE, pillar);
         if (distributeResponse.getStatus() == HttpStatus.SC_NOT_FOUND) {
             // simple pillar save for CB <= 1.14
@@ -172,6 +173,8 @@ public class SaltConnector implements Closeable {
     @Measure(SaltConnector.class)
     @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public <T> T run(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, Long timeout, String... arg) {
+        LOGGER.debug("Executing salt run. target: {}, fun: {}, clientType: {}, class: {}, timeout: {}, arg: {}",
+                target, fun, clientType.toString(), clazz, timeout, arg);
         Form form = new Form();
         form = addAuth(form)
                 .param("fun", fun)
@@ -211,6 +214,7 @@ public class SaltConnector implements Closeable {
     @Measure(SaltConnector.class)
     @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public <T> T wheel(String fun, Collection<String> match, Class<T> clazz) {
+        LOGGER.debug("Executing salt wheel. fun: {}, match: {}, class: {}", fun, match, clazz);
         Form form = new Form();
         form = addAuth(form)
                 .param("fun", fun)
@@ -228,6 +232,7 @@ public class SaltConnector implements Closeable {
     @Measure(SaltConnector.class)
     @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public GenericResponses upload(Iterable<String> targets, String path, String fileName, byte[] content) throws IOException {
+        LOGGER.debug("Executing salt upload. targets: {}, path: {}, fileName: {}", targets, path, fileName);
         Response distributeResponse = upload(SaltEndpoint.BOOT_FILE_DISTRIBUTE.getContextPath(), targets, path, fileName, content);
         return getGenericResponses(targets, path, fileName, content, distributeResponse);
     }
@@ -235,6 +240,7 @@ public class SaltConnector implements Closeable {
     @Measure(SaltConnector.class)
     @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public GenericResponses upload(Iterable<String> targets, String path, String fileName, String permission, byte[] content) throws IOException {
+        LOGGER.debug("Executing salt upload with permission. targets: {}, path: {}, fileName: {}, permission: {}", targets, path, fileName, permission);
         Response distributeResponse = upload(SaltEndpoint.BOOT_FILE_DISTRIBUTE.getContextPath(), targets, path, fileName, permission, content);
         return getGenericResponses(targets, path, fileName, content, distributeResponse);
     }
