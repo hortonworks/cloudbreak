@@ -32,4 +32,30 @@ class ConclusionStepTreeFactoryTest {
         assertNull(networkCheckerStopNode2.getSuccessNode());
     }
 
+    @Test
+    public void testGetConclusionStepTreeWhenClusterProvisionBeforeSaltBootstrapConclusionCheckerType() {
+        ConclusionStepNode rootNode = ConclusionStepTreeFactory.getConclusionStepTree(ConclusionCheckerType.CLUSTER_PROVISION_BEFORE_SALT_BOOTSTRAP);
+
+        assertNotNull(rootNode);
+        assertNull(rootNode.getFailureNode());
+        ConclusionStepNode vmStatusCheckerStepNode = rootNode.getSuccessNode();
+        assertNotNull(vmStatusCheckerStepNode);
+        assertNull(vmStatusCheckerStepNode.getFailureNode());
+        assertNull(vmStatusCheckerStepNode.getSuccessNode());
+    }
+
+    @Test
+    public void testGetConclusionStepTreeWhenClusterProvisionAfterSaltBootstrapConclusionCheckerType() {
+        ConclusionStepNode rootNode = ConclusionStepTreeFactory.getConclusionStepTree(ConclusionCheckerType.CLUSTER_PROVISION_AFTER_SALT_BOOTSTRAP);
+
+        assertNotNull(rootNode);
+        assertNull(rootNode.getFailureNode());
+        ConclusionStepNode saltCheckerStepNode = rootNode.getSuccessNode();
+        assertNotNull(saltCheckerStepNode);
+        assertNull(saltCheckerStepNode.getSuccessNode());
+        ConclusionStepNode vmStatusCheckerStepNode = saltCheckerStepNode.getFailureNode();
+        assertNotNull(vmStatusCheckerStepNode);
+        assertNull(vmStatusCheckerStepNode.getSuccessNode());
+        assertNull(vmStatusCheckerStepNode.getFailureNode());
+    }
 }

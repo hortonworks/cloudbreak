@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.conclusion;
 
-enum ConclusionCheckerType {
+public enum ConclusionCheckerType {
 
-    DEFAULT;
+    DEFAULT,
+    CLUSTER_PROVISION_BEFORE_SALT_BOOTSTRAP,
+    CLUSTER_PROVISION_AFTER_SALT_BOOTSTRAP;
 
 }

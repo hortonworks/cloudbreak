@@ -61,7 +61,8 @@ class ConclusionCheckerServiceTest {
         when(entitlementService.conclusionCheckerSendUserEventEnabled(anyString())).thenReturn(Boolean.TRUE);
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN,
-                () -> underTest.runConclusionChecker(STACK_ID, Status.STOP_FAILED.name(), ResourceEvent.CLUSTER_STOP_FAILED, "eventMessageArg"));
+                () -> underTest.runConclusionChecker(STACK_ID, Status.STOP_FAILED.name(), ResourceEvent.CLUSTER_STOP_FAILED,
+                        ConclusionCheckerType.DEFAULT, "eventMessageArg"));
 
         verify(conclusionChecker, times(1)).doCheck(eq(STACK_ID));
         verifyNoMoreInteractions(conclusionChecker);
@@ -77,7 +78,8 @@ class ConclusionCheckerServiceTest {
         when(conclusionChecker.doCheck(eq(STACK_ID))).thenThrow(new RuntimeException("error"));
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN,
-                () -> underTest.runConclusionChecker(STACK_ID, Status.STOP_FAILED.name(), ResourceEvent.CLUSTER_STOP_FAILED, "eventMessageArg"));
+                () -> underTest.runConclusionChecker(STACK_ID, Status.STOP_FAILED.name(), ResourceEvent.CLUSTER_STOP_FAILED, ConclusionCheckerType.DEFAULT,
+                        "eventMessageArg"));
 
         verify(conclusionChecker, times(1)).doCheck(eq(STACK_ID));
         verifyNoMoreInteractions(conclusionChecker);

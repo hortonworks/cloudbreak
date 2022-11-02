@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.conclusion;
 
 import static com.sequenceiq.cloudbreak.conclusion.ConclusionStepNode.stepNode;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -18,10 +18,14 @@ class ConclusionStepTreeFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConclusionStepTreeFactory.class);
 
-    private static final Map<ConclusionCheckerType, ConclusionStepNode> CONCLUSION_CHECKER_TYPE_MAP = new HashMap<>();
+    private static final Map<ConclusionCheckerType, ConclusionStepNode> CONCLUSION_CHECKER_TYPE_MAP = new EnumMap<>(ConclusionCheckerType.class);
 
     static {
         CONCLUSION_CHECKER_TYPE_MAP.put(ConclusionCheckerType.DEFAULT, initDefaultConclusionStepTree());
+        CONCLUSION_CHECKER_TYPE_MAP.put(ConclusionCheckerType.CLUSTER_PROVISION_BEFORE_SALT_BOOTSTRAP,
+                initClusterProvisionBeforeSaltBootstrapConclusionStepTree());
+        CONCLUSION_CHECKER_TYPE_MAP.put(ConclusionCheckerType.CLUSTER_PROVISION_AFTER_SALT_BOOTSTRAP,
+                initClusterProvisionAfterSaltBootstrapConclusionStepTree());
     }
 
     private ConclusionStepTreeFactory() {
@@ -43,6 +47,19 @@ class ConclusionStepTreeFactory {
                                 .withSuccessNode(stepNode(NetworkCheckerConclusionStep.class)))
                         .withFailureNode(stepNode(VmStatusCheckerConclusionStep.class)
                                 .withSuccessNode(stepNode(NetworkCheckerConclusionStep.class))));
+        return root;
+    }
+
+    private static ConclusionStepNode initClusterProvisionBeforeSaltBootstrapConclusionStepTree() {
+        ConclusionStepNode root = stepNode(InfoCollectorConclusionStep.class)
+                .withSuccessNode(stepNode(VmStatusCheckerConclusionStep.class));
+        return root;
+    }
+
+    private static ConclusionStepNode initClusterProvisionAfterSaltBootstrapConclusionStepTree() {
+        ConclusionStepNode root = stepNode(InfoCollectorConclusionStep.class)
+                .withSuccessNode(stepNode(SaltCheckerConclusionStep.class)
+                        .withFailureNode(stepNode(VmStatusCheckerConclusionStep.class)));
         return root;
     }
 }

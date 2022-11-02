@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerService;
+import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -83,6 +84,6 @@ public class ClusterUpgradeFailedHandler extends ExceptionCatcherEventHandler<Cl
     private void runConclusionChecking(ClusterUpgradeFailedRequest request) {
         ResourceEvent resourceEvent = DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED == request.getDetailedStatus()
                 ? CLUSTER_MANAGER_UPGRADE_FAILED : CLUSTER_UPGRADE_FAILED;
-        conclusionCheckerService.runConclusionChecker(request.getResourceId(), UPDATE_FAILED.name(), resourceEvent);
+        conclusionCheckerService.runConclusionChecker(request.getResourceId(), UPDATE_FAILED.name(), resourceEvent, ConclusionCheckerType.DEFAULT);
     }
 }

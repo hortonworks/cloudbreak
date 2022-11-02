@@ -78,7 +78,7 @@ public class ClusterCreationService {
     }
 
     public void startingClusterServices(Long stackId) {
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.STARTING_CLUSTER_MANAGER_SERVICES, "Running cluster services.");
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.STARTING_CLUSTER_SERVICES, "Running cluster services.");
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_RUN_SERVICES);
     }
 

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerService;
+import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterDownscaleFailedConclusionRequest;
@@ -42,7 +43,8 @@ public class ClusterDownscaleFailedConclusionHandler extends ExceptionCatcherEve
     protected Selectable doAccept(HandlerEvent<ClusterDownscaleFailedConclusionRequest> event) {
         ClusterDownscaleFailedConclusionRequest request = event.getData();
         LOGGER.info("Handle ClusterDownscaleFailedConclusionRequest, stackId: {}", request.getResourceId());
-        conclusionCheckerService.runConclusionChecker(request.getResourceId(), UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, "removed from");
+        conclusionCheckerService.runConclusionChecker(request.getResourceId(), UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, ConclusionCheckerType.DEFAULT,
+                "removed from");
         return new StackEvent(ClusterDownscaleEvent.FAIL_HANDLED_EVENT.event(), request.getResourceId());
     }
 
