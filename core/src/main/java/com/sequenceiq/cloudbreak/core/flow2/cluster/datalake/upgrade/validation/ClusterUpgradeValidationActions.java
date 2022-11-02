@@ -103,7 +103,7 @@ public class ClusterUpgradeValidationActions {
     @Inject
     private StackUpdater stackUpdater;
 
-    private String V_7_2_16 = "7.2.16";
+    private final String v_7_2_16 = "7.2.16";
 
     @Bean(name = "CLUSTER_UPGRADE_VALIDATION_INIT_STATE")
     public Action<?, ?> initClusterUpgradeValidation() {
@@ -141,7 +141,7 @@ public class ClusterUpgradeValidationActions {
                         .getImageModelFromStatedImage(context.getStack().getStack(), upgradeImageInfo.getCurrentImage(),
                                 upgradeImageInfo.getTargetStatedImage());
                 String targetVersion = targetImage.getPackageVersions().getOrDefault("stack", "");
-                if (targetVersion.equals(V_7_2_16)) {
+                if (targetVersion.equals(v_7_2_16)) {
                     ClusterUpgradeS3guardValidationEvent event = new ClusterUpgradeS3guardValidationEvent(VALIDATE_S3GUARD_DISABLED_EVENT.name(),
                             payload.getResourceId(), payload.getImageId());
                     sendEvent(context, event.selector(), event);

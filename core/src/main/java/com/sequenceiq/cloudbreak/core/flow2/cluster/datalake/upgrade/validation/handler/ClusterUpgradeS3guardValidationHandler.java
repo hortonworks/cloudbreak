@@ -33,7 +33,6 @@ public class ClusterUpgradeS3guardValidationHandler  extends ExceptionCatcherEve
     @Inject
     private EnvironmentClientService environmentService;
 
-
     @Override
     public String selector() {
         return VALIDATE_S3GUARD_DISABLED_EVENT.selector();
@@ -54,12 +53,12 @@ public class ClusterUpgradeS3guardValidationHandler  extends ExceptionCatcherEve
         try {
             String environmentCrn = stackService.findEnvironmentCrnByStackId(stackId);
             DetailedEnvironmentResponse environmentResponse = environmentService.getByCrn(environmentCrn);
-            boolean isS3guardEnabled = environmentResponse.getAws() != null && environmentResponse.getAws().getS3guard() != null
+            boolean s3guardEnabled = environmentResponse.getAws() != null && environmentResponse.getAws().getS3guard() != null
                     && environmentResponse.getAws().getS3guard().getDynamoDbTableName() != null;
-            if (isS3guardEnabled) {
+            if (s3guardEnabled) {
                 LOGGER.error("Upgrade validation failed for resource: {} as S3Guard is enabled", request.getResourceId());
                 throw new UpgradeValidationFailedException("S3Guard is enabled. " +
-                        "Please disable it by following: https://docs.cloudera.com/cdp-public-cloud-preview-features/cloud/disable-s3-guard/disable-s3-guard.pdf");
+                    "Please disable it by following: https://docs.cloudera.com/cdp-public-cloud-preview-features/cloud/disable-s3-guard/disable-s3-guard.pdf");
             }
             return new ClusterUpgradeS3guardValidationEvent(getNextSelector(), request.getResourceId(), request.getImageId());
         } catch (UpgradeValidationFailedException ex) {

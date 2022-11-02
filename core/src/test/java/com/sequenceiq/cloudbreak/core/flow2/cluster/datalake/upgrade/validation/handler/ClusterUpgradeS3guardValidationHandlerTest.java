@@ -53,9 +53,6 @@ public class ClusterUpgradeS3guardValidationHandlerTest {
         verify(environmentService).getByCrn("1");
     }
 
-    /**
-     * @throws UpgradeValidationFailedException
-     */
     @Test
     public void testHandlerToCheckS3guardEnvironment() {
         when(stackService.findEnvironmentCrnByStackId(STACK_ID)).thenReturn("1");
