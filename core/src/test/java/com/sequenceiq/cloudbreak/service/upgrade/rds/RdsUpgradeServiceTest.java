@@ -320,19 +320,19 @@ class RdsUpgradeServiceTest {
 
     @ParameterizedTest
     @EnumSource(value = DatabaseServerStatus.class, names = {"AVAILABLE", "UPGRADE_FAILED"})
-    void testUpgradeRdsWithValidDatabaseStuatusThenSuccess(DatabaseServerStatus status) {
+    void testUpgradeRdsWithValidDatabaseStatusThenSuccess(DatabaseServerStatus status) {
         Stack stack = createStack(Status.AVAILABLE);
         when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10, status));
         when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
         when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
-        when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION))).thenReturn(flowId);
+        when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE))).thenReturn(flowId);
         when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
 
         RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
 
-        verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION));
+        verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION), eq(BACKUP_INSTANCE_PROFILE));
         assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
         assertThat(response.getFlowIdentifier().getPollableId()).isEqualTo(FLOW_ID);
     }
