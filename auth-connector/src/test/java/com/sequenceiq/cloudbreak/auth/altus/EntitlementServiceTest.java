@@ -238,6 +238,9 @@ class EntitlementServiceTest {
 
                 {"CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL", (EntitlementCheckFunction) EntitlementService::isUserSyncSplitFreeIPAUserRetrievalEnabled, false},
                 {"CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL", (EntitlementCheckFunction) EntitlementService::isUserSyncSplitFreeIPAUserRetrievalEnabled, true},
+
+                {"TARGETING_SUBNETS_FOR_LB", (EntitlementCheckFunction) EntitlementService::isTargetingSubnetsForLbEnabled, false},
+                {"TARGETING_SUBNETS_FOR_LB", (EntitlementCheckFunction) EntitlementService::isTargetingSubnetsForLbEnabled, true},
         };
     }
 
