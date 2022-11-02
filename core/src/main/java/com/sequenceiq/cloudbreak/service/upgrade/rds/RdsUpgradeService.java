@@ -91,6 +91,13 @@ public class RdsUpgradeService {
         TargetMajorVersion calculatedVersion = ObjectUtils.defaultIfNull(targetMajorVersion, defaultTargetMajorVersion);
         String accountId = restRequestThreadLocalService.getAccountId();
         StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
+
+        boolean dataHubWithEmbeddedDatabase = !stack.isDatalake() && stack.getExternalDatabaseCreationType().isEmbedded();
+        if (dataHubWithEmbeddedDatabase) {
+            LOGGER.warn("Database upgrade is not allowed for DataHubs with embedded database ");
+            throw new BadRequestException("Database upgrade is not allowed for DataHubs with embedded database");
+        }
+
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("RDS upgrade has been initiated for stack {} to version {}, request version was {}",
                 nameOrCrn.getNameOrCrn(), calculatedVersion, targetMajorVersion);
