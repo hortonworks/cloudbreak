@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerService;
+import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterUpscaleFailedConclusionRequest;
@@ -42,7 +43,8 @@ public class ClusterUpscaleFailedConclusionHandler extends ExceptionCatcherEvent
     protected Selectable doAccept(HandlerEvent<ClusterUpscaleFailedConclusionRequest> event) {
         ClusterUpscaleFailedConclusionRequest request = event.getData();
         LOGGER.info("Handle ClusterUpscaleFailedConclusionRequest, stackId: {}", request.getResourceId());
-        conclusionCheckerService.runConclusionChecker(request.getResourceId(), UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, "added to");
+        conclusionCheckerService.runConclusionChecker(request.getResourceId(), UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, ConclusionCheckerType.DEFAULT,
+                "added to");
         return new StackEvent(ClusterUpscaleEvent.FAIL_HANDLED_EVENT.event(), request.getResourceId());
     }
 

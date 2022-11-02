@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerService;
+import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartFailedRequest;
@@ -42,6 +43,7 @@ class ClusterStartFailedHandlerTest {
         assertThat(selectable).isInstanceOf(StackEvent.class);
         assertThat(selectable.getSelector()).isEqualTo(ClusterStartEvent.FAIL_HANDLED_EVENT.event());
 
-        verify(conclusionCheckerService, times(1)).runConclusionChecker(eq(STACK_ID), anyString(), any());
+        verify(conclusionCheckerService, times(1)).runConclusionChecker(eq(STACK_ID), anyString(), any(),
+                eq(ConclusionCheckerType.DEFAULT));
     }
 }

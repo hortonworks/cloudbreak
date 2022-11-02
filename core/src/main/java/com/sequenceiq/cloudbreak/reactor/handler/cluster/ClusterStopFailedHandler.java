@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerService;
+import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopFailedRequest;
@@ -42,7 +43,7 @@ public class ClusterStopFailedHandler extends ExceptionCatcherEventHandler<Clust
     protected Selectable doAccept(HandlerEvent<ClusterStopFailedRequest> event) {
         ClusterStopFailedRequest request = event.getData();
         LOGGER.info("Handle ClusterStopFailedRequest, stackId: {}", request.getResourceId());
-        conclusionCheckerService.runConclusionChecker(request.getResourceId(), STOP_FAILED.name(), CLUSTER_STOP_FAILED);
+        conclusionCheckerService.runConclusionChecker(request.getResourceId(), STOP_FAILED.name(), CLUSTER_STOP_FAILED, ConclusionCheckerType.DEFAULT);
         return new StackEvent(ClusterStopEvent.FINALIZED_EVENT.event(), request.getResourceId());
     }
 }
