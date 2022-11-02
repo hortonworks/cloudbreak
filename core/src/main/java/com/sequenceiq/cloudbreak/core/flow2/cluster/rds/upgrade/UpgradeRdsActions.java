@@ -38,6 +38,8 @@ public class UpgradeRdsActions {
 
     private static final Object CLOUD_STORAGE_BACKUP_LOCATION = "cloud_storage_backup_location";
 
+    private static final Object CLOUD_STORAGE_INSTANCE_PROFILE = "cloud_storage_instance_profile";
+
     @Inject
     private UpgradeRdsService upgradeRdsService;
 
@@ -47,6 +49,7 @@ public class UpgradeRdsActions {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsTriggerRequest payload, Map<Object, Object> variables) {
                 putIfPresent(variables, CLOUD_STORAGE_BACKUP_LOCATION, payload.getBackupLocation());
+                putIfPresent(variables, CLOUD_STORAGE_INSTANCE_PROFILE, payload.getBackupInstanceProfile());
                 upgradeRdsService.stopServicesState(payload.getResourceId());
                 sendEvent(context, new UpgradeRdsStopServicesRequest(context.getStackId(), context.getVersion()));
             }
@@ -60,8 +63,9 @@ public class UpgradeRdsActions {
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsStopServicesResult payload, Map<Object, Object> variables) {
                 if (upgradeRdsService.shouldRunDataBackupRestore(context.getStack(), context.getCluster())) {
                     String backupLocation = Objects.toString(variables.get(CLOUD_STORAGE_BACKUP_LOCATION), null);
+                    String backupInstanceProfile = Objects.toString(variables.get(CLOUD_STORAGE_INSTANCE_PROFILE), null);
                     upgradeRdsService.backupRdsState(payload.getResourceId());
-                    sendEvent(context, new UpgradeRdsDataBackupRequest(context.getStackId(), context.getVersion(), backupLocation));
+                    sendEvent(context, new UpgradeRdsDataBackupRequest(context.getStackId(), context.getVersion(), backupLocation, backupInstanceProfile));
                 } else {
                     sendEvent(context, new UpgradeRdsDataBackupResult(context.getStackId(), context.getVersion()));
                 }

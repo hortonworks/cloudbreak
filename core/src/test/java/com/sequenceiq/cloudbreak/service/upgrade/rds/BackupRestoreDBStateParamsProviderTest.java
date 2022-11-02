@@ -25,6 +25,8 @@ class BackupRestoreDBStateParamsProviderTest {
 
     private static final String ABFS_FOLDER = "aFolder";
 
+    private static final String BACKUP_INSTANCE_PROFILE = "BACKUP_INSTANCE_PROFILE";
+
     @Mock
     private AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
 
@@ -33,10 +35,11 @@ class BackupRestoreDBStateParamsProviderTest {
 
     @Test
     void testCreateBackupParamsWithoutLocation() {
-        Map<String, Object> actualResult = underTest.createParamsForBackupRestore(null);
+        Map<String, Object> actualResult = underTest.createParamsForBackupRestore(null, null);
         Map<String, String> upgradeParams = (Map<String, String>) ((Map<String, Object>) actualResult.get("postgres")).get("upgrade");
         assertEmbeddedParams(upgradeParams);
         Assertions.assertNull(upgradeParams.get("backup_location"));
+        Assertions.assertNull(upgradeParams.get("backup_instance_profile"));
     }
 
     @Test
@@ -44,10 +47,11 @@ class BackupRestoreDBStateParamsProviderTest {
         AdlsGen2Config adlsGen2Config = new AdlsGen2Config(ABFS_FOLDER, ABFS_FILESYSTEM_NAME, ABFS_STORAGE_ACCOUNT_NAME, false);
         when(adlsGen2ConfigGenerator.generateStorageConfig(BACKUP_LOCATION)).thenReturn(adlsGen2Config);
 
-        Map<String, Object> actualResult = underTest.createParamsForBackupRestore(BACKUP_LOCATION);
+        Map<String, Object> actualResult = underTest.createParamsForBackupRestore(BACKUP_LOCATION, BACKUP_INSTANCE_PROFILE);
         Map<String, String> upgradeParams = (Map<String, String>) ((Map<String, Object>) actualResult.get("postgres")).get("upgrade");
         assertEmbeddedParams(upgradeParams);
         Assertions.assertEquals(BACKUP_LOCATION, upgradeParams.get("backup_location"));
+        Assertions.assertEquals(BACKUP_INSTANCE_PROFILE, upgradeParams.get("backup_instance_profile"));
         Assertions.assertEquals(ABFS_STORAGE_ACCOUNT_NAME, upgradeParams.get("abfs_account_name"));
         Assertions.assertEquals(ABFS_FILESYSTEM_NAME, upgradeParams.get("abfs_file_system"));
         Assertions.assertEquals(ABFS_FOLDER, upgradeParams.get("abfs_file_system_folder"));
