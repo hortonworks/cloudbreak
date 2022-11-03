@@ -33,4 +33,8 @@ public class DocumentationLinkProvider {
     public static String awsAddSubnetLink() {
         return "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-subnet-adding-azure.html";
     }
+
+    public static String awsS3guardDisableDocumentationLink() {
+        return "https://docs.cloudera.com/cdp-public-cloud-preview-features/cloud/disable-s3-guard/disable-s3-guard.pdf";
+    }
 }
