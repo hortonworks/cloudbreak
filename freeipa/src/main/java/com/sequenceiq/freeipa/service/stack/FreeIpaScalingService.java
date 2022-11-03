@@ -86,8 +86,8 @@ public class FreeIpaScalingService {
 
     private UpscaleResponse triggerUpscale(UpscaleRequest request, Stack stack, AvailabilityType originalAvailabilityType) {
         Operation operation = startScalingOperation(stack.getAccountId(), request.getEnvironmentCrn(), OperationType.UPSCALE);
-        UpscaleEvent upscaleEvent = new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(),
-                stack.getId(), request.getTargetAvailabilityType().getInstanceCount(), false, false, false, operation.getOperationId(), null);
+        UpscaleEvent upscaleEvent = new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(), stack.getId(), new ArrayList<>(),
+                request.getTargetAvailabilityType().getInstanceCount(), false, false, false, operation.getOperationId(), null);
         try {
             LOGGER.info("Trigger upscale flow with event: {}", upscaleEvent);
             FlowIdentifier flowIdentifier = flowManager.notify(UpscaleFlowEvent.UPSCALE_EVENT.event(), upscaleEvent);

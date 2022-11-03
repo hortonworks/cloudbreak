@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -116,12 +118,13 @@ public class InstanceMetaDataService {
         return instanceMetaDataRepository.getStackAuthenticationViewByInstanceMetaDataId(instanceId);
     }
 
-    public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances) {
+    public Stack saveInstanceAndGetUpdatedStack(Stack stack, List<CloudInstance> cloudInstances, List<InstanceMetaData> instancesToRemove) {
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         DetailedEnvironmentResponse environment = measure(() -> cachedEnvironmentClientService.getByCrn(stack.getEnvironmentCrn()),
                 LOGGER, "Environment properties were queried under {} ms for environment {}", stack.getEnvironmentCrn());
         Map<String, List<CloudInstance>> instancesPerGroup = cloudInstances.stream()
                 .collect(Collectors.groupingBy(cloudInstance -> cloudInstance.getTemplate().getGroupName()));
+        Iterator<InstanceMetaData> instanceIdsToRemoveIterator = instancesToRemove.iterator();
         for (Map.Entry<String, List<CloudInstance>> instancesPerGroupEntry : instancesPerGroup.entrySet()) {
             InstanceGroup instanceGroup = getInstanceGroup(stack.getInstanceGroups(), instancesPerGroupEntry.getKey());
             if (instanceGroup != null) {
@@ -134,10 +137,24 @@ public class InstanceMetaDataService {
                     instanceMetaData.setInstanceStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED);
                     instanceMetaData.setInstanceGroup(instanceGroup);
                     instanceMetaData.setDiscoveryFQDN(freeIpa.getHostname() + String.format("%d.", privateId) + freeIpa.getDomain());
-                    if (!subnetAzMap.isEmpty()) {
+                    if (instanceIdsToRemoveIterator.hasNext()) {
+                        InstanceMetaData nextInstanceMetadata = instanceIdsToRemoveIterator.next();
+                        instanceMetaData.setAvailabilityZone(nextInstanceMetadata.getAvailabilityZone());
+                        instanceMetaData.setSubnetId(nextInstanceMetadata.getSubnetId());
+                        LOGGER.debug("Instance metadata found with id: {}, the subnet and AZ are set to {}/{} for the new instance metadata with private id: {}",
+                                nextInstanceMetadata.getInstanceId(), nextInstanceMetadata.getAvailabilityZone(), nextInstanceMetadata.getSubnetId(),
+                                privateId);
+                    }
+                    if (StringUtils.isBlank(instanceMetaData.getSubnetId()) && !subnetAzMap.isEmpty()) {
+                        LOGGER.debug("Calculate new subnet and AZ for private id: {}", privateId);
                         Map<String, String> filteredSubnetsByLeastUsedAz = multiAzCalculatorService.filterSubnetByLeastUsedAz(instanceGroup, subnetAzMap);
                         multiAzCalculatorService.updateSubnetIdForSingleInstanceIfEligible(filteredSubnetsByLeastUsedAz, currentSubnetUsage, instanceMetaData,
                                 instanceGroup);
+                    } else if (StringUtils.isNoneBlank(instanceMetaData.getSubnetId())) {
+                        LOGGER.debug("Subnet and AZ calculation skipped, because the AZ/subnet already set: {}/{}",
+                                instanceMetaData.getAvailabilityZone(), instanceMetaData.getSubnetId());
+                    } else {
+                        LOGGER.debug("Subnet and AZ calculation skipped, because the subnetAzMap is empty");
                     }
                     instanceMetaDataRepository.save(instanceMetaData);
                     LOGGER.debug("Saved InstanceMetaData: {}", instanceMetaData);

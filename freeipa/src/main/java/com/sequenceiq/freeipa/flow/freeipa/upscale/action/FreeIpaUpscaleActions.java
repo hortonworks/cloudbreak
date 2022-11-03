@@ -160,6 +160,7 @@ public class FreeIpaUpscaleActions {
                 setRepair(variables, payload.getRepair());
                 setChainedAction(variables, payload.isChained());
                 setFinalChain(variables, payload.isFinalChain());
+                setInstanceIds(variables, payload.getInstanceIds());
                 LOGGER.info("Starting upscale {}", payload);
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Starting upscale");
                 sendEvent(context, UPSCALE_STARTING_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
@@ -179,7 +180,11 @@ public class FreeIpaUpscaleActions {
                 if (newInstances.isEmpty()) {
                     skipAddingNewInstances(context, stack);
                 } else {
-                    addNewInstances(context, stack, newInstances);
+                    List<String> instanceIdsToRemove = getInstanceIds(variables);
+                    if (instanceIdsToRemove == null) {
+                        instanceIdsToRemove = new ArrayList<>();
+                    }
+                    addNewInstances(context, stack, newInstances, instanceIdsToRemove);
                 }
             }
 
@@ -192,8 +197,12 @@ public class FreeIpaUpscaleActions {
                 sendEvent(context, result.selector(), result);
             }
 
-            private void addNewInstances(StackContext context, Stack stack, List<CloudInstance> newInstances) {
-                Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, newInstances);
+            private void addNewInstances(StackContext context, Stack stack, List<CloudInstance> newInstances, List<String> instanceIdsToRemove) {
+                List<InstanceMetaData> instancesToRemove = stack.getInstanceGroups().stream().flatMap(ig -> ig.getInstanceMetaData().stream())
+                        .filter(im -> instanceIdsToRemove.contains(im.getInstanceId()) && Objects.nonNull(im.getSubnetId()))
+                        .collect(Collectors.toList());
+                LOGGER.debug("Instances to replace and keep the AZ: {}", instancesToRemove);
+                Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, newInstances, instancesToRemove);
                 List<CloudResource> cloudResources = resourceService.findAllByStackId(stack.getId()).stream()
                         .map(resource -> resourceConverter.convert(resource))
                         .collect(Collectors.toList());
