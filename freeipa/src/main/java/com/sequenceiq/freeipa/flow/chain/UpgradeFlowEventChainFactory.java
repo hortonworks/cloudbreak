@@ -72,14 +72,15 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
             Set<String> groupNames) {
         LOGGER.debug("Add events for primary gateway with id: [{}]", event.getPrimareGwInstanceId());
         List<Selectable> events = new ArrayList<>(PRIMARY_GW_EVENT_COUNT);
+        ArrayList<String> instanceIdToDownscale = Lists.newArrayList(event.getPrimareGwInstanceId());
         addMigrationFlowIfNeed(event, events, groupNames, "Resource create flow");
-        events.add(new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(),
-                event.getResourceId(), instanceCountForUpscale, Boolean.FALSE, true, false, event.getOperationId(), event.getTriggeredVariant()));
+        events.add(new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(), event.getResourceId(), instanceIdToDownscale,
+                instanceCountForUpscale, Boolean.FALSE, true, false, event.getOperationId(), event.getTriggeredVariant()));
         ArrayList<String> oldInstances = new ArrayList<>(event.getInstanceIds());
         oldInstances.add(event.getPrimareGwInstanceId());
         events.add(new ChangePrimaryGatewayEvent(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), event.getResourceId(),
                 oldInstances, Boolean.FALSE, event.getOperationId()));
-        events.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), event.getResourceId(), Lists.newArrayList(event.getPrimareGwInstanceId()),
+        events.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), event.getResourceId(), instanceIdToDownscale,
                 instanceCountForDownscale, false, true, false, event.getOperationId()));
         addMigrationFlowIfNeed(event, events, groupNames, "CloudFormation cleanup");
         return events;
@@ -95,10 +96,11 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         }
         for (String instanceId : event.getInstanceIds()) {
             LOGGER.debug("Add upscale and downscale event for [{}]", instanceId);
-            events.add(new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(),
-                    event.getResourceId(), instanceCountForUpscale, Boolean.FALSE, true, false, event.getOperationId(), event.getTriggeredVariant()));
+            ArrayList<String> instanceIdToDownscale = Lists.newArrayList(instanceId);
+            events.add(new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(), event.getResourceId(), instanceIdToDownscale, instanceCountForUpscale,
+                    Boolean.FALSE, true, false, event.getOperationId(), event.getTriggeredVariant()));
             events.add(new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(),
-                    event.getResourceId(), Lists.newArrayList(instanceId), instanceCountForDownscale, false, true, false, event.getOperationId()));
+                    event.getResourceId(), instanceIdToDownscale, instanceCountForDownscale, false, true, false, event.getOperationId()));
         }
         if (!event.getInstanceIds().isEmpty()) {
             addMigrationFlowIfNeed(event, events, groupNames, "Non Pw instances found, cloudFormation cleanup");

@@ -1,12 +1,17 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.event;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
-public class UpscaleEvent extends StackEvent {
+public class
+UpscaleEvent extends StackEvent {
+
+    private final ArrayList<String> instanceIds;
 
     private final Integer instanceCountByGroup;
 
@@ -24,6 +29,7 @@ public class UpscaleEvent extends StackEvent {
     public UpscaleEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("instanceIds") ArrayList<String> instanceIds,
             @JsonProperty("instanceCountByGroup") Integer instanceCountByGroup,
             @JsonProperty("repair") Boolean repair,
             @JsonProperty("chained") boolean chained,
@@ -31,12 +37,17 @@ public class UpscaleEvent extends StackEvent {
             @JsonProperty("operationId") String operationId,
             @JsonProperty("triggeredVariant") String triggeredVariant) {
         super(selector, stackId);
+        this.instanceIds = instanceIds;
         this.instanceCountByGroup = instanceCountByGroup;
         this.repair = repair;
         this.chained = chained;
         this.finalChain = finalChain;
         this.operationId = operationId;
         this.triggeredVariant = triggeredVariant;
+    }
+
+    public List<String> getInstanceIds() {
+        return instanceIds;
     }
 
     public Integer getInstanceCountByGroup() {
@@ -76,7 +87,8 @@ public class UpscaleEvent extends StackEvent {
     @Override
     public String toString() {
         return "UpscaleEvent{" +
-                "instanceCountByGroup=" + instanceCountByGroup +
+                "instanceIds=" + instanceIds +
+                ", instanceCountByGroup=" + instanceCountByGroup +
                 ", repair=" + repair +
                 ", operationId='" + operationId + '\'' +
                 ", chained=" + chained +

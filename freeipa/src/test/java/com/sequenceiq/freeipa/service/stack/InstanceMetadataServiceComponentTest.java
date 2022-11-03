@@ -95,7 +95,7 @@ public class InstanceMetadataServiceComponentTest {
         freeIpa.setDomain("domain");
         when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
 
-        instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, cloudInstances(42, "worker"));
+        instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, cloudInstances(42, "worker"), Collections.emptyList());
         Map<String, List<InstanceMetaData>> groupBySub = workerInstanceGroup.getInstanceMetaDataSet().stream()
                 .collect(Collectors.groupingBy(
                         InstanceMetaData::getSubnetId,
@@ -153,7 +153,7 @@ public class InstanceMetadataServiceComponentTest {
         freeIpa.setDomain("domain");
         when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
 
-        instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, cloudInstances(1, "master"));
+        instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, cloudInstances(1, "master"), Collections.emptyList());
         Map<String, List<InstanceMetaData>> groupBySub = masterInstanceGroup.getInstanceMetaDataSet().stream()
                 .collect(Collectors.groupingBy(
                         InstanceMetaData::getSubnetId,
