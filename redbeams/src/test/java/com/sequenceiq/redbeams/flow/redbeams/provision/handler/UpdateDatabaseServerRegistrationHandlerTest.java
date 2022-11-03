@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandlerTestSupport;
 import com.sequenceiq.redbeams.TestData;
@@ -44,8 +45,6 @@ import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificateSyncService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
-
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 class UpdateDatabaseServerRegistrationHandlerTest {

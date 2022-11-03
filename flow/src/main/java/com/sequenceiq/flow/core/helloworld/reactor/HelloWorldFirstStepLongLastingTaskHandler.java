@@ -5,13 +5,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.core.helloworld.flowevents.HelloWorldFirstStepLongLastingTaskFailureResponse;
 import com.sequenceiq.flow.core.helloworld.flowevents.HelloWorldFirstStepLongLastingTaskSuccessResponse;
 import com.sequenceiq.flow.core.helloworld.flowevents.HelloWorldFirstStepLongLastingTaskTriggerEvent;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @Component
 public class HelloWorldFirstStepLongLastingTaskHandler extends ExceptionCatcherEventHandler<HelloWorldFirstStepLongLastingTaskTriggerEvent> {

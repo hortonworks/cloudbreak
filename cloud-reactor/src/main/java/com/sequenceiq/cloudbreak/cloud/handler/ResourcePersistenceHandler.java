@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
+import java.util.function.Consumer;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -10,10 +12,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.retry.RetryUtil;
-
-import reactor.bus.Event;
-import reactor.fn.Consumer;
 
 @Component
 public class ResourcePersistenceHandler implements Consumer<Event<ResourceNotification>> {

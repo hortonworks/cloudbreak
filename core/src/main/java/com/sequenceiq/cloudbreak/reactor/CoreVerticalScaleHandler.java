@@ -18,11 +18,10 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleService;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleResult;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class CoreVerticalScaleHandler implements CloudPlatformEventHandler<CoreVerticalScaleRequest> {

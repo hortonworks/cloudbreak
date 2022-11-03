@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.init;
 
-import static reactor.bus.selector.Selectors.$;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.handler.CloudPlatformEventHandler;
-
-import reactor.bus.EventBus;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 
 @Component
 public class CloudPlatformInitializer {
@@ -36,7 +33,7 @@ public class CloudPlatformInitializer {
         for (CloudPlatformEventHandler<?> handler : handlers) {
             String selector = CloudPlatformRequest.selector(handler.type());
             LOGGER.debug("Registering handler [{}] for selector [{}]", handler.getClass(), selector);
-            eventBus.on($(selector), handler);
+            eventBus.on(selector, handler);
         }
     }
 

@@ -1,6 +1,6 @@
 package com.sequenceiq.flow.reactor.api.handler;
 
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 public class HandlerEvent<T> {
 

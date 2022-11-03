@@ -50,6 +50,9 @@ import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -75,11 +78,6 @@ import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.service.FlowService;
 
-import reactor.bus.Event;
-import reactor.bus.Event.Headers;
-import reactor.bus.EventBus;
-import reactor.rx.Promise;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ContextConfiguration(initializers = TestEnvironmentInitializer.class, classes = ComponentTestConfig.class)
@@ -101,7 +99,7 @@ public class FlowComponentTest {
 
     private static final Duration POLLING_PERIOD = Duration.ofMillis(500);
 
-    private static final long WAIT_FACTOR = 5L;
+    private static final long WAIT_FACTOR = 10L;
 
     private static final AtomicInteger RESOURCE_ID_SEC = new AtomicInteger(0);
 
@@ -544,7 +542,7 @@ public class FlowComponentTest {
     private FlowAcceptResult notify(String selector, Acceptable event) throws InterruptedException {
         Map<String, Object> extendedHeaders = new HashMap<>(Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, USER_CRN));
         extendedHeaders.put(MDCBuilder.MDC_CONTEXT_ID, MDCBuilder.getMdcContextMap());
-        eventBus.notify(selector, new Event<>(new Headers(extendedHeaders), event));
+        eventBus.notify(selector, new Event<>(new Event.Headers(extendedHeaders), event));
         return (FlowAcceptResult) event.accepted().await(FLOW_ACCEPT_TIMEOUT, TimeUnit.SECONDS);
     }
 
@@ -581,7 +579,7 @@ public class FlowComponentTest {
     }
 
     private ConditionFactory baseAwaitConfig(String name, Duration timeout) {
-        return await(name).atMost(timeout.toMillis(), TimeUnit.MILLISECONDS)
+        return await(name).dontCatchUncaughtExceptions().atMost(timeout.toMillis(), TimeUnit.MILLISECONDS)
                 .pollInterval(POLLING_PERIOD.toMillis(), TimeUnit.MILLISECONDS);
     }
 

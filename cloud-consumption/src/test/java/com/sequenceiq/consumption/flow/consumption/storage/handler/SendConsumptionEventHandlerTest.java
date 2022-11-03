@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.consumption.AwsS3ConsumptionCa
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudConsumption;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.usage.MeteringEventProcessor;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
@@ -41,8 +42,6 @@ import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumpt
 import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionHandlerEvent;
 import com.sequenceiq.consumption.service.EnvironmentService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 public class SendConsumptionEventHandlerTest {

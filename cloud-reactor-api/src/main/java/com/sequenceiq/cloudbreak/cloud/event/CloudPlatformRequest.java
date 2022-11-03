@@ -2,15 +2,11 @@ package com.sequenceiq.cloudbreak.cloud.event;
 
 import java.util.concurrent.TimeUnit;
 
-import org.reactivestreams.Subscriber;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-
-import reactor.rx.Promise;
-import reactor.rx.Promises;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 
 public class CloudPlatformRequest<T> implements Selectable {
 
@@ -24,7 +20,7 @@ public class CloudPlatformRequest<T> implements Selectable {
     public CloudPlatformRequest(CloudContext cloudContext, CloudCredential cloudCredential) {
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
-        result = Promises.prepare();
+        result = Promise.prepare();
     }
 
     public static String selector(Class<?> clazz) {
@@ -52,7 +48,7 @@ public class CloudPlatformRequest<T> implements Selectable {
         return cloudCredential;
     }
 
-    public Subscriber<T> getResult() {
+    public Promise<T> getResult() {
         return result;
     }
 

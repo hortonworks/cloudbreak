@@ -4,12 +4,8 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.concurrent.TimeUnit;
 
-import org.reactivestreams.Subscriber;
-
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-
-import reactor.rx.Promise;
-import reactor.rx.Promises;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 
 public class FreeIpaClientRequest<T> implements Selectable {
 
@@ -19,7 +15,7 @@ public class FreeIpaClientRequest<T> implements Selectable {
 
     public FreeIpaClientRequest(Long stackId) {
         this.stackId = requireNonNull(stackId);
-        result = Promises.prepare();
+        result = Promise.prepare();
     }
 
     public static String selector(Class<?> clazz) {
@@ -36,7 +32,7 @@ public class FreeIpaClientRequest<T> implements Selectable {
         return stackId;
     }
 
-    public Subscriber<T> getResult() {
+    public Promise<T> getResult() {
         return result;
     }
 

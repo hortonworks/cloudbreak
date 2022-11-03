@@ -30,9 +30,8 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudPlatformValidationWarningE
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 public class ProvisionValidationHandlerTest {

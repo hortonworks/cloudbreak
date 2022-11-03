@@ -21,15 +21,14 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartClusterManagerServicesSuccess;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 class StartAmbariServicesHandlerTest {
@@ -71,7 +70,7 @@ class StartAmbariServicesHandlerTest {
 
         verify(clusterApi).waitForServer(eq(defaultClusterManagerAuth));
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+        verify(eventBus).notify(any(), resultCaptor.capture());
 
         assertEquals(1, resultCaptor.getAllValues().size());
         Event resultEvent = resultCaptor.getValue();
@@ -88,7 +87,7 @@ class StartAmbariServicesHandlerTest {
         underTest.accept(getEvent(defaultClusterManagerAuth));
 
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+        verify(eventBus).notify(any(), resultCaptor.capture());
 
         assertEquals(1, resultCaptor.getAllValues().size());
         Event resultEvent = resultCaptor.getValue();

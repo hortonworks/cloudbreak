@@ -15,9 +15,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.common.api.type.CdpResourceType;
-
-import reactor.bus.Event;
 
 @Component
 public class GetPlatformVmTypesHandler implements CloudPlatformEventHandler<GetPlatformVmTypesRequest> {

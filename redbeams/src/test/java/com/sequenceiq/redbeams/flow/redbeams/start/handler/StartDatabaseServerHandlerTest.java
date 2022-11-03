@@ -31,12 +31,11 @@ import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerSuccess;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 public class StartDatabaseServerHandlerTest {
@@ -138,10 +137,7 @@ public class StartDatabaseServerHandlerTest {
     }
 
     private Event<StartDatabaseServerRequest> anEvent() {
-        Event<StartDatabaseServerRequest> event = new Event<>(StartDatabaseServerRequest.class);
-        event.setData(aStartDatabaseServerRequest());
-
-        return event;
+        return new Event<>(aStartDatabaseServerRequest());
     }
 
     private StartDatabaseServerRequest aStartDatabaseServerRequest() {

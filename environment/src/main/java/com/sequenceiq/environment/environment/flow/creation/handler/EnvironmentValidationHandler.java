@@ -19,6 +19,8 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidate
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -38,9 +40,6 @@ import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class EnvironmentValidationHandler extends EventSenderAwareHandler<EnvironmentValidationDto> {

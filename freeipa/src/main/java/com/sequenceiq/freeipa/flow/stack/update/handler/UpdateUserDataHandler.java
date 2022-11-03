@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -16,8 +17,6 @@ import com.sequenceiq.freeipa.flow.stack.update.event.UserDataUpdateFailed;
 import com.sequenceiq.freeipa.flow.stack.update.event.UserDataUpdateRequest;
 import com.sequenceiq.freeipa.flow.stack.update.event.UserDataUpdateSuccess;
 import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
-
-import reactor.bus.Event;
 
 @Component
 public class UpdateUserDataHandler extends ExceptionCatcherEventHandler<UserDataUpdateRequest> {

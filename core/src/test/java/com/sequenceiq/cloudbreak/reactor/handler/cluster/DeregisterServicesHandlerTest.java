@@ -27,14 +27,13 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.datalake.DatalakeDto;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DeregisterServicesRequest;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 class DeregisterServicesHandlerTest {
@@ -85,7 +84,6 @@ class DeregisterServicesHandlerTest {
         Stack datahub = new Stack();
         datahub.setName(TEST_DATAHUB_NAME);
 
-        when(eventBus.notify((Object) any(), any(Event.class))).thenReturn(eventBus);
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(datahub);
         when(datalakeService.getDatalakeStackByDatahubStack(any(Stack.class))).thenReturn(Optional.of(getDatalakeStack()));
         when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
@@ -105,7 +103,7 @@ class DeregisterServicesHandlerTest {
         assertThat(result.getUser()).isEqualTo(TEST_CM_USER);
         assertThat(result.getPassword()).isEqualTo(TEST_CM_PASSWORD);
         assertThat(result.getGatewayPort()).isEqualTo(TEST_GATEWAY_PORT);
-        verify(eventBus, times(1)).notify((Object) any(), any(Event.class));
+        verify(eventBus, times(1)).notify(any(), any(Event.class));
     }
 
     @Test
@@ -115,7 +113,7 @@ class DeregisterServicesHandlerTest {
         underTest.accept(event);
 
         verify(clusterSecurityService, never()).deregisterServices(anyString(), any());
-        verify(eventBus, times(1)).notify((Object) any(), any(Event.class));
+        verify(eventBus, times(1)).notify(any(), any(Event.class));
     }
 
     private Stack getDatalakeStack() {

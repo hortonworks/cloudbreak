@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
@@ -32,9 +33,6 @@ import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFaile
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
-
-import reactor.bus.Event;
-import reactor.bus.Event.Headers;
 
 @ExtendWith(MockitoExtension.class)
 class PublicKeyDeleteHandlerTest {
@@ -58,7 +56,7 @@ class PublicKeyDeleteHandlerTest {
     private HandlerExceptionProcessor mockExceptionProcessor;
 
     @Mock
-    private Headers headers;
+    private Event.Headers headers;
 
     @InjectMocks
     private PublicKeyDeleteHandler underTest;
@@ -67,7 +65,7 @@ class PublicKeyDeleteHandlerTest {
     private ArgumentCaptor<BaseNamedFlowEvent> baseNamedFlowEvent;
 
     @Captor
-    private ArgumentCaptor<Headers> headersArgumentCaptor;
+    private ArgumentCaptor<Event.Headers> headersArgumentCaptor;
 
     @BeforeEach
     void setUp() {
@@ -84,7 +82,7 @@ class PublicKeyDeleteHandlerTest {
                 .build();
         lenient().when(environmentDtoEvent.getData()).thenReturn(build);
         lenient().when(environmentDtoEvent.getHeaders()).thenReturn(headers);
-        lenient().doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Headers.class));
+        lenient().doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Event.Headers.class));
     }
 
     @Test

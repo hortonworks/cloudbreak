@@ -7,8 +7,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SshUserRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SshUserResponse;
-
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 @Component
 public class SshUserHandler implements CloudPlatformEventHandler<SshUserRequest> {

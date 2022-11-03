@@ -5,8 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
-
-import reactor.rx.Promise;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 
 public class ValidateRdsUpgradeTriggerRequest extends AbstractValidateRdsUpgradeEvent {
 

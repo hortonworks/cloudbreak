@@ -11,8 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.CheckPlatformVariantReques
 import com.sequenceiq.cloudbreak.cloud.event.platform.CheckPlatformVariantResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
-
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 @Component
 public class CheckPlatformVariantHandler implements CloudPlatformEventHandler<CheckPlatformVariantRequest> {

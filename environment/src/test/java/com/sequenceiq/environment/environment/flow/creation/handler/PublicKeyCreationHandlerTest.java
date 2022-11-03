@@ -24,6 +24,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -33,10 +35,6 @@ import com.sequenceiq.environment.environment.service.EnvironmentResourceService
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
-
-import reactor.bus.Event;
-import reactor.bus.Event.Headers;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 class PublicKeyCreationHandlerTest {
@@ -60,7 +58,7 @@ class PublicKeyCreationHandlerTest {
     private EnvironmentResourceService environmentResourceService;
 
     @Mock
-    private Headers headers;
+    private Event.Headers headers;
 
     @Mock
     private EventBus eventBus;
@@ -72,7 +70,7 @@ class PublicKeyCreationHandlerTest {
     private ArgumentCaptor<BaseNamedFlowEvent> baseNamedFlowEvent;
 
     @Captor
-    private ArgumentCaptor<Headers> headersArgumentCaptor;
+    private ArgumentCaptor<Event.Headers> headersArgumentCaptor;
 
     @Captor
     private ArgumentCaptor<Event<EnvCreationFailureEvent>> envCreationFailureEventEventCaptor;
@@ -90,7 +88,7 @@ class PublicKeyCreationHandlerTest {
 
     @Test
     void acceptEnvironmentNotFound() {
-        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Headers.class));
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Event.Headers.class));
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.empty());
 
         underTest.accept(environmentDtoEvent);
@@ -113,7 +111,7 @@ class PublicKeyCreationHandlerTest {
 
     @Test
     void acceptTestEnvironmentShouldBeUpdatedWhenSshKeyHasBeenCreated() {
-        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Headers.class));
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Event.Headers.class));
         EnvironmentAuthentication authentication = new EnvironmentAuthentication();
         authentication.setManagedKey(true);
         Environment environment = new Environment();
@@ -130,7 +128,7 @@ class PublicKeyCreationHandlerTest {
 
     @Test
     void acceptTestEnvironmentShouldNotBeUpdatedWhenSshKeyHasNotBeenCreated() {
-        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Headers.class));
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Event.Headers.class));
         EnvironmentAuthentication authentication = new EnvironmentAuthentication();
         authentication.setManagedKey(true);
         Environment environment = new Environment();
@@ -147,7 +145,7 @@ class PublicKeyCreationHandlerTest {
 
     @Test
     void acceptTestEnvironmentShouldNotBeUpdatedWhenAuthenticationDoesNotContainManagedKey() {
-        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Headers.class));
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Event.Headers.class));
         EnvironmentAuthentication authentication = new EnvironmentAuthentication();
         authentication.setManagedKey(false);
         Environment environment = new Environment();
@@ -165,7 +163,7 @@ class PublicKeyCreationHandlerTest {
     @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
     void selector() {
-        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Headers.class));
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Event.Headers.class));
         assertThat(underTest.selector()).isEqualTo("CREATE_PUBLICKEY_EVENT");
     }
 

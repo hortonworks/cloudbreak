@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFailedEvent;
@@ -87,8 +88,6 @@ import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 import com.sequenceiq.flow.domain.FlowLog;
-import com.sequenceiq.flow.reactor.eventbus.ConsumerCheckerEventBus;
-import com.sequenceiq.flow.reactor.handler.ConsumerNotFoundHandler;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
@@ -99,10 +98,6 @@ import io.jaegertracing.internal.reporters.InMemoryReporter;
 import io.jaegertracing.internal.samplers.ConstSampler;
 import io.jaegertracing.spi.Reporter;
 import io.jaegertracing.spi.Sampler;
-import reactor.Environment;
-import reactor.bus.EventBus;
-import reactor.bus.spec.EventBusSpec;
-import reactor.core.dispatch.MpscDispatcher;
 
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
@@ -428,15 +423,14 @@ class UpgradeCcmFlowIntegrationTest {
         }
 
         @Bean
-        public EventBus reactor(MDCCleanerThreadPoolExecutor threadPoolExecutor, Environment env) {
-            MpscDispatcher dispatcher = new MpscDispatcher("test-dispatcher");
-            EventBus eventBus = new EventBusSpec()
-                    .env(env)
-                    .dispatcher(dispatcher)
-                    .traceEventPath()
-                    .consumerNotFoundHandler(new ConsumerNotFoundHandler())
-                    .get();
-            return new ConsumerCheckerEventBus(eventBus);
+        public EventBus reactor(MDCCleanerThreadPoolExecutor threadPoolExecutor) {
+            return EventBus.builder()
+                    .executor(threadPoolExecutor)
+                    .exceptionHandler((exception, context) -> {
+                    })
+                    .unhandledEventHandler(event -> {
+                    })
+                    .build();
         }
     }
 

@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static reactor.core.support.Assert.isTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
 
@@ -40,9 +41,9 @@ public class GatewayManifesterTest {
 
         StackV4Request result = underTest.configureGatewayForSdxCluster(stackV4Request);
 
-        isTrue(result.getCluster() != null);
-        isTrue(result.getCluster().getGateway() != null);
-        isTrue(result.getCluster().getGateway().getSsoType().equals(SSOType.SSO_PROVIDER_FROM_UMS));
+        assertNotNull(result.getCluster());
+        assertNotNull(result.getCluster().getGateway());
+        assertEquals(result.getCluster().getGateway().getSsoType(), SSOType.SSO_PROVIDER_FROM_UMS);
     }
 
     @Test
@@ -55,7 +56,7 @@ public class GatewayManifesterTest {
 
         underTest.configureGatewayForSdxCluster(stackV4Request);
 
-        isTrue(stackV4Request.getCluster().getGateway().equals(gatewayV4Request));
+        assertEquals(stackV4Request.getCluster().getGateway(), gatewayV4Request);
     }
 
     private GatewayV4Request getGatewayV4Request() {

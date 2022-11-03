@@ -36,9 +36,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 public class StopStartDownscaleStopInstancesHandlerTest {
@@ -129,7 +128,7 @@ public class StopStartDownscaleStopInstancesHandlerTest {
         underTest.accept(event);
 
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+        verify(eventBus).notify(any(), resultCaptor.capture());
 
         assertEquals(1, resultCaptor.getAllValues().size());
         Event resultEvent = resultCaptor.getValue();
@@ -158,7 +157,7 @@ public class StopStartDownscaleStopInstancesHandlerTest {
         underTest.accept(event);
 
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+        verify(eventBus).notify(any(), resultCaptor.capture());
 
         if (expectedCloudInteractions) {
             verify(instanceConnector).stopWithLimitedRetry(any(AuthenticatedContext.class), eq(null), eq(cloudInstancesToStop),

@@ -14,11 +14,10 @@ import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
-import com.sequenceiq.flow.reactor.eventbus.ConsumerCheckerEventBus;
-import com.sequenceiq.flow.reactor.handler.ConsumerNotFoundHandler;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.freeipa.FreeIpaFlowInformation;
@@ -36,10 +35,6 @@ import io.jaegertracing.internal.reporters.InMemoryReporter;
 import io.jaegertracing.internal.samplers.ConstSampler;
 import io.jaegertracing.spi.Reporter;
 import io.jaegertracing.spi.Sampler;
-import reactor.Environment;
-import reactor.bus.EventBus;
-import reactor.bus.spec.EventBusSpec;
-import reactor.core.dispatch.MpscDispatcher;
 
 @Profile("integration-test")
 @TestConfiguration
@@ -105,14 +100,13 @@ public class FlowIntegrationTestConfig {
     }
 
     @Bean
-    public EventBus reactor(MDCCleanerThreadPoolExecutor threadPoolExecutor, Environment env) {
-        MpscDispatcher dispatcher = new MpscDispatcher("test-dispatcher");
-        EventBus eventBus = new EventBusSpec()
-                .env(env)
-                .dispatcher(dispatcher)
-                .traceEventPath()
-                .consumerNotFoundHandler(new ConsumerNotFoundHandler())
-                .get();
-        return new ConsumerCheckerEventBus(eventBus);
+    public EventBus reactor(MDCCleanerThreadPoolExecutor threadPoolExecutor) {
+        return EventBus.builder()
+                .executor(threadPoolExecutor)
+                .exceptionHandler((exception, context) -> {
+                })
+                .unhandledEventHandler(deadEvent -> {
+                })
+                .build();
     }
 }

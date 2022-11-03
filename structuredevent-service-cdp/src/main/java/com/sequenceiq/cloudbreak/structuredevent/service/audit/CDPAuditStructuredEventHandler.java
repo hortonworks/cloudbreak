@@ -11,11 +11,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.audit.AuditClient;
 import com.sequenceiq.cloudbreak.audit.model.ActorCrn;
 import com.sequenceiq.cloudbreak.audit.model.AuditEvent;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.Event;
 
 @Component
 public class CDPAuditStructuredEventHandler<T extends CDPStructuredEvent> implements EventHandler<T> {

@@ -20,12 +20,11 @@ import org.mockito.Mock;
 
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesResult;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @RunWith(org.mockito.junit.MockitoJUnitRunner.class)
 public class CollectDownscaleCandidatesHandlerTest {
@@ -57,7 +56,7 @@ public class CollectDownscaleCandidatesHandlerTest {
         testedClass.accept(event);
         //then
         ArgumentCaptor<Event<CollectDownscaleCandidatesResult>> capturedEvent = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify((Object) any(), capturedEvent.capture());
+        verify(eventBus).notify(any(), capturedEvent.capture());
         Event<CollectDownscaleCandidatesResult> submittedEvent = capturedEvent.getValue();
         CollectDownscaleCandidatesResult submittedResult = submittedEvent.getData();
         assertNotNull(submittedResult);
@@ -74,7 +73,7 @@ public class CollectDownscaleCandidatesHandlerTest {
         testedClass.accept(event);
         //then
         ArgumentCaptor<Event<CollectDownscaleCandidatesResult>> capturedEvent = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify((Object) any(), capturedEvent.capture());
+        verify(eventBus).notify(any(), capturedEvent.capture());
         Event<CollectDownscaleCandidatesResult> submittedEvent = capturedEvent.getValue();
         CollectDownscaleCandidatesResult submittedResult = submittedEvent.getData();
         assertNotNull(submittedResult);
@@ -92,7 +91,7 @@ public class CollectDownscaleCandidatesHandlerTest {
         testedClass.accept(event);
         //then
         ArgumentCaptor<Event<CollectDownscaleCandidatesResult>> capturedEvent = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify((Object) any(), capturedEvent.capture());
+        verify(eventBus).notify(any(), capturedEvent.capture());
         Event<CollectDownscaleCandidatesResult> submittedEvent = capturedEvent.getValue();
         CollectDownscaleCandidatesResult submittedResult = submittedEvent.getData();
         assertNotNull(submittedResult);

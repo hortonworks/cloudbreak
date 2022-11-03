@@ -9,8 +9,7 @@ import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
-
-import reactor.rx.Promise;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 
 public class BaseFlowEvent implements IdempotentEvent<BaseFlowEvent>, ResourceCrnPayload {
 

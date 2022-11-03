@@ -12,9 +12,8 @@ import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMet
 import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.handler.service.LoadBalancerMetadataService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 
 @Component
 public class CollectLoadBalancerMetadataHandler implements CloudPlatformEventHandler<CollectLoadBalancerMetadataRequest> {
@@ -38,9 +37,9 @@ public class CollectLoadBalancerMetadataHandler implements CloudPlatformEventHan
         CollectLoadBalancerMetadataRequest request = collectLBMetadataRequestEvent.getData();
         try {
             List<CloudLoadBalancerMetadata> loadBalancerStatuses = loadBalancerMetadataService.collectMetadata(request.getCloudContext(),
-                request.getCloudCredential(), request.getTypesPresentInStack(), request.getCloudResources());
+                    request.getCloudCredential(), request.getTypesPresentInStack(), request.getCloudResources());
             CollectLoadBalancerMetadataResult collectLBMetadataResult =
-                new CollectLoadBalancerMetadataResult(request.getResourceId(), loadBalancerStatuses);
+                    new CollectLoadBalancerMetadataResult(request.getResourceId(), loadBalancerStatuses);
 
             request.getResult().onNext(collectLBMetadataResult);
             eventBus.notify(collectLBMetadataResult.selector(), new Event<>(collectLBMetadataRequestEvent.getHeaders(), collectLBMetadataResult));

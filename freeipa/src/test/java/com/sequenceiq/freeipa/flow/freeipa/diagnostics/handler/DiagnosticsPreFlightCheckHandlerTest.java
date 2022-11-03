@@ -24,6 +24,7 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
@@ -34,8 +35,6 @@ import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollecti
 import com.sequenceiq.freeipa.service.stack.FreeIpaNodeStatusService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
-
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 public class DiagnosticsPreFlightCheckHandlerTest {

@@ -64,7 +64,6 @@ import com.sequenceiq.flow.service.FlowNameFormatService;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 import io.opentracing.Tracer;
-import reactor.Environment;
 
 @MockBeans({@MockBean(ApplicationFlowInformation.class), @MockBean(FlowLogDBService.class), @MockBean(FlowRegister.class)})
 @Configuration
@@ -214,11 +213,6 @@ public class TestApplicationContext {
         when(instanceConnector.getConsoleOutput(any(), eq(cloudInstanceBad)))
                 .thenReturn("XYZ    RSA/n-----END SSH HOST KEY FINGERPRINTS-----");
         return cloudConnector;
-    }
-
-    @Bean
-    public Environment env() {
-        return Environment.initializeIfEmpty();
     }
 
     @Bean

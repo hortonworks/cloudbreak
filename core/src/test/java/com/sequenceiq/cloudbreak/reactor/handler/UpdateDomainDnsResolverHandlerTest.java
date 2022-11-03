@@ -17,12 +17,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverRequest;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 public class UpdateDomainDnsResolverHandlerTest {
@@ -50,7 +49,7 @@ public class UpdateDomainDnsResolverHandlerTest {
         verify(stackDtoService, times(1)).getById(any());
         verify(stackDtoService, times(0)).updateDomainDnsResolver(anyLong(), eq(DnsResolverType.FREEIPA_FOR_ENV));
         verify(targetedUpscaleSupportService, times(1)).getActualDnsResolverType(any());
-        verify(eventBus, times(1)).notify(any(Object.class), any(Event.class));
+        verify(eventBus, times(1)).notify(any(), any(Event.class));
     }
 
     @Test
@@ -64,7 +63,7 @@ public class UpdateDomainDnsResolverHandlerTest {
         verify(stackDtoService, times(1)).getById(any());
         verify(stackDtoService, times(0)).updateDomainDnsResolver(anyLong(), eq(DnsResolverType.FREEIPA_FOR_ENV));
         verify(targetedUpscaleSupportService, times(1)).getActualDnsResolverType(any());
-        verify(eventBus, times(1)).notify(any(Object.class), any(Event.class));
+        verify(eventBus, times(1)).notify(any(), any(Event.class));
     }
 
     @Test
@@ -78,7 +77,7 @@ public class UpdateDomainDnsResolverHandlerTest {
         verify(stackDtoService, times(1)).getById(any());
         verify(stackDtoService, times(0)).updateDomainDnsResolver(anyLong(), eq(DnsResolverType.FREEIPA_FOR_ENV));
         verify(targetedUpscaleSupportService, times(1)).getActualDnsResolverType(any());
-        verify(eventBus, times(1)).notify(any(Object.class), any(Event.class));
+        verify(eventBus, times(1)).notify(any(), any(Event.class));
     }
 
     private StackDto stack(DnsResolverType dnsResolverType) {

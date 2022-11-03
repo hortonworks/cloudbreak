@@ -13,6 +13,7 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.cert.renew.event.SdxCertRenewalEvent;
 import com.sequenceiq.datalake.flow.cert.renew.event.SdxCertRenewalFailedEvent;
@@ -23,8 +24,6 @@ import com.sequenceiq.datalake.service.sdx.cert.CertRenewalService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @Component
 public class SdxCertRenewWaitHandler extends ExceptionCatcherEventHandler<SdxCertRenewalWaitEvent> {

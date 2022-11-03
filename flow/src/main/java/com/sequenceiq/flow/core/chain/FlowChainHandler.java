@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -22,9 +24,6 @@ import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.chain.config.FlowChainOperationTypeConfig;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.domain.FlowChainLog;
-
-import reactor.bus.Event;
-import reactor.fn.Consumer;
 
 @Component
 public class FlowChainHandler implements Consumer<Event<? extends Payload>> {

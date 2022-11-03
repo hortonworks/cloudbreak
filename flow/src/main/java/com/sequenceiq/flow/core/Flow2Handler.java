@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogUtil;
 import com.sequenceiq.cloudbreak.util.Benchmark;
@@ -62,8 +64,6 @@ import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
-import reactor.bus.Event;
-import reactor.fn.Consumer;
 
 @Component
 public class Flow2Handler implements Consumer<Event<? extends Payload>> {
@@ -114,7 +114,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     @Override
     public void accept(Event<? extends Payload> event) {
-        String key = (String) event.getKey();
+        String key = event.getKey();
         Payload payload = event.getData();
         String flowId = getFlowId(event);
         String flowChainId = getFlowChainId(event);
@@ -355,10 +355,15 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 }
             });
             logFlowId(flowId);
+            FlowAcceptResult flowAcceptResult = getFlowAcceptResult(flowChainId, flowParameters.getFlowId());
+            if (isAcceptablePayload(payload)) {
+                LOGGER.info("Accepting flow {}", flowAcceptResult);
+                ((Acceptable) payload).accepted().accept(flowAcceptResult);
+            }
             flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload, flowParameters.getSpanContext(),
                     flowParameters.getFlowOperationType());
             LOGGER.info("Flow started '{}'. Start event: {}", flowConfig.getDisplayName(), payload);
-            return getFlowAcceptResult(flowChainId, flowParameters.getFlowId());
+            return flowAcceptResult;
         } catch (Exception e) {
             LOGGER.error("Can't save flow: {}", flowId);
             runningFlows.remove(flowId);
@@ -404,6 +409,11 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             if (!flowCancelled.booleanValue()) {
                 LOGGER.debug("Send event: key: {}, flowid: {}, usercrn: {}, payload: {}", key, flowId, flowParameters.getFlowTriggerUserCrn(), payload);
                 flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload, flowParameters.getSpanContext(), flowParameters.getFlowOperationType());
+                if (isAcceptablePayload(payload)) {
+                    FlowAcceptResult flowAcceptResult = FlowAcceptResult.runningInFlow(flowId);
+                    LOGGER.info("Accepting flow in flow control {}", flowAcceptResult);
+                    ((Acceptable) payload).accepted().accept(flowAcceptResult);
+                }
             }
         } else {
             LOGGER.debug("Cancelled flow finished running. Resource ID {}, flow ID {}, event {}", payload.getResourceId(), flowId, key);

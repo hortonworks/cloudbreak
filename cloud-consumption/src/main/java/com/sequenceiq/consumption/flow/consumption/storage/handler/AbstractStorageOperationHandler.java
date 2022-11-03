@@ -1,13 +1,12 @@
 package com.sequenceiq.consumption.flow.consumption.storage.handler;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.consumption.flow.consumption.storage.StorageConsumptionCollectionFlowException;
 import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionFailureEvent;
 import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionHandlerEvent;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 public abstract class AbstractStorageOperationHandler extends ExceptionCatcherEventHandler<StorageConsumptionCollectionHandlerEvent> {
 

@@ -3,10 +3,9 @@ package com.sequenceiq.environment.environment.flow.verticalscale.freeipa.event;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
-
-import reactor.rx.Promise;
 
 @JsonDeserialize(builder = EnvironmentVerticalScaleEvent.Builder.class)
 public class EnvironmentVerticalScaleEvent extends BaseNamedFlowEvent {

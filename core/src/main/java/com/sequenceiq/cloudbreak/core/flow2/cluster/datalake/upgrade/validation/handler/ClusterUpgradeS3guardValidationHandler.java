@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedExcepti
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeS3guardValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeS3guardValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
@@ -20,10 +21,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
-import reactor.bus.Event;
-
 @Component
-public class ClusterUpgradeS3guardValidationHandler  extends ExceptionCatcherEventHandler<ClusterUpgradeS3guardValidationEvent> {
+public class ClusterUpgradeS3guardValidationHandler extends ExceptionCatcherEventHandler<ClusterUpgradeS3guardValidationEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeS3guardValidationHandler.class);
 
@@ -57,8 +56,8 @@ public class ClusterUpgradeS3guardValidationHandler  extends ExceptionCatcherEve
             if (s3guardEnabled) {
                 LOGGER.error("Upgrade validation failed for resource: {} as S3Guard is enabled", request.getResourceId());
                 return new ClusterUpgradeValidationFailureEvent(stackId,
-                    new UpgradeValidationFailedException(String.format("S3Guard is enabled. Please disable it by following: %s",
-                            DocumentationLinkProvider.awsS3guardDisableDocumentationLink())));
+                        new UpgradeValidationFailedException(String.format("S3Guard is enabled. Please disable it by following: %s",
+                                DocumentationLinkProvider.awsS3guardDisableDocumentationLink())));
             }
             return new ClusterUpgradeS3guardValidationFinishedEvent(request.getResourceId(), request.getImageId());
         } catch (Exception ex) {

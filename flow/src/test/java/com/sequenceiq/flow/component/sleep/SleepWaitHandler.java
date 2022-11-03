@@ -4,14 +4,13 @@ import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.component.sleep.event.SleepCompletedEvent;
 import com.sequenceiq.flow.component.sleep.event.SleepFailedEvent;
 import com.sequenceiq.flow.component.sleep.event.SleepWaitRequest;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 public class SleepWaitHandler extends ExceptionCatcherEventHandler<SleepWaitRequest> {
 

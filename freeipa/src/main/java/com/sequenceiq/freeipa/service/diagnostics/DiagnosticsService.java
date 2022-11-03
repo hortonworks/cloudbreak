@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticsDataToParameterConverter;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
@@ -31,9 +33,6 @@ import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollecti
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.stack.StackService;
-
-import reactor.bus.Event;
-import reactor.rx.Promise;
 
 @Service
 public class DiagnosticsService {

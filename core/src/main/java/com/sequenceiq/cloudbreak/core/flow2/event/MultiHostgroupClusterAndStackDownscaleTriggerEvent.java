@@ -8,9 +8,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-
-import reactor.rx.Promise;
 
 public class MultiHostgroupClusterAndStackDownscaleTriggerEvent extends StackEvent {
     private final ScalingType scalingType;

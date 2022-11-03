@@ -23,8 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.gs.collections.impl.tuple.AbstractImmutableEntry;
-import com.gs.collections.impl.tuple.ImmutableEntry;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -203,7 +201,7 @@ public class StackUtil {
     Map<String, Map<String, Object>> createInstanceToVolumeInfoMap(List<Resource> volumeSets) {
         return volumeSets.stream()
                 .filter(volumeSet -> StringUtils.isNotEmpty(volumeSet.getInstanceId()))
-                .map(volumeSet -> new ImmutableEntry<>(volumeSet.getInstanceId(),
+                .map(volumeSet -> Map.entry(volumeSet.getInstanceId(),
                         resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class)))
                 .map(entry -> {
                     List<Volume> volumes = entry.getValue().map(VolumeSetAttributes::getVolumes).orElse(List.of());
@@ -213,14 +211,14 @@ public class StackUtil {
                             .filter(index -> volumes.get(index).getCloudVolumeUsageType() == CloudVolumeUsageType.DATABASE)
                             .findFirst()
                             .orElse(-1);
-                    return new ImmutableEntry<String, Map<String, Object>>(entry.getKey(), Map.of(
+                    return Map.<String, Map<String, Object>>entry(entry.getKey(), Map.of(
                             "dataVolumes", String.join(" ", dataVolumes),
                             "serialIds", String.join(" ", serialIds),
                             "dataBaseVolumeIndex", dataBaseVolumeIndex,
                             "fstab", entry.getValue().map(VolumeSetAttributes::getFstab).orElse(""),
                             "uuids", entry.getValue().map(VolumeSetAttributes::getUuids).orElse("")));
                 })
-                .collect(Collectors.toMap(AbstractImmutableEntry::getKey, AbstractImmutableEntry::getValue));
+                .collect(Collectors.toMap(entry -> (String) entry.getKey(), entry -> (Map<String, Object>) entry.getValue()));
     }
 
     private <T> T getOrDefault(Map<String, Map<String, Object>> instanceToVolumeInfoMap, String instanceId, String innerKey, T defaultValue) {

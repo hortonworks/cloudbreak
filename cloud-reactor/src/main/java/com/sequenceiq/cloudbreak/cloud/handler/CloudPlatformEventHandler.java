@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-import reactor.bus.Event;
-import reactor.fn.Consumer;
+import java.util.function.Consumer;
+
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 public interface CloudPlatformEventHandler<T> extends Consumer<Event<T>> {
 

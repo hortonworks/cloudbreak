@@ -6,9 +6,8 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
-
-import reactor.rx.Promise;
 
 @JsonDeserialize(builder = DatalakeVerticalScaleEvent.Builder.class)
 public class DatalakeVerticalScaleEvent extends BaseNamedFlowEvent implements Selectable {

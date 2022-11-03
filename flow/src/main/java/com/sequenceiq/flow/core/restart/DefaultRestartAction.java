@@ -15,12 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.RestartContext;
 import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-
-import reactor.bus.EventBus;
 
 /**
  * Please consider using a different, service specific one which sets the MdcContext

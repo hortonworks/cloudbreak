@@ -1,7 +1,6 @@
 package com.sequenceiq.flow.core.chain.config;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -9,11 +8,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.core.chain.FlowChainHandler;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
-
-import reactor.bus.EventBus;
-import reactor.bus.selector.Selectors;
 
 @Component
 public class FlowChainInitializer {
@@ -28,7 +25,8 @@ public class FlowChainInitializer {
 
     @PostConstruct
     public void init() {
-        String chainSelectors = flowChainFactories.stream().map(FlowEventChainFactory::initEvent).collect(Collectors.joining("|"));
-        reactor.on(Selectors.regex(chainSelectors), flowChainHandler);
+        flowChainFactories.stream()
+                .map(FlowEventChainFactory::initEvent)
+                .forEach(initEvent -> reactor.on(initEvent, flowChainHandler));
     }
 }

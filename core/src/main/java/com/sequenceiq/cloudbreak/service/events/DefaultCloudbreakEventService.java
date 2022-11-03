@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.stack.CmCommandLinkProvider;
@@ -40,9 +41,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEve
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-
-import reactor.bus.EventBus;
-import reactor.bus.selector.Selectors;
 
 @Service
 @Transactional
@@ -96,7 +94,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService, Cl
 
     @PostConstruct
     public void setup() {
-        reactor.on(Selectors.$(CLOUDBREAK_EVENT), cloudbreakEventHandler);
+        reactor.on(CLOUDBREAK_EVENT, cloudbreakEventHandler);
     }
 
     @Override

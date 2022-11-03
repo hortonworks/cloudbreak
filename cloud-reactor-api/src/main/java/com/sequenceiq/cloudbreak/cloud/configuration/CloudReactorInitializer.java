@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.configuration;
 
+import java.util.function.Consumer;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -7,11 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceRetrievalNotification;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
-import reactor.bus.selector.Selectors;
-import reactor.fn.Consumer;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 
 @Component
 public class CloudReactorInitializer {
@@ -27,8 +26,8 @@ public class CloudReactorInitializer {
 
     @PostConstruct
     public void initialize() {
-        eventBus.on(Selectors.$("resource-persisted"), resourcePersistenceHandler);
-        eventBus.on(Selectors.$("resource-retrieved"), resourceRetrievalHandler);
+        eventBus.on("resource-persisted", resourcePersistenceHandler);
+        eventBus.on("resource-retrieved", resourceRetrievalHandler);
     }
 
 }

@@ -6,9 +6,7 @@ import java.util.List;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-
-import reactor.rx.Promise;
-import reactor.rx.Promises;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 
 /**
  * Notification sent to Cloudbreak.
@@ -30,7 +28,7 @@ public class ResourceNotification {
     public ResourceNotification(List<CloudResource> cloudResources, CloudContext cloudContext, ResourceNotificationType type) {
         this.cloudResources = cloudResources;
         this.cloudContext = cloudContext;
-        promise = Promises.prepare();
+        promise = Promise.prepare();
         this.type = type;
     }
 

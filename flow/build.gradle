@@ -33,9 +33,6 @@ dependencies {
   api group: 'org.springframework.statemachine',      name: 'spring-statemachine-core',       version: '1.0.1.RELEASE'
   implementation group: 'org.springframework.boot',              name: 'spring-boot-starter-quartz',     version: springBootVersion
 
-  api group: 'io.projectreactor',                     name: 'reactor-core',                   version: eventBusVersion
-  api group: 'io.projectreactor',                     name: 'reactor-bus',                    version: eventBusVersion
-  api group: 'io.projectreactor',                     name: 'reactor-stream',                 version: eventBusVersion
   implementation group: 'commons-io',                            name: 'commons-io',                     version: apacheCommonsIoVersion
   implementation group: 'org.mybatis',                           name: 'mybatis-migrations',             version: mybatisMigrationVersion
 

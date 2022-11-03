@@ -11,10 +11,9 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialExperiencePolicyRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialExperiencePolicyResult;
 import com.sequenceiq.cloudbreak.cloud.handler.CloudPlatformEventHandler;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
 import com.sequenceiq.environment.experience.ExperienceConnectorService;
-
-import reactor.bus.Event;
 
 @Component
 public class CredentialExperiencePolicyHandler implements CloudPlatformEventHandler<CredentialExperiencePolicyRequest> {

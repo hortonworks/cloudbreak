@@ -27,6 +27,7 @@ import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
@@ -39,9 +40,6 @@ import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParameter
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
-
-import reactor.bus.Event;
-import reactor.bus.Event.Headers;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceEncryptionDeleteHandlerTest {
@@ -68,7 +66,7 @@ class ResourceEncryptionDeleteHandlerTest {
     private Event<EnvironmentDeletionDto> environmentDtoEvent;
 
     @Mock
-    private Headers headers;
+    private Event.Headers headers;
 
     @InjectMocks
     private ResourceEncryptionDeleteHandler underTest;
@@ -77,7 +75,7 @@ class ResourceEncryptionDeleteHandlerTest {
     private ArgumentCaptor<BaseNamedFlowEvent> baseNamedFlowEventCaptor;
 
     @Captor
-    private ArgumentCaptor<Headers> headersArgumentCaptor;
+    private ArgumentCaptor<Event.Headers> headersArgumentCaptor;
 
     @Captor
     private ArgumentCaptor<HandlerFailureConjoiner> handlerFailureConjoinerCaptor;
@@ -107,7 +105,7 @@ class ResourceEncryptionDeleteHandlerTest {
                 .build();
         lenient().when(environmentDtoEvent.getData()).thenReturn(environmentDeletionDto);
         lenient().when(environmentDtoEvent.getHeaders()).thenReturn(headers);
-        lenient().doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Headers.class));
+        lenient().doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Event.Headers.class));
     }
 
     @Test
@@ -216,7 +214,7 @@ class ResourceEncryptionDeleteHandlerTest {
     }
 
     private void verifyEnvDeleteFailedEvent(Exception exceptionExpected, boolean wrappedInCloudbreakServiceException,
-            String messageCloudbreakServiceExceptionExpected) {
+                                            String messageCloudbreakServiceExceptionExpected) {
         HandlerFailureConjoiner conjoiner = handlerFailureConjoinerCaptor.getValue();
 
         Exception exception = conjoiner.getException();

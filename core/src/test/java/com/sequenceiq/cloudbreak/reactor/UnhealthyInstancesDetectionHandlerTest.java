@@ -19,6 +19,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionResult;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -27,9 +29,6 @@ import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstancesFinalize
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UnhealthyInstancesDetectionHandlerTest {

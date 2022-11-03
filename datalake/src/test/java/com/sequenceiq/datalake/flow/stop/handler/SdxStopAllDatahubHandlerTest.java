@@ -19,12 +19,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.datalake.flow.stop.event.SdxStopAllDatahubRequest;
 import com.sequenceiq.datalake.flow.stop.event.SdxStopFailedEvent;
 import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 public class SdxStopAllDatahubHandlerTest {

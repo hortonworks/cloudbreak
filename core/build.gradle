@@ -123,11 +123,6 @@ dependencyManagement {
       entry 'spring-boot-starter-freemarker'
     }
 
-    dependencySet(group: 'io.projectreactor', version: eventBusVersion) {
-      entry 'reactor-core'
-      entry 'reactor-bus'
-    }
-
     dependencySet(group: 'io.springfox', version: swaggerSpringFoxVersion) {
       entry 'springfox-boot-starter'
     }
@@ -190,9 +185,6 @@ dependencies {
   implementation group: 'org.springframework.kafka',          name: 'spring-kafka',               version: '2.6.4'
 
   implementation group: 'org.springframework.retry',          name: 'spring-retry'
-
-  implementation group: 'io.projectreactor',                  name: 'reactor-core'
-  implementation group: 'io.projectreactor',                  name: 'reactor-bus'
 
   implementation group: 'org.apache.commons',                 name: 'commons-collections4'
   implementation group: 'org.apache.commons',                 name: 'commons-lang3'

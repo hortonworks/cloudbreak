@@ -12,8 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineRecommend
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
-
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 @Component
 public class GetVirtualMachineRecommendationsHandler implements CloudPlatformEventHandler<GetVirtualMachineRecommendtaionRequest> {

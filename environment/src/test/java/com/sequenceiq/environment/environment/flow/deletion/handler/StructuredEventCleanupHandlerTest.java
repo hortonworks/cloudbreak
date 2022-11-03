@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -24,14 +25,11 @@ import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent
 import com.sequenceiq.environment.environment.service.cleanup.EnvironmentStructuredEventCleanupService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 
-import reactor.bus.Event;
-import reactor.bus.Event.Headers;
-
 @ExtendWith(MockitoExtension.class)
 class StructuredEventCleanupHandlerTest {
 
     @Mock
-    private Headers mockHeaders;
+    private Event.Headers mockHeaders;
 
     @Mock
     private EnvironmentDto mockEnvironmentDto;
@@ -80,7 +78,7 @@ class StructuredEventCleanupHandlerTest {
 
     @Test
     void testWhenSomethingThrowsExceptionOtherThanTheActualActionThenExceptionProcessorWhouldHandleIt() {
-        doThrow(new RuntimeException()).when(mockEventSender).sendEvent(any(EnvDeleteEvent.class), any(Headers.class));
+        doThrow(new RuntimeException()).when(mockEventSender).sendEvent(any(EnvDeleteEvent.class), any(Event.Headers.class));
 
         underTest.accept(mockEventOfEnvironmentDeletionDto);
 

@@ -40,6 +40,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
@@ -56,10 +58,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
-
-import reactor.bus.Event;
-import reactor.bus.Event.Headers;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 class DecommissionHandlerTest {
@@ -168,7 +166,7 @@ class DecommissionHandlerTest {
         when(clusterDecomissionService.collectHostsToRemove(HOST_GROUP_NAME, Set.of(FQDN))).thenReturn(Map.of(FQDN, instance));
         doThrow(new CloudbreakException("Restart stale services failed.")).when(clusterDecomissionService).restartStaleServices(true);
 
-        underTest.accept(new Event<>(new Headers(), forcedDecommissionRequest()));
+        underTest.accept(new Event<>(new Event.Headers(), forcedDecommissionRequest()));
 
         verify(eventService).fireCloudbreakEvent(STACK_ID, "UPDATE_IN_PROGRESS", CLUSTER_DECOMMISSION_FAILED_FORCE_DELETE_CONTINUE,
                 List.of("Restart stale services failed."));
@@ -196,7 +194,7 @@ class DecommissionHandlerTest {
         CloudbreakException cloudbreakException = new CloudbreakException("Restart stale services failed.");
         doThrow(cloudbreakException).when(clusterDecomissionService).restartStaleServices(false);
 
-        underTest.accept(new Event<>(new Headers(), decommissionRequest()));
+        underTest.accept(new Event<>(new Event.Headers(), decommissionRequest()));
 
         verify(eventBus).notify(eq("DECOMMISSIONRESULT_ERROR"), captor.capture());
         Event<DecommissionResult> resultEvent = captor.getValue();
@@ -221,7 +219,7 @@ class DecommissionHandlerTest {
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(clusterDecomissionService.collectHostsToRemove(HOST_GROUP_NAME, Set.of(FQDN))).thenReturn(Map.of(FQDN, instance));
 
-        underTest.accept(new Event<>(new Headers(), decommissionRequest()));
+        underTest.accept(new Event<>(new Event.Headers(), decommissionRequest()));
 
         verify(eventBus).notify(eq("DECOMMISSIONRESULT"), captor.capture());
         Event<DecommissionResult> resultEvent = captor.getValue();

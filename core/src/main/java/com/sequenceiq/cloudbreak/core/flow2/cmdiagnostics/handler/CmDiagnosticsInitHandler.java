@@ -15,13 +15,12 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.CmDiagnosticsFlowService;
 import com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event.CmDiagnosticsCollectionEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event.CmDiagnosticsCollectionFailureEvent;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.model.diagnostics.CmDiagnosticsParameters;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class CmDiagnosticsInitHandler extends EventSenderAwareHandler<CmDiagnosticsCollectionEvent> {

@@ -10,14 +10,13 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.audit.AuditClient;
 import com.sequenceiq.cloudbreak.audit.model.ActorCrn;
 import com.sequenceiq.cloudbreak.audit.model.AuditEvent;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.audit.extractor.RequestMethodBasedRestAuditEventNameExtractor;
 import com.sequenceiq.cloudbreak.structuredevent.service.audit.extractor.RestAuditEventSourceExtractor;
 import com.sequenceiq.cloudbreak.structuredevent.service.audit.extractor.RestCDPEventDataExtractor;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.Event;
 
 @Component
 public class CDPRestAuditEventHandler implements EventHandler<CDPStructuredRestCallEvent> {

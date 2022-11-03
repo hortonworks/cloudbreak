@@ -11,11 +11,10 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUp
 import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.event.PillarConfigUpdateFailed;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.event.PillarConfigUpdateRequest;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.event.PillarConfigUpdateSuccess;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @Component
 public class PillarConfigUpdateHandler extends ExceptionCatcherEventHandler<PillarConfigUpdateRequest> {

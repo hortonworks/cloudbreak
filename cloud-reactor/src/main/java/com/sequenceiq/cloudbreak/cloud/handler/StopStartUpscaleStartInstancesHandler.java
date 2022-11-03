@@ -21,10 +21,9 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEventHandler<StopStartUpscaleStartInstancesRequest> {
