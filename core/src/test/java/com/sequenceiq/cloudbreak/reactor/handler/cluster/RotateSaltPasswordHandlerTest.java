@@ -17,6 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -28,9 +30,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordTyp
 import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 class RotateSaltPasswordHandlerTest {

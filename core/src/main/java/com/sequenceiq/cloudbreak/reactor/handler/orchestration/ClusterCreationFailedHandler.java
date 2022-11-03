@@ -18,14 +18,13 @@ import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerService;
 import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterCreationFailedRequest;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @Component
 public class ClusterCreationFailedHandler extends ExceptionCatcherEventHandler<ClusterCreationFailedRequest> {

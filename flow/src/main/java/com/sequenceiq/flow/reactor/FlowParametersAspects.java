@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowTracingUtil;
@@ -20,7 +21,6 @@ import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
-import reactor.bus.Event;
 
 @Component
 @Aspect
@@ -30,7 +30,7 @@ public class FlowParametersAspects {
     @Inject
     private Tracer tracer;
 
-    @Pointcut("execution(public * reactor.fn.Consumer+.accept(..)) && within(com.sequenceiq..*)")
+    @Pointcut("execution(public * java.util.function.Consumer+.accept(..)) && args(com.sequenceiq.cloudbreak.eventbus.Event) && within(com.sequenceiq..*)")
     public void interceptReactorConsumersAcceptMethod() {
     }
 
@@ -39,7 +39,7 @@ public class FlowParametersAspects {
         Event<?> event = (Event<?>) proceedingJoinPoint.getArgs()[0];
         String flowTriggerUserCrn = event.getHeaders().get(FlowConstants.FLOW_TRIGGER_USERCRN);
         return ThreadBasedUserCrnProvider.doAsAndThrow(flowTriggerUserCrn, () -> {
-            String operationName = event.getKey().toString();
+            String operationName = event.getKey();
             SpanContext spanContext = event.getHeaders().get(FlowConstants.SPAN_CONTEXT);
             Span activeSpan = tracer.activeSpan();
             if (FlowTracingUtil.isActiveSpanReusable(activeSpan, spanContext, operationName)) {

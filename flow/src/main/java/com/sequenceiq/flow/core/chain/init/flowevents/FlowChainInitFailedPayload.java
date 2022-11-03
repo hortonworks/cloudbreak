@@ -2,8 +2,7 @@ package com.sequenceiq.flow.core.chain.init.flowevents;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import reactor.rx.Promise;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 
 public class FlowChainInitFailedPayload extends FlowChainInitPayload {
 

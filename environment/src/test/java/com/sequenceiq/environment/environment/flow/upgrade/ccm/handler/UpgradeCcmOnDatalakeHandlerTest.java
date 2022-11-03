@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmEvent;
 import com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmFailedEvent;
@@ -30,8 +31,6 @@ import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.sdx.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
-
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 class UpgradeCcmOnDatalakeHandlerTest {

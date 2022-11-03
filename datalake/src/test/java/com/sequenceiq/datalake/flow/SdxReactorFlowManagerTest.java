@@ -29,6 +29,9 @@ import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
@@ -42,10 +45,6 @@ import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
-import reactor.rx.Promise;
 
 @ExtendWith(MockitoExtension.class)
 class SdxReactorFlowManagerTest {

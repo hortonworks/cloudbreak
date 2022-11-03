@@ -25,6 +25,8 @@ import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollect
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -43,9 +45,6 @@ import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
-
-import reactor.bus.Event;
-import reactor.rx.Promise;
 
 @Service
 public class DiagnosticsService {

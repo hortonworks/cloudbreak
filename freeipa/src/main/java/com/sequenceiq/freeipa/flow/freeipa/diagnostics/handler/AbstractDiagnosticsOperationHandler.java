@@ -2,13 +2,12 @@ package com.sequenceiq.freeipa.flow.freeipa.diagnostics.handler;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsFlowException;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionFailureEvent;
-
-import reactor.bus.Event;
 
 public abstract class AbstractDiagnosticsOperationHandler extends ExceptionCatcherEventHandler<DiagnosticsCollectionEvent> {
 

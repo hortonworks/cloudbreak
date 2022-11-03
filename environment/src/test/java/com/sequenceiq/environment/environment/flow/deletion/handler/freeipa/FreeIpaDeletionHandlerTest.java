@@ -22,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -38,8 +39,6 @@ import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
-
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaDeletionHandlerTest {

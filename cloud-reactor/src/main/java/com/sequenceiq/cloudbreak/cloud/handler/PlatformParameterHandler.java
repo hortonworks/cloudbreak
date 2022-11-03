@@ -11,8 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParameterResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 @Component
 public class PlatformParameterHandler implements CloudPlatformEventHandler<PlatformParameterRequest> {

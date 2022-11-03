@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -25,8 +26,6 @@ import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-
-import reactor.bus.Event;
 
 @Component
 public class LoadBalancerEnvUpdateHandler extends EventSenderAwareHandler<EnvironmentLoadBalancerDto> {

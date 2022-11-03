@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
@@ -17,8 +18,6 @@ import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-
-import reactor.bus.Event;
 
 @Component
 public class NetworkDeleteHandler extends EventSenderAwareHandler<EnvironmentDeletionDto> {

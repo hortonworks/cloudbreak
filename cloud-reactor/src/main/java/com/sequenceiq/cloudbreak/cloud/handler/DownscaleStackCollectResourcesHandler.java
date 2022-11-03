@@ -15,9 +15,8 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackCollectResou
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackCollectResourcesResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 
 @Component
 public class DownscaleStackCollectResourcesHandler implements CloudPlatformEventHandler<DownscaleStackCollectResourcesRequest> {

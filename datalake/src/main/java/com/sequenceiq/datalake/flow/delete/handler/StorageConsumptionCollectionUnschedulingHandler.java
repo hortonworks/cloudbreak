@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
 import com.sequenceiq.datalake.flow.delete.event.StorageConsumptionCollectionUnschedulingRequest;
 import com.sequenceiq.datalake.flow.delete.event.StorageConsumptionCollectionUnschedulingSuccessEvent;
@@ -15,8 +16,6 @@ import com.sequenceiq.datalake.service.consumption.ConsumptionService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @Component
 public class StorageConsumptionCollectionUnschedulingHandler extends ExceptionCatcherEventHandler<StorageConsumptionCollectionUnschedulingRequest> {

@@ -25,9 +25,8 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedExcep
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 
 public class InstanceStateHandlerTest {
 

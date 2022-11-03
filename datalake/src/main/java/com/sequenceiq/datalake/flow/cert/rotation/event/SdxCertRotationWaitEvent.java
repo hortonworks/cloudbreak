@@ -4,10 +4,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
-
-import reactor.rx.Promise;
 
 public class SdxCertRotationWaitEvent extends SdxEvent {
     public SdxCertRotationWaitEvent(Long sdxId, String userId) {

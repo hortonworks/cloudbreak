@@ -1,9 +1,9 @@
 package com.sequenceiq.flow.reactor.handler;
 
+import java.util.function.Consumer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import reactor.fn.Consumer;
 
 public class ConsumerNotFoundHandler implements Consumer<Object> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerNotFoundHandler.class);

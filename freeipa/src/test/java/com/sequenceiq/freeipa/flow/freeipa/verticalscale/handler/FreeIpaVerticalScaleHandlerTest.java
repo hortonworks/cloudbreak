@@ -33,13 +33,12 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.FreeIpaVerticalScaleService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 public class FreeIpaVerticalScaleHandlerTest {
@@ -172,7 +171,7 @@ public class FreeIpaVerticalScaleHandlerTest {
                 any(com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleRequest.class),
                 any(CloudConnector.class))
         ).thenThrow(new RuntimeException());
-        verify(eventBus, times(0)).notify(any(Object.class), any(Event.class));
+        verify(eventBus, times(0)).notify(any(), any(Event.class));
 
         underTest.accept(new Event<>(freeIpaVerticalScaleRequest));
     }

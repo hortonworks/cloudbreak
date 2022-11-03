@@ -23,9 +23,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 
 @Component
 public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetSSHFingerprintsRequest> {

@@ -14,8 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
-
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 @Component
 public class GetRegionsV2Handler implements CloudPlatformEventHandler<GetPlatformRegionsRequestV2> {

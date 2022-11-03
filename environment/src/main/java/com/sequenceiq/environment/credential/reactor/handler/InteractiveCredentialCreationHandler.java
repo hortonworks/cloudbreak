@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
@@ -19,8 +20,6 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialToCredential
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.Event;
 
 @Component
 public class InteractiveCredentialCreationHandler implements EventHandler<InteractiveCredentialCreationRequest> {

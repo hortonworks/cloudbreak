@@ -27,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -36,8 +37,6 @@ import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFaile
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
-
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 class ExperienceDeletionHandlerTest {

@@ -77,7 +77,7 @@ public class FlowLogDBService implements FlowLogService {
 
     @Override
     public FlowLog save(FlowParameters flowParameters, String flowChainId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
-            FlowState currentState) {
+                        FlowState currentState) {
         String payloadJackson = JsonUtil.writeValueAsStringSilent(payload);
         String variablesJackson = TypedJsonUtil.writeValueAsStringSilent(variables);
 

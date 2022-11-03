@@ -28,6 +28,7 @@ import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -39,8 +40,6 @@ import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
-
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 class RdsDeletionHandlerTest {

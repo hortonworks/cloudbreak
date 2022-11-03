@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableDeleteRequest;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableDeleteResponse;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableMetadataResponse;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -50,9 +51,6 @@ import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
-
-import reactor.bus.Event;
-import reactor.bus.Event.Headers;
 
 @ExtendWith(MockitoExtension.class)
 class S3GuardTableDeleteHandlerTest {
@@ -91,7 +89,7 @@ class S3GuardTableDeleteHandlerTest {
     private Event<EnvironmentDeletionDto> environmentDtoEvent;
 
     @Mock
-    private Headers headers;
+    private Event.Headers headers;
 
     @Mock
     private CloudConnector cloudConnector;
@@ -103,7 +101,7 @@ class S3GuardTableDeleteHandlerTest {
     private ArgumentCaptor<BaseNamedFlowEvent> eventArgumentCaptor;
 
     @Captor
-    private ArgumentCaptor<Headers> headersArgumentCaptor;
+    private ArgumentCaptor<Event.Headers> headersArgumentCaptor;
 
     @BeforeEach
     void setUp() {

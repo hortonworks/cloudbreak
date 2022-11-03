@@ -2,9 +2,8 @@ package com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds;
 
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-
-import reactor.rx.Promise;
 
 public abstract class AbstractUpgradeRdsEvent extends StackEvent {
 

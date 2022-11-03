@@ -25,9 +25,8 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-
-import reactor.rx.Promise;
 
 @ExtendWith(MockitoExtension.class)
 public class MultiHostgroupDownscaleFlowEventChainFactoryTest {

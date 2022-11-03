@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableDeleteRequest;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableDeleteResponse;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableMetadataResponse;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -30,8 +31,6 @@ import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-
-import reactor.bus.Event;
 
 @Component
 public class S3GuardTableDeleteHandler extends EventSenderAwareHandler<EnvironmentDeletionDto> {

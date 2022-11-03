@@ -34,6 +34,8 @@ import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.state.State;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmFailedEvent;
@@ -55,8 +57,6 @@ import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ExtendWith(MockitoExtension.class)

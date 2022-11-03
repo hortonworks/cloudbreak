@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.gs.collections.impl.factory.Sets;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -365,7 +365,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 .filter(i -> i.getDiscoveryFQDN() != null)
                 .map(InstanceMetadataView::getDiscoveryFQDN)
                 .collect(toSet());
-        return Sets.intersect(healthyHosts, unhealthyStoredHosts);
+        return Sets.intersection(healthyHosts, unhealthyStoredHosts);
     }
 
     private EnumSet<InstanceStatus> statesFromHealthyAllowed() {

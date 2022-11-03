@@ -3,8 +3,7 @@ package com.sequenceiq.flow.core.helloworld;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-
-import reactor.rx.Promise;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 
 public abstract class HelloWorldSelectableEvent implements Selectable, Acceptable {
 

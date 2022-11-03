@@ -24,6 +24,8 @@ import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
@@ -34,9 +36,6 @@ import com.sequenceiq.environment.environment.service.network.NetworkTest;
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 public class NetworkCreationHandlerTest extends NetworkTest {
 
@@ -68,8 +67,6 @@ public class NetworkCreationHandlerTest extends NetworkTest {
         Field enabledPlatformsField = ReflectionUtils.findField(NetworkCreationHandler.class, "enabledPlatforms");
         ReflectionUtils.makeAccessible(enabledPlatformsField);
         ReflectionUtils.setField(enabledPlatformsField, underTest, Set.of("AWS", "AZURE"));
-
-        when(eventBus.notify(any(Object.class), any(Event.class))).thenReturn(null);
     }
 
     @Test
@@ -134,7 +131,7 @@ public class NetworkCreationHandlerTest extends NetworkTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.accept(environmentDtoEvent));
 
         ArgumentCaptor<Event<EnvCreationFailureEvent>> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus, times(1)).notify(any(Object.class), eventCaptor.capture());
+        verify(eventBus, times(1)).notify(any(), eventCaptor.capture());
         Event<EnvCreationFailureEvent> value = eventCaptor.getValue();
         assertTrue(value.getData().getException() instanceof BadRequestException);
     }

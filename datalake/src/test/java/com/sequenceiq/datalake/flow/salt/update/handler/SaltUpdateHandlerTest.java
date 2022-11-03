@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.salt.update.event.SaltUpdateFailureResponse;
 import com.sequenceiq.datalake.flow.salt.update.event.SaltUpdateRequest;
@@ -22,8 +23,6 @@ import com.sequenceiq.datalake.flow.salt.update.event.SaltUpdateSuccessResponse;
 import com.sequenceiq.datalake.service.sdx.CloudbreakStackService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 public class SaltUpdateHandlerTest {
@@ -68,7 +67,7 @@ public class SaltUpdateHandlerTest {
 
         Selectable nextEvent = underTest.doAccept(getEvent());
 
-        assertEquals("SALTUPDATESUCCESSRESPONSE",  nextEvent.selector());
+        assertEquals("SALTUPDATESUCCESSRESPONSE", nextEvent.selector());
         assertEquals(SDX_ID, nextEvent.getResourceId());
         assertEquals(USER_ID, ((SaltUpdateSuccessResponse) nextEvent).getUserId());
         verify(cloudbreakStackService, times(1)).updateSaltByName(sdxCluster);
@@ -82,7 +81,7 @@ public class SaltUpdateHandlerTest {
 
         Selectable nextEvent = underTest.doAccept(getEvent());
 
-        assertEquals("SALTUPDATEFAILURERESPONSE",  nextEvent.selector());
+        assertEquals("SALTUPDATEFAILURERESPONSE", nextEvent.selector());
         assertEquals(SDX_ID, nextEvent.getResourceId());
         assertEquals(USER_ID, ((SaltUpdateFailureResponse) nextEvent).getUserId());
         assertEquals("error", ((SaltUpdateFailureResponse) nextEvent).getException().getMessage());

@@ -22,6 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -38,9 +40,6 @@ import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidato
 import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentValidationHandlerTest {

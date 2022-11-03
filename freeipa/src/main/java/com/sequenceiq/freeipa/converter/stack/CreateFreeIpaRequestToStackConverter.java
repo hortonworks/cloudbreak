@@ -1,10 +1,10 @@
 package com.sequenceiq.freeipa.converter.stack;
 
-import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.AWS_KMS_ENCRYPTION_KEY;
 import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.DISK_ENCRYPTION_SET_ID;
 import static com.sequenceiq.freeipa.util.CloudArgsForIgConverter.GCP_KMS_ENCRYPTION_KEY;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.EnumMap;
@@ -235,7 +235,7 @@ public class CreateFreeIpaRequestToStackConverter {
         try {
             Map<String, String> userDefined = source.getTags();
             if (userDefined == null) {
-                userDefined =  new HashMap<>();
+                userDefined = new HashMap<>();
             }
             // userdefined tags comming from environment service
             return new Json(new StackTags(userDefined, new HashMap<>(), getDefaultTags(stack, userCrn, userName)));

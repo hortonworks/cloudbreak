@@ -13,8 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowResponse;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 @Component
 public class InitCodeGrantFlowHandler implements CloudPlatformEventHandler<InitCodeGrantFlowRequest> {

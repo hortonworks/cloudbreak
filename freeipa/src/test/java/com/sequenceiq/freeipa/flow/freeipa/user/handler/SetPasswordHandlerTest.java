@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Config;
@@ -38,8 +39,6 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsCredentialProvider;
 import com.sequenceiq.freeipa.service.stack.StackService;
-
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 class SetPasswordHandlerTest {

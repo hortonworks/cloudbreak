@@ -1,7 +1,5 @@
 package com.sequenceiq.flow.conf;
 
-import static reactor.bus.selector.Selectors.$;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,9 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.EventBus;
 
 @Configuration
 public class ReactorEventHandlerInitializer {
@@ -27,7 +24,7 @@ public class ReactorEventHandlerInitializer {
         for (EventHandler<?> handler : eventHandlers.getEventHandlers()) {
             String selector = handler.selector();
             LOGGER.debug("Registering handler [{}] for selector [{}]", handler.getClass(), selector);
-            eventBus.on($(selector), handler);
+            eventBus.on(selector, handler);
         }
     }
 

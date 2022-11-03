@@ -1,15 +1,11 @@
 package com.sequenceiq.cloudbreak.reactor.api.handler;
 
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
-import reactor.bus.Event;
-
-@Component
 class ExceptionCatcherEventHandlerTestHelper extends ExceptionCatcherEventHandler<Payload> {
 
     private String selectorString;

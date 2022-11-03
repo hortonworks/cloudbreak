@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.refresh.event.DatahubRefreshStartEvent;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -26,8 +27,6 @@ import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 

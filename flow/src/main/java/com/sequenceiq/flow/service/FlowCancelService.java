@@ -11,14 +11,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.core.EventParameterFactory;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-
-import reactor.bus.EventBus;
 
 @Service
 public class FlowCancelService {

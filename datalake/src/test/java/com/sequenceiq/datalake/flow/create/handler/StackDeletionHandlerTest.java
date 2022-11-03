@@ -21,15 +21,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
 import com.sequenceiq.datalake.flow.delete.event.StackDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.StackDeletionWaitRequest;
 import com.sequenceiq.datalake.flow.delete.handler.StackDeletionHandler;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("StackDeletionHandler tests")

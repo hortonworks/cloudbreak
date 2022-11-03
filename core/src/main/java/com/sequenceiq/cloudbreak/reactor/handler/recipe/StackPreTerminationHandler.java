@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.flow.PreTerminationStateExecutor;
@@ -21,9 +23,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class StackPreTerminationHandler implements EventHandler<StackPreTerminationRequest> {

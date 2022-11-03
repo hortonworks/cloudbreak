@@ -14,6 +14,7 @@ import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeImageChangeEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFailedEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeValidationFailedEvent;
@@ -22,8 +23,6 @@ import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxUpgradeService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @Component
 public class DatalakeUpgradeWaitHandler extends ExceptionCatcherEventHandler<DatalakeUpgradeWaitRequest> {

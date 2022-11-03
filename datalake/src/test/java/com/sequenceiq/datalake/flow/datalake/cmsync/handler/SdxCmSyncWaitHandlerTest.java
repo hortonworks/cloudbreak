@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.datalake.cmsync.event.SdxCmSyncFailedEvent;
 import com.sequenceiq.datalake.flow.datalake.cmsync.event.SdxCmSyncWaitEvent;
@@ -27,8 +28,6 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.flowwait.SdxWaitService;
 import com.sequenceiq.datalake.service.sdx.flowwait.exception.SdxWaitException;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 public class SdxCmSyncWaitHandlerTest {

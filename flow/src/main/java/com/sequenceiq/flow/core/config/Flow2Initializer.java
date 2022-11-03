@@ -1,6 +1,6 @@
 package com.sequenceiq.flow.core.config;
 
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -12,13 +12,10 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
-import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
-
-import reactor.bus.EventBus;
-import reactor.bus.selector.Selectors;
 
 @Component
 public class Flow2Initializer {
@@ -29,24 +26,32 @@ public class Flow2Initializer {
     private Flow2Handler flow2Handler;
 
     @Resource
-    private List<FlowConfiguration<?>> flowConfigs;
+    private List<AbstractFlowConfiguration<?, ?>> flowConfigs;
 
     @Resource
     private List<FlowEventChainFactory<?>> flowChainFactories;
 
     @PostConstruct
     public void init() {
-        List<String> flowSelectors = flowConfigs.stream()
-                .flatMap(c -> Arrays.stream(c.getEvents()))
-                .map(FlowEvent::event)
-                .collect(Collectors.toList());
+        Set<String> flowSelectors = new HashSet<>();
+        for (AbstractFlowConfiguration<?, ?> flowConfiguration : flowConfigs) {
+            for (AbstractFlowConfiguration.Transition<?, ?> transition : flowConfiguration.getTransitions()) {
+                if (transition.getEvent() != null) {
+                    flowSelectors.add(transition.getEvent().event());
+                }
+                if (transition.getFailureEvent() != null) {
+                    flowSelectors.add(transition.getFailureEvent().event());
+                }
+            }
+            flowSelectors.add(flowConfiguration.getFailHandledEvent().event());
+        }
         validateNotFlowChainSelectors(flowSelectors);
-        String eventSelector = Stream.concat(Stream.of(FlowConstants.FLOW_FINAL, FlowConstants.FLOW_CANCEL), flowSelectors.stream())
-                .distinct().collect(Collectors.joining("|"));
-        reactor.on(Selectors.regex(eventSelector), flow2Handler);
+        Stream.concat(Stream.of(FlowConstants.FLOW_FINAL, FlowConstants.FLOW_CANCEL), flowSelectors.stream())
+                .distinct()
+                .forEach(eventKey -> reactor.on(eventKey, flow2Handler));
     }
 
-    private void validateNotFlowChainSelectors(List<String> flowSelectors) {
+    private void validateNotFlowChainSelectors(Set<String> flowSelectors) {
         Set<String> flowChainSelectors = flowChainFactories.stream()
                 .map(FlowEventChainFactory::initEvent)
                 .collect(Collectors.toSet());

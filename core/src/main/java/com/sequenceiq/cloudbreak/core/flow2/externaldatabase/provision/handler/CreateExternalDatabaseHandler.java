@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseSer
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.CreateExternalDatabaseFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.CreateExternalDatabaseRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.CreateExternalDatabaseResult;
@@ -27,9 +29,6 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class CreateExternalDatabaseHandler implements EventHandler<CreateExternalDatabaseRequest> {

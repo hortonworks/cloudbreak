@@ -17,10 +17,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionResult;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-
-import reactor.bus.EventBus;
 
 @ExtendWith(SpringExtension.class)
 public class ResourceDefinitionServiceTest {

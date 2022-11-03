@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
@@ -17,9 +19,6 @@ import com.sequenceiq.freeipa.flow.stack.termination.event.ums.RemoveMachineUser
 import com.sequenceiq.freeipa.flow.stack.termination.event.ums.RemoveMachineUserRequest;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class MachineUserRemoveHandler implements EventHandler<RemoveMachineUserRequest> {

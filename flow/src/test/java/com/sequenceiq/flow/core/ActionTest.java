@@ -16,12 +16,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 public abstract class ActionTest {

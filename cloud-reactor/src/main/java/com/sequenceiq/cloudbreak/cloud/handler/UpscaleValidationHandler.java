@@ -13,9 +13,8 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 
 @Component
 public class UpscaleValidationHandler implements CloudPlatformEventHandler<UpscaleStackValidationRequest> {

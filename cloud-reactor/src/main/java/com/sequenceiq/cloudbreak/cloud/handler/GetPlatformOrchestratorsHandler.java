@@ -19,8 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
-
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 @Component
 public class GetPlatformOrchestratorsHandler implements CloudPlatformEventHandler<GetPlatformOrchestratorsRequest> {

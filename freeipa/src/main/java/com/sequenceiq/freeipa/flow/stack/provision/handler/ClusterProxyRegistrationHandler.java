@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -19,9 +21,6 @@ import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterPro
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationSuccess;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProxyRegistrationRequest> {

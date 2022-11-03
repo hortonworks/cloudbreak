@@ -10,12 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmService;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmFailureEvent;
-
-import reactor.bus.Event;
 
 @Component
 public class UpgradeCcmRevertHandler extends ExceptionCatcherEventHandler<UpgradeCcmFailureEvent> {

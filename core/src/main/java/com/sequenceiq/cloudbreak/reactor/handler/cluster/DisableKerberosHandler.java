@@ -8,15 +8,14 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DisableKerberosRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DisableKerberosResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class DisableKerberosHandler implements EventHandler<DisableKerberosRequest> {

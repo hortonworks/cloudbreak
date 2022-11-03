@@ -16,8 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformInstanceGroupPa
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
-
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 @Component
 public class GetPlatformInstanceGroupParametersHandler implements CloudPlatformEventHandler<GetPlatformInstanceGroupParameterRequest> {

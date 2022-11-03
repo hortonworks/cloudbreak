@@ -26,6 +26,8 @@ import org.mockito.quality.Strictness;
 
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -39,10 +41,6 @@ import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
-
-import reactor.bus.Event;
-import reactor.bus.Event.Headers;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceEncryptionInitializationHandlerTest {
@@ -70,7 +68,7 @@ class ResourceEncryptionInitializationHandlerTest {
     private Event<EnvironmentDto> environmentDtoEvent;
 
     @Mock
-    private Headers headers;
+    private Event.Headers headers;
 
     @Mock
     private EventBus eventBus;
@@ -82,7 +80,7 @@ class ResourceEncryptionInitializationHandlerTest {
     private ArgumentCaptor<BaseNamedFlowEvent> baseNamedFlowEventCaptor;
 
     @Captor
-    private ArgumentCaptor<Headers> headersArgumentCaptor;
+    private ArgumentCaptor<Event.Headers> headersArgumentCaptor;
 
     @Captor
     private ArgumentCaptor<Event<EnvCreationFailureEvent>> envCreationFailureEventEventCaptor;
@@ -108,7 +106,7 @@ class ResourceEncryptionInitializationHandlerTest {
 
     @Test
     void acceptEnvironmentNotFound() {
-        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Headers.class));
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Event.Headers.class));
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.empty());
 
         underTest.accept(environmentDtoEvent);
@@ -131,7 +129,7 @@ class ResourceEncryptionInitializationHandlerTest {
 
     @Test
     void acceptTestEnvironmentShouldNotBeUpdatedWhenCloudPlatformIsNotAzure() {
-        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Headers.class));
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Event.Headers.class));
         Environment environment = new Environment();
         eventDto.setCloudPlatform("Dummy-cloud");
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
@@ -145,7 +143,7 @@ class ResourceEncryptionInitializationHandlerTest {
 
     @Test
     void acceptTestEnvironmentShouldNotBeUpdatedWhenEncryptionKeyUrlIsEmpty() {
-        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Headers.class));
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Event.Headers.class));
         Environment environment = new Environment();
         eventDto.setParameters(null);
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
@@ -159,7 +157,7 @@ class ResourceEncryptionInitializationHandlerTest {
 
     @Test
     void acceptTestEnvironmentShouldNotBeUpdatedWhenEncryptionKeyUrlIsPresentButStatusAlreadyInitialized() {
-        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Headers.class));
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Event.Headers.class));
         Environment environment = new Environment();
         environment.setStatus(EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_INITIALIZED);
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
@@ -173,7 +171,7 @@ class ResourceEncryptionInitializationHandlerTest {
 
     @Test
     void acceptTestEnvironmentShouldBeUpdatedWhenEncryptionKeyUrlIsPresentAndStatusNotYetInitialized() {
-        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Headers.class));
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Event.Headers.class));
         Environment environment = new Environment();
         environment.setParameters(newAzureParameters());
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
@@ -210,7 +208,7 @@ class ResourceEncryptionInitializationHandlerTest {
     @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
     void selector() {
-        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Headers.class));
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Event.Headers.class));
         assertThat(underTest.selector()).isEqualTo("INITIALIZE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT");
     }
 

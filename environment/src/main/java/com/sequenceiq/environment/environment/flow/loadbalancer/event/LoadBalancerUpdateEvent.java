@@ -6,13 +6,12 @@ import java.util.Set;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
-
-import reactor.rx.Promise;
 
 @JsonDeserialize(builder = LoadBalancerUpdateEvent.LoadBalancerUpdateEventBuilder.class)
 public class LoadBalancerUpdateEvent extends BaseNamedFlowEvent {

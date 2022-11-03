@@ -1,10 +1,9 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
-
-import reactor.bus.Event;
 
 public class HandlerFailureConjoiner {
 

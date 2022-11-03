@@ -27,6 +27,8 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmFailedEvent;
 import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmStackRequest;
@@ -35,9 +37,6 @@ import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.upgrade.ccm.SdxCcmUpgradeService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandlerTestSupport;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 class UpgradeCcmStackHandlerTest {
@@ -52,7 +51,7 @@ class UpgradeCcmStackHandlerTest {
     private SdxService sdxService;
 
     @Captor
-    private ArgumentCaptor<Object> keyCaptor;
+    private ArgumentCaptor<String> keyCaptor;
 
     @Captor
     private ArgumentCaptor<Event<?>> eventCaptor;
@@ -97,7 +96,7 @@ class UpgradeCcmStackHandlerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = { UserBreakException.class, PollerStoppedException.class, PollerException.class })
+    @ValueSource(classes = {UserBreakException.class, PollerStoppedException.class, PollerException.class})
     void acceptWithExceptions(Class<? extends Throwable> errorClass) throws Exception {
         UpgradeCcmStackRequest request = new UpgradeCcmStackRequest(1L, "user");
         Event.Headers headers = new Event.Headers();

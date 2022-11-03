@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StorageSizeRequest;
 import com.sequenceiq.cloudbreak.cloud.model.StorageSizeResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
 import com.sequenceiq.consumption.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.consumption.domain.Consumption;
@@ -46,8 +47,6 @@ import com.sequenceiq.consumption.service.EnvironmentService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse.LocationResponseBuilder;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 public class StorageConsumptionCollectionHandlerTest {

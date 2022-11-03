@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -25,8 +26,6 @@ import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaNodeUtilService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-
-import reactor.bus.Event;
 
 @Component
 public class CreateFullBackupHandler extends ExceptionCatcherEventHandler<CreateFullBackupEvent> {

@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.SetupRecoveryFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.SetupRecoveryRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.SetupRecoverySuccess;
@@ -15,8 +16,6 @@ import com.sequenceiq.cloudbreak.service.recovery.RdsRecoverySetupService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @Component
 public class RecoverySetupHandler extends ExceptionCatcherEventHandler<SetupRecoveryRequest> {

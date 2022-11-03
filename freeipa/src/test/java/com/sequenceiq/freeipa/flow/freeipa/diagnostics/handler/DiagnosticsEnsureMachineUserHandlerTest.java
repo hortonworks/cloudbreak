@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryFeatureService;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
@@ -36,8 +37,6 @@ import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollecti
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 public class DiagnosticsEnsureMachineUserHandlerTest {

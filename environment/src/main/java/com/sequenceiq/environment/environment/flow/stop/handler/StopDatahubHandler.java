@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.stop.handler;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
@@ -11,8 +12,6 @@ import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelect
 import com.sequenceiq.environment.environment.service.datahub.DatahubPollerService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-
-import reactor.bus.Event;
 
 @Component
 public class StopDatahubHandler extends EventSenderAwareHandler<EnvironmentDto> {

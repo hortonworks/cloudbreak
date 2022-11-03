@@ -27,9 +27,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 public class CreateResourcesHandlerTest {

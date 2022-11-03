@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -19,9 +21,6 @@ import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.service.FlowNameFormatService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class RedbeamsFlowManager {

@@ -4,8 +4,7 @@ import java.util.Objects;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 /**
  * Support class to make unit testing of {@link ExceptionCatcherEventHandler} easier.

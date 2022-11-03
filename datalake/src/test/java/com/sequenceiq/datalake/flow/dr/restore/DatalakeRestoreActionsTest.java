@@ -25,6 +25,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse.State;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.chain.DatalakeResizeFlowEventChainFactory;
@@ -42,8 +43,6 @@ import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
-
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 public class DatalakeRestoreActionsTest {

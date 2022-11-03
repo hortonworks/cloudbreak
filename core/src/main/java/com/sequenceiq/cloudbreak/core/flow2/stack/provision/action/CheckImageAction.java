@@ -2,7 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.provision.action;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.inject.Inject;
 
@@ -20,8 +21,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.PayloadConverter;
-
-import reactor.fn.timer.Timer;
 
 @Component("CheckImageAction")
 public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
@@ -86,8 +85,17 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
     }
 
     private void repeat(StackCreationContext context) {
-        timer.submit(aLong -> sendEvent(context, new StackEvent(getRepeatEvent().event(),
-                context.getStackId())), REPEAT_TIME, TimeUnit.MILLISECONDS);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    sendEvent(context, new StackEvent(getRepeatEvent().event(),
+                            context.getStackId()));
+                } catch (Exception e) {
+                    LOGGER.error("{}", e.getMessage(), e);
+                }
+            }
+        }, REPEAT_TIME);
     }
 
     protected FlowEvent getRepeatEvent() {

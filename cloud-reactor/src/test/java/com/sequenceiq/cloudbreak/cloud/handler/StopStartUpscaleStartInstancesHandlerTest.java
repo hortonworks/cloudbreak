@@ -41,9 +41,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 public class StopStartUpscaleStartInstancesHandlerTest {
@@ -190,7 +189,7 @@ public class StopStartUpscaleStartInstancesHandlerTest {
         underTest.accept(event);
 
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+        verify(eventBus).notify(any(), resultCaptor.capture());
         verifyNoMoreInteractions(instanceConnector);
 
         assertEquals(1, resultCaptor.getAllValues().size());
@@ -216,7 +215,7 @@ public class StopStartUpscaleStartInstancesHandlerTest {
         underTest.accept(event);
 
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+        verify(eventBus).notify(any(), resultCaptor.capture());
         verifyNoMoreInteractions(instanceConnector);
 
         assertEquals(1, resultCaptor.getAllValues().size());
@@ -254,7 +253,7 @@ public class StopStartUpscaleStartInstancesHandlerTest {
 
         underTest.accept(event);
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+        verify(eventBus).notify(any(), resultCaptor.capture());
 
         assertEquals(1, resultCaptor.getAllValues().size());
         Event resultEvent = resultCaptor.getValue();
@@ -287,7 +286,7 @@ public class StopStartUpscaleStartInstancesHandlerTest {
 
         underTest.accept(event);
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+        verify(eventBus).notify(any(), resultCaptor.capture());
 
         assertEquals(1, resultCaptor.getAllValues().size());
         Event resultEvent = resultCaptor.getValue();
@@ -315,7 +314,7 @@ public class StopStartUpscaleStartInstancesHandlerTest {
         underTest.accept(event);
 
         ArgumentCaptor<Event> captor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(any(Object.class), captor.capture());
+        verify(eventBus).notify(any(), captor.capture());
         verifyNoMoreInteractions(instanceConnector);
 
         assertEquals(1, captor.getAllValues().size());
@@ -348,7 +347,7 @@ public class StopStartUpscaleStartInstancesHandlerTest {
         underTest.accept(event);
 
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+        verify(eventBus).notify(any(), resultCaptor.capture());
         verify(instanceConnector).checkWithoutRetry(any(AuthenticatedContext.class), eq(stoppedInstancesArg));
         verify(instanceConnector).startWithLimitedRetry(
                 any(AuthenticatedContext.class), eq(null), eq(stoppedInstancesArg), anyLong());
@@ -389,7 +388,7 @@ public class StopStartUpscaleStartInstancesHandlerTest {
         underTest.accept(event);
 
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+        verify(eventBus).notify(any(), resultCaptor.capture());
         verify(instanceConnector).checkWithoutRetry(any(AuthenticatedContext.class), eq(allInstancesInHg));
         verify(instanceConnector).startWithLimitedRetry(
                 any(AuthenticatedContext.class), eq(null), eq(allInstancesInHg.subList(0, expectedInstances)), any(Long.class));
@@ -431,7 +430,7 @@ public class StopStartUpscaleStartInstancesHandlerTest {
         underTest.accept(event);
 
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+        verify(eventBus).notify(any(), resultCaptor.capture());
         verify(instanceConnector, never()).checkWithoutRetry(any(AuthenticatedContext.class), eq(allInstancesInHg));
         verify(instanceConnector).startWithLimitedRetry(
                 any(AuthenticatedContext.class), eq(null), eq(stoppedInstancesArg), any(Long.class));
@@ -473,7 +472,7 @@ public class StopStartUpscaleStartInstancesHandlerTest {
         underTest.accept(event);
 
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+        verify(eventBus).notify(any(), resultCaptor.capture());
         verify(instanceConnector).checkWithoutRetry(any(AuthenticatedContext.class), eq(allInstancesInHg));
         verify(instanceConnector).startWithLimitedRetry(any(AuthenticatedContext.class), eq(null), eq(expInvocationList), any(Long.class));
 
@@ -518,7 +517,7 @@ public class StopStartUpscaleStartInstancesHandlerTest {
         underTest.accept(event);
 
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+        verify(eventBus).notify(any(), resultCaptor.capture());
         verify(instanceConnector).checkWithoutRetry(any(AuthenticatedContext.class), eq(stoppedInstancesArg));
         verify(instanceConnector).startWithLimitedRetry(
                 any(AuthenticatedContext.class), eq(null), eq(stoppedInstancesInHg.subList(0, expectedInstances)), any(Long.class));

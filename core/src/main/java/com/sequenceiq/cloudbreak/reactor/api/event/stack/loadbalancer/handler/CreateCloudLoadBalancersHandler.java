@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateCloudLoadBalancersFailure;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateCloudLoadBalancersRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateCloudLoadBalancersSuccess;
@@ -34,8 +35,6 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @Component
 public class CreateCloudLoadBalancersHandler extends ExceptionCatcherEventHandler<CreateCloudLoadBalancersRequest> {

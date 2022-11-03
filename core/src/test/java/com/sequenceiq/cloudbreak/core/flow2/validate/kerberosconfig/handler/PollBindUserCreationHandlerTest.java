@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.PollBindUserCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.ValidateKerberosConfigEvent;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -27,8 +28,6 @@ import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaOperationPollerObject;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
-
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 class PollBindUserCreationHandlerTest {

@@ -15,11 +15,10 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.notification.NotificationService;
-
-import reactor.bus.Event;
 
 @Component
 public class InteractiveCredentialCreationStatusHandler implements EventHandler<InteractiveCredentialCreationStatus> {

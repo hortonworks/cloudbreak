@@ -12,11 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.structuredevent.conf.StructuredEventEnablementConfig;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.Event;
 
 @Component
 public class CDPFileStructuredEventHandler<T extends CDPStructuredEvent> implements EventHandler<T> {

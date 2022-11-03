@@ -5,11 +5,10 @@ import java.util.Objects;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
-
-import reactor.rx.Promise;
 
 @JsonDeserialize(builder = EnvStartEvent.EnvStartEventBuilder.class)
 public class EnvStartEvent extends BaseNamedFlowEvent {

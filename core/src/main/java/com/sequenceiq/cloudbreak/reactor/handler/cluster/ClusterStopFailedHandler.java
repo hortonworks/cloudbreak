@@ -13,13 +13,12 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerService;
 import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopEvent;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopFailedRequest;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @Component
 public class ClusterStopFailedHandler extends ExceptionCatcherEventHandler<ClusterStopFailedRequest> {

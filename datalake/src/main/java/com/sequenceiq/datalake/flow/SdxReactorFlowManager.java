@@ -35,6 +35,8 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
@@ -78,9 +80,6 @@ import com.sequenceiq.flow.service.FlowNameFormatService;
 import com.sequenceiq.sdx.api.model.SdxRecoveryType;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Service
 public class SdxReactorFlowManager {

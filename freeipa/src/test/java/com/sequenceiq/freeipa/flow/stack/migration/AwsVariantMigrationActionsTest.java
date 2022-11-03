@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -35,8 +36,6 @@ import com.sequenceiq.freeipa.metrics.FreeIpaMetricService;
 import com.sequenceiq.freeipa.metrics.MetricType;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
-
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsVariantMigrationActionsTest {

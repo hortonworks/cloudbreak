@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailHandledRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedRequest;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -25,8 +26,6 @@ import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncerService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @Component
 public class ClusterUpgradeFailedHandler extends ExceptionCatcherEventHandler<ClusterUpgradeFailedRequest> {

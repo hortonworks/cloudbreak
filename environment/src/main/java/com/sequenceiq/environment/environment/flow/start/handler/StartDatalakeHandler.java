@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.start.handler;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentStartDto;
@@ -12,8 +13,6 @@ import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSele
 import com.sequenceiq.environment.environment.service.sdx.SdxPollerService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-
-import reactor.bus.Event;
 
 @Component
 public class StartDatalakeHandler extends EventSenderAwareHandler<EnvironmentStartDto> {

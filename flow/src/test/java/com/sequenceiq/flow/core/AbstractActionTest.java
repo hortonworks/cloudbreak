@@ -32,6 +32,7 @@ import org.springframework.statemachine.config.common.annotation.ObjectPostProce
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
@@ -40,7 +41,6 @@ import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
-import reactor.bus.EventBus;
 
 @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
 public class AbstractActionTest {

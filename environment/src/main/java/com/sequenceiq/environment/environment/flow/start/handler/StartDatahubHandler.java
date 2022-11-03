@@ -4,6 +4,7 @@ import static com.sequenceiq.common.api.type.DataHubStartAction.START_ALL;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentStartDto;
@@ -14,8 +15,6 @@ import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSele
 import com.sequenceiq.environment.environment.service.datahub.DatahubPollerService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-
-import reactor.bus.Event;
 
 @Component
 public class StartDatahubHandler extends EventSenderAwareHandler<EnvironmentStartDto> {

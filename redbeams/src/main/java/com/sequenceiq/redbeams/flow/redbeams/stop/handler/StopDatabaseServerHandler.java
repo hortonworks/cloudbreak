@@ -16,15 +16,14 @@ import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerSuccess;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class StopDatabaseServerHandler implements EventHandler<StopDatabaseServerRequest> {

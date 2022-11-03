@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.config.update.handler;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesEvent;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesEvent.EnvStackConfigUpdatesEventBuilder;
@@ -12,8 +13,6 @@ import com.sequenceiq.environment.environment.service.stack.StackPollerService;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-
-import reactor.bus.Event;
 
 @Component
 public class StackConfigUpdatesHandler extends EventSenderAwareHandler<EnvironmentDto> {

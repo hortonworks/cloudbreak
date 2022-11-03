@@ -8,14 +8,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.SuppressClusterWarningsFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.SuppressClusterWarningsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.SuppressClusterWarningsSuccess;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @Component
 public class SuppressClusterWarningsHandler extends ExceptionCatcherEventHandler<SuppressClusterWarningsRequest> {

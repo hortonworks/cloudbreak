@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -22,8 +23,6 @@ import com.sequenceiq.environment.environment.service.EnvironmentViewService;
 import com.sequenceiq.environment.util.PollingConfig;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-
-import reactor.bus.Event;
 
 @Component
 public class DataLakeClustersDeleteHandler extends EventSenderAwareHandler<EnvironmentDeletionDto> {

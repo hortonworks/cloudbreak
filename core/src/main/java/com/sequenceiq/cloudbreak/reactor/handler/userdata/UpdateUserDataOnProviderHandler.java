@@ -13,14 +13,13 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateOnProviderRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateOnProviderResult;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @Component
 public class UpdateUserDataOnProviderHandler extends ExceptionCatcherEventHandler<UserDataUpdateOnProviderRequest> {

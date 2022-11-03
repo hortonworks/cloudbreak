@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataRequest;
@@ -15,9 +17,6 @@ import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class CreateUserDataHandler implements EventHandler<CreateUserDataRequest> {

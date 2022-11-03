@@ -19,6 +19,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
@@ -27,9 +29,6 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.consumption.ConsumptionService;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 class StorageConsumptionCollectionSchedulingHandlerTest {
@@ -138,7 +137,7 @@ class StorageConsumptionCollectionSchedulingHandlerTest {
 
         verifySuccessEvent();
         verify(consumptionService).scheduleStorageConsumptionCollectionIfNeeded(environmentDto);
-        verify(eventBus, never()).notify((Object) any(), any(Event.class));
+        verify(eventBus, never()).notify(any(), any(Event.class));
     }
 
     private void verifySuccessEvent() {

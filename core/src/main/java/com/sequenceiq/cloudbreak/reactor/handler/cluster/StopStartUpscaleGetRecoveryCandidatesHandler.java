@@ -24,12 +24,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stopstart.RecoveryCandidateCollectionService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class StopStartUpscaleGetRecoveryCandidatesHandler implements CloudPlatformEventHandler<StopStartUpscaleGetRecoveryCandidatesRequest> {

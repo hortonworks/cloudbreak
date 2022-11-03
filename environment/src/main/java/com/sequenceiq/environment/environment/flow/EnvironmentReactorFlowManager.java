@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
@@ -40,9 +42,6 @@ import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
-
-import reactor.bus.Event;
-import reactor.rx.Promise;
 
 @Service
 public class EnvironmentReactorFlowManager {

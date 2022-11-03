@@ -15,6 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationFailed;
@@ -22,9 +24,6 @@ import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterPro
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationSuccess;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterProxyRegistrationHandlerTest {

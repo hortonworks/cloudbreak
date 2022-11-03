@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.events;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -9,12 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyDefaultStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 import com.sequenceiq.notification.NotificationService;
-
-import reactor.bus.Event;
-import reactor.fn.Consumer;
 
 @Service
 public class CloudbreakEventHandler implements Consumer<Event<CloudbreakCompositeEvent>> {

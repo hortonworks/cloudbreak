@@ -10,8 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 @Component
 public class ResourceDefinitionHandler implements CloudPlatformEventHandler<ResourceDefinitionRequest> {

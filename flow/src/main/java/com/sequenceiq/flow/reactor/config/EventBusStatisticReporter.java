@@ -9,16 +9,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 
-import reactor.bus.EventBus;
-import reactor.core.Dispatcher;
-
 @Component
 public class EventBusStatisticReporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventBusStatisticReporter.class);
-
-    @Inject
-    private EventBus eventBus;
 
     @Inject
     @Named("eventBusThreadPoolExecutor")
@@ -34,25 +28,18 @@ public class EventBusStatisticReporter {
 
     private EventBusStatistics create() {
         EventBusStatistics stats = new EventBusStatistics();
-        Dispatcher dispatcher = eventBus.getDispatcher();
-        stats.setBackLogSize(dispatcher.backlogSize());
-        stats.setRemainingSlots(dispatcher.remainingSlots());
-        stats.setInContext(dispatcher.inContext());
 
         stats.setPoolSize(executor.getPoolSize());
         stats.setCorePoolSize(executor.getCorePoolSize());
         stats.setTaskCount(executor.getTaskCount());
         stats.setActiveCount(executor.getActiveCount());
         stats.setCompletedTaskCount(executor.getCompletedTaskCount());
+        stats.setRemainingCapacity(executor.getQueue().remainingCapacity());
 
         return stats;
     }
 
     public static class EventBusStatistics {
-
-        private long backLogSize;
-
-        private long remainingSlots;
 
         private long taskCount;
 
@@ -64,7 +51,7 @@ public class EventBusStatisticReporter {
 
         private int activeCount;
 
-        private boolean inContext;
+        private int remainingCapacity;
 
         public void setTaskCount(long taskCount) {
             this.taskCount = taskCount;
@@ -86,29 +73,19 @@ public class EventBusStatisticReporter {
             this.activeCount = activeCount;
         }
 
-        public void setBackLogSize(long backLogSize) {
-            this.backLogSize = backLogSize;
-        }
-
-        public void setRemainingSlots(long remainingSlots) {
-            this.remainingSlots = remainingSlots;
-        }
-
-        public void setInContext(boolean inContext) {
-            this.inContext = inContext;
+        public void setRemainingCapacity(int remainingCapacity) {
+            this.remainingCapacity = remainingCapacity;
         }
 
         @Override
         public String toString() {
             return "EventBusStatistics{" +
-                    "backLogSize=" + backLogSize +
-                    ", remainingSlots=" + remainingSlots +
                     ", taskCount=" + taskCount +
                     ", completedTaskCount=" + completedTaskCount +
                     ", corePoolSize=" + corePoolSize +
                     ", poolSize=" + poolSize +
                     ", activeCount=" + activeCount +
-                    ", inContext=" + inContext +
+                    ", remainingCapacity=" + remainingCapacity +
                     '}';
         }
     }

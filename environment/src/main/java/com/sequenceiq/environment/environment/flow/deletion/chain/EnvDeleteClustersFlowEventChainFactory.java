@@ -12,13 +12,12 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
-
-import reactor.rx.Promise;
 
 @Component
 public class EnvDeleteClustersFlowEventChainFactory implements FlowEventChainFactory<EnvDeleteEvent> {

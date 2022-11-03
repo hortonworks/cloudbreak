@@ -27,15 +27,14 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.datalake.flow.refresh.DatahubRefreshFlowEvent;
 import com.sequenceiq.datalake.flow.refresh.event.DatahubRefreshFailedEvent;
 import com.sequenceiq.datalake.flow.refresh.event.DatahubRefreshWaitEvent;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.refresh.SdxRefreshService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandlerTestSupport;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 public class DatahubRefreshHandlerTest {
@@ -49,7 +48,7 @@ public class DatahubRefreshHandlerTest {
     private EventBus eventBus;
 
     @Captor
-    private ArgumentCaptor<Object> keyCaptor;
+    private ArgumentCaptor<String> keyCaptor;
 
     @Captor
     private ArgumentCaptor<Event<?>> eventCaptor;
@@ -90,7 +89,7 @@ public class DatahubRefreshHandlerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(classes = { UserBreakException.class, PollerStoppedException.class, PollerException.class })
+    @ValueSource(classes = {UserBreakException.class, PollerStoppedException.class, PollerException.class})
     void acceptWithExceptions(Class<? extends Throwable> errorClass) throws Exception {
         DatahubRefreshWaitEvent request = new DatahubRefreshWaitEvent(SDX_ID, "user");
         Event.Headers headers = new Event.Headers();

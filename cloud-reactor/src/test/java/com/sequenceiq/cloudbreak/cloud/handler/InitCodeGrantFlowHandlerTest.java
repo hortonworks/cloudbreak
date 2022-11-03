@@ -21,8 +21,8 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowRespons
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 
 public class InitCodeGrantFlowHandlerTest {
 
@@ -45,7 +45,7 @@ public class InitCodeGrantFlowHandlerTest {
     private Platform platform;
 
     @Mock
-    private org.reactivestreams.Subscriber<InitCodeGrantFlowResponse> result;
+    private Promise<InitCodeGrantFlowResponse> result;
 
     @Mock
     private CredentialConnector credentialConnector;

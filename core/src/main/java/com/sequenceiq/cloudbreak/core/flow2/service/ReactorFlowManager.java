@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTrigger
 import com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordRequest;
@@ -84,8 +85,6 @@ import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.service.FlowCancelService;
-
-import reactor.rx.Promise;
 
 /**
  * Flow manager implementation backed by Reactor.

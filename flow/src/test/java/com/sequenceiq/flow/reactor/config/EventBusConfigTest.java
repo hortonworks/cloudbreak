@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -19,17 +20,14 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
-import reactor.bus.Event;
-import reactor.bus.EventBus;
-import reactor.bus.selector.Selectors;
-import reactor.fn.Consumer;
-
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { EventBusConfig.class })
+@SpringBootTest(classes = {EventBusConfig.class})
 class EventBusConfigTest {
 
     @Inject
@@ -77,7 +75,7 @@ class EventBusConfigTest {
         when(flowLogDBService.findFirstByFlowIdOrderByCreatedDesc("123")).thenReturn(Optional.of(flowLog));
         Event.Headers headers = new Event.Headers();
         headers.set("FLOW_ID", "123");
-        eventBus.on(Selectors.regex("exampleselector"), (Consumer<Event<? extends Payload>>) event -> {
+        eventBus.on("exampleselector", (Consumer<Event<? extends Payload>>) event -> {
             throw new RuntimeException("uncaught exception");
         });
         eventBus.notify("exampleselector", new Event<>(headers, null));
@@ -95,7 +93,7 @@ class EventBusConfigTest {
         when(flowLogDBService.findFirstByFlowIdOrderByCreatedDesc("123")).thenReturn(Optional.empty());
         Event.Headers headers = new Event.Headers();
         headers.set("FLOW_ID", "123");
-        eventBus.on(Selectors.regex("exampleselector"), (Consumer<Event<? extends Payload>>) event -> {
+        eventBus.on("exampleselector", (Consumer<Event<? extends Payload>>) event -> {
             throw new RuntimeException("uncaught exception");
         });
         eventBus.notify("exampleselector", new Event<>(headers, null));

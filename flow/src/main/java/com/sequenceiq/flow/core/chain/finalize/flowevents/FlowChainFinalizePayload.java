@@ -6,9 +6,8 @@ import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.flow.core.chain.finalize.config.FlowChainFinalizeEvent;
-
-import reactor.rx.Promise;
 
 public class FlowChainFinalizePayload implements Selectable, Acceptable {
 

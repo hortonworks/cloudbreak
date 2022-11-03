@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -21,8 +22,6 @@ import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmService;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmEvent;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmFailureEvent;
 import com.sequenceiq.freeipa.service.upgrade.ccm.CcmParametersConfigService;
-
-import reactor.bus.Event;
 
 @Component
 public class UpgradeCcmUpgradeHandler extends AbstractUpgradeCcmEventHandler {

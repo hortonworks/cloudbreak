@@ -21,8 +21,5 @@ dependencies {
     api project(':cloud-common')
 
     implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
-    api            group: 'io.projectreactor',             name: 'reactor-core',                   version: eventBusVersion
-    api            group: 'io.projectreactor',             name: 'reactor-bus',                    version: eventBusVersion
-    api            group: 'io.projectreactor',             name: 'reactor-stream',                 version: eventBusVersion
 
 }

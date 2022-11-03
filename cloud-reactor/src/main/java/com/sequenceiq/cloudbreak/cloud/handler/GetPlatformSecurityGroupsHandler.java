@@ -15,9 +15,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
-
-import reactor.bus.Event;
 
 @Component
 public class GetPlatformSecurityGroupsHandler implements CloudPlatformEventHandler<GetPlatformSecurityGroupsRequest> {

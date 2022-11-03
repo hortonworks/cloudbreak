@@ -10,9 +10,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-
-import reactor.rx.Promise;
 
 public class RedbeamsEvent implements IdempotentEvent<RedbeamsEvent> {
 
