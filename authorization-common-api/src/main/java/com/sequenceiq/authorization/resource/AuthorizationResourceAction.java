@@ -98,6 +98,8 @@ public enum AuthorizationResourceAction {
     ROTATE_SALTUSER_PASSWORD_ENVIRONMENT("environments/rotateSaltuserPassword", AuthorizationResourceType.ENVIRONMENT),
     ROTATE_SALTUSER_PASSWORD_DATALAKE("environments/rotateSaltuserPassword", AuthorizationResourceType.DATALAKE),
     ROTATE_SALTUSER_PASSWORD_DATAHUB("environments/rotateSaltuserPassword", AuthorizationResourceType.DATAHUB),
+    UPDATE_SALT_DATALAKE("environments/updateSalt", AuthorizationResourceType.DATALAKE),
+    UPDATE_SALT_DATAHUB("environments/updateSalt", AuthorizationResourceType.DATAHUB),
     MODIFY_AUDIT_CREDENTIAL("environments/modifyAuditCredential", AuthorizationResourceType.AUDIT_CREDENTIAL),
     POWERUSER_ONLY("cloudbreak/allowPowerUserOnly", null),
     LIST_ASSIGNED_ROLES("iam/listAssignedResourceRoles", null),

@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_CRN;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_NAME;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.UPDATE_SALT;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.ATTACH_RECIPE_BY_CRN;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.ATTACH_RECIPE_BY_NAME;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHANGE_IMAGE_CATALOG;
@@ -261,6 +262,12 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = ROTATE_SALT_PASSWORD_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "rotateSaltPasswordDistroXV1ByCrn")
     FlowIdentifier rotateSaltPasswordByCrn(@PathParam("crn") String crn);
+
+    @PUT
+    @Path("crn/{crn}/salt_update")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UPDATE_SALT, nickname = "updateSaltDistroxV1ByCrn")
+    FlowIdentifier updateSaltByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/scaling")

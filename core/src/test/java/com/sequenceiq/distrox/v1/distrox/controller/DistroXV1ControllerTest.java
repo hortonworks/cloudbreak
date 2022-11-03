@@ -127,4 +127,13 @@ class DistroXV1ControllerTest {
 
         verify(stackOperations).rotateSaltPassword(NameOrCrn.ofCrn(CRN), ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
     }
+
+    @Test
+    void testUpdateSaltByCrn() {
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
+
+        distroXV1Controller.updateSaltByCrn(CRN);
+
+        verify(stackOperations).updateSalt(NameOrCrn.ofCrn(CRN), ACCOUNT_ID);
+    }
 }
