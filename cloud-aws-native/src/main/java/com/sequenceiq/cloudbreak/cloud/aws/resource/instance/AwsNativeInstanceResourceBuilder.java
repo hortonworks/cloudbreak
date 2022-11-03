@@ -120,10 +120,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             TagSpecification tagSpecification = awsTaggingService.prepareEc2TagSpecification(awsCloudStackView.getTags(),
                     com.amazonaws.services.ec2.model.ResourceType.Instance);
             String securityGroupId = getSecurityGroupId(context, group);
-            tagSpecification.withTags(
-                    new Tag().withKey("Name").withValue(cloudResource.getName()),
-                    new Tag().withKey("instanceGroup").withValue(group.getName())
-            );
+            tagSpecification.withTags(new Tag().withKey("Name").withValue(cloudResource.getName()));
             RunInstancesRequest request = new RunInstancesRequest()
                     .withInstanceType(instanceTemplate.getFlavor())
                     .withImageId(cloudStack.getImage().getImageName())

@@ -40,7 +40,7 @@ cdp.structuredevent:
   rest:
     contentlogging: true
 freeipa:
-  verticalScalingSupported: AWS,MOCK
+  verticalScalingSupported: AWS
   cert.dir: /certs/
   client:
     id: freeipa

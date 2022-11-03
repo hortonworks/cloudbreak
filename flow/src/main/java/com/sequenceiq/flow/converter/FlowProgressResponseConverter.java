@@ -23,7 +23,7 @@ public class FlowProgressResponseConverter {
 
     private static final int FINISHED_PERCENTAGE = 100;
 
-    private static final double MILLISEC_TO_SEC_DOUBLE_DIVIDER = 1000d;
+    private static final double MILLISEC_TO_SEC_DOUBLE_DEVIDER = 1000d;
 
     private final FlowProgressHolder flowProgressHolder;
 
@@ -50,10 +50,10 @@ public class FlowProgressResponseConverter {
             FlowLog firstFlowLog = flowLogs.get(flowLogs.size() - 1);
             response.setFlowId(lastFlowLog.getFlowId());
             response.setFlowChainId(lastFlowLog.getFlowChainId());
-            Integer progressFromSteps = flowTypeOpt.map(s ->
+            Integer prgoressFromSteps = flowTypeOpt.map(s ->
                     flowProgressHolder.getProgressPercentageForState(s, lastFlowLog.getCurrentState()))
                     .orElse(UNKNOWN_PROGRESS_PERCENTAGE);
-            response.setProgress(progressFromSteps);
+            response.setProgress(prgoressFromSteps);
             response.setMaxNumberOfTransitions(flowTypeOpt
                     .map(flowProgressHolder::getTransitionsSize)
                     .orElse(null));
@@ -100,6 +100,6 @@ public class FlowProgressResponseConverter {
     }
 
     private Double getRoundedTimeInSeconds(Long from, Long to) {
-        return  Double.valueOf(new DecimalFormat("#.###").format((to - from) / MILLISEC_TO_SEC_DOUBLE_DIVIDER));
+        return  Double.valueOf(new DecimalFormat("#.###").format((to - from) / MILLISEC_TO_SEC_DOUBLE_DEVIDER));
     }
 }

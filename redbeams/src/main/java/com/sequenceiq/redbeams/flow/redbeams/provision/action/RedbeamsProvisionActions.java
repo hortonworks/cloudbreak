@@ -114,7 +114,7 @@ public class RedbeamsProvisionActions {
 
             @Override
             protected Selectable createRequest(RedbeamsContext context) {
-                return new RedbeamsEvent(RedbeamsProvisionEvent.REDBEAMS_PROVISION_FINISHED_EVENT.name(), context.getDBStack().getId());
+                return new RedbeamsEvent(RedbeamsProvisionEvent.REDBEAMS_PROVISION_FINISHED_EVENT.name(), 0L);
             }
         };
     }
@@ -159,7 +159,7 @@ public class RedbeamsProvisionActions {
 
             @Override
             protected Selectable createRequest(RedbeamsContext context) {
-                return new RedbeamsEvent(RedbeamsProvisionEvent.REDBEAMS_PROVISION_FAILURE_HANDLED_EVENT.event(), context.getDBStack().getId());
+                return new RedbeamsEvent(RedbeamsProvisionEvent.REDBEAMS_PROVISION_FAILURE_HANDLED_EVENT.event(), 0L);
             }
         };
     }

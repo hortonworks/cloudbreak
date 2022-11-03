@@ -9,9 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerService;
+import com.sequenceiq.cloudbreak.conclusion.ConclusionChecker;
+import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerFactory;
+import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerType;
+import com.sequenceiq.cloudbreak.conclusion.ConclusionResult;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterUpscaleFailedConclusionRequest;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -26,7 +32,13 @@ public class ClusterUpscaleFailedConclusionHandler extends ExceptionCatcherEvent
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpscaleFailedConclusionHandler.class);
 
     @Inject
-    private ConclusionCheckerService conclusionCheckerService;
+    private ConclusionCheckerFactory conclusionCheckerFactory;
+
+    @Inject
+    private CloudbreakFlowMessageService flowMessageService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Override
     public String selector() {
@@ -42,8 +54,18 @@ public class ClusterUpscaleFailedConclusionHandler extends ExceptionCatcherEvent
     protected Selectable doAccept(HandlerEvent<ClusterUpscaleFailedConclusionRequest> event) {
         ClusterUpscaleFailedConclusionRequest request = event.getData();
         LOGGER.info("Handle ClusterUpscaleFailedConclusionRequest, stackId: {}", request.getResourceId());
-        conclusionCheckerService.runConclusionChecker(request.getResourceId(), UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, "added to");
+        try {
+            ConclusionChecker conclusionChecker = conclusionCheckerFactory.getConclusionChecker(ConclusionCheckerType.DEFAULT);
+            ConclusionResult conclusionResult = conclusionChecker.doCheck(request.getResourceId());
+            if (entitlementService.conclusionCheckerSendUserEventEnabled(ThreadBasedUserCrnProvider.getAccountId()) && conclusionResult.isFailureFound()) {
+                flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED,
+                        "added to", conclusionResult.getFailedConclusionTexts().toString());
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error happened during conclusion check", e);
+        }
         return new StackEvent(ClusterUpscaleEvent.FAIL_HANDLED_EVENT.event(), request.getResourceId());
+
     }
 
 }

@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler;
 
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_UMS_RESOURCE_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_EVENT_CLEANUP_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINISH_ENV_DELETE_EVENT;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -71,7 +71,7 @@ public class EnvironmentUMSResourceDeleteHandler extends EventSenderAwareHandler
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentCrn)
                 .withForceDelete(environmentDeletionDto.isForceDelete())
-                .withSelector(START_EVENT_CLEANUP_EVENT.selector())
+                .withSelector(FINISH_ENV_DELETE_EVENT.selector())
                 .build();
         eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
     }

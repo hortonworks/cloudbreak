@@ -4,6 +4,9 @@
 include:
   - monitoring.scripts
 {%- if monitoring.enabled and monitoring.remoteWriteUrl %}
+  {%- if monitoring.useDevStack %}
+  - monitoring.dev-stack
+  {%- endif %}
   - monitoring.exporters
   {%- if monitoring.nodeExporterExists %}
   - monitoring.textfiles.*

@@ -35,8 +35,6 @@ public class DistroXVerticalScaleAction implements Action<DistroXTestDto, Cloudb
                             convertVerticalScaleTestDtoToStackV4VerticalScaleRequest(testContext));
             testDto.setFlow("DistroX put vertical scaling", flowIdentifier);
             Log.whenJson(LOGGER, format("DistroX put vertical scaling: %n"), testDto.getCrn());
-        } else {
-            Log.when(LOGGER, "DataHub vertical scale is not supported by now for the following cloud provider: " + testContext.getCloudPlatform());
         }
         return testDto;
     }

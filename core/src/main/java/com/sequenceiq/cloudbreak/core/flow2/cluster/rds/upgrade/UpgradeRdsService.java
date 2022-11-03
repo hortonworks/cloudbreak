@@ -100,7 +100,6 @@ public class UpgradeRdsService {
 
     public void installPostgresPackages(Long stackId) throws CloudbreakOrchestratorException {
         rdsUpgradeOrchestratorService.installPostgresPackages(stackId);
-        rdsUpgradeOrchestratorService.updatePostgresAlternatives(stackId);
     }
 
     public void handleInstallPostgresPackagesError(Long stackId, String version, String exception) {

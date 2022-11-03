@@ -101,7 +101,7 @@ dependencies {
     implementation     group: "io.projectreactor",         name: "reactor-bus",                              version: eventBusVersion
     implementation     group: 'com.dyngr',                 name: 'polling',                                  version: dyngrPollingVersion
     implementation     group: 'net.sourceforge.jregex',    name: 'jregex',                                   version: '1.2_01'
-    implementation     group: 'com.fasterxml.jackson.core',name: 'jackson-databind',                         version: jacksonDatabindVersion
+    implementation     group: 'com.fasterxml.jackson.core',name: 'jackson-databind',                         version: jacksonVersion
 
     implementation(group: 'net.minidev', name: 'json-smart') {
       version {

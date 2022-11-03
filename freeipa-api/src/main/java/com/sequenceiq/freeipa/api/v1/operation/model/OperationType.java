@@ -12,8 +12,7 @@ public enum OperationType {
     UPSCALE,
     BIND_USER_CREATE,
     UPGRADE,
-    UPGRADE_CCM,
-    MODIFY_PROXY_CONFIG;
+    UPGRADE_CCM;
 
     public static OperationType fromSyncOperationType(SyncOperationType syncOperationType) {
         switch (syncOperationType) {

@@ -26,7 +26,7 @@ dependencies {
   testImplementation group: 'org.assertj',                name: 'assertj-core',          version: assertjVersion
 
   runtimeOnly            group: 'org.glassfish.jersey.core',  name: 'jersey-common',         version: jerseyCoreVersion
-  implementation(    group: 'com.fasterxml.jackson.core', name: 'jackson-databind',      version: jacksonDatabindVersion) {
+  implementation(    group: 'com.fasterxml.jackson.core', name: 'jackson-databind',      version: jacksonVersion) {
     force = true
   }
 

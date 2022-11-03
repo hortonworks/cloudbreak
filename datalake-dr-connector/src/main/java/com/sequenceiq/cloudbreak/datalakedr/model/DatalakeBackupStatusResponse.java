@@ -10,10 +10,7 @@ public class DatalakeBackupStatusResponse {
         STARTED,
         IN_PROGRESS,
         SUCCESSFUL,
-        VALIDATION_SUCCESSFUL,
-        VALIDATION_FAILED,
-        FAILED,
-        CANCELLED
+        FAILED
     }
 
     private final State state;
@@ -30,11 +27,11 @@ public class DatalakeBackupStatusResponse {
     }
 
     public boolean isComplete() {
-        return state != State.IN_PROGRESS && state != State.STARTED;
+        return state == State.SUCCESSFUL || state == State.FAILED;
     }
 
     public boolean failed() {
-        return state.equals(State.FAILED) || state.equals(State.VALIDATION_FAILED);
+        return state.equals(State.FAILED);
     }
 
     public State getState() {

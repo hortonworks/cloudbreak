@@ -28,10 +28,8 @@ public class EnvironmentVerticalScaleAction extends AbstractEnvironmentAction {
                     .environmentV1Endpoint()
                     .verticalScalingByCrn(testDto.getResponse().getCrn(), verticalScalingTestDto.getRequest());
             testDto.setLastKnownFlow(flowIdentifier);
-            Log.when(LOGGER, "Environment vertical scale action put");
-        } else {
-            Log.when(LOGGER, "environment vertical scale is not supported by now for the following cloud provider: " + testContext.getCloudPlatform());
         }
+        Log.when(LOGGER, "Environment vertical scale action put");
         return testDto;
     }
 }

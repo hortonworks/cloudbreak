@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.util.ssh.action;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY_PRIMARY;
 import static java.lang.String.format;
 
 import java.io.IOException;
@@ -64,18 +63,6 @@ public class SshJClientActions extends SshJClient {
                             publicIp ? "Public" : "Private");
                     return publicIp ? instanceMetaData.getPublicIp() : instanceMetaData.getPrivateIp();
                 })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
-    private List<String> getPrimaryGatewayIps(List<InstanceGroupV4Response> instanceGroups, boolean publicIp) {
-        return instanceGroups.stream()
-                .filter(ig -> com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY == ig.getType())
-                .map(InstanceGroupV4Response::getMetadata)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .filter(imd -> GATEWAY_PRIMARY == imd.getInstanceType())
-                .map(imd -> publicIp && StringUtils.isNotEmpty(imd.getPublicIp()) ? imd.getPublicIp() : imd.getPrivateIp())
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
@@ -222,12 +209,6 @@ public class SshJClientActions extends SshJClient {
     public Map<String, Pair<Integer, String>> executeSshCommandOnHost(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
             String sshCommand, boolean publicIp) {
         return getInstanceGroupIps(instanceGroups, hostGroupNames, publicIp).stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, sshCommand)));
-    }
-
-    public Map<String, Pair<Integer, String>> executeSshCommandOnPrimaryGateways(List<InstanceGroupV4Response> instanceGroups, String sshCommand,
-            boolean publicIp) {
-        return getPrimaryGatewayIps(instanceGroups, publicIp).stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, sshCommand)));
     }
 

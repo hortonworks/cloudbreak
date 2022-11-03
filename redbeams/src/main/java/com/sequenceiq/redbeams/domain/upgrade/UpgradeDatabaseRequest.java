@@ -1,7 +1,5 @@
 package com.sequenceiq.redbeams.domain.upgrade;
 
-import java.util.Objects;
-
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 
 public class UpgradeDatabaseRequest {
@@ -21,22 +19,5 @@ public class UpgradeDatabaseRequest {
         return "UpgradeDatabaseRequest{" +
                 "targetMajorVersion=" + targetMajorVersion +
                 '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        UpgradeDatabaseRequest that = (UpgradeDatabaseRequest) o;
-        return targetMajorVersion == that.targetMajorVersion;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(targetMajorVersion);
     }
 }

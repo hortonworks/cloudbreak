@@ -1,7 +1,5 @@
 package com.sequenceiq.redbeams.flow.redbeams.upgrade.event;
 
-import java.util.Objects;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
@@ -32,20 +30,4 @@ public class RedbeamsStartUpgradeRequest extends RedbeamsEvent {
                 "} " + super.toString();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        RedbeamsStartUpgradeRequest that = (RedbeamsStartUpgradeRequest) o;
-        return targetMajorVersion == that.targetMajorVersion;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(targetMajorVersion);
-    }
 }

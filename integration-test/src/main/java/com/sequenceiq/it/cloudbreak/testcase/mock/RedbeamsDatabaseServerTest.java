@@ -10,12 +10,14 @@ import javax.ws.rs.BadRequestException;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.crn.TestCrnGenerator;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseServerTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.redbeams.api.model.common.Status;
 
@@ -37,10 +39,13 @@ public class RedbeamsDatabaseServerTest extends AbstractMockTest {
             then = "the create should return a BadRequestException")
     public void createRedbeamsDatabaseServerTest(MockedTestContext testContext) {
         String databaseName = resourcePropertyProvider().getName();
+        String networkKey = "someOtherNetwork";
         String clusterCrn = TestCrnGenerator.getDatalakeCrn(UUID.randomUUID().toString(), "cloudera");
         testContext
+                .given(networkKey, EnvironmentNetworkTestDto.class)
+                .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
-                .withNetwork()
+                .withNetwork(networkKey)
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
@@ -62,9 +67,12 @@ public class RedbeamsDatabaseServerTest extends AbstractMockTest {
             then = "the create should return a BadRequestException")
     public void createRedbeamsDatabaseServerWithInvalidCrnTest(MockedTestContext testContext) {
         String databaseName = resourcePropertyProvider().getName();
+        String networkKey = "someOtherNetwork";
         testContext
+                .given(networkKey, EnvironmentNetworkTestDto.class)
+                .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
-                .withNetwork()
+                .withNetwork(networkKey)
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())

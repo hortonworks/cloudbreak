@@ -30,8 +30,6 @@ public class AwsProperties {
 
     private Boolean govCloud;
 
-    private Boolean externalDatabaseSslEnforcementSupported;
-
     private final Instance instance = new Instance();
 
     private final Instance storageOptimizedInstance = new Instance();
@@ -86,14 +84,6 @@ public class AwsProperties {
 
     public void setGovCloud(Boolean govCloud) {
         this.govCloud = govCloud;
-    }
-
-    public Boolean getExternalDatabaseSslEnforcementSupported() {
-        return Boolean.TRUE.equals(externalDatabaseSslEnforcementSupported);
-    }
-
-    public void setExternalDatabaseSslEnforcementSupported(Boolean externalDatabaseSslEnforcementSupported) {
-        this.externalDatabaseSslEnforcementSupported = externalDatabaseSslEnforcementSupported;
     }
 
     public String getLocation() {

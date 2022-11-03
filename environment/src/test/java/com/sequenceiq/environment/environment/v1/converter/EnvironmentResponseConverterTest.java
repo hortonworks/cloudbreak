@@ -6,8 +6,6 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -121,7 +119,7 @@ public class EnvironmentResponseConverterTest {
         when(credentialConverter.convert(environment.getCredential())).thenReturn(credentialResponse);
         when(freeIpaConverter.convert(environment.getFreeIpaCreation())).thenReturn(freeIpaResponse);
         when(regionConverter.convertRegions(environment.getRegions())).thenReturn(compactRegionResponse);
-        when(telemetryApiConverter.convert(eq(environment.getTelemetry()), any())).thenReturn(telemetryResponse);
+        when(telemetryApiConverter.convert(environment.getTelemetry())).thenReturn(telemetryResponse);
         when(backupConverter.convert(environment.getBackup())).thenReturn(backupResponse);
         when(proxyConfigToProxyResponseConverter.convert((ProxyConfig) environment.getProxyConfig())).thenReturn(proxyResponse);
         when(networkDtoToResponseConverter.convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), true))
@@ -163,7 +161,7 @@ public class EnvironmentResponseConverterTest {
         verify(credentialConverter).convert(environment.getCredential());
         verify(freeIpaConverter).convert(environment.getFreeIpaCreation());
         verify(regionConverter).convertRegions(environment.getRegions());
-        verify(telemetryApiConverter).convert(eq(environment.getTelemetry()), any());
+        verify(telemetryApiConverter).convert(environment.getTelemetry());
         verify(proxyConfigToProxyResponseConverter).convert(environment.getProxyConfig());
         verify(networkDtoToResponseConverter).convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), true);
     }
@@ -182,7 +180,7 @@ public class EnvironmentResponseConverterTest {
         when(credentialViewConverter.convertResponse(environmentDto.getCredential())).thenReturn(credentialResponse);
         when(freeIpaConverter.convert(environmentDto.getFreeIpaCreation())).thenReturn(freeIpaResponse);
         when(regionConverter.convertRegions(environmentDto.getRegions())).thenReturn(compactRegionResponse);
-        when(telemetryApiConverter.convert(eq(environmentDto.getTelemetry()), any())).thenReturn(telemetryResponse);
+        when(telemetryApiConverter.convert(environmentDto.getTelemetry())).thenReturn(telemetryResponse);
         when(proxyConfigToProxyResponseConverter.convertToView(environmentDto.getProxyConfig())).thenReturn(proxyResponse);
         when(networkDtoToResponseConverter.convert(environmentDto.getNetwork(), environmentDto.getExperimentalFeatures().getTunnel(), false))
                 .thenReturn(environmentNetworkResponse);
@@ -217,7 +215,7 @@ public class EnvironmentResponseConverterTest {
         verify(credentialViewConverter).convertResponse(environmentDto.getCredential());
         verify(freeIpaConverter).convert(environmentDto.getFreeIpaCreation());
         verify(regionConverter).convertRegions(environmentDto.getRegions());
-        verify(telemetryApiConverter).convert(eq(environmentDto.getTelemetry()), any());
+        verify(telemetryApiConverter).convert(environmentDto.getTelemetry());
         verify(proxyConfigToProxyResponseConverter).convertToView(environmentDto.getProxyConfig());
         verify(networkDtoToResponseConverter).convert(environmentDto.getNetwork(), environmentDto.getExperimentalFeatures().getTunnel(), false);
     }
@@ -227,7 +225,7 @@ public class EnvironmentResponseConverterTest {
             assertEquals(environment.getParameters().getAwsParametersDto().getS3GuardTableName(), actual.getAws().getS3guard().getDynamoDbTableName());
             assertEquals(environment.getParameters().getAwsParametersDto().getAwsDiskEncryptionParametersDto().getEncryptionKeyArn(),
                     actual.getAws().getAwsDiskEncryptionParameters().getEncryptionKeyArn());
-        } else if (AZURE.equals(cloudPlatform)) {
+        } else if (AZURE.equals(cloudPlatform))  {
             assertAzureParameters(environment.getParameters().getAzureParametersDto(), actual.getAzure());
         } else if (GCP.equals(cloudPlatform)) {
             assertGcpParameters(environment.getParameters().getGcpParametersDto(), actual.getGcp());
@@ -360,7 +358,7 @@ public class EnvironmentResponseConverterTest {
                 .withAwsParametersDto(AwsParametersDto.builder()
                         .withAwsDiskEncryptionParametersDto(AwsDiskEncryptionParametersDto.builder()
                                 .withEncryptionKeyArn("dummy-key-arn")
-                                .build())
+                        .build())
                         .build())
                 .build();
     }

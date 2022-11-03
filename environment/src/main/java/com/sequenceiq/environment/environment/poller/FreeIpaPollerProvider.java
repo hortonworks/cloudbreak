@@ -142,14 +142,6 @@ public class FreeIpaPollerProvider {
     }
 
     public AttemptResult<Void> upgradeCcmPoller(Long envId, String envCrn, String operationId) {
-        return operationStatusPoller(envId, envCrn, operationId, "FreeIpa Upgrade CCM");
-    }
-
-    public AttemptResult<Void> modifyProxyConfigPoller(Long envId, String envCrn, String operationId) {
-        return operationStatusPoller(envId, envCrn, operationId, "FreeIpa modify proxy config");
-    }
-
-    private AttemptResult<Void> operationStatusPoller(Long envId, String envCrn, String operationId, String operationName) {
         if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
             LOGGER.info("FreeIpa polling cancelled in inmemory store, id: " + envId);
             return AttemptResults.breakFor("FreeIpa polling cancelled in inmemory store, id: " + envId);
@@ -159,7 +151,7 @@ public class FreeIpaPollerProvider {
         if (operationCompleted(operationStatus)) {
             return AttemptResults.finishWith(null);
         } else {
-            return checkOperationStatus(operationStatus, operationName);
+            return checkUpgradeCcmStatus(operationStatus);
         }
     }
 
@@ -183,20 +175,20 @@ public class FreeIpaPollerProvider {
         return Boolean.TRUE.booleanValue() == flowLogResponse.getFinalized().booleanValue();
     }
 
-    private AttemptResult<Void> checkOperationStatus(OperationStatus operationStatus, String operationName) {
+    private AttemptResult<Void> checkUpgradeCcmStatus(OperationStatus operationStatus) {
         OperationState state = operationStatus.getStatus();
         switch (state) {
             case REQUESTED:
             case RUNNING:
                 return AttemptResults.justContinue();
             case TIMEDOUT:
-                return AttemptResults.breakFor(operationName + " failed: timeout.");
+                return AttemptResults.breakFor("FreeIpa Upgrade CCM failed: timeout.");
             case REJECTED:
-                return AttemptResults.breakFor(operationName + " operation request was rejected.");
+                return AttemptResults.breakFor("FreeIpa Upgrade CCM operation request was rejected.");
             case FAILED:
-                return AttemptResults.breakFor(operationName + " failed: " + operationStatus.getError());
+                return AttemptResults.breakFor("FreeIpa Upgrade CCM failed.");
             default:
-                return AttemptResults.breakFor(operationName + " failed: unexpected operation status returned: " + state);
+                return AttemptResults.breakFor("FreeIpa Upgrade CCM failed: unexpected operation status returned: " + state);
         }
     }
 

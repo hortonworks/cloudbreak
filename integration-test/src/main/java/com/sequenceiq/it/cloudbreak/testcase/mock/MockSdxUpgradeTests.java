@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.auth.crn.TestCrnGenerator;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
@@ -30,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
@@ -76,8 +78,12 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
         String stack = resourcePropertyProvider().getName();
         String cluster = "cmcluster";
         String imageSettings = "imageSettingsUpgrade";
+        String networkKey = "someOtherNetwork";
         testContext
+                .given(networkKey, EnvironmentNetworkTestDto.class)
+                .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
+                .withNetwork(networkKey)
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
@@ -120,9 +126,13 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
         String clouderaManager = "cm";
         String cluster = "cmcluster";
         String imageSettings = "imageSettingsUpgrade";
+        String networkKey = "someOtherNetwork";
         String clusterCrn = TestCrnGenerator.getDatalakeCrn(UUID.randomUUID().toString(), "cloudera");
         testContext
+                .given(networkKey, EnvironmentNetworkTestDto.class)
+                .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
+                .withNetwork(networkKey)
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
@@ -188,9 +198,13 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
         String stack = resourcePropertyProvider().getName();
         String cluster = "cmcluster";
         String imageSettings = "imageSettingsUpgrade";
+        String networkKey = "someOtherNetwork";
 
         testContext
+                .given(networkKey, EnvironmentNetworkTestDto.class)
+                .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
+                .withNetwork(networkKey)
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .withBackup("location/of/the/backup")
@@ -227,9 +241,13 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
         String stack = resourcePropertyProvider().getName();
         String cluster = "cmcluster";
         String imageSettings = "imageSettingsUpgrade";
+        String networkKey = "someOtherNetwork";
 
         testContext
+                .given(networkKey, EnvironmentNetworkTestDto.class)
+                .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
+                .withNetwork(networkKey)
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .withBackup("location/of/the/backup")

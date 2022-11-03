@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.flow.redbeams.start.actions;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,8 +18,8 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
+import com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartContext;
 import com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerSuccess;
 import com.sequenceiq.redbeams.metrics.MetricType;
@@ -70,7 +70,7 @@ public class StartDatabaseServerFinishedActionTest {
 
     @Test
     public void shouldIncrementMetricOnCreateRequest() {
-        RedbeamsContext context = new RedbeamsContext(flowParameters, cloudContext, cloudCredential, databaseStack, dbStack);
+        RedbeamsStartContext context = new RedbeamsStartContext(flowParameters, cloudContext, cloudCredential, databaseStack);
 
         RedbeamsEvent redbeamsEvent = (RedbeamsEvent) victim.createRequest(context);
 

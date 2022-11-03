@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
@@ -30,14 +29,9 @@ public class UpgradePreconditionService {
     @Inject
     private StackStopRestrictionService stackStopRestrictionService;
 
-    @Inject
-    private EntitlementService entitlementService;
-
-    public String checkForRunningAttachedClusters(List<? extends StackDtoDelegate> datahubsInEnvironment, Boolean skipDataHubValidation, String accountId) {
+    public String checkForRunningAttachedClusters(List<? extends StackDtoDelegate> datahubsInEnvironment, Boolean skipDataHubValidation) {
         String notStoppedAttachedClusters = getNotStoppedAttachedClusters(datahubsInEnvironment);
-        if (!Boolean.TRUE.equals(skipDataHubValidation)
-                && !entitlementService.isUpgradeAttachedDatahubsCheckSkipped(accountId)
-                && !notStoppedAttachedClusters.isEmpty()) {
+        if (!Boolean.TRUE.equals(skipDataHubValidation) && !notStoppedAttachedClusters.isEmpty()) {
             return String.format("There are attached Data Hub clusters in incorrect state: %s. "
                     + "Please stop those to be able to perform the upgrade.", notStoppedAttachedClusters);
         }

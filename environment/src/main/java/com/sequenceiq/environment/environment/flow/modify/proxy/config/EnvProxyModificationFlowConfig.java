@@ -4,13 +4,11 @@ import static com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyM
 import static com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState.INIT_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_FINISHED_STATE;
-import static com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_FREEIPA_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.EnvProxyModificationState.PROXY_CONFIG_MODIFICATION_START_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors.FAILED_MODIFY_PROXY_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors.FINALIZE_MODIFY_PROXY_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors.FINISH_MODIFY_PROXY_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors.HANDLE_FAILED_MODIFY_PROXY_EVENT;
-import static com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors.MODIFY_PROXY_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors.MODIFY_PROXY_START_EVENT;
 
 import java.util.List;
@@ -34,10 +32,7 @@ public class EnvProxyModificationFlowConfig extends
                     .from(INIT_STATE).to(PROXY_CONFIG_MODIFICATION_START_STATE)
                     .event(MODIFY_PROXY_START_EVENT).defaultFailureEvent()
 
-                    .from(PROXY_CONFIG_MODIFICATION_START_STATE).to(PROXY_CONFIG_MODIFICATION_FREEIPA_STATE)
-                    .event(MODIFY_PROXY_FREEIPA_EVENT).defaultFailureEvent()
-
-                    .from(PROXY_CONFIG_MODIFICATION_FREEIPA_STATE).to(PROXY_CONFIG_MODIFICATION_FINISHED_STATE)
+                    .from(PROXY_CONFIG_MODIFICATION_START_STATE).to(PROXY_CONFIG_MODIFICATION_FINISHED_STATE)
                     .event(FINISH_MODIFY_PROXY_EVENT).defaultFailureEvent()
 
                     .from(PROXY_CONFIG_MODIFICATION_FINISHED_STATE).to(FINAL_STATE)

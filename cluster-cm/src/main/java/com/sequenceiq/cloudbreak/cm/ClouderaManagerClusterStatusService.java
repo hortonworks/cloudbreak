@@ -460,7 +460,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     }
 
     @Override
-    public List<ClusterManagerCommand> getActiveCommandsList() {
+    public List<String> getActiveCommandsList() {
         try {
             ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
             List<ApiCommand> activeCommands = clouderaManagerResourceApi.listActiveCommands("SUMMARY").getItems();
@@ -509,11 +509,13 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         return command;
     }
 
-    private List<ClusterManagerCommand> convertCommandsList(List<ApiCommand> activeCommands) {
+    private List<String> convertCommandsList(List<ApiCommand> activeCommands) {
         if (activeCommands == null) {
             return List.of();
         } else {
-            return activeCommands.stream().map(this::convertApiCommand).collect(toList());
+            return activeCommands.stream()
+                    .map(cmd -> "ApiCommand[id: " + cmd.getId() + ", name: " + cmd.getName() + ", starttime: " + cmd.getStartTime() + "]")
+                    .collect(Collectors.toList());
         }
     }
 

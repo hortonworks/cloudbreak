@@ -2,11 +2,8 @@ package com.sequenceiq.freeipa.flow.stack.update.event;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
-
-import reactor.rx.Promise;
 
 public class UserDataUpdateRequest extends StackEvent {
     private String operationId;
@@ -31,11 +28,6 @@ public class UserDataUpdateRequest extends StackEvent {
         super(selector, stackId);
         this.operationId = null;
         this.oldTunnel = oldTunnel;
-    }
-
-    public UserDataUpdateRequest(String selector, Long stackId, Promise<AcceptResult> accepted) {
-        super(selector, stackId, accepted);
-        this.oldTunnel = null;
     }
 
     public UserDataUpdateRequest withOperationId(String operationId) {

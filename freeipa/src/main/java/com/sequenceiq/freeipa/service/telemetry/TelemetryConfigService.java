@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.telemetry.context.NodeStatusContext;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringClusterType;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigService;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringServiceType;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryConfigProvider;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
@@ -62,6 +63,9 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
 
     @Value("${info.app.version:}")
     private String version;
+
+    @Inject
+    private MonitoringConfigService monitoringConfigService;
 
     @Inject
     private VmLogsService vmLogsService;
@@ -143,8 +147,11 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
 
     private MonitoringContext createMonitoringContext(Stack stack, Telemetry telemetry, NodeStatusContext nodeStatusContext,
             CdpAccessKeyType cdpAccessKeyType) {
+        boolean cdpSaasEnabled = entitlementService.isCdpSaasEnabled(stack.getAccountId());
+        boolean computeMonitoring = entitlementService.isComputeMonitoringEnabled(stack.getAccountId());
+        boolean monitoringEnabled = monitoringConfigService.isMonitoringEnabled(cdpSaasEnabled, computeMonitoring);
         MonitoringContext.Builder builder = MonitoringContext.builder();
-        if (entitlementService.isComputeMonitoringEnabled(stack.getAccountId())) {
+        if (monitoringEnabled) {
             builder.enabled();
             try {
                 Optional<MonitoringCredential> monitoringCredential = altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(stack, cdpAccessKeyType);
@@ -153,7 +160,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
                 throw new CloudbreakServiceException(e);
             }
         }
-        if (entitlementService.isCdpSaasEnabled(stack.getAccountId())) {
+        if (cdpSaasEnabled) {
             builder.withServiceType(MonitoringServiceType.SAAS);
         }
         builder.withClusterType(MonitoringClusterType.FREEIPA);

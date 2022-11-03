@@ -31,7 +31,6 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
-import com.sequenceiq.freeipa.service.binduser.UserSyncBindUserService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
@@ -81,9 +80,6 @@ public class FreeIpaPostInstallService {
     @Inject
     private FreeIpaRecipeService freeIpaRecipeService;
 
-    @Inject
-    private UserSyncBindUserService userSyncBindUserService;
-
     @Retryable(value = FreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
@@ -95,12 +91,7 @@ public class FreeIpaPostInstallService {
         freeIpaTopologyService.updateReplicationTopology(stackId, Set.of(), freeIpaClient);
         if (fullPostInstall) {
             setInitialFreeIpaPolicies(stack, freeIpaClient);
-            userSyncBindUserService.createUserAndLdapConfig(stack);
             synchronizeUsers(stack);
-        } else {
-            if (!userSyncBindUserService.doesBindUserAndConfigAlreadyExist(stack)) {
-                userSyncBindUserService.createUserAndLdapConfig(stack);
-            }
         }
         if (freeIpaRecipeService.hasRecipeType(stackId, RecipeType.POST_SERVICE_DEPLOYMENT, RecipeType.POST_CLUSTER_INSTALL)) {
             executePostServiceDeploymentRecipes(stack);

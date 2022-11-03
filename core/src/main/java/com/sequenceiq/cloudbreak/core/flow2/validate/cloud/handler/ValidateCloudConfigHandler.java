@@ -109,7 +109,6 @@ public class ValidateCloudConfigHandler extends ExceptionCatcherEventHandler<Val
 
         ParametersValidationRequest parametersValidationRequest = parametersValidator.validate(
                 stack.getCloudPlatform(),
-                stack.getPlatformVariant(),
                 cloudCredential,
                 stack.getParameters(),
                 stack.getWorkspaceId());

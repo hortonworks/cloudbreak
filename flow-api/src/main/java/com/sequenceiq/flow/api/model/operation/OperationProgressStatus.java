@@ -11,9 +11,4 @@ public enum OperationProgressStatus {
     public boolean isCompleted() {
         return StringUtils.equalsAny(name(), FINISHED.name(), CANCELLED.name(), FAILED.name());
     }
-
-    @JsonIgnore
-    public boolean isRunning() {
-        return StringUtils.equals(name(), RUNNING.name());
-    }
 }

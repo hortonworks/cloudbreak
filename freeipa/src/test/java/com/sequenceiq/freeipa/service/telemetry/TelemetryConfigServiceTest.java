@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentType;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigService;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
@@ -73,6 +74,9 @@ public class TelemetryConfigServiceTest {
 
     @Mock
     private CMLicenseParser cmLicenseParser;
+
+    @Mock
+    private MonitoringConfigService monitoringConfigService;
 
     @Mock
     private TelemetrySaltPillarDecorator telemetrySaltPillarDecorator;
@@ -120,7 +124,7 @@ public class TelemetryConfigServiceTest {
         given(entitlementService.useDataBusCNameEndpointEnabled(anyString())).willReturn(false);
         given(entitlementService.isFreeIpaDatabusEndpointValidationEnabled(anyString())).willReturn(true);
         given(vmLogsService.getVmLogs()).willReturn(new ArrayList<>());
-        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
+        given(monitoringConfigService.isMonitoringEnabled(anyBoolean(), anyBoolean())).willReturn(true);
         given(altusMachineUserService.getOrCreateDataBusCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class))).willReturn(dataBusCredential);
         given(altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class)))
                 .willReturn(Optional.of(monitoringCredential));
@@ -147,7 +151,7 @@ public class TelemetryConfigServiceTest {
         monitoringCredential.setAccessKey("accessKey");
         monitoringCredential.setPrivateKey("privateKey");
         given(umsClient.getAccountDetails(anyString(), any())).willReturn(account);
-        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
+        given(monitoringConfigService.isMonitoringEnabled(anyBoolean(), anyBoolean())).willReturn(true);
         given(altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class)))
                 .willReturn(Optional.of(monitoringCredential));
         // WHEN
@@ -166,6 +170,7 @@ public class TelemetryConfigServiceTest {
                 .setClouderaManagerLicenseKey("myLicense")
                 .build();
         given(umsClient.getAccountDetails(anyString(), any())).willReturn(account);
+        given(monitoringConfigService.isMonitoringEnabled(anyBoolean(), anyBoolean())).willReturn(false);
         Telemetry telemetry = telemetry(true, false, false);
         telemetry.getLogging().setS3(null);
         // WHEN

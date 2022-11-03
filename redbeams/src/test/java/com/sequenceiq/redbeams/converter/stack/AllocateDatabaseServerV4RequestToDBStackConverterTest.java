@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -67,7 +68,6 @@ import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
 import com.sequenceiq.redbeams.service.AccountTagService;
 import com.sequenceiq.redbeams.service.EnvironmentService;
@@ -75,7 +75,9 @@ import com.sequenceiq.redbeams.service.PasswordGeneratorService;
 import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.UuidGeneratorService;
 import com.sequenceiq.redbeams.service.crn.CrnService;
-import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
+import com.sequenceiq.redbeams.service.network.NetworkParameterAdder;
+import com.sequenceiq.redbeams.service.network.SubnetChooserService;
+import com.sequenceiq.redbeams.service.network.SubnetListerService;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -155,10 +157,19 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     private Clock clock;
 
     @Mock
+    private SubnetListerService subnetListerService;
+
+    @Mock
+    private SubnetChooserService subnetChooserService;
+
+    @Mock
     private UserGeneratorService userGeneratorService;
 
     @Mock
     private PasswordGeneratorService passwordGeneratorService;
+
+    @Mock
+    private NetworkParameterAdder networkParameterAdder;
 
     @Mock
     private UuidGeneratorService uuidGeneratorService;
@@ -183,9 +194,6 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     @Mock
     private X509Certificate x509Certificate;
-
-    @Mock
-    private NetworkBuilderService networkBuilderService;
 
     @InjectMocks
     private AllocateDatabaseServerV4RequestToDBStackConverter underTest;
@@ -252,8 +260,6 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 .withTag(new TagResponse())
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
-        Network network = new Network();
-        when(networkBuilderService.buildNetwork(eq(networkRequest), eq(environment), eq(AWS_CLOUD_PLATFORM), any(DBStack.class))).thenReturn(network);
         DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
 
         assertEquals(allocateRequest.getName(), dbStack.getName());
@@ -268,6 +274,11 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals(Status.REQUESTED, dbStack.getStatus());
         assertEquals(DetailedDBStackStatus.PROVISION_REQUESTED, dbStack.getDbStackStatus().getDetailedDBStackStatus());
         assertEquals(NOW.toEpochMilli(), dbStack.getDbStackStatus().getCreated().longValue());
+
+        assertEquals("n-uuid", dbStack.getNetwork().getName());
+        assertEquals(1, dbStack.getNetwork().getAttributes().getMap().size());
+        assertEquals("netvalue", dbStack.getNetwork().getAttributes().getMap().get("netkey"));
+
         assertEquals("dbsvr-uuid", dbStack.getDatabaseServer().getName());
         assertEquals(databaseServerRequest.getInstanceType(), dbStack.getDatabaseServer().getInstanceType());
         assertEquals(DatabaseVendor.fromValue(databaseServerRequest.getDatabaseVendor()), dbStack.getDatabaseServer().getDatabaseVendor());
@@ -279,13 +290,16 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals("dbvalue", dbStack.getDatabaseServer().getAttributes().getMap().get("dbkey"));
         assertEquals(REDBEAMS_DB_MAJOR_VERSION, dbStack.getDatabaseServer().getAttributes().getMap().get("engineVersion"));
         assertEquals(securityGroupRequest.getSecurityGroupIds(), dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds());
-        assertEquals(network, dbStack.getNetwork());
         assertEquals(dbStack.getTags().get(StackTags.class).getUserDefinedTags().get("DistroXKey1"), "DistroXValue1");
 
         verifySsl(dbStack, Set.of(CERT_PEM_V3), CLOUD_PROVIDER_IDENTIFIER_V3);
         verify(databaseServerSslCertificateConfig, never()).getCertsByCloudPlatformAndRegionAndVersions(anyString(), anyString(), any());
 
         verify(providerParameterCalculator).get(allocateRequest);
+        verify(providerParameterCalculator).get(networkRequest);
+        verify(subnetListerService, never()).listSubnets(any(), any());
+        verify(subnetChooserService, never()).chooseSubnets(anyList(), any(), any());
+        verify(networkParameterAdder, never()).addSubnetIds(any(), any(), any(), any());
         verify(userGeneratorService, never()).generateUserName();
         verify(passwordGeneratorService, never()).generatePassword(any());
     }
@@ -323,6 +337,9 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                         .build())
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
+        when(subnetListerService.listSubnets(any(), any())).thenReturn(cloudSubnets);
+        when(subnetChooserService.chooseSubnets(any(), any(), any())).thenReturn(cloudSubnets);
+        when(networkParameterAdder.addSubnetIds(any(), any(), any(), any())).thenReturn(SUBNET_ID_REQUEST_PARAMETERS);
         when(userGeneratorService.generateUserName()).thenReturn(USERNAME);
         when(passwordGeneratorService.generatePassword(any())).thenReturn(PASSWORD);
 
@@ -331,6 +348,9 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals(ENVIRONMENT_NAME + "-dbstck-parts", dbStack.getName());
         assertEquals(PASSWORD, dbStack.getDatabaseServer().getRootPassword());
         assertEquals(USERNAME, dbStack.getDatabaseServer().getRootUserName());
+        assertEquals("n-uuid", dbStack.getNetwork().getName());
+        assertEquals(1, dbStack.getNetwork().getAttributes().getMap().size());
+        assertEquals("netvalue", dbStack.getNetwork().getAttributes().getMap().get("netkey"));
         assertThat(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds()).hasSize(1);
         assertEquals(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds().iterator().next(), DEFAULT_SECURITY_GROUP_ID);
         assertEquals(dbStack.getTags().get(StackTags.class).getUserDefinedTags().get("DistroXKey1"), "DistroXValue1");
@@ -340,6 +360,9 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
         verify(providerParameterCalculator).get(allocateRequest);
         verify(providerParameterCalculator, never()).get(networkRequest);
+        verify(subnetListerService).listSubnets(any(), any());
+        verify(subnetChooserService).chooseSubnets(anyList(), any(), any());
+        verify(networkParameterAdder).addSubnetIds(any(), any(), any(), any());
         verify(userGeneratorService).generateUserName();
         verify(passwordGeneratorService).generatePassword(any());
     }

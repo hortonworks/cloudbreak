@@ -734,10 +734,6 @@ cb:
         enabled: true
       sdx:
         enabled: true
-      cm:
-        interruptableCommands: >
-          global-estimate-host-statistics,
-          ProcessStalenessCheckCommand
     permittedServicesForUpgrade: >
         CORE_SETTINGS: 7.2.0,
         CRUISE_CONTROL: 7.2.7,

@@ -112,7 +112,6 @@ public interface PlatformParameters {
         specialParameters.put(PlatformParametersConsts.REGIONS_SUPPORTED, Boolean.TRUE);
         specialParameters.put(PlatformParametersConsts.VOLUME_ATTACHMENT_SUPPORTED, Boolean.TRUE);
         specialParameters.put(PlatformParametersConsts.VERTICAL_SCALING_SUPPORTED, Boolean.TRUE);
-        specialParameters.put(PlatformParametersConsts.DB_SUBNETS_UPDATE_ENABLED, Boolean.FALSE);
         return new SpecialParameters(specialParameters);
     }
 

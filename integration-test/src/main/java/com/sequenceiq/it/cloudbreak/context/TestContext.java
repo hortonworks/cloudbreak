@@ -122,9 +122,6 @@ public abstract class TestContext implements ApplicationContextAware {
     @Value("${integrationtest.ums.host:localhost}")
     private String umsHost;
 
-    @Value("${integrationtest.ums.port:8982}")
-    private int umsPort;
-
     @Value("${integrationtest.authdistributor.host:localhost}")
     private String authDistributorHost;
 
@@ -459,7 +456,7 @@ public abstract class TestContext implements ApplicationContextAware {
             EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, cloudbreakUser,
                     regionAwareInternalCrnGeneratorFactory.iam());
             SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, cloudbreakUser);
-            UmsClient umsClient = UmsClient.createProxyUmsClient(tracer, umsHost, umsPort);
+            UmsClient umsClient = UmsClient.createProxyUmsClient(tracer, umsHost);
             SdxSaasItClient sdxSaasItClient = SdxSaasItClient.createProxySdxSaasClient(tracer, umsHost, regionAwareInternalCrnGeneratorFactory);
             AuthDistributorClient authDistributorClient = AuthDistributorClient.createProxyAuthDistributorClient(tracer,
                     regionAwareInternalCrnGeneratorFactory, authDistributorHost);
@@ -488,7 +485,7 @@ public abstract class TestContext implements ApplicationContextAware {
             EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, accountAdmin,
                     regionAwareInternalCrnGeneratorFactory.iam());
             SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, accountAdmin);
-            UmsClient umsClient = UmsClient.createProxyUmsClient(tracer, umsHost, umsPort);
+            UmsClient umsClient = UmsClient.createProxyUmsClient(tracer, umsHost);
             SdxSaasItClient sdxSaasItClient = SdxSaasItClient.createProxySdxSaasClient(tracer, umsHost, regionAwareInternalCrnGeneratorFactory);
             AuthDistributorClient authDistributorClient = AuthDistributorClient.createProxyAuthDistributorClient(tracer,
                     regionAwareInternalCrnGeneratorFactory, authDistributorHost);

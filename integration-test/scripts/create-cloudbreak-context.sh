@@ -16,6 +16,3 @@ if [[ "$AWS" == true ]]; then
     echo "export AWS_SECRET_ACCESS_KEY=${INTEGRATIONTEST_AWS_CREDENTIAL_SECRETKEY}" >> integcb/Profile
     echo "export CB_AWS_ACCOUNT_ID=${INTEGRATIONTEST_AWS_ACCOUNTID}" >> integcb/Profile
 fi
-if [[ ! -z "${CUSTOM_UMS_SHORT_TIMEOUT}" ]]; then
-  echo "export ALTUS_UMS_CLIENT_GRPC_SHORT_TIMEOUT_SEC=${CUSTOM_UMS_SHORT_TIMEOUT}" >> integcb/Profile
-fi

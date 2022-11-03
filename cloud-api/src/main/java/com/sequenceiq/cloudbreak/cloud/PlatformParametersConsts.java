@@ -24,8 +24,6 @@ public class PlatformParametersConsts {
 
     public static final String VERTICAL_SCALING_SUPPORTED = "verticalScalingSupported";
 
-    public static final String DB_SUBNETS_UPDATE_ENABLED = "dbSubnetsUpdateEnabled";
-
     public static final String FREEIPA_STACK_TYPE = "freeipa";
 
     public static final String CLOUD_STACK_TYPE_PARAMETER = "cloudStackType";

@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
-import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -57,6 +56,7 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConver
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.network.instancegroup.InstanceGroupNetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
+import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.SharedServiceValidator;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;

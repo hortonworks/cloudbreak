@@ -61,14 +61,13 @@ public class ClusterRepairTriggerEvent extends StackEvent {
     public ClusterRepairTriggerEvent(
             @JsonProperty("selector") String event,
             @JsonProperty("resourceId") Long stackId,
-            @JsonProperty("oneNodeFromEachHostGroupAtOnce") boolean oneNodeFromEachHostGroupAtOnce,
             @JsonProperty("failedNodesMap") Map<String, List<String>> failedNodesMap,
             @JsonProperty("restartServices") boolean restartServices,
             @JsonProperty("triggeredStackVariant") String triggeredStackVariant) {
         super(event, stackId);
         this.failedNodesMap = copyToSerializableMap(failedNodesMap);
         this.stackId = stackId;
-        this.oneNodeFromEachHostGroupAtOnce = oneNodeFromEachHostGroupAtOnce;
+        this.oneNodeFromEachHostGroupAtOnce = false;
         this.restartServices = restartServices;
         this.upgrade = triggeredStackVariant != null;
         this.triggeredStackVariant = triggeredStackVariant;

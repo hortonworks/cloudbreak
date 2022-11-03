@@ -93,7 +93,6 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaStackHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStartService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStopService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaUpgradeCcmService;
-import com.sequenceiq.freeipa.service.stack.FreeipaModifyProxyConfigService;
 import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -177,9 +176,6 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private FreeIpaUpgradeCcmService upgradeCcmService;
-
-    @Inject
-    private FreeipaModifyProxyConfigService modifyProxyConfigService;
 
     @Inject
     private EntitlementService entitlementService;
@@ -435,15 +431,6 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER }) @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
         String accountId = crnService.getCurrentAccountId();
         return upgradeCcmService.upgradeCcm(environmentCrn, accountId);
-    }
-
-    @Override
-    @InternalOnly
-    public OperationStatus modifyProxyConfigInternal(
-            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
-            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER }) @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
-        String accountId = crnService.getCurrentAccountId();
-        return modifyProxyConfigService.modifyProxyConfig(environmentCrn, accountId);
     }
 
     @Override

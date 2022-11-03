@@ -9,7 +9,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -31,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.S
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -167,8 +167,8 @@ public class StackRequestManifester {
             setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
             validateCloudStorage(sdxCluster, environment, stackRequest);
             setupInstanceVolumeEncryption(stackRequest, environment);
-            setupMultiAz(sdxCluster, environment, stackRequest);
             setupGovCloud(sdxCluster, environment, stackRequest);
+            setupMultiAz(sdxCluster, environment, stackRequest);
             stackRequest.setExternalDatabase(databaseRequestConverter.createExternalDbRequest(sdxCluster));
             return stackRequest;
         } catch (IOException e) {
@@ -185,8 +185,7 @@ public class StackRequestManifester {
     private void validateCloudStorageAndHandleTimeout(SdxCluster sdxCluster, DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         try {
-            CloudStorageRequest cloudStorage = getCloudStorage(stackRequest);
-            cloudStorageValidator.validate(cloudStorage, environment, validationResultBuilder);
+            cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment, validationResultBuilder);
         } catch (Exception e) {
             String message = String.format("Error occured during object storage validation, validation skipped. Error: %s", e.getMessage());
             LOGGER.warn(message);
@@ -309,7 +308,8 @@ public class StackRequestManifester {
     }
 
     void addAzureIdbrokerMsiToTelemetry(Map<String, Object> fluentAttributes, StackV4Request stackRequest) {
-        if (getCloudStorage(stackRequest) != null && stackRequest.getCluster().getCloudStorage().getIdentities() != null) {
+        if (stackRequest.getCluster() != null && stackRequest.getCluster().getCloudStorage() != null
+                && stackRequest.getCluster().getCloudStorage().getIdentities() != null) {
             List<StorageIdentityBase> identities = stackRequest.getCluster().getCloudStorage().getIdentities();
             for (StorageIdentityBase identity : identities) {
                 if (CloudIdentityType.ID_BROKER.equals(identity.getType()) && identity.getAdlsGen2() != null) {
@@ -326,7 +326,7 @@ public class StackRequestManifester {
     @VisibleForTesting
     void setupCloudStorageAccountMapping(StackV4Request stackRequest, String environmentCrn, IdBrokerMappingSource mappingSource, String cloudPlatform) {
         String stackName = stackRequest.getName();
-        CloudStorageRequest cloudStorage = getCloudStorage(stackRequest);
+        CloudStorageRequest cloudStorage = stackRequest.getCluster().getCloudStorage();
         if (cloudStorage != null && cloudStorage.getAccountMapping() == null) {
             // In case of SdxClusterRequest with cloud storage, or SdxInternalClusterRequest with cloud storage but missing "accountMapping" property,
             // getAccountMapping() == null means we need to fetch mappings from IDBMMS.
@@ -359,11 +359,6 @@ public class StackRequestManifester {
             LOGGER.info("{} for stack {} in environment {}.", cloudStorage == null ? "Cloud storage is disabled" : "Applying user-provided mappings",
                     stackName, environmentCrn);
         }
-    }
-
-    @Nullable
-    private CloudStorageRequest getCloudStorage(StackV4Request stackRequest) {
-        return stackRequest.getCluster() == null ? null : stackRequest.getCluster().getCloudStorage();
     }
 
     void validateMappingsConfig(MappingsConfig mappingsConfig, StackV4Request stackRequest) {
@@ -475,7 +470,7 @@ public class StackRequestManifester {
     }
 
     private void setupMultiAz(SdxCluster sdxCluster, DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
-        if (entitlementService.awsNativeDataLakeEnabled(environment.getAccountId()) && sdxCluster.isEnableMultiAz()) {
+        if (entitlementService.awsNativeDataLakeEnabled(ThreadBasedUserCrnProvider.getAccountId()) && sdxCluster.isEnableMultiAz()) {
             multiAzDecorator.decorateStackRequestWithAwsNative(stackRequest, environment);
             multiAzDecorator.decorateStackRequestWithMultiAz(stackRequest, environment, sdxCluster.getClusterShape());
         }

@@ -69,13 +69,10 @@ public class BootstrapService {
         Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataService.findNotTerminatedForStack(stack.getId()).stream()
                 .filter(instanceMetaData -> Objects.isNull(instanceIds) || instanceIds.contains(instanceMetaData.getInstanceId()))
                 .collect(Collectors.toSet());
-        Set<String> hostNames = instanceMetaDatas.stream().map(InstanceMetaData::getShortHostname).collect(Collectors.toSet());
-        LOGGER.info("Bootstrapping nodes {} of stack {}", hostNames, stack.getResourceCrn());
         bootstrap(stack, instanceMetaDatas, false);
     }
 
     public void reBootstrap(Stack stack) throws CloudbreakOrchestratorException {
-        LOGGER.info("Re-bootstrapping nodes of stack {}", stack.getResourceCrn());
         bootstrap(stack, stack.getNotDeletedInstanceMetaDataSet(), true);
     }
 
@@ -100,7 +97,7 @@ public class BootstrapService {
         StackBasedExitCriteriaModel exitCriteriaModel = new StackBasedExitCriteriaModel(stack.getId());
         try {
             if (reBootstrap) {
-                hostOrchestrator.reBootstrapExistingNodes(gatewayConfigs, allNodes, params, exitCriteriaModel);
+                hostOrchestrator.bootstrap(gatewayConfigs, allNodes, params, exitCriteriaModel);
             } else {
                 byte[] stateConfigZip = getStateConfigZip();
                 hostOrchestrator.bootstrapNewNodes(gatewayConfigs, allNodes, allNodes,

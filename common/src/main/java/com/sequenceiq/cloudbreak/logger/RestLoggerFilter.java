@@ -27,8 +27,6 @@ public class RestLoggerFilter extends OncePerRequestFilter {
 
     private static final int MAX_SIZE = 30000;
 
-    private static final String REDACTED = "REDACTED COMPLETELY";
-
     private final boolean restLoggerEnabled;
 
     public RestLoggerFilter(boolean restLoggerEnabled) {
@@ -43,8 +41,7 @@ public class RestLoggerFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(wrappedRequest, wrappedResponse);
 
-        String requestPath = request.getRequestURI();
-        if (restLoggerEnabled && !excludePathPattern(requestPath)) {
+        if (restLoggerEnabled && !excludePathPattern(request.getRequestURI())) {
             DateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
             formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
             Date end = new Date(System.currentTimeMillis());
@@ -57,10 +54,10 @@ public class RestLoggerFilter extends OncePerRequestFilter {
                     .append(appendLine(RestLoggerField.QUERY_STRING, request.getQueryString()))
                     .append(appendLine(RestLoggerField.CLIENT_IP, request.getRemoteAddr()))
                     .append(appendLine(RestLoggerField.REQUEST,
-                            logContent(wrappedRequest.getContentAsByteArray(), request.getCharacterEncoding(), isUberSensitive(requestPath))))
+                            logContent(wrappedRequest.getContentAsByteArray(), request.getCharacterEncoding())))
                     .append(appendLine(RestLoggerField.RESPONSE_STATUS, String.valueOf(response.getStatus())))
                     .append(appendLine(RestLoggerField.RESPONSE,
-                            logContent(wrappedResponse.getContentAsByteArray(), request.getCharacterEncoding(), isUberSensitive(requestPath))))
+                            logContent(wrappedResponse.getContentAsByteArray(), request.getCharacterEncoding())))
                     .toString();
             LOGGER.debug(log);
         }
@@ -68,11 +65,10 @@ public class RestLoggerFilter extends OncePerRequestFilter {
     }
 
     private boolean excludePathPattern(String requestPath) {
-        return requestPath.contains("/metrics") || requestPath.contains("/autoscale");
-    }
-
-    private boolean isUberSensitive(String requestPath) {
-        return requestPath.contains("/credential");
+        if (requestPath.contains("/credential") || requestPath.contains("/metrics") || requestPath.contains("/autoscale")) {
+            return true;
+        }
+        return false;
     }
 
     @NotNull
@@ -85,7 +81,7 @@ public class RestLoggerFilter extends OncePerRequestFilter {
         return new ContentCachingRequestWrapper(request);
     }
 
-    private String logContent(byte[] content, String contentEncoding, boolean hide) {
+    private static String logContent(byte[] content, String contentEncoding) {
         String contentString;
         try {
             contentString = new String(content, contentEncoding);
@@ -95,17 +91,7 @@ public class RestLoggerFilter extends OncePerRequestFilter {
         } catch (UnsupportedEncodingException e) {
             contentString = "We were not able to encode the content: " + e.getMessage();
         }
-        return redact(contentString, hide);
-    }
-
-    private String redact(String contentString, boolean hide) {
-        String redacted;
-        if (hide) {
-            redacted = REDACTED;
-        } else {
-            redacted = AnonymizerUtil.anonymize(contentString);
-        }
-        return redacted;
+        return AnonymizerUtil.anonymize(contentString);
     }
 
     private String appendLine(RestLoggerField key, String value) {

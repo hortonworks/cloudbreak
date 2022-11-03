@@ -3,7 +3,7 @@
 : ${AZURE_CLIENT_ID:? required}
 : ${AZURE_CLIENT_SECRET:? required}
 : ${AZURE_TENANT_ID:? required}
-: ${INTEGRATIONTEST_UMS_JSONSECRET_VERSION:="e556a55296e349f993d324680baa3350"}
+: ${INTEGRATIONTEST_UMS_JSONSECRET_VERSION:="9fb177df00f0419aa0658ad18a041ee4"}
 : ${INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH:="./src/main/resources/ums-users/api-credentials.json"}
 : ${INTEGRATIONTEST_UMS_JSONSECRET_NAME:="real-ums-users-dev"}
 : ${IMAGE_NAME:=mcr.microsoft.com/azure-cli}

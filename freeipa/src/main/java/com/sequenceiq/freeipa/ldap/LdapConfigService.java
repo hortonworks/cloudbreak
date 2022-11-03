@@ -100,7 +100,7 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
     }
 
     @Override
-    public JpaRepository<LdapConfig, Long> repository() {
+    public JpaRepository repository() {
         return ldapConfigRepository;
     }
 
@@ -110,7 +110,7 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
                         resource.getEnvironmentCrn())
                 : ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameAndArchivedIsFalse(resource.getAccountId(), resource.getEnvironmentCrn(),
                 resource.getClusterName());
-        ldapConfig.ifPresent(config -> {
+        ldapConfig.ifPresent(kerberosConfig -> {
             String message = format("LdapConfig in the [%s] account's [%s] environment is already exists", resource.getAccountId(),
                     resource.getEnvironmentCrn());
             LOGGER.info(message);

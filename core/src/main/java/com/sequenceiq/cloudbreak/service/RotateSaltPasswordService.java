@@ -115,7 +115,7 @@ public class RotateSaltPasswordService {
         SecurityConfig securityConfig = stack.getSecurityConfig();
         securityConfig.getSaltSecurityConfig().setSaltPassword(newPassword);
         try {
-            clusterBootstrapper.reBootstrapGateways(stack);
+            clusterBootstrapper.reBootstrapOnHost(stack);
             securityConfigService.changeSaltPassword(securityConfig, newPassword);
         } catch (CloudbreakException e) {
             Set<String> gatewayConfigAddresses = allGatewayConfig.stream()

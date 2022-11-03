@@ -340,11 +340,7 @@
     "label": "dl_backup"
   },
   {
-    "path": "/var/log/get_datalake_database_sizes.log",
-    "label": "get_datalake_database_sizes"
-  },
-  {
-    "path": "/var/log/get_datalake_solr_hbase_data_sizes.log",
-    "label": "get_datalake_solr_hbase_data_sizes"
+    "path": "/var/log/get_backup_data_sizes.log",
+    "label": "get_backup_data_sizes"
   }
 ]

@@ -119,7 +119,6 @@ class UpgradeRdsServiceTest {
         underTest.installPostgresPackages(STACK_ID);
 
         verify(rdsUpgradeOrchestratorService).installPostgresPackages(eq(STACK_ID));
-        verify(rdsUpgradeOrchestratorService).updatePostgresAlternatives(eq(STACK_ID));
     }
 
     @Test

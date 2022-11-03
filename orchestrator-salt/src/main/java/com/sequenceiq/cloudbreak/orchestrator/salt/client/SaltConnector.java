@@ -152,7 +152,6 @@ public class SaltConnector implements Closeable {
     @Measure(SaltConnector.class)
     @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public GenericResponses action(SaltAction saltAction) {
-        LOGGER.debug("Executing salt action {}", saltAction);
         Response response = postSignedJsonSaltRequest(SaltEndpoint.BOOT_ACTION_DISTRIBUTE, saltAction);
         GenericResponses responseEntity = JaxRSUtil.response(response, GenericResponses.class);
         LOGGER.debug("SaltBoot. SaltAction response: {}", responseEntity);

@@ -228,19 +228,6 @@ public class FreeIpaService {
         }
     }
 
-    public OperationStatus modifyProxyConfig(String environmentCrn) {
-        try {
-            LOGGER.debug("Calling FreeIPA modify proxy config for environment {}", environmentCrn);
-            return ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    initiatorUserCrn -> freeIpaV1Endpoint.modifyProxyConfigInternal(environmentCrn, initiatorUserCrn));
-        } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error("Failed to modify proxy config on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
-            throw new FreeIpaOperationFailedException(errorMessage, e);
-        }
-    }
-
     public VerticalScaleResponse verticalScale(String environmentCrn, VerticalScaleRequest freeIPAVerticalScaleRequest) {
         try {
             LOGGER.debug("Calling FreeIPA CCM upgrade for environment {}", environmentCrn);

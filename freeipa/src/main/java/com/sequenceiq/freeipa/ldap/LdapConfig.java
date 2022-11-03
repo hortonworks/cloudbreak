@@ -40,10 +40,6 @@ public class LdapConfig implements ArchivableResource, AuthResource, AccountAwar
 
     private String environmentCrn;
 
-    /**
-     * practically works as a postfix after 'ldapbind-'
-     * @see com.sequenceiq.freeipa.service.binduser.LdapBindUserNameProvider
-     */
     private String clusterName;
 
     private boolean archived;

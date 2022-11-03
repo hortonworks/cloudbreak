@@ -120,10 +120,6 @@ public class StackDtoService {
         return getStackProxy(stackView, fetchResources);
     }
 
-    public Optional<StackDto> getByIdOpt(Long id) {
-        return stackDtoRepository.findById(id).map(stackViewDelegate -> getStackProxy(stackViewDelegate, false));
-    }
-
     public StackDto getByCrn(String crn) {
         StackView stackView = stackDtoRepository.findByCrn(crn).orElseThrow(NotFoundException.notFound("Stack by crn", crn));
         return getStackProxy(stackView, false);
@@ -256,10 +252,6 @@ public class StackDtoService {
 
     public StackView getStackViewById(Long id) {
         return stackDtoRepository.findById(id).orElseThrow(NotFoundException.notFound("Stack", id));
-    }
-
-    public Optional<StackView> getStackViewByIdOpt(Long id) {
-        return stackDtoRepository.findById(id).map(StackView.class::cast);
     }
 
     public ClusterView getClusterViewByStackId(Long id) {

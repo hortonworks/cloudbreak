@@ -20,8 +20,6 @@ public class GcpProperties {
 
     private Boolean multiaz;
 
-    private Boolean externalDatabaseSslEnforcementSupported;
-
     private final Credential credential = new Credential();
 
     private final Instance instance = new Instance();
@@ -65,14 +63,6 @@ public class GcpProperties {
 
     public void setMultiaz(Boolean multiaz) {
         this.multiaz = multiaz;
-    }
-
-    public Boolean getExternalDatabaseSslEnforcementSupported() {
-        return Boolean.TRUE.equals(externalDatabaseSslEnforcementSupported);
-    }
-
-    public void setExternalDatabaseSslEnforcementSupported(Boolean externalDatabaseSslEnforcementSupported) {
-        this.externalDatabaseSslEnforcementSupported = externalDatabaseSslEnforcementSupported;
     }
 
     public Baseimage getBaseimage() {

@@ -24,5 +24,5 @@ public abstract class AbstractArchivistService<T extends ArchivableResource> {
         return resource;
     }
 
-    public abstract JpaRepository<T, Long> repository();
+    public abstract JpaRepository repository();
 }

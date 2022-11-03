@@ -18,9 +18,4 @@ public enum SaltActionType {
     public String getAction() {
         return action;
     }
-
-    @Override
-    public String toString() {
-        return action;
-    }
 }

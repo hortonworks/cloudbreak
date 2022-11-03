@@ -14,20 +14,20 @@ import com.sequenceiq.cloudbreak.conclusion.step.NodeServicesCheckerConclusionSt
 import com.sequenceiq.cloudbreak.conclusion.step.SaltCheckerConclusionStep;
 import com.sequenceiq.cloudbreak.conclusion.step.VmStatusCheckerConclusionStep;
 
-class ConclusionStepTreeFactory {
+public class ConclusionStepNodeFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConclusionStepTreeFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConclusionStepNodeFactory.class);
 
     private static final Map<ConclusionCheckerType, ConclusionStepNode> CONCLUSION_CHECKER_TYPE_MAP = new HashMap<>();
 
     static {
-        CONCLUSION_CHECKER_TYPE_MAP.put(ConclusionCheckerType.DEFAULT, initDefaultConclusionStepTree());
+        CONCLUSION_CHECKER_TYPE_MAP.put(ConclusionCheckerType.DEFAULT, initDefaultConclusionCheckerType());
     }
 
-    private ConclusionStepTreeFactory() {
+    private ConclusionStepNodeFactory() {
     }
 
-    public static ConclusionStepNode getConclusionStepTree(ConclusionCheckerType conclusionCheckerType) {
+    public static ConclusionStepNode getConclusionStepNode(ConclusionCheckerType conclusionCheckerType) {
         if (!CONCLUSION_CHECKER_TYPE_MAP.containsKey(conclusionCheckerType)) {
             String error = "Unknown conclusion checker type: " + conclusionCheckerType;
             LOGGER.error(error);
@@ -36,13 +36,13 @@ class ConclusionStepTreeFactory {
         return CONCLUSION_CHECKER_TYPE_MAP.get(conclusionCheckerType);
     }
 
-    private static ConclusionStepNode initDefaultConclusionStepTree() {
+    private static ConclusionStepNode initDefaultConclusionCheckerType() {
         ConclusionStepNode root = stepNode(InfoCollectorConclusionStep.class)
                 .withSuccessNode(stepNode(SaltCheckerConclusionStep.class)
                         .withSuccessNode(stepNode(NodeServicesCheckerConclusionStep.class)
                                 .withSuccessNode(stepNode(NetworkCheckerConclusionStep.class)))
-                        .withFailureNode(stepNode(VmStatusCheckerConclusionStep.class)
-                                .withSuccessNode(stepNode(NetworkCheckerConclusionStep.class))));
+                        .withFailureNode(stepNode(VmStatusCheckerConclusionStep.class))
+                        .withSuccessNode(stepNode(NetworkCheckerConclusionStep.class)));
         return root;
     }
 }

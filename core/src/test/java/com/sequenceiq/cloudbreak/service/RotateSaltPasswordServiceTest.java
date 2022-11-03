@@ -212,7 +212,7 @@ class RotateSaltPasswordServiceTest {
         String newPassword = stack.getSecurityConfig().getSaltSecurityConfig().getSaltPassword();
         assertThat(newPassword).isNotEqualTo(OLD_PASSWORD);
         verify(hostOrchestrator).runCommandOnHosts(gatewayConfigs, Set.of("fqdn"), "userdel saltuser");
-        verify(clusterBootstrapper).reBootstrapGateways(stack);
+        verify(clusterBootstrapper).reBootstrapOnHost(stack);
         verify(securityConfigService).changeSaltPassword(securityConfig, newPassword);
     }
 
@@ -229,7 +229,7 @@ class RotateSaltPasswordServiceTest {
         String newPassword = stack.getSecurityConfig().getSaltSecurityConfig().getSaltPassword();
         assertThat(newPassword).isNotEqualTo(OLD_PASSWORD);
         verify(hostOrchestrator).runCommandOnHosts(gatewayConfigs, Set.of("fqdn"), "userdel saltuser");
-        verify(clusterBootstrapper).reBootstrapGateways(stack);
+        verify(clusterBootstrapper).reBootstrapOnHost(stack);
         verify(securityConfigService).changeSaltPassword(securityConfig, newPassword);
     }
 
@@ -239,7 +239,7 @@ class RotateSaltPasswordServiceTest {
         when(node.getHostname()).thenReturn("fqdn");
         Set<Node> nodes = Set.of(node);
         when(stack.getAllPrimaryGatewayInstanceNodes()).thenReturn(nodes);
-        doThrow(CloudbreakException.class).when(clusterBootstrapper).reBootstrapGateways(stack);
+        doThrow(CloudbreakException.class).when(clusterBootstrapper).reBootstrapOnHost(stack);
 
         assertThatThrownBy(() -> underTest.rotateSaltPasswordFallback(stack))
                 .isInstanceOf(CloudbreakOrchestratorFailedException.class)

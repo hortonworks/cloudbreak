@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.conclusion.step.ConclusionStep;
 
-class ConclusionStepNode {
+public class ConclusionStepNode {
 
     private Class<? extends ConclusionStep> stepClass;
 

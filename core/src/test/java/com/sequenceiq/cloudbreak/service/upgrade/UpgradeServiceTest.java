@@ -38,7 +38,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -124,9 +123,6 @@ public class UpgradeServiceTest {
 
     @Mock
     private User user;
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @Captor
     private ArgumentCaptor<ImageSettingsV4Request> captor;
@@ -265,34 +261,6 @@ public class UpgradeServiceTest {
                         eq(false), eq(user), any());
         assertThat(result.getUpgrade().getImageName()).isEqualTo("id-2");
         assertThat(result.getReason()).isEqualTo("Please stop connected DataHub clusters before upgrade.");
-    }
-
-    @Test
-    public void upgradeAllowedWhenConnectedDataHubClusterIsAvailableAndEntitlementTrue()
-            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        when(entitlementService.isUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
-        Stack stack = getStack();
-        Image image = getImage("id-1");
-        Blueprint blueprint = new Blueprint();
-        mockClouderaManagerRepoDetails();
-        setupImageCatalogMocks(image, true, "id-1", "id-2");
-
-        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
-                Result.success(new HashMap<>());
-        when(clusterRepairService.repairWithDryRun(1L)).thenReturn(repairStartResult);
-
-        when(stackDtoService.getStackViewByNameOrCrn(OF_NAME, ACCOUNT_ID)).thenReturn(stack);
-        when(blueprintService.getByClusterId(any())).thenReturn(Optional.of(blueprint));
-
-        UpgradeOptionV4Response result = underTest.getOsUpgradeOptionByStackNameOrCrn(ACCOUNT_ID, OF_NAME, user);
-
-        verify(clusterRepairService).repairWithDryRun(eq(stack.getId()));
-        verify(componentConfigProviderService).getImage(1L);
-        verify(imageService)
-                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq("AWS"), eq(blueprint), eq(false),
-                        eq(false), eq(user), any());
-        assertThat(result.getUpgrade().getImageName()).isEqualTo("id-2");
-        assertThat(result.getReason()).isEqualTo(null);
     }
 
     @Test

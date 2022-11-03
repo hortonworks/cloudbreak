@@ -402,7 +402,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         String groupName = "groupName";
         String triggeredVariant = "triggeredVariant";
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
-        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), false, Map.of(), false, triggeredVariant);
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), Map.of(), false, triggeredVariant);
 
         underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);
 
@@ -415,7 +415,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         String groupName = "groupName";
         String triggeredVariant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value();
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
-        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), false, Map.of(), false, triggeredVariant);
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), Map.of(), false, triggeredVariant);
 
         underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);
 
@@ -429,7 +429,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         String groupName = "groupName";
         String triggeredVariant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value();
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_VARIANT.variant().value());
-        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), false, Map.of(), false, triggeredVariant);
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), Map.of(), false, triggeredVariant);
 
         underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);
 
@@ -443,7 +443,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         String groupName = "groupName";
         String triggeredVariant = "AWS_NATIVE";
         when(stackUpgradeService.awsVariantMigrationIsFeasible(stackView, triggeredVariant)).thenReturn(true);
-        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), false, Map.of(), false, triggeredVariant);
+        ClusterRepairTriggerEvent triggerEvent = new ClusterRepairTriggerEvent("eventname", stackView.getId(), Map.of(), false, triggeredVariant);
 
         underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackView);
 

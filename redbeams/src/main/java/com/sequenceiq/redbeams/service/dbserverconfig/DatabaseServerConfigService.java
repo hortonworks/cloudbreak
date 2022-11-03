@@ -240,7 +240,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     }
 
     @Override
-    public JpaRepository<DatabaseServerConfig, Long> repository() {
+    public JpaRepository repository() {
         return repository;
     }
 

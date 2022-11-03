@@ -34,7 +34,6 @@ import org.springframework.util.ReflectionUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -297,6 +296,12 @@ class RdsUpgradeServiceTest {
         verify(stackService, never()).getByWorkspaceId(1L, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD));
     }
 
+    private StackDatabaseServerResponse createDatabaseServerResponse(MajorVersion majorVersion) {
+        StackDatabaseServerResponse stackDatabaseServerResponse = new StackDatabaseServerResponse();
+        stackDatabaseServerResponse.setMajorVersion(majorVersion);
+        return stackDatabaseServerResponse;
+    }
+
     @ParameterizedTest
     @EnumSource(value = Status.class, names = {"AVAILABLE", "MAINTENANCE_MODE_ENABLED", "EXTERNAL_DATABASE_UPGRADE_FAILED"}, mode = EnumSource.Mode.EXCLUDE)
     void testWhenStackUnavailableThenError(Status status) {
@@ -310,69 +315,6 @@ class RdsUpgradeServiceTest {
                 .hasMessage(ERROR_REASON);
 
         verifyNoInteractions(reactorFlowManager);
-    }
-
-    @ParameterizedTest
-    @EnumSource(value = DatabaseServerStatus.class, names = {"AVAILABLE", "UPGRADE_FAILED"})
-    void testUpgradeRdsWithValidDatabaseStuatusThenSuccess(DatabaseServerStatus status) {
-        Stack stack = createStack(Status.AVAILABLE);
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
-        when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10, status));
-        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
-        FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_ID);
-        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
-        when(reactorFlowManager.triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION))).thenReturn(flowId);
-        when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
-
-        RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
-
-        verify(reactorFlowManager).triggerRdsUpgrade(eq(STACK_ID), eq(TARGET_VERSION), eq(BACKUP_LOCATION));
-        assertThat(response.getFlowIdentifier().getType()).isEqualTo(FlowType.FLOW_CHAIN);
-        assertThat(response.getFlowIdentifier().getPollableId()).isEqualTo(FLOW_ID);
-    }
-
-    @Test
-    void testUpgradeRdsWithDatabaseNullStatusThenError() {
-        Stack stack = createStack(Status.AVAILABLE);
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
-        when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10, null));
-        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
-        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
-        when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
-
-        Assertions.assertThatCode(() -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Upgrading database server is not possible as database server is not available.");
-
-        verifyNoInteractions(reactorFlowManager);
-    }
-
-    @ParameterizedTest
-    @EnumSource(value = DatabaseServerStatus.class, names = {"AVAILABLE", "UPGRADE_FAILED"}, mode = EnumSource.Mode.EXCLUDE)
-    void testUpgradeRdsWithDatabaseNotAvailableThenError(DatabaseServerStatus status) {
-        Stack stack = createStack(Status.AVAILABLE);
-        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
-        when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_10, status));
-        when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
-        when(databaseUpgradeRuntimeValidator.validateRuntimeVersionForUpgrade(STACK_VERSION, ACCOUNT_ID)).thenReturn(Optional.empty());
-        when(entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(false);
-
-        Assertions.assertThatCode(() -> underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage(String.format("Upgrading database server is not possible as database server is not available, it is in %s state.", status));
-
-        verifyNoInteractions(reactorFlowManager);
-    }
-
-    private StackDatabaseServerResponse createDatabaseServerResponse(MajorVersion majorVersion) {
-        return createDatabaseServerResponse(majorVersion, DatabaseServerStatus.AVAILABLE);
-    }
-
-    private StackDatabaseServerResponse createDatabaseServerResponse(MajorVersion majorVersion, DatabaseServerStatus status) {
-        StackDatabaseServerResponse stackDatabaseServerResponse = new StackDatabaseServerResponse();
-        stackDatabaseServerResponse.setMajorVersion(majorVersion);
-        stackDatabaseServerResponse.setStatus(status);
-        return stackDatabaseServerResponse;
     }
 
     private Stack createStack(Status status) {

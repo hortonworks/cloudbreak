@@ -91,6 +91,8 @@ public class MonitoringConfigServiceTest {
     @Test
     public void testCreateConfigs() {
         // GIVEN
+        given(monitoringConfiguration.isEnabled()).willReturn(true);
+        given(monitoringConfiguration.isDevStack()).willReturn(false);
         given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
         given(requestSignerConfiguration.isEnabled()).willReturn(true);
         given(monitoringConfiguration.getClouderaManagerExporter()).willReturn(cmMonitoringConfiguration);

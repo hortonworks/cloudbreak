@@ -61,7 +61,8 @@ public class MetricsClientTest {
     public void testProcessStackStatus() {
         // GIVEN
         given(configuration.isStreamingEnabled()).willReturn(true);
-        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
+        given(configuration.isComputeMonitoringSupported()).willReturn(true);
+        given(configuration.isPaasSupported()).willReturn(true);
         // WHEN
         underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL, Optional.of(true));
         // THEN
@@ -72,6 +73,8 @@ public class MetricsClientTest {
     public void testProcessStackStatusWithEntitlement() {
         // GIVEN
         given(configuration.isStreamingEnabled()).willReturn(true);
+        given(configuration.isComputeMonitoringSupported()).willReturn(true);
+        given(configuration.isPaasSupported()).willReturn(false);
         given(entitlementService.isCdpSaasEnabled(anyString())).willReturn(true);
         // WHEN
         underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL, Optional.of(true));
@@ -83,6 +86,7 @@ public class MetricsClientTest {
     public void testProcessStackStatusWithNoPaasOrEntitlementSupport() {
         // GIVEN
         given(configuration.isStreamingEnabled()).willReturn(true);
+        given(configuration.isComputeMonitoringSupported()).willReturn(true);
         // WHEN
         underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL, Optional.of(true));
         // THEN
@@ -93,6 +97,7 @@ public class MetricsClientTest {
     public void testProcessStackStatusWithDisabledGlobalMonitoring() {
         // GIVEN
         given(configuration.isStreamingEnabled()).willReturn(true);
+        given(configuration.isComputeMonitoringSupported()).willReturn(false);
         // WHEN
         underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL, Optional.of(true));
         // THEN

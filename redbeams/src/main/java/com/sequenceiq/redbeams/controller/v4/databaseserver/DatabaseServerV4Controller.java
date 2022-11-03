@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
@@ -46,9 +45,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
 import com.sequenceiq.redbeams.converter.stack.AllocateDatabaseServerV4RequestToDBStackConverter;
-import com.sequenceiq.redbeams.converter.upgrade.UpgradeDatabaseResponseToUpgradeDatabaseServerV4ResponseConverter;
 import com.sequenceiq.redbeams.converter.upgrade.UpgradeDatabaseServerV4RequestToUpgradeDatabaseServerRequestConverter;
 import com.sequenceiq.redbeams.converter.v4.databaseserver.DBStackToDatabaseServerStatusV4ResponseConverter;
 import com.sequenceiq.redbeams.converter.v4.databaseserver.DatabaseServerConfigToDatabaseServerV4ResponseConverter;
@@ -63,7 +60,6 @@ import com.sequenceiq.redbeams.service.stack.RedbeamsStartService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStopService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsUpgradeService;
-import com.sequenceiq.redbeams.service.validation.RedBeamsTagValidator;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -87,9 +83,6 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     private RedbeamsUpgradeService redbeamsUpgradeService;
 
     @Inject
-    private RedBeamsTagValidator redBeamsTagValidator;
-
-    @Inject
     private DatabaseServerConfigService databaseServerConfigService;
 
     @Inject
@@ -106,9 +99,6 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Inject
     private UpgradeDatabaseServerV4RequestToUpgradeDatabaseServerRequestConverter upgradeDatabaseServerV4RequestConverter;
-
-    @Inject
-    private UpgradeDatabaseResponseToUpgradeDatabaseServerV4ResponseConverter upgradeDatabaseServerV4ResponseConverter;
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
@@ -146,10 +136,6 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     public DatabaseServerStatusV4Response create(AllocateDatabaseServerV4Request request) {
         MDCBuilder.addEnvironmentCrn(request.getEnvironmentCrn());
         DBStack dbStack = dbStackConverter.convert(request, ThreadBasedUserCrnProvider.getUserCrn());
-        ValidationResult validationResult = redBeamsTagValidator.validateTags(dbStack.getCloudPlatform(), request.getTags());
-        if (validationResult.hasError()) {
-            throw new IllegalArgumentException(validationResult.getFormattedErrors());
-        }
         DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack, request.getClusterCrn());
         return dbStackToDatabaseServerStatusV4ResponseConverter.convert(savedDBStack);
     }
@@ -246,9 +232,9 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @InternalOnly
-    public UpgradeDatabaseServerV4Response upgrade(@TenantAwareParam @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER)
-    String databaseServerCrn, @Valid @NotNull UpgradeDatabaseServerV4Request request) {
+    public void upgrade(@TenantAwareParam @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) String databaseServerCrn,
+            @Valid @NotNull UpgradeDatabaseServerV4Request request) {
         UpgradeDatabaseRequest upgradeDatabaseRequest = upgradeDatabaseServerV4RequestConverter.convert(request);
-        return upgradeDatabaseServerV4ResponseConverter.convert(redbeamsUpgradeService.upgradeDatabaseServer(databaseServerCrn, upgradeDatabaseRequest));
+        redbeamsUpgradeService.upgradeDatabaseServer(databaseServerCrn, upgradeDatabaseRequest);
     }
 }

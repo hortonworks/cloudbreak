@@ -7,11 +7,11 @@ import java.util.Optional;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 
 /**
-    Represents the major version of a postgreSQL instance.
+    Represents the major version of a postgreSql instance.
  */
 public enum MajorVersion implements Version, Versioned {
 
-    // VERSIONS_9 is not a concrete PostgreSQL version, but the collection of 9.0 to 9.6 versions.
+    // VERSIONS_9 is not a concrete PostgreSql version, but the collection of 9.0 to 9.6 versions.
     VERSION_FAMILY_9("9"),
     VERSION_9_6("9.6"),
     VERSION_10("10"),

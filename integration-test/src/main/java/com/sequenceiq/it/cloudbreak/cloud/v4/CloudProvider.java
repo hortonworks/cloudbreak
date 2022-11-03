@@ -94,8 +94,6 @@ public interface CloudProvider {
 
     EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network);
 
-    EnvironmentNetworkTestDto newNetwork(EnvironmentNetworkTestDto network);
-
     TelemetryTestDto telemetry(TelemetryTestDto telemetry);
 
     EnvironmentTestDto setS3Guard(EnvironmentTestDto environmentTestDto, String tableName);
@@ -201,6 +199,4 @@ public interface CloudProvider {
     boolean isMultiAZ();
 
     boolean verticalScalingSupported();
-
-    boolean isExternalDatabaseSslEnforcementSupported();
 }

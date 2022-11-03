@@ -36,8 +36,6 @@ public enum EnvironmentStatus {
 
     UMS_RESOURCE_DELETE_IN_PROGRESS("User resources deletion in progress"),
 
-    EVENT_CLEANUP_IN_PROGRESS("Environment event cleanup in progress"),
-
     IDBROKER_MAPPINGS_DELETE_IN_PROGRESS("Deleting Role Mappings"),
     S3GUARD_TABLE_DELETE_IN_PROGRESS("Deleting DynamoDB table"),
 
@@ -106,8 +104,6 @@ public enum EnvironmentStatus {
     VERTICAL_SCALE_FAILED("Vertical Scale failed"),
 
     PROXY_CONFIG_MODIFICATION_IN_PROGRESS("Starting proxy configuration modification"),
-    PROXY_CONFIG_MODIFICATION_ON_FREEIPA_IN_PROGRESS("Modifying proxy configuration on FreeIPA"),
-    PROXY_CONFIG_MODIFICATION_ON_FREEIPA_FAILED("Failed to modify proxy configuration on FreeIPA"),
     PROXY_CONFIG_MODIFICATION_FAILED("Proxy configuration modification failed");
 
     private static final Set<EnvironmentStatus> STARTABLE_STATUSES = Set.of(

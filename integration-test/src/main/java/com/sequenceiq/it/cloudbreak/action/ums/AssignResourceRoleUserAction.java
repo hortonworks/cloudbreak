@@ -30,8 +30,8 @@ public class AssignResourceRoleUserAction extends AbstractUmsAction<UmsTestDto> 
     protected UmsTestDto umsAction(TestContext testContext, UmsTestDto testDto, UmsClient client) throws Exception {
         CloudbreakUser user = testContext.getRealUmsUserByKey(userKey);
         String userCrn = user.getCrn();
+        String resourceRole = testDto.getRequest().getRoleCrn();
         String resourceCrn = testDto.getRequest().getResourceCrn();
-        String resourceRole = UmsClientUtils.getResourceRoleCrn(testDto, client, regionAwareInternalCrnGeneratorFactory);
 
         Log.when(LOGGER, format(" Assigning resource role '%s' to user '%s' at resource '%s'... ", resourceRole, userCrn, resourceCrn));
         Log.whenJson(LOGGER, format(" Assign resource role request:%n "), testDto.getRequest());

@@ -296,6 +296,7 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
                 .addItemsItem(new ApiConfig().name("prometheus_metrics_endpoint_username"))
                 .addItemsItem(new ApiConfig().name("prometheus_metrics_endpoint_password"))
                 .addItemsItem(new ApiConfig().name("prometheus_adapter_enabled")));
+        given(monitoringConfiguration.isEnabled()).willReturn(true);
         given(monitoringConfiguration.getClouderaManagerExporter()).willReturn(cmMonitoringConfiguration);
         given(cmMonitoringConfiguration.getPort()).willReturn(EXPORTER_PORT);
         given(clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(apiClient)).willReturn(mgmtRoleConfigGroupsResourceApi);

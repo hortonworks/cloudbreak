@@ -94,5 +94,4 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     protected String getBaseLocationForPreTermination(TestContext testContext) {
         return testContext.getCloudProvider().getBaseLocationForPreTermination();
     }
-
 }

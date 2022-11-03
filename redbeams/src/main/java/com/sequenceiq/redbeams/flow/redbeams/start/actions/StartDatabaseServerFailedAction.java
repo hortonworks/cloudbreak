@@ -15,9 +15,9 @@ import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
+import com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartContext;
 import com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartEvent;
 import com.sequenceiq.redbeams.flow.redbeams.start.RedbeamsStartState;
 import com.sequenceiq.redbeams.metrics.MetricType;
@@ -50,7 +50,7 @@ public class StartDatabaseServerFailedAction extends AbstractRedbeamsStartAction
     }
 
     @Override
-    protected RedbeamsContext createFlowContext(
+    protected RedbeamsStartContext createFlowContext(
             FlowParameters flowParameters,
             StateContext<RedbeamsStartState, RedbeamsStartEvent> stateContext,
             RedbeamsFailureEvent payload) {
@@ -61,7 +61,7 @@ public class StartDatabaseServerFailedAction extends AbstractRedbeamsStartAction
     }
 
     @Override
-    protected Selectable createRequest(RedbeamsContext context) {
-        return new RedbeamsEvent(RedbeamsStartEvent.REDBEAMS_START_FAILURE_HANDLED_EVENT.event(), context.getDBStack().getId());
+    protected Selectable createRequest(RedbeamsStartContext context) {
+        return new RedbeamsEvent(RedbeamsStartEvent.REDBEAMS_START_FAILURE_HANDLED_EVENT.event(), 0L);
     }
 }

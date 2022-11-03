@@ -92,7 +92,7 @@ public class TelemetryDecoratorTest {
         given(telemetry.isCloudStorageLoggingEnabled()).willReturn(true);
         given(telemetry.isClusterLogsCollectionEnabled()).willReturn(true);
         given(logging.getS3()).willReturn(new S3CloudStorageV1Parameters());
-        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
+        given(monitoringConfigService.isMonitoringEnabled(anyBoolean(), anyBoolean())).willReturn(true);
         given(telemetry.getMonitoring()).willReturn(monitoring);
         given(monitoring.getRemoteWriteUrl()).willReturn("https://remotewrite:80/api/v1/write");
         // WHEN
@@ -126,7 +126,7 @@ public class TelemetryDecoratorTest {
         // GIVEN
         given(telemetry.isAnyDataBusBasedFeatureEnablred()).willReturn(false);
         given(telemetry.isComputeMonitoringEnabled()).willReturn(true);
-        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
+        given(monitoringConfigService.isMonitoringEnabled(anyBoolean(), anyBoolean())).willReturn(true);
         given(telemetry.getMonitoring()).willReturn(monitoring);
         given(monitoring.getRemoteWriteUrl()).willReturn("https://remotewrite:80/api/v1/write");
         // WHEN

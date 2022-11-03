@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.conclusion.step.Conclusion;
 import com.sequenceiq.cloudbreak.conclusion.step.ConclusionStep;
 
-class ConclusionChecker {
+public class ConclusionChecker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConclusionChecker.class);
 
@@ -20,7 +20,7 @@ class ConclusionChecker {
 
     private Map<Class<? extends ConclusionStep>, ConclusionStep> conclusionStepInstances;
 
-    ConclusionChecker(ConclusionStepNode rootNode, Map<Class<? extends ConclusionStep>, ConclusionStep> conclusionStepInstances) {
+    public ConclusionChecker(ConclusionStepNode rootNode, Map<Class<? extends ConclusionStep>, ConclusionStep> conclusionStepInstances) {
         this.rootNode = rootNode;
         this.conclusionStepInstances = conclusionStepInstances;
     }

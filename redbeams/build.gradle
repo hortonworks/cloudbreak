@@ -120,7 +120,6 @@ dependencies {
   implementation project(':datalake-api')
   implementation project(':status-checker')
   implementation project(':cloud-common')
-  implementation project(":cloud-azure")
   implementation project(':secret-engine')
   implementation project(':common')
   implementation project(':auth-connector')

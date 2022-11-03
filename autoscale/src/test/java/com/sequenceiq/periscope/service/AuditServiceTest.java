@@ -7,7 +7,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
@@ -26,7 +25,6 @@ import com.sequenceiq.cloudbreak.audit.model.ApiRequestData;
 import com.sequenceiq.cloudbreak.audit.model.AuditEvent;
 import com.sequenceiq.cloudbreak.audit.model.ServiceEventData;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 
 public class AuditServiceTest {
@@ -37,9 +35,6 @@ public class AuditServiceTest {
     @Mock
     AuditClient auditClient;
 
-    @Mock
-    CloudbreakUser cloudbreakUser;
-
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -49,19 +44,16 @@ public class AuditServiceTest {
     public void testAuditRestEvent() {
         Map requestParams = Map.of("param1", "param2");
         String userCrn = "crn:altus:iam:us-west-1:05681f13-41fc-4b2a-9588-a78d640f3c23:user:5f03bc0d-83d5-40c3-8624-f7b21481c1f7";
-        when(cloudbreakUser.getUserCrn()).thenReturn(userCrn);
-        when(cloudbreakUser.getTenant()).thenReturn("05681f13-41fc-4b2a-9588-a78d640f3c23");
-        underTest.auditRestApi(requestParams, true, "user-agent", cloudbreakUser, "requestId", "127.0.0.1");
+        underTest.auditRestApi(requestParams, true, "user-agent", userCrn, "user-account", "127.0.0.1");
 
         ArgumentCaptor<AuditEvent> captor = ArgumentCaptor.forClass(AuditEvent.class);
         verify(auditClient, times(1)).createAuditEvent(captor.capture());
         AuditEvent auditEvent = captor.getValue();
 
-        assertEquals("requestId", auditEvent.getRequestId());
-        assertEquals("05681f13-41fc-4b2a-9588-a78d640f3c23", auditEvent.getAccountId());
+        assertEquals("user-account", auditEvent.getAccountId());
         assertEquals("127.0.0.1", auditEvent.getSourceIp());
         assertEquals(MANAGE_AUTOSCALE_DATAHUB_CLUSTER, auditEvent.getEventName());
-        assertEquals(Crn.Service.AUTOSCALE, auditEvent.getEventSource());
+        assertEquals(Crn.Service.DATAHUB, auditEvent.getEventSource());
         assertEquals(userCrn, ((ActorCrn) auditEvent.getActor()).getActorCrn());
 
         ApiRequestData apiRequestData = (ApiRequestData) auditEvent.getEventData();
@@ -82,7 +74,7 @@ public class AuditServiceTest {
 
         assertEquals("user-account", auditEvent.getAccountId());
         assertEquals(AUTOSCALE_DATAHUB_CLUSTER, auditEvent.getEventName());
-        assertEquals(Crn.Service.AUTOSCALE, auditEvent.getEventSource());
+        assertEquals(Crn.Service.DATAHUB, auditEvent.getEventSource());
         assertEquals(Crn.Service.DATAHUB.getName(), ((ActorService) auditEvent.getActor()).getActorServiceName());
 
         ServiceEventData serviceEventData = (ServiceEventData) auditEvent.getEventData();

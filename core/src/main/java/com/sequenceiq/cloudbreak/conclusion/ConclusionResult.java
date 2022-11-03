@@ -6,11 +6,11 @@ import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.conclusion.step.Conclusion;
 
-class ConclusionResult {
+public class ConclusionResult {
 
     private List<Conclusion> conclusions;
 
-    ConclusionResult(List<Conclusion> conclusions) {
+    public ConclusionResult(List<Conclusion> conclusions) {
         if (conclusions != null) {
             this.conclusions = conclusions;
         } else {

@@ -24,7 +24,6 @@ import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXInternalV1Endpoint;
 
 @ExtendWith(MockitoExtension.class)
 public class DatahubServiceTest {
-    private static final String INTERNAL_ACTOR_CRN = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
 
     @Mock
     private CloudbreakInternalCrnClient cloudbreakInternalCrnClient;
@@ -52,7 +51,7 @@ public class DatahubServiceTest {
         String datahubCrn = "crn";
         StackInstancesV4Responses stackInstancesV4Responses = new StackInstancesV4Responses();
 
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_ACTOR_CRN);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("iam");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(cloudbreakInternalCrnClient.withInternalCrn()).thenReturn(cloudbreakServiceCrnEndpoints);
         when(cloudbreakServiceCrnEndpoints.distroXInternalV1Endpoint()).thenReturn(distroXInternalV1Endpoint);
@@ -67,7 +66,7 @@ public class DatahubServiceTest {
         String datahubCrn = "crn";
         WebApplicationException webApplicationException = new WebApplicationException("test");
 
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_ACTOR_CRN);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("iam");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(cloudbreakInternalCrnClient.withInternalCrn()).thenReturn(cloudbreakServiceCrnEndpoints);
         when(cloudbreakServiceCrnEndpoints.distroXInternalV1Endpoint()).thenReturn(distroXInternalV1Endpoint);

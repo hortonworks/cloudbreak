@@ -10,9 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -45,7 +43,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -53,11 +50,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.common.model.PackageInfo;
-import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
@@ -75,7 +68,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltMaster;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
-import com.sequenceiq.cloudbreak.orchestrator.salt.utils.MinionUtil;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.RetryService;
 
@@ -91,9 +83,6 @@ class SaltStateServiceTest {
     @Captor
     private ArgumentCaptor<Set<String>> minionIdsCaptor;
 
-    @Mock
-    private MinionUtil minionUtil;
-
     @InjectMocks
     private SaltStateService underTest;
 
@@ -105,7 +94,6 @@ class SaltStateServiceTest {
         targets.add("10-0-0-3.example.com");
         target = new HostList(targets);
         saltConnector = mock(SaltConnector.class);
-        lenient().when(minionUtil.createMinion(any(), any(), anyBoolean(), anyBoolean())).thenReturn(mock(Minion.class));
     }
 
     @Test
@@ -358,35 +346,6 @@ class SaltStateServiceTest {
         Set<String> minionAddresses = saltAction.getMasters().stream().map(SaltMaster::getAddress).collect(Collectors.toSet());
         assertThat(minionAddresses, containsInAnyOrder("10.0.0.1", "10.0.0.2", "10.0.0.3"));
         assertTrue(saltAction.getMasters().stream().allMatch(master -> master.getAuth().getPassword().equals(password)));
-    }
-
-    @Test
-    void bootstrapTest() {
-        Set<Node> targets = new HashSet<>();
-        targets.add(new Node("10.0.0.1", null, null, "hg"));
-        targets.add(new Node("10.0.0.2", null, null, "hg"));
-        targets.add(new Node("10.0.0.3", null, null, "hg"));
-
-        GenericResponses genericResponses = mock(GenericResponses.class);
-        when(saltConnector.action(any())).thenReturn(genericResponses);
-
-        BootstrapParams params = new BootstrapParams();
-        params.setRestartNeeded(true);
-        params.setRestartNeededFlagSupported(false);
-
-        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
-        String gatewayIp = "8.8.8.8";
-        when(gatewayConfig.getPrivateAddress()).thenReturn(gatewayIp);
-
-        GenericResponses result = underTest.bootstrap(saltConnector, params, List.of(gatewayConfig), targets);
-
-        assertEquals(genericResponses, result);
-        targets.forEach(node -> verify(minionUtil).createMinion(node, List.of(gatewayIp), params.isSaltBootstrapFpSupported(), params.isRestartNeeded()));
-        ArgumentCaptor<SaltAction> captor = ArgumentCaptor.forClass(SaltAction.class);
-        verify(saltConnector).action(captor.capture());
-        SaltAction saltAction = captor.getValue();
-        List<Minion> minions = saltAction.getMinions();
-        assertEquals(3, minions.size());
     }
 
     @Test

@@ -442,7 +442,7 @@ public class KnoxGatewayConfigProviderTest {
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
                 .withKerberosConfig(kerberosConfig)
                 .build();
-        assertEquals(config("gateway_dispatch_whitelist", "^/.*$;^https?://([^/]+\\.example.com):[0-9]+/?.*$"),
+        assertEquals(config("gateway_dispatch_whitelist", "^/.*$;^https?://(.+.example.com):[0-9]+/?.*$"),
                 underTest.getGatewayWhitelistConfig(kerberosNoAutoTlsTPO));
 
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
@@ -451,7 +451,7 @@ public class KnoxGatewayConfigProviderTest {
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withKerberosConfig(kerberosConfig)
                 .build();
-        assertEquals(config("gateway_dispatch_whitelist", "^/.*$;^https://([^/]+\\.example.com):[0-9]+/?.*$"),
+        assertEquals(config("gateway_dispatch_whitelist", "^/.*$;^https://(.+.example.com):[0-9]+/?.*$"),
                 underTest.getGatewayWhitelistConfig(kerberosAutoTlsTPO));
     }
 

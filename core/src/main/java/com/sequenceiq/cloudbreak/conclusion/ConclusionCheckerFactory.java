@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.conclusion.step.ConclusionStep;
 
 @Component
-class ConclusionCheckerFactory {
+public class ConclusionCheckerFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConclusionCheckerFactory.class);
 
@@ -30,7 +30,7 @@ class ConclusionCheckerFactory {
     }
 
     public ConclusionChecker getConclusionChecker(ConclusionCheckerType conclusionCheckerType) {
-        ConclusionStepNode rootNode = ConclusionStepTreeFactory.getConclusionStepTree(conclusionCheckerType);
+        ConclusionStepNode rootNode = ConclusionStepNodeFactory.getConclusionStepNode(conclusionCheckerType);
         Map<Class<? extends ConclusionStep>, ConclusionStep> conclusionStepInstances = getConclusionStepInstances(rootNode);
         return new ConclusionChecker(rootNode, conclusionStepInstances);
     }

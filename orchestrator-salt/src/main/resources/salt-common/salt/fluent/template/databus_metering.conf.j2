@@ -9,7 +9,6 @@
   pos_file /var/log/{{ fluent.binary }}/pos/metering.json.pos
   tag metering_databus.metering-json
   read_from_head true
-  follow_inodes true
 </source>
 
 <match metering_databus.*>

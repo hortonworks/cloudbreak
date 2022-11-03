@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
@@ -52,6 +51,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;

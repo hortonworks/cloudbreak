@@ -8,12 +8,10 @@ import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.IN_PROGRESS;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -34,7 +32,6 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.CreateVolumeRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
@@ -300,7 +297,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Override
     public List<CloudResource> update(AwsContext context, CloudInstance instance, long privateId,
-            AuthenticatedContext auth, Group group, CloudStack cloudStack) throws Exception {
+        AuthenticatedContext auth, Group group, CloudStack cloudStack) throws Exception {
         return List.of();
     }
 
@@ -387,53 +384,32 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             Boolean deleteOnTermination, AmazonEc2Client client) {
         String instanceId = resource.getInstanceId();
         if (StringUtils.isNotEmpty(instanceId)) {
-            List<InstanceBlockDeviceMappingSpecification> attachedDeviceMappingSpecifications =
-                    getDeviceMappingSpecifications(cloudResourceStatuses, deleteOnTermination, EnumSet.of(ATTACHED));
-            if (!attachedDeviceMappingSpecifications.isEmpty()) {
-                changeDeleteOnTermination(deleteOnTermination, client, instanceId, attachedDeviceMappingSpecifications);
+            List<InstanceBlockDeviceMappingSpecification> deviceMappingSpecifications = cloudResourceStatuses.stream()
+                    .filter(cloudResourceStatus -> ATTACHED.equals(cloudResourceStatus.getStatus()))
+                    .map(CloudResourceStatus::getCloudResource)
+                    .map(cloudResource -> cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class))
+                    .map(VolumeSetAttributes::getVolumes)
+                    .flatMap(List::stream)
+                    .map(volume -> toInstanceBlockDeviceMappingSpecification.apply(volume, deleteOnTermination))
+                    .collect(Collectors.toList());
+            if (!deviceMappingSpecifications.isEmpty()) {
+                ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = new ModifyInstanceAttributeRequest()
+                        .withInstanceId(instanceId)
+                        .withBlockDeviceMappings(deviceMappingSpecifications);
+
+                ModifyInstanceAttributeResult modifyIdentityIdFormatResult = awsMethodExecutor.execute(
+                        () -> client.modifyInstanceAttribute(modifyInstanceAttributeRequest), null);
+                String result = instanceId + " not found on the provider.";
+                if (modifyIdentityIdFormatResult != null) {
+                    result = modifyIdentityIdFormatResult.toString();
+                }
+                LOGGER.info("Delete on termination set to '{}' on instance '{}'. {}", deleteOnTermination, instanceId, result);
             } else {
                 LOGGER.info("No device mapping specification found for instance '{}', skipping the modify instance attributes call to AWS.", instanceId);
-            }
-            List<InstanceBlockDeviceMappingSpecification> deletedAndDetachedDeviceMappingSpecifications =
-                    getDeviceMappingSpecifications(cloudResourceStatuses, deleteOnTermination, EnumSet.of(DELETED, CREATED));
-            if (!deletedAndDetachedDeviceMappingSpecifications.isEmpty() && deleteOnTermination) {
-                for (InstanceBlockDeviceMappingSpecification specification : deletedAndDetachedDeviceMappingSpecifications) {
-                    try {
-                        changeDeleteOnTermination(deleteOnTermination, client, instanceId, List.of(specification));
-                    } catch (AmazonServiceException e) {
-                        LOGGER.debug("Volume '{}' is already deleted.", specification.getDeviceName());
-                    }
-                }
             }
         } else {
             LOGGER.info("No instance id found for volume set resource, skipping the modify instance attributes call to AWS.");
         }
-    }
-
-    private void changeDeleteOnTermination(Boolean deleteOnTermination, AmazonEc2Client client,
-            String instanceId, List<InstanceBlockDeviceMappingSpecification> deviceMappingSpecifications) {
-        ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = new ModifyInstanceAttributeRequest()
-                .withInstanceId(instanceId)
-                .withBlockDeviceMappings(deviceMappingSpecifications);
-        ModifyInstanceAttributeResult modifyIdentityIdFormatResult = awsMethodExecutor.execute(
-                () -> client.modifyInstanceAttribute(modifyInstanceAttributeRequest), null);
-        String result = instanceId + " not found on the provider.";
-        if (modifyIdentityIdFormatResult != null) {
-            result = modifyIdentityIdFormatResult.toString();
-        }
-        LOGGER.info("Delete on termination set to '{}' on instance '{}'. {}", deleteOnTermination, instanceId, result);
-    }
-
-    private List<InstanceBlockDeviceMappingSpecification> getDeviceMappingSpecifications(List<CloudResourceStatus> cloudResourceStatuses,
-            Boolean deleteOnTermination, Set<ResourceStatus> resourceStatus) {
-        return cloudResourceStatuses.stream()
-                .filter(cloudResourceStatus -> resourceStatus.contains(cloudResourceStatus.getStatus()))
-                .map(CloudResourceStatus::getCloudResource)
-                .map(cloudResource -> cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class))
-                .map(VolumeSetAttributes::getVolumes)
-                .flatMap(List::stream)
-                .map(volume -> toInstanceBlockDeviceMappingSpecification.apply(volume, deleteOnTermination))
-                .collect(Collectors.toList());
     }
 
     private void deleteOrphanedVolumes(List<CloudResourceStatus> cloudResourceStatuses, AmazonEc2Client client) {
@@ -446,7 +422,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .flatMap(List::stream)
                 .map(VolumeSetAttributes.Volume::getId)
                 .map(volumeId -> new DeleteVolumeRequest().withVolumeId(volumeId))
-                .forEach(request -> deleteVolumeSilentlyByDeleteVolumeRequest(client, request));
+                .forEach(request -> deleteVolumeByDeleteVolumeRequest(client, request));
     }
 
     @Override
@@ -480,13 +456,9 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .collect(Collectors.toList());
     }
 
-    private void deleteVolumeSilentlyByDeleteVolumeRequest(AmazonEc2Client client, DeleteVolumeRequest request) {
+    private void deleteVolumeByDeleteVolumeRequest(AmazonEc2Client client, DeleteVolumeRequest request) {
         LOGGER.debug("About to delete the following volume: {}", request.toString());
-        try {
-            client.deleteVolume(request);
-        } catch (AmazonServiceException e) {
-            LOGGER.debug(String.format("Exception during aws volume (%s) deletion.", request.getVolumeId()), e);
-        }
+        client.deleteVolume(request);
     }
 
     private ResourceStatus getResourceStatus(DescribeVolumesResult result) {

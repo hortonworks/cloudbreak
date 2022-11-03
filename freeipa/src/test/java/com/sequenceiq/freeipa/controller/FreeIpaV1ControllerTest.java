@@ -51,7 +51,6 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaUpgradeCcmService;
-import com.sequenceiq.freeipa.service.stack.FreeipaModifyProxyConfigService;
 import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -105,9 +104,6 @@ class FreeIpaV1ControllerTest {
 
     @Mock
     private FreeIpaUpgradeCcmService upgradeCcmService;
-
-    @Mock
-    private FreeipaModifyProxyConfigService modifyProxyConfigService;
 
     @Mock
     private RotateSaltPasswordService rotateSaltPasswordService;
@@ -290,17 +286,6 @@ class FreeIpaV1ControllerTest {
         OperationStatus result = underTest.upgradeCcmInternal(ENVIRONMENT_CRN, INITIATOR_USER_CRN);
 
         assertThat(result).isSameAs(operationStatus);
-    }
-
-    @Test
-    void modifyProxyConfigInternalTest() {
-        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        OperationStatus operationStatus = new OperationStatus();
-        when(modifyProxyConfigService.modifyProxyConfig(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(operationStatus);
-
-        OperationStatus result = underTest.modifyProxyConfigInternal(ENVIRONMENT_CRN, ACCOUNT_ID);
-
-        assertThat(result).isEqualTo(operationStatus);
     }
 
     @Test

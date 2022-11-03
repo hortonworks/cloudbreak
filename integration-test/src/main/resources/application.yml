@@ -39,14 +39,13 @@ integrationtest:
     server: http://localhost
   ums:
     host: ums.thunderhead-dev.cloudera.com
-    port: 8982
-    # Possible values: default, legacy, e2e, e2e_eu
-    accountKey: e2e_eu
+    # Possible values: default, legacy
+    accountKey: default
     # Possible values: dev, int, stage, prod
     deploymentKey: dev
     jsonSecret:
       name: real-ums-users-dev
-      version: e556a55296e349f993d324680baa3350
+      version: 9fb177df00f0419aa0658ad18a041ee4
       destinationPath: "./src/main/resources/ums-users/api-credentials.json"
   user:
     accesskey: Y3JuOmFsdHVzOmlhbTp1cy13ZXN0LTE6Y2xvdWRlcmE6dXNlcjptb2NrdXNlckB1bXMubW9jaw==
@@ -95,9 +94,6 @@ integrationtest:
     distroXUpgrade3rdPartyCurrentVersion: 7.2.7
     distroXUpgrade3rdPartyTargetVersion: 7.2.12
     imageCatalogUrl3rdParty: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-prod-cb-image-catalog.json
-  upgradeDatabaseServer:
-    originalDatabaseMajorVersion: 10
-    targetDatabaseMajorVersion: 11
   privateEndpointEnabled: false
 
   spot:
@@ -112,7 +108,6 @@ integrationtest:
   aws:
     govCloud: false
     multiaz: false
-    externalDatabaseSslEnforcementSupported: true
     region: eu-central-1
     location: eu-central-1
     availabilityZone: eu-central-1a
@@ -170,7 +165,6 @@ integrationtest:
   # azure parameters
   azure:
     availabilityZone:
-    externalDatabaseSslEnforcementSupported: true
     region: West US 2
     location: West US 2
     verticalScale:
@@ -233,7 +227,6 @@ integrationtest:
     baseimage:
       imageId:
     availabilityZone: europe-west2-a
-    externalDatabaseSslEnforcementSupported: false
     region: europe-west2
     location: europe-west2
     verticalScale:
@@ -303,11 +296,10 @@ integrationtest:
   mock:
     region: London
     location: London
-    availabilityZone: london-a
+    availabilityZone: London
     vpcId: vpc1
-    networkCidr: 192.168.0.0/16
     verticalScale:
-      supported: true
+      supported: false
     subnetIds:
       - net1
       - net2

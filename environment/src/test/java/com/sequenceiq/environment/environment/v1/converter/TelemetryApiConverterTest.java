@@ -52,6 +52,7 @@ public class TelemetryApiConverterTest {
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null, false);
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null, false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
+        monitoringConfig.setEnabled(true);
         monitoringConfig.setRemoteWriteUrl("http://myaddress/api/v1/receive");
         TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(
                 altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
@@ -73,7 +74,7 @@ public class TelemetryApiConverterTest {
         fr.addWorkloadAnalytics(true);
         fr.addMonitoring(true);
         telemetryRequest.setFeatures(fr);
-        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
+        given(entitlementService.isCdpSaasEnabled(anyString())).willReturn(true);
         // WHEN
         EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
         // THEN
@@ -125,6 +126,7 @@ public class TelemetryApiConverterTest {
     public void testConvertWithDefaultMonitoringFeatureWithoutCdpSaas() {
         // GIVEN
         TelemetryRequest telemetryRequest = new TelemetryRequest();
+        given(entitlementService.isCdpSaasEnabled(anyString())).willReturn(false);
         // WHEN
         EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
         // THEN
@@ -136,14 +138,14 @@ public class TelemetryApiConverterTest {
     public void testConvertWithMonitoringFeatureWithoutCdpSaas() {
         // GIVEN
         TelemetryRequest telemetryRequest = new TelemetryRequest();
+        given(entitlementService.isCdpSaasEnabled(anyString())).willReturn(false);
         FeaturesRequest featuresRequest = new FeaturesRequest();
         featuresRequest.addMonitoring(true);
         telemetryRequest.setFeatures(featuresRequest);
-        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(false);
         // WHEN
         EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
         // THEN
-        assertNull(result.getFeatures().getMonitoring());
+        assertTrue(result.getFeatures().getMonitoring().getEnabled());
         assertNull(result.getMonitoring().getRemoteWriteUrl());
     }
 
@@ -151,10 +153,10 @@ public class TelemetryApiConverterTest {
     public void testConvertWithDisabledMonitoringFeatureWithCdpSaas() {
         // GIVEN
         TelemetryRequest telemetryRequest = new TelemetryRequest();
+        given(entitlementService.isCdpSaasEnabled(anyString())).willReturn(true);
         FeaturesRequest featuresRequest = new FeaturesRequest();
         featuresRequest.addMonitoring(false);
         telemetryRequest.setFeatures(featuresRequest);
-        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
         // WHEN
         EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
         // THEN
@@ -185,7 +187,7 @@ public class TelemetryApiConverterTest {
         EnvironmentTelemetry telemetry = new EnvironmentTelemetry();
         telemetry.setLogging(logging);
         // WHEN
-        TelemetryResponse result = underTest.convert(telemetry, ACCOUNT_ID);
+        TelemetryResponse result = underTest.convert(telemetry);
         // THEN
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
         assertNull(result.getWorkloadAnalytics());
@@ -201,7 +203,7 @@ public class TelemetryApiConverterTest {
         EnvironmentTelemetry telemetry = new EnvironmentTelemetry();
         telemetry.setLogging(logging);
         // WHEN
-        TelemetryRequest result = underTest.convertToRequest(telemetry, ACCOUNT_ID);
+        TelemetryRequest result = underTest.convertToRequest(telemetry);
         // THEN
         assertNull(result.getFeatures());
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
@@ -221,7 +223,7 @@ public class TelemetryApiConverterTest {
         telemetry.setLogging(logging);
         telemetry.setFeatures(features);
         // WHEN
-        TelemetryRequest result = underTest.convertToRequest(telemetry, ACCOUNT_ID);
+        TelemetryRequest result = underTest.convertToRequest(telemetry);
         // THEN
         assertNotNull(result.getFeatures());
         assertFalse(result.getFeatures().getClusterLogsCollection().getEnabled());

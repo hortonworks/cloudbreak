@@ -2,14 +2,12 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.environment;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_SERVICE_DEPLOYMENT;
 import static com.sequenceiq.it.cloudbreak.assertion.freeipa.RecipeTestAssertion.validateFilesOnFreeIpa;
-import static java.lang.String.format;
 
 import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -19,9 +17,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvail
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.assertion.util.CloudProviderSideTagAssertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -33,7 +29,6 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -43,7 +38,6 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.cloudbreak.util.clouderamanager.ClouderaManagerUtil;
@@ -77,14 +71,6 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
 
     private static final String UPGRADED_DATAHUB_INSTANCE_TYPE = "m5.4xlarge";
 
-    private static final String FREEIPA_VERTICAL_SCALE_KEY = "freeipaVerticalScaleKey";
-
-    private static final String SDX_VERTICAL_SCALE_KEY = "sdxVerticalScaleKey";
-
-    private static final String DISTROX_VERTICAL_SCALE_KEY = "distroxVerticalScaleKey";
-
-    private String telemetryStorageLocation;
-
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
@@ -117,7 +103,6 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
     }
@@ -135,29 +120,32 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
         String filePath = "/pre-service-deployment";
         String fileName = "pre-service-deployment";
 
+        String freeipaVerticalScaleKey = "freeipaVerticalScaleKey";
+        String sdxVerticalScaleKey = "sdxVerticalScaleKey";
+        String distroxVerticalScaleKey = "distroxVerticalScaleKey";
+
         testContext
                 .given(RecipeTestDto.class)
-                    .withName(recipeName)
-                    .withContent(recipeUtil.generatePreDeploymentRecipeContent(applicationContext))
-                    .withRecipeType(PRE_SERVICE_DEPLOYMENT)
+                .withName(recipeName)
+                .withContent(recipeUtil.generatePreDeploymentRecipeContent(applicationContext))
+                .withRecipeType(PRE_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4())
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
                 .given("telemetry", TelemetryTestDto.class)
-                    .withLogging()
-                    .withReportClusterLogs()
+                .withLogging()
+                .withReportClusterLogs()
                 .given(EnvironmentTestDto.class)
-                    .withNetwork()
-                    .withTelemetry("telemetry")
-                    .withCreateFreeIpa(Boolean.TRUE)
-                    .withOneFreeIpaNode()
-                    .withFreeIpaRecipe(Set.of(recipeName))
-                    .addTags(ENV_TAGS)
+                .withNetwork()
+                .withTelemetry("telemetry")
+                .withCreateFreeIpa(Boolean.TRUE)
+                .withOneFreeIpaNode()
+                .withFreeIpaRecipe(Set.of(recipeName))
+                .addTags(ENV_TAGS)
                 .when(environmentTestClient.create())
-                .then(this::getTelemetryStorageLocation)
                 .given(SdxInternalTestDto.class)
                 .addTags(SDX_TAGS)
-                    .withCloudStorage(getCloudStorageRequest(testContext))
+                .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())
                 .given(EnvironmentTestDto.class)
                 .await(EnvironmentStatus.AVAILABLE)
@@ -169,7 +157,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then(cloudProviderSideTagAssertion.verifyInternalSdxTags(SDX_TAGS))
                 .given("dx1", DistroXTestDto.class)
-                    .withExternalDatabaseOnAws(distroXDatabaseRequest)
+                .withExternalDatabaseOnAws(distroXDatabaseRequest)
                 .addTags(DX1_TAGS)
                 .when(distroXTestClient.create(), RunningParameter.key("dx1"))
                 .given("dx2", DistroXTestDto.class)
@@ -183,77 +171,53 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .when(environmentTestClient.stop())
                 .await(EnvironmentStatus.ENV_STOPPED)
 
-                .when(this::executeVerticalScaleIfSupported)
+                .given(freeipaVerticalScaleKey, VerticalScalingTestDto.class)
+                .withFreeipaVerticalScale()
+                .withGroup(TARGET_INSTANCE_GROUP_TYPE)
+                .withInstanceType(UPGRADED_FREEIPA_INSTANCE_TYPE)
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.verticalScale(freeipaVerticalScaleKey))
+                .await(EnvironmentStatus.ENV_STOPPED)
+
+                .given(sdxVerticalScaleKey, VerticalScalingTestDto.class)
+                .withSdxVerticalScale()
+                .withGroup(TARGET_INSTANCE_GROUP_TYPE)
+                .withInstanceType(UPGRADED_DATALAKE_INSTANCE_TYPE)
+                .given(SdxInternalTestDto.class)
+                .when(sdxTestClient.verticalScale(sdxVerticalScaleKey))
+                .await(SdxClusterStatusResponse.STOPPED)
+
+                .given(distroxVerticalScaleKey, VerticalScalingTestDto.class)
+                .withDistroXVerticalScale()
+                .withInstanceType(UPGRADED_DATAHUB_INSTANCE_TYPE)
+                .withGroup(TARGET_INSTANCE_GROUP_TYPE)
+
+                .given("dx1", DistroXTestDto.class)
+                .when(distroXTestClient.verticalScale(distroxVerticalScaleKey))
+                .await(STACK_STOPPED, RunningParameter.key("dx1"))
 
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.start())
                 .await(EnvironmentStatus.AVAILABLE)
-                .then(this::validateClusterLogsArePresent)
-                .then(this::validateClusterBackupsArePresent)
                 .given("dx1", DistroXTestDto.class)
                 .await(STACK_AVAILABLE, RunningParameter.key("dx1"))
                 .awaitForHealthyInstances()
                 .then(this::verifyCmServicesStartedSuccessfully)
 
-                .then(this::verifyVerticalScaleOutputsIfSupported)
+                // vertical scale validation start:
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .then(this::validateFreeIpaInstanceType)
+                .given(SdxInternalTestDto.class)
+                .when(sdxTestClient.detailedDescribeInternal())
+                .then(this::validateDataLakeInstanceType)
+                .given("dx1", DistroXTestDto.class)
+                .when(distroXTestClient.get())
+                .then(this::validateDataHubInstanceType)
+
                 .validate();
 
         LOGGER.info("Environment stop-start test execution has been finished....");
-    }
-
-    private <O extends CloudbreakTestDto, C extends MicroserviceClient<?, ?, ?, ?>> O executeVerticalScaleIfSupported(TestContext testContext, O testDto,
-            C client) {
-        if (testContext.getCloudProvider().verticalScalingSupported()) {
-            testContext
-                    .given(FREEIPA_VERTICAL_SCALE_KEY, VerticalScalingTestDto.class)
-                    .withFreeipaVerticalScale()
-                    .withGroup(TARGET_INSTANCE_GROUP_TYPE)
-                    .withInstanceType(UPGRADED_FREEIPA_INSTANCE_TYPE)
-                    .given(EnvironmentTestDto.class)
-                    .when(environmentTestClient.verticalScale(FREEIPA_VERTICAL_SCALE_KEY))
-                    .await(EnvironmentStatus.ENV_STOPPED)
-
-                    .given(SDX_VERTICAL_SCALE_KEY, VerticalScalingTestDto.class)
-                    .withSdxVerticalScale()
-                    .withGroup(TARGET_INSTANCE_GROUP_TYPE)
-                    .withInstanceType(UPGRADED_DATALAKE_INSTANCE_TYPE)
-                    .given(SdxInternalTestDto.class)
-                    .when(sdxTestClient.verticalScale(SDX_VERTICAL_SCALE_KEY))
-                    .await(SdxClusterStatusResponse.STOPPED)
-
-                    .given(DISTROX_VERTICAL_SCALE_KEY, VerticalScalingTestDto.class)
-                    .withDistroXVerticalScale()
-                    .withInstanceType(UPGRADED_DATAHUB_INSTANCE_TYPE)
-                    .withGroup(TARGET_INSTANCE_GROUP_TYPE)
-                    .given("dx1", DistroXTestDto.class)
-                    .when(distroXTestClient.verticalScale(DISTROX_VERTICAL_SCALE_KEY))
-                    .await(STACK_STOPPED, RunningParameter.key("dx1"));
-        } else {
-            LOGGER.debug("No vertical scale will happen this case because at this point Cloudbreak does not support vertical scale in case of the following " +
-                    "cloud platform: {}", testContext.getCloudPlatform());
-        }
-        return testDto;
-    }
-
-    private DistroXTestDto verifyVerticalScaleOutputsIfSupported(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
-        if (testContext.getCloudProvider().verticalScalingSupported()) {
-            LOGGER.debug("Vertical scaling verification result initiated since the cloud platform '{}' suppots such operation.",
-                    testContext.getCloudPlatform());
-            testContext
-                    .given(FreeIpaTestDto.class)
-                    .when(freeIpaTestClient.describe())
-                    .then(this::validateFreeIpaInstanceType)
-                    .given(SdxInternalTestDto.class)
-                    .when(sdxTestClient.detailedDescribeInternal())
-                    .then(this::validateDataLakeInstanceType)
-                    .given("dx1", DistroXTestDto.class)
-                    .when(distroXTestClient.get())
-                    .then(this::validateDataHubInstanceType);
-        } else {
-            LOGGER.debug("Since Cloudbreak right now does not support vertical scaling for cloud platform {}, hence no need for verification.",
-                    testContext.getCloudPlatform());
-        }
-        return testDto;
     }
 
     private DistroXTestDto verifyCmServicesStartedSuccessfully(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
@@ -283,29 +247,8 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
 
     private void validateInstanceType(String instanceType, String expectedType, String service) {
         if (!instanceType.equals(expectedType)) {
-            throw new TestFailException(format(VERTICAL_SCALE_FAIL_MSG_FORMAT, service, expectedType, instanceType));
+            throw new TestFailException(String.format(VERTICAL_SCALE_FAIL_MSG_FORMAT, service, expectedType, instanceType));
         }
     }
 
-    private EnvironmentTestDto getTelemetryStorageLocation(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
-        telemetryStorageLocation = testDto.getResponse().getTelemetry().getLogging().getStorageLocation();
-        if (StringUtils.isBlank(telemetryStorageLocation)) {
-            LOGGER.error(format(" Telemetry Storage Location has not been set at '%s' environment! ", testDto.getName()));
-            throw new TestFailException(format(" Telemetry Storage Location has not been set at '%s' environment! ", testDto.getName()));
-        } else {
-            LOGGER.info(format(" Telemetry Storage Location has been set to '%s' at '%s' environment! ", telemetryStorageLocation, testDto.getName()));
-            Log.then(LOGGER, format(" Telemetry Storage Location has been set to '%s' at '%s' environment! ", telemetryStorageLocation, testDto.getName()));
-        }
-        return testDto;
-    }
-
-    private EnvironmentTestDto validateClusterLogsArePresent(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
-        testContext.getCloudProvider().getCloudFunctionality().cloudStorageListContainer(telemetryStorageLocation, "cluster-logs", true);
-        return testDto;
-    }
-
-    private EnvironmentTestDto validateClusterBackupsArePresent(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
-        testContext.getCloudProvider().getCloudFunctionality().cloudStorageListContainer(telemetryStorageLocation, "cluster-backups", true);
-        return testDto;
-    }
 }

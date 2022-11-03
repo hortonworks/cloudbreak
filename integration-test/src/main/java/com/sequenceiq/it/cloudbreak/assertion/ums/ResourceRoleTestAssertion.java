@@ -6,10 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Multimap;
-import com.sequenceiq.cloudbreak.auth.altus.service.UmsResourceRole;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.UmsClient;
-import com.sequenceiq.it.cloudbreak.action.ums.UmsClientUtils;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
@@ -23,36 +21,34 @@ public class ResourceRoleTestAssertion {
     private ResourceRoleTestAssertion() {
     }
 
-    public static Assertion<UmsTestDto, UmsClient> validateAssignedResourceRole(CloudbreakUser assignee, UmsResourceRole umsResourceRole,
-            boolean expectedPresence, RegionAwareInternalCrnGeneratorFactory crnGeneratorFactory) {
+    public static Assertion<UmsTestDto, UmsClient> validateAssignedResourceRole(CloudbreakUser assignee, String roleCrn, boolean expectedPresence,
+            RegionAwareInternalCrnGeneratorFactory crnGeneratorFactory) {
         return (testContext, umsTestDto, umsClient) -> {
             String resourceCrn = umsTestDto.getRequest().getResourceCrn();
             String userCrn = assignee.getCrn();
-            String resourceRole = UmsClientUtils.getResourceRoleCrn(umsResourceRole, umsClient, resourceCrn, crnGeneratorFactory);
 
-            LOGGER.info(format(" Validate resource role '%s' has been successfully assigned to user '%s' at resource '%s'... ",
-                    resourceRole, userCrn, resourceCrn));
+            LOGGER.info(format(" Validate resource role '%s' has been successfully assigned to user '%s' at resource '%s'... ", roleCrn, userCrn, resourceCrn));
             Multimap<String, String> assignedResourceRoles = umsClient.getDefaultClient()
                     .listAssignedResourceRoles(userCrn, crnGeneratorFactory);
-            boolean resourceRoleAssigned = assignedResourceRoles.get(resourceCrn).contains(resourceRole);
+            boolean resourceRoleAssigned = assignedResourceRoles.get(resourceCrn).contains(roleCrn);
             if (expectedPresence) {
                 if (resourceRoleAssigned) {
-                    LOGGER.info(format(" Resource role '%s' has successfully been assigned to user '%s' at resource '%s' ", resourceRole, userCrn,
+                    LOGGER.info(format(" Resource role '%s' has successfully been assigned to user '%s' at resource '%s' ", roleCrn, userCrn,
                             resourceCrn));
-                    Log.then(LOGGER, format(" Resource role '%s' has successfully been assigned to user '%s' at resource '%s' ", resourceRole, userCrn,
+                    Log.then(LOGGER, format(" Resource role '%s' has successfully been assigned to user '%s' at resource '%s' ", roleCrn, userCrn,
                             resourceCrn));
                 } else {
-                    throw new TestFailException(format(" Resource role '%s' has not been assigned to user '%s' at resource '%s'! ", resourceRole,
+                    throw new TestFailException(format(" Resource role '%s' has not been assigned to user '%s' at resource '%s'! ", roleCrn,
                             userCrn, resourceCrn));
                 }
             } else {
                 if (!resourceRoleAssigned) {
-                    LOGGER.info(format(" Resource role '%s' has successfully been revoked from user '%s' at resource '%s' ", resourceRole, userCrn,
+                    LOGGER.info(format(" Resource role '%s' has successfully been revoked from user '%s' at resource '%s' ", roleCrn, userCrn,
                             resourceCrn));
-                    Log.then(LOGGER, format(" Resource role '%s' has successfully been revoked from user '%s' at resource '%s' ", resourceRole,
+                    Log.then(LOGGER, format(" Resource role '%s' has successfully been revoked from user '%s' at resource '%s' ", roleCrn,
                             userCrn, resourceCrn));
                 } else {
-                    throw new TestFailException(format(" Resource role '%s' has not been revoked from user '%s' at resource '%s'! ", resourceRole,
+                    throw new TestFailException(format(" Resource role '%s' has not been revoked from user '%s' at resource '%s'! ", roleCrn,
                             userCrn, resourceCrn));
                 }
             }

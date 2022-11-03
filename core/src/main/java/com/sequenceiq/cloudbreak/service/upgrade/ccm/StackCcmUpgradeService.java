@@ -120,8 +120,6 @@ public class StackCcmUpgradeService {
     }
 
     public int getNotUpgradedStackCount(String envCrn) {
-        MDCBuilder.addResourceCrn(envCrn);
-        MDCBuilder.addEnvironmentCrn(envCrn);
-        return stackService.getNotUpgradedStackCount(envCrn, Tunnel.getUpgradables());
+        return stackService.getNotUpgradedStackCount(envCrn, Tunnel.latestUpgradeTarget());
     }
 }

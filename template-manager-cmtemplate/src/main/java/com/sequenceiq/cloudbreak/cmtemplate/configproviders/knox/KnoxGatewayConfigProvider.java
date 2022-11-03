@@ -147,10 +147,10 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
             String domain = kerberosConfig.get().getDomain();
             if (source.getGeneralClusterConfigs().getAutoTlsEnabled()) {
                 // HTTPS only whitelist when AutoTLS enabled
-                whitelist = "^/.*$;^https://([^/]+\\." + domain + "):[0-9]+/?.*$";
+                whitelist = "^/.*$;^https://(.+." + domain + "):[0-9]+/?.*$";
             } else {
                 // HTTP or HTTPS whitelist when AutoTLS disabled
-                whitelist = "^/.*$;^https?://([^/]+\\." + domain + "):[0-9]+/?.*$";
+                whitelist = "^/.*$;^https?://(.+." + domain + "):[0-9]+/?.*$";
             }
         } else {
             // Allow all when Kerberos isn't used

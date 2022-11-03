@@ -35,7 +35,6 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
 import com.sequenceiq.redbeams.doc.Notes.DatabaseServerNotes;
 import com.sequenceiq.redbeams.doc.OperationDescriptions.DatabaseServerOpDescription;
 import com.sequenceiq.redbeams.doc.ParamDescriptions.DatabaseServerParamDescriptions;
@@ -207,7 +206,7 @@ public interface DatabaseServerV4Endpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.UPGRADE, notes = DatabaseServerNotes.UPGRADE,
             consumes = MediaType.APPLICATION_JSON, nickname = "upgradeDatabaseServer")
-    UpgradeDatabaseServerV4Response upgrade(
+    void upgrade(
             @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotEmpty @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn,
             @Valid @NotNull @ApiParam(DatabaseServerParamDescriptions.UPGRADE_DATABASE_SERVER_REQUEST) UpgradeDatabaseServerV4Request request);
 

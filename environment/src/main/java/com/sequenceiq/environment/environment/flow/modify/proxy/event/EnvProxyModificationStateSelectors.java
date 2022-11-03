@@ -5,7 +5,6 @@ import com.sequenceiq.flow.core.FlowEvent;
 public enum EnvProxyModificationStateSelectors implements FlowEvent {
 
     MODIFY_PROXY_START_EVENT,
-    MODIFY_PROXY_FREEIPA_EVENT,
     FINISH_MODIFY_PROXY_EVENT,
     FINALIZE_MODIFY_PROXY_EVENT,
     HANDLE_MODIFY_PROXY_EVENT,

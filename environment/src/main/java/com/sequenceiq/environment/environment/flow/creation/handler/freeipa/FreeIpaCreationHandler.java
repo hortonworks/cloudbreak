@@ -288,7 +288,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private void setTelemetry(EnvironmentDto environmentDto, CreateFreeIpaRequest createFreeIpaRequest) {
-        TelemetryRequest telemetryRequest = telemetryApiConverter.convertToRequest(environmentDto.getTelemetry(), environmentDto.getAccountId());
+        TelemetryRequest telemetryRequest = telemetryApiConverter.convertToRequest(environmentDto.getTelemetry());
         createFreeIpaRequest.setTelemetry(telemetryRequest);
     }
 

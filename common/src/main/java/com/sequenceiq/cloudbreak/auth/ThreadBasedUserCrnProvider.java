@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.auth;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
@@ -18,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
-import com.sequenceiq.cloudbreak.logger.MdcContext;
 
 public class ThreadBasedUserCrnProvider {
 
@@ -52,7 +49,6 @@ public class ThreadBasedUserCrnProvider {
             throw new IllegalStateException(errorMessage);
         } else {
             USER_CRN.set(userCrn);
-            addUserCrnAndTenantToMdcContext(userCrn);
         }
     }
 
@@ -71,7 +67,6 @@ public class ThreadBasedUserCrnProvider {
     }
 
     // CHECKSTYLE:OFF
-
     public static <T, W extends Throwable> T doAsAndThrow(String userCrn, ThrowableCallable<T, W> callable) throws Throwable {
         // CHECKSTYLE:ON
         String previousUserCrn = getUserCrn();
@@ -139,11 +134,5 @@ public class ThreadBasedUserCrnProvider {
         } else {
             return doAs(internalCrn, () -> originalUserCrnConsumer.apply(originalUserCrn));
         }
-    }
-
-    private static void addUserCrnAndTenantToMdcContext(String userCrn) {
-        MdcContext.Builder builder = MdcContext.builder();
-        doIfNotNull(userCrn, builder::userCrn);
-        builder.buildMdc();
     }
 }

@@ -36,7 +36,7 @@ public class EnvProxyModificationSaveAssociationHandler extends EventSenderAware
             EnvironmentDto environmentDto = environmentService.updateProxyConfig(eventData.getEnvironmentDto().getId(), eventData.getProxyConfig());
 
             EnvProxyModificationDefaultEvent envProxyModificationEvent = new EnvProxyModificationDefaultEvent(
-                    EnvProxyModificationStateSelectors.MODIFY_PROXY_FREEIPA_EVENT.selector(), environmentDto, eventData.getProxyConfig());
+                    EnvProxyModificationStateSelectors.FINISH_MODIFY_PROXY_EVENT.selector(), environmentDto, eventData.getProxyConfig());
             eventSender().sendEvent(envProxyModificationEvent, event.getHeaders());
         } catch (Exception e) {
             EnvProxyModificationFailedEvent envProxyModificationFailedEvent = new EnvProxyModificationFailedEvent(

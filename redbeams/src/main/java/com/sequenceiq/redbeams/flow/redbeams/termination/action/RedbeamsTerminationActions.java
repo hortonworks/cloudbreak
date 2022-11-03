@@ -124,7 +124,7 @@ public class RedbeamsTerminationActions {
 
             @Override
             protected Selectable createRequest(RedbeamsContext context) {
-                return new RedbeamsEvent(REDBEAMS_TERMINATION_FINISHED_EVENT.name(), context.getDBStack().getId());
+                return new RedbeamsEvent(REDBEAMS_TERMINATION_FINISHED_EVENT.name(), 0L);
             }
         };
     }

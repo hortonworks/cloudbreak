@@ -19,8 +19,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -34,8 +32,6 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.common.model.PackageInfo;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
@@ -44,13 +40,11 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyFullResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Cloud;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.CommandExecutionResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JidInfoResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Os;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PackageVersionResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo;
@@ -61,7 +55,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAuth;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltMaster;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SlsExistsSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
-import com.sequenceiq.cloudbreak.orchestrator.salt.utils.MinionUtil;
 import com.sequenceiq.cloudbreak.service.Retry;
 
 @Service
@@ -72,9 +65,6 @@ public class SaltStateService {
     private static final long NETWORK_IPADDRS_TIMEOUT = 15L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltStateService.class);
-
-    @Inject
-    private MinionUtil minionUtil;
 
     public Map<String, String> getUuidList(SaltConnector sc) {
         ApplyResponse applyResponse = applyStateAllSync(sc, "disks.get-uuid-list");
@@ -322,47 +312,14 @@ public class SaltStateService {
         return sc.action(saltAction);
     }
 
-    public GenericResponses bootstrap(SaltConnector sc, BootstrapParams params, List<GatewayConfig> allGatewayConfigs, Set<Node> targets) {
-        SaltAction saltAction = new SaltAction(SaltActionType.RUN);
-        if (params.getCloud() != null) {
-            saltAction.setCloud(new Cloud(params.getCloud()));
-        }
-        if (params.getOs() != null) {
-            saltAction.setOs(new Os(params.getOs()));
-        }
-        SaltAuth auth = new SaltAuth(sc.getSaltPassword());
-        List<String> targetIps = targets.stream().map(Node::getPrivateIp).collect(Collectors.toList());
-        List<String> gatewayPrivateIps = allGatewayConfigs.stream().map(GatewayConfig::getPrivateAddress).collect(Collectors.toList());
-        for (GatewayConfig gatewayConfig : allGatewayConfigs) {
-            String gatewayAddress = gatewayConfig.getPrivateAddress();
-            if (targetIps.contains(gatewayAddress)) {
-                Node saltMaster = targets.stream().filter(n -> n.getPrivateIp().equals(gatewayAddress)).findFirst().get();
-                SaltMaster master = new SaltMaster();
-                master.setAddress(gatewayAddress);
-                master.setAuth(auth);
-                master.setDomain(saltMaster.getDomain());
-                master.setHostName(saltMaster.getHostname());
-                // set due to compatibility reasons
-                saltAction.setServer(gatewayAddress);
-                saltAction.setMaster(master);
-                saltAction.addMinion(minionUtil.createMinion(saltMaster, gatewayPrivateIps, params.isRestartNeededFlagSupported(), params.isRestartNeeded()));
-                saltAction.addMaster(master);
-            }
-        }
-        for (Node minionNode : targets.stream().filter(node -> !gatewayPrivateIps.contains(node.getPrivateIp())).collect(Collectors.toList())) {
-            saltAction.addMinion(minionUtil.createMinion(minionNode, gatewayPrivateIps, params.isRestartNeededFlagSupported(), params.isRestartNeeded()));
-        }
-        return sc.action(saltAction);
-    }
-
     public Map<String, List<PackageInfo>> getPackageVersions(SaltConnector sc, Map<String, Optional<String>> packages) {
         Map<String, List<PackageInfo>> packageVersions = new HashMap<>();
-        packages.forEach((key, versionPattern) -> {
-            Map<String, PackageInfo> singlePackageVersion = getSinglePackageVersion(sc, key, versionPattern);
-            singlePackageVersion.entrySet().forEach(entry -> addToVersionList(packageVersions, entry));
-        });
-        return packageVersions;
-    }
+            packages.forEach((key, versionPattern) -> {
+                Map<String, PackageInfo> singlePackageVersion = getSinglePackageVersion(sc, key, versionPattern);
+                singlePackageVersion.entrySet().forEach(entry -> addToVersionList(packageVersions, entry));
+            });
+            return packageVersions;
+        }
 
     private void addToVersionList(Map<String, List<PackageInfo>> packageVersions, Entry<String, PackageInfo> entry) {
         String hostKey = entry.getKey();

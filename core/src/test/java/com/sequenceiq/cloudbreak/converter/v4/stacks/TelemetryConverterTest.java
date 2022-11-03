@@ -5,21 +5,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
@@ -52,24 +47,18 @@ public class TelemetryConverterTest {
 
     private static final String MONITORING_REMOTE_WRITE_URL = "http://myendpoint/api/v1/write";
 
-    private static final String ACCOUNT_ID = "accountId";
-
-    @Mock
-    private EntitlementService entitlementService;
-
     private TelemetryConverter underTest;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, true, "****", "****");
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "app", "stream", false);
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, "app", "stream", false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
-        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
+        monitoringConfig.setEnabled(true);
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
-        underTest = new TelemetryConverter(telemetryConfiguration, entitlementService, true, true);
+        underTest = new TelemetryConverter(telemetryConfiguration, true, true);
     }
 
     @Test
@@ -102,7 +91,7 @@ public class TelemetryConverterTest {
         telemetryRequest.setFeatures(featuresRequest);
         telemetryRequest.setWorkloadAnalytics(workloadAnalyticsRequest);
         // WHEN
-        Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD, ACCOUNT_ID);
+        Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD);
         // THEN
         assertNotNull(result.getFeatures().getWorkloadAnalytics());
         assertFalse(result.getFeatures().getClusterLogsCollection().getEnabled());
@@ -145,7 +134,7 @@ public class TelemetryConverterTest {
         fluentAttributes.put("myAttrKey", "myAttrValue");
         telemetryRequest.setFluentAttributes(fluentAttributes);
         // WHEN
-        Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD, ACCOUNT_ID);
+        Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD);
         // THEN
         assertEquals(1, result.getFluentAttributes().size());
     }
@@ -167,10 +156,10 @@ public class TelemetryConverterTest {
 
     @Test
     public void testConvertWhenMonitoringIsDisabledThenItShouldBeFalseInTheResult() {
-        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(false);
+        ReflectionTestUtils.setField(underTest, "monitoringEnabled", false);
         TelemetryRequest input = new TelemetryRequest();
 
-        Telemetry result = underTest.convert(input, StackType.WORKLOAD, ACCOUNT_ID);
+        Telemetry result = underTest.convert(input, StackType.WORKLOAD);
 
         assertNotNull(result);
         assertFalse(result.getFeatures().getMonitoring().getEnabled());
@@ -178,16 +167,16 @@ public class TelemetryConverterTest {
 
     @Test
     public void testConvertWhenMonitoringIsDisabledButUrlIsInRequest() {
-        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(false);
+        ReflectionTestUtils.setField(underTest, "monitoringEnabled", false);
         TelemetryRequest input = new TelemetryRequest();
         MonitoringRequest monitoring = new MonitoringRequest();
         monitoring.setRemoteWriteUrl("anurl");
         input.setMonitoring(monitoring);
 
-        Telemetry result = underTest.convert(input, StackType.WORKLOAD, ACCOUNT_ID);
+        Telemetry result = underTest.convert(input, StackType.WORKLOAD);
 
         assertNotNull(result);
-        assertFalse(result.getFeatures().getMonitoring().getEnabled());
+        assertTrue(result.getFeatures().getMonitoring().getEnabled());
     }
 
     @Test
@@ -195,7 +184,7 @@ public class TelemetryConverterTest {
         ReflectionTestUtils.setField(underTest, "clusterLogsCollection", false);
         TelemetryRequest input = new TelemetryRequest();
 
-        Telemetry result = underTest.convert(input, StackType.WORKLOAD, ACCOUNT_ID);
+        Telemetry result = underTest.convert(input, StackType.WORKLOAD);
 
         assertNotNull(result);
         assertFalse(result.getFeatures().getClusterLogsCollection().getEnabled());
@@ -206,7 +195,7 @@ public class TelemetryConverterTest {
         // GIVEN
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         // WHEN
-        Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD, ACCOUNT_ID);
+        Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD);
         // THEN
         assertFalse(result.getFeatures().getClusterLogsCollection().getEnabled());
         assertTrue(result.getFeatures().getMetering().getEnabled());
@@ -221,7 +210,7 @@ public class TelemetryConverterTest {
         features.addClusterLogsCollection(true);
         telemetryRequest.setFeatures(features);
         // WHEN
-        Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD, ACCOUNT_ID);
+        Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD);
         // THEN
         assertTrue(result.getFeatures().getClusterLogsCollection().getEnabled());
         assertTrue(result.getFeatures().getMetering().getEnabled());
@@ -232,7 +221,7 @@ public class TelemetryConverterTest {
         // GIVEN
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         // WHEN
-        Telemetry result = underTest.convert(telemetryRequest, StackType.DATALAKE, ACCOUNT_ID);
+        Telemetry result = underTest.convert(telemetryRequest, StackType.DATALAKE);
         // THEN
         assertFalse(result.getFeatures().getClusterLogsCollection().getEnabled());
         assertNull(result.getFeatures().getMetering());
@@ -259,10 +248,10 @@ public class TelemetryConverterTest {
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, null, null, false);
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null, false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
-        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
+        monitoringConfig.setEnabled(true);
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
-        TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, entitlementService, true, false);
+        TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, true, false);
         // WHEN
         TelemetryRequest result = converter.convert(null, sdxClusterResponse);
         // THEN
@@ -336,10 +325,10 @@ public class TelemetryConverterTest {
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, null, null, false);
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null, false);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
-        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
+        monitoringConfig.setEnabled(true);
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
-        TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, entitlementService, false, true);
+        TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, false, true);
         // WHEN
         TelemetryRequest result = converter.convert(response, sdxClusterResponse);
         // THEN

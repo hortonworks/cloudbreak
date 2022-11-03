@@ -26,8 +26,6 @@ public class ClouderaManagerDatabusServiceTest {
 
     private static final String SDX_STACK_CRN = "crn:cdp:sdx:us-west-1:1234:sdxcluster:mystack";
 
-    private static final String INTERNAL_ACTOR_CRN = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
-
     @InjectMocks
     private ClouderaManagerDatabusService underTest;
 
@@ -66,7 +64,7 @@ public class ClouderaManagerDatabusServiceTest {
         // GIVEN
         AltusCredential credential = new AltusCredential("accessKey", "secretKey".toCharArray());
         when(iamService.generateMachineUserWithAccessKeyForLegacyCm(any(), any(), any(), any())).thenReturn(credential);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_ACTOR_CRN);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(roleCrnGenerator.getBuiltInWXMClusterAdminResourceRoleCrn(any())).thenReturn("resourceRoleCrn");
         when(regionAwareCrnGenerator.generateCrnString(any(), any(), any())).thenReturn("resourceCrn");

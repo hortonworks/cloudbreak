@@ -509,9 +509,4 @@ public class AzureCloudProvider extends AbstractCloudProvider {
             Log.then(LOGGER, format(" Volume has been encrypted with '%s' DES key. ", desKeyUrl));
         }
     }
-
-    @Override
-    public boolean isExternalDatabaseSslEnforcementSupported() {
-        return azureProperties.getExternalDatabaseSslEnforcementSupported();
-    }
 }

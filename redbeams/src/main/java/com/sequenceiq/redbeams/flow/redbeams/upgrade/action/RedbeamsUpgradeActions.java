@@ -25,8 +25,12 @@ import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.AbstractRedbeamsUpgradeAction;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsUpgradeEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsUpgradeState;
+import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.BackupDatabaseServerRequest;
+import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.BackupDatabaseServerSuccess;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartUpgradeRequest;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsUpgradeFailedEvent;
+import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RestoreDatabaseServerRequest;
+import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RestoreDatabaseServerSuccess;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.UpgradeDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.UpgradeDatabaseServerSuccess;
 import com.sequenceiq.redbeams.metrics.MetricType;
@@ -45,13 +49,33 @@ public class RedbeamsUpgradeActions {
     @Inject
     private RedbeamsMetricService metricService;
 
-    @Bean(name = "UPGRADE_DATABASE_SERVER_STATE")
-    public Action<?, ?> upgradeDatabaseServer() {
+    @Bean(name = "BACKUP_DATABASE_SERVER_STATE")
+    public Action<?, ?> backupDatabaseServer() {
         return new AbstractRedbeamsUpgradeAction<>(RedbeamsStartUpgradeRequest.class) {
 
             @Override
             protected void doExecute(RedbeamsContext context, RedbeamsStartUpgradeRequest payload, Map<Object, Object> variables) {
-                TargetMajorVersion targetMajorVersion = payload.getTargetMajorVersion();
+                variables.put(TARGET_MAJOR_VERSION, payload.getTargetMajorVersion());
+                dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.UPGRADE_IN_PROGRESS);
+                sendEvent(context,
+                        new BackupDatabaseServerRequest(
+                                context.getCloudContext(),
+                                context.getCloudCredential(),
+                                context.getDatabaseStack(),
+                                payload.getTargetMajorVersion()
+                        )
+                );
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_DATABASE_SERVER_STATE")
+    public Action<?, ?> upgradeDatabaseServer() {
+        return new AbstractRedbeamsUpgradeAction<>(BackupDatabaseServerSuccess.class) {
+
+            @Override
+            protected void doExecute(RedbeamsContext context, BackupDatabaseServerSuccess payload, Map<Object, Object> variables) {
+                TargetMajorVersion targetMajorVersion = (TargetMajorVersion) variables.get(TARGET_MAJOR_VERSION);
                 sendEvent(context,
                         new UpgradeDatabaseServerRequest(
                                 context.getCloudContext(),
@@ -65,12 +89,31 @@ public class RedbeamsUpgradeActions {
         };
     }
 
-    @Bean(name = "REDBEAMS_UPGRADE_FINISHED_STATE")
-    public Action<?, ?> upgradeFinished() {
+    @Bean(name = "RESTORE_DATABASE_SERVER_STATE")
+    public Action<?, ?> restoreDatabaseServer() {
         return new AbstractRedbeamsUpgradeAction<>(UpgradeDatabaseServerSuccess.class) {
 
             @Override
-            protected void prepareExecution(UpgradeDatabaseServerSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(RedbeamsContext context, UpgradeDatabaseServerSuccess payload, Map<Object, Object> variables) {
+                TargetMajorVersion targetMajorVersion = (TargetMajorVersion) variables.get(TARGET_MAJOR_VERSION);
+                sendEvent(context,
+                        new RestoreDatabaseServerRequest(
+                                context.getCloudContext(),
+                                context.getCloudCredential(),
+                                context.getDatabaseStack(),
+                                targetMajorVersion)
+                );
+            }
+
+        };
+    }
+
+    @Bean(name = "REDBEAMS_UPGRADE_FINISHED_STATE")
+    public Action<?, ?> upgradeFinished() {
+        return new AbstractRedbeamsUpgradeAction<>(RestoreDatabaseServerSuccess.class) {
+
+            @Override
+            protected void prepareExecution(RestoreDatabaseServerSuccess payload, Map<Object, Object> variables) {
                 Optional<DBStack> dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.AVAILABLE);
                 metricService.incrementMetricCounter(MetricType.DB_UPGRADE_FINISHED, dbStack);
             }

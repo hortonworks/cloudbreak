@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.common.api.telemetry.base.FeaturesBase;
@@ -44,8 +43,6 @@ public class TelemetryConverter {
 
     private static final String DATABUS_HEADER_SDX_NAME = "databus.header.sdx.name";
 
-    private final EntitlementService entitlementService;
-
     private final boolean telemetryPublisherEnabled;
 
     private final boolean telemetryPublisherDefaultValue;
@@ -54,20 +51,21 @@ public class TelemetryConverter {
 
     private final boolean meteringEnabled;
 
+    private final boolean monitoringEnabled;
+
     private final boolean clusterLogsCollection;
 
     private final boolean useSharedAltusCredential;
 
     public TelemetryConverter(TelemetryConfiguration configuration,
-            EntitlementService entitlementService,
             @Value("${cb.cm.telemetrypublisher.enabled:false}") boolean telemetryPublisherEnabled,
             @Value("${cb.cm.telemetrypublisher.default:true}") boolean telemetryPublisherDefaultValue) {
-        this.entitlementService = entitlementService;
         this.telemetryPublisherEnabled = telemetryPublisherEnabled;
         this.telemetryPublisherDefaultValue = telemetryPublisherDefaultValue;
         this.databusEndpoint = configuration.getAltusDatabusConfiguration().getAltusDatabusEndpoint();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
         this.meteringEnabled = configuration.getMeteringConfiguration().isEnabled();
+        this.monitoringEnabled = configuration.getMonitoringConfiguration().isEnabled();
         this.clusterLogsCollection = configuration.getClusterLogsCollectionConfiguration().isEnabled();
     }
 
@@ -88,7 +86,7 @@ public class TelemetryConverter {
         return response;
     }
 
-    public Telemetry convert(TelemetryRequest request, StackType type, String accountId) {
+    public Telemetry convert(TelemetryRequest request, StackType type) {
         Telemetry telemetry = new Telemetry();
         Features features = new Features();
         LOGGER.debug("Converting telemetry request to telemetry object");
@@ -101,12 +99,12 @@ public class TelemetryConverter {
             telemetry.setWorkloadAnalytics(workloadAnalytics);
             setWorkloadAnalyticsFeature(telemetry, features);
             setClusterLogsCollection(request, features);
-            setMonitoring(request, features, accountId);
+            setMonitoring(request, features);
             setUseSharedAltusCredential(features);
             setCloudStorageLogging(request, features);
             telemetry.setFluentAttributes(request.getFluentAttributes());
         }
-        if (entitlementService.isComputeMonitoringEnabled(accountId)) {
+        if (monitoringEnabled) {
             LOGGER.debug("Cluster level monitoring feature is enabled");
             features.addMonitoring(true);
         }
@@ -439,8 +437,10 @@ public class TelemetryConverter {
         }
     }
 
-    private void setMonitoring(TelemetryRequest request, Features features, String accountId) {
-        if (entitlementService.isComputeMonitoringEnabled(accountId)) {
+    private void setMonitoring(TelemetryRequest request, Features features) {
+        // second condition is a temporary workaround, later we should check an entitlement instead to simplify logic
+        // now if monitoring and url is not null, it means env/freeipa has monitoring enabled, based on conditions in those services
+        if (monitoringEnabled || (request.getMonitoring() != null && request.getMonitoring().getRemoteWriteUrl() != null)) {
             if (request.getFeatures() != null && request.getFeatures().getMonitoring() != null) {
                 LOGGER.debug("Fill cluster monitoring setting from telemetry feature request");
                 features.setMonitoring(request.getFeatures().getMonitoring());

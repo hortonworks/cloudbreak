@@ -12,9 +12,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerService;
+import com.sequenceiq.cloudbreak.conclusion.ConclusionChecker;
+import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerFactory;
+import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerType;
+import com.sequenceiq.cloudbreak.conclusion.ConclusionResult;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeService;
+import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailHandledRequest;
@@ -42,7 +48,13 @@ public class ClusterUpgradeFailedHandler extends ExceptionCatcherEventHandler<Cl
     private StackService stackService;
 
     @Inject
-    private ConclusionCheckerService conclusionCheckerService;
+    private ConclusionCheckerFactory conclusionCheckerFactory;
+
+    @Inject
+    private CloudbreakFlowMessageService flowMessageService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Inject
     private ClusterUpgradeService clusterUpgradeService;
@@ -81,8 +93,17 @@ public class ClusterUpgradeFailedHandler extends ExceptionCatcherEventHandler<Cl
     }
 
     private void runConclusionChecking(ClusterUpgradeFailedRequest request) {
-        ResourceEvent resourceEvent = DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED == request.getDetailedStatus()
-                ? CLUSTER_MANAGER_UPGRADE_FAILED : CLUSTER_UPGRADE_FAILED;
-        conclusionCheckerService.runConclusionChecker(request.getResourceId(), UPDATE_FAILED.name(), resourceEvent);
+        try {
+            ConclusionChecker conclusionChecker = conclusionCheckerFactory.getConclusionChecker(ConclusionCheckerType.DEFAULT);
+            ConclusionResult conclusionResult = conclusionChecker.doCheck(request.getResourceId());
+            if (entitlementService.conclusionCheckerSendUserEventEnabled(ThreadBasedUserCrnProvider.getAccountId()) && conclusionResult.isFailureFound()) {
+                ResourceEvent resourceEvent = DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED == request.getDetailedStatus()
+                        ? CLUSTER_MANAGER_UPGRADE_FAILED : CLUSTER_UPGRADE_FAILED;
+                flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_FAILED.name(), resourceEvent,
+                        conclusionResult.getFailedConclusionTexts().toString());
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Error happened during conclusion check", e);
+        }
     }
 }

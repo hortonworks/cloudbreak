@@ -207,7 +207,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             uploadSaltConfig(sc, gatewayTargets, exitModel);
             Set<String> allTargets = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             uploadSignKey(sc, primaryGateway, gatewayTargets, allTargets, exitModel);
-            OrchestratorBootstrap saltBootstrap = saltBootstrapFactory.of(sc, saltConnectors, allGatewayConfigs, targets, params);
+            OrchestratorBootstrap saltBootstrap = saltBootstrapFactory.of(saltStateService, sc, saltConnectors, allGatewayConfigs, targets, params);
             Callable<Boolean> saltBootstrapRunner = saltRunner.runner(saltBootstrap, exitCriteria, exitModel);
             saltBootstrapRunner.call();
         } catch (Exception e) {
@@ -421,33 +421,9 @@ public class SaltOrchestrator implements HostOrchestrator {
             uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitModel);
             // if there is a new salt master then re-bootstrap all nodes
             Set<Node> nodes = gatewayTargets.isEmpty() ? targets : allNodes;
-            OrchestratorBootstrap saltBootstrap = saltBootstrapFactory.of(sc, saltConnectors, allGatewayConfigs, nodes, params);
+            OrchestratorBootstrap saltBootstrap = saltBootstrapFactory.of(saltStateService, sc, saltConnectors, allGatewayConfigs, nodes, params);
             Callable<Boolean> saltBootstrapRunner = saltRunner.runner(saltBootstrap, exitCriteria, exitModel);
             saltBootstrapRunner.call();
-        } catch (Exception e) {
-            LOGGER.info("Error occurred during salt upscale", e);
-            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
-        } finally {
-            saltConnectors.forEach(SaltConnector::close);
-        }
-    }
-
-    @Override
-    public void reBootstrapExistingNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, BootstrapParams params,
-            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
-        LOGGER.info("Re-bootstrap existing nodes: {}", targets.stream().map(Node::getHostname).collect(Collectors.toSet()));
-        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
-        List<SaltConnector> saltConnectors = saltService.createSaltConnector(allGatewayConfigs);
-        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            GenericResponses genericResponses = saltStateService.bootstrap(sc, params, allGatewayConfigs, targets);
-            List<GenericResponse> errorResponses = genericResponses.getResponses().stream()
-                    .filter(response -> response.getStatusCode() != HttpStatus.OK.value())
-                    .collect(Collectors.toList());
-            if (!errorResponses.isEmpty()) {
-                Set<String> nodesWithErrors = errorResponses.stream().map(GenericResponse::getAddress).collect(Collectors.toSet());
-                LOGGER.error("Failed to rebootstrap existing nodes [{}/{}] {}", targets.size(), nodesWithErrors.size(), errorResponses);
-                throw new CloudbreakOrchestratorFailedException(String.format("Failed to rebootstrap existing nodes %s", nodesWithErrors));
-            }
         } catch (Exception e) {
             LOGGER.info("Error occurred during salt upscale", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
@@ -835,22 +811,14 @@ public class SaltOrchestrator implements HostOrchestrator {
             String errorMsg) throws CloudbreakOrchestratorException {
         Set<String> targets = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
-            runHighStateWithSpecificRole(allNodes, exitCriteriaModel, role, targets, sc);
-        } catch (Exception e) {
-            LOGGER.error(errorMsg, e);
-            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
-        }
-    }
-
-    private void runHighStateWithSpecificRole(Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, String role, Set<String> targets, SaltConnector sc)
-            throws Exception {
-        try {
             saltCommandRunner.runModifyGrainCommand(sc,
                     new GrainAddRunner(saltStateService, targets, allNodes, role), exitCriteriaModel, exitCriteria);
             runNewService(sc, new HighStateRunner(saltStateService, targets, allNodes), exitCriteriaModel);
-        } finally {
             saltCommandRunner.runModifyGrainCommand(sc,
                     new GrainRemoveRunner(saltStateService, targets, allNodes, role), exitCriteriaModel, exitCriteria);
+        } catch (Exception e) {
+            LOGGER.error(errorMsg, e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
 

@@ -47,7 +47,7 @@ public class AbstractActionTest {
 
     public static final String FLOW_ID = "flowId";
 
-    public static final String FLOW_TRIGGER_USERCRN = "crn:cdp:iam:us-west-1:cloudera:user:ausername";
+    public static final String FLOW_TRIGGER_USERCRN = "flowTriggerUserCrn";
 
     public static final FlowParameters FLOW_PARAMETERS = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USERCRN, null);
 

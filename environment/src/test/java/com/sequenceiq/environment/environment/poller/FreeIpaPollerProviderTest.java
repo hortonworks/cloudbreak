@@ -98,7 +98,7 @@ class FreeIpaPollerProviderTest {
     @ParameterizedTest
     @MethodSource("upgradeCcmStatuses")
     void testUpgradeCcmPoller(OperationState operationState, AttemptState attemptState, String message) {
-        OperationStatus status = new OperationStatus("123", OperationType.UPGRADE_CCM, operationState, null, null, "error message", 0, null);
+        OperationStatus status = new OperationStatus("123", OperationType.UPGRADE_CCM, operationState, null, null, null, 0, null);
         when(freeIpaService.getOperationStatus("123")).thenReturn(status);
         AttemptResult<Void> result = underTest.upgradeCcmPoller(ENV_ID, CRN, "123");
 
@@ -136,7 +136,7 @@ class FreeIpaPollerProviderTest {
     public static Stream<Arguments> upgradeCcmStatuses() {
         return Stream.of(
                 Arguments.of(OperationState.COMPLETED, AttemptState.FINISH, ""),
-                Arguments.of(OperationState.FAILED, AttemptState.BREAK, "FreeIpa Upgrade CCM failed: error message"),
+                Arguments.of(OperationState.FAILED, AttemptState.BREAK, "FreeIpa Upgrade CCM failed."),
                 Arguments.of(OperationState.REJECTED, AttemptState.BREAK, "FreeIpa Upgrade CCM operation request was rejected."),
                 Arguments.of(OperationState.REQUESTED, AttemptState.CONTINUE, ""),
                 Arguments.of(OperationState.RUNNING, AttemptState.CONTINUE, ""),

@@ -144,7 +144,6 @@ public class ClusterBootstrapper {
 
     public void bootstrapMachines(Long stackId) throws CloudbreakException {
         StackDto stackDto = stackDtoService.getById(stackId);
-        LOGGER.info("BootstrapMachines for stack [{}] [{}]", stackDto.getName(), stackDto.getResourceCrn());
         bootstrapOnHost(stackDto);
     }
 
@@ -156,28 +155,7 @@ public class ClusterBootstrapper {
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     public void bootstrapOnHost(StackDto stack) throws CloudbreakException {
-        LOGGER.info("BootstrapOnHost for stack [{}] [{}]", stack.getName(), stack.getResourceCrn());
         bootstrapOnHostInternal(stack, this::saveSaltComponent);
-    }
-
-    public void reBootstrapGateways(StackDto stack) throws CloudbreakException {
-        try {
-            List<GatewayConfig> allGatewayConfig = collectAndCheckGateways(stack);
-            Set<Node> gatewayNodes = transactionService.required(() -> collectNodesForBootstrap(stack)).stream()
-                    .filter(node -> allGatewayConfig.stream().anyMatch(gw -> gw.getPrivateAddress().equals(node.getPrivateIp())))
-                    .collect(Collectors.toSet());
-            Set<String> gatewayHostNames = gatewayNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            LOGGER.info("ReBootstrapGateways for stack [{}] [{}] with gateways {}", stack.getName(), stack.getResourceCrn(), gatewayHostNames);
-
-            BootstrapParams params = createBootstrapParams(stack);
-            hostOrchestrator.reBootstrapExistingNodes(allGatewayConfig, gatewayNodes, params, clusterDeletionBasedModel(stack.getId(), null));
-
-            checkIfAllNodesAvailable(stack, gatewayNodes, stack.getPrimaryGatewayInstance());
-        } catch (TransactionExecutionException e) {
-            throw new CloudbreakException(e.getCause());
-        } catch (Exception e) {
-            throw new CloudbreakException(e);
-        }
     }
 
     private void bootstrapOnHostInternal(StackDto stack, Consumer<StackView> saveOrUpdateSaltComponent) throws CloudbreakException {
@@ -225,7 +203,6 @@ public class ClusterBootstrapper {
 
     private void checkIfAllNodesAvailable(StackDto stack, Set<Node> nodes, InstanceMetadataView primaryGateway)
             throws CloudbreakOrchestratorFailedException {
-        LOGGER.info("Checking availability of nodes {}", nodes.stream().map(Node::getHostname).collect(Collectors.toSet()));
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack.getStack(), stack.getSecurityConfig(), primaryGateway, isKnoxEnabled(stack));
         ExtendedPollingResult allNodesAvailabilityPolling = hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(
                 hostClusterAvailabilityCheckerTask, new HostOrchestratorClusterContext(stack, hostOrchestrator, gatewayConfig, nodes),
@@ -234,7 +211,6 @@ public class ClusterBootstrapper {
         if (allNodesAvailabilityPolling.isTimeout()) {
             clusterBootstrapperErrorHandler.terminateFailedNodes(hostOrchestrator, null, stack, gatewayConfig, nodes);
         }
-        LOGGER.info("All nodes are available");
     }
 
     private void saveSaltComponent(StackView stack) {

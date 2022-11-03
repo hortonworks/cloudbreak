@@ -916,22 +916,12 @@ public class GrpcUmsClient {
 
     @Cacheable(cacheNames = "umsResourceRolesCache", key = "{ #accountId }")
     public Set<String> getResourceRoles(String accountId) {
-        return getResourceRoles(accountId, regionAwareInternalCrnGeneratorFactory);
-    }
-
-    @Cacheable(cacheNames = "umsRolesCache", key = "{ #accountId }")
-    public Set<String> getRoles(String accountId) {
-        return getRoles(accountId, regionAwareInternalCrnGeneratorFactory);
-    }
-
-    @Cacheable(cacheNames = "umsResourceRolesCache", key = "{ #accountId }")
-    public Set<String> getResourceRoles(String accountId, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         return client.listResourceRoles(accountId);
     }
 
     @Cacheable(cacheNames = "umsRolesCache", key = "{ #accountId }")
-    public Set<String> getRoles(String accountId, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+    public Set<String> getRoles(String accountId) {
         UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         return client.listRoles(accountId);
     }

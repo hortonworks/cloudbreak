@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.environment.flow.deletion;
 
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.CLEANUP_EVENTS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_CLUSTER_DEFINITION_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_FREEIPA_EVENT;
@@ -81,7 +80,12 @@ public class EnvDeleteActions {
                 EnvironmentDto envDto = environmentStatusUpdateService
                         .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS,
                                 ResourceEvent.ENVIRONMENT_FREEIPA_DELETION_STARTED, EnvDeleteState.FREEIPA_DELETE_STARTED_STATE);
-                sendEvent(context, DELETE_FREEIPA_EVENT.selector(), createEnvironmentDeletionDto(envDto, payload.isForceDelete(), payload.getResourceId()));
+                EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
+                        .withEnvironmentDto(envDto)
+                        .withForceDelete(payload.isForceDelete())
+                        .withId(payload.getResourceId())
+                        .build();
+                sendEvent(context, DELETE_FREEIPA_EVENT.selector(), environmentDeletionDto);
             }
         };
     }
@@ -95,8 +99,12 @@ public class EnvDeleteActions {
                         .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_IN_PROGRESS,
                                 ResourceEvent.ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED,
                                 EnvDeleteState.STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED_STATE);
-                sendEvent(context, UNSCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT.selector(), createEnvironmentDeletionDto(envDto, payload.isForceDelete(),
-                        payload.getResourceId()));
+                EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
+                        .withEnvironmentDto(envDto)
+                        .withForceDelete(payload.isForceDelete())
+                        .withId(payload.getResourceId())
+                        .build();
+                sendEvent(context, UNSCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT.selector(), environmentDeletionDto);
             }
         };
     }
@@ -109,7 +117,12 @@ public class EnvDeleteActions {
                 EnvironmentDto envDto = environmentStatusUpdateService
                         .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.RDBMS_DELETE_IN_PROGRESS,
                                 ResourceEvent.ENVIRONMENT_DATABASE_DELETION_STARTED, EnvDeleteState.RDBMS_DELETE_STARTED_STATE);
-                sendEvent(context, DELETE_RDBMS_EVENT.selector(), createEnvironmentDeletionDto(envDto, payload.isForceDelete(), payload.getResourceId()));
+                EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
+                        .withEnvironmentDto(envDto)
+                        .withForceDelete(payload.isForceDelete())
+                        .withId(payload.getResourceId())
+                        .build();
+                sendEvent(context, DELETE_RDBMS_EVENT.selector(), environmentDeletionDto);
             }
         };
     }
@@ -122,8 +135,13 @@ public class EnvDeleteActions {
                 EnvironmentDto envDto = environmentStatusUpdateService
                         .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.PUBLICKEY_DELETE_IN_PROGRESS,
                                 ResourceEvent.ENVIRONMENT_PUBLICKEY_DELETION_STARTED, EnvDeleteState.PUBLICKEY_DELETE_STARTED_STATE);
-                sendEvent(context, DELETE_PUBLICKEY_EVENT.selector(), createEnvironmentDeletionDto(envDto, payload.isForceDelete(),
-                        payload.getResourceId()));
+
+                EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
+                        .withEnvironmentDto(envDto)
+                        .withForceDelete(payload.isForceDelete())
+                        .withId(payload.getResourceId())
+                        .build();
+                sendEvent(context, DELETE_PUBLICKEY_EVENT.selector(), environmentDeletionDto);
             }
         };
     }
@@ -137,8 +155,13 @@ public class EnvDeleteActions {
                         .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS,
                                 ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETION_STARTED,
                                 EnvDeleteState.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_STARTED_STATE);
-                sendEvent(context, DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector(), createEnvironmentDeletionDto(envDto, payload.isForceDelete(),
-                        payload.getResourceId()));
+
+                EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
+                        .withEnvironmentDto(envDto)
+                        .withForceDelete(payload.isForceDelete())
+                        .withId(payload.getResourceId())
+                        .build();
+                sendEvent(context, DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector(), environmentDeletionDto);
             }
         };
     }
@@ -151,7 +174,12 @@ public class EnvDeleteActions {
                 EnvironmentDto envDto = environmentStatusUpdateService
                         .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.NETWORK_DELETE_IN_PROGRESS,
                                 ResourceEvent.ENVIRONMENT_NETWORK_DELETION_STARTED, EnvDeleteState.NETWORK_DELETE_STARTED_STATE);
-                sendEvent(context, DELETE_NETWORK_EVENT.selector(), createEnvironmentDeletionDto(envDto, payload.isForceDelete(), payload.getResourceId()));
+                EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
+                        .withEnvironmentDto(envDto)
+                        .withForceDelete(payload.isForceDelete())
+                        .withId(payload.getResourceId())
+                        .build();
+                sendEvent(context, DELETE_NETWORK_EVENT.selector(), environmentDeletionDto);
             }
         };
     }
@@ -164,8 +192,12 @@ public class EnvDeleteActions {
                 EnvironmentDto envDto = environmentStatusUpdateService
                         .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.IDBROKER_MAPPINGS_DELETE_IN_PROGRESS,
                                 ResourceEvent.ENVIRONMENT_IDBROKER_MAPPINGS_DELETION_STARTED, EnvDeleteState.IDBROKER_MAPPINGS_DELETE_STARTED_STATE);
-                sendEvent(context, DELETE_IDBROKER_MAPPINGS_EVENT.selector(), createEnvironmentDeletionDto(envDto, payload.isForceDelete(),
-                        payload.getResourceId()));
+                EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
+                        .withEnvironmentDto(envDto)
+                        .withForceDelete(payload.isForceDelete())
+                        .withId(payload.getResourceId())
+                        .build();
+                sendEvent(context, DELETE_IDBROKER_MAPPINGS_EVENT.selector(), environmentDeletionDto);
             }
         };
     }
@@ -178,8 +210,12 @@ public class EnvDeleteActions {
                 EnvironmentDto envDto = environmentStatusUpdateService
                         .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.S3GUARD_TABLE_DELETE_IN_PROGRESS,
                                 ResourceEvent.ENVIRONMENT_S3GUARD_TABLE_DELETION_STARTED, EnvDeleteState.S3GUARD_TABLE_DELETE_STARTED_STATE);
-                sendEvent(context, DELETE_S3GUARD_TABLE_EVENT.selector(), createEnvironmentDeletionDto(envDto, payload.isForceDelete(),
-                        payload.getResourceId()));
+                EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
+                        .withEnvironmentDto(envDto)
+                        .withForceDelete(payload.isForceDelete())
+                        .withId(payload.getResourceId())
+                        .build();
+                sendEvent(context, DELETE_S3GUARD_TABLE_EVENT.selector(), environmentDeletionDto);
             }
         };
     }
@@ -192,8 +228,12 @@ public class EnvDeleteActions {
                 EnvironmentDto envDto = environmentStatusUpdateService
                         .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.CLUSTER_DEFINITION_DELETE_PROGRESS,
                                 ResourceEvent.ENVIRONMENT_CLUSTER_DEFINITION_DELETE_STARTED, EnvDeleteState.CLUSTER_DEFINITION_DELETE_STARTED_STATE);
-                sendEvent(context, DELETE_CLUSTER_DEFINITION_EVENT.selector(), createEnvironmentDeletionDto(envDto, payload.isForceDelete(),
-                        payload.getResourceId()));
+                EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
+                        .withEnvironmentDto(envDto)
+                        .withForceDelete(payload.isForceDelete())
+                        .withId(payload.getResourceId())
+                        .build();
+                sendEvent(context, DELETE_CLUSTER_DEFINITION_EVENT.selector(), environmentDeletionDto);
             }
         };
     }
@@ -207,22 +247,12 @@ public class EnvDeleteActions {
                 EnvironmentDto envDto = environmentStatusUpdateService
                         .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.UMS_RESOURCE_DELETE_IN_PROGRESS,
                                 ResourceEvent.ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED, EnvDeleteState.UMS_RESOURCE_DELETE_STARTED_STATE);
-                sendEvent(context, DELETE_UMS_RESOURCE_EVENT.selector(), createEnvironmentDeletionDto(envDto, payload.isForceDelete(),
-                        payload.getResourceId()));
-            }
-        };
-    }
-
-    @Bean(name = "EVENT_CLEANUP_STARTED_STATE")
-    public Action<?, ?> eventCleanupStartedState() {
-        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
-            @Override
-            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("{} flow step is initiated.", EnvDeleteState.EVENT_CLEANUP_STARTED_STATE.name());
-                EnvironmentDto envDto = environmentStatusUpdateService
-                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.EVENT_CLEANUP_IN_PROGRESS,
-                                ResourceEvent.ENVIRONMENT_EVENT_CLEANUP_STARTED, EnvDeleteState.EVENT_CLEANUP_STARTED_STATE);
-                sendEvent(context, CLEANUP_EVENTS_EVENT.selector(), createEnvironmentDeletionDto(envDto, payload.isForceDelete(), payload.getResourceId()));
+                EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
+                        .withEnvironmentDto(envDto)
+                        .withForceDelete(payload.isForceDelete())
+                        .withId(payload.getResourceId())
+                        .build();
+                sendEvent(context, DELETE_UMS_RESOURCE_EVENT.selector(), environmentDeletionDto);
             }
         };
     }
@@ -277,14 +307,6 @@ public class EnvDeleteActions {
         };
     }
 
-    private EnvironmentDeletionDto createEnvironmentDeletionDto(EnvironmentDto envDto, boolean forceDelete, Long resourceId) {
-        return EnvironmentDeletionDto.builder()
-                .withEnvironmentDto(envDto)
-                .withForceDelete(forceDelete)
-                .withId(resourceId)
-                .build();
-    }
-
     private abstract static class AbstractEnvDeleteAction<P extends ResourceCrnPayload>
             extends AbstractAction<EnvDeleteState, EnvDeleteStateSelectors, CommonContext, P> {
 
@@ -315,7 +337,6 @@ public class EnvDeleteActions {
                 LOGGER.warn("Payload was null in prepareExecution so resourceCrn cannot be added to the MdcContext!");
             }
         }
-
     }
 
 }

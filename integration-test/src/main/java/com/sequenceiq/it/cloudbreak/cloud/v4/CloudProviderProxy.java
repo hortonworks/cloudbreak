@@ -239,11 +239,6 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public EnvironmentNetworkTestDto newNetwork(EnvironmentNetworkTestDto network) {
-        return getDelegate(network).newNetwork(network);
-    }
-
-    @Override
     public TelemetryTestDto telemetry(TelemetryTestDto telemetry) {
         return telemetry;
     }
@@ -469,9 +464,5 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public boolean verticalScalingSupported() {
         return delegate.verticalScalingSupported();
-    }
-
-    public boolean isExternalDatabaseSslEnforcementSupported() {
-        return delegate.isExternalDatabaseSslEnforcementSupported();
     }
 }

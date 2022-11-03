@@ -101,32 +101,26 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
 
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
-        return stackDtoService.getStackViewByIdOpt(getStackId()).map(MdcContextInfoProvider.class::cast);
+        return Optional.ofNullable(stackDtoService.getStackViewById(getStackId()));
     }
 
     @Override
     protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
         try {
             measure(() -> {
-                Optional<StackDto> stackOptional = stackDtoService.getByIdOpt(getStackId());
-                if (stackOptional.isEmpty()) {
-                    LOGGER.debug("Stack salt sync will be unscheduled, stack with id {} is not found", getStackId());
+                StackDto stack = stackDtoService.getById(getStackId());
+                rotateSaltPasswordService.validateRotateSaltPassword(stack);
+                Status stackStatus = stack.getStatus();
+                if (Status.getUnschedulableStatuses().contains(stackStatus)) {
+                    LOGGER.debug("Stack salt sync will be unscheduled, stack state is {}", stackStatus);
                     jobService.unschedule(context.getJobDetail().getKey());
+                } else if (null == stackStatus || IGNORED_STATES.contains(stackStatus)) {
+                    LOGGER.debug("Stack salt sync is skipped, stack state is {}", stackStatus);
+                } else if (SYNCABLE_STATES.contains(stackStatus)) {
+                    RegionAwareInternalCrnGenerator dataHub = regionAwareInternalCrnGeneratorFactory.datahub();
+                    ThreadBasedUserCrnProvider.doAs(dataHub.getInternalCrnForServiceAsString(), () -> rotateSaltPasswordIfNeeded(stack));
                 } else {
-                    StackDto stack = stackOptional.get();
-                    Status stackStatus = stack.getStatus();
-                    if (Status.getUnschedulableStatuses().contains(stackStatus)) {
-                        LOGGER.debug("Stack salt sync will be unscheduled, stack state is {}", stackStatus);
-                        jobService.unschedule(context.getJobDetail().getKey());
-                    } else if (null == stackStatus || IGNORED_STATES.contains(stackStatus)) {
-                        LOGGER.debug("Stack salt sync is skipped, stack state is {}", stackStatus);
-                    } else if (SYNCABLE_STATES.contains(stackStatus)) {
-                        rotateSaltPasswordService.validateRotateSaltPassword(stack);
-                        RegionAwareInternalCrnGenerator dataHub = regionAwareInternalCrnGeneratorFactory.datahub();
-                        ThreadBasedUserCrnProvider.doAs(dataHub.getInternalCrnForServiceAsString(), () -> rotateSaltPasswordIfNeeded(stack));
-                    } else {
-                        LOGGER.warn("Unhandled stack status, {}", stackStatus);
-                    }
+                    LOGGER.warn("Unhandled stack status, {}", stackStatus);
                 }
             }, LOGGER, "Check salt status took {} ms for stack {}.", getStackId());
         } catch (BadRequestException e) {
@@ -143,14 +137,13 @@ public class StackSaltStatusCheckerJob extends StatusCheckerJob {
             Optional<RotateSaltPasswordReason> reasonOptional = RotateSaltPasswordReason.getForStatus(status);
             if (reasonOptional.isPresent()) {
                 RotateSaltPasswordReason reason = reasonOptional.get();
-                LOGGER.info("Triggering salt password rotation for status {} with reason {}", status, reason);
+                LOGGER.info("Triggering salt password rotaiton for status {} with reason {}", status, reason);
                 rotateSaltPasswordService.triggerRotateSaltPassword(stack, reason);
             } else {
                 LOGGER.debug("Salt password rotation is not needed for status {}", status);
             }
         } catch (Exception e) {
-            String message = "Failed to get salt password status: " + e.getMessage();
-            rotateSaltPasswordService.sendFailureUsageReport(stack.getResourceCrn(), RotateSaltPasswordReason.UNSET, message);
+            rotateSaltPasswordService.sendFailureUsageReport(stack.getResourceCrn(), RotateSaltPasswordReason.UNSET, e.getMessage());
             throw e;
         }
     }
