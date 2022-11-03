@@ -345,6 +345,12 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPDATE_SALT_DATAHUB)
+    public FlowIdentifier updateSaltByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @ResourceCrn String crn) {
+        return stackOperations.updateSalt(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId());
+    }
+
+    @Override
     @CheckPermissionByResourceNameList(action = AuthorizationResourceAction.START_DATAHUB)
     public void putStartByNames(@ResourceNameList List<String> names) {
         names.forEach(this::putStartByName);

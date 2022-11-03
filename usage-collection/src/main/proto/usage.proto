@@ -222,6 +222,8 @@ message Event {
     CDPDFFlowDesignLifecycle cdpDFFlowDesignLifecycle = 106;
     // A CDP environment's proxy config is edited.
     CDPEnvironmentProxyConfigEditEvent cdpEnvironmentProxyConfigEditEvent = 107;
+    // A CDP CDW Usage Event.
+    CDPCDWUsageEvent cdpCDWUsageEvent = 108;
   }
 }
 
@@ -1570,6 +1572,13 @@ message CDPClusterStatus {
     DATABASE_UPGRADE_FINISHED = 56;
     // The status when the database server upgrade fails for a DL / DH
     DATABASE_UPGRADE_FAILED = 57;
+
+    // The status when a salt update operation on the cluster is started
+    SALT_UPDATE_STARTED = 58;
+    // The status when a salt update operation on the cluster is finished
+    SALT_UPDATE_FINISHED = 59;
+    // The status when a salt update operation on the cluster is failed
+    SALT_UPDATE_FAILED = 60;
   }
 }
 
@@ -2151,6 +2160,14 @@ message CDPDFServiceStatus {
     ROLLBACK_IN_PROGRESS = 25;
     // The status of a df service that has deployments upgrade in progress
     UPGRADE_DEPLOYMENTS_IN_PROGRESS = 26;
+    // The status of a df service that indicates that the PEM certificate renewal was requested
+    PEM_CERTIFICATE_RENEWAL_REQUESTED = 27;
+    // The status of a df service that indicates that the PEM certificate renewal is in progress
+    PEM_CERTIFICATE_RENEWAL_IN_PROGRESS = 28;
+    // The status of a df service that indicates that the PEM certificate renewal failed
+    PEM_CERTIFICATE_RENEWAL_FAILED = 29;
+    // The status of a df service that indicates that the PEM certificate renewal succeeded
+    PEM_CERTIFICATE_RENEWAL_SUCCEEDED = 30;
   }
 }
 
@@ -2824,6 +2841,44 @@ message CDPCDWResourceStatus {
   }
 }
 
+// Generic CDW Usage Event generated for different cases.
+message CDPCDWUsageEvent {
+  // The CDP account ID.
+  string accountId = 1;
+  // The CDP environment name.
+  string environmentName = 2;
+  // The CDP CDW environment type.
+  CDPEnvironmentsEnvironmentType.Value environmentType = 3;
+  // The CDP CDW cluster ID.
+  string clusterId = 4;
+  // The type of CDW resource.
+  CDPCDWResourceType.Value resourceType = 5;
+  // The id of CDW resource.
+  string resourceId = 6;
+  // The component sending the event.
+  string component = 7;
+  // The type of CDW usage event.
+  string eventType = 8;
+  // The data of CDW usage event.
+  string eventData = 9;
+}
+
+// The type of a CDW Resource.
+message CDPCDWResourceType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Environment.
+    ENVIRONMENT = 1;
+    // Database Catalog.
+    DATABASE_CATALOG = 2;
+    // Virtual Warehouse.
+    VIRTUAL_WAREHOUSE = 3;
+    // Data Visualization.
+    DATA_VISUALIZATION = 4;
+  }
+}
+
 // Generated when a CDP CDW environment create, update or upgrade has been requested.
 message CDPCDWEnvironmentRequested {
   // The ID of the CDW environment.
@@ -2840,6 +2895,8 @@ message CDPCDWEnvironmentRequested {
   string actorCrn = 6;
   // The status of the CDW environment.
   CDPCDWResourceStatus.Value status = 7;
+  // Track Enable Das Link
+  bool enableDas = 8;
 }
 
 // Generated when a CDP CDW environment's status has changed.
@@ -3160,10 +3217,18 @@ message CDPCDEJobRunStatusChanged {
   string vcId = 2;
   // ID if the job run.
   string runId = 3;
+  // Name of the user running the job(hashed)
+  string user = 8;
   // New status of the job run.
   string status = 4;
   // Details of the job run.
   CDPCDEJobDetails jobDetails = 5;
+  // Indicates when the job was started
+  uint64 started = 6;
+  // Indicates when the job run ended
+  uint64 ended = 7;
+  // Indicates the duration of the job run
+  int32 duration = 9;
 }
 
 // Generated when a CDP CDE job is created or is modified.
