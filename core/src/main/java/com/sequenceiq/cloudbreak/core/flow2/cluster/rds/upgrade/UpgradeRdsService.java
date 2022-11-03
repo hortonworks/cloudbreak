@@ -90,8 +90,8 @@ public class UpgradeRdsService {
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DATABASE_UPGRADE_IN_PROGRESS, statusReason);
     }
 
-    public void backupRds(Long stackId, String backupLocation) throws CloudbreakOrchestratorException {
-        rdsUpgradeOrchestratorService.backupRdsData(stackId, backupLocation);
+    public void backupRds(Long stackId, String backupLocation, String backupInstanceProfile) throws CloudbreakOrchestratorException {
+        rdsUpgradeOrchestratorService.backupRdsData(stackId, backupLocation, backupInstanceProfile);
     }
 
     public void restoreRds(Long stackId) throws CloudbreakOrchestratorException {

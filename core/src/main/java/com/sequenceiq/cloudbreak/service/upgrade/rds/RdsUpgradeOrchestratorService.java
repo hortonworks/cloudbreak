@@ -88,16 +88,16 @@ public class RdsUpgradeOrchestratorService {
     @Value("${cb.db.env.upgrade.rds.backuprestore.validationratio}")
     private double backupValidationRatio;
 
-    public void backupRdsData(Long stackId, String backupLocation) throws CloudbreakOrchestratorException {
+    public void backupRdsData(Long stackId, String backupLocation, String backupInstanceProfile) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = createStateParams(stackId, BACKUP_STATE, true);
-        stateParams.setStateParams(backupRestoreDBStateParamsProvider.createParamsForBackupRestore(backupLocation));
+        stateParams.setStateParams(backupRestoreDBStateParamsProvider.createParamsForBackupRestore(backupLocation, backupInstanceProfile));
         LOGGER.debug("Calling backupRdsData with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
     public void restoreRdsData(Long stackId) throws CloudbreakOrchestratorException {
         OrchestratorStateParams stateParams = createStateParams(stackId, RESTORE_STATE, true);
-        stateParams.setStateParams(backupRestoreDBStateParamsProvider.createParamsForBackupRestore(null));
+        stateParams.setStateParams(backupRestoreDBStateParamsProvider.createParamsForBackupRestore(null, null));
         LOGGER.debug("Calling restoreRdsData with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
     }

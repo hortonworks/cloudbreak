@@ -69,7 +69,8 @@ class UpgradeRdsActionsTest {
     public void testShouldAddBackupLocationIfNotNull() throws Exception {
         AbstractAction action = (AbstractAction) upgradeRdsActions.stopServicesAndCm();
         UpgradeRdsTriggerRequest triggerEvent =
-                new UpgradeRdsTriggerRequest(UpgradeRdsEvent.UPGRADE_RDS_EVENT.event(), STACK_ID, TargetMajorVersion.VERSION_11, "aLocation");
+                new UpgradeRdsTriggerRequest(UpgradeRdsEvent.UPGRADE_RDS_EVENT.event(), STACK_ID, TargetMajorVersion.VERSION_11, "aLocation",
+                        "anInstanceProfile");
         Map<Object, Object> variables = mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true);
 
         verify(upgradeRdsService).stopServicesState(STACK_ID);
@@ -81,7 +82,7 @@ class UpgradeRdsActionsTest {
     public void testShouldNotAddBackupLocationIfItIsNull() throws Exception {
         AbstractAction action = (AbstractAction) upgradeRdsActions.stopServicesAndCm();
         UpgradeRdsTriggerRequest triggerEvent =
-                new UpgradeRdsTriggerRequest(UpgradeRdsEvent.UPGRADE_RDS_EVENT.event(), STACK_ID, TargetMajorVersion.VERSION_11, null);
+                new UpgradeRdsTriggerRequest(UpgradeRdsEvent.UPGRADE_RDS_EVENT.event(), STACK_ID, TargetMajorVersion.VERSION_11, null, null);
         Map<Object, Object> variables = mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true);
 
         verify(upgradeRdsService).stopServicesState(STACK_ID);
@@ -112,8 +113,8 @@ class UpgradeRdsActionsTest {
     @Test
     public void testShouldStopServicesAlways() throws Exception {
         AbstractAction action = (AbstractAction) upgradeRdsActions.stopServicesAndCm();
-        UpgradeRdsTriggerRequest triggerEvent =
-                new UpgradeRdsTriggerRequest(UpgradeRdsEvent.UPGRADE_RDS_EVENT.event(), STACK_ID, TargetMajorVersion.VERSION_11, "aLocation");
+        UpgradeRdsTriggerRequest triggerEvent = new UpgradeRdsTriggerRequest(UpgradeRdsEvent.UPGRADE_RDS_EVENT.event(), STACK_ID,
+                TargetMajorVersion.VERSION_11, "aLocation", "anInstanceProfile");
         mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true);
 
         verify(upgradeRdsService, times(1)).stopServicesState(STACK_ID);

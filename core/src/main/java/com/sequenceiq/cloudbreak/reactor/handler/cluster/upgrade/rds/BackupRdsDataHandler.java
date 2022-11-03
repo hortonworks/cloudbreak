@@ -44,10 +44,13 @@ public class BackupRdsDataHandler extends ExceptionCatcherEventHandler<UpgradeRd
         UpgradeRdsDataBackupRequest request = event.getData();
         Long stackId = request.getResourceId();
         String backupLocation = request.getBackupLocation();
-        LOGGER.info("Starting backup for RDS upgrade {}...",
-                StringUtils.isNotBlank(backupLocation) ? "and uploading to storage location " + backupLocation :  "");
+        String backupInstanceProfile = request.getBackupInstanceProfile();
+        LOGGER.info("Starting backup for RDS upgrade {} {}...",
+                StringUtils.isNotBlank(backupLocation) ? "and uploading to storage location " + backupLocation :  "",
+                StringUtils.isNotBlank(backupInstanceProfile) ? "with using the backup instance profile " + backupInstanceProfile :  ""
+        );
         try {
-            upgradeRdsService.backupRds(stackId, backupLocation);
+            upgradeRdsService.backupRds(stackId, backupLocation, backupInstanceProfile);
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.warn("RDS backup failed due to {}", e.getMessage());
             return new UpgradeRdsFailedEvent(stackId, e, DetailedStackStatus.AVAILABLE);
