@@ -106,6 +106,9 @@ public class Json implements Serializable {
 
         JSONObject object = jsonObject;
         for (int i = 0; i < split.length - 1; i++) {
+            if (object.isEmpty()) {
+                return null;
+            }
             object = object.getJSONObject(split[i]);
         }
         return object.containsKey(split[split.length - 1]) ? (T) object.get(split[split.length - 1]) : null;
