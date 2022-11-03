@@ -21,13 +21,12 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.conf.StructuredEventSenderConfig;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
-
-import reactor.bus.Event;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KafkaStructuredEventHandlerTest {

@@ -49,7 +49,6 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.config.ConversionConfig;
-import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.environment.authorization.EnvironmentCredentialFiltering;
@@ -89,8 +88,6 @@ import com.sequenceiq.notification.HttpNotificationSenderService;
 import com.sequenceiq.notification.NotificationService;
 
 import io.opentracing.Tracer;
-import reactor.core.Dispatcher;
-import reactor.core.dispatch.SynchronousDispatcher;
 
 @ExtendWith(SpringExtension.class)
 public class CredentialExperienceTest {
@@ -350,11 +347,6 @@ public class CredentialExperienceTest {
         @Primary
         MetricService metricService() {
             return new EnvironmentMetricService();
-        }
-
-        @Bean
-        public Dispatcher dispatcher(MDCCleanerThreadPoolExecutor threadPoolExecutor) {
-            return new SynchronousDispatcher();
         }
 
     }

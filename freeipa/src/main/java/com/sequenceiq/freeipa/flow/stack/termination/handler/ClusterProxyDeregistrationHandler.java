@@ -7,14 +7,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.freeipa.flow.stack.termination.event.clusterproxy.ClusterProxyDeregistrationFinished;
 import com.sequenceiq.freeipa.flow.stack.termination.event.clusterproxy.ClusterProxyDeregistrationRequest;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class ClusterProxyDeregistrationHandler implements EventHandler<ClusterProxyDeregistrationRequest> {

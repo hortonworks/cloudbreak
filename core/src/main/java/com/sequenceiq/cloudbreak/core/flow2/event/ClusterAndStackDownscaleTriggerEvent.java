@@ -9,8 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
-
-import reactor.rx.Promise;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 
 public class ClusterAndStackDownscaleTriggerEvent extends ClusterDownscaleTriggerEvent {
     private final ScalingType scalingType;

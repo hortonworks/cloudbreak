@@ -10,8 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVariantsRequest
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVariantsResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
-
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 @Component
 public class GetPlatformVariantsHandler implements CloudPlatformEventHandler<GetPlatformVariantsRequest> {

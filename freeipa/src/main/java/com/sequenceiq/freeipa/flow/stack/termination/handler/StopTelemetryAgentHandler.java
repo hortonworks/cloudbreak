@@ -6,14 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.freeipa.flow.stack.termination.event.telemetry.StopTelemetryAgentFinished;
 import com.sequenceiq.freeipa.flow.stack.termination.event.telemetry.StopTelemetryAgentRequest;
 import com.sequenceiq.freeipa.service.telemetry.TelemetryAgentService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class StopTelemetryAgentHandler implements EventHandler<StopTelemetryAgentRequest> {

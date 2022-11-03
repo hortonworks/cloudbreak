@@ -17,15 +17,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsFlowService;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsFailedEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsSuccessEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsWaitRequest;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 class SdxDiagnosticsCollectionHandlerTest {

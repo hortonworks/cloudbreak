@@ -35,13 +35,12 @@ import org.mockito.internal.configuration.DefaultInjectionEngine;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.verification.VerificationMode;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmService;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmEvent;
 import com.sequenceiq.freeipa.service.upgrade.ccm.CcmParametersConfigService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 /**
  * This test class dynamically checks all handlers for Upgrade CCM flow where there is an operation needed in case of CCMv1 original tunnel,

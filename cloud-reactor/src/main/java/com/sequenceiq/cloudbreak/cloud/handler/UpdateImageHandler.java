@@ -16,10 +16,9 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateImageResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.common.api.type.CommonResourceType;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class UpdateImageHandler implements CloudPlatformEventHandler<UpdateImageRequest> {

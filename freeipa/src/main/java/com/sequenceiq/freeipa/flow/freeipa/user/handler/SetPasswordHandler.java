@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
@@ -30,8 +31,6 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredentialUpdate;
 import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsCredentialProvider;
 import com.sequenceiq.freeipa.service.stack.StackService;
-
-import reactor.bus.Event;
 
 @Component
 public class SetPasswordHandler implements EventHandler<SetPasswordRequest> {

@@ -18,9 +18,8 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartDownscaleStopInst
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 
 @Component
 public class StopStartDownscaleStopInstancesHandler implements CloudPlatformEventHandler<StopStartDownscaleStopInstancesRequest> {

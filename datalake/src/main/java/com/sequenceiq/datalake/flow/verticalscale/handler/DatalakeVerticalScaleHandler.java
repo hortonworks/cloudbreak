@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleEvent;
 import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleFailedEvent;
@@ -22,8 +23,6 @@ import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.VerticalScaleService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-
-import reactor.bus.Event;
 
 @Component
 public class DatalakeVerticalScaleHandler extends EventSenderAwareHandler<DatalakeVerticalScaleEvent> {

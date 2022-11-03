@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
@@ -30,8 +31,6 @@ import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 public class StopFreeIpaHandlerTest {

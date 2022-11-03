@@ -3,7 +3,6 @@ package com.sequenceiq.redbeams.service.validation;
 import java.util.Map;
 import java.util.Optional;
 
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.TagValidator;

@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CmSyncRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CmSyncResult;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -22,8 +23,6 @@ import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOper
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @Component
 public class CmSyncHandler extends ExceptionCatcherEventHandler<CmSyncRequest> {

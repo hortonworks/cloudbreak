@@ -4,12 +4,11 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyBaseStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component("legacyStructuredEventAsyncNotifier")
 public class LegacyStructuredEventAsyncNotifier implements LegacyBaseStructuredEventClient {

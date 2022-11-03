@@ -14,8 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
-
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 @Component
 public class GetPlatformNoSqlTablesHandler implements CloudPlatformEventHandler<GetPlatformNoSqlTablesRequest> {

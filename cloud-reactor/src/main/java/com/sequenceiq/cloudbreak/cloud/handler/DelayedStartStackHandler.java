@@ -23,10 +23,9 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.service.executor.DelayedExecutorService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 @ConditionalOnBean(name = DELAYED_TASK_EXECUTOR, value = DelayedExecutorService.class)

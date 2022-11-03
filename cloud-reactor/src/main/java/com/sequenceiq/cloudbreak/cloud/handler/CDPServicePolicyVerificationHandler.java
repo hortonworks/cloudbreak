@@ -21,8 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.CDPServicePolicyVerifica
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CDPServicePolicyVerificationResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CDPServicePolicyVerificationResponses;
-
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 @Component
 public class CDPServicePolicyVerificationHandler implements CloudPlatformEventHandler<CDPServicePolicyVerificationRequest> {

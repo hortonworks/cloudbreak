@@ -25,14 +25,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.ccm.termination.CcmResourceTerminationListener;
 import com.sequenceiq.cloudbreak.ccm.termination.CcmV2AgentTerminationListener;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.CcmKeyDeregisterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.CcmKeyDeregisterSuccess;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.common.api.type.Tunnel;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 class CcmKeyDeregisterHandlerTest {
@@ -175,12 +174,12 @@ class CcmKeyDeregisterHandlerTest {
     }
 
     private void checkSuccess() {
-        verify(eventBus).notify((Object) any(), eventCaptor.capture());
+        verify(eventBus).notify(any(), eventCaptor.capture());
         assertThat(eventCaptor.getValue().getData()).isInstanceOf(CcmKeyDeregisterSuccess.class);
     }
 
     private void checkFailure() {
-        verify(eventBus).notify((Object) any(), eventCaptor.capture());
+        verify(eventBus).notify(any(), eventCaptor.capture());
         assertThat(eventCaptor.getValue().getData()).isInstanceOf(StackFailureEvent.class);
     }
 }

@@ -237,6 +237,10 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             return target;
         }
 
+        public E getEvent() {
+            return event;
+        }
+
         public S getFailureState() {
             return failureState;
         }

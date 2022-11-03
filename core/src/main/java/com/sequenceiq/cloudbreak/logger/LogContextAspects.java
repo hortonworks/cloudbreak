@@ -8,9 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakCompositeEvent;
-
-import reactor.bus.Event;
 
 @Component("CloudbreakLogContextAspects")
 @Aspect

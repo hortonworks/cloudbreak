@@ -52,6 +52,8 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.cleanup.InMemoryCleanup;
 import com.sequenceiq.flow.core.FlowState.FlowStateConstants;
@@ -75,9 +77,6 @@ import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
-import reactor.bus.Event;
-import reactor.bus.Event.Headers;
-import reactor.rx.Promise;
 
 @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
 class Flow2HandlerTest {
@@ -196,7 +195,7 @@ class Flow2HandlerTest {
         MockitoAnnotations.initMocks(this);
         Map<String, Object> headers = new HashMap<>();
         headers.put(FlowConstants.FLOW_ID, FLOW_ID);
-        dummyEvent = new Event<>(new Headers(headers), payload);
+        dummyEvent = new Event<>(new Event.Headers(headers), payload);
         flowState = new OwnFlowState();
         doAnswer(invocation -> {
             ((Runnable) invocation.getArgument(0)).run();
@@ -317,9 +316,8 @@ class Flow2HandlerTest {
         given(helloWorldFlowConfig.getFlowOperationType()).willReturn(OperationType.UNKNOWN);
         given(flowTriggerCondition.isFlowTriggerable(any(Payload.class))).willReturn(FlowTriggerConditionResult.ok());
         given(flow.getCurrentState()).willReturn(flowState);
-        Event<Payload> event = new Event<>(payload);
+        Event<Payload> event = new Event<>(new Event.Headers(Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN)), payload);
         event.setKey("KEY");
-        event.getHeaders().set(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN);
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
         verify(runningFlows, times(1)).put(eq(flow), isNull(String.class));
@@ -467,7 +465,7 @@ class Flow2HandlerTest {
         Map<String, Object> headers = new HashMap<>();
         headers.put(FlowConstants.FLOW_CHAIN_ID, FLOW_CHAIN_ID);
         headers.put(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN);
-        dummyEvent = new Event<>(new Headers(headers), payload);
+        dummyEvent = new Event<>(new Event.Headers(headers), payload);
         dummyEvent.setKey("KEY");
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
@@ -490,7 +488,7 @@ class Flow2HandlerTest {
         Map<String, Object> headers = new HashMap<>();
         headers.put(FlowConstants.FLOW_CHAIN_ID, FLOW_CHAIN_ID);
         headers.put(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN);
-        dummyEvent = new Event<>(new Headers(headers), payload);
+        dummyEvent = new Event<>(new Event.Headers(headers), payload);
         dummyEvent.setKey("KEY");
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);

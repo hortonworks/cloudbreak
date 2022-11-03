@@ -4,11 +4,9 @@ import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
-
-import reactor.rx.Promise;
-import reactor.rx.Promises;
 
 public class ResourceRetrievalNotification {
 
@@ -30,7 +28,7 @@ public class ResourceRetrievalNotification {
         this.resourceReferences = resourceReferences;
         this.status = status;
         this.resourceType = resourceType;
-        this.promise = Promises.prepare();
+        this.promise = Promise.prepare();
         this.stackId = stackId;
     }
 

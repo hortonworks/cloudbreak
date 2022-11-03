@@ -12,8 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesR
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
-
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 @Component
 public class CredentialPrerequisitesHandler implements CloudPlatformEventHandler<CredentialPrerequisitesRequest> {

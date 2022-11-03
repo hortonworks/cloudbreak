@@ -22,14 +22,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.telemetry.diagnostics.DiagnosticsOperationsService;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsFlowException;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionEvent;
-
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 public class DiagnosticsInitHandlerTest {

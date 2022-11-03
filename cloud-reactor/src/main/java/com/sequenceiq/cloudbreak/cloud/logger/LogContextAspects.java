@@ -16,11 +16,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
-
-import reactor.bus.Event;
 
 @Component("CloudLogContextAspects")
 @Aspect

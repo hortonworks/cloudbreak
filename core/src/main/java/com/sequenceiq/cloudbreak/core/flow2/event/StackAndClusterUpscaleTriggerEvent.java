@@ -11,9 +11,8 @@ import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
-
-import reactor.rx.Promise;
 
 public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
 

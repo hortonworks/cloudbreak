@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.Timer;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,6 +25,8 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.service.StackCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -32,9 +34,6 @@ import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import io.opentracing.SpanContext;
-import reactor.bus.Event;
-import reactor.bus.EventBus;
-import reactor.fn.timer.Timer;
 
 @ExtendWith(MockitoExtension.class)
 public class CheckImageActionTest {
@@ -83,8 +82,8 @@ public class CheckImageActionTest {
         underTest.doExecute(stackContext, stackEvent, variables);
 
         assertEquals(0, variables.get(IMAGE_COPY_FAULT_NUM));
-        verify(timer).submit(any(), eq(REPEAT_WAIT_TIME), eq(TimeUnit.MILLISECONDS));
-        verify(eventBus, never()).notify((Object) any(), any(Event.class));
+        verify(timer).schedule(any(), eq(REPEAT_WAIT_TIME));
+        verify(eventBus, never()).notify(any(), any(Event.class));
     }
 
     @Test
@@ -98,7 +97,7 @@ public class CheckImageActionTest {
 
         underTest.doExecute(stackContext, stackEvent, variables);
 
-        verify(eventBus).notify((Object) any(), any(Event.class));
+        verify(eventBus).notify(any(), any(Event.class));
     }
 
     @Test
@@ -110,8 +109,8 @@ public class CheckImageActionTest {
         underTest.doExecute(stackContext, stackEvent, variables);
 
         assertEquals(1, variables.get(IMAGE_COPY_FAULT_NUM));
-        verify(timer).submit(any(), anyLong(), any());
-        verify(eventBus, never()).notify((Object) any(), any(Event.class));
+        verify(timer).schedule(any(), anyLong());
+        verify(eventBus, never()).notify(any(), any(Event.class));
     }
 
     @Test
@@ -126,8 +125,8 @@ public class CheckImageActionTest {
         );
 
         assertNull(variables.get(IMAGE_COPY_FAULT_NUM));
-        verify(timer, never()).submit(any(), anyLong(), any());
-        verify(eventBus, never()).notify((Object) any(), any(Event.class));
+        verify(timer, never()).schedule(any(), anyLong());
+        verify(eventBus, never()).notify(any(), any(Event.class));
     }
 
     @Test
@@ -139,8 +138,8 @@ public class CheckImageActionTest {
         underTest.doExecute(stackContext, stackEvent, variables);
 
         assertEquals(0, variables.get(IMAGE_COPY_FAULT_NUM));
-        verify(timer).submit(any(), eq(REPEAT_WAIT_TIME), eq(TimeUnit.MILLISECONDS));
-        verify(eventBus, never()).notify((Object) any(), any(Event.class));
+        verify(timer).schedule(any(), eq(REPEAT_WAIT_TIME));
+        verify(eventBus, never()).notify(any(), any(Event.class));
     }
 
 }

@@ -11,8 +11,6 @@ import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.reactor.config.EventBusConfig;
 
-import reactor.bus.EventBus;
-
 class ContextClosedEventHandlerTest {
 
     public static final String TEST_PROFILE = "test";
@@ -27,13 +25,10 @@ class ContextClosedEventHandlerTest {
 
         MDCCleanerThreadPoolExecutor eventBusThreadPoolExecutor = applicationContext.getBean("eventBusThreadPoolExecutor", MDCCleanerThreadPoolExecutor.class);
         Assertions.assertFalse(eventBusThreadPoolExecutor.isShutdown());
-        EventBus eventBus = applicationContext.getBean(EventBus.class);
-        Assertions.assertTrue(eventBus.getDispatcher().alive());
 
         applicationContext.close();
 
         Assertions.assertTrue(eventBusThreadPoolExecutor.isShutdown());
-        Assertions.assertFalse(eventBus.getDispatcher().alive());
     }
 
     @TestComponent

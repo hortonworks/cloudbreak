@@ -33,6 +33,8 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
@@ -61,10 +63,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-
-import reactor.bus.Event;
-import reactor.bus.Event.Headers;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 public class FreeIpaCreationHandlerTest {
@@ -165,7 +163,7 @@ public class FreeIpaCreationHandlerTest {
                 = ArgumentCaptor.forClass(AttachChildEnvironmentRequest.class);
         verify(dnsV1Endpoint).addDnsZoneForSubnets(addDnsZoneForSubnetsRequestArgumentCaptor.capture());
         verify(freeIpaService).attachChildEnvironment(attachChildEnvironmentRequestArgumentCaptor.capture());
-        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Headers.class));
+        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
 
         assertEquals(PARENT_ENVIRONMENT_CRN, addDnsZoneForSubnetsRequestArgumentCaptor.getValue().getEnvironmentCrn());
         assertEquals(Collections.singletonList(YARN_NETWORK_CIDR), addDnsZoneForSubnetsRequestArgumentCaptor.getValue().getSubnets());
@@ -185,7 +183,7 @@ public class FreeIpaCreationHandlerTest {
 
         verify(dnsV1Endpoint, never()).addDnsZoneForSubnets(any(AddDnsZoneForSubnetsRequest.class));
         verify(freeIpaService, never()).attachChildEnvironment(any(AttachChildEnvironmentRequest.class));
-        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Headers.class));
+        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
     }
 
     @Test
@@ -199,7 +197,7 @@ public class FreeIpaCreationHandlerTest {
 
         verify(dnsV1Endpoint, never()).addDnsZoneForSubnets(any(AddDnsZoneForSubnetsRequest.class));
         verify(freeIpaService, never()).attachChildEnvironment(any(AttachChildEnvironmentRequest.class));
-        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Headers.class));
+        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
     }
 
     @ParameterizedTest
@@ -255,11 +253,11 @@ public class FreeIpaCreationHandlerTest {
         Double spotMaxPrice = 0.9;
         environmentDto.getFreeIpaCreation()
                 .setAws(FreeIpaCreationAwsParametersDto.builder()
-                .withSpot(FreeIpaCreationAwsSpotParametersDto.builder()
-                        .withMaxPrice(spotMaxPrice)
-                        .withPercentage(spotPercentage)
-                        .build())
-                .build());
+                        .withSpot(FreeIpaCreationAwsSpotParametersDto.builder()
+                                .withMaxPrice(spotMaxPrice)
+                                .withPercentage(spotPercentage)
+                                .build())
+                        .build());
         environmentDto.setCredential(new Credential());
 
         ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()

@@ -17,14 +17,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.flow.stack.update.event.UserDataUpdateRequest;
 import com.sequenceiq.freeipa.flow.stack.update.event.UserDataUpdateSuccess;
 import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 class UpdateUserDataHandlerTest {

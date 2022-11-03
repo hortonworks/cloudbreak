@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -14,8 +15,6 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.Orchestr
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigSuccess;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaOrchestrationConfigService;
-
-import reactor.bus.Event;
 
 @Component
 public class OrchestratorConfigHandler extends ExceptionCatcherEventHandler<OrchestratorConfigRequest> {

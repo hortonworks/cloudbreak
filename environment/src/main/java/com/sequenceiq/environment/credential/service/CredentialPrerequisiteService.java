@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesR
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
@@ -31,8 +32,6 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.user.UserPreferencesService;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-
-import reactor.bus.EventBus;
 
 @Service
 public class CredentialPrerequisiteService {

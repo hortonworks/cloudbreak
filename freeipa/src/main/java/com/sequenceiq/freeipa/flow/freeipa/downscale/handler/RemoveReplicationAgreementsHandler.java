@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -21,8 +22,6 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removereplication.Rem
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removereplication.RemoveReplicationAgreementsResponse;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaTopologyService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-
-import reactor.bus.Event;
 
 @Component
 public class RemoveReplicationAgreementsHandler extends ExceptionCatcherEventHandler<RemoveReplicationAgreementsRequest> {

@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -17,8 +18,6 @@ import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltP
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordSuccessResponse;
 import com.sequenceiq.freeipa.orchestrator.RotateSaltPasswordService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-
-import reactor.bus.Event;
 
 @Component
 public class RotateSaltPasswordHandler extends ExceptionCatcherEventHandler<RotateSaltPasswordRequest> {

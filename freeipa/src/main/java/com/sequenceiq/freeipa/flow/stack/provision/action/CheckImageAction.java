@@ -2,7 +2,8 @@ package com.sequenceiq.freeipa.flow.stack.provision.action;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.inject.Inject;
 
@@ -19,8 +20,6 @@ import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.PrepareImageResultToStackEventConverter;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent;
-
-import reactor.fn.timer.Timer;
 
 @Component("CheckImageAction")
 public class CheckImageAction extends AbstractStackProvisionAction<StackEvent> {
@@ -85,8 +84,17 @@ public class CheckImageAction extends AbstractStackProvisionAction<StackEvent> {
     }
 
     private void repeat(StackContext context) {
-        timer.submit(aLong -> sendEvent(context, new StackEvent(getRepeatEvent().event(),
-                context.getStack().getId())), REPEAT_TIME, TimeUnit.MILLISECONDS);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    sendEvent(context, new StackEvent(getRepeatEvent().event(),
+                            context.getStack().getId()));
+                } catch (Exception e) {
+                    LOGGER.error("{}", e.getMessage(), e);
+                }
+            }
+        }, REPEAT_TIME);
     }
 
     protected FlowEvent getRepeatEvent() {

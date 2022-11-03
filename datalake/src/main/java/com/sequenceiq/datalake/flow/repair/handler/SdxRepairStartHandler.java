@@ -7,14 +7,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairCouldNotStartEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairInProgressEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartRequest;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @Component
 public class SdxRepairStartHandler extends ExceptionCatcherEventHandler<SdxRepairStartRequest> {

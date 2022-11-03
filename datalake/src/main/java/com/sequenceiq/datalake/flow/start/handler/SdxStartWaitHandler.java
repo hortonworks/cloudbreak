@@ -13,6 +13,7 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.datalake.flow.start.event.SdxStartFailedEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartSuccessEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartWaitRequest;
@@ -20,8 +21,6 @@ import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.start.SdxStartService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @Component
 public class SdxStartWaitHandler extends ExceptionCatcherEventHandler<SdxStartWaitRequest> {

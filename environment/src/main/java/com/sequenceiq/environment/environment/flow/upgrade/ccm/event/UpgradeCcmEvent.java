@@ -3,9 +3,8 @@ package com.sequenceiq.environment.environment.flow.upgrade.ccm.event;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
-
-import reactor.rx.Promise;
 
 @JsonDeserialize(builder = UpgradeCcmEvent.Builder.class)
 public class UpgradeCcmEvent extends BaseNamedFlowEvent {

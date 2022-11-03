@@ -14,9 +14,8 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 
 @Component
 public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupRequest> {

@@ -21,10 +21,9 @@ import com.sequenceiq.cloudbreak.cloud.handler.CloudPlatformEventHandler;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.freeipa.flow.stack.migration.handler.service.ResourceRecreator;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class CreateResourcesHandler implements CloudPlatformEventHandler<CreateResourcesRequest> {

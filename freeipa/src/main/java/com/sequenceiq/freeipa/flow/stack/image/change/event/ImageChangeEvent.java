@@ -6,10 +6,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
-
-import reactor.rx.Promise;
 
 public class ImageChangeEvent extends StackEvent {
 

@@ -4,9 +4,8 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
-
-import reactor.rx.Promise;
 
 public class TerminationEvent extends StackEvent {
 

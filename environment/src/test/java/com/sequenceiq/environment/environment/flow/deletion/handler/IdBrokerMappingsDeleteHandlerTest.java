@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -33,7 +34,6 @@ import com.sequenceiq.flow.reactor.api.event.EventSender;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 class IdBrokerMappingsDeleteHandlerTest {

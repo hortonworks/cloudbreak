@@ -15,14 +15,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerRequest;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 class DeregisterDatabaseServerHandlerTest {
@@ -60,7 +59,7 @@ class DeregisterDatabaseServerHandlerTest {
         underTest.accept(event);
 
         verify(databaseServerConfigService).delete(databaseServerConfig);
-        verify(eventBus).notify(any(Object.class), any(Event.class));
+        verify(eventBus).notify(any(), any(Event.class));
     }
 
     @Test
@@ -76,7 +75,7 @@ class DeregisterDatabaseServerHandlerTest {
         underTest.accept(event);
 
         verify(databaseServerConfigService, times(0)).delete(any());
-        verify(eventBus).notify(any(Object.class), any(Event.class));
+        verify(eventBus).notify(any(), any(Event.class));
     }
 
     private void mockDeregisterEvent() {

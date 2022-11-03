@@ -9,13 +9,12 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.ccm.termination.CcmResourceTerminationListener;
 import com.sequenceiq.cloudbreak.ccm.termination.CcmV2AgentTerminationListener;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.freeipa.flow.stack.termination.event.ccm.CcmKeyDeregistrationFinished;
 import com.sequenceiq.freeipa.flow.stack.termination.event.ccm.CcmKeyDeregistrationRequest;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class CcmKeyDeregistrationHandler implements EventHandler<CcmKeyDeregistrationRequest> {

@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -31,8 +32,6 @@ import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.Termina
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.TerminateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.TerminateDatabaseServerSuccess;
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
-
-import reactor.bus.Event;
 
 @Component
 public class TerminateDatabaseServerHandler extends ExceptionCatcherEventHandler<TerminateDatabaseServerRequest> {

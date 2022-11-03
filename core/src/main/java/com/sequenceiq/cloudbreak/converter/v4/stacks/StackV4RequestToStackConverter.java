@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
-import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -176,7 +175,7 @@ public class StackV4RequestToStackConverter {
         Stack stack = new Stack();
         stack.setEnvironmentCrn(source.getEnvironmentCrn());
         DetailedEnvironmentResponse environment = null;
-        if (!StringUtils.isEmpty(source.getEnvironmentCrn())) {
+        if (!isEmpty(source.getEnvironmentCrn())) {
             environment = measure(() -> environmentClientService.getByCrn(source.getEnvironmentCrn()),
                     LOGGER, "Environment responded in {} ms for stack {}", source.getName());
         }
@@ -258,7 +257,7 @@ public class StackV4RequestToStackConverter {
             stack.setHostgroupNameAsHostname(source.getCustomDomain().isHostgroupNameAsHostname());
         }
         // Host names shall be prefixed with stack name if not configured otherwise
-        if (StringUtils.isEmpty(stack.getCustomHostname())) {
+        if (isEmpty(stack.getCustomHostname())) {
             stack.setCustomHostname(stack.getName());
         }
     }
@@ -356,8 +355,8 @@ public class StackV4RequestToStackConverter {
     }
 
     private void validateStackAuthentication(StackV4Request source) {
-        if (StringUtils.isEmpty(source.getAuthentication().getPublicKey())
-                && StringUtils.isEmpty(source.getAuthentication().getPublicKeyId())) {
+        if (isEmpty(source.getAuthentication().getPublicKey())
+                && isEmpty(source.getAuthentication().getPublicKeyId())) {
             throw new BadRequestException("You should define the publickey or publickeyid!");
         } else if (source.getAuthentication().getLoginUserName() != null) {
             throw new BadRequestException("You can not modify the default user!");
@@ -475,7 +474,7 @@ public class StackV4RequestToStackConverter {
     }
 
     private void setUpMock(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
-        if (!StringUtils.isEmpty(subnetId)) {
+        if (!isEmpty(subnetId)) {
             InstanceGroupMockNetworkV4Parameters mock = new InstanceGroupMockNetworkV4Parameters();
             mock.setSubnetIds(List.of(subnetId));
             instanceGroupNetworkV4Request.setMock(mock);
@@ -490,7 +489,7 @@ public class StackV4RequestToStackConverter {
     }
 
     private void setUpGcp(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
-        if (!StringUtils.isEmpty(subnetId)) {
+        if (!isEmpty(subnetId)) {
             InstanceGroupGcpNetworkV4Parameters gcp = new InstanceGroupGcpNetworkV4Parameters();
             gcp.setSubnetIds(List.of(subnetId));
             instanceGroupNetworkV4Request.setGcp(gcp);
@@ -508,7 +507,7 @@ public class StackV4RequestToStackConverter {
     }
 
     private void setUpAws(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
-        if (!StringUtils.isEmpty(subnetId)) {
+        if (!isEmpty(subnetId)) {
             InstanceGroupAwsNetworkV4Parameters aws = new InstanceGroupAwsNetworkV4Parameters();
             aws.setSubnetIds(List.of(subnetId));
             instanceGroupNetworkV4Request.setAws(aws);

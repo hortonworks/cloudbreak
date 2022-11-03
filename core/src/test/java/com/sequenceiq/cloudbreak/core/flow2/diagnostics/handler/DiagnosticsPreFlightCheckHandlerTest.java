@@ -27,10 +27,9 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsFlowException;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsFlowService;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionEvent;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import reactor.bus.Event;
 
 @ExtendWith(MockitoExtension.class)
 public class DiagnosticsPreFlightCheckHandlerTest {

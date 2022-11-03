@@ -49,13 +49,12 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stopstart.RecoveryCandidateCollectionService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @ExtendWith(MockitoExtension.class)
 class StopStartDownscaleGetRecoveryCandidatesHandlerTest {
@@ -147,7 +146,7 @@ class StopStartDownscaleGetRecoveryCandidatesHandlerTest {
 
         underTest.accept(event);
 
-        verify(eventBus).notify(any(Object.class), argumentCaptor.capture());
+        verify(eventBus).notify(any(), argumentCaptor.capture());
         Event resultEvent = argumentCaptor.getValue();
         StopStartDownscaleGetRecoveryCandidatesResult result = (StopStartDownscaleGetRecoveryCandidatesResult) resultEvent.getData();
 
@@ -172,7 +171,7 @@ class StopStartDownscaleGetRecoveryCandidatesHandlerTest {
 
         underTest.accept(event);
 
-        verify(eventBus).notify(any(Object.class), argumentCaptor.capture());
+        verify(eventBus).notify(any(), argumentCaptor.capture());
         Event resultEvent = argumentCaptor.getValue();
         StopStartDownscaleGetRecoveryCandidatesResult result = (StopStartDownscaleGetRecoveryCandidatesResult) resultEvent.getData();
 
@@ -195,7 +194,7 @@ class StopStartDownscaleGetRecoveryCandidatesHandlerTest {
 
         underTest.accept(event);
 
-        verify(eventBus).notify(any(Object.class), argumentCaptor.capture());
+        verify(eventBus).notify(any(), argumentCaptor.capture());
         Event resultEvent = argumentCaptor.getValue();
         StopStartDownscaleGetRecoveryCandidatesResult result = (StopStartDownscaleGetRecoveryCandidatesResult) resultEvent.getData();
 
@@ -217,7 +216,7 @@ class StopStartDownscaleGetRecoveryCandidatesHandlerTest {
 
         underTest.accept(event);
 
-        verify(eventBus).notify(any(Object.class), argumentCaptor.capture());
+        verify(eventBus).notify(any(), argumentCaptor.capture());
         Event resultEvent = argumentCaptor.getValue();
         StopStartDownscaleGetRecoveryCandidatesResult result = (StopStartDownscaleGetRecoveryCandidatesResult) resultEvent.getData();
 

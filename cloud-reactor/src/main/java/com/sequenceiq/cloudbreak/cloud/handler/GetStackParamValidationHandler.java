@@ -10,8 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetStackParamValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetStackParamValidationResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-
-import reactor.bus.Event;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 @Component
 public class GetStackParamValidationHandler implements CloudPlatformEventHandler<GetStackParamValidationRequest> {

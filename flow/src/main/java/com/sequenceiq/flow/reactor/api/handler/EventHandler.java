@@ -1,7 +1,8 @@
 package com.sequenceiq.flow.reactor.api.handler;
 
-import reactor.bus.Event;
-import reactor.fn.Consumer;
+import java.util.function.Consumer;
+
+import com.sequenceiq.cloudbreak.eventbus.Event;
 
 /**
  * @deprecated Please use {@link ExceptionCatcherEventHandler}

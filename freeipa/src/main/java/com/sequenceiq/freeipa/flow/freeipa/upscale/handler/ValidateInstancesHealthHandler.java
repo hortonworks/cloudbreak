@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -30,8 +31,6 @@ import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
-
-import reactor.bus.Event;
 
 @Component
 public class ValidateInstancesHealthHandler extends ExceptionCatcherEventHandler<ValidateInstancesHealthEvent> {

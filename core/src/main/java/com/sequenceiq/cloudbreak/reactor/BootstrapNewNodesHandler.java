@@ -7,13 +7,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesResult;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class BootstrapNewNodesHandler implements EventHandler<BootstrapNewNodesRequest> {

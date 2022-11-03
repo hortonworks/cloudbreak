@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -15,8 +16,6 @@ import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.BackupDatabaseServerR
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.BackupDatabaseServerSuccess;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsUpgradeFailedEvent;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
-
-import reactor.bus.Event;
 
 @Component
 public class BackupDatabaseServerHandler extends ExceptionCatcherEventHandler<BackupDatabaseServerRequest> {
