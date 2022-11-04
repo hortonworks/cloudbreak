@@ -311,7 +311,7 @@ public class GcpClientActions extends GcpClient {
              * Duplicate directory blobs are omitted.
              */
             blobs = storage
-                    .list(bucketName, BlobListOption.prefix(keyPrefix + "/"), BlobListOption.currentDirectory());
+                    .list(bucketName, BlobListOption.prefix(keyPrefix + "/"));
         } catch (Exception e) {
             Log.error(LOGGER, format("GCP GCS bucket '%s' is not present or accessible at base location '%s'", bucketName, baseLocationUri), e);
             throw new TestFailException(format("GCP GCS bucket '%s' is not present or accessible at base location '%s'", bucketName, baseLocationUri), e);
