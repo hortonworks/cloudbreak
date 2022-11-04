@@ -39,6 +39,8 @@ import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationSta
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.service.freeipa.user.EnvironmentUserSyncStateCalculator;
 import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
+import com.sequenceiq.freeipa.service.freeipa.user.PostUserSyncService;
+import com.sequenceiq.freeipa.service.freeipa.user.PreUserSyncService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncRequestFilter;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
@@ -62,6 +64,12 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Inject
     private EnvironmentUserSyncStateCalculator environmentUserSyncStateCalculator;
+
+    @Inject
+    private PreUserSyncService preUserSyncService;
+
+    @Inject
+    private PostUserSyncService postUserSyncService;
 
     @Override
     @CustomPermissionCheck
@@ -159,8 +167,25 @@ public class UserV1Controller implements UserV1Endpoint {
     public EnvironmentUserSyncState getUserSyncState(@ResourceCrn @TenantAwareParam @NotEmpty String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Crn envCrn = Crn.safeFromString(environmentCrn);
-
         return environmentUserSyncStateCalculator.calculateEnvironmentUserSyncState(accountId, envCrn);
+    }
+
+    @Override
+    @InternalOnly
+    public SyncOperationStatus preSynchronize(@TenantAwareParam String environmentCrn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        Operation operation = preUserSyncService.runUserSyncTasks(environmentCrn, accountId);
+        SyncOperationStatus syncOperationStatus = operationToSyncOperationStatus.convert(operation);
+        return checkOperationRejected(syncOperationStatus);
+    }
+
+    @Override
+    @InternalOnly
+    public SyncOperationStatus postSynchronize(@TenantAwareParam String environmentCrn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        Operation operation = postUserSyncService.runUserSyncTasks(environmentCrn, accountId);
+        SyncOperationStatus syncOperationStatus = operationToSyncOperationStatus.convert(operation);
+        return checkOperationRejected(syncOperationStatus);
     }
 
     private String determineAccountId(String callingActor, String requestedAccountId) {
