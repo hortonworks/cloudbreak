@@ -211,4 +211,12 @@ public interface DatabaseServerV4Endpoint {
             @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotEmpty @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn,
             @Valid @NotNull @ApiParam(DatabaseServerParamDescriptions.UPGRADE_DATABASE_SERVER_REQUEST) UpgradeDatabaseServerV4Request request);
 
+    @PUT
+    @Path("{crn}/validate_upgrade")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DatabaseServerOpDescription.VALIDATE_UPGRADE, notes = DatabaseServerNotes.VALIDATE_UPGRADE,
+            consumes = MediaType.APPLICATION_JSON, nickname = "validateUpgradeDatabaseServer")
+    UpgradeDatabaseServerV4Response validateUpgrade(
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotEmpty @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn,
+            @Valid @NotNull @ApiParam(DatabaseServerParamDescriptions.VALIDATE_UPGRADE_DATABASE_SERVER_REQUEST) UpgradeDatabaseServerV4Request request);
 }

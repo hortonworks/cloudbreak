@@ -6,6 +6,9 @@ public final class ModelDescriptions {
 
     public static final String UPGRADE_DATABASE_SERVER_REQUEST = "Request for upgrading a database server in a provider to a higher major version";
     public static final String UPGRADE_DATABASE_SERVER_RESPONSE = "Response for upgrading a database server";
+    public static final String VALIDATE_UPGRADE_DATABASE_SERVER_REQUEST =
+            "Request for validating the upgrade of the database server in a provider to a higher major version";
+    public static final String VALIDATE_UPGRADE_DATABASE_SERVER_RESPONSE = "Response for validating the upgrade of the database server";
     public static final String SSL_CONFIG_REQUEST = "Request for the SSL config of a database server";
     public static final String CREATE_DATABASE_REQUEST = "Request for creating a new database on a registered database server";
     public static final String CREATE_DATABASE_RESPONSE = "Response for creating a new database on a registered database server";

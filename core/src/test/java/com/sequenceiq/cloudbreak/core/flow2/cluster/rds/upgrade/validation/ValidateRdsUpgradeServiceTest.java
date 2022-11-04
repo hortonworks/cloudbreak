@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -52,6 +54,9 @@ class ValidateRdsUpgradeServiceTest {
     @Mock
     private ClusterView cluster;
 
+    @Mock
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
     @InjectMocks
     private ValidateRdsUpgradeService underTest;
 
@@ -68,6 +73,7 @@ class ValidateRdsUpgradeServiceTest {
     @Test
     public void testValidateRdsUpgradeFailedWithException() {
         Exception exception = new RuntimeException("Could not determine database size.");
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any(Exception.class))).thenReturn(exception.getMessage());
 
         underTest.validateRdsUpgradeFailed(STACK_ID, CLUSTER_ID, exception);
 
@@ -112,5 +118,16 @@ class ValidateRdsUpgradeServiceTest {
                 eq(VALIDATE_BACKUP_STATE));
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
                 eq(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_BACKUP_VALIDATION));
+    }
+
+    @Test
+    public void testValidateOnCloudProvider() {
+        when(messagesService.getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_ON_CLOUDPROVIDER.getMessage())).thenReturn("message");
+        underTest.validateOnCloudProvider(STACK_ID);
+
+        verify(stackUpdater).updateStackStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_UPGRADE_VALIDATION_IN_PROGRESS),
+                eq("message"));
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
+                eq(ResourceEvent.CLUSTER_RDS_UPGRADE_VALIDATION_ON_CLOUDPROVIDER));
     }
 }

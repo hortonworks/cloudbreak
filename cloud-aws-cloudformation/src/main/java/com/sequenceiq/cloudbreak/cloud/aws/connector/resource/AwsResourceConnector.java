@@ -18,6 +18,7 @@ import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.AwsRdsUpgradeService;
+import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsUpgradeValidatorService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -37,6 +38,7 @@ import freemarker.template.Configuration;
 
 @Service
 public class AwsResourceConnector implements ResourceConnector {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsResourceConnector.class);
 
     private static final List<String> CAPABILITY_IAM = singletonList("CAPABILITY_IAM");
@@ -79,6 +81,9 @@ public class AwsResourceConnector implements ResourceConnector {
     private AwsRdsUpgradeService awsRdsUpgradeService;
 
     @Inject
+    private AwsRdsUpgradeValidatorService awsRdsUpgradeValidatorService;
+
+    @Inject
     private AwsTerminateService awsTerminateService;
 
     @Inject
@@ -117,6 +122,12 @@ public class AwsResourceConnector implements ResourceConnector {
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext ac, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier) throws Exception {
         return awsRdsLaunchService.launch(ac, stack, persistenceNotifier);
+    }
+
+    @Override
+    public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier,
+            TargetMajorVersion targetMajorVersion) throws Exception {
+        awsRdsUpgradeValidatorService.validateCustomPropertiesAdded(authenticatedContext, stack);
     }
 
     @Override
