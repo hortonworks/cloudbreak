@@ -21,10 +21,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -45,13 +42,9 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
-import com.sequenceiq.freeipa.client.FreeIpaClient;
-import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.configuration.BatchPartitionSizeProperties;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -89,25 +82,13 @@ public class UserSyncServiceTest {
     private EntitlementService entitlementService;
 
     @Mock
-    private FreeIpaClientFactory freeIpaClientFactory;
-
-    @Mock
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @Mock
-    private FreeIpaClient freeIpaClient;
-
-    @Mock
-    private BatchPartitionSizeProperties batchPartitionSizeProperties;
-
-    @Mock
     private ExecutorService asyncTaskExecutor;
-
-    @Mock
-    private ScheduledExecutorService scheduledExecutorService;
 
     @Mock
     private UserSyncForEnvService userSyncForEnvService;
@@ -118,14 +99,11 @@ public class UserSyncServiceTest {
     @Mock
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
 
+    @Mock
+    private TimeoutTaskScheduler timeoutTaskScheduler;
+
     @InjectMocks
     private UserSyncService underTest;
-
-    @Before
-    public void setup() throws FreeIpaClientException {
-        when(batchPartitionSizeProperties.getByOperation(anyString())).thenReturn(100);
-        when(freeIpaClientFactory.getFreeIpaClientForStack(any())).thenReturn(freeIpaClient);
-    }
 
     @Test
     public void testSyncUsers() {
@@ -303,8 +281,6 @@ public class UserSyncServiceTest {
         when(userSyncStatusService.getOrCreateForStack(stack)).thenReturn(userSyncStatus);
         when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         when(entitlementService.isFmsToFreeipaBatchCallEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
-        when(entitlementService.isUserSyncThreadTimeoutEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
-        ReflectionTestUtils.setField(underTest, "operationTimeout", TIMEOUT);
         Future<?> usersyncTask = mock(Future.class);
         doAnswer(inv -> {
             Runnable runnable = inv.getArgument(0, Runnable.class);
@@ -313,12 +289,6 @@ public class UserSyncServiceTest {
             runnable.run();
             return usersyncTask;
         }).when(asyncTaskExecutor).submit(any(Runnable.class));
-        doAnswer(inv -> {
-            Runnable runnable = inv.getArgument(0, Runnable.class);
-            runnable.run();
-            return null;
-        }).when(scheduledExecutorService).schedule(any(Runnable.class), eq(TIMEOUT), eq(TimeUnit.MILLISECONDS));
-        when(usersyncTask.isDone()).thenReturn(Boolean.TRUE);
 
         Operation result = underTest.synchronizeUsers(ACCOUNT_ID, ACTOR_CRN, Set.of(), Set.of(), Set.of(), WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
 
@@ -338,10 +308,6 @@ public class UserSyncServiceTest {
         assertTrue(userSyncOptions.isFullSync());
         assertTrue(userSyncOptions.isCredentialsUpdateOptimizationEnabled());
         assertTrue(userSyncOptions.isFmsToFreeIpaBatchCallEnabled());
-        verify(usersyncTask, never()).cancel(true);
-        verify(usersyncTask, never()).cancel(false);
-        verify(usersyncTask).isCancelled();
-        verify(usersyncTask).isDone();
         verify(operationService, never()).timeout(anyString(), anyString());
     }
 
@@ -366,7 +332,6 @@ public class UserSyncServiceTest {
         when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         when(entitlementService.isFmsToFreeipaBatchCallEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         when(entitlementService.isUserSyncThreadTimeoutEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
-        ReflectionTestUtils.setField(underTest, "operationTimeout", TIMEOUT);
         Future<?> usersyncTask = mock(Future.class);
         doAnswer(inv -> {
             Runnable runnable = inv.getArgument(0, Runnable.class);
@@ -375,11 +340,7 @@ public class UserSyncServiceTest {
             runnable.run();
             return usersyncTask;
         }).when(asyncTaskExecutor).submit(any(Runnable.class));
-        doAnswer(inv -> {
-            Runnable runnable = inv.getArgument(0, Runnable.class);
-            runnable.run();
-            return null;
-        }).when(scheduledExecutorService).schedule(any(Runnable.class), eq(TIMEOUT), eq(TimeUnit.MILLISECONDS));
+        ReflectionTestUtils.setField(underTest, "operationTimeout", TIMEOUT);
 
         Operation result = underTest.synchronizeUsers(ACCOUNT_ID, ACTOR_CRN, Set.of(), Set.of(), Set.of(), WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
 
@@ -399,11 +360,7 @@ public class UserSyncServiceTest {
         assertTrue(userSyncOptions.isFullSync());
         assertTrue(userSyncOptions.isCredentialsUpdateOptimizationEnabled());
         assertTrue(userSyncOptions.isFmsToFreeIpaBatchCallEnabled());
-        verify(usersyncTask).cancel(true);
-        verify(usersyncTask, never()).cancel(false);
-        verify(usersyncTask).isCancelled();
-        verify(usersyncTask).isDone();
-        verify(operationService).timeout(operation.getOperationId(), ACCOUNT_ID);
+        verify(timeoutTaskScheduler).scheduleTimeoutTask(operation.getOperationId(), ACCOUNT_ID, usersyncTask, TIMEOUT);
     }
 
     private Operation createRunningOperation() {

@@ -2,13 +2,10 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,14 +42,14 @@ public class UserSyncService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserSyncService.class);
 
-    @Value("#{${freeipa.operation.cleanup.timeout-millis} * 0.95 }")
-    private Long operationTimeout;
-
     @Value("${freeipa.usersync.scale.large-group.size}")
     private int largeGroupThreshold;
 
     @Value("${freeipa.usersync.scale.large-group.limit}")
     private int largeGroupLimit;
+
+    @Value("#{${freeipa.operation.cleanup.timeout-millis} * 0.95 }")
+    private Long operationTimeout;
 
     @Inject
     private StackService stackService;
@@ -63,10 +60,6 @@ public class UserSyncService {
     @Inject
     @Qualifier(UsersyncConfig.USERSYNC_EXTERNAL_TASK_EXECUTOR)
     private ExecutorService usersyncExternalTaskExecutor;
-
-    @Inject
-    @Qualifier(UsersyncConfig.USERSYNC_TIMEOUT_TASK_EXECUTOR)
-    private ScheduledExecutorService timeoutTaskExecutor;
 
     @Inject
     private UserSyncStatusService userSyncStatusService;
@@ -88,6 +81,9 @@ public class UserSyncService {
 
     @Inject
     private CustomCheckUtil customCheckUtil;
+
+    @Inject
+    private TimeoutTaskScheduler timeoutTaskScheduler;
 
     public Operation synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter, WorkloadCredentialsUpdateType workloadCredentialsUpdateType) {
@@ -196,28 +192,11 @@ public class UserSyncService {
             long startTime = System.currentTimeMillis();
             Future<?> task = usersyncExternalTaskExecutor.submit(() ->
                     userSyncForEnvService.synchronizeUsers(operationId, accountId, stacks, userSyncFilter, options, startTime));
-            scheduleTimeoutTask(operationId, accountId, task);
+            if (entitlementService.isUserSyncThreadTimeoutEnabled(accountId)) {
+                timeoutTaskScheduler.scheduleTimeoutTask(operationId, accountId, task, operationTimeout);
+            }
         } finally {
             MDCBuilder.removeOperationId();
-        }
-
-    }
-
-    private void scheduleTimeoutTask(String operationId, String accountId, Future<?> task) {
-        if (entitlementService.isUserSyncThreadTimeoutEnabled(accountId)) {
-            LOGGER.info("Scheduling timeout task for {} with {}ms timeout", operationId, operationTimeout);
-            Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
-            timeoutTaskExecutor.schedule(() -> {
-                MDCBuilder.buildMdcContextFromMap(mdcContextMap);
-                if (task.isCancelled() || task.isDone()) {
-                    LOGGER.debug("Nothing to do for operation id: [{}]", operationId);
-                } else {
-                    LOGGER.debug("Terminating usersync task with operation id: [{}]", operationId);
-                    task.cancel(true);
-                    operationService.timeout(operationId, accountId);
-                }
-                MDCBuilder.cleanupMdc();
-            }, operationTimeout, TimeUnit.MILLISECONDS);
         }
     }
 

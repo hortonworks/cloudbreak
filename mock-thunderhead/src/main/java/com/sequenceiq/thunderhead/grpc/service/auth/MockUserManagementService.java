@@ -53,6 +53,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_EDIT_PROXY_CONFIG;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_PRIVILEGED_USER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_DELAYED_STOP_START;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_RECIPE;
@@ -476,6 +477,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datalake.zdu.osupgrade.enable}")
     private boolean enableDatalakeZduOSUpgrade;
+
+    @Value("${auth.mock.freeipa.privileged.user.enable}")
+    private boolean enablePrivilegedUser;
 
     @Value("${auth.mock.workloadiam.sync.enable}")
     private boolean enableWorkloadIamSync;
@@ -1024,6 +1028,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableDatalakeZduOSUpgrade) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_ZDU_OS_UPGRADE));
+        }
+        if (enablePrivilegedUser) {
+            builder.addEntitlements(createEntitlement(CDP_ENVIRONMENT_PRIVILEGED_USER));
         }
         if (enableWorkloadIamSync) {
             builder.addEntitlements(createEntitlement(WORKLOAD_IAM_SYNC));

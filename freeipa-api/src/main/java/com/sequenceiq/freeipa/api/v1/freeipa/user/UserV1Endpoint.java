@@ -10,8 +10,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserOperationDescriptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.EnvironmentUserSyncState;
@@ -77,4 +79,18 @@ public interface UserV1Endpoint {
     @ApiOperation(value = UserOperationDescriptions.ENVIRONMENT_USERSYNC_STATE, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
             nickname = "getEnvironmentUserSyncStateV1")
     EnvironmentUserSyncState getUserSyncState(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
+
+    @POST
+    @Path("presync")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UserOperationDescriptions.PRE_SYNC, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
+            nickname = "preSynchronizeV1")
+    SyncOperationStatus preSynchronize(@QueryParam("environmentCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotEmpty String environmentCrn);
+
+    @POST
+    @Path("postsync")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UserOperationDescriptions.POST_SYNC, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
+            nickname = "postSynchronizeV1")
+    SyncOperationStatus postSynchronize(@QueryParam("environmentCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotEmpty String environmentCrn);
 }
