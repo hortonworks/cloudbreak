@@ -5,7 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,6 +22,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.cloud.Authenticator;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -29,15 +43,19 @@ import com.sequenceiq.flow.api.model.operation.OperationProgressStatus;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
+import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
+import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseResponse;
+import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsUpgradeEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartUpgradeRequest;
+import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.operation.OperationService;
 
@@ -64,6 +82,30 @@ public class RedbeamsUpgradeServiceTest {
 
     @Mock
     private OperationService operationService;
+
+    @Mock
+    private CredentialService credentialService;
+
+    @Mock
+    private CredentialToCloudCredentialConverter credentialConverter;
+
+    @Mock
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Mock
+    private PersistenceNotifier persistenceNotifier;
+
+    @Mock
+    private CloudConnector cloudConnector;
+
+    @Mock
+    private DBStackToDatabaseStackConverter databaseStackConverter;
+
+    @Mock
+    private ResourceConnector resourceConnector;
+
+    @Mock
+    private Authenticator authenticator;
 
     @InjectMocks
     private RedbeamsUpgradeService underTest;
@@ -178,6 +220,56 @@ public class RedbeamsUpgradeServiceTest {
         assertEquals(TARGET_MAJOR_VERSION, actualRedbeamsStartUpgradeRequest.getTargetMajorVersion());
     }
 
+    @Test
+    void testValidateUpgradeDatabaseServer() throws Exception {
+        // GIVEN
+        DBStack dbStack = getDbStack(Status.AVAILABLE);
+        UpgradeDatabaseRequest upgradeDatabaseRequest = getUpgradeDatabaseRequest();
+        Credential credential = mock(Credential.class);
+        CloudCredential cloudCredential = mock(CloudCredential.class);
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        DatabaseStack databaseStack = mock(DatabaseStack.class);
+        when(dbStackService.getByCrn(SERVER_CRN_STRING)).thenReturn(dbStack);
+        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
+        when(cloudConnector.authentication()).thenReturn(authenticator);
+        when(cloudConnector.resources()).thenReturn(resourceConnector);
+        when(credentialService.getCredentialByEnvCrn("envcrn")).thenReturn(credential);
+        when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
+        when(authenticator.authenticate(any(CloudContext.class), eq(cloudCredential))).thenReturn(authenticatedContext);
+        when(databaseStackConverter.convert(dbStack)).thenReturn(databaseStack);
+        // WHEN
+        UpgradeDatabaseResponse actualResponse = underTest.validateUpgradeDatabaseServer(SERVER_CRN_STRING, upgradeDatabaseRequest);
+        // THEN
+        verify(resourceConnector, times(1)).validateUpgradeDatabaseServer(authenticatedContext, databaseStack, persistenceNotifier, TARGET_MAJOR_VERSION);
+        assertNull(actualResponse.getReason());
+    }
+
+    @Test
+    void testValidateUpgradeDatabaseServerWhenCloudConnectorExceptionIsThrown() throws Exception {
+        // GIVEN
+        DBStack dbStack = getDbStack(Status.AVAILABLE);
+        UpgradeDatabaseRequest upgradeDatabaseRequest = getUpgradeDatabaseRequest();
+        Credential credential = mock(Credential.class);
+        CloudCredential cloudCredential = mock(CloudCredential.class);
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        DatabaseStack databaseStack = mock(DatabaseStack.class);
+        Exception exception = new Exception("cloudconnectorexception");
+        when(dbStackService.getByCrn(SERVER_CRN_STRING)).thenReturn(dbStack);
+        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
+        when(cloudConnector.authentication()).thenReturn(authenticator);
+        when(cloudConnector.resources()).thenReturn(resourceConnector);
+        when(credentialService.getCredentialByEnvCrn("envcrn")).thenReturn(credential);
+        when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
+        when(authenticator.authenticate(any(CloudContext.class), eq(cloudCredential))).thenReturn(authenticatedContext);
+        when(databaseStackConverter.convert(dbStack)).thenReturn(databaseStack);
+        doThrow(exception).when(resourceConnector)
+                .validateUpgradeDatabaseServer(authenticatedContext, databaseStack, persistenceNotifier, TARGET_MAJOR_VERSION);
+        // WHEN
+        UpgradeDatabaseResponse actualResponse = underTest.validateUpgradeDatabaseServer(SERVER_CRN_STRING, upgradeDatabaseRequest);
+        // THEN
+        assertEquals("cloudconnectorexception", actualResponse.getReason());
+    }
+
     private DBStackStatus getDbStackStatus(Status status) {
         DBStackStatus dbStackStatus = new DBStackStatus();
         dbStackStatus.setStatus(status);
@@ -194,6 +286,7 @@ public class RedbeamsUpgradeServiceTest {
         DBStack dbStack = new DBStack();
         dbStack.setId(1L);
         dbStack.setCloudPlatform("AZURE");
+        dbStack.setOwnerCrn(Crn.safeFromString("crn:cdp:iam:us-west-1:cloudera:user:test@cloudera.com"));
         dbStack.setEnvironmentId("envcrn");
         dbStack.setDBStackStatus(getDbStackStatus(status));
         DatabaseServer databaseServer = new DatabaseServer();

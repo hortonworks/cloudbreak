@@ -6,15 +6,25 @@ import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.ope
 import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.RdsState.UNKNOWN;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.services.rds.model.DBParameterGroupStatus;
+import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
+import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsRdsStatusLookupService;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.common.database.Version;
 import com.sequenceiq.cloudbreak.util.MajorVersionComparator;
 
@@ -22,6 +32,9 @@ import com.sequenceiq.cloudbreak.util.MajorVersionComparator;
 public class AwsRdsUpgradeValidatorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsRdsUpgradeValidatorService.class);
+
+    @Inject
+    private AwsRdsStatusLookupService awsRdsStatusLookupService;
 
     public void validateUpgradePresentForTargetMajorVersion(Optional<RdsEngineVersion> upgradeTargetForMajorVersion) {
         if (upgradeTargetForMajorVersion.isEmpty()) {
@@ -62,6 +75,36 @@ public class AwsRdsUpgradeValidatorService {
         LOGGER.debug("Comparing current DB version to target major version if an upgrade is needed. Current version: {}. target version: {}. upgarde needed: {}",
                 currentVersion, targetVersion, upgradeNeeded);
         return upgradeNeeded;
+    }
+
+    public void validateCustomPropertiesAdded(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        if (stack.getDatabaseServer().isUseSslEnforcement()) {
+            LOGGER.info("Custom parameter group check is skipped as CB use its own custom group for ssl enforcement");
+        } else {
+            DescribeDBInstancesResult describeDBInstancesResult = awsRdsStatusLookupService.getDescribeDBInstancesResult(authenticatedContext, stack);
+            if (describeDBInstancesResult != null && CollectionUtils.isNotEmpty(describeDBInstancesResult.getDBInstances())) {
+                String nonDefaultParamGroupNames = getNonDefaultParamGroupNames(describeDBInstancesResult);
+                if (StringUtils.isNotBlank(nonDefaultParamGroupNames)) {
+                    String message = String.format("The following custom parameter groups are attached to the RDS instance [%s]: %s. " +
+                                    "As we could not guarantee parameter compatibility between RDS versions, " +
+                                    "please remove them before RDS upgrade and they can be recreated based on the previous ones afterwards manually.",
+                            stack.getDatabaseServer().getServerId(), nonDefaultParamGroupNames);
+                    LOGGER.warn(message);
+                    throw new CloudConnectorException(message);
+                }
+            } else {
+                LOGGER.warn("AWS describeRDSInstances() returns empty result for {}, validation will be skipped", stack.getDatabaseServer().getServerId());
+            }
+        }
+    }
+
+    private String getNonDefaultParamGroupNames(DescribeDBInstancesResult describeDBInstancesResult) {
+        return describeDBInstancesResult.getDBInstances().stream()
+                .filter(instance -> Objects.nonNull(instance.getDBParameterGroups()))
+                .flatMap(instance -> instance.getDBParameterGroups().stream())
+                .map(DBParameterGroupStatus::getDBParameterGroupName)
+                .filter(groupName -> !groupName.startsWith("default."))
+                .collect(Collectors.joining(", "));
     }
 
     private Set<String> getNotApplicableStates(Map<String, String> dbArnToInstanceStatuses) {

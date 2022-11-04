@@ -251,4 +251,12 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
         UpgradeDatabaseRequest upgradeDatabaseRequest = upgradeDatabaseServerV4RequestConverter.convert(request);
         return upgradeDatabaseServerV4ResponseConverter.convert(redbeamsUpgradeService.upgradeDatabaseServer(databaseServerCrn, upgradeDatabaseRequest));
     }
+
+    @Override
+    @InternalOnly
+    public UpgradeDatabaseServerV4Response validateUpgrade(@TenantAwareParam @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) String crn,
+            @Valid @NotNull UpgradeDatabaseServerV4Request request) {
+        UpgradeDatabaseRequest upgradeDatabaseRequest = upgradeDatabaseServerV4RequestConverter.convert(request);
+        return upgradeDatabaseServerV4ResponseConverter.convert(redbeamsUpgradeService.validateUpgradeDatabaseServer(crn, upgradeDatabaseRequest));
+    }
 }

@@ -94,6 +94,11 @@ public class AwsRdsStatusLookupService {
                 "DB Instance does not exist! Therefore termination protection check is not relevant anymore: {}");
     }
 
+    public DescribeDBInstancesResult getDescribeDBInstancesResult(AuthenticatedContext ac, DatabaseStack dbStack) {
+        return getDescribeDBInstancesResultInternal(ac, dbStack, String.format("Get DB instance %s", dbStack.getDatabaseServer().getServerId()),
+                "DB Instance does not exist: {}");
+    }
+
     private ExternalDatabaseStatus getExternalDatabaseStatus(String dbInstanceStatus) {
         switch (dbInstanceStatus.toLowerCase()) {
             case "starting":
