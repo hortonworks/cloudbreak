@@ -1,5 +1,9 @@
 package com.sequenceiq.redbeams.service.stack;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
+import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -9,6 +13,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -18,12 +31,16 @@ import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
+import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
+import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseResponse;
+import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.RedbeamsUpgradeEvent;
 import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartUpgradeRequest;
+import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.operation.OperationService;
 
@@ -45,6 +62,52 @@ public class RedbeamsUpgradeService {
 
     @Inject
     private OperationService operationService;
+
+    @Inject
+    private CredentialService credentialService;
+
+    @Inject
+    private CredentialToCloudCredentialConverter credentialConverter;
+
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Inject
+    private PersistenceNotifier persistenceNotifier;
+
+    @Inject
+    private DBStackToDatabaseStackConverter databaseStackConverter;
+
+    public void validateUpgradeDatabaseServer(String crn, UpgradeDatabaseRequest upgradeDatabaseRequest) throws Exception {
+        DBStack dbStack = dbStackService.getByCrn(crn);
+        MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
+
+        MajorVersion currentVersion = dbStack.getMajorVersion();
+        TargetMajorVersion targetVersion = upgradeDatabaseRequest.getTargetMajorVersion();
+
+        LOGGER.debug("Validate upgrade called for: {}, with target version: {}, current version is: {}", dbStack, targetVersion, currentVersion);
+        MDCBuilder.buildMdcContext(dbStack);
+        Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
+        String accountId = dbStack.getOwnerCrn().getAccountId();
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(dbStack.getId())
+                .withName(dbStack.getName())
+                .withCrn(dbStack.getResourceCrn())
+                .withPlatform(dbStack.getCloudPlatform())
+                .withVariant(dbStack.getPlatformVariant())
+                .withLocation(location)
+                .withUserName(dbStack.getUserName())
+                .withAccountId(accountId)
+                .build();
+        Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
+        CloudCredential cloudCredential = credentialConverter.convert(credential);
+        CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+        AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
+        DatabaseStack databaseStack = databaseStackConverter.convert(dbStack);
+
+        ResourceConnector resourceConnector = connector.resources();
+        resourceConnector.validateUpgradeDatabaseServer(ac, databaseStack, persistenceNotifier, targetVersion);
+    }
 
     public UpgradeDatabaseResponse upgradeDatabaseServer(String crn, UpgradeDatabaseRequest upgradeDatabaseRequest) {
         DBStack dbStack = dbStackService.getByCrn(crn);

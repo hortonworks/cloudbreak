@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -250,5 +251,17 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     String databaseServerCrn, @Valid @NotNull UpgradeDatabaseServerV4Request request) {
         UpgradeDatabaseRequest upgradeDatabaseRequest = upgradeDatabaseServerV4RequestConverter.convert(request);
         return upgradeDatabaseServerV4ResponseConverter.convert(redbeamsUpgradeService.upgradeDatabaseServer(databaseServerCrn, upgradeDatabaseRequest));
+    }
+
+    @Override
+    @InternalOnly
+    public void validateUpgrade(@TenantAwareParam @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) String crn,
+            @Valid @NotNull UpgradeDatabaseServerV4Request request) {
+        UpgradeDatabaseRequest upgradeDatabaseRequest = upgradeDatabaseServerV4RequestConverter.convert(request);
+        try {
+            redbeamsUpgradeService.validateUpgradeDatabaseServer(crn, upgradeDatabaseRequest);
+        } catch (Exception exception) {
+            throw new BadRequestException(exception.getMessage(), exception);
+        }
     }
 }
