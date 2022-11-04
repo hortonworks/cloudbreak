@@ -76,7 +76,7 @@ sdx:
     ssotype: SSO_PROVIDER
   upgrade.database:
     sleeptime-sec: 20
-    duration-min: 180
+    duration-min: 330
 
   paywall.url: "https://archive.cloudera.com/p/cdp-public/"
 
