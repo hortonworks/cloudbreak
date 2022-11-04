@@ -10,6 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -33,6 +34,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.adls.AdlsGen2ConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3.S3ConfigProvider;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -49,6 +51,9 @@ public class CoreConfigProviderTest {
 
     @Mock
     private S3ConfigProvider s3ConfigProvider;
+
+    @Mock
+    private AdlsGen2ConfigProvider adlsGen2ConfigProvider;
 
     @BeforeEach
     public void setUp() {
@@ -143,8 +148,10 @@ public class CoreConfigProviderTest {
         Optional<BaseFileSystemConfigurationsView> fileSystemConfigurationView = Optional.of(fileSystemConfiguration);
 
         when(mockTemplateProcessor.getRoleConfig(CORE_SETTINGS, STORAGEOPERATIONS, CORE_DEFAULTFS)).thenReturn(Optional.empty());
+        when(mockTemplateProcessor.getStackVersion()).thenReturn("7.2.15");
         when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(fileSystemConfigurationView);
         doNothing().when(s3ConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
+        doNothing().when(adlsGen2ConfigProvider).populateServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class), anyString());
         String coreSafetyValveProperty = ConfigUtils.getSafetyValveProperty("hadoop.security.groups.cache.background.reload", "true");
         List<ApiClusterTemplateConfig> expected = List.of(config("core_site_safety_valve", coreSafetyValveProperty));
 
