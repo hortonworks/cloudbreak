@@ -15,6 +15,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
@@ -74,6 +75,7 @@ public class SubnetSelector {
     }
 
     public Optional<CloudSubnet> chooseSubnetForEndpointGateway(EnvironmentNetworkResponse source, String baseSubnetId) {
+        MDCBuilder.buildMdcContext(source);
         Optional<CloudSubnet> endpointGatewayCloudSubnet = Optional.empty();
         if (source.getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED) {
             Optional<CloudSubnet> baseSubnet = findSubnetById(source.getSubnetMetas(), baseSubnetId);

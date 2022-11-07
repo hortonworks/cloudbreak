@@ -68,11 +68,11 @@ public class NetworkMetadataValidationService {
             Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
         if (shouldValidateEndpointGatewaySubnets(environment, subnetMetas)) {
             if (endpointGatewaySubnetMetas != null && !endpointGatewaySubnetMetas.isEmpty()) {
-                LOGGER.info("Validation of endpoint gateway subnets failed: gateway subnets should share availability " +
+                LOGGER.info("Validation of endpoint gateway subnets: gateway subnets should share availability " +
                         "zones with the provided environment subnets.");
                 valildateProvidedEndpointGatewaySubnets(subnetMetas, endpointGatewaySubnetMetas);
             } else {
-                LOGGER.info("Validation of endpoint gateway subnets failed: Please make sure to provide a public " +
+                LOGGER.info("Validation of endpoint gateway subnets: Please make sure to provide a public " +
                         "subnet for every availability zone where the environment has a private subnet.");
                 valildateEnvironmentSubnetsForEndpointGateway(subnetMetas);
             }

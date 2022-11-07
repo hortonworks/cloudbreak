@@ -54,6 +54,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerCreation;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
@@ -114,6 +116,12 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         Cluster cluster = new Cluster();
         cluster.setBlueprint(blueprint);
         Stack stack = new Stack();
+        Workspace workspace = new Workspace();
+        workspace.setName("tenant");
+        Tenant tenant = new Tenant();
+        tenant.setName("tenant");
+        workspace.setTenant(tenant);
+        stack.setWorkspace(workspace);
         stack.setCluster(cluster);
 
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
@@ -133,7 +141,12 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         Stack stack = new Stack();
         stack.setCluster(cluster);
         stack.setInstanceGroups(Set.of(instanceGroup));
-
+        Workspace workspace = new Workspace();
+        workspace.setName("tenant");
+        Tenant tenant = new Tenant();
+        tenant.setName("tenant");
+        workspace.setTenant(tenant);
+        stack.setWorkspace(workspace);
         when(blueprint.getBlueprintText()).thenReturn("{}");
 
         Set<String> selectedGroups = underTest.getKnoxGatewayGroups(stack);
@@ -146,7 +159,12 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         cluster.setBlueprint(blueprint);
         Stack stack = new Stack();
         stack.setCluster(cluster);
-
+        Workspace workspace = new Workspace();
+        workspace.setName("tenant");
+        Tenant tenant = new Tenant();
+        tenant.setName("tenant");
+        workspace.setTenant(tenant);
+        stack.setWorkspace(workspace);
         when(blueprint.getBlueprintText()).thenReturn("{}");
 
         Set<String> selectedGroups = underTest.getKnoxGatewayGroups(stack);
@@ -1098,6 +1116,12 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         stack.setInstanceGroups(instanceGroups);
         stack.setCloudPlatform(cloudPlatform);
         Network network = new Network();
+        Workspace workspace = new Workspace();
+        workspace.setName("tenant");
+        Tenant tenant = new Tenant();
+        tenant.setName("tenant");
+        workspace.setTenant(tenant);
+        stack.setWorkspace(workspace);
         Map<String, Object> attributes = new HashMap<>();
         if (StringUtils.isNotEmpty(subnetId)) {
             attributes.put("subnetId", subnetId);
@@ -1123,6 +1147,12 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         stack.setCluster(cluster);
         stack.setInstanceGroups(Set.of(instanceGroup));
         stack.setCloudPlatform(YARN);
+        Workspace workspace = new Workspace();
+        workspace.setName("tenant");
+        Tenant tenant = new Tenant();
+        tenant.setName("tenant");
+        workspace.setTenant(tenant);
+        stack.setWorkspace(workspace);
         return stack;
     }
 
