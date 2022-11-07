@@ -38,7 +38,18 @@ public class DependentRolesHealthCheckService {
                 .collect(toSet());
     }
 
-    private boolean isDependentComponentPresentInHostGroup(Set<String> components, Set<String> dependentComponents) {
+    public Set<String> getDependentHostGroupsForHostGroup(CmTemplateProcessor processor, String hostGroup) {
+        Set<String> dependentComponents = getDependentComponentsForHostGroup(processor, hostGroup);
+        return dependentComponents.contains(UNDEFINED_DEPENDENCY)
+                ? Collections.singleton(UNDEFINED_DEPENDENCY)
+                : processor.getNonGatewayComponentsByHostGroup()
+                .entrySet().stream()
+                .filter(e -> isDependentComponentPresentInHostGroup(e.getValue(), dependentComponents))
+                .map(Map.Entry::getKey)
+                .collect(toSet());
+    }
+
+    private boolean isDependentComponentPresentInHostGroup(Collection<String> components, Collection<String> dependentComponents) {
         return dependentComponents.stream().anyMatch(components::contains);
     }
 
