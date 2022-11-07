@@ -82,8 +82,8 @@ public class SdxSaltStatusCheckerJob extends StatusCheckerJob {
         if (sdxClusterOptional.isPresent()) {
             SdxCluster sdxCluster = sdxClusterOptional.get();
             SdxStatusEntity sdxStatus = sdxStatusService.getActualStatusForSdx(sdxCluster);
-            if (sdxStatus.getStatus().isDeleteInProgressOrCompleted()) {
-                LOGGER.debug("SDX cluster with id {} is deleted, unscheduling salt status check", getLocalId());
+            if (sdxStatus.getStatus().isDeleteInProgressOrCompleted() || sdxStatus.getStatus().isProvisioningFailed()) {
+                LOGGER.debug("SDX cluster with id {} status is {}, unscheduling salt status check", getLocalId(), sdxStatus.getStatus());
                 jobService.unschedule(context.getJobDetail().getKey());
             } else if (sdxStatus.getStatus().isStopState()) {
                 LOGGER.debug("SDX cluster with id {} is stopped, can not run salt status check", getLocalId());
