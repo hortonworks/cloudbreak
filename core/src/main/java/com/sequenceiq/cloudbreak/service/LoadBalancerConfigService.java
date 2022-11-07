@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -97,6 +98,7 @@ public class LoadBalancerConfigService {
     private AvailabilitySetNameService availabilitySetNameService;
 
     public Set<String> getKnoxGatewayGroups(Stack stack) {
+        MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Fetching list of instance groups with Knox gateway installed");
         Set<String> groupNames = new HashSet<>();
         Cluster cluster = stack.getCluster();
@@ -291,6 +293,7 @@ public class LoadBalancerConfigService {
 
     public Set<LoadBalancer> setupLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean dryRun, boolean loadBalancerFlagEnabled,
             LoadBalancerSku sku) {
+        MDCBuilder.buildMdcContext(environment);
         if (dryRun) {
             LOGGER.info("Checking if load balancers are enabled and configurable for stack {}", stack.getName());
         } else {
@@ -414,7 +417,9 @@ public class LoadBalancerConfigService {
     }
 
     private boolean isLoadBalancerEnabled(StackType type, String cloudPlatform, DetailedEnvironmentResponse environment, boolean flagEnabled) {
-        return getSupportedPlatforms().contains(cloudPlatform) && !isLoadBalancerDisabled(environment) &&
+        return !type.equals(StackType.TEMPLATE) &&
+                getSupportedPlatforms().contains(cloudPlatform) &&
+                !isLoadBalancerDisabled(environment) &&
                 (flagEnabled || isLoadBalancerEnabledForDatalake(type, environment) || isLoadBalancerEnabledForDatahub(type, environment));
     }
 
