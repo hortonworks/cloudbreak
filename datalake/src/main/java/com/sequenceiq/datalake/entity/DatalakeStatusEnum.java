@@ -129,6 +129,10 @@ public enum DatalakeStatusEnum {
                 || DATALAKE_UPGRADE_DATABASE_SERVER_IN_PROGRESS == this;
     }
 
+    public boolean isProvisioningFailed() {
+        return PROVISIONING_FAILED.equals(this);
+    }
+
     public ResourceEvent getDefaultResourceEvent() {
         return resourceEvent;
     }
