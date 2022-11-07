@@ -80,6 +80,9 @@ cb:
       write.timeout.seconds: 125
       syncCommandPoller:
         interrupt.timeout.seconds: 120
+  dependentHostGroups:
+    cache.ttl: 10
+    max.entries: 500
 
 rest:
   debug: false

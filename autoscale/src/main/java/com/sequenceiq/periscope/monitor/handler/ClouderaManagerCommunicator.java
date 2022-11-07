@@ -12,10 +12,12 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.RoleConfigGroupsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
+import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiConfig;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.DataView;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.tracing.CmOkHttpTracingInterceptor;
 import com.sequenceiq.cloudbreak.cm.client.tracing.CmRequestIdProviderInterceptor;
@@ -51,20 +53,41 @@ public class ClouderaManagerCommunicator {
     @Inject
     private CmRequestIdProviderInterceptor cmRequestIdProviderInterceptor;
 
+    private ApiClient createApiClient(Cluster cluster) {
+        HttpClientConfig clientConfig = tlsHttpClientConfigurationService.buildTLSClientConfig(cluster.getStackCrn(), cluster.getClusterManager().getHost(),
+                cluster.getTunnel());
+        ClusterManager cm = cluster.getClusterManager();
+        String user = secretService.get(cm.getUser());
+        String pass = secretService.get(cm.getPass());
+
+        try {
+            return clouderaManagerApiClientProvider.getV31Client(Integer.valueOf(cm.getPort()), user, pass, clientConfig);
+        } catch (ClouderaManagerClientInitException e) {
+            LOGGER.error("Error when trying to initialize CM API client for cluster: {}", cluster.getStackCrn(), e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean isClusterManagerRunning(Cluster cluster) {
+        LOGGER.info("Checking if cluster manager is running for cluster: {}", cluster.getStackCrn());
+        try {
+            ApiClient client = createApiClient(cluster);
+            clouderaManagerApiFactory.getClouderaManagerResourceApi(client).getVersion();
+            return true;
+        } catch (ApiException e) {
+            LOGGER.error("Error when trying to determine CM status for cluster: {}", cluster.getStackCrn(), e);
+            return false;
+        }
+    }
+
     public Map<String, ApiConfig> getRoleConfigPropertiesFromCM(Cluster cluster, String serviceName,
         String roleGroupRef, Set roleConfigPropertyNames) {
         LOGGER.debug("Retrieving roleConfigProperties for cluster '{}', service '{}', roleGroupRef '{}'",
                 cluster.getStackCrn(), serviceName, roleGroupRef);
 
-        HttpClientConfig httpClientConfig = tlsHttpClientConfigurationService.buildTLSClientConfig(cluster.getStackCrn(),
-                cluster.getClusterManager().getHost(), cluster.getTunnel());
-        ClusterManager cm = cluster.getClusterManager();
-        String user = secretService.get(cm.getUser());
-        String pass = secretService.get(cm.getPass());
-
         Map<String, ApiConfig> roleConfigProperties = requestLogging.logResponseTime(() -> {
             try {
-                ApiClient client = clouderaManagerApiClientProvider.getV31Client(Integer.valueOf(cm.getPort()), user, pass, httpClientConfig);
+                ApiClient client = createApiClient(cluster);
                 client.getHttpClient().interceptors().add(cmOkHttpTracingInterceptor);
                 client.getHttpClient().interceptors().add(cmRequestIdProviderInterceptor);
                 RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(client);

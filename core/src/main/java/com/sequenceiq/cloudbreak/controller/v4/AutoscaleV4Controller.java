@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeFo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.DependentHostGroupsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.LimitsConfigurationResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -45,11 +46,14 @@ import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.AutoscaleRecommendationToAutoscaleRecommendationV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToAutoscaleStackV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToDependentHostGroupV4ResponseConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -63,6 +67,9 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     @Inject
     private StackOperations stackOperations;
@@ -84,6 +91,9 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Inject
     private StackToAutoscaleStackV4ResponseConverter stackToAutoscaleStackV4ResponseConverter;
+
+    @Inject
+    private StackToDependentHostGroupV4ResponseConverter stackToDependentHostGroupV4ResponseConverter;
 
     @Inject
     private AutoscaleRecommendationToAutoscaleRecommendationV4ResponseConverter autoscaleRecommendationToAutoscaleRecommendationV4ResponseConverter;
@@ -186,6 +196,13 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @InternalOnly
     public StackV4Response get(@TenantAwareParam String crn) {
         return stackCommonService.getByCrn(crn);
+    }
+
+    @Override
+    @InternalOnly
+    public DependentHostGroupsV4Response getDependentHostGroupsForMultipleHostGroups(@TenantAwareParam String crn, Set<String> hostGroups) {
+        StackDto stack = stackDtoService.getByCrn(crn);
+        return stackToDependentHostGroupV4ResponseConverter.convert(stack, hostGroups);
     }
 
     @Override
