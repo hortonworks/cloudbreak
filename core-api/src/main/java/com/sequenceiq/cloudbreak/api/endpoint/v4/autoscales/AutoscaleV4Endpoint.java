@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeFo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.DependentHostGroupsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.LimitsConfigurationResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
@@ -107,6 +109,14 @@ public interface AutoscaleV4Endpoint {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_BY_CRN, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "getStackForAutoscale")
     StackV4Response get(@PathParam("crn") String crn);
+
+    @GET
+    @Path("/stack/crn/{crn}/dependent_host_groups")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.GET_DEPENDENT_HOSTGROUPS_BY_CRN, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "getDependentHostGroupsForMultipleAutoscaleHostGroups")
+    DependentHostGroupsV4Response getDependentHostGroupsForMultipleHostGroups(@PathParam("crn") String crn,
+            @QueryParam("hostGroups") @NotEmpty Set<String> hostGroups);
 
     @GET
     @Path("/stack/crn/{crn}/status")
