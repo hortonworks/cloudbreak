@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.network.v1.converter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -11,13 +12,19 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
+import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -29,6 +36,7 @@ import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.v1.AzureRegistrationTypeResolver;
 
+@ExtendWith(MockitoExtension.class)
 class AzureEnvironmentNetworkConverterTest {
 
     private static final String LOCATION = "eu-west";
@@ -71,10 +79,17 @@ class AzureEnvironmentNetworkConverterTest {
 
     private static final String RESOURCE_GROUP_NAME = "resourceGroup";
 
-    private final EnvironmentViewConverter environmentViewConverter = Mockito.mock(EnvironmentViewConverter.class);
+    @Mock
+    private EnvironmentViewConverter environmentViewConverter;
 
-    private final AzureEnvironmentNetworkConverter underTest = new AzureEnvironmentNetworkConverter(environmentViewConverter,
-            new AzureRegistrationTypeResolver());
+    @Mock
+    private EntitlementService entitlementService;
+
+    @Spy
+    private AzureRegistrationTypeResolver azureRegistrationTypeResolver;
+
+    @InjectMocks
+    private AzureEnvironmentNetworkConverter underTest;
 
     @Test
     void testConvertShouldCreateABaseNetworkFromAnEnvironmentAndANetworkDto() {
@@ -178,6 +193,8 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(NETWORK_ID, actual.getNetworkId());
         assertEquals(RESOURCE_GROUP_NAME, actual.getResourceGroupName());
         assertTrue(SUBNET_IDS.containsAll(actual.getSubnetMetas().keySet()));
+        assertThat(actual.getSubnetMetas().get(SUBNET_1).getDeploymentRestrictions())
+                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
 
         assertEquals(SUBNET_1, actual.getSubnetMetas().get(SUBNET_1).getId());
         assertEquals(SUBNET_1, actual.getSubnetMetas().get(SUBNET_1).getName());
@@ -190,12 +207,16 @@ class AzureEnvironmentNetworkConverterTest {
         assertEquals(AZ_2, actual.getSubnetMetas().get(SUBNET_2).getAvailabilityZone());
         assertEquals(SUBNET_CIDR_2, actual.getSubnetMetas().get(SUBNET_2).getCidr());
         assertTrue(actual.getSubnetMetas().get(SUBNET_2).isPrivateSubnet());
+        assertThat(actual.getSubnetMetas().get(SUBNET_2).getDeploymentRestrictions())
+                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
 
         assertEquals(SUBNET_3, actual.getSubnetMetas().get(SUBNET_3).getId());
         assertEquals(SUBNET_3, actual.getSubnetMetas().get(SUBNET_3).getName());
         assertEquals(AZ_3, actual.getSubnetMetas().get(SUBNET_3).getAvailabilityZone());
         assertEquals(SUBNET_CIDR_3, actual.getSubnetMetas().get(SUBNET_3).getCidr());
         assertTrue(actual.getSubnetMetas().get(SUBNET_3).isPrivateSubnet());
+        assertThat(actual.getSubnetMetas().get(SUBNET_3).getDeploymentRestrictions())
+                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
     }
 
     @Test

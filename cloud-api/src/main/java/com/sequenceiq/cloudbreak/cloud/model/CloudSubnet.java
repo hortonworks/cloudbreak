@@ -2,11 +2,13 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
+import com.sequenceiq.common.api.type.DeploymentRestriction;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -27,6 +29,8 @@ public class CloudSubnet extends DynamicModel implements Serializable {
     private boolean mapPublicIpOnLaunch;
 
     private boolean igwAvailable;
+
+    private Set<DeploymentRestriction> deploymentRestrictions = Set.of();
 
     public CloudSubnet() {
     }
@@ -49,6 +53,12 @@ public class CloudSubnet extends DynamicModel implements Serializable {
         this.mapPublicIpOnLaunch = mapPublicIpOnLaunch;
         this.igwAvailable = igwAvailable;
         this.type = type;
+    }
+
+    public CloudSubnet(String id, String name, String availabilityZone, String cidr, boolean privateSubnet, boolean mapPublicIpOnLaunch, boolean igwAvailable,
+            SubnetType type, Set<DeploymentRestriction> deploymentRestrictions) {
+        this(id, name, availabilityZone, cidr, privateSubnet, mapPublicIpOnLaunch, igwAvailable, type);
+        this.deploymentRestrictions = deploymentRestrictions;
     }
 
     public String getId() {
@@ -115,6 +125,14 @@ public class CloudSubnet extends DynamicModel implements Serializable {
         this.type = type;
     }
 
+    public Set<DeploymentRestriction> getDeploymentRestrictions() {
+        return deploymentRestrictions;
+    }
+
+    public void setDeploymentRestrictions(Set<DeploymentRestriction> deploymentRestrictions) {
+        this.deploymentRestrictions = deploymentRestrictions;
+    }
+
     public CloudSubnet withId(String newId) {
         return new CloudSubnet(newId, name, availabilityZone, cidr, privateSubnet, mapPublicIpOnLaunch, igwAvailable, type);
     }
@@ -135,12 +153,14 @@ public class CloudSubnet extends DynamicModel implements Serializable {
                 Objects.equals(id, that.id) &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(availabilityZone, that.availabilityZone) &&
-                Objects.equals(cidr, that.cidr);
+                Objects.equals(cidr, that.cidr) &&
+                Objects.equals(type, that.type) &&
+                Objects.equals(deploymentRestrictions, that.deploymentRestrictions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, availabilityZone, cidr, privateSubnet, mapPublicIpOnLaunch, igwAvailable);
+        return Objects.hash(id, name, availabilityZone, cidr, privateSubnet, mapPublicIpOnLaunch, igwAvailable, type, deploymentRestrictions);
     }
 
     @Override
@@ -153,6 +173,8 @@ public class CloudSubnet extends DynamicModel implements Serializable {
                 + ", privateSubnet=" + privateSubnet
                 + ", mapPublicIpOnLaunch=" + mapPublicIpOnLaunch
                 + ", igwAvailable=" + igwAvailable
+                + ", type=" + type
+                + ", deploymentRestrictions=" + deploymentRestrictions
                 + ", parameters=" + getParameters()
                 + '}';
     }

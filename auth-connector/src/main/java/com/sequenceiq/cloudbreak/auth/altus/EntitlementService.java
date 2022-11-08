@@ -110,7 +110,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH_ONE_HOUR_TOKEN;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PERSONAL_VIEW_CB_BY_RIGHT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.SDX_CONFIGURATION_OPTIMIZATION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.TARGETING_SUBNETS_FOR_LB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
 
@@ -594,8 +594,8 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, SDX_CONFIGURATION_OPTIMIZATION);
     }
 
-    public boolean isTargetingSubnetsForLbEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, TARGETING_SUBNETS_FOR_LB);
+    public boolean isTargetingSubnetsForEndpointAccessGatewayEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY);
     }
 
     public List<String> getEntitlements(String accountId) {

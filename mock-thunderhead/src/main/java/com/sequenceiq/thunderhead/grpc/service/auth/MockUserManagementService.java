@@ -105,7 +105,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.EPHEMERAL_D
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.TARGETING_SUBNETS_FOR_LB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
 import static java.util.Collections.newSetFromMap;
@@ -588,8 +588,8 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.environment.edit.proxy.enable}")
     private boolean enableEditProxy;
 
-    @Value("${auth.mock.targeting.subnets.for.lb}")
-    private boolean enableTargetingSubnetsForLb;
+    @Value("${auth.mock.targeting.subnets.for.endpoint.access.gateway.enable}")
+    private boolean enableTargetingSubnetsForEndpointAccessGateway;
 
     @Value("${auth.mock.azure.certificate.auth.enable}")
     private boolean azureCertificateAuth;
@@ -1075,8 +1075,8 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (skipPostgresUpgradeServicesAndCmStop) {
             builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP));
         }
-        if (enableTargetingSubnetsForLb) {
-            builder.addEntitlements(createEntitlement(TARGETING_SUBNETS_FOR_LB));
+        if (enableTargetingSubnetsForEndpointAccessGateway) {
+            builder.addEntitlements(createEntitlement(TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY));
         }
         if (azureCertificateAuth) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_CERTIFICATE_AUTH));

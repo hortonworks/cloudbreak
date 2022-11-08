@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -21,8 +22,8 @@ public class YarnEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
     @Value("${cb.yarn.networkCidr}")
     private String yarnNetworkCidr;
 
-    public YarnEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter) {
-        super(environmentViewConverter);
+    public YarnEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter, EntitlementService entitlementService) {
+        super(environmentViewConverter, entitlementService);
     }
 
     @Override

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
@@ -39,11 +40,27 @@ public class CloudNetworkService {
     }
 
     public Map<String, CloudSubnet> retrieveSubnetMetadata(EnvironmentDto environmentDto, NetworkDto network) {
-        return getSubnetMetadata(environmentDto, network, network == null ? Set.of() : network.getSubnetIds());
+        Map<String, CloudSubnet> subnetMetadata = getSubnetMetadata(environmentDto, network, network == null ? Set.of() : network.getSubnetIds());
+        subnetMetadata.forEach((name, subnet) -> subnet.setDeploymentRestrictions(DeploymentRestriction.NON_ENDPOINT_ACCESS_GATEWAYS));
+        return subnetMetadata;
+    }
+
+    public Map<String, CloudSubnet> retrieveSubnetMetadata(Environment environment, NetworkDto network) {
+        Map<String, CloudSubnet> subnetMetadata = getSubnetMetadata(environment, network, network == null ? Set.of() : network.getSubnetIds());
+        subnetMetadata.forEach((name, subnet) -> subnet.setDeploymentRestrictions(DeploymentRestriction.NON_ENDPOINT_ACCESS_GATEWAYS));
+        return subnetMetadata;
     }
 
     public Map<String, CloudSubnet> retrieveEndpointGatewaySubnetMetadata(EnvironmentDto environmentDto, NetworkDto network) {
-        return getSubnetMetadata(environmentDto, network, network == null ? Set.of() : network.getEndpointGatewaySubnetIds());
+        Map<String, CloudSubnet> subnetMetadata = getSubnetMetadata(environmentDto, network, network == null ? Set.of() : network.getEndpointGatewaySubnetIds());
+        subnetMetadata.forEach((name, subnet) -> subnet.setDeploymentRestrictions(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS));
+        return subnetMetadata;
+    }
+
+    public Map<String, CloudSubnet> retrieveEndpointGatewaySubnetMetadata(Environment environment, NetworkDto network) {
+        Map<String, CloudSubnet> subnetMetadata = getSubnetMetadata(environment, network, network == null ? Set.of() : network.getEndpointGatewaySubnetIds());
+        subnetMetadata.forEach((name, subnet) -> subnet.setDeploymentRestrictions(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS));
+        return subnetMetadata;
     }
 
     private Map<String, CloudSubnet> getSubnetMetadata(EnvironmentDto environmentDto, NetworkDto network, Set<String> subnetIds) {
@@ -66,10 +83,7 @@ public class CloudNetworkService {
             Map<String, String> filter = new HashMap<>();
             filter.put(GcpStackUtil.NETWORK_ID, network.getGcp().getNetworkId());
             filter.put(GcpStackUtil.SHARED_PROJECT_ID, network.getGcp().getSharedProjectId());
-            boolean createFireWallRule = false;
-            if (!isNullOrEmpty(environmentDto.getSecurityAccess().getCidr())) {
-                createFireWallRule = true;
-            }
+            boolean createFireWallRule = !isNullOrEmpty(environmentDto.getSecurityAccess().getCidr());
             filter.put(GcpStackUtil.NO_FIREWALL_RULES, String.valueOf(!createFireWallRule));
             filter.put(GcpStackUtil.NO_PUBLIC_IP, String.valueOf(Boolean.TRUE.equals(network.getGcp().getNoPublicIp())));
             buildSubnetIdFilter(subnetIds, filter);
@@ -78,14 +92,6 @@ public class CloudNetworkService {
         } else {
             return subnetIds.stream().collect(toMap(Function.identity(), id -> new CloudSubnet(id, null)));
         }
-    }
-
-    public Map<String, CloudSubnet> retrieveSubnetMetadata(Environment environment, NetworkDto network) {
-        return getSubnetMetadata(environment, network, network == null ? Set.of() : network.getSubnetIds());
-    }
-
-    public Map<String, CloudSubnet> retrieveEndpointGatewaySubnetMetadata(Environment environment, NetworkDto network) {
-        return getSubnetMetadata(environment, network, network == null ? Set.of() : network.getEndpointGatewaySubnetIds());
     }
 
     private Map<String, CloudSubnet> getSubnetMetadata(Environment environment, NetworkDto network, Set<String> subnetIds) {
@@ -108,10 +114,7 @@ public class CloudNetworkService {
             Map<String, String> filter = new HashMap<>();
             filter.put(GcpStackUtil.NETWORK_ID, network.getGcp().getNetworkId());
             filter.put(GcpStackUtil.SHARED_PROJECT_ID, network.getGcp().getSharedProjectId());
-            boolean createFireWallRule = false;
-            if (!isNullOrEmpty(environment.getCidr())) {
-                createFireWallRule = true;
-            }
+            boolean createFireWallRule = !isNullOrEmpty(environment.getCidr());
             filter.put(GcpStackUtil.NO_FIREWALL_RULES, String.valueOf(!createFireWallRule));
             filter.put(GcpStackUtil.NO_PUBLIC_IP, String.valueOf(Boolean.TRUE.equals(network.getGcp().getNoPublicIp())));
             buildSubnetIdFilter(subnetIds, filter);

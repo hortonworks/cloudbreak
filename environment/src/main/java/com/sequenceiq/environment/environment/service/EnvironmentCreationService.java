@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -35,6 +34,12 @@ import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeSe
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.service.LoadBalancerEntitlementService;
+import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
+import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
+import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
+import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
@@ -93,10 +98,8 @@ public class EnvironmentCreationService {
     public EnvironmentDto create(EnvironmentCreationDto creationDto) {
         LOGGER.info("Environment creation initiated.");
 
-        PublicEndpointAccessGateway endpointAccessGateway = creationDto.getNetwork() == null ?
-            null : creationDto.getNetwork().getPublicEndpointAccessGateway();
         loadBalancerEntitlementService.validateNetworkForEndpointGateway(creationDto.getCloudPlatform(), creationDto.getName(),
-            endpointAccessGateway);
+                getIfNotNull(creationDto.getNetwork(), NetworkDto::getEndpointGatewaySubnetIds));
 
         validatorService.validateFMSRecipesEntitlement(creationDto);
 
@@ -153,7 +156,7 @@ public class EnvironmentCreationService {
         Credential credential = environmentResourceService.getCredentialFromRequest(creationDto.getCredential(), creationDto.getAccountId());
         environment.setCredential(credential);
         Optional<ProxyConfig> proxyConfig = environmentResourceService.getProxyConfig(creationDto.getProxyConfigName(), creationDto.getAccountId());
-        proxyConfig.ifPresent(pc -> environment.setProxyConfig(pc));
+        proxyConfig.ifPresent(environment::setProxyConfig);
         environment.setCloudPlatform(credential.getCloudPlatform());
         environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(creationDto.getAuthentication()));
         environment.setEnvironmentServiceVersion(environmentServiceVersion);
@@ -230,27 +233,27 @@ public class EnvironmentCreationService {
         switch (cloudPlatform) {
             case "azure":
                 String encryptionKeyUrl = Optional.ofNullable(creationDto.getParameters())
-                        .map(paramsDto -> paramsDto.getAzureParametersDto())
-                        .map(azureParamsDto -> azureParamsDto.getAzureResourceEncryptionParametersDto())
-                        .map(azureREParamsDto -> azureREParamsDto.getEncryptionKeyUrl()).orElse(null);
+                        .map(ParametersDto::getAzureParametersDto)
+                        .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
+                        .map(AzureResourceEncryptionParametersDto::getEncryptionKeyUrl).orElse(null);
                 if (encryptionKeyUrl != null) {
                     resultBuilder.merge(validatorService.validateEncryptionKeyUrl(encryptionKeyUrl, creationDto.getAccountId()));
                 }
                 break;
             case "gcp":
                 String encryptionKey = Optional.ofNullable(creationDto.getParameters())
-                        .map(parametersDto -> parametersDto.getGcpParametersDto())
-                        .map(gcpParametersDto -> gcpParametersDto.getGcpResourceEncryptionParametersDto())
-                        .map(gcpREParamsDto -> gcpREParamsDto.getEncryptionKey()).orElse(null);
+                        .map(ParametersDto::getGcpParametersDto)
+                        .map(GcpParametersDto::getGcpResourceEncryptionParametersDto)
+                        .map(GcpResourceEncryptionParametersDto::getEncryptionKey).orElse(null);
                 if (encryptionKey != null) {
                     resultBuilder.merge(validatorService.validateEncryptionKey(encryptionKey, creationDto.getAccountId()));
                 }
                 break;
             case "aws":
                 String encryptionKeyArn = Optional.ofNullable(creationDto.getParameters())
-                        .map(paramsDto -> paramsDto.getAwsParametersDto())
-                        .map(awsParamsDto -> awsParamsDto.getAwsDiskEncryptionParametersDto())
-                        .map(awsREparamsDto -> awsREparamsDto.getEncryptionKeyArn()).orElse(null);
+                        .map(ParametersDto::getAwsParametersDto)
+                        .map(AwsParametersDto::getAwsDiskEncryptionParametersDto)
+                        .map(AwsDiskEncryptionParametersDto::getEncryptionKeyArn).orElse(null);
                 if (encryptionKeyArn != null) {
                     resultBuilder.merge(validatorService.validateEncryptionKeyArn(encryptionKeyArn, creationDto.getAccountId()));
                 }

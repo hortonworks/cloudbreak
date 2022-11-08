@@ -12,12 +12,14 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.GcpNetwork;
@@ -28,8 +30,8 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 @Component
 public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConverter {
 
-    protected GcpEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter) {
-        super(environmentViewConverter);
+    protected GcpEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter, EntitlementService entitlementService) {
+        super(environmentViewConverter, entitlementService);
     }
 
     @Override
@@ -90,7 +92,10 @@ public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
                                 !subnet.isPublicSubnet(),
                                 subnet.isMapPublicIpOnLaunch(),
                                 subnet.isIgwAvailable(),
-                                subnet.isIgwAvailable() ? PUBLIC : PRIVATE)
+                                subnet.isIgwAvailable() ? PUBLIC : PRIVATE,
+                                subnet.isPublicSubnet()
+                                        ? DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS
+                                        : getDeploymentRestrictionForPrivateSubnet(subnet.getType()))
                         )
                 )
         );

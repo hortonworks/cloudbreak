@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.network.service;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,14 +55,14 @@ public class SubnetIdProvider {
                 : fallback(network);
 
         Set<CloudSubnet> selectedSubnets = subnetSelectionResult.hasResult()
-                ? subnetSelectionResult.getResult().stream().collect(Collectors.toSet())
+                ? new HashSet<>(subnetSelectionResult.getResult())
                 : fallbacks(network);
 
         return new ProvidedSubnetIds(
                 selectedSubnet.getId(),
                 selectedSubnets
                         .stream()
-                        .map(e -> e.getId())
+                        .map(CloudSubnet::getId)
                         .collect(Collectors.toSet()));
     }
 
@@ -72,9 +73,9 @@ public class SubnetIdProvider {
     }
 
     private Set<CloudSubnet> fallbacks(NetworkDto network) {
-        Set<CloudSubnet> chosenSubnets = network.getSubnetMetas().values().stream().collect(Collectors.toSet());
+        Set<CloudSubnet> chosenSubnets = new HashSet<>(network.getSubnetMetas().values());
         LOGGER.debug("Choosing subnets, fallback strategy: '{}'",
-                chosenSubnets.stream().map(e -> e.getId()).collect(Collectors.toSet()));
+                chosenSubnets.stream().map(CloudSubnet::getId).collect(Collectors.toSet()));
         return chosenSubnets;
     }
 }

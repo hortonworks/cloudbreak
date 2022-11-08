@@ -29,7 +29,7 @@ import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager
 import com.sequenceiq.environment.network.service.LoadBalancerEntitlementService;
 
 @ExtendWith(SpringExtension.class)
-public class EnvironmentLoadBalancerServiceTest {
+class EnvironmentLoadBalancerServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
@@ -53,7 +53,7 @@ public class EnvironmentLoadBalancerServiceTest {
     private EnvironmentLoadBalancerService underTest;
 
     @Test
-    public void testNoEnvironmentFound() {
+    void testNoEnvironmentFound() {
         EnvironmentLoadBalancerDto environmentLbDto = EnvironmentLoadBalancerDto.builder()
             .withEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED)
             .build();
@@ -77,7 +77,7 @@ public class EnvironmentLoadBalancerServiceTest {
     }
 
     @Test
-    public void testEndpointGatewayEnabled() {
+    void testEndpointGatewayEnabled() {
         EnvironmentLoadBalancerDto environmentLbDto = EnvironmentLoadBalancerDto.builder()
             .withEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED)
             .build();
@@ -98,7 +98,7 @@ public class EnvironmentLoadBalancerServiceTest {
     }
 
     @Test
-    public void testDataLakeLoadBalancerEnabled() {
+    void testDataLakeLoadBalancerEnabled() {
         EnvironmentLoadBalancerDto environmentLbDto = EnvironmentLoadBalancerDto.builder()
             .withEndpointAccessGateway(PublicEndpointAccessGateway.DISABLED)
             .build();
@@ -120,7 +120,7 @@ public class EnvironmentLoadBalancerServiceTest {
     }
 
     @Test
-    public void testNoEntitlements() {
+    void testNoEntitlements() {
         EnvironmentLoadBalancerDto environmentLbDto = EnvironmentLoadBalancerDto.builder()
             .withEndpointAccessGateway(PublicEndpointAccessGateway.DISABLED)
             .build();
@@ -131,7 +131,7 @@ public class EnvironmentLoadBalancerServiceTest {
 
         when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(false);
 
-        final BadRequestException[] exception = new BadRequestException[1];
+        BadRequestException[] exception = new BadRequestException[1];
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             exception[0] = assertThrows(BadRequestException.class, () ->
                 underTest.updateLoadBalancerInEnvironmentAndStacks(environmentDto, environmentLbDto));

@@ -26,7 +26,7 @@ public class SubnetFilterStrategyMultiplePreferPrivate implements SubnetFilterSt
     public SubnetSelectionResult filter(Collection<CloudSubnet> subnets, int azCount) {
         List<CloudSubnet> result = subnetSelectorService.collectPrivateSubnets(subnets);
         Set<String> uniqueAzs = result.stream()
-                .map(e -> e.getAvailabilityZone())
+                .map(CloudSubnet::getAvailabilityZone)
                 .collect(Collectors.toSet());
         if (uniqueAzs.size() < azCount) {
             LOGGER.info("There is not enough different AZ in the private subnets which {}, falling back to private subnets: {}",
