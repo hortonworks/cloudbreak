@@ -344,6 +344,7 @@ public class GcpDatabaseServerLaunchServiceTest {
         GoogleJsonResponseException googleJsonResponseException = mock(GoogleJsonResponseException.class);
         GoogleJsonError googleJsonError = mock(GoogleJsonError.class);
         when(googleJsonResponseException.getDetails()).thenReturn(googleJsonError);
+        when(googleJsonResponseException.getMessage()).thenReturn("error");
         when(googleJsonError.getMessage()).thenReturn("error");
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
@@ -412,6 +413,7 @@ public class GcpDatabaseServerLaunchServiceTest {
         GoogleJsonResponseException googleJsonResponseException = mock(GoogleJsonResponseException.class);
         GoogleJsonError googleJsonError = mock(GoogleJsonError.class);
         when(googleJsonResponseException.getDetails()).thenReturn(googleJsonError);
+        when(googleJsonResponseException.getMessage()).thenReturn("error");
         when(googleJsonError.getMessage()).thenReturn("error");
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);

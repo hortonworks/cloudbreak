@@ -104,12 +104,14 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                     buildableResource.forEach(dbr -> resourceNotifier.notifyAllocation(dbr, ac.getCloudContext()));
                     return Collections.singletonList(operationAwareCloudResource);
                 } catch (GoogleJsonResponseException e) {
+                    LOGGER.debug("Error occured in database server launch: {}", e.getMessage());
                     throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
                 }
             } else {
                 LOGGER.debug("Deployment already exists: {}", deploymentName);
             }
         } catch (GoogleJsonResponseException e) {
+            LOGGER.debug("Error occured in database server launch: {}", e.getMessage());
             throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
         }
         return List.of();
