@@ -6,16 +6,19 @@ import static com.sequenceiq.cloudbreak.cloud.azure.AzureUtils.RG_NAME;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
@@ -29,9 +32,9 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
 
     private final AzureRegistrationTypeResolver azureRegistrationTypeResolver;
 
-    public AzureEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter,
+    public AzureEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter, EntitlementService entitlementService,
         AzureRegistrationTypeResolver azureRegistrationTypeResolver) {
-        super(environmentViewConverter);
+        super(environmentViewConverter, entitlementService);
         this.azureRegistrationTypeResolver = azureRegistrationTypeResolver;
     }
 
@@ -66,11 +69,25 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                                 subnet.isPublicSubnet(),
                                 subnet.isMapPublicIpOnLaunch(),
                                 subnet.isIgwAvailable(),
-                                subnet.getType())
+                                subnet.getType(),
+                                subnet.isPublicSubnet()
+                                        ? DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS
+                                        : getDeploymentRestrictionForPrivateSubnet(subnet.getType()))
                         )
                 )
         );
         return azureNetwork;
+    }
+
+    @Override
+    protected Set<DeploymentRestriction> getDeploymentRestrictionForPrivateSubnet(SubnetType type) {
+        if (type == SubnetType.DWX) {
+            return Set.of(DeploymentRestriction.DWX);
+        } else if (type == SubnetType.MLX) {
+            return Set.of(DeploymentRestriction.MLX);
+        } else {
+            return super.getDeploymentRestrictionForPrivateSubnet(type);
+        }
     }
 
     @Override

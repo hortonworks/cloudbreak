@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.network.v1.converter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -17,11 +18,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
+import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -77,6 +80,9 @@ class AwsEnvironmentNetworkConverterTest {
 
     @Mock
     private EnvironmentViewConverter environmentViewConverter;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private AwsEnvironmentNetworkConverter underTest;
@@ -179,18 +185,24 @@ class AwsEnvironmentNetworkConverterTest {
         assertEquals(AZ_1, awsNetwork.getSubnetMetas().get(SUBNET_1).getAvailabilityZone());
         assertEquals(SUBNET_CIDR_1, awsNetwork.getSubnetMetas().get(SUBNET_1).getCidr());
         assertFalse(awsNetwork.getSubnetMetas().get(SUBNET_1).isPrivateSubnet());
+        assertThat(awsNetwork.getSubnetMetas().get(SUBNET_1).getDeploymentRestrictions())
+                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
 
         assertEquals(SUBNET_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getId());
         assertEquals(SUBNET_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getName());
         assertEquals(AZ_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getAvailabilityZone());
         assertEquals(SUBNET_CIDR_2, awsNetwork.getSubnetMetas().get(SUBNET_2).getCidr());
         assertFalse(awsNetwork.getSubnetMetas().get(SUBNET_2).isPrivateSubnet());
+        assertThat(awsNetwork.getSubnetMetas().get(SUBNET_3).getDeploymentRestrictions())
+                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
 
         assertEquals(SUBNET_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getId());
         assertEquals(SUBNET_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getName());
         assertEquals(AZ_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getAvailabilityZone());
         assertEquals(SUBNET_CIDR_3, awsNetwork.getSubnetMetas().get(SUBNET_3).getCidr());
         assertFalse(awsNetwork.getSubnetMetas().get(SUBNET_3).isPrivateSubnet());
+        assertThat(awsNetwork.getSubnetMetas().get(SUBNET_3).getDeploymentRestrictions())
+                .containsExactlyElementsOf(DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS);
     }
 
     @Test

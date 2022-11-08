@@ -110,7 +110,7 @@ auth:
     postgres.upgrade.skip.service.stop.enable: false
     environment.edit.proxy.enable: true
     upgrade.skip.attached.datahubs.check.enable: false
-    targeting.subnets.for.lb: true
+    targeting.subnets.for.endpoint.access.gateway.enable: true
 crn:
   partition: cdp
   region: us-west-1

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -14,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
+import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -24,8 +26,8 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 @Component
 public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConverter {
 
-    public AwsEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter) {
-        super(environmentViewConverter);
+    public AwsEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter, EntitlementService entitlementService) {
+        super(environmentViewConverter, entitlementService);
     }
 
     @Override
@@ -69,7 +71,10 @@ public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
                                 !subnet.isPublicSubnet(),
                                 subnet.isMapPublicIpOnLaunch(),
                                 subnet.isIgwAvailable(),
-                                subnet.getType())
+                                subnet.getType(),
+                                subnet.isPublicSubnet()
+                                        ? DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS
+                                        : getDeploymentRestrictionForPrivateSubnet(subnet.getType()))
                         )
                 )
         );

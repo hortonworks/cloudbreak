@@ -50,17 +50,6 @@ public class NetworkRequestToDtoConverter {
             builder.withAzure(azureParams);
             builder.withNetworkId(network.getAzure().getNetworkId());
         }
-        if (network.getGcp() != null) {
-            LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "GCP");
-            GcpParams gcpParams = GcpParams.builder()
-                    .withNetworkId(network.getGcp().getNetworkId())
-                    .withSharedProjectId(network.getGcp().getSharedProjectId())
-                    .withNoFirewallRules(network.getGcp().getNoFirewallRules())
-                    .withNoPublicIp(network.getGcp().getNoPublicIp())
-                    .build();
-            builder.withGcp(gcpParams);
-            builder.withNetworkId(network.getGcp().getNetworkId());
-        }
         if (network.getYarn() != null) {
             LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Yarn");
             YarnParams yarnParams = YarnParams.builder()
@@ -79,7 +68,7 @@ public class NetworkRequestToDtoConverter {
             builder.withNetworkId(mockParams.getVpcId());
         }
         if (network.getGcp() != null) {
-            LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Gcp");
+            LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "GCP");
             GcpParams gcpParams = GcpParams.builder()
                     .withSharedProjectId(network.getGcp().getSharedProjectId())
                     .withNetworkId(network.getGcp().getNetworkId())

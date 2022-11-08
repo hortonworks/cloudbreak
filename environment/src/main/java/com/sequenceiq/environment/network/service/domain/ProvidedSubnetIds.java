@@ -1,12 +1,11 @@
 package com.sequenceiq.environment.network.service.domain;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class ProvidedSubnetIds {
-    private String subnetId;
+    private final String subnetId;
 
-    private Set<String> subnetIds = new HashSet<>();
+    private final Set<String> subnetIds;
 
     public ProvidedSubnetIds(String subnetId, Set<String> subnetIds) {
         this.subnetId = subnetId;

@@ -41,17 +41,17 @@ public class NetworkMetadataValidationService {
     }
 
     public Map<String, CloudSubnet> getEndpointGatewaySubnetMetadata(Environment environment, EnvironmentDto environmentDto) {
-        Map<String, CloudSubnet> endpointGatewaySubnetMetas = null;
         LOGGER.debug("Fetching subnet metadata for from cloud providers.");
-        endpointGatewaySubnetMetas = removePrivateSubnets(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(
-            environmentDto, environmentDto.getNetwork()));
+        Map<String, CloudSubnet> endpointGatewaySubnetMetas = removePrivateSubnets(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(
+                environmentDto, environmentDto.getNetwork()));
         validateSubnetsIfProvided(environment, environmentDto.getNetwork().getSubnetMetas(), endpointGatewaySubnetMetas);
         return endpointGatewaySubnetMetas;
     }
 
     private Map<String, CloudSubnet> removePrivateSubnets(Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
-        if (entitlementService.endpointGatewaySkipValidation(ThreadBasedUserCrnProvider.getAccountId())) {
-            LOGGER.debug("Endpoint gateway subnet type validation is disabled. Accepting provided subnets");
+        if (entitlementService.endpointGatewaySkipValidation(ThreadBasedUserCrnProvider.getAccountId())
+                || entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            LOGGER.debug("Targeting Subnets for Endpoint Access Gateway is enabled, private subnets are allowed.");
             return endpointGatewaySubnetMetas;
         } else {
             LOGGER.debug("Removing any private subnets from the provided endpoint gateway list because they won't be used.");
@@ -80,7 +80,8 @@ public class NetworkMetadataValidationService {
     }
 
     private boolean shouldValidateEndpointGatewaySubnets(Environment environment, Map<String, CloudSubnet> subnetMetas) {
-        return hasSupportedNetwork(environment) &&
+        return !entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
+            hasSupportedNetwork(environment) &&
             environment.getNetwork().getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED &&
             environment.getNetwork().getRegistrationType() != RegistrationType.CREATE_NEW &&
             subnetMetas != null &&

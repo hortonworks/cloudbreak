@@ -91,8 +91,9 @@ public class SubnetSelector {
                 }
 
                 Map<String, CloudSubnet> publicSubnetMetas;
-                if (entitlementService.endpointGatewaySkipValidation(ThreadBasedUserCrnProvider.getAccountId())) {
-                    LOGGER.debug("Endpoint gateway subnet type validation is disabled. Will use all provided subnets for selection.");
+                if (entitlementService.endpointGatewaySkipValidation(ThreadBasedUserCrnProvider.getAccountId())
+                        || entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+                    LOGGER.debug("Endpoint gateway subnet targeting is enabled. Will use provided subnets for selection.");
                     publicSubnetMetas = subnetsToParse;
                 } else {
                     LOGGER.debug("Searching endpoint gateway subnets for public subnets.");
