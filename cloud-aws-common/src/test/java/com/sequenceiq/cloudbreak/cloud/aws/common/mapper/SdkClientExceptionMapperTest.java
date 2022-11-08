@@ -37,7 +37,7 @@ public class SdkClientExceptionMapperTest {
     private AwsCredentialView ac;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         when(signature.getName()).thenReturn("methodName");
     }
 
