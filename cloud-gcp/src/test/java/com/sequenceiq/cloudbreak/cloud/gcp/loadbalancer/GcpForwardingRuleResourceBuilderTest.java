@@ -108,7 +108,7 @@ public class GcpForwardingRuleResourceBuilderTest {
     private CloudResource ipResource;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
         GcpResourceNameService resourceNameService = new GcpResourceNameService();

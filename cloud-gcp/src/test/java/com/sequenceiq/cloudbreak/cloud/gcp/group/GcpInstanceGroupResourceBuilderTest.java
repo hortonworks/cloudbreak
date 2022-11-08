@@ -78,7 +78,7 @@ public class GcpInstanceGroupResourceBuilderTest {
     private Group group;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         GcpResourceNameService resourceNameService = new GcpResourceNameService();
         ReflectionTestUtils.setField(resourceNameService, "maxResourceNameLength", 50);
         ReflectionTestUtils.setField(underTest, "resourceNameService", resourceNameService);
