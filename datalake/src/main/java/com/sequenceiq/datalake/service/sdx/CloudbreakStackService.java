@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessage
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class CloudbreakStackService {
@@ -77,6 +78,19 @@ public class CloudbreakStackService {
             return upgradeResponse;
         } catch (WebApplicationException e) {
             String message = String.format("Could not launch database server upgrade in core, reason: %s.", exceptionMessageExtractor.getErrorMessage(e));
+            LOGGER.warn(message, e);
+            throw new CloudbreakApiException(message, e);
+        }
+    }
+
+    public void updateSaltByName(SdxCluster sdxCluster) {
+        try {
+            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> stackV4Endpoint.updateSaltByName(WORKSPACE_ID, sdxCluster.getClusterName(), sdxCluster.getAccountId()));
+            cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
+        } catch (WebApplicationException e) {
+            String message = String.format("Could not launch Salt update in core, reason: %s", exceptionMessageExtractor.getErrorMessage(e));
             LOGGER.warn(message, e);
             throw new CloudbreakApiException(message, e);
         }

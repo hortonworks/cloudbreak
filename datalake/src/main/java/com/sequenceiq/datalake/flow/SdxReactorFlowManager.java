@@ -60,6 +60,8 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStar
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.flow.salt.rotatepassword.RotateSaltPasswordTrackerEvent;
+import com.sequenceiq.datalake.flow.salt.update.SaltUpdateEvent;
+import com.sequenceiq.datalake.flow.salt.update.event.SaltUpdateTriggerEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmStackEvent;
@@ -315,6 +317,13 @@ public class SdxReactorFlowManager {
         String selector = RotateSaltPasswordTrackerEvent.ROTATE_SALT_PASSWORD_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SdxEvent(selector, cluster.getId(), userId), cluster.getClusterName());
+    }
+
+    public FlowIdentifier triggerSaltUpdate(SdxCluster cluster) {
+        LOGGER.info("Trigger Datalake salt Salt update for: {}", cluster);
+        String selector = SaltUpdateEvent.SALT_UPDATE_EVENT.event();
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
+        return notify(selector, new SaltUpdateTriggerEvent(cluster.getId(), userId), cluster.getClusterName());
     }
 
 }

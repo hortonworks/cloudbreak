@@ -1379,4 +1379,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             LOGGER.info("Updated database engine version for [{}] with [{}]", crn, databaseEngineVersion);
         }
     }
+
+    public FlowIdentifier updateSalt(SdxCluster sdxCluster) {
+        return sdxReactorFlowManager.triggerSaltUpdate(sdxCluster);
+    }
 }
