@@ -1,5 +1,6 @@
 package com.sequenceiq.sdx.api.endpoint;
 
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.UPDATE_SALT;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHANGE_IMAGE_CATALOG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GENERATE_IMAGE_CATALOG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.ROTATE_CERTIFICATES;
@@ -215,6 +216,12 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "rotate SaltStack user password", produces = MediaType.APPLICATION_JSON, nickname = "rotateSaltPasswordSdxByCrn")
     FlowIdentifier rotateSaltPasswordByCrn(@PathParam("crn") String crn);
+
+    @PUT
+    @Path("crn/{crn}/salt_update")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UPDATE_SALT, nickname = "updateSaltSdxByCrn")
+    FlowIdentifier updateSaltByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATALAKE) @PathParam("crn") String crn);
 
     @GET
     @Path("/versions")

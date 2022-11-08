@@ -238,6 +238,20 @@ class SdxControllerTest {
         assertEquals(ValidationResult.State.VALID, result.getState());
     }
 
+    @Test
+    void testUpdateSaltByCrn() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.getByCrn(USER_CRN, sdxCluster.getCrn())).thenReturn(sdxCluster);
+        when(sdxService.updateSalt(sdxCluster)).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.updateSaltByCrn(sdxCluster.getCrn()));
+
+        verify(sdxService, times(1)).getByCrn(USER_CRN, sdxCluster.getCrn());
+        verify(sdxService, times(1)).updateSalt(sdxCluster);
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals("FLOW_ID", flowIdentifier.getPollableId());
+    }
+
     private SdxCluster getValidSdxCluster() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName(SDX_CLUSTER_NAME);

@@ -152,6 +152,31 @@ public class CloudbreakStackServiceTest {
                 .hasMessage("Rds upgrade validation failed: " + ERROR_MSG);
     }
 
+    @Test
+    void testUpdateSaltByName() {
+        SdxCluster sdxCluster = setupSdxCluster();
+        setupIam();
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateSaltByName(sdxCluster));
+
+        verify(stackV4Endpoint).updateSaltByName(WORKSPACE_ID, sdxCluster.getClusterName(), sdxCluster.getAccountId());
+    }
+
+    @Test
+    void testUpdateSaltByNameThrowsError() {
+        SdxCluster sdxCluster = setupSdxCluster();
+        setupIam();
+        when(exceptionMessageExtractor.getErrorMessage(any(WebApplicationException.class))).thenReturn(ERROR_MSG);
+        doThrow(new WebApplicationException(ERROR_MSG)).when(stackV4Endpoint)
+                .updateSaltByName(WORKSPACE_ID, sdxCluster.getClusterName(), sdxCluster.getAccountId());
+
+        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateSaltByName(sdxCluster)))
+                .isInstanceOf(CloudbreakApiException.class)
+                .hasCauseInstanceOf(RuntimeException.class)
+                .hasRootCauseMessage(ERROR_MSG)
+                .hasMessage("Could not launch Salt update in core, reason: " + ERROR_MSG);
+    }
+
     private static RdsUpgradeV4Response setupResponse(FlowIdentifier flowIdentifier) {
         RdsUpgradeV4Response rdsUpgradeV4Response = new RdsUpgradeV4Response();
         rdsUpgradeV4Response.setFlowIdentifier(flowIdentifier);
