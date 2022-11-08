@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.cloud.azure.util.AzureValidationMessageU
 import static com.sequenceiq.cloudbreak.cloud.azure.util.AzureValidationMessageUtil.AzureMessageResourceType.STORAGE_LOCATION;
 import static com.sequenceiq.cloudbreak.cloud.azure.util.AzureValidationMessageUtil.getAdviceMessage;
 import static com.sequenceiq.cloudbreak.cloud.azure.util.AzureValidationMessageUtil.getIdentityType;
+import static com.sequenceiq.cloudbreak.cloud.azure.validator.Scope.managementGroup;
+import static com.sequenceiq.cloudbreak.cloud.azure.validator.Scope.resource;
 import static com.sequenceiq.common.model.CloudIdentityType.ID_BROKER;
 import static com.sequenceiq.common.model.CloudIdentityType.LOG;
 
@@ -173,11 +175,12 @@ public class AzureIDBrokerObjectStorageValidator {
 
     }
 
-    private List<String> getScopesForIDBrokerValidation(String subscriptionId, Optional<ResourceGroup> singleResourceGroup) {
-        List<String> result = new ArrayList<>();
-        result.add("/subscriptions/" + subscriptionId);
-        singleResourceGroup.ifPresent(rg -> result.add(rg.id()));
-        return result;
+    private List<Scope> getScopesForIDBrokerValidation(String subscriptionId, Optional<ResourceGroup> singleResourceGroup) {
+        List<Scope> scopes = new ArrayList<>();
+        scopes.add(resource("/subscriptions/" + subscriptionId));
+        singleResourceGroup.ifPresent(rg -> scopes.add(resource(rg.id())));
+        scopes.add(managementGroup());
+        return scopes;
     }
 
     private void validateLocation(AzureClient client, Set<Identity> identities, String locationBase, ValidationResultBuilder resultBuilder) {
@@ -216,10 +219,10 @@ public class AzureIDBrokerObjectStorageValidator {
                 getRoleAssignmentsOfSubscription(roleAssignments, storageAccountResourceId.subscriptionId(), client, differentSubscriptions);
         for (Identity identity : identities) {
             validateRoleAssigmentAndScope(roleAssignmentsForSubscription, resultBuilder, identity,
-                    List.of(adlsGen2Config.getFileSystem(),
-                            storageAccountName,
-                            storageAccountResourceId.resourceGroupName(),
-                            storageAccountResourceId.subscriptionId()),
+                    List.of(resource(adlsGen2Config.getFileSystem()),
+                            resource(storageAccountName),
+                            resource(storageAccountResourceId.resourceGroupName()),
+                            resource(storageAccountResourceId.subscriptionId())),
                     differentSubscriptions, cloudIdentityType);
         }
     }
@@ -270,7 +273,7 @@ public class AzureIDBrokerObjectStorageValidator {
     }
 
     private void validateRoleAssigmentAndScope(List<RoleAssignmentInner> roleAssignments, ValidationResultBuilder resultBuilder, Identity identity,
-            List<String> scopes, boolean logOnly, CloudIdentityType cloudIdentityType) {
+            List<Scope> scopes, boolean logOnly, CloudIdentityType cloudIdentityType) {
         if (Objects.nonNull(roleAssignments) && !roleAssignments.isEmpty()) {
             if (!hasMatchingRoles(roleAssignments, identity, scopes)) {
                 addErrorOrLog(resultBuilder,
@@ -283,12 +286,12 @@ public class AzureIDBrokerObjectStorageValidator {
         }
     }
 
-    private boolean hasMatchingRoles(List<RoleAssignmentInner> roleAssignments, Identity identity, List<String> scopes) {
+    private boolean hasMatchingRoles(List<RoleAssignmentInner> roleAssignments, Identity identity, List<Scope> scopes) {
         long numberOfMatchingRoles = 0;
-        for (String scope : scopes) {
+        for (Scope scope : scopes) {
             numberOfMatchingRoles += roleAssignments.stream()
                     .filter(roleAssignment -> roleAssignment.principalId().equals(identity.principalId())
-                            && roleAssignment.scope().endsWith(scope))
+                            && scope.match(roleAssignment.scope()))
                     .count();
         }
         return numberOfMatchingRoles > 0;
@@ -307,4 +310,5 @@ public class AzureIDBrokerObjectStorageValidator {
             resultBuilder.error(msg);
         }
     }
+
 }
