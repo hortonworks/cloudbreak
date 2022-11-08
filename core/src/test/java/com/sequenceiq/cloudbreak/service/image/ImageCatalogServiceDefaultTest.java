@@ -1,10 +1,14 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
+import static org.mockito.AdditionalAnswers.returnsSecondArg;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -101,6 +105,9 @@ public class ImageCatalogServiceDefaultTest {
     @Mock
     private LatestDefaultImageUuidProvider latestDefaultImageUuidProvider;
 
+    @Mock
+    private ProviderSpecificImageFilter providerSpecificImageFilter;
+
     @InjectMocks
     private VersionBasedImageProvider versionBasedImageProvider;
 
@@ -158,6 +165,7 @@ public class ImageCatalogServiceDefaultTest {
         lenient().when(user.getUserCrn()).thenReturn(TestConstants.CRN);
         when(userService.getOrCreate(any())).thenReturn(user);
         when(entitlementService.baseImageEnabled(anyString())).thenReturn(true);
+        when(providerSpecificImageFilter.filterImages(any(), anyList())).then(returnsSecondArg());
 
         ReflectionTestUtils.setField(underTest, "imageCatalogServiceProxy", imageCatalogServiceProxy);
         ReflectionTestUtils.setField(imageCatalogServiceProxy, "advertisedImageCatalogService", advertisedImageCatalogService);
@@ -183,6 +191,8 @@ public class ImageCatalogServiceDefaultTest {
         StatedImage statedImage = underTest.getImagePrewarmedDefaultPreferred(imageFilter, image -> true);
         // THEN
         Assert.assertEquals("Wrong default image has been selected", expectedImageId, statedImage.getImage().getUuid());
+
+        verify(providerSpecificImageFilter, times(3)).filterImages(any(), anyList());
     }
 
     private void setupLatestDefaultImageUuidProvider(String uuid) {

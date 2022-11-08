@@ -23,19 +23,32 @@ public class AzureMarketplaceImageProviderService {
     private static final int INDEX_MARKETPLACE_VERSION = 3;
 
     public AzureMarketplaceImage get(Image image) {
-        String imageUri = image.getImageName();
-        String[] splitUri = imageUri.split(":");
-        if (splitUri.length != MARKETPLACE_IMAGE_PARTS_COUNT) {
+        return get(image.getImageName());
+    }
+
+    private AzureMarketplaceImage get(String imageName) {
+        if (!hasMarketplaceFormat(imageName)) {
             String errorMessage = String.format("Invalid Marketplace image URN in the image catalog! "
-                    + "Please specify the image in an URN format, 4 segments separated by a colon (actual value is: %s)!", imageUri);
+                    + "Please specify the image in an URN format, 4 segments separated by a colon (actual value is: %s)!", imageName);
             LOGGER.warn(errorMessage);
             throw new CloudConnectorException(errorMessage);
         }
+        String[] splitUri = imageName.split(":");
         return new AzureMarketplaceImage(
                 splitUri[INDEX_MARKETPLACE_PUBLISHER_ID],
                 splitUri[INDER_MARKETPLACE_OFFER_ID],
                 splitUri[INDEX_MARKETPLACE_PLAN_ID],
                 splitUri[INDEX_MARKETPLACE_VERSION]
         );
+    }
+
+    public boolean hasMarketplaceFormat(String imageName) {
+        String[] splitUri = imageName.split(":");
+        if (splitUri.length != MARKETPLACE_IMAGE_PARTS_COUNT) {
+            LOGGER.debug("Image with name {} is not a valid Marketplace image", imageName);
+            return false;
+        } else {
+            return true;
+        }
     }
 }

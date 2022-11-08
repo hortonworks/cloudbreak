@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.model.catalog;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -238,25 +237,96 @@ public class Image {
         return shortOsDescriptionFormat();
     }
 
-    public String toStringFull() {
-        return "Image{"
-                + "uuid='" + uuid + '\''
-                + ", date='" + date + '\''
-                + ", created='" + created + '\''
-                + ", published='" + published + '\''
-                + ", description='" + description + '\''
-                + ", os='" + os + '\''
-                + ", osType='" + osType + '\''
-                + ", version='" + version + '\''
-                + ", default='" + defaultImage + '\''
-                + ", packageVersions='" + packageVersions + '\''
-                + ", preWarmParcels='" + preWarmParcels.stream().flatMap(Collection::stream).collect(Collectors.joining(", ")) + '\''
-                + ", preWarmCsd='" + String.join(", ", preWarmCsd) + '\''
-                + ", cmBuildNumber='" + cmBuildNumber + '\''
-                + ", advertised='" + advertised + '\''
-                + ", baseParcelUrl='" + baseParcelUrl + '\''
-                + ", sourceImageId='" + sourceImageId + '\''
-                + '}';
+    @Override
+    @SuppressWarnings({"checkstyle:CyclomaticComplexity", "checkstyle:NPathComplexity"})
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Image image = (Image) o;
+
+        if (defaultImage != image.defaultImage) {
+            return false;
+        }
+        if (advertised != image.advertised) {
+            return false;
+        }
+        if (!Objects.equals(date, image.date)) {
+            return false;
+        }
+        if (!Objects.equals(created, image.created)) {
+            return false;
+        }
+        if (!Objects.equals(published, image.published)) {
+            return false;
+        }
+        if (!Objects.equals(description, image.description)) {
+            return false;
+        }
+        if (!Objects.equals(os, image.os)) {
+            return false;
+        }
+        if (!Objects.equals(osType, image.osType)) {
+            return false;
+        }
+        if (!Objects.equals(uuid, image.uuid)) {
+            return false;
+        }
+        if (!Objects.equals(version, image.version)) {
+            return false;
+        }
+        if (!Objects.equals(repo, image.repo)) {
+            return false;
+        }
+        if (!Objects.equals(imageSetsByProvider, image.imageSetsByProvider)) {
+            return false;
+        }
+        if (!Objects.equals(stackDetails, image.stackDetails)) {
+            return false;
+        }
+        if (!Objects.equals(packageVersions, image.packageVersions)) {
+            return false;
+        }
+        if (!Objects.equals(preWarmParcels, image.preWarmParcels)) {
+            return false;
+        }
+        if (!Objects.equals(preWarmCsd, image.preWarmCsd)) {
+            return false;
+        }
+        if (!Objects.equals(cmBuildNumber, image.cmBuildNumber)) {
+            return false;
+        }
+        if (!Objects.equals(baseParcelUrl, image.baseParcelUrl)) {
+            return false;
+        }
+        return Objects.equals(sourceImageId, image.sourceImageId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(advertised,
+                baseParcelUrl,
+                cmBuildNumber,
+                created,
+                date,
+                defaultImage,
+                description,
+                imageSetsByProvider,
+                os,
+                osType,
+                packageVersions,
+                preWarmCsd,
+                preWarmParcels,
+                published,
+                repo,
+                sourceImageId,
+                stackDetails,
+                uuid,
+                version);
     }
 
     public String shortOsDescriptionFormat() {

@@ -18,7 +18,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.azure.AzurePlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.conf.AzureConfig;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureTagValidator;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -71,8 +70,7 @@ public class RedBeamsTagValidatorTest {
     @Import({RedBeamsTagValidator.class,
             CloudPlatformConnectors.class,
             AzureConfig.class,
-            AzureTagValidator.class,
-            AzurePlatformParameters.class
+            AzureTagValidator.class
     })
     static class Config {
 
@@ -96,5 +94,4 @@ public class RedBeamsTagValidatorTest {
             return mock;
         }
     }
-
 }

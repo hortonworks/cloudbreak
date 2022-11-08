@@ -243,6 +243,12 @@ class EntitlementServiceTest {
                         (EntitlementCheckFunction) EntitlementService::isTargetingSubnetsForEndpointAccessGatewayEnabled, false},
                 {"TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY",
                         (EntitlementCheckFunction) EntitlementService::isTargetingSubnetsForEndpointAccessGatewayEnabled, true},
+
+                {"CDP_AZURE_IMAGE_MARKETPLACE", (EntitlementCheckFunction) EntitlementService::azureMarketplaceImagesEnabled, false},
+                {"CDP_AZURE_IMAGE_MARKETPLACE", (EntitlementCheckFunction) EntitlementService::azureMarketplaceImagesEnabled, true},
+
+                {"CDP_AZURE_IMAGE_MARKETPLACE_ONLY", (EntitlementCheckFunction) EntitlementService::azureOnlyMarketplaceImagesEnabled, false},
+                {"CDP_AZURE_IMAGE_MARKETPLACE_ONLY", (EntitlementCheckFunction) EntitlementService::azureOnlyMarketplaceImagesEnabled, true},
         };
     }
 

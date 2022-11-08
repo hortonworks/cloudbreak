@@ -39,7 +39,7 @@ public class ImagesToImagesV4ResponseConverter {
         res.setBaseImages(baseImages);
         List<ImageV4Response> cdhImages = convertImages(source.getCdhImages(), StackType.CDH);
         res.setCdhImages(cdhImages);
-        res.setSupportedVersions(source.getSuppertedVersions());
+        res.setSupportedVersions(source.getSupportedVersions());
         res.setFreeipaImages(source.getFreeIpaImages().stream()
                 .map(image -> imageToImageV4ResponseConverter.convert(image))
                 .collect(Collectors.toList()));

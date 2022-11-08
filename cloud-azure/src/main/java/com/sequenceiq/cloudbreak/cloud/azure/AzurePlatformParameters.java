@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.cloud.ImageFilter;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.TagValidator;
@@ -71,11 +72,11 @@ public class AzurePlatformParameters implements PlatformParameters {
     private String armZoneParameterDefault;
 
     @Inject
-    @Qualifier("AzureTagSpecification")
-    private TagSpecification tagSpecification;
+    private AzureTagValidator azureTagValidator;
 
     @Inject
-    private AzureTagValidator azureTagValidator;
+    @Qualifier("AzureImageFilter")
+    private ImageFilter imageFilter;
 
     private VmRecommendations vmRecommendations;
 
@@ -98,6 +99,11 @@ public class AzurePlatformParameters implements PlatformParameters {
     @Override
     public TagValidator tagValidator() {
         return azureTagValidator;
+    }
+
+    @Override
+    public Optional<ImageFilter> imageFilter() {
+        return Optional.of(imageFilter);
     }
 
     @Override
@@ -165,7 +171,7 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     @Override
     public TagSpecification tagSpecification() {
-        return tagSpecification;
+        return azureTagValidator.getTagSpecification();
     }
 
     @Override

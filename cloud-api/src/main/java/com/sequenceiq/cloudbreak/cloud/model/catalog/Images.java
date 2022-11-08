@@ -28,18 +28,18 @@ public class Images {
 
     private final List<Image> freeIpaImages;
 
-    private final Set<String> suppertedVersions;
+    private final Set<String> supportedVersions;
 
     @JsonCreator
     public Images(
             @JsonProperty(BASE_IMAGES) List<Image> baseImages,
             @JsonProperty(CDH_IMAGES) List<Image> cdhImages,
             @JsonProperty(FREEIPA_IMAGES) List<Image> freeIpaImages,
-            @JsonProperty("supported-cb-versions") Set<String> suppertedVersions) {
+            @JsonProperty("supported-cb-versions") Set<String> supportedVersions) {
         this.baseImages = (baseImages == null) ? emptyList() : baseImages;
         this.cdhImages = (cdhImages == null) ? emptyList() : cdhImages;
         this.freeIpaImages = (freeIpaImages == null) ? emptyList() : freeIpaImages;
-        this.suppertedVersions = (suppertedVersions == null) ? emptySet() : suppertedVersions;
+        this.supportedVersions = (supportedVersions == null) ? emptySet() : supportedVersions;
     }
 
     @JsonProperty(BASE_IMAGES)
@@ -58,8 +58,8 @@ public class Images {
     }
 
     @JsonIgnore
-    public Set<String> getSuppertedVersions() {
-        return suppertedVersions;
+    public Set<String> getSupportedVersions() {
+        return supportedVersions;
     }
 
     @JsonIgnore

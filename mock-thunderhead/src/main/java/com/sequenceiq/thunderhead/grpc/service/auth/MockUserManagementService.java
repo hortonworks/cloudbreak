@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_I
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_UAE_CENTRAL;
@@ -385,6 +386,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.azure.marketplace.images.enable}")
     private boolean enableAzureMarketplaceImages;
+
+    @Value("${auth.mock.azure.marketplace.images.only.enable}")
+    private boolean enableAzureMarketplaceImagesOnly;
 
     @Value("${auth.mock.cloudidentitymappinng.enable}")
     private boolean enableCloudIdentityMappinng;
@@ -891,6 +895,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableAzureMarketplaceImages) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_IMAGE_MARKETPLACE));
+        }
+        if (enableAzureMarketplaceImagesOnly) {
+            builder.addEntitlements(createEntitlement(CDP_AZURE_IMAGE_MARKETPLACE_ONLY));
         }
         if (enableCloudIdentityMappinng) {
             builder.addEntitlements(createEntitlement(CDP_CLOUD_IDENTITY_MAPPING));

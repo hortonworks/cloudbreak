@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.service.image.ImageFilter;
 import com.sequenceiq.cloudbreak.service.image.LatestDefaultImageUuidProvider;
+import com.sequenceiq.cloudbreak.service.image.ProviderSpecificImageFilter;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
 import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 
@@ -30,6 +31,9 @@ public class AdvertisedImageProvider {
 
     @Inject
     private LatestDefaultImageUuidProvider latestDefaultImageUuidProvider;
+
+    @Inject
+    private ProviderSpecificImageFilter providerSpecificImageFilter;
 
     public StatedImages getImages(CloudbreakImageCatalogV3 imageCatalogV3, ImageFilter imageFilter) {
         return statedImages(
@@ -52,7 +56,7 @@ public class AdvertisedImageProvider {
 
         Collection<String> latestDefaultImageUuids = latestDefaultImageUuidProvider.getLatestDefaultImageUuids(platforms, result);
         result.forEach(image -> image.setDefaultImage(latestDefaultImageUuids.contains(image.getUuid())));
-        return result;
+        return providerSpecificImageFilter.filterImages(platforms, result);
     }
 
     private List<Image> getBaseImagesOrEmptyList(CloudbreakImageCatalogV3 imageCatalogV3, ImageFilter imageFilter) {

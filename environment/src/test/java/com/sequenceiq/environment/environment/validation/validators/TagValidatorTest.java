@@ -20,7 +20,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.azure.AzurePlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.conf.AzureConfig;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureTagValidator;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -54,7 +53,7 @@ class TagValidatorTest {
     public void testNegative(String tag, String value, String messagePortion) {
         ValidationResult result = tagValidatorUnderTest.validateTags(CloudConstants.AZURE, Map.of(tag, value));
         Assertions.assertTrue(result.hasError(), "tag validation should fail");
-        Assertions.assertTrue(result.getErrors().size() == 1, "tag validation should have one error only");
+        Assertions.assertEquals(1, result.getErrors().size(), "tag validation should have one error only");
         Assertions.assertTrue(result.getErrors().get(0).contains(messagePortion));
     }
 
@@ -67,8 +66,7 @@ class TagValidatorTest {
     @Import({TagValidator.class,
             CloudPlatformConnectors.class,
             AzureConfig.class,
-            AzureTagValidator.class,
-            AzurePlatformParameters.class
+            AzureTagValidator.class
     })
     static class Config {
 
@@ -92,5 +90,4 @@ class TagValidatorTest {
             return mock;
         }
     }
-
 }

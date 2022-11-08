@@ -5,17 +5,18 @@ import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CommonTagValidator;
-import com.sequenceiq.cloudbreak.cloud.azure.AzurePlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 
 @Component
 public class AzureTagValidator extends CommonTagValidator {
 
     @Inject
-    private AzurePlatformParameters platformParameters;
+    @Qualifier("AzureTagSpecification")
+    private TagSpecification tagSpecification;
 
     private Pattern keyValidator;
 
@@ -23,13 +24,13 @@ public class AzureTagValidator extends CommonTagValidator {
 
     @PostConstruct
     public void init() {
-        keyValidator = Pattern.compile(platformParameters.tagSpecification().getKeyValidator());
-        valueValidator = Pattern.compile(platformParameters.tagSpecification().getValueValidator());
+        keyValidator = Pattern.compile(tagSpecification.getKeyValidator());
+        valueValidator = Pattern.compile(tagSpecification.getValueValidator());
     }
 
     @Override
     public TagSpecification getTagSpecification() {
-        return platformParameters.tagSpecification();
+        return tagSpecification;
     }
 
     @Override

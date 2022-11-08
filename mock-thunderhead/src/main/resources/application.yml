@@ -34,6 +34,7 @@ auth:
     sshpublickey.file: key.pub
     raws3.enable: false
     azure.marketplace.images.enable: true
+    azure.marketplace.images.only.enable: false
     azure.single.resourcegroup.enable: true
     azure.single.resourcegroup.dedicated.storage.account.enable: true
     cloudidentitymappinng.enable: true

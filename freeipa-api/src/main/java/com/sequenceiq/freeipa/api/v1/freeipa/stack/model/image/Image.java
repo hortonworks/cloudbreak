@@ -44,7 +44,7 @@ public class Image {
 
     private final Map<String, String> packageVersions;
 
-    private boolean advertised;
+    private final boolean advertised;
 
     @JsonCreator
     public Image(
