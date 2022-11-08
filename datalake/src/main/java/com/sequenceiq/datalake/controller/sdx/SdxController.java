@@ -354,6 +354,13 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPDATE_SALT_DATALAKE)
+    public FlowIdentifier updateSaltByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATALAKE) @ResourceCrn String crn) {
+        SdxCluster sdxCluster = getSdxClusterByCrn(crn);
+        return sdxService.updateSalt(sdxCluster);
+    }
+
+    @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
     public List<String> versions(String cloudPlatform) {
         return cdpConfigService.getDatalakeVersions(cloudPlatform);

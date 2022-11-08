@@ -1731,4 +1731,16 @@ class SdxServiceTest {
 
         assertThrows(NotFoundException.class, () -> underTest.updateDatabaseEngineVersion(SDX_CRN, "10"));
     }
+
+    @Test
+    public void testUpdateSalt() {
+        SdxCluster sdxCluster = getSdxCluster();
+        when(sdxReactorFlowManager.triggerSaltUpdate(sdxCluster)).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        FlowIdentifier flowIdentifier = underTest.updateSalt(sdxCluster);
+
+        verify(sdxReactorFlowManager, times(1)).triggerSaltUpdate(sdxCluster);
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals("FLOW_ID", flowIdentifier.getPollableId());
+    }
 }

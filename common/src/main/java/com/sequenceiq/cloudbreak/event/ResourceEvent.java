@@ -580,6 +580,10 @@ public enum ResourceEvent {
     DATALAKE_SALT_PASSWORD_ROTATION_FAILED("datalake.salt.passwordrotation.failed"),
     DATALAKE_SALT_PASSWORD_ROTATION_FINISHED("datalake.salt.passwordrotation.finished"),
 
+    DATALAKE_SALT_UPDATE_IN_PROGRESS("datalake.salt.update.in.progress"),
+    DATALAKE_SALT_UPDATE_FAILED("datalake.salt.update.failed"),
+    DATALAKE_SALT_UPDATE_FINISHED("datalake.salt.update.finished"),
+
     DATALAKE_VERTICAL_SCALE_VALIDATION_IN_PROGRESS("datalake.verticalscale.validation.in.progress"),
     DATALAKE_VERTICAL_SCALE_VALIDATION_FAILED("datalake.verticalscale.validation.failed"),
     DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS("datalake.verticalscale.datalake.in.progress"),
