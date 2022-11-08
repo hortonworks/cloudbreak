@@ -10,9 +10,12 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
+import com.sequenceiq.common.api.type.DeploymentRestriction;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
@@ -24,8 +27,11 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
 
     private final EnvironmentViewConverter environmentViewConverter;
 
-    protected EnvironmentBaseNetworkConverter(EnvironmentViewConverter environmentViewConverter) {
+    private final EntitlementService entitlementService;
+
+    protected EnvironmentBaseNetworkConverter(EnvironmentViewConverter environmentViewConverter, EntitlementService entitlementService) {
         this.environmentViewConverter = environmentViewConverter;
+        this.entitlementService = entitlementService;
     }
 
     @Override
@@ -52,7 +58,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         NetworkDto.Builder builder = NetworkDto.builder()
                 .withId(source.getId())
                 .withName(source.getName())
-                .withSubnetMetas(source.getSubnetMetas())
+                .withSubnetMetas(setDefaultDeploymentRestrictions(source.getSubnetMetas()))
                 .withNetworkCidr(source.getNetworkCidr())
                 .withNetworkCidrs(getNetworkCidrs(source))
                 .withResourceCrn(source.getResourceCrn())
@@ -68,6 +74,20 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         convertSubnets(source, builder);
 
         return setProviderSpecificFields(builder, source);
+    }
+
+    private Map<String, CloudSubnet> setDefaultDeploymentRestrictions(Map<String, CloudSubnet> subnetMetas) {
+        subnetMetas.forEach((name, cloudSubnet) ->
+                cloudSubnet.setDeploymentRestrictions(cloudSubnet.isPrivateSubnet()
+                        ? getDeploymentRestrictionForPrivateSubnet(cloudSubnet.getType())
+                        : DeploymentRestriction.ENDPOINT_ACCESS_GATEWAYS));
+        return subnetMetas;
+    }
+
+    protected Set<DeploymentRestriction> getDeploymentRestrictionForPrivateSubnet(SubnetType type) {
+        return entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())
+                ? DeploymentRestriction.ALL
+                : DeploymentRestriction.NON_ENDPOINT_ACCESS_GATEWAYS;
     }
 
     Set<String> getNetworkCidrs(BaseNetwork source) {

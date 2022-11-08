@@ -60,12 +60,13 @@ public class SubnetSelectorTest extends SubnetTest {
     }
 
     @Test
-    public void testChooseEndpointGatewaySubnetFromEndpointSubnetst() {
+    public void testChooseEndpointGatewaySubnetFromEndpointSubnets() {
         EnvironmentNetworkResponse source = setupResponse();
         source.setSubnetMetas(Map.of("key", getCloudSubnet(AZ_1)));
         source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
         source.setGatewayEndpointSubnetMetas(Map.of("public-key", getPublicCloudSubnet(PUBLIC_ID_1, AZ_1)));
         when(entitlementService.endpointGatewaySkipValidation(any())).thenReturn(false);
+        when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(any())).thenReturn(false);
 
         Optional<CloudSubnet> subnet =
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.chooseSubnetForEndpointGateway(source, PRIVATE_ID_1));
@@ -75,7 +76,7 @@ public class SubnetSelectorTest extends SubnetTest {
     }
 
     @Test
-    public void testChooseEndpointGatewaySubnetFromEnvironmentSubnetst() {
+    public void testChooseEndpointGatewaySubnetFromEnvironmentSubnets() {
         EnvironmentNetworkResponse source = setupResponse();
         source.setSubnetMetas(Map.of(
             "key1", getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1),
@@ -83,6 +84,7 @@ public class SubnetSelectorTest extends SubnetTest {
         ));
         source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
         when(entitlementService.endpointGatewaySkipValidation(any())).thenReturn(false);
+        when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(any())).thenReturn(false);
 
         Optional<CloudSubnet> subnet =
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.chooseSubnetForEndpointGateway(source, PRIVATE_ID_1));
@@ -98,6 +100,7 @@ public class SubnetSelectorTest extends SubnetTest {
         source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
         source.setGatewayEndpointSubnetMetas(Map.of("private-key", getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1)));
         when(entitlementService.endpointGatewaySkipValidation(any())).thenReturn(false);
+        when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(any())).thenReturn(false);
 
         Optional<CloudSubnet> subnet =
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.chooseSubnetForEndpointGateway(source, PRIVATE_ID_1));
@@ -126,6 +129,7 @@ public class SubnetSelectorTest extends SubnetTest {
         source.setSubnetMetas(Map.of("key", getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1)));
         source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
         when(entitlementService.endpointGatewaySkipValidation(any())).thenReturn(false);
+        when(entitlementService.isTargetingSubnetsForEndpointAccessGatewayEnabled(any())).thenReturn(false);
 
         Optional<CloudSubnet> subnet =
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.chooseSubnetForEndpointGateway(source, PRIVATE_ID_1));

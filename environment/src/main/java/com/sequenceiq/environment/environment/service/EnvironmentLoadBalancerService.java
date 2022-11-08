@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static java.util.Objects.requireNonNull;
 
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.service.LoadBalancerEntitlementService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -49,7 +51,7 @@ public class EnvironmentLoadBalancerService {
         requireNonNull(environmentLbDto);
 
         loadBalancerEntitlementService.validateNetworkForEndpointGateway(environmentDto.getCloudPlatform(), environmentDto.getName(),
-            environmentLbDto.getEndpointAccessGateway());
+            getIfNotNull(environmentDto.getNetwork(), NetworkDto::getEndpointGatewaySubnetIds));
 
         if (!isLoadBalancerEnabledForDatalake(ThreadBasedUserCrnProvider.getAccountId(), environmentDto.getCloudPlatform(),
             environmentLbDto.getEndpointAccessGateway())) {

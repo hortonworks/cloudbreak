@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,8 +17,10 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
@@ -32,6 +35,7 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 
+@ExtendWith(MockitoExtension.class)
 class CloudNetworkServiceTest {
 
     private static final byte AMOUNT_OF_SUBNETS = 2;
@@ -63,21 +67,19 @@ class CloudNetworkServiceTest {
     @Mock
     private Environment testEnvironment;
 
+    @InjectMocks
     private CloudNetworkService underTest;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
-        underTest = new CloudNetworkService(platformParameterService);
-
         Region testRegion = new Region();
         testRegion.setName(DEFAULT_TEST_REGION_NAME);
         testRegion.setDisplayName(DEFAULT_TEST_REGION_NAME);
 
-        when(cloudNetworks.getCloudNetworkResponses()).thenReturn(cloudSubnetCreator(AMOUNT_OF_SUBNETS));
-        when(platformParameterService.getCloudNetworks(any(PlatformResourceRequest.class))).thenReturn(cloudNetworks);
-        when(testEnvironmentDto.getRegions()).thenReturn(Set.of(testRegion));
-        when(testEnvironment.getRegionSet()).thenReturn(Set.of(testRegion));
+        lenient().when(cloudNetworks.getCloudNetworkResponses()).thenReturn(cloudSubnetCreator(AMOUNT_OF_SUBNETS));
+        lenient().when(platformParameterService.getCloudNetworks(any(PlatformResourceRequest.class))).thenReturn(cloudNetworks);
+        lenient().when(testEnvironmentDto.getRegions()).thenReturn(Set.of(testRegion));
+        lenient().when(testEnvironment.getRegionSet()).thenReturn(Set.of(testRegion));
     }
 
     @Test
@@ -398,6 +400,7 @@ class CloudNetworkServiceTest {
         when(testNetworkDto.getEndpointGatewaySubnetIds()).thenReturn(DEFAULT_TEST_SUBNET_ID_SET);
         when(testNetworkDto.getAws()).thenReturn(awsParams);
         when(testEnvironment.getCloudPlatform()).thenReturn(AWS_CLOUD_PLATFORM);
+        when(testEnvironmentDto.getCloudPlatform()).thenReturn(AWS_CLOUD_PLATFORM);
         when(cloudNetworks.getCloudNetworkResponses()).thenReturn(cloudNetworksFromProvider);
 
         Map<String, CloudSubnet> result = underTest.retrieveSubnetMetadata(testEnvironment, testNetworkDto);
@@ -414,7 +417,7 @@ class CloudNetworkServiceTest {
             "The amount of result CloudSubnet(s) for the gateway endpoint must be: " + expectedAmountOfResultCloudSubnet);
         assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
 
-        verify(platformParameterService, times(1)).getCloudNetworks(any());
+        verify(platformParameterService, times(2)).getCloudNetworks(any());
     }
 
     @Test
@@ -433,6 +436,7 @@ class CloudNetworkServiceTest {
         when(testNetworkDto.getEndpointGatewaySubnetIds()).thenReturn(DEFAULT_TEST_SUBNET_ID_SET);
         when(testNetworkDto.getAzure()).thenReturn(azureParams);
         when(testEnvironment.getCloudPlatform()).thenReturn(AZURE_CLOUD_PLATFORM);
+        when(testEnvironmentDto.getCloudPlatform()).thenReturn(AZURE_CLOUD_PLATFORM);
         when(cloudNetworks.getCloudNetworkResponses()).thenReturn(cloudNetworksFromProvider);
 
         Map<String, CloudSubnet> result = underTest.retrieveSubnetMetadata(testEnvironment, testNetworkDto);
@@ -449,7 +453,7 @@ class CloudNetworkServiceTest {
             "The amount of result CloudSubnet(s) for the gateway endpoint must be: " + expectedAmountOfResultCloudSubnet);
         assertEquals(DEFAULT_TEST_SUBNET_ID_SET.iterator().next(), gatewayResult.get(gatewayResult.keySet().iterator().next()).getId());
 
-        verify(platformParameterService, times(1)).getCloudNetworks(any());
+        verify(platformParameterService, times(2)).getCloudNetworks(any());
     }
 
     @Test

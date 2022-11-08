@@ -47,89 +47,89 @@ public class NetworkV1ToNetworkV4Converter {
     @Inject
     private EndpointGatewayNetworkValidator endpointGatewayNetworkValidator;
 
-    public NetworkV4Request convertToNetworkV4Request(Pair<NetworkV1Request, DetailedEnvironmentResponse> network) {
-        EnvironmentNetworkResponse value = network.getValue().getNetwork();
-        NetworkV1Request key = network.getKey();
-        if (key == null) {
-            key = new NetworkV1Request();
+    public NetworkV4Request convertToNetworkV4Request(Pair<NetworkV1Request, DetailedEnvironmentResponse> source) {
+        EnvironmentNetworkResponse networkResponse = source.getValue().getNetwork();
+        NetworkV1Request networkV1Request = source.getKey();
+        if (networkV1Request == null) {
+            networkV1Request = new NetworkV1Request();
         }
 
         NetworkV4Request request = new NetworkV4Request();
 
-        if (network.getValue().getCloudPlatform() == null) {
+        if (source.getValue().getCloudPlatform() == null) {
             throw new IllegalStateException("Unable to determine cloud platform for network since it has not been set!");
         }
-        switch (network.getValue().getCloudPlatform()) {
+        switch (source.getValue().getCloudPlatform()) {
             case "AWS":
-                request.setAws(getAwsNetworkParameters(Optional.ofNullable(key.getAws()), value));
+                request.setAws(getAwsNetworkParameters(Optional.ofNullable(networkV1Request.getAws()), networkResponse));
                 break;
             case "AZURE":
-                request.setAzure(getAzureNetworkParameters(Optional.ofNullable(key.getAzure()), value));
+                request.setAzure(getAzureNetworkParameters(Optional.ofNullable(networkV1Request.getAzure()), networkResponse));
                 break;
             case "MOCK":
-                request.setMock(getMockNetworkParameters(Optional.ofNullable(key.getMock()), value));
+                request.setMock(getMockNetworkParameters(Optional.ofNullable(networkV1Request.getMock()), networkResponse));
                 break;
             case "GCP":
-                request.setGcp(getGcpNetworkParameters(Optional.ofNullable(key.getGcp()), value));
+                request.setGcp(getGcpNetworkParameters(Optional.ofNullable(networkV1Request.getGcp()), networkResponse));
                 break;
             default:
                 LOGGER.warn(NetworkV1ToNetworkV4Converter.class.getSimpleName() + " has no implemented action for cloud platform: " +
-                        network.getValue().getCloudPlatform());
+                        source.getValue().getCloudPlatform());
         }
         return request;
     }
 
-    private MockNetworkV4Parameters getMockNetworkParameters(Optional<MockNetworkV1Parameters> mockKey, EnvironmentNetworkResponse value) {
+    private MockNetworkV4Parameters getMockNetworkParameters(Optional<MockNetworkV1Parameters> mockKey, EnvironmentNetworkResponse networkResponse) {
         MockNetworkV1Parameters params = mockKey.orElse(new MockNetworkV1Parameters());
-        return convertToMockNetworkParams(new ImmutablePair<>(params, value));
+        return convertToMockNetworkParams(new ImmutablePair<>(params, networkResponse));
     }
 
-    private AzureNetworkV4Parameters getAzureNetworkParameters(Optional<AzureNetworkV1Parameters> azureKey, EnvironmentNetworkResponse value) {
+    private AzureNetworkV4Parameters getAzureNetworkParameters(Optional<AzureNetworkV1Parameters> azureKey, EnvironmentNetworkResponse networkResponse) {
         AzureNetworkV1Parameters params = azureKey.orElse(new AzureNetworkV1Parameters());
-        return convertToAzureStackRequest(new ImmutablePair<>(params, value));
+        return convertToAzureStackRequest(new ImmutablePair<>(params, networkResponse));
     }
 
-    private AwsNetworkV4Parameters getAwsNetworkParameters(Optional<AwsNetworkV1Parameters> awsKey, EnvironmentNetworkResponse value) {
+    private AwsNetworkV4Parameters getAwsNetworkParameters(Optional<AwsNetworkV1Parameters> awsKey, EnvironmentNetworkResponse networkResponse) {
         AwsNetworkV1Parameters params = awsKey.orElse(new AwsNetworkV1Parameters());
-        return convertToAwsStackRequest(new ImmutablePair<>(params, value));
+        return convertToAwsStackRequest(new ImmutablePair<>(params, networkResponse));
     }
 
-    private GcpNetworkV4Parameters getGcpNetworkParameters(Optional<GcpNetworkV1Parameters> gcpKey, EnvironmentNetworkResponse value) {
+    private GcpNetworkV4Parameters getGcpNetworkParameters(Optional<GcpNetworkV1Parameters> gcpKey, EnvironmentNetworkResponse networkResponse) {
         GcpNetworkV1Parameters params = gcpKey.orElse(new GcpNetworkV1Parameters());
-        return convertToGcpStackRequest(new ImmutablePair<>(params, value));
+        return convertToGcpStackRequest(new ImmutablePair<>(params, networkResponse));
     }
 
     private MockNetworkV4Parameters convertToMockNetworkParams(Pair<MockNetworkV1Parameters, EnvironmentNetworkResponse> source) {
-        EnvironmentNetworkResponse value = source.getValue();
-        MockNetworkV1Parameters key = source.getKey();
+        EnvironmentNetworkResponse networkResponse = source.getValue();
+        MockNetworkV1Parameters mockNetworkV1Parameters = source.getKey();
 
         MockNetworkV4Parameters params = new MockNetworkV4Parameters();
 
-        if (key != null) {
-            String subnetId = key.getSubnetId();
-            if (value != null) {
+        if (mockNetworkV1Parameters != null) {
+            String subnetId = mockNetworkV1Parameters.getSubnetId();
+            if (networkResponse != null) {
                 evaluateIfTrueDoOtherwise(subnetId, StringUtils::isNotEmpty, params::setSubnetId,
-                        s -> params.setSubnetId(value.getPreferedSubnetId()));
+                        s -> params.setSubnetId(networkResponse.getPreferedSubnetId()));
             }
-            params.setInternetGatewayId(key.getInternetGatewayId());
-            params.setVpcId(key.getVpcId());
+            params.setInternetGatewayId(mockNetworkV1Parameters.getInternetGatewayId());
+            params.setVpcId(mockNetworkV1Parameters.getVpcId());
         }
 
         return params;
     }
 
     private AzureNetworkV4Parameters convertToAzureStackRequest(Pair<AzureNetworkV1Parameters, EnvironmentNetworkResponse> source) {
-        EnvironmentNetworkResponse value = source.getValue();
-        AzureNetworkV1Parameters key = source.getKey();
+        EnvironmentNetworkResponse networkResponse = source.getValue();
+        AzureNetworkV1Parameters azureNetworkV1Parameters = source.getKey();
 
         AzureNetworkV4Parameters response = new AzureNetworkV4Parameters();
 
-        if (key != null) {
-            response.setNetworkId(value.getAzure().getNetworkId());
-            response.setNoPublicIp(value.getAzure().getNoPublicIp());
-            response.setResourceGroupName(value.getAzure().getResourceGroupName());
-            response.setDatabasePrivateDnsZoneId(value.getAzure().getDatabasePrivateDnsZoneId());
-            String subnetId = key.getSubnetId();
+        if (azureNetworkV1Parameters != null) {
+            response.setNetworkId(networkResponse.getAzure().getNetworkId());
+            response.setNoPublicIp(networkResponse.getAzure().getNoPublicIp());
+            response.setResourceGroupName(networkResponse.getAzure().getResourceGroupName());
+            response.setDatabasePrivateDnsZoneId(networkResponse.getAzure().getDatabasePrivateDnsZoneId());
+            String subnetId = azureNetworkV1Parameters.getSubnetId();
             if (!Strings.isNullOrEmpty(subnetId)) {
                 response.setSubnetId(subnetId);
             } else if (source.getValue() != null) {
@@ -141,22 +141,22 @@ public class NetworkV1ToNetworkV4Converter {
     }
 
     private GcpNetworkV4Parameters convertToGcpStackRequest(Pair<GcpNetworkV1Parameters, EnvironmentNetworkResponse> source) {
-        EnvironmentNetworkResponse value = source.getValue();
-        GcpNetworkV1Parameters key = source.getKey();
+        EnvironmentNetworkResponse networkResponse = source.getValue();
+        GcpNetworkV1Parameters gcpNetworkV1Parameters = source.getKey();
 
         GcpNetworkV4Parameters response = new GcpNetworkV4Parameters();
 
-        if (key != null) {
-            response.setNetworkId(value.getGcp().getNetworkId());
-            response.setNoFirewallRules(value.getGcp().getNoFirewallRules());
-            response.setNoPublicIp(value.getGcp().getNoPublicIp());
-            response.setSharedProjectId(value.getGcp().getSharedProjectId());
+        if (gcpNetworkV1Parameters != null) {
+            response.setNetworkId(networkResponse.getGcp().getNetworkId());
+            response.setNoFirewallRules(networkResponse.getGcp().getNoFirewallRules());
+            response.setNoPublicIp(networkResponse.getGcp().getNoPublicIp());
+            response.setSharedProjectId(networkResponse.getGcp().getSharedProjectId());
 
-            String subnetId = key.getSubnetId();
+            String subnetId = gcpNetworkV1Parameters.getSubnetId();
             if (!Strings.isNullOrEmpty(subnetId)) {
                 response.setSubnetId(subnetId);
             } else {
-                response.setSubnetId(getFirstSubnetIdFromEnvironment(value));
+                response.setSubnetId(getFirstSubnetIdFromEnvironment(networkResponse));
             }
         }
 
@@ -168,27 +168,27 @@ public class NetworkV1ToNetworkV4Converter {
     }
 
     private AwsNetworkV4Parameters convertToAwsStackRequest(Pair<AwsNetworkV1Parameters, EnvironmentNetworkResponse> source) {
-        EnvironmentNetworkResponse value = source.getValue();
-        AwsNetworkV1Parameters key = source.getKey();
+        EnvironmentNetworkResponse networkResponse = source.getValue();
+        AwsNetworkV1Parameters awsNetworkV1Parameters = source.getKey();
 
         AwsNetworkV4Parameters response = new AwsNetworkV4Parameters();
 
-        if (key != null) {
-            response.setVpcId(value.getAws().getVpcId());
+        if (awsNetworkV1Parameters != null) {
+            response.setVpcId(networkResponse.getAws().getVpcId());
 
-            String subnetId = key.getSubnetId();
+            String subnetId = awsNetworkV1Parameters.getSubnetId();
             if (!Strings.isNullOrEmpty(subnetId)) {
-                response.setSubnetId(key.getSubnetId());
-            } else if (value != null) {
-                response.setSubnetId(value.getPreferedSubnetId());
+                response.setSubnetId(awsNetworkV1Parameters.getSubnetId());
+            } else {
+                response.setSubnetId(networkResponse.getPreferedSubnetId());
             }
 
-            if (PublicEndpointAccessGateway.ENABLED.equals(value.getPublicEndpointAccessGateway())) {
-                ValidationResult validationResult = endpointGatewayNetworkValidator.validate(new ImmutablePair<>(response.getSubnetId(), value));
+            if (PublicEndpointAccessGateway.ENABLED.equals(networkResponse.getPublicEndpointAccessGateway())) {
+                ValidationResult validationResult = endpointGatewayNetworkValidator.validate(new ImmutablePair<>(response.getSubnetId(), networkResponse));
                 if (validationResult.getState() == ValidationResult.State.ERROR || validationResult.hasError()) {
                     throw new BadRequestException("Endpoint gateway subnet validation failed: " + validationResult.getFormattedErrors());
                 }
-                Optional<CloudSubnet> endpointGatewaySubnet = subnetSelector.chooseSubnetForEndpointGateway(value, response.getSubnetId());
+                Optional<CloudSubnet> endpointGatewaySubnet = subnetSelector.chooseSubnetForEndpointGateway(networkResponse, response.getSubnetId());
                 if (endpointGatewaySubnet.isPresent()) {
                     response.setEndpointGatewaySubnetId(endpointGatewaySubnet.get().getId());
                 }
@@ -199,13 +199,13 @@ public class NetworkV1ToNetworkV4Converter {
     }
 
     public NetworkV1Request convertToNetworkV1Request(NetworkV4Request network) {
-        NetworkV1Request response = new NetworkV1Request();
-        response.setAws(getIfNotNull(network.getAws(), this::convertToAwsNetworkV1Parameters));
-        response.setAzure(getIfNotNull(network.getAzure(), this::convertToAzureNetworkV1Parameters));
-        response.setGcp(getIfNotNull(network.getGcp(), this::convertToGcpNetworkV1Parameters));
-        response.setYarn(getIfNotNull(network.getYarn(), this::convertToYarnNetworkV1Parameters));
-        response.setMock(getIfNotNull(network.getMock(), this::convertToMockNetworkV1Parameters));
-        return response;
+        NetworkV1Request request = new NetworkV1Request();
+        request.setAws(getIfNotNull(network.getAws(), this::convertToAwsNetworkV1Parameters));
+        request.setAzure(getIfNotNull(network.getAzure(), this::convertToAzureNetworkV1Parameters));
+        request.setGcp(getIfNotNull(network.getGcp(), this::convertToGcpNetworkV1Parameters));
+        request.setYarn(getIfNotNull(network.getYarn(), this::convertToYarnNetworkV1Parameters));
+        request.setMock(getIfNotNull(network.getMock(), this::convertToMockNetworkV1Parameters));
+        return request;
     }
 
     private YarnNetworkV1Parameters convertToYarnNetworkV1Parameters(YarnNetworkV4Parameters source) {
@@ -213,28 +213,28 @@ public class NetworkV1ToNetworkV4Converter {
     }
 
     private MockNetworkV1Parameters convertToMockNetworkV1Parameters(MockNetworkV4Parameters source) {
-        MockNetworkV1Parameters response = new MockNetworkV1Parameters();
-        response.setSubnetId(source.getSubnetId());
-        response.setVpcId(source.getVpcId());
-        response.setInternetGatewayId(source.getInternetGatewayId());
-        return response;
+        MockNetworkV1Parameters parameters = new MockNetworkV1Parameters();
+        parameters.setSubnetId(source.getSubnetId());
+        parameters.setVpcId(source.getVpcId());
+        parameters.setInternetGatewayId(source.getInternetGatewayId());
+        return parameters;
     }
 
     private AzureNetworkV1Parameters convertToAzureNetworkV1Parameters(AzureNetworkV4Parameters source) {
-        AzureNetworkV1Parameters response = new AzureNetworkV1Parameters();
-        response.setSubnetId(source.getSubnetId());
-        return response;
+        AzureNetworkV1Parameters parameters = new AzureNetworkV1Parameters();
+        parameters.setSubnetId(source.getSubnetId());
+        return parameters;
     }
 
     private GcpNetworkV1Parameters convertToGcpNetworkV1Parameters(GcpNetworkV4Parameters source) {
-        GcpNetworkV1Parameters response = new GcpNetworkV1Parameters();
-        response.setSubnetId(source.getSubnetId());
-        return response;
+        GcpNetworkV1Parameters parameters = new GcpNetworkV1Parameters();
+        parameters.setSubnetId(source.getSubnetId());
+        return parameters;
     }
 
     private AwsNetworkV1Parameters convertToAwsNetworkV1Parameters(AwsNetworkV4Parameters source) {
-        AwsNetworkV1Parameters response = new AwsNetworkV1Parameters();
-        response.setSubnetId(source.getSubnetId());
-        return response;
+        AwsNetworkV1Parameters parameters = new AwsNetworkV1Parameters();
+        parameters.setSubnetId(source.getSubnetId());
+        return parameters;
     }
 }

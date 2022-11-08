@@ -103,7 +103,7 @@ public class NetworkCreationRequestFactory {
                 .withPrivateEndpointsEnabled(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT == networkDto.getServiceEndpointCreation())
                 .withServicesWithExistingPrivateDnsZones(azureExistingPrivateDnsZonesService.getServiceNamesWithExistingZones(networkDto))
                 .withTags(environmentTagProvider.getTags(environment, environment.getNetwork().getResourceCrn()));
-                getResourceGroupName(environment).ifPresent(builder::withResourceGroup);
+        getResourceGroupName(environment).ifPresent(builder::withResourceGroup);
         return builder.build();
     }
 

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -21,6 +22,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.service.EnvironmentTestData;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.environment.validation.network.NetworkTestUtils;
+import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.dto.YarnParams;
@@ -110,6 +112,21 @@ public class NetworkCreationValidatorTest {
         ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto);
         ValidationResult validationResult = resultBuilder.build();
         assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    void testValidateWhenNewNetworkAndEnpointGatewaySubnetProvided() {
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, AwsParams.builder().build(), null, null, "cidr", 1);
+        networkDto.setEndpointGatewaySubnetMetas(Map.of("lbsubnet1", new CloudSubnet()));
+        environment.setCloudPlatform(CloudPlatform.AWS.name());
+        environment.setCidr("cidr");
+
+        ValidationResultBuilder resultBuilder = underTest.validateNetworkCreation(environment, networkDto);
+        ValidationResult validationResult = resultBuilder.build();
+        assertTrue(validationResult.hasError());
+        assertEquals(1, validationResult.getErrors().size());
+        String actual = validationResult.getErrors().get(0);
+        assertEquals("The Endpoint Gateway Subnet IDs must not be defined if CIDR ('cidr') is present!", actual);
     }
 
 }
