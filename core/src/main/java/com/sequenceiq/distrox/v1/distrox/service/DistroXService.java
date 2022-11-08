@@ -60,8 +60,8 @@ public class DistroXService {
     private void validate(DistroXV1Request request) {
         DetailedEnvironmentResponse environment = Optional.ofNullable(environmentClientService.getByName(request.getEnvironmentName()))
                 .orElseThrow(() -> new BadRequestException("No environment name provided hence unable to obtain some important data"));
-        if (environment == null) {
-            throw new BadRequestException(format("'%s' Environment does not exist.", request.getEnvironmentName()));
+        if (environment.getEnvironmentStatus().isDeleteInProgress()) {
+            throw new BadRequestException(format("'%s' Environment can not be delete in progress state.", request.getEnvironmentName()));
         }
         DescribeFreeIpaResponse freeipa = freeipaClientService.getByEnvironmentCrn(environment.getCrn());
         if (freeipa == null || freeipa.getAvailabilityStatus() == null || !freeipa.getAvailabilityStatus().isAvailable()) {

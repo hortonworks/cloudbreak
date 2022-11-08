@@ -41,6 +41,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
@@ -134,6 +135,7 @@ class DistroXServiceTest {
 
             DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
             envResponse.setCrn("crn");
+            envResponse.setEnvironmentStatus(AVAILABLE);
             envResponse.setName(envName);
 
             DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
@@ -154,6 +156,35 @@ class DistroXServiceTest {
             verify(workspaceService, never()).getForCurrentUser();
             verify(stackRequestConverter, never()).convert(any(DistroXV1Request.class));
         }
+    }
+
+    @Test
+    @DisplayName("When the environment that has the given name is exist and also in the state DELETE_IN_PROGRESS then no exception should come")
+    void testWhenEnvDeleteInProgressExistsThenShouldThrowBadRequest() throws IllegalAccessException {
+        String envName = "someAwesomeEnvironment";
+        DistroXV1Request r = new DistroXV1Request();
+        r.setEnvironmentName(envName);
+
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setEnvironmentStatus(EnvironmentStatus.DELETE_INITIATED);
+        envResponse.setCrn("crn");
+        DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+        freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+        freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
+
+        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
+        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+
+        StackV4Request converted = new StackV4Request();
+        CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
+        when(stackRequestConverter.convert(r)).thenReturn(converted);
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+
+        BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.post(r));
+
+        assertEquals(String.format("'someAwesomeEnvironment' Environment can not be delete in progress state."),
+                err.getMessage());
     }
 
     @Test
