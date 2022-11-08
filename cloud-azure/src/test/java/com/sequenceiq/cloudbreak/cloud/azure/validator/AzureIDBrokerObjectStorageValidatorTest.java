@@ -81,6 +81,8 @@ public class AzureIDBrokerObjectStorageValidatorTest {
 
     private static final String STORAGE_RESOURCE_GROUP_NAME = "rg-storage";
 
+    private static final String MANAGEMENT_GROUP_SCOPE = "/providers/Microsoft.Management/managementGroups/";
+
     private static final String STORAGE_RESOURCE_GROUP_ID = SUBSCRIPTION_FULL_ID
             + "/resourceGroups/" + STORAGE_RESOURCE_GROUP_NAME;
 
@@ -372,8 +374,9 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         assertEquals(2, validationResult.getErrors().size());
         assertEquals(validationResult.getErrors().get(1), String.format("Identity with id %s has no role assignment. " +
                 "Please check if you've used the correct Identity when setting up Data Access.", ASSUMER_IDENTITY));
-        assertEquals(validationResult.getErrors().get(0), String.format("Identity with id %s has no role assignment on scope(s) [/subscriptions/%s]. " +
-                "Please check if you've used the correct Identity when setting up Data Access.", ASSUMER_IDENTITY, SUBSCRIPTION_ID));
+        assertEquals(validationResult.getErrors().get(0), String.format("Identity with id %s has no role assignment on scope(s) " +
+                "[/subscriptions/%s, %s]. Please check if you've used the correct Identity when setting up Data Access.",
+                ASSUMER_IDENTITY, SUBSCRIPTION_ID, MANAGEMENT_GROUP_SCOPE));
     }
 
     @Test
@@ -392,8 +395,24 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         assertEquals(2, validationResult.getErrors().size());
         assertEquals(validationResult.getErrors().get(1), String.format("Identity with id %s has no role assignment. " +
                 "Please check if you've used the correct Identity when setting up Data Access.", ASSUMER_IDENTITY));
-        assertEquals(validationResult.getErrors().get(0), String.format("Identity with id %s has no role assignment on scope(s) [/subscriptions/%s, %s]. " +
-                "Please check if you've used the correct Identity when setting up Data Access.", ASSUMER_IDENTITY, SUBSCRIPTION_ID, RESOURCE_GROUP_ID));
+        assertEquals(validationResult.getErrors().get(0), String.format("Identity with id %s has no role assignment on scope(s) " +
+                "[/subscriptions/%s, %s, %s]. Please check if you've used the correct Identity when setting up Data Access.",
+                ASSUMER_IDENTITY, SUBSCRIPTION_ID, RESOURCE_GROUP_ID, MANAGEMENT_GROUP_SCOPE));
+    }
+
+    @Test
+    public void testValidateObjectStorageWithManagementGroupScopeRoleAssignment() {
+        SpiFileSystem fileSystem = setupSpiFileSystem(false);
+        new RoleASsignmentBuilder(client)
+                .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, MANAGEMENT_GROUP_SCOPE);
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+
+        underTest.validateObjectStorage(client, ACCOUNT_ID, fileSystem, "", null, RESOURCE_GROUP_NAME, resultBuilder);
+
+        ValidationResult validationResult = resultBuilder.build();
+        verify(client, times(0)).listRoleAssignments();
+        verify(client, times(1)).listRoleAssignmentsByScopeInner(RESOURCE_GROUP_ID);
+        assertFalse(validationResult.hasError());
     }
 
     @Test
