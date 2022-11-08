@@ -8,17 +8,23 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.service.image.ImageFilter;
+import com.sequenceiq.cloudbreak.service.image.ProviderSpecificImageFilter;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
 import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 
 @Component
 public class RawImageProvider {
+
+    @Inject
+    private ProviderSpecificImageFilter providerSpecificImageFilter;
 
     public StatedImages getImages(CloudbreakImageCatalogV3 imageCatalogV3, ImageFilter imageFilter) {
         Images catalogImages = imageCatalogV3.getImages();
@@ -28,15 +34,16 @@ public class RawImageProvider {
         List<Image> freeipaImages = filterImagesByPlatforms(platforms, catalogImages.getFreeIpaImages());
 
         return statedImages(
-                new Images(baseImages, cdhImages, freeipaImages, catalogImages.getSuppertedVersions()),
+                new Images(baseImages, cdhImages, freeipaImages, catalogImages.getSupportedVersions()),
                 imageFilter.getImageCatalog().getImageCatalogUrl(),
                 imageFilter.getImageCatalog().getName());
     }
 
     List<Image> filterImagesByPlatforms(Collection<ImageCatalogPlatform> platforms, Collection<Image> images) {
-        return images.stream()
+        List<Image> imageList = images.stream()
                 .filter(isPlatformMatching(platforms))
                 .collect(toList());
+        return providerSpecificImageFilter.filterImages(platforms, imageList);
     }
 
     private static Predicate<Image> isPlatformMatching(Collection<ImageCatalogPlatform> platforms) {

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageFilter;
 import com.sequenceiq.cloudbreak.service.image.LatestDefaultImageUuidProvider;
 import com.sequenceiq.cloudbreak.service.image.PrefixMatchImages;
 import com.sequenceiq.cloudbreak.service.image.PrefixMatcherService;
+import com.sequenceiq.cloudbreak.service.image.ProviderSpecificImageFilter;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
 import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 
@@ -49,8 +50,11 @@ public class VersionBasedImageProvider {
     @Inject
     private CloudbreakVersionListProvider cloudbreakVersionListProvider;
 
+    @Inject
+    private ProviderSpecificImageFilter providerSpecificImageFilter;
+
     public StatedImages getImages(CloudbreakImageCatalogV3 imageCatalogV3, ImageFilter imageFilter) {
-        Set<String> suppertedVersions;
+        Set<String> supportedVersions;
 
         Set<String> vMImageUUIDs = new HashSet<>();
         Set<String> defaultVMImageUUIDs = new HashSet<>();
@@ -68,13 +72,13 @@ public class VersionBasedImageProvider {
                 vMImageUUIDs.addAll(exactMatchedImg.getImageIds());
                 defaultVMImageUUIDs.addAll(exactMatchedImg.getDefaults());
             }
-            suppertedVersions = Collections.singleton(currentCbVersion);
+            supportedVersions = Collections.singleton(currentCbVersion);
         } else {
             LOGGER.debug("No image found with exact match for version {} Trying prefix matching", currentCbVersion);
             PrefixMatchImages prefixMatchImages = prefixMatcherService.prefixMatchForCBVersion(imageFilter.getCbVersion(), cloudbreakVersions);
             vMImageUUIDs.addAll(prefixMatchImages.getvMImageUUIDs());
             defaultVMImageUUIDs.addAll(prefixMatchImages.getDefaultVMImageUUIDs());
-            suppertedVersions = prefixMatchImages.getSupportedVersions();
+            supportedVersions = prefixMatchImages.getSupportedVersions();
         }
         LOGGER.info("The following images are matching for CB version ({}): {} ", currentCbVersion, vMImageUUIDs);
 
@@ -96,7 +100,7 @@ public class VersionBasedImageProvider {
         if (!imageFilter.isBaseImageEnabled()) {
             baseImages.clear();
         }
-        return statedImages(new Images(baseImages, cdhImages, freeipaImages, suppertedVersions),
+        return statedImages(new Images(baseImages, cdhImages, freeipaImages, supportedVersions),
                 imageFilter.getImageCatalog().getImageCatalogUrl(),
                 imageFilter.getImageCatalog().getName());
     }
@@ -108,16 +112,21 @@ public class VersionBasedImageProvider {
     }
 
     private List<Image> filterImagesByPlatforms(Collection<ImageCatalogPlatform> platforms, Collection<Image> images, Collection<String> vMImageUUIDs) {
-        return images.stream()
+        List<Image> imageList = images.stream()
                 .filter(isPlatformMatching(platforms, vMImageUUIDs))
                 .collect(toList());
+        return providerSpecificImageFilter.filterImages(platforms, imageList);
     }
 
-    private static Predicate<Image> isPlatformMatching(Collection<ImageCatalogPlatform> platforms, Collection<String> vMImageUUIDs) {
+    private Predicate<Image> isPlatformMatching(Collection<ImageCatalogPlatform> platforms, Collection<String> vMImageUUIDs) {
         return img -> vMImageUUIDs.contains(img.getUuid())
                 && img.getImageSetsByProvider().keySet()
                 .stream()
-                .anyMatch(p -> platforms.stream().anyMatch(platform -> platform.nameToLowerCase().equalsIgnoreCase(p)));
+                .anyMatch(actualPlatform -> platformMatches(platforms, actualPlatform));
+    }
+
+    private boolean platformMatches(Collection<ImageCatalogPlatform> platforms, String p) {
+        return platforms.stream().anyMatch(platform -> platform.nameToLowerCase().equalsIgnoreCase(p));
     }
 
     private Optional<? extends Image> getImage(String imageId, Images images) {

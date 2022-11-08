@@ -72,7 +72,7 @@ public class StackImageFilterService {
                 filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getCdhImages(), currentImageUuid);
         LOGGER.info("Filtered CDH images: {}", filteredCdhImages);
 
-        return new Images(filteredBaseImages, filteredCdhImages, statedImages.getImages().getFreeIpaImages(), statedImages.getImages().getSuppertedVersions());
+        return new Images(filteredBaseImages, filteredCdhImages, statedImages.getImages().getFreeIpaImages(), statedImages.getImages().getSupportedVersions());
 
     }
 

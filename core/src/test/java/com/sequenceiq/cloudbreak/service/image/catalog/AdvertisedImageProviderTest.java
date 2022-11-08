@@ -3,15 +3,17 @@ package com.sequenceiq.cloudbreak.service.image.catalog;
 import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.AdditionalAnswers.returnsSecondArg;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.ImageFilter;
 import com.sequenceiq.cloudbreak.service.image.LatestDefaultImageUuidProvider;
+import com.sequenceiq.cloudbreak.service.image.ProviderSpecificImageFilter;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,6 +71,9 @@ public class AdvertisedImageProviderTest {
     @Mock
     private LatestDefaultImageUuidProvider latestDefaultImageUuidProvider;
 
+    @Mock
+    private ProviderSpecificImageFilter providerSpecificImageFilter;
+
     @InjectMocks
     private AdvertisedImageProvider victim;
 
@@ -87,6 +93,8 @@ public class AdvertisedImageProviderTest {
 
     @Test
     public void shouldIncludeBaseImagesWhenBaseImagesAreEnabled() {
+        when(providerSpecificImageFilter.filterImages(any(), anyList())).then(returnsSecondArg());
+
         CloudbreakImageCatalogV3 imageCatalog = anImageCatalogV3();
         StatedImages actual = victim.getImages(anImageCatalogV3(), createImageFilter(true));
 
@@ -105,6 +113,8 @@ public class AdvertisedImageProviderTest {
 
     @Test
     public void shouldHaveImagesWithAdvertisedFlagAndWithTheEnabledPlatforms() {
+        when(providerSpecificImageFilter.filterImages(any(), anyList())).then(returnsSecondArg());
+
         StatedImages actual = victim.getImages(anImageCatalogV3(), createImageFilter(true));
 
         assertTrue(imageAvailableWithId(actual.getImages().getBaseImages(), BASE_IMAGE_ID_AWS_ADVERTISED));
@@ -125,7 +135,8 @@ public class AdvertisedImageProviderTest {
     @Test
     public void shouldSetDefaultFlags() {
         when(latestDefaultImageUuidProvider.getLatestDefaultImageUuids(any(), any()))
-                .thenReturn(asList(BASE_IMAGE_ID_AWS_ADVERTISED, CDH_IMAGE_ID_AWS_ADVERTISED).stream().collect(toSet()));
+                .thenReturn(new HashSet<>(asList(BASE_IMAGE_ID_AWS_ADVERTISED, CDH_IMAGE_ID_AWS_ADVERTISED)));
+        when(providerSpecificImageFilter.filterImages(any(), anyList())).then(returnsSecondArg());
 
         StatedImages actual = victim.getImages(anImageCatalogV3(), createImageFilter(true));
 

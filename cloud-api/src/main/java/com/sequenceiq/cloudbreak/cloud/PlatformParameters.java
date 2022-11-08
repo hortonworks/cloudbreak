@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -90,6 +91,15 @@ public interface PlatformParameters {
      * @return the {@link TagValidator} of a platform
      */
     TagValidator tagValidator();
+
+    /**
+     * Return the platform specific image filter or an empty Optional is there is none
+     *
+     * @return the {@link ImageFilter} of a platform
+     */
+    default Optional<ImageFilter> imageFilter() {
+        return Optional.empty();
+    }
 
     /**
      * The recommended virtual machine types for the platform

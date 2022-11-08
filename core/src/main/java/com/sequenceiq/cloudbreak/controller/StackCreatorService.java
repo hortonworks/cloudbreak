@@ -240,7 +240,7 @@ public class StackCreatorService {
                         "Fill up instance metadata took {} ms");
 
 
-                StatedImage imgFromCatalog = measure(() -> getImageCatalog(imgFromCatalogFuture),
+                StatedImage imgFromCatalog = measure(() -> getImageFromCatalog(imgFromCatalogFuture),
                         LOGGER,
                         "Select the correct image took {} ms");
                 stackRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
@@ -483,7 +483,7 @@ public class StackCreatorService {
         return (cmRequest != null && !CollectionUtils.isEmpty(cmRequest.getProducts())) || (cmRequest != null && cmRequest.getRepository() != null);
     }
 
-    private StatedImage getImageCatalog(Future<StatedImage> imgFromCatalogFuture) {
+    private StatedImage getImageFromCatalog(Future<StatedImage> imgFromCatalogFuture) {
         int time = 1;
         TimeUnit unit = TimeUnit.MINUTES;
         return Optional.ofNullable(imgFromCatalogFuture).map(f -> {

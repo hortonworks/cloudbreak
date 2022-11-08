@@ -78,7 +78,7 @@ public class PreferencesService {
                 result.put(platform, true);
             }
             for (CloudConstant cloudConstant : cloudConstants) {
-                if (!result.keySet().contains(cloudConstant.platform().value())) {
+                if (!result.containsKey(cloudConstant.platform().value())) {
                     result.put(cloudConstant.platform().value(), false);
                 }
             }
@@ -97,7 +97,7 @@ public class PreferencesService {
                 result.put(platform, true);
             }
             for (CloudConstant cloudConstant : cloudConstants) {
-                if (!result.keySet().contains(cloudConstant.platform().value())) {
+                if (!result.containsKey(cloudConstant.platform().value())) {
                     result.put(cloudConstant.platform().value(), false);
                 }
             }

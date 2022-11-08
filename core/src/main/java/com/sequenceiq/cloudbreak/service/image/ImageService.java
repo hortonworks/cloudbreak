@@ -223,7 +223,7 @@ public class ImageService {
         if (imagesForPlatform.isPresent()) {
             Map<String, String> imagesByRegion = imagesForPlatform.get();
             Optional<String> imageNameOpt = findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion);
-            if (!imageNameOpt.isPresent()) {
+            if (imageNameOpt.isEmpty()) {
                 imageNameOpt = findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion);
             }
             if (imageNameOpt.isPresent()) {

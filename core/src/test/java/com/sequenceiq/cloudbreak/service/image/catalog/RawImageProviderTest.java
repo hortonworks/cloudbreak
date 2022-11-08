@@ -5,20 +5,30 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.AdditionalAnswers.returnsSecondArg;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.ImageFilter;
+import com.sequenceiq.cloudbreak.service.image.ProviderSpecificImageFilter;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
 
+@ExtendWith(MockitoExtension.class)
 public class RawImageProviderTest {
 
     private static final String BASE_IMAGE_AWS = "base-aws-1";
@@ -37,12 +47,18 @@ public class RawImageProviderTest {
 
     private static final String FREEIPA_IMAGE_AZURE = "freeipa-az-2";
 
-    private final RawImageProvider underTest = new RawImageProvider();
+    @Mock
+    private ProviderSpecificImageFilter providerSpecificImageFilter;
+
+    @InjectMocks
+    private RawImageProvider underTest;
 
     @Test
     void testGetImagesShouldReturnOnlyTheAwsImagesFromTheImageCatalog() {
         ImageFilter imageFilter = createImageFilter();
         CloudbreakImageCatalogV3 imageCatalogV3 = createImageCatalog();
+
+        when(providerSpecificImageFilter.filterImages(any(), anyList())).then(returnsSecondArg());
 
         StatedImages actual = underTest.getImages(imageCatalogV3, imageFilter);
 

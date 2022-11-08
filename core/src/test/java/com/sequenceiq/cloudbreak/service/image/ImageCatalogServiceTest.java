@@ -9,8 +9,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.AdditionalAnswers.returnsSecondArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -232,16 +234,20 @@ public class ImageCatalogServiceTest {
     @Mock
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
+    @Mock
+    private ProviderSpecificImageFilter providerSpecificImageFilter;
+
     @Before
     public void beforeTest() throws Exception {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
 
+        when(providerSpecificImageFilter.filterImages(any(), anyList())).then(returnsSecondArg());
         when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList("AZURE", "AWS", "GCP")));
         lenient().when(user.getUserCrn()).thenReturn(TestConstants.CRN);
         when(userService.getOrCreate(any())).thenReturn(user);
         when(entitlementService.baseImageEnabled(anyString())).thenReturn(true);
 
-        constants.addAll(Collections.singletonList(new AwsCloudConstant()));
+        constants.add(new AwsCloudConstant());
 
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "defaultCatalogUrl", DEFAULT_CATALOG_URL, null);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "defaultFreeIpaCatalogUrl", DEFAULT_FREEIPA_CATALOG_URL, null);
@@ -850,7 +856,7 @@ public class ImageCatalogServiceTest {
     }
 
     @Test
-    public void testGetRuntimeImagesByFromCustomImageCatalogByImageCatalogName() throws CloudbreakImageCatalogException, IOException {
+    public void testGetRuntimeImagesFromCustomImageCatalogByImageCatalogName() throws CloudbreakImageCatalogException, IOException {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setCustomImages(Set.of(getCustomImage(ImageType.RUNTIME, "5b60b723-4beb-40b0-5cba-47ea9c9b6e53", CUSTOM_BASE_PARCEL_URL)));
         StatedImage statedImage = StatedImage.statedImage(getImage(), CUSTOM_IMAGE_CATALOG_URL, CUSTOM_CATALOG_NAME);

@@ -22,7 +22,7 @@ public interface Setup {
      * To check whether the image copy is finished use {@link #checkImageStatus(AuthenticatedContext, CloudStack, Image)}
      *
      * @param authenticatedContext the context which already contains the authenticated client
-     * @param stack                stack the definition of infrastucture that needs to be launched
+     * @param stack                stack the definition of infrastructure that needs to be launched
      * @param image                the image to be copied
      */
     void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image);
@@ -31,26 +31,26 @@ public interface Setup {
      * Invoked by Cloudbreak to check the whether the image copy is finished
      *
      * @param authenticatedContext the context which already contains the authenticated client
-     * @param stack                stack the definition of infrastucture that needs to be launched
+     * @param stack                stack the definition of infrastructure that needs to be launched
      * @param image                the image to be copied
      * @return state of the image
      */
     ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack, Image image);
 
     /**
-     * Implementation of this method shall contain basic checks, e.g. checking that the the flavours defined in {@link CloudStack} available or the
+     * Implementation of this method shall contain basic checks, e.g. checking that the flavours defined in {@link CloudStack} available or the
      * platform or checking whether the defined subnet is in the same region where the stack intended to be launched
      *
      * @param authenticatedContext the context which already contains the authenticated client
-     * @param stack                stack the definition of infrastucture that needs to be launched
-     * @param persistenceNotifier  if a resource has been created during this prerequisit check then the Cloud provider can persist them to Cloudbreak's
+     * @param stack                stack the definition of infrastructure that needs to be launched
+     * @param persistenceNotifier  if a resource has been created during this prerequisite check then the Cloud provider can persist them to Cloudbreak's
      */
     void prerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier);
 
     /**
      * Hadoop supports multiple filesystems instead of HDFS. These filesystems can be validated before cluster creation.
      *
-     * @param credential credenital to enable validation
+     * @param credential credential to enable validation
      * @param spiFileSystem filesystem to validate
      * @throws Exception exception is thrown when the filesystem does not meet the desired requirements
      */
@@ -68,7 +68,7 @@ public interface Setup {
      * Implementation of this method shall contain basic checks if scaling is possible or not.
      *
      * @param authenticatedContext the context which already contains the authenticated client
-     * @param stack                stack the definition of infrastucture that needs to be launched
+     * @param stack                stack the definition of infrastructure that needs to be launched
      * @param upscale              true in case of upscale, false in case of downscale
      */
     void scalingPrerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, boolean upscale);

@@ -15,15 +15,13 @@ import com.sequenceiq.freeipa.entity.ImageEntity;
 public class ImageConverter implements Converter<ImageEntity, Image> {
     @Override
     public Image convert(ImageEntity source) {
-        Image image =
-                new Image(source.getImageName(),
-                        Map.of(InstanceGroupType.GATEWAY, Optional.ofNullable(source.getUserdata()).orElse("")),
-                        source.getOs(),
-                        source.getOsType(),
-                        source.getImageCatalogUrl(),
-                        source.getImageCatalogName(),
-                        source.getImageId(),
-                        Collections.emptyMap());
-        return image;
+        return new Image(source.getImageName(),
+                Map.of(InstanceGroupType.GATEWAY, Optional.ofNullable(source.getUserdata()).orElse("")),
+                source.getOs(),
+                source.getOsType(),
+                source.getImageCatalogUrl(),
+                source.getImageCatalogName(),
+                source.getImageId(),
+                Collections.emptyMap());
     }
 }

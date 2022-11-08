@@ -11,6 +11,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.AdditionalAnswers.returnsSecondArg;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.lenient;
 
 import java.io.IOException;
@@ -67,6 +70,9 @@ public class FreeIpaImageProviderTest {
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
 
+    @Mock
+    private ProviderSpecificImageFilter providerSpecificImageFilter;
+
     @InjectMocks
     private FreeIpaImageProvider underTest;
 
@@ -75,8 +81,8 @@ public class FreeIpaImageProviderTest {
 
     @BeforeEach
     public void setup() throws Exception {
-        ImageCatalog imageCatalog = setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, CATALOG_FILE);
-        imageCatalog.getImages().getFreeipaImages().get(0);
+        setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, CATALOG_FILE);
+        lenient().when(providerSpecificImageFilter.filterImages(any(), anyList())).then(returnsSecondArg());
 
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "defaultOs", DEFAULT_OS, null);
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "defaultCatalogUrl", DEFAULT_CATALOG_URL, null);

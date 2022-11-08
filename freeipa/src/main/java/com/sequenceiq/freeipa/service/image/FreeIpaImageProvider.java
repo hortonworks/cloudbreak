@@ -49,6 +49,9 @@ public class FreeIpaImageProvider implements ImageProvider {
     @Value("${info.app.version:}")
     private String freeIpaVersion;
 
+    @Inject
+    private ProviderSpecificImageFilter providerSpecificImageFilter;
+
     @Override
     public Optional<ImageWrapper> getImage(ImageSettingsRequest imageSettings, String region, String platform) {
         String imageId = imageSettings.getId();
@@ -100,11 +103,8 @@ public class FreeIpaImageProvider implements ImageProvider {
                     .filter(img -> hasSameUuid(imageId, img) || isMatchingImageIdInRegion(imageId, region, platform, img))
                     .collect(Collectors.toList());
         } else {
-            if (StringUtils.isNotBlank(imageOs)) {
-                images = filterImages(images, imageOs, platform, region);
-            }
-
-            return images.stream().filter(image -> image.getImageSetsByProvider().containsKey(platform))
+            return filterImages(images, imageOs, platform, region).stream()
+                    .filter(image -> image.getImageSetsByProvider().containsKey(platform))
                     .collect(Collectors.toList());
         }
     }
@@ -125,16 +125,20 @@ public class FreeIpaImageProvider implements ImageProvider {
     }
 
     private List<Image> filterImages(List<Image> imageList, String os, String platform, String region) {
-        Predicate<Image> predicate = img -> img.getOs().equalsIgnoreCase(os)
-                && img.getImageSetsByProvider().containsKey(platform) && filterRegion(region, platform, img);
+        Predicate<Image> predicate = img -> img.getOs().equalsIgnoreCase(os) &&
+                img.getImageSetsByProvider().containsKey(platform) &&
+                filterRegion(region, platform, img);
         Map<Boolean, List<Image>> partitionedImages =
-                Optional.ofNullable(imageList).orElse(Collections.emptyList()).stream()
+                Optional.ofNullable(imageList).
+                        orElse(Collections.emptyList()).
+                        stream()
                         .collect(Collectors.partitioningBy(predicate));
         if (hasFiltered(partitionedImages)) {
             LOGGER.debug("Used filter for: | {} | Images filtered: {}",
                     os,
                     partitionedImages.get(false).stream().map(Image::toString).collect(Collectors.joining(", ")));
-            return partitionedImages.get(true);
+            List<Image> images = partitionedImages.get(true);
+            return providerSpecificImageFilter.filterImages(platform, images);
         } else {
             LOGGER.warn("No FreeIPA image found with OS {}, falling back to the latest available one if such exists!", os);
             return imageList;

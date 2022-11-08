@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.azure.image.marketplace;
 
 public class AzureMarketplaceImage {
 
+    public static final String MARKETPLACE_REGION = "default";
+
     private final String publisherId;
 
     private final String offerId;
