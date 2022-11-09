@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.client;
 import javax.ws.rs.client.WebTarget;
 
 import com.sequenceiq.cloudbreak.client.AbstractKeyBasedServiceEndpoint;
+import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.operation.OperationV4Endpoint;
@@ -32,6 +33,11 @@ public class RedbeamsApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint imp
     @Override
     public OperationV4Endpoint operationV4Endpoint() {
         return getEndpoint(OperationV4Endpoint.class);
+    }
+
+    @Override
+    public FlowEndpoint flowEndpoint() {
+        return getEndpoint(FlowEndpoint.class);
     }
 }
 

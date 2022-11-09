@@ -13,11 +13,14 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
+import com.sequenceiq.redbeams.api.endpoint.v1.RedBeamsFlowEndpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
 
 @Service
 public class RedbeamsClientService {
@@ -26,6 +29,9 @@ public class RedbeamsClientService {
 
     @Inject
     private DatabaseServerV4Endpoint redbeamsServerEndpoint;
+
+    @Inject
+    private RedBeamsFlowEndpoint redBeamsFlowEndpoint;
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -95,9 +101,9 @@ public class RedbeamsClientService {
         }
     }
 
-    public void upgradeByCrn(String crn, UpgradeDatabaseServerV4Request request) {
+    public UpgradeDatabaseServerV4Response upgradeByCrn(String crn, UpgradeDatabaseServerV4Request request) {
         try {
-            ThreadBasedUserCrnProvider.doAsInternalActor(
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> redbeamsServerEndpoint.upgrade(crn, request));
         } catch (WebApplicationException | ProcessingException e) {
@@ -134,5 +140,11 @@ public class RedbeamsClientService {
         if (StringUtils.isBlank(clusterCrn)) {
             throw new CloudbreakServiceException("Cluster CRN is empty");
         }
+    }
+
+    public FlowCheckResponse hasFlowRunningByFlowId(String flowId) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> redBeamsFlowEndpoint.hasFlowRunningByFlowId(flowId));
     }
 }
