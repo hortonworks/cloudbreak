@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.client;
 
+import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.operation.OperationV4Endpoint;
@@ -14,4 +15,6 @@ public interface RedbeamsClient {
     ProgressV4Endpoint progressV4Endpoint();
 
     OperationV4Endpoint operationV4Endpoint();
+
+    FlowEndpoint flowEndpoint();
 }

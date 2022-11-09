@@ -16,9 +16,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
+import com.dyngr.core.AttemptResult;
+import com.dyngr.core.AttemptResults;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -31,10 +34,13 @@ import com.sequenceiq.cloudbreak.service.externaldatabase.model.DatabaseStackCon
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTargetMajorVersion;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 
 @Service
@@ -45,6 +51,14 @@ public class ExternalDatabaseService {
     public static final int DURATION_IN_MINUTES_FOR_DB_POLLING = 60;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalDatabaseService.class);
+
+    private static final PollingConfig DB_POLLING_CONFIG = PollingConfig.builder()
+            .withSleepTime(SLEEP_TIME_IN_SEC_FOR_DB_POLLING)
+            .withSleepTimeUnit(TimeUnit.SECONDS)
+            .withTimeout(DURATION_IN_MINUTES_FOR_DB_POLLING)
+            .withTimeoutTimeUnit(TimeUnit.MINUTES)
+            .withStopPollingIfExceptionOccured(false)
+            .build();
 
     private final RedbeamsClientService redbeamsClient;
 
@@ -144,14 +158,40 @@ public class ExternalDatabaseService {
                 try {
                     UpgradeDatabaseServerV4Request request = new UpgradeDatabaseServerV4Request();
                     request.setUpgradeTargetMajorVersion(targetMajorVersion);
-                    redbeamsClient.upgradeByCrn(databaseCrn, request);
-                    waitAndGetDatabase(cluster, databaseCrn, DatabaseOperation.UPGRADE, false);
+                    UpgradeDatabaseServerV4Response response = redbeamsClient.upgradeByCrn(databaseCrn, request);
+                    if (null == response.getFlowIdentifier()) {
+                        LOGGER.info(response.getReason());
+                    } else {
+                        pollUntilUpgradeFlowFinished(databaseCrn, response.getFlowIdentifier());
+                    }
                 } catch (NotFoundException notFoundException) {
                     LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
                 }
             } else {
                 LOGGER.warn("[INVESTIGATE] The external database crn reference was not present");
             }
+    }
+
+    private void pollUntilUpgradeFlowFinished(String databaseCrn, FlowIdentifier flowIdentifier) {
+        Boolean success = Polling.waitPeriodly(DB_POLLING_CONFIG.getSleepTime(), DB_POLLING_CONFIG.getSleepTimeUnit())
+                .stopIfException(DB_POLLING_CONFIG.getStopPollingIfExceptionOccured())
+                .stopAfterDelay(DB_POLLING_CONFIG.getTimeout(), DB_POLLING_CONFIG.getTimeoutTimeUnit())
+                .run(() -> pollFlowState(flowIdentifier));
+        if (!success) {
+            String message = String.format("Upgrade database flow failed in RedBeams. Database crn: %s, upgrade flow: %s",
+                    databaseCrn, flowIdentifier);
+            LOGGER.warn(message);
+            throw new CloudbreakServiceException(message);
+        }
+    }
+
+    private AttemptResult<Boolean> pollFlowState(FlowIdentifier flowIdentifier) {
+        FlowCheckResponse flowState = redbeamsClient.hasFlowRunningByFlowId(flowIdentifier.getPollableId());
+        LOGGER.debug("Database upgrade polling has active flow: {}, with latest fail: {}",
+                flowState.getHasActiveFlow(), flowState.getLatestFlowFinalizedAndFailed());
+        return flowState.getHasActiveFlow()
+                ? AttemptResults.justContinue()
+                : AttemptResults.finishWith(!flowState.getLatestFlowFinalizedAndFailed());
     }
 
     private Optional<DatabaseServerV4Response> findExistingDatabase(Cluster cluster, String environmentCrn) {
@@ -227,15 +267,7 @@ public class ExternalDatabaseService {
 
     private void waitAndGetDatabase(ClusterView cluster, String databaseCrn,
             DatabaseOperation databaseOperation, boolean cancellable) {
-
-        PollingConfig pollingConfig = PollingConfig.builder()
-                .withSleepTime(SLEEP_TIME_IN_SEC_FOR_DB_POLLING)
-                .withSleepTimeUnit(TimeUnit.SECONDS)
-                .withTimeout(DURATION_IN_MINUTES_FOR_DB_POLLING)
-                .withTimeoutTimeUnit(TimeUnit.MINUTES)
-                .withStopPollingIfExceptionOccured(false)
-                .build();
-        waitAndGetDatabase(cluster, databaseCrn, pollingConfig, databaseOperation, cancellable);
+        waitAndGetDatabase(cluster, databaseCrn, DB_POLLING_CONFIG, databaseOperation, cancellable);
     }
 
     private void waitAndGetDatabase(ClusterView cluster, String databaseCrn, PollingConfig pollingConfig, DatabaseOperation databaseOperation,

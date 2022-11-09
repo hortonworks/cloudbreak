@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.client.ApiClientRequestFilter;
 import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
 import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.redbeams.api.RedbeamsApi;
+import com.sequenceiq.redbeams.api.endpoint.v1.RedBeamsFlowEndpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.operation.OperationV4Endpoint;
@@ -64,5 +65,11 @@ public class RedbeamsApiClientConfig {
     @ConditionalOnBean(RedbeamsApiClientParams.class)
     OperationV4Endpoint operationDatabaseServerV4Endpoint(WebTarget redbeamsApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(redbeamsApiClientWebTarget, OperationV4Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(RedbeamsApiClientParams.class)
+    RedBeamsFlowEndpoint redBeamsV1FlowEndpoint(WebTarget redbeamsApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(redbeamsApiClientWebTarget, RedBeamsFlowEndpoint.class);
     }
 }
