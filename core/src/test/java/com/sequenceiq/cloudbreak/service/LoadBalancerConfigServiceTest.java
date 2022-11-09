@@ -111,6 +111,35 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     }
 
     @Test
+    public void testGetKnoxGatewayThrowsErrorWhenKnoxExplicitlyDefined() {
+        Set<String> groups = Set.of("master");
+        Cluster cluster = new Cluster();
+        cluster.setBlueprint(blueprint);
+        Stack stack = new Stack();
+        Workspace workspace = new Workspace();
+        workspace.setName("tenant");
+        Tenant tenant = new Tenant();
+        tenant.setName("tenant");
+        workspace.setTenant(tenant);
+        stack.setWorkspace(workspace);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("master");
+        InstanceGroup instanceGroup1 = new InstanceGroup();
+        instanceGroup1.setGroupName("gateway");
+        instanceGroup1.setInstanceGroupType(InstanceGroupType.GATEWAY);
+        stack.setInstanceGroups(Set.of(instanceGroup, instanceGroup1));
+        stack.setCluster(cluster);
+
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
+        when(blueprint.getName()).thenReturn("dummy");
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.getKnoxGatewayGroups(stack));
+        assertEquals(exception.getMessage(), "KNOX can only be installed on instance group where type is GATEWAY. As per the template " +
+                "dummy" + " KNOX_GATEWAY role config is present in groups " + groups  +
+                " while the GATEWAY nodeType is available for instance group " + Set.of("gateway"));
+    }
+
+    @Test
     public void testGetKnoxGatewayWhenKnoxExplicitlyDefined() {
         Set<String> groups = Set.of("master");
         Cluster cluster = new Cluster();
@@ -122,6 +151,10 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         tenant.setName("tenant");
         workspace.setTenant(tenant);
         stack.setWorkspace(workspace);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("master");
+        instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
+        stack.setInstanceGroups(Set.of(instanceGroup));
         stack.setCluster(cluster);
 
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
@@ -1031,10 +1064,9 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     @Test
     public void isdatalakeLoadBalancerEntitlementEnabled() {
         Stack azureStack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
-        azureStack.getInstanceGroups().clear();
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
         DetailedEnvironmentResponse environment = createEnvironment(subnet, false, "AZURE");
-        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-multi-knox.bp"));
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
         Set<LoadBalancer> loadBalancers = underTest.setupLoadBalancers(azureStack, environment, false, true, LoadBalancerSku.BASIC);
         assertEquals(new HashSet<>(), loadBalancers);
     }
@@ -1099,9 +1131,11 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         Set<InstanceGroup> instanceGroups = new HashSet<>();
         InstanceGroup instanceGroup1 = new InstanceGroup();
         instanceGroup1.setGroupName("master");
+        instanceGroup1.setInstanceGroupType(InstanceGroupType.GATEWAY);
         instanceGroup1.setAttributes(new Json(new HashMap<String, Object>()));
         InstanceGroup instanceGroup2 = new InstanceGroup();
         instanceGroup2.setGroupName("manager");
+        instanceGroup2.setInstanceGroupType(InstanceGroupType.GATEWAY);
         instanceGroup2.setAttributes(new Json(new HashMap<String, Object>()));
         instanceGroups.add(instanceGroup1);
         instanceGroups.add(instanceGroup2);
@@ -1130,6 +1164,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             attributes.put("noPublicIp", makePrivate);
             InstanceGroup instanceGroup3 = new InstanceGroup();
             instanceGroup3.setGroupName("worker");
+            instanceGroup3.setInstanceGroupType(InstanceGroupType.GATEWAY);
             instanceGroups.add(instanceGroup3);
         }
         network.setAttributes(new Json(attributes));
@@ -1142,6 +1177,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         cluster.setBlueprint(blueprint);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName("master");
+        instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         Stack stack = new Stack();
         stack.setType(StackType.DATALAKE);
         stack.setCluster(cluster);
