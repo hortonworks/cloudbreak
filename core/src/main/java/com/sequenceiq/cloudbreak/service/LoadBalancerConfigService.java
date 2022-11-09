@@ -107,13 +107,21 @@ public class LoadBalancerConfigService {
             CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(cluster.getBlueprint().getBlueprintText());
             groupNames = cmTemplateProcessor.getHostGroupsWithComponent(KnoxRoles.KNOX_GATEWAY);
         }
+        Set<String> gatewayGroupNames = stack.getInstanceGroups().stream()
+                .filter(i -> InstanceGroupType.isGateway(i.getInstanceGroupType()))
+                .map(InstanceGroup::getGroupName)
+                .collect(Collectors.toSet());
 
         if (groupNames.isEmpty()) {
             LOGGER.debug("Knox gateway is not explicitly defined; searching for CM gateway hosts");
-            groupNames = stack.getInstanceGroups().stream()
-                    .filter(i -> InstanceGroupType.isGateway(i.getInstanceGroupType()))
-                    .map(InstanceGroup::getGroupName)
-                    .collect(Collectors.toSet());
+            groupNames = gatewayGroupNames;
+        } else if (!gatewayGroupNames.containsAll(groupNames)) {
+            LOGGER.error("KNOX can only be installed on instance group where type is GATEWAY. As per the template " + cluster.getBlueprint().getName() +
+                    " KNOX_GATEWAY role config is present in groups " + groupNames  + " while the GATEWAY nodeType is available for instance group " +
+                    gatewayGroupNames);
+            throw new CloudbreakServiceException("KNOX can only be installed on instance group where type is GATEWAY. As per the template " +
+                    cluster.getBlueprint().getName() + " KNOX_GATEWAY role config is present in groups " + groupNames  +
+                    " while the GATEWAY nodeType is available for instance group " + gatewayGroupNames);
         }
 
         if (groupNames.isEmpty()) {
