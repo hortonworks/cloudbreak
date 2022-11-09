@@ -47,7 +47,6 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRe
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginRequest;
-import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -57,12 +56,9 @@ import com.sequenceiq.cloudbreak.quartz.configuration.QuartzJobInitializer;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBasedParameters;
-import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
-import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.RoleBasedRequest;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponses;
-import com.sequenceiq.environment.api.v1.credential.model.response.InteractiveCredentialResponse;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponses;
@@ -199,7 +195,7 @@ public class EnvironmentServiceIntegrationTest {
         );
         when(resourceDefinitionRequest.await()).thenReturn(new ResourceDefinitionResult(1L, DEFINITION_AWS));
 
-        CredentialResponse response = client.credentialV1Endpoint().post(credentialRequest);
+        CredentialResponse response = client.credentialV1Endpoint().create(credentialRequest);
         assertTrue(response.getName().equals(credentialRequest.getName()), " not saved, or response is different");
         assertTrue(credentialRepository.findByNameAndAccountId(credentialRequest.getName(), TEST_ACCOUNT_ID, List.of("AWS"), ENVIRONMENT).isPresent());
     }
@@ -220,28 +216,7 @@ public class EnvironmentServiceIntegrationTest {
                 });
         when(resourceDefinitionRequest.await()).thenReturn(new ResourceDefinitionResult(1L, DEFINITION_AWS));
 
-        Assertions.assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().post(credentialRequest));
-    }
-
-    @Test
-    public void testCredentialInteractiveLogin() throws InterruptedException {
-        credentialRequest.setName("testcredential");
-        credentialRequest.setCloudPlatform("AZURE");
-        AzureCredentialRequestParameters azureCredentialRequestParameters = new AzureCredentialRequestParameters();
-        azureCredentialRequestParameters.setSubscriptionId("subid");
-        azureCredentialRequestParameters.setTenantId("tenant");
-        RoleBasedRequest roleBasedRequest = new RoleBasedRequest();
-        roleBasedRequest.setDeploymentAddress("alma");
-        roleBasedRequest.setRoleName("role");
-        azureCredentialRequestParameters.setRoleBased(roleBasedRequest);
-        credentialRequest.setAzure(azureCredentialRequestParameters);
-
-        InteractiveLoginResult interactiveLoginResult = new InteractiveLoginResult(1L, Map.of("user_code", USER_CODE, "verification_url", VERIFICATION_URL));
-        when(requestProvider.getInteractiveLoginRequest(any(), any())).thenReturn(interactiveLoginRequest);
-        when(interactiveLoginRequest.await()).thenReturn(interactiveLoginResult);
-        InteractiveCredentialResponse result = client.credentialV1Endpoint().interactiveLogin(credentialRequest);
-        assertEquals(result.getUserCode(), USER_CODE);
-        assertEquals(result.getVerificationUrl(), VERIFICATION_URL);
+        Assertions.assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().create(credentialRequest));
     }
 
     @Test

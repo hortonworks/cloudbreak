@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_H
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_RESTRICTED_POLICY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_CERTIFICATE_AUTH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
@@ -519,6 +520,10 @@ public class EntitlementService {
 
     public boolean isComputeMonitoringEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CENTRAL_COMPUTE_MONITORING);
+    }
+
+    public boolean isAzureCertificateAuthEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_AZURE_CERTIFICATE_AUTH);
     }
 
     public boolean isWorkloadIamSyncEnabled(String accountId) {
