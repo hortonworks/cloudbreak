@@ -101,9 +101,9 @@ public class ServiceProviderCredentialAdapter {
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
             CredentialVerificationResult res = request.await();
-            String message = FAILED_CREDETIAL_VERIFICATION_MESSAGE;
             LOGGER.debug("Result: {}", res);
             if (res.getStatus() != EventStatus.OK) {
+                String message = FAILED_CREDETIAL_VERIFICATION_MESSAGE;
                 LOGGER.info(message, res.getErrorDetails());
                 throw new CredentialVerificationException(message + res.getErrorDetails(), res.getErrorDetails());
             }

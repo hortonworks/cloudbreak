@@ -19,7 +19,7 @@ public class CredentialCreateIfNotExistAction implements Action<CredentialTestDt
         Log.when(LOGGER, "Credential create request: " + testDto.getRequest());
         try {
             testDto.setResponse(
-                    environmentClient.getDefaultClient().credentialV1Endpoint().post(testDto.getRequest())
+                    environmentClient.getDefaultClient().credentialV1Endpoint().create(testDto.getRequest())
             );
             Log.whenJson(LOGGER, "Credential created successfully: ", testDto.getRequest());
         } catch (ProxyMethodInvocationException e) {

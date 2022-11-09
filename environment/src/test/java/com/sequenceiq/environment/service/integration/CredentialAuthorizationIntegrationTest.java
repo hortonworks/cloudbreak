@@ -133,9 +133,9 @@ public class CredentialAuthorizationIntegrationTest {
         when(grpcUmsClient.checkAccountRight(eq(FIRST_USER_CRN), anyString(), any())).thenReturn(Boolean.TRUE);
         when(grpcUmsClient.checkAccountRight(eq(SECOND_USER_CRN), anyString(), any())).thenReturn(Boolean.FALSE);
 
-        assertNotNull(firstUserClient.credentialV1Endpoint().post(getAwsCredentialRequest(FIRST_CRED_NAME)));
+        assertNotNull(firstUserClient.credentialV1Endpoint().create(getAwsCredentialRequest(FIRST_CRED_NAME)));
         assertThrows(ForbiddenException.class, () ->
-                secondUserClient.credentialV1Endpoint().post(getAwsCredentialRequest(SECOND_CRED_NAME)));
+                secondUserClient.credentialV1Endpoint().create(getAwsCredentialRequest(SECOND_CRED_NAME)));
     }
 
     @Test
@@ -163,7 +163,7 @@ public class CredentialAuthorizationIntegrationTest {
 
         assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().getByName(wrongCredentialName));
         assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().getByResourceCrn(wrongCredentialCrn));
-        assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().put(getAwsEditCredentialRequest(wrongCredentialName)));
+        assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().modify(getAwsEditCredentialRequest(wrongCredentialName)));
         assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().deleteMultiple(Sets.newHashSet(wrongCredentialName)));
         assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().deleteByName(wrongCredentialName));
         assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().deleteByResourceCrn(wrongCredentialCrn));

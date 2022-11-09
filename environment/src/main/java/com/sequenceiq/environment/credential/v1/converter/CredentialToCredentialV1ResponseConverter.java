@@ -8,24 +8,20 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
-import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
-import com.sequenceiq.environment.api.v1.credential.model.request.EditCredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.aws.AwsCredentialV1ParametersToAwsCredentialAttributesConverter;
-import com.sequenceiq.environment.credential.v1.converter.azure.AzureCredentialV1ParametersToAzureCredentialAttributesConverter;
+import com.sequenceiq.environment.credential.v1.converter.azure.AzureCredentialAttributesToAzureCredentialResponseParametersConverter;
 import com.sequenceiq.environment.credential.v1.converter.gcp.GcpCredentialV1ParametersToGcpCredentialAttributesConverter;
 import com.sequenceiq.environment.credential.v1.converter.mock.MockCredentialV1ParametersToMockCredentialAttributesConverter;
 import com.sequenceiq.environment.credential.v1.converter.yarn.YarnCredentialV1ParametersToAwsYarnAttributesConverter;
@@ -48,7 +44,7 @@ public class CredentialToCredentialV1ResponseConverter {
     private AwsCredentialV1ParametersToAwsCredentialAttributesConverter awsConverter;
 
     @Inject
-    private AzureCredentialV1ParametersToAzureCredentialAttributesConverter azureConverter;
+    private AzureCredentialAttributesToAzureCredentialResponseParametersConverter azureConverter;
 
     @Inject
     private GcpCredentialV1ParametersToGcpCredentialAttributesConverter gcpConverter;
@@ -102,40 +98,6 @@ public class CredentialToCredentialV1ResponseConverter {
         }
     }
 
-    public Credential convert(CredentialRequest source) {
-        if (source == null) {
-            return null;
-        }
-        Credential credential = new Credential();
-        credential.setName(Strings.isNullOrEmpty(source.getName()) ? UUID.randomUUID().toString() : source.getName());
-        credential.setDescription(source.getDescription());
-        credential.setCloudPlatform(source.getCloudPlatform());
-        credential.setVerificationStatusText(source.getVerificationStatusText());
-        credential.setVerifyPermissions(source.isVerifyPermissions());
-        convertAttributes(source, credential);
-        if (source.getAws() != null) {
-            credential.setGovCloud(source.getAws().getGovCloud());
-        }
-        return credential;
-    }
-
-    public Credential convert(EditCredentialRequest source) {
-        if (source == null) {
-            return null;
-        }
-        Credential credential = new Credential();
-        credential.setName(Strings.isNullOrEmpty(source.getName()) ? UUID.randomUUID().toString() : source.getName());
-        credential.setDescription(source.getDescription());
-        credential.setCloudPlatform(source.getCloudPlatform());
-        credential.setVerificationStatusText(source.getVerificationStatusText());
-        credential.setVerifyPermissions(source.isVerifyPermissions());
-        convertAttributes(source, credential);
-        if (source.getAws() != null) {
-            credential.setGovCloud(source.getAws().getGovCloud());
-        }
-        return credential;
-    }
-
     public Credential convert(ExtendedCloudCredential source) {
         if (source == null) {
             return null;
@@ -150,26 +112,6 @@ public class CredentialToCredentialV1ResponseConverter {
         Map<String, Object> attributes = source.getParameters() == null ? new HashMap<>() : source.getParameters();
         credential.setAttributes(new Json(attributes).getValue());
         return credential;
-    }
-
-    private void convertAttributes(CredentialRequest source, Credential credential) {
-        CredentialAttributes credentialAttributes = new CredentialAttributes();
-        doIfNotNull(source.getAws(), params -> credentialAttributes.setAws(awsConverter.convert(params)));
-        doIfNotNull(source.getAzure(), params -> credentialAttributes.setAzure(azureConverter.convert(params)));
-        doIfNotNull(source.getGcp(), params -> credentialAttributes.setGcp(gcpConverter.convert(params)));
-        doIfNotNull(source.getMock(), params -> credentialAttributes.setMock(mockConverter.convert(params)));
-        doIfNotNull(source.getYarn(), params -> credentialAttributes.setYarn(yarnConverter.convert(params)));
-        credential.setAttributes(new Json(credentialAttributes).getValue());
-    }
-
-    private void convertAttributes(EditCredentialRequest source, Credential credential) {
-        CredentialAttributes credentialAttributes = new CredentialAttributes();
-        doIfNotNull(source.getAws(), params -> credentialAttributes.setAws(awsConverter.convert(params)));
-        doIfNotNull(source.getAzure(), params -> credentialAttributes.setAzure(azureConverter.convert(params)));
-        doIfNotNull(source.getGcp(), params -> credentialAttributes.setGcp(gcpConverter.convert(params)));
-        doIfNotNull(source.getMock(), params -> credentialAttributes.setMock(mockConverter.convert(params)));
-        doIfNotNull(source.getYarn(), params -> credentialAttributes.setYarn(yarnConverter.convert(params)));
-        credential.setAttributes(new Json(credentialAttributes).getValue());
     }
 
     private void coverSensitiveData(Json json) {
