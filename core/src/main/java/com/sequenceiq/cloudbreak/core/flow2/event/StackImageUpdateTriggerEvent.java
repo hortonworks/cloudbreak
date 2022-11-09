@@ -24,6 +24,19 @@ public class StackImageUpdateTriggerEvent extends StackEvent {
         imageCatalogUrl = null;
     }
 
+    public StackImageUpdateTriggerEvent(
+            String selector,
+            Long stackId,
+            Promise<AcceptResult> accepted,
+            String newImageId,
+            String imageCatalogName,
+            String imageCatalogUrl) {
+        super(selector, stackId, accepted);
+        this.newImageId = newImageId;
+        this.imageCatalogName = imageCatalogName;
+        this.imageCatalogUrl = imageCatalogUrl;
+    }
+
     @JsonCreator
     public StackImageUpdateTriggerEvent(
             @JsonProperty("selector") String selector,

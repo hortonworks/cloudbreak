@@ -16,6 +16,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXGetAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXInternalGetAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXOSUpgradeByUpgradeSetsAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRemoveInstancesAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRepairAction;
@@ -116,6 +117,10 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> upgrade() {
         return new DistroXUpgradeAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> osUpgradeByUpgradeSets() {
+        return new DistroXOSUpgradeByUpgradeSetsAction();
     }
 
     public Action<DistroXChangeImageCatalogTestDto, CloudbreakClient> changeImageCatalog() {

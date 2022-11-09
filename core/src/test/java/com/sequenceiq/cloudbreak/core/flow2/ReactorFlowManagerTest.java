@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -164,6 +165,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerRdsUpgrade(STACK_ID, TargetMajorVersion.VERSION_11, null, null);
         underTest.triggerRotateSaltPassword(STACK_ID, RotateSaltPasswordReason.MANUAL, RotateSaltPasswordType.FALLBACK);
         underTest.triggerVerticalScale(STACK_ID, new StackVerticalScaleV4Request());
+        underTest.triggerOsUpgradeByUpgradeSetsFlow(STACK_ID, "AWS", new ImageChangeDto(STACK_ID, null), List.of());
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {

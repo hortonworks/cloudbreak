@@ -44,7 +44,13 @@ public class FreeipaClientService {
 
     public DescribeFreeIpaResponse getByEnvironmentCrn(String environmentCrn) {
         try {
-            return freeIpaV1Endpoint.describe(environmentCrn);
+            if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
+                LOGGER.info("The user CRN is internal CRN, so we call freeipa on internal endpoint");
+                String accountId = Crn.fromString(environmentCrn).getAccountId();
+                return freeIpaV1Endpoint.describeInternal(environmentCrn, accountId);
+            } else {
+                return freeIpaV1Endpoint.describe(environmentCrn);
+            }
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Failed to GET FreeIPA by environment crn: %s, due to: %s. %s.", environmentCrn, e.getMessage(), errorMessage);
@@ -60,6 +66,7 @@ public class FreeipaClientService {
     public Optional<DescribeFreeIpaResponse> findByEnvironmentCrn(String environmentCrn) {
         try {
             if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
+                LOGGER.info("The user CRN is internal CRN, so we call freeipa on internal endpoint");
                 String accountId = Crn.fromString(environmentCrn).getAccountId();
                 return Optional.ofNullable(freeIpaV1Endpoint.describeInternal(environmentCrn, accountId));
             }

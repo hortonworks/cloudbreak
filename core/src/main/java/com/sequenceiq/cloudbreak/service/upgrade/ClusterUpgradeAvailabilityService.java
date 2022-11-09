@@ -141,7 +141,7 @@ public class ClusterUpgradeAvailabilityService {
         return upgradeCandidates;
     }
 
-    private UpgradeV4Response checkForUpgrades(Stack stack, boolean lockComponents, InternalUpgradeSettings internalUpgradeSettings) {
+    public UpgradeV4Response checkForUpgrades(Stack stack, boolean lockComponents, InternalUpgradeSettings internalUpgradeSettings) {
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         UpgradeV4Response upgradeOptions = new UpgradeV4Response();
         try {

@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.springframework.validation.annotation.Validated;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSetRequest;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
@@ -21,6 +22,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Reque
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Response;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -93,5 +95,11 @@ public interface DistroXUpgradeV1Endpoint {
     DistroXCcmUpgradeV1Response upgradeCcmByCrnInternal(@NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
             @NotEmpty @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @POST
+    @Path("internal/{crn}/os_upgrade_by_upgrade_sets")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Upgrades distrox cluster OS by name and upgrades sets internal", nickname = "osUpgradeByUpgradeSetsInternal")
+    FlowIdentifier osUpgradeByUpgradeSetsInternal(@PathParam("crn") String crn, OrderedOSUpgradeSetRequest orderedOsUpgradeSetRequest);
 
 }

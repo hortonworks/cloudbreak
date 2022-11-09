@@ -29,7 +29,7 @@ public class EnvironmentService {
 
     public boolean environmentStatusInDesiredState(StackView stack, Set<EnvironmentStatus> desiredStatuses) {
         if (stack.getEnvironmentCrn() != null) {
-            DetailedEnvironmentResponse environmentResponse = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+            DetailedEnvironmentResponse environmentResponse = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
             return desiredStatuses.contains(environmentResponse.getEnvironmentStatus());
         }
         return false;
