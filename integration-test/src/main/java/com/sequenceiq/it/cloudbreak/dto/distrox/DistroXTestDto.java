@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
@@ -67,6 +68,8 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     private StackViewV4Response internalStackResponse;
 
     private List<String> actionableInstanceIds;
+
+    private List<OrderedOSUpgradeSet> osUpgradeByUpgradeSets;
 
     private Optional<List<String>> repairableInstanceIds = Optional.empty();
 
@@ -375,6 +378,14 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     public Optional<List<String>> getRepairableInstanceIds() {
         return repairableInstanceIds;
+    }
+
+    public List<OrderedOSUpgradeSet> getOsUpgradeByUpgradeSets() {
+        return osUpgradeByUpgradeSets;
+    }
+
+    public void setOsUpgradeByUpgradeSets(List<OrderedOSUpgradeSet> osUpgradeByUpgradeSets) {
+        this.osUpgradeByUpgradeSets = osUpgradeByUpgradeSets;
     }
 
 }

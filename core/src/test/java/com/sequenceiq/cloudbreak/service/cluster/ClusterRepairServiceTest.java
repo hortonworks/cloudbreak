@@ -429,8 +429,8 @@ public class ClusterRepairServiceTest {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false));
         });
 
-        assertEquals("Database dbCrn is not in AVAILABLE status, could not start repair.", exception.getMessage());
-        verifyEventArguments(CLUSTER_MANUALRECOVERY_COULD_NOT_START, "Database dbCrn is not in AVAILABLE status, could not start repair.");
+        assertEquals("Database dbCrn is not in AVAILABLE status, could not start node replacement.", exception.getMessage());
+        verifyEventArguments(CLUSTER_MANUALRECOVERY_COULD_NOT_START, "Database dbCrn is not in AVAILABLE status, could not start node replacement.");
         verifyNoInteractions(stackUpdater);
     }
 
@@ -461,7 +461,7 @@ public class ClusterRepairServiceTest {
         String expectedErrorMessage =
                 "Action cannot be performed because there are stopped nodes in the cluster. " +
                         "Stopped nodes: [host2]. " +
-                        "Please select them for repair or start the stopped nodes.";
+                        "Please select them for node replacement or start the stopped nodes.";
         assertEquals(expectedErrorMessage,
                 exception.getMessage());
         verifyEventArguments(CLUSTER_MANUALRECOVERY_COULD_NOT_START,

@@ -1,6 +1,7 @@
 package com.sequenceiq.distrox.v1.distrox.service.upgrade;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -12,7 +13,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
@@ -23,12 +26,16 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -64,16 +71,48 @@ public class DistroXUpgradeService {
     private StackDtoService stackDtoService;
 
     @Inject
+    private StackService stackService;
+
+    @Inject
     private ClouderaManagerLicenseProvider clouderaManagerLicenseProvider;
 
     @Inject
     private LockedComponentService lockedComponentService;
 
     @Inject
+    private UpgradeService upgradeService;
+
+    @Inject
+    private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
+
+    @Inject
     private StackUpgradeService stackUpgradeService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    public FlowIdentifier triggerOsUpgradeByUpgradeSets(NameOrCrn nameOrCrn, Long workspaceId, String imageId, List<OrderedOSUpgradeSet> upgradeSets) {
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        Crn crn = Crn.safeFromString(stack.getResourceCrn());
+        ImageChangeDto imageChangeDto = deteremineImageChangeDto(nameOrCrn, imageId, stack, crn.getAccountId());
+        return upgradeService.osUpgradeByUpgradeSets(stack, imageChangeDto, upgradeSets);
+    }
+
+    private ImageChangeDto deteremineImageChangeDto(NameOrCrn nameOrCrn, String imageId, Stack stack, String accountId) {
+        boolean dataHubRuntimeUpgradeEnabled = upgradeAvailabilityService.isRuntimeUpgradeEnabledByAccountId(accountId);
+        LOGGER.info("DH Runtime Upgrade entitlement: {}", dataHubRuntimeUpgradeEnabled);
+        boolean dataHubOsUpgradeEntitled = upgradeAvailabilityService.isOsUpgradeEnabledByAccountId(accountId);
+        LOGGER.info("DH OS Upgrade entitlement: {}", dataHubOsUpgradeEntitled);
+        UpgradeV4Response upgradeOptions = clusterUpgradeAvailabilityService.checkForUpgrades(stack, true,
+                new InternalUpgradeSettings(false, dataHubRuntimeUpgradeEnabled, dataHubOsUpgradeEntitled));
+        if (upgradeOptions.getUpgradeCandidates().isEmpty()) {
+            throw new BadRequestException("There is no available image for upgrade.");
+        }
+        LOGGER.info("Upgrade options: {}", upgradeOptions);
+        ImageInfoV4Response targetImage = imageSelector.determineImage(Optional.ofNullable(imageId), upgradeOptions.getUpgradeCandidates());
+        LOGGER.info("Target image will be: {}", targetImage);
+        return createImageChangeDto(nameOrCrn, stack.getWorkspaceId(), targetImage);
+    }
 
     public UpgradeV4Response triggerUpgrade(NameOrCrn cluster, Long workspaceId, String userCrn, UpgradeV4Request request, boolean upgradePreparation) {
         UpgradeV4Response upgradeV4Response = upgradeAvailabilityService.checkForUpgrade(cluster, workspaceId, request, userCrn);

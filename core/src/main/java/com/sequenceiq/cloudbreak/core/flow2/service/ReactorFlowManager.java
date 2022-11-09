@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGrou
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
@@ -76,6 +77,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReq
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CmSyncTriggerEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.OSUpgradeByUpgradeSetsTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationType;
@@ -334,6 +336,12 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerManualRepairFlow(Long stackId) {
         String selector = MANUAL_STACK_REPAIR_TRIGGER_EVENT.event();
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
+    }
+
+    public FlowIdentifier triggerOsUpgradeByUpgradeSetsFlow(Long stackId, String triggeredVariant, ImageChangeDto imageChangeDto,
+            List<OrderedOSUpgradeSet> upgradeSets) {
+        return reactorNotifier.notify(stackId, FlowChainTriggers.OS_UPGRADE_BY_UPGRADE_SETS_TRIGGER_EVENT,
+                new OSUpgradeByUpgradeSetsTriggerEvent(stackId, triggeredVariant, imageChangeDto, upgradeSets));
     }
 
     public void triggerStackRepairFlow(Long stackId, UnhealthyInstances unhealthyInstances) {

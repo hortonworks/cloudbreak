@@ -9,11 +9,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
@@ -36,14 +40,19 @@ import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
+import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
@@ -83,6 +92,9 @@ class DistroXUpgradeServiceTest {
     private ReactorFlowManager reactorFlowManager;
 
     @Mock
+    private StackService stackService;
+
+    @Mock
     private StackDtoService stackDtoService;
 
     @Mock
@@ -96,6 +108,12 @@ class DistroXUpgradeServiceTest {
 
     @Mock
     private StackUpgradeService stackUpgradeService;
+
+    @Mock
+    private UpgradeService upgradeService;
+
+    @Mock
+    private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
 
     @InjectMocks
     private DistroXUpgradeService underTest;
@@ -318,6 +336,38 @@ class DistroXUpgradeServiceTest {
         // THEN
         verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS, "variant", ROLLING_UPGRADE_ENABLED);
         assertFalse(result.isReplaceVms());
+    }
+
+    @Test
+    public void testTriggerOsUpgradeByUpgradeSets() {
+        Stack stack = new Stack();
+        stack.setResourceCrn("crn:cdp:datalake:us-west-1:tenant:datalake:resourceCrn1");
+        Workspace workspace = new Workspace();
+        workspace.setId(WS_ID);
+        stack.setWorkspace(workspace);
+        when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WS_ID)).thenReturn(stack);
+        UpgradeV4Response response = new UpgradeV4Response();
+        response.setReplaceVms(true);
+        response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
+        when(clusterUpgradeAvailabilityService.checkForUpgrades(eq(stack), eq(true), any())).thenReturn(response);
+        ImageInfoV4Response imageInfoV4Response = new ImageInfoV4Response();
+        imageInfoV4Response.setImageId("imageID");
+        imageInfoV4Response.setImageCatalogName("catalogName");
+        when(imageSelector.determineImage(eq(Optional.of("imageID")), eq(response.getUpgradeCandidates()))).thenReturn(imageInfoV4Response);
+        List<OrderedOSUpgradeSet> upgradeSets = List.of(new OrderedOSUpgradeSet(0, Set.of("i-1", "i-2")),
+                new OrderedOSUpgradeSet(1, Set.of("i-3", "i-4")));
+        ArgumentCaptor<StackImageChangeV4Request> imageChangeRequestArgumentCaptor = ArgumentCaptor.forClass(StackImageChangeV4Request.class);
+        ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, imageInfoV4Response.getImageId());
+        when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
+        underTest.triggerOsUpgradeByUpgradeSets(CLUSTER, WS_ID, "imageID", upgradeSets);
+        ArgumentCaptor<InternalUpgradeSettings> internalUpgradeSettingsArgumentCaptor = ArgumentCaptor.forClass(InternalUpgradeSettings.class);
+        verify(clusterUpgradeAvailabilityService, times(1)).checkForUpgrades(eq(stack), eq(true),
+                internalUpgradeSettingsArgumentCaptor.capture());
+        assertFalse(internalUpgradeSettingsArgumentCaptor.getValue().isSkipValidations());
+        ArgumentCaptor<ImageChangeDto> imageChangeDtoCaptor = ArgumentCaptor.forClass(ImageChangeDto.class);
+        verify(upgradeService, times(1)).osUpgradeByUpgradeSets(eq(stack), imageChangeDtoCaptor.capture(), eq(upgradeSets));
+        assertEquals("imageID", imageChangeDtoCaptor.getValue().getImageId());
+        assertEquals("imageID", imageChangeRequestArgumentCaptor.getValue().getImageId());
     }
 
     private UpgradeV4Request createRequest(boolean osUpgradeEnabled, boolean rollingUpgradeEnabled) {

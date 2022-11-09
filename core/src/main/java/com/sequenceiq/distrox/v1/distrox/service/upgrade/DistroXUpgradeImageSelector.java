@@ -20,12 +20,18 @@ public class DistroXUpgradeImageSelector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXUpgradeImageSelector.class);
 
+    public ImageInfoV4Response determineImage(Optional<String> imageIdOptional, List<ImageInfoV4Response> upgradeCandidates) {
+        return imageIdOptional.map(s -> selectRequestedImage(imageIdOptional.get(), upgradeCandidates))
+                .orElseGet(() -> selectLatestImageFromCandidates(upgradeCandidates))
+                .orElseThrow(() -> new BadRequestException("Invalid upgrade request, we can't find proper image"));
+    }
+
     public ImageInfoV4Response determineImageId(UpgradeV4Request request, List<ImageInfoV4Response> upgradeCandidates) {
         Optional<ImageInfoV4Response> image = Optional.empty();
         if (Objects.isNull(request) || request.isEmpty() || Boolean.TRUE.equals(request.getLockComponents())) {
             image = selectLatestImageFromCandidates(upgradeCandidates);
         } else if (StringUtils.isNotEmpty(request.getImageId())) {
-            image = selectRequestedImage(request, upgradeCandidates);
+            image = selectRequestedImage(request.getImageId(), upgradeCandidates);
         } else if (StringUtils.isNotEmpty(request.getRuntime())) {
             image = selectLatestImageByRuntime(upgradeCandidates, request.getRuntime());
         }
@@ -62,9 +68,9 @@ public class DistroXUpgradeImageSelector {
                 .collect(Collectors.joining(","));
     }
 
-    private Optional<ImageInfoV4Response> selectRequestedImage(UpgradeV4Request request, List<ImageInfoV4Response> upgradeCandidates) {
+    private Optional<ImageInfoV4Response> selectRequestedImage(String imageId, List<ImageInfoV4Response> upgradeCandidates) {
         Optional<ImageInfoV4Response> requestedImage = upgradeCandidates.stream()
-                .filter(candidate -> request.getImageId().equals(candidate.getImageId()))
+                .filter(candidate -> imageId.equals(candidate.getImageId()))
                 .findFirst();
         validateImageIsPresent(upgradeCandidates, requestedImage);
         LOGGER.debug("Chosen image {} as it was specified in the request", requestedImage);

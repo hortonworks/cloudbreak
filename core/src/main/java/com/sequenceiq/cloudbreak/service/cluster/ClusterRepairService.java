@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -183,29 +182,12 @@ public class ClusterRepairService {
             Set<String> selectedParts, boolean deleteVolumes) {
         boolean reattach = !deleteVolumes;
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult;
-        List<String> stoppedInstanceIds = getStoppedNotSelectedInstanceIds(stack, repairMode, selectedParts);
-        if (!freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())) {
-            repairStartResult = Result.error(RepairValidation
-                    .of("Action cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state."));
-        } else if (!environmentService.environmentStatusInDesiredState(stack.getStack(), Set.of(EnvironmentStatus.AVAILABLE))) {
-            repairStartResult = Result.error(RepairValidation
-                    .of("Action cannot be performed because the Environment isn't available. Please check the Environment state."));
-        } else if (!stoppedInstanceIds.isEmpty()) {
-            repairStartResult = Result.error(RepairValidation
-                    .of("Action cannot be performed because there are stopped nodes in the cluster. " +
-                            "Stopped nodes: [" + String.join(", ", stoppedInstanceIds) + "]. " +
-                            "Please select them for repair or start the stopped nodes."));
+        Optional<RepairValidation> repairValidationError = validateRepairConditions(repairMode, stack, selectedParts);
+        if (repairValidationError.isPresent()) {
+            repairStartResult = Result.error(repairValidationError.get());
         } else if (!isReattachSupportedOnProvider(stack.getStack(), reattach)) {
             repairStartResult = Result.error(RepairValidation
                     .of(String.format("Volume reattach currently not supported on %s platform!", stack.getPlatformVariant())));
-        } else if (hasNotAvailableDatabase(stack)) {
-            repairStartResult = Result.error(RepairValidation
-                    .of(String.format("Database %s is not in AVAILABLE status, could not start repair.", stack.getCluster().getDatabaseServerCrn())));
-        } else if (isHAClusterAndRepairNotAllowed(stack)) {
-            repairStartResult = Result.error(RepairValidation
-                    .of("Repair is not supported when the cluster uses cluster proxy and has multiple gateway nodes. This will be fixed in future releases."));
-        } else if (isAnyGWUnhealthyAndItIsNotSelected(repairMode, selectedParts, stack)) {
-            repairStartResult = Result.error(RepairValidation.of("Gateway node is unhealthy, it must be repaired first."));
         } else {
             Pair<Predicate<HostGroup>, Predicate<InstanceMetaData>> instanceSelectors = getInstanceSelectors(repairMode, selectedParts);
             Map<HostGroupName, Set<InstanceMetaData>> repairableNodes = selectRepairableNodes(instanceSelectors, stack.getStack());
@@ -216,12 +198,37 @@ public class ClusterRepairService {
                 if (!validationBySelectedNodes.getValidationErrors().isEmpty()) {
                     repairStartResult = Result.error(validationBySelectedNodes);
                 } else {
-                    setStackStatusAndMarkDeletableVolumes(repairMode, deleteVolumes, stack.getStack(), repairableNodes);
+                    // TODO: it should not be here... we should move it to the repair flow.
+                    setStackStatusAndMarkDeletableVolumes(repairMode, deleteVolumes, stack.getStack(), repairableNodes.values().stream()
+                            .flatMap(Collection::stream).map(InstanceMetaData::getInstanceId).collect(Collectors.toSet()));
                     repairStartResult = Result.success(repairableNodes);
                 }
             }
         }
         return repairStartResult;
+    }
+
+    public Optional<RepairValidation> validateRepairConditions(ManualClusterRepairMode repairMode, StackDto stack, Set<String> selectedParts) {
+        List<String> stoppedInstanceIds = getStoppedNotSelectedInstanceIds(stack, repairMode, selectedParts);
+        if (!freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())) {
+            return Optional.of(RepairValidation.of("Action cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state."));
+        } else if (!environmentService.environmentStatusInDesiredState(stack.getStack(), Set.of(EnvironmentStatus.AVAILABLE))) {
+            return Optional.of(RepairValidation.of("Action cannot be performed because the Environment isn't available. Please check the Environment state."));
+        } else if (!stoppedInstanceIds.isEmpty()) {
+            return Optional.of(RepairValidation.of("Action cannot be performed because there are stopped nodes in the cluster. " +
+                            "Stopped nodes: [" + String.join(", ", stoppedInstanceIds) + "]. " +
+                            "Please select them for node replacement or start the stopped nodes."));
+        } else if (hasNotAvailableDatabase(stack)) {
+            return Optional.of(RepairValidation.of(String.format("Database %s is not in AVAILABLE status, could not start node replacement.",
+                    stack.getCluster().getDatabaseServerCrn())));
+        } else if (isHAClusterAndRepairNotAllowed(stack)) {
+            return Optional.of(RepairValidation.of("Repair is not supported when the cluster uses cluster proxy and has multiple gateway nodes. " +
+                    "This will be fixed in future releases."));
+        } else if (isAnyGWUnhealthyAndItIsNotSelected(repairMode, selectedParts, stack)) {
+            return Optional.of(RepairValidation.of("Gateway node is unhealthy, it must be repaired first."));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private boolean isAnyGWUnhealthyAndItIsNotSelected(ManualClusterRepairMode repairMode, Set<String> selectedParts, StackDto stack) {
@@ -426,16 +433,16 @@ public class ClusterRepairService {
         return volumeSet;
     }
 
-    private void setStackStatusAndMarkDeletableVolumes(ManualClusterRepairMode repairMode, boolean deleteVolumes, StackView stack,
-            Map<HostGroupName, Set<InstanceMetaData>> nodesToRepair) {
-        if (!ManualClusterRepairMode.DRY_RUN.equals(repairMode) && !nodesToRepair.isEmpty()) {
+    public void markVolumesToNonDeletable(StackView stack, Set<String> instanceIdsToRepair) {
+        Predicate<Resource> updateVolumesPredicate = inInstances(instanceIdsToRepair);
+        updateVolumesDeleteFlag(stack, updateVolumesPredicate, false);
+    }
+
+    public void setStackStatusAndMarkDeletableVolumes(ManualClusterRepairMode repairMode, boolean deleteVolumes, StackView stack,
+            Set<String> instanceIdsToRepair) {
+        if (!ManualClusterRepairMode.DRY_RUN.equals(repairMode) && !instanceIdsToRepair.isEmpty()) {
             LOGGER.info("Repair mode is not a dry run, {}", repairMode);
-            Predicate<Resource> updateVolumesPredicate = inInstances(nodesToRepair.values()
-                    .stream()
-                    .flatMap(Collection::stream)
-                    .map(InstanceMetaData::getInstanceId)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toUnmodifiableSet()));
+            Predicate<Resource> updateVolumesPredicate = inInstances(instanceIdsToRepair);
             updateVolumesDeleteFlag(stack, updateVolumesPredicate, deleteVolumes);
             LOGGER.info("Update stack status to REPAIR_IN_PROGRESS");
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_IN_PROGRESS);

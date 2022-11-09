@@ -4,6 +4,7 @@ import static com.sequenceiq.flow.api.model.FlowType.NOT_TRIGGERED;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
@@ -46,6 +48,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
+import com.sequenceiq.cloudbreak.service.cluster.OSUpgradeByUpgradeSetsService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
@@ -84,6 +87,9 @@ public class UpgradeService {
     private ClusterRepairService clusterRepairService;
 
     @Inject
+    private OSUpgradeByUpgradeSetsService osUpgradeByUpgradeSetsService;
+
+    @Inject
     private DistroXV1Endpoint distroXV1Endpoint;
 
     @Inject
@@ -115,25 +121,38 @@ public class UpgradeService {
         }
     }
 
+    public FlowIdentifier osUpgradeByUpgradeSets(StackView stack, ImageChangeDto imageChangeDto, List<OrderedOSUpgradeSet> upgradeSets) {
+        MDCBuilder.buildMdcContext(stack);
+        ClusterComponent clusterComponent = clusterBootstrapper.updateSaltComponent(stack);
+        try {
+            FlowIdentifier flowIdentifier = osUpgradeByUpgradeSetsService.osUpgradeByUpgradeSets(stack, imageChangeDto, upgradeSets);
+            if (flowIdentifier != null && NOT_TRIGGERED == flowIdentifier.getType()) {
+                LOGGER.warn("Upgrade flow not triggered, reverting salt state upgrade");
+                clusterComponentConfigProvider.restorePreviousVersion(clusterComponent);
+            }
+            return flowIdentifier;
+        } catch (RuntimeException e) {
+            LOGGER.error("Failed to start OS upgrade by upgrade sets, reverting salt state upgrade", e);
+            clusterComponentConfigProvider.restorePreviousVersion(clusterComponent);
+            throw e;
+        }
+    }
+
     public FlowIdentifier upgradeOs(String accountId, NameOrCrn stackNameOrCrn) {
         StackView stack = stackDtoService.getStackViewByNameOrCrn(stackNameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         ClusterComponent clusterComponent = clusterBootstrapper.updateSaltComponent(stack);
-        FlowIdentifier flowIdentifier = null;
         try {
-            // CHECKSTYLE:OFF - false recognition of unnecessary variable assignment
-            flowIdentifier = clusterRepairService.repairAll(stack, true);
-            // CHECKSTYLE:ON
+            FlowIdentifier flowIdentifier = clusterRepairService.repairAll(stack, true);
+            if (flowIdentifier != null && NOT_TRIGGERED == flowIdentifier.getType()) {
+                LOGGER.warn("Upgrade flow not triggered, reverting salt state upgrade");
+                clusterComponentConfigProvider.restorePreviousVersion(clusterComponent);
+            }
             return flowIdentifier;
         } catch (RuntimeException e) {
             LOGGER.error("Failed to start OS upgrade, reverting salt state upgrade", e);
             clusterComponentConfigProvider.restorePreviousVersion(clusterComponent);
             throw e;
-        } finally {
-            if (flowIdentifier != null && NOT_TRIGGERED == flowIdentifier.getType()) {
-                LOGGER.warn("Upgrade flow not triggered, reverting salt state upgrade");
-                clusterComponentConfigProvider.restorePreviousVersion(clusterComponent);
-            }
         }
     }
 
