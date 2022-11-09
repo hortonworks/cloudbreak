@@ -178,6 +178,8 @@ public class StackOperationService {
             throw new BadRequestException("Downscale via Instance Stop cannot process more than one host group");
         }
         updateNodeCountValidator.validateInstanceGroup(stackDto, instanceIdsByHostgroupMap.keySet().iterator().next());
+        updateNodeCountValidator.validateStackStatusForStopStartHostGroup(stackDto, instanceIdsByHostgroupMap.keySet().iterator().next(),
+                -instanceIdsByHostgroupMap.size());
         LOGGER.info("InstanceIds without metadata: [{}]", instanceIdsWithoutMetadata);
         updateNodeCountValidator.validateServiceRoles(stackDto, instanceIdsByHostgroupMap.entrySet()
                 .stream()
@@ -309,7 +311,8 @@ public class StackOperationService {
         try {
             return transactionService.required(() -> {
                 updateNodeCountValidator.validateServiceRoles(stackDto, instanceGroupAdjustmentJson);
-                updateNodeCountValidator.validateStackStatusForStartHostGroup(stackDto, instanceGroupAdjustmentJson);
+                updateNodeCountValidator.validateStackStatusForStopStartHostGroup(stackDto, instanceGroupAdjustmentJson.getInstanceGroup(),
+                        instanceGroupAdjustmentJson.getScalingAdjustment());
                 updateNodeCountValidator.validateInstanceGroup(stackDto, instanceGroupAdjustmentJson.getInstanceGroup());
                 updateNodeCountValidator.validateInstanceGroupForStopStart(stackDto,
                         instanceGroupAdjustmentJson.getInstanceGroup(), instanceGroupAdjustmentJson.getScalingAdjustment());

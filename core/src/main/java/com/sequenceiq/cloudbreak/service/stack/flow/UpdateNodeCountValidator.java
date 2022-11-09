@@ -134,16 +134,21 @@ public class UpdateNodeCountValidator {
                 stack.getName(), stack.getStatus()));
     }
 
-    public void validateStackStatusForStartHostGroup(StackDto stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentV4Request) {
+    public void validateStackStatusForStopStartHostGroup(StackDto stack, String instanceGroup, Integer scalingAdjustment) {
 
         if (stack.getStack().isModificationInProgress()) {
-            throw new BadRequestException(format("Data Hub '%s' has '%s' state. Upscaling is not allowed.",
-                    stack.getStack().getName(), stack.getStack().getStatus()));
+            if (scalingAdjustment > 0) {
+                throw new BadRequestException(format("Data Hub '%s' has '%s' state. Upscaling is not allowed.",
+                        stack.getStack().getName(), stack.getStack().getStatus()));
+            } else if (scalingAdjustment < 0) {
+                throw new BadRequestException(format("Data Hub '%s' has '%s' state. Downscaling is not allowed.",
+                        stack.getStack().getName(), stack.getStack().getStatus()));
+            }
         }
 
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintText());
         Set<String> dependentComponents = dependentRolesHealthCheckService.getDependentComponentsForHostGroup(processor,
-                instanceGroupAdjustmentV4Request.getInstanceGroup());
+                instanceGroup);
 
         if (dependentComponents.contains(UNDEFINED_DEPENDENCY)) {
             if (!(stack.getStack().isAvailable() || stack.getStack().isAvailableWithStoppedInstances())) {
@@ -153,9 +158,15 @@ public class UpdateNodeCountValidator {
         } else {
             List<String> unhealthyHostGroupNames = dependentRolesHealthCheckService.getUnhealthyDependentHostGroups(stack, processor, dependentComponents);
             if (!unhealthyHostGroupNames.isEmpty()) {
-                throw new BadRequestException(format("Upscaling is Not Allowed for HostGroup: '%s' as Data hub '%s' has " +
-                                "services which may not be healthy for instances in hostGroup(s): [%s]",
-                        instanceGroupAdjustmentV4Request.getInstanceGroup(), stack.getStack().getName(), unhealthyHostGroupNames));
+                if (scalingAdjustment > 0) {
+                    throw new BadRequestException(format("Upscaling is Not Allowed for HostGroup: '%s' as Data hub '%s' has " +
+                                    "services which may not be healthy for instances in hostGroup(s): [%s]",
+                            instanceGroup, stack.getStack().getName(), unhealthyHostGroupNames));
+                } else if (scalingAdjustment < 0) {
+                    throw new BadRequestException(format("Downscaling is Not Allowed for HostGroup: '%s' as Data hub '%s' has " +
+                                    "services which may not be healthy for instances in hostGroup(s): [%s]",
+                            instanceGroup, stack.getStack().getName(), unhealthyHostGroupNames));
+                }
             }
         }
     }

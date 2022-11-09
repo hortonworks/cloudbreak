@@ -342,7 +342,7 @@ public class StackOperationServiceTest {
         when(transactionService.required(any(Supplier.class))).thenAnswer(ans -> ((Supplier) ans.getArgument(0)).get());
         doNothing().when(updateNodeCountValidator).validateServiceRoles(any(), any(InstanceGroupAdjustmentV4Request.class));
         if (stackStatus != CLUSTER_UPGRADE_FAILED) {
-            doNothing().when(updateNodeCountValidator).validateStackStatusForStartHostGroup(any(), any());
+            doNothing().when(updateNodeCountValidator).validateStackStatusForStopStartHostGroup(any(), any(), any());
             doNothing().when(updateNodeCountValidator).validateInstanceGroup(any(), any());
             doNothing().when(updateNodeCountValidator).validateScalabilityOfInstanceGroup(any(), any(InstanceGroupAdjustmentV4Request.class));
             doNothing().when(updateNodeCountValidator).validateScalingAdjustment(any(InstanceGroupAdjustmentV4Request.class), any());

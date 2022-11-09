@@ -142,13 +142,14 @@ public class UpdateNodeCountValidatorTest {
     }
 
     @ParameterizedTest(name = "The stack status is {0}.")
-    @MethodSource("testValidateStatusForStartHostGroupData")
-    public void testValidateStatusForStartHostGroup(
+    @MethodSource("testValidateStatusForStopStartHostGroupData")
+    public void testValidateStatusForStopStartHostGroup(
             Status status,
             Optional<String> errorMessageSegment,
             String instancegroup,
             boolean unDefinedDependencyPresent,
-            boolean unhealthyHostgroup) {
+            boolean unhealthyHostgroup,
+            Integer scalingAdjustment) {
         StackDto stackdto = mock(StackDto.class);
         StackView stackView = mock(StackView.class);
         setupMocksForStopStartInstanceGroupValidation(stackdto);
@@ -189,9 +190,10 @@ public class UpdateNodeCountValidatorTest {
 
         if (errorMessageSegment.isPresent()) {
             checkExecutableThrowsException(errorMessageSegment, stackdto,
-                    () -> underTest.validateStackStatusForStartHostGroup(stackdto, instanceGroupAdjustmentV4Request));
+                    () -> underTest.validateStackStatusForStopStartHostGroup(stackdto, instanceGroupAdjustmentV4Request.getInstanceGroup(), scalingAdjustment));
         } else {
-            assertDoesNotThrow(() -> underTest.validateStackStatusForStartHostGroup(stackdto, instanceGroupAdjustmentV4Request));
+            assertDoesNotThrow(() -> underTest.validateStackStatusForStopStartHostGroup(stackdto,
+                    instanceGroupAdjustmentV4Request.getInstanceGroup(), scalingAdjustment));
         }
     }
 
@@ -201,27 +203,46 @@ public class UpdateNodeCountValidatorTest {
         Assert.assertTrue(badRequestException.getMessage().contains(errorMessageSegment.get()));
     }
 
-    private static Stream<Arguments> testValidateStatusForStartHostGroupData() {
+    private static Stream<Arguments> testValidateStatusForStopStartHostGroupData() {
         return Stream.of(
-                Arguments.of(AVAILABLE, NO_ERROR, "compute", false, false),
+                Arguments.of(AVAILABLE, NO_ERROR, "compute", false, false, 1),
+                Arguments.of(AVAILABLE, NO_ERROR, "compute", false, false, -1),
                 Arguments.of(AVAILABLE,
                         Optional.of("Upscaling is Not Allowed for HostGroup: 'compute' as Data hub 'master-stack' " +
-                                "has services which may not be healthy for instances in hostGroup(s): [[master]]"), "compute", false, true),
-                Arguments.of(AVAILABLE, NO_ERROR, "compute", true, false),
+                                "has services which may not be healthy for instances in hostGroup(s): [[master]]"), "compute", false, true, 1),
+                Arguments.of(AVAILABLE,
+                        Optional.of("Downscaling is Not Allowed for HostGroup: 'compute' as Data hub 'master-stack' " +
+                                "has services which may not be healthy for instances in hostGroup(s): [[master]]"), "compute", false, true, -1),
+                Arguments.of(AVAILABLE, NO_ERROR, "compute", true, false, 1),
+                Arguments.of(AVAILABLE, NO_ERROR, "compute", true, false, -1),
                 Arguments.of(UPDATE_IN_PROGRESS,
-                        Optional.of("Data Hub 'master-stack' has 'UPDATE_IN_PROGRESS' state. Upscaling is not allowed."), "compute", false, false),
+                        Optional.of("Data Hub 'master-stack' has 'UPDATE_IN_PROGRESS' state. Upscaling is not allowed."), "compute", false, false, 1),
                 Arguments.of(UPDATE_IN_PROGRESS,
-                        Optional.of("Data Hub 'master-stack' has 'UPDATE_IN_PROGRESS' state. Upscaling is not allowed."), "compute", false, true),
-                Arguments.of(NODE_FAILURE, NO_ERROR, "compute", false, false),
+                        Optional.of("Data Hub 'master-stack' has 'UPDATE_IN_PROGRESS' state. Downscaling is not allowed."), "compute", false, false, -1),
+                Arguments.of(UPDATE_IN_PROGRESS,
+                        Optional.of("Data Hub 'master-stack' has 'UPDATE_IN_PROGRESS' state. Upscaling is not allowed."), "compute", false, true, 1),
+                Arguments.of(UPDATE_IN_PROGRESS,
+                        Optional.of("Data Hub 'master-stack' has 'UPDATE_IN_PROGRESS' state. Downscaling is not allowed."), "compute", false, true, -1),
+                Arguments.of(NODE_FAILURE, NO_ERROR, "compute", false, false, 1),
+                Arguments.of(NODE_FAILURE, NO_ERROR, "compute", false, false, -1),
                 Arguments.of(NODE_FAILURE,
                         Optional.of("Upscaling is Not Allowed for HostGroup: 'compute' as Data hub 'master-stack' " +
-                                "has services which may not be healthy for instances in hostGroup(s): [[master]]"), "compute", false, true),
+                                "has services which may not be healthy for instances in hostGroup(s): [[master]]"), "compute", false, true, 1),
+                Arguments.of(NODE_FAILURE,
+                        Optional.of("Downscaling is Not Allowed for HostGroup: 'compute' as Data hub 'master-stack' " +
+                                "has services which may not be healthy for instances in hostGroup(s): [[master]]"), "compute", false, true, -1),
                 Arguments.of(NODE_FAILURE,
                         Optional.of("Data Hub 'master-stack' has 'NODE_FAILURE' state. Node group start operation is not allowed for this state."),
-                        "compute", true, false),
+                        "compute", true, false, 1),
                 Arguments.of(NODE_FAILURE,
                         Optional.of("Data Hub 'master-stack' has 'NODE_FAILURE' state. Node group start operation is not allowed for this state."),
-                        "compute", true, true)
+                        "compute", true, false, -1),
+                Arguments.of(NODE_FAILURE,
+                        Optional.of("Data Hub 'master-stack' has 'NODE_FAILURE' state. Node group start operation is not allowed for this state."),
+                        "compute", true, true, 1),
+                Arguments.of(NODE_FAILURE,
+                        Optional.of("Data Hub 'master-stack' has 'NODE_FAILURE' state. Node group start operation is not allowed for this state."),
+                        "compute", true, true, -1)
         );
     }
 
