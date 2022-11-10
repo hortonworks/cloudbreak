@@ -17,6 +17,8 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.Ex
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.stack.termination.sync.TerminationStackSyncEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.termination.sync.TerminationStackSyncFlowConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -33,7 +35,8 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
             ClusterTerminationEvent.TERMINATION_EVENT.event(),
             ExternalDatabaseTerminationEvent.START_EXTERNAL_DATABASE_TERMINATION_EVENT.event(),
             StackTerminationEvent.TERMINATION_EVENT.event(),
-            ClusterTerminationEvent.PROPER_TERMINATION_EVENT.event());
+            ClusterTerminationEvent.PROPER_TERMINATION_EVENT.event(),
+            TerminationStackSyncEvent.TERMINATION_STACK_SYNC_EVENT.event());
 
     @Inject
     private StackService stackService;
@@ -45,7 +48,11 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
 
     @Override
     public List<Class<? extends FlowConfiguration<?>>> getTerminationFlow() {
-        return Arrays.asList(StackTerminationFlowConfig.class, ClusterTerminationFlowConfig.class, ExternalDatabaseTerminationFlowConfig.class);
+        return Arrays.asList(
+                TerminationStackSyncFlowConfig.class,
+                StackTerminationFlowConfig.class,
+                ClusterTerminationFlowConfig.class,
+                ExternalDatabaseTerminationFlowConfig.class);
     }
 
     @Override

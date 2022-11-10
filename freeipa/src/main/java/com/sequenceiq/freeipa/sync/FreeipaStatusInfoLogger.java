@@ -29,7 +29,7 @@ public class FreeipaStatusInfoLogger {
         StackStatus freeipaStatus = stackStatusService.findFirstByStackIdOrderByCreatedDesc(stackId);
         String freeipaStatusInfo = String.format("freeipa stack is %s.", freeipaStatus.getStatus());
         String allInstanceStatusInfo = createInstancesStatusInfo(stackId, checkableInstances);
-        LOGGER.debug(":::Auto sync::: freeipa status from healtch check: {} {}", freeipaStatusInfo, allInstanceStatusInfo);
+        LOGGER.debug(":::Auto sync::: freeipa status from health check: {} {}", freeipaStatusInfo, allInstanceStatusInfo);
     }
 
     private String createInstancesStatusInfo(Long stackId, Set<InstanceMetaData> checkableInstances) {

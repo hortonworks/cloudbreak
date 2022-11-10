@@ -5,6 +5,7 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.DELETE_STARTED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
 import static com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationEvent.START_EXTERNAL_DATABASE_TERMINATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.sync.TerminationStackSyncEvent.TERMINATION_STACK_SYNC_EVENT;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -15,6 +16,7 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationState;
+import com.sequenceiq.cloudbreak.core.flow2.event.TerminationStackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -33,6 +35,7 @@ public class TerminationFlowEventChainFactory implements FlowEventChainFactory<T
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(TerminationEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
+        flowEventChain.add(new TerminationStackSyncTriggerEvent(TERMINATION_STACK_SYNC_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new StackEvent(ClusterTerminationEvent.TERMINATION_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new TerminationEvent(START_EXTERNAL_DATABASE_TERMINATION_EVENT.event(), event.getResourceId(), event.getTerminationType(),
                 event.accepted()));

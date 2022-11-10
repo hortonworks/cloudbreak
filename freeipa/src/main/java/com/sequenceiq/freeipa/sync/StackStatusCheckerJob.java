@@ -78,9 +78,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         try {
             if (flowLogService.isOtherFlowRunning(stackId)) {
-                LOGGER.debug("StackStatusCheckerJob cannot run, because flow is running for freeipa stack: {}", stackId);
+                LOGGER.debug("StackStatusCheckerJob cannot be executed, because flow is running for freeipa stack: {}", stackId);
             } else {
-                LOGGER.debug("No flows running, trying to sync freeipa");
+                LOGGER.debug("No flows are running, trying to sync freeipa");
                 syncAStack(stack, false);
             }
             if (stack.getStackStatus() != null && stack.getStackStatus().getStatus() != null) {
@@ -112,7 +112,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
                     int alreadyDeletedCount = notTerminatedForStack.size() - checkableInstances.size();
                     if (alreadyDeletedCount > 0) {
-                        LOGGER.info(":::Auto sync::: Count of already in deleted on provider side state: {}", alreadyDeletedCount);
+                        LOGGER.info(":::Auto sync::: Count of instances already in DELETED_ON_PROVIDER_SIDE state: {}", alreadyDeletedCount);
                     }
                     if (!checkableInstances.isEmpty()) {
                         SyncResult syncResult = freeipaChecker.getStatus(stack, checkableInstances);
@@ -166,13 +166,13 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         if (status != stack.getStackStatus().getDetailedStackStatus()) {
             if (autoSyncConfig.isUpdateStatus()) {
                 if (!updateStatusFromFlow && flowLogService.isOtherFlowRunning(stack.getId())) {
-                    throw new InterruptSyncingException(":::Auto sync::: interrupt syncing in updateStackStatus, flow is running on freeipa stack " +
+                    throw new InterruptSyncingException(":::Auto sync::: interrupting sync, flow is running on freeipa stack " +
                             stack.getName());
                 } else {
                     stackUpdater.updateStackStatus(stack, status, result.getMessage());
                 }
             } else {
-                LOGGER.info(":::Auto sync::: The stack status would be had to update from {} to {}",
+                LOGGER.info(":::Auto sync::: Status update disabled, stack status would have been updated from {} to {}",
                         stack.getStackStatus().getDetailedStackStatus(), status);
             }
         }
@@ -202,11 +202,11 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private void setStatusIfNotTheSame(InstanceMetaData instanceMetaData, InstanceStatus newStatus) {
         InstanceStatus oldStatus = instanceMetaData.getInstanceStatus();
         if (oldStatus != newStatus) {
-            if (updateStatus) {
+            if (autoSyncConfig.isUpdateStatus()) {
                 instanceMetaData.setInstanceStatus(newStatus);
-                LOGGER.info(":::Auto sync::: The instance status updated from {} to {}", oldStatus, newStatus);
+                LOGGER.info(":::Auto sync::: The instance status has been updated from {} to {}", oldStatus, newStatus);
             } else {
-                LOGGER.info(":::Auto sync::: The instance status would be had to update from {} to {}",
+                LOGGER.info(":::Auto sync::: Status update disabled, instance status would have been updated from {} to {}",
                         oldStatus, newStatus);
             }
         }

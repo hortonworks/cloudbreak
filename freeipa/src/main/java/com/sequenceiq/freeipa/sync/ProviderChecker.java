@@ -46,7 +46,7 @@ public class ProviderChecker {
             List<ProviderSyncResult> results = new ArrayList<>();
             List<CloudVmInstanceStatus> statuses = stackInstanceProviderChecker.checkStatus(stack, checkableInstances);
             if (!updateStatusFromFlow && flowLogService.isOtherFlowRunning(stack.getId())) {
-                throw new InterruptSyncingException(":::Auto sync::: interrupt syncing in updateAndGetStatuses, flow is running on freeipa stack " +
+                throw new InterruptSyncingException("interrupting sync, flow is running on freeipa stack " +
                         stack.getName());
             } else {
                 statuses.forEach(s -> {
@@ -59,7 +59,7 @@ public class ProviderChecker {
                             results.add(new ProviderSyncResult("", instanceStatus, false, s.getCloudInstance().getInstanceId()));
                         }
                     } else {
-                        LOGGER.info(":::Auto sync::: Cannot find instanceMetaData");
+                        LOGGER.info("Cannot find instanceMetaData");
                     }
                 });
                 checkableInstances.forEach(instanceMetaData -> {
@@ -74,12 +74,12 @@ public class ProviderChecker {
                 });
                 return results;
             }
-        }, LOGGER, ":::Auto sync::: provider is checked in {}ms");
+        }, LOGGER, "provider is checked in {}ms");
     }
 
     private InstanceStatus updateStatuses(CloudVmInstanceStatus vmInstanceStatus, InstanceMetaData instanceMetaData,
         Map<InstanceMetaData, DetailedStackStatus> instanceHealthStatusMap) {
-        LOGGER.info(":::Auto sync::: {} instance metadata status update in progress, new status: {}",
+        LOGGER.info("{} instance metadata status update in progress, new status: {}",
                 instanceMetaData.getShortHostname(), vmInstanceStatus);
         InstanceStatus status = null;
         switch (vmInstanceStatus.getStatus()) {
@@ -112,7 +112,7 @@ public class ProviderChecker {
                 status = InstanceStatus.DELETED_BY_PROVIDER;
                 break;
             default:
-                LOGGER.info(":::Auto sync::: the '{}' status is not converted", vmInstanceStatus.getStatus());
+                LOGGER.info("the '{}' status is not converted", vmInstanceStatus.getStatus());
         }
         if (updateStatus) {
             instanceMetaDataService.save(instanceMetaData);
@@ -128,9 +128,9 @@ public class ProviderChecker {
         if (oldStatus != newStatus) {
             if (updateStatus) {
                 instanceMetaData.setInstanceStatus(newStatus);
-                LOGGER.info(":::Auto sync::: The instance status updated from {} to {}", oldStatus, newStatus);
+                LOGGER.info("The instance status has been updated from {} to {}", oldStatus, newStatus);
             } else {
-                LOGGER.info(":::Auto sync::: The instance status would be had to update from {} to {}",
+                LOGGER.info("Status update disabled, instance status would have been updated from {} to {}",
                         oldStatus, newStatus);
             }
         }

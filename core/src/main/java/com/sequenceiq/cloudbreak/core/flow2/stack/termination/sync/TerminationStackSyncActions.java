@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.stack.sync;
+package com.sequenceiq.cloudbreak.core.flow2.stack.termination.sync;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE;
@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.TerminationStackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -29,8 +29,8 @@ import com.sequenceiq.cloudbreak.service.stack.flow.SyncConfig;
 import com.sequenceiq.cloudbreak.view.StackView;
 
 @Configuration
-public class StackSyncActions {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackSyncActions.class);
+public class TerminationStackSyncActions {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TerminationStackSyncActions.class);
 
     @Inject
     private StackSyncService stackSyncService;
@@ -38,21 +38,17 @@ public class StackSyncActions {
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
 
-    @Bean(name = "SYNC_STATE")
+    @Bean(name = "TERMINATION_SYNC_STATE")
     public Action<?, ?> stackSyncAction() {
-        return new AbstractStackSyncAction<>(StackSyncTriggerEvent.class) {
-            @Override
-            protected void prepareExecution(StackSyncTriggerEvent payload, Map<Object, Object> variables) {
-                variables.put(STATUS_UPDATE_ENABLED, payload.getStatusUpdateEnabled());
-            }
+        return new AbstractTerminationStackSyncAction<>(TerminationStackSyncTriggerEvent.class) {
 
             @Override
-            protected void doExecute(StackSyncContext context, StackSyncTriggerEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(TerminationStackSyncContext context, TerminationStackSyncTriggerEvent payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackSyncContext context) {
+            protected Selectable createRequest(TerminationStackSyncContext context) {
                 StackView stack = context.getStack();
                 List<CloudInstance> cloudInstances = stackSyncService.getCloudInstances(context.getInstanceMetaData(), stack);
                 return new GetInstancesStateRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudInstances);
@@ -60,26 +56,26 @@ public class StackSyncActions {
         };
     }
 
-    @Bean(name = "SYNC_FINISHED_STATE")
+    @Bean(name = "TERMINATION_SYNC_FINISHED_STATE")
     public Action<?, ?> stackSyncFinishedAction() {
-        return new AbstractStackSyncAction<>(GetInstancesStateResult.class) {
+        return new AbstractTerminationStackSyncAction<>(GetInstancesStateResult.class) {
             @Override
-            protected void doExecute(StackSyncContext context, GetInstancesStateResult payload, Map<Object, Object> variables) {
-                SyncConfig syncConfig = new SyncConfig(context.isStatusUpdateEnabled(), true);
+            protected void doExecute(TerminationStackSyncContext context, GetInstancesStateResult payload, Map<Object, Object> variables) {
+                SyncConfig syncConfig = new SyncConfig(false, true);
                 stackSyncService.updateInstances(context.getStack(), context.getInstanceMetaData(), payload.getStatuses(), syncConfig);
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackSyncContext context) {
-                return new StackEvent(StackSyncEvent.SYNC_FINALIZED_EVENT.event(), context.getStack().getId());
+            protected Selectable createRequest(TerminationStackSyncContext context) {
+                return new StackEvent(TerminationStackSyncEvent.TERMINATION_SYNC_FINALIZED_EVENT.event(), context.getStack().getId());
             }
         };
     }
 
-    @Bean(name = "SYNC_FAILED_STATE")
+    @Bean(name = "TERMINATION_SYNC_FAILED_STATE")
     public Action<?, ?> stackSyncFailedAction() {
-        return new AbstractStackFailureAction<StackSyncState, StackSyncEvent>() {
+        return new AbstractStackFailureAction<TerminationStackSyncState, TerminationStackSyncEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Error during Stack synchronization flow:", payload.getException());
@@ -89,7 +85,7 @@ public class StackSyncActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StackSyncEvent.SYNC_FAIL_HANDLED_EVENT.event(), context.getStackId());
+                return new StackEvent(TerminationStackSyncEvent.TERMINATION_SYNC_FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

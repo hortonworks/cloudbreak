@@ -35,10 +35,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.domain.stack.StackParameters;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -63,6 +66,19 @@ public class StackSyncService {
 
     @Inject
     private ImageService imageService;
+
+    @Inject
+    private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
+
+    @Inject
+    private StackDtoService stackDtoService;
+
+    public List<CloudInstance> getCloudInstances(List<InstanceMetadataView> instanceMetadataViews, StackView stackView) {
+        List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(instanceMetadataViews, stackView);
+        List<StackParameters> stackParameters = stackDtoService.getStackParameters(stackView.getId());
+        cloudInstances.forEach(instance -> stackParameters.forEach(p -> instance.putParameter(p.getKey(), p.getValue())));
+        return cloudInstances;
+    }
 
     public void updateInstances(StackView stack, Iterable<InstanceMetadataView> instanceMetaDataList,
             Collection<CloudVmInstanceStatus> instanceStatuses, SyncConfig syncConfig) {
