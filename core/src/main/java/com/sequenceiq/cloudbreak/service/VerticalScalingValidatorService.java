@@ -45,6 +45,9 @@ public class VerticalScalingValidatorService {
         if (!cloudParameterCache.isVerticalScalingSupported(stack.getCloudPlatform())) {
             throw new BadRequestException(String.format("Vertical scaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
         }
+        if (!stack.isStopped()) {
+            throw new BadRequestException(String.format("You must stop %s to be able to vertically scale it.", stack.getName()));
+        }
     }
 
     public void validateRequest(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request) {

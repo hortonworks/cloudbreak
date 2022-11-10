@@ -94,6 +94,7 @@ public class VerticalScalingValidatorServiceTest {
     public void testRequestWhenTemplateNotSpecifiedInTheRequestShouldThrowBadRequest() {
         ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of(AWS));
         when(stack.getCloudPlatform()).thenReturn(AWS);
+        when(stack.isStopped()).thenReturn(true);
 
         VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
 
@@ -115,6 +116,7 @@ public class VerticalScalingValidatorServiceTest {
 
         when(stack.getCloudPlatform()).thenReturn(AWS);
         when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup(instanceGroupNameInStack, instanceTypeNameInStack)));
+        when(stack.isStopped()).thenReturn(true);
 
         VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
         InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
@@ -160,6 +162,7 @@ public class VerticalScalingValidatorServiceTest {
         when(stack.getCloudPlatform()).thenReturn(AWS);
         when(stack.getEnvironmentCrn()).thenReturn("crn");
         when(stack.getRegion()).thenReturn("eu");
+        when(stack.isStopped()).thenReturn(true);
         when(stack.getAvailabilityZone()).thenReturn("eu1");
         when(stack.getPlatformvariant()).thenReturn("awsvariant");
         when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup(instanceGroupNameInStack, instanceTypeNameInStack)));
@@ -216,6 +219,7 @@ public class VerticalScalingValidatorServiceTest {
         when(stack.getCloudPlatform()).thenReturn(AWS);
         when(stack.getEnvironmentCrn()).thenReturn("crn");
         when(stack.getRegion()).thenReturn("eu");
+        when(stack.isStopped()).thenReturn(true);
         when(stack.getAvailabilityZone()).thenReturn("eu1");
         when(stack.getPlatformvariant()).thenReturn("awsvariant");
         when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup(instanceGroupNameInStack, instanceTypeNameInStack)));
@@ -272,6 +276,7 @@ public class VerticalScalingValidatorServiceTest {
         when(stack.getCloudPlatform()).thenReturn(AWS);
         when(stack.getEnvironmentCrn()).thenReturn("crn");
         when(stack.getRegion()).thenReturn("eu");
+        when(stack.isStopped()).thenReturn(true);
         when(stack.getAvailabilityZone()).thenReturn("eu1");
         when(stack.getPlatformvariant()).thenReturn("awsvariant");
         when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup(instanceGroupNameInStack, instanceTypeNameInStack)));
@@ -328,6 +333,7 @@ public class VerticalScalingValidatorServiceTest {
         when(stack.getCloudPlatform()).thenReturn(AWS);
         when(stack.getEnvironmentCrn()).thenReturn("crn");
         when(stack.getRegion()).thenReturn("eu");
+        when(stack.isStopped()).thenReturn(true);
         when(stack.getAvailabilityZone()).thenReturn("eu1");
         when(stack.getPlatformvariant()).thenReturn("awsvariant");
         when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup(instanceGroupNameInStack, instanceTypeNameInStack)));
@@ -377,6 +383,7 @@ public class VerticalScalingValidatorServiceTest {
         when(stack.getCloudPlatform()).thenReturn(AWS);
         when(stack.getEnvironmentCrn()).thenReturn("crn");
         when(stack.getRegion()).thenReturn("eu");
+        when(stack.isStopped()).thenReturn(true);
         when(stack.getAvailabilityZone()).thenReturn("eu1");
         when(stack.getPlatformvariant()).thenReturn("awsvariant");
         when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup(instanceGroupNameInStack, instanceTypeNameInStack)));
@@ -395,6 +402,29 @@ public class VerticalScalingValidatorServiceTest {
         verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
         verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
+    }
+
+    @Test
+    public void testRequestWhenTheClusterDidNotStoppedShouldDropException() {
+        ReflectionTestUtils.setField(underTest, "verticalScalingSupported", Set.of(AWS));
+        String instanceGroupNameInRequest = "master1";
+        String instanceTypeNameInRequest = "m3.xlarge";
+
+        when(stack.getCloudPlatform()).thenReturn(AWS);
+        when(stack.isStopped()).thenReturn(false);
+
+        VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
+        InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
+        instanceTemplateRequest.setInstanceType(instanceTypeNameInRequest);
+        verticalScaleRequest.setTemplate(instanceTemplateRequest);
+        verticalScaleRequest.setGroup(instanceGroupNameInRequest);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            underTest.validateRequest(stack, verticalScaleRequest);
+        });
+
+        assertEquals("You must stop FreeIPA to be able to vertically scale it.",
+                badRequestException.getMessage());
     }
 
     private CloudVmTypes cloudVmTypes(String zone, VmType... vmTypes) {

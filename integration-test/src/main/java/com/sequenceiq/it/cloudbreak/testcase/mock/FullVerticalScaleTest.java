@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENV_STOPPED;
+
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -71,6 +73,9 @@ public class FullVerticalScaleTest extends AbstractClouderaManagerTest {
         String distroxVerticalScaleKey = "distroxVerticalScaleKey";
         String xlargeInstanceType = "xlarge";
         testContext
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.stop())
+                .await(ENV_STOPPED)
                 .given(freeipaVerticalScaleKey, VerticalScalingTestDto.class)
                 .withGroup("master")
                 .withInstanceType(xlargeInstanceType)
