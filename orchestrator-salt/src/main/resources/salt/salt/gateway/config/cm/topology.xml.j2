@@ -213,14 +213,6 @@
                  <name>{{ aclsauthz_prefix ~ "ssb-sse-ws.acl" }}</name>
                  <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
              </param>
-             <param>
-                 <name>{{ aclsauthz_prefix ~ "ssb-sse-ui-lb.acl" }}</name>
-                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-             </param>
-             <param>
-                 <name>{{ aclsauthz_prefix ~ "ssb-sse-ws-lb.acl" }}</name>
-                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-             </param>
          </provider>
     {%- endif %}
          <provider>
@@ -910,22 +902,6 @@
         <role>SSB-SSE-WS</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['STREAMING_SQL_ENGINE'] -%}
         <url>{% if protocol == 'https' %}wss{% else %}ws{% endif %}://{{ hostloc }}:{{ ports['SSB-SSE-WS'] }}</url>
-        {%- endfor %}
-    </service>
-    {%- endif %}
-    {% if 'SSB-SSE-UI-LB' in exposed -%}
-    <service>
-        <role>SSB-SSE-UI-LB</role>
-        {% for hostloc in salt['pillar.get']('gateway:location')['STREAMING_SQL_ENGINE'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SSB-SSE-UI-LB'] }}</url>
-        {%- endfor %}
-    </service>
-    {%- endif %}
-    {% if 'SSB-SSE-WS' in exposed -%}
-    <service>
-        <role>SSB-SSE-WS-LB</role>
-        {% for hostloc in salt['pillar.get']('gateway:location')['STREAMING_SQL_ENGINE'] -%}
-        <url>{% if protocol == 'https' %}wss{% else %}ws{% endif %}://{{ hostloc }}:{{ ports['SSB-SSE-WS-LB'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}

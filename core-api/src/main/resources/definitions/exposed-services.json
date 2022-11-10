@@ -793,36 +793,6 @@
       "minVersion": "7.2.16"
     },
     {
-      "name": "SSB-SSE-UI-LB",
-      "displayName": "Streaming SQL Console (LB)",
-      "serviceName": "STREAMING_SQL_ENGINE",
-      "knoxService": "SSB-SSE-UI-LB",
-      "knoxUrl": "/ssb-sse-ui-lb/",
-      "ssoSupported": true,
-      "port": 8445,
-      "tlsPort": 8445,
-      "apiOnly": false,
-      "apiIncluded": false,
-      "visibleForDatalake": false,
-      "visibleForDatahub": true,
-      "minVersion": "7.2.16"
-    },
-    {
-      "name": "SSB-SSE-WS-LB",
-      "displayName": "Streaming SQL Console WebSocket (LB)",
-      "serviceName": "STREAMING_SQL_ENGINE",
-      "knoxService": "SSB-SSE-WS-LB",
-      "knoxUrl": "/ssb-sse-ws-lb/",
-      "ssoSupported": true,
-      "port": 8445,
-      "tlsPort": 8445,
-      "apiOnly": false,
-      "apiIncluded": false,
-      "visibleForDatalake": false,
-      "visibleForDatahub": false,
-      "minVersion": "7.2.16"
-    },
-    {
       "name": "KNOX_TOKEN_INTEGRATOR",
       "displayName": "Token Integration",
       "serviceName": "KNOX",
