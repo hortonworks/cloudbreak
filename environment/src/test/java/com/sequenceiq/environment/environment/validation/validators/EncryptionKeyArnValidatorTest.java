@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -101,12 +102,17 @@ class EncryptionKeyArnValidatorTest {
         when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
         CloudEncryptionKey testInput = new CloudEncryptionKey();
         testInput.setName("arn:aws:kms:eu-west-2:123456789012:key/1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p");
-        CloudEncryptionKeys cloudEncryptionKeys = new CloudEncryptionKeys(Set.of(testInput));
+        CloudEncryptionKey testInput1 = new CloudEncryptionKey();
+        testInput1.setName("arn:aws:kms:eu-west-2:123456789012:key/1a2b3c4d-5e6f-jjjj-9i0j-1k2l3m4n5o6p");
+        CloudEncryptionKeys cloudEncryptionKeys = new CloudEncryptionKeys(Set.of(testInput, testInput1));
         when(retryService.testWith2SecDelayMax15Times(any(Supplier.class))).thenReturn(cloudEncryptionKeys);
 
         ValidationResult validationResult = underTest.validate(environmentValidationDto);
         assertTrue(validationResult.hasError());
-        assertEquals(String.format("The provided encryption key does not exist in the given region's encryption key list for this credential."),
+        assertEquals(String.format("Following encryption keys are retrieved from the cloud " +
+                        cloudEncryptionKeys.getCloudEncryptionKeys().stream().map(CloudEncryptionKey::getName).collect(Collectors.toList()) +
+                        " . The provided encryption key " + invalidKey +
+                        " does not exist in the given region's encryption key list for this credential."),
                 validationResult.getFormattedErrors());
     }
 
