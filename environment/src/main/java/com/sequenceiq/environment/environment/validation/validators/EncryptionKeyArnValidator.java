@@ -3,9 +3,11 @@ package com.sequenceiq.environment.environment.validation.validators;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,9 +102,12 @@ public class EncryptionKeyArnValidator {
         try {
             CloudEncryptionKeys encryptionKeys =  retryService.testWith2SecDelayMax15Times(() -> cloudPlatformConnectors.get(cloudPlatformVariant).
                     platformResources().encryptionKeys(extendedCloudCredential, region, Collections.emptyMap()));
-            if (encryptionKeys.getCloudEncryptionKeys().stream().map(CloudEncryptionKey::getName)
-                    .noneMatch(s -> s.equals(encryptionKeyArn))) {
-                validationResultBuilder.error("The provided encryption key does not exist in the given region's encryption key list for this credential.");
+            List<String> keyArns = encryptionKeys.getCloudEncryptionKeys().stream().map(CloudEncryptionKey::getName).collect(Collectors.toList());
+            if (keyArns.stream().noneMatch(s -> s.equals(encryptionKeyArn))) {
+                validationResultBuilder.error("Following encryption keys are retrieved from the cloud " + keyArns +
+                                " . The provided encryption key " + encryptionKeyArn +
+                        " does not exist in the given region's encryption key list for this credential.");
+
             }
         } catch (Exception e) {
             LOGGER.error("An unexpected error occurred while trying to fetch the KMS keys from AWS");
