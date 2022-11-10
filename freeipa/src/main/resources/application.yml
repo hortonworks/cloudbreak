@@ -70,7 +70,7 @@ freeipa:
     GCP: n1-standard-2
     MOCK: large
   platform.dnssec.validation:
-    AWS: true
+    AWS: false
     AZURE: false
     GCP: false
   environment:
