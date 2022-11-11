@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.common.model.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -48,5 +49,13 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
     Set<InstanceMetaData> findRemovableInstances(@Param("stackId") Long stackId);
 
     List<InstanceMetaData> findAllByInstanceGroupAndInstanceStatus(InstanceGroup instanceGroup, InstanceStatus status);
+
+    @Query("SELECT distinct new com.sequenceiq.common.model.SubnetIdWithResourceNameAndCrn(s.name, s.resourceCrn, im.subnetId, 'FREEIPA') " +
+            "FROM InstanceMetaData im " +
+            "LEFT JOIN im.instanceGroup ig  " +
+            "LEFT JOIN ig.stack s " +
+            "WHERE s.environmentCrn = :environmentCrn " +
+            "AND im.instanceStatus <> 'TERMINATED' ")
+    List<SubnetIdWithResourceNameAndCrn> findAllUsedSubnetsByEnvironmentCrn(@Param("environmentCrn") String environmentCrn);
 
 }

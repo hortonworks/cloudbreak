@@ -14,6 +14,7 @@ public final class OperationDescriptions {
         public static final String DELETE_BY_CRN = "delete a database config by CRN";
         public static final String DELETE_BY_NAME = "delete a database config by name";
         public static final String DELETE_MULTIPLE_BY_CRN = "delete multiple database configs by CRN";
+        public static final String GET_USED_SUBNETS_BY_ENVIRONMENT_CRN = "list the used subnets by the given Environment resource CRN";
 
         private DatabaseOpDescription() {
         }

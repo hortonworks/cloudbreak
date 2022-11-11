@@ -32,6 +32,7 @@ public final class Notes {
             + "with its corresponding user.";
         public static final String DELETE_MULTIPLE_BY_CRN =
             "Deletes multiple databases, each by CRN. See the notes on the single delete operation for details.";
+        public static final String GET_USED_SUBNETS_BY_ENVIRONMENT_CRN = "List the used subnets by the given Environment resource CRN";
 
         private DatabaseNotes() {
         }

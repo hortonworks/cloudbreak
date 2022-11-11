@@ -29,9 +29,13 @@ public class NetworkCreationValidator {
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
-    public NetworkCreationValidator(Map<CloudPlatform, EnvironmentNetworkValidator> envNetworkValidators, EnvironmentDtoConverter environmentDtoConverter) {
+    private final SubnetUsageValidator subnetUsageValidator;
+
+    public NetworkCreationValidator(Map<CloudPlatform, EnvironmentNetworkValidator> envNetworkValidators, EnvironmentDtoConverter environmentDtoConverter,
+            SubnetUsageValidator subnetUsageValidator) {
         environmentNetworkValidatorsByCloudPlatform = envNetworkValidators;
         this.environmentDtoConverter = environmentDtoConverter;
+        this.subnetUsageValidator = subnetUsageValidator;
     }
 
     public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network) {
@@ -46,6 +50,7 @@ public class NetworkCreationValidator {
     public ValidationResultBuilder validateNetworkEdit(Environment environment, NetworkDto network) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         resultBuilder.prefix("Cannot edit environment");
+        subnetUsageValidator.validate(environment, network, resultBuilder);
         validateNetworkToEdit(environment, network, resultBuilder);
         return resultBuilder;
     }
