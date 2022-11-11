@@ -67,6 +67,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerUpdateService;
@@ -508,5 +509,11 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     public void updateLoadBalancerDNS(Long workspaceId, NameOrCrn nameOrCrn) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         gatewayPublicEndpointManagementService.updateDnsEntryForLoadBalancers(stack);
+    }
+
+    public List<SubnetIdWithResourceNameAndCrn> getUsedSubnetsByEnvironment(String environmentCrn) {
+        List<SubnetIdWithResourceNameAndCrn> usedSubnets = stackCommonService.getAllUsedSubnetsByEnvironmentCrn(environmentCrn);
+        LOGGER.info("All used subnets ({}) for environment: {}", usedSubnets, environmentCrn);
+        return usedSubnets;
     }
 }

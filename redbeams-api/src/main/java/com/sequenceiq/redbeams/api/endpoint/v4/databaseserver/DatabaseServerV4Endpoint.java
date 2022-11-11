@@ -24,6 +24,7 @@ import org.springframework.validation.annotation.Validated;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
 import com.sequenceiq.redbeams.api.RedbeamsApi;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
@@ -36,7 +37,9 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.UpgradeDatabaseServerV4Response;
+import com.sequenceiq.redbeams.doc.Notes;
 import com.sequenceiq.redbeams.doc.Notes.DatabaseServerNotes;
+import com.sequenceiq.redbeams.doc.OperationDescriptions;
 import com.sequenceiq.redbeams.doc.OperationDescriptions.DatabaseServerOpDescription;
 import com.sequenceiq.redbeams.doc.ParamDescriptions.DatabaseServerParamDescriptions;
 
@@ -210,6 +213,14 @@ public interface DatabaseServerV4Endpoint {
     UpgradeDatabaseServerV4Response upgrade(
             @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotEmpty @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn,
             @Valid @NotNull @ApiParam(DatabaseServerParamDescriptions.UPGRADE_DATABASE_SERVER_REQUEST) UpgradeDatabaseServerV4Request request);
+
+    @GET
+    @Path("internal/used_subnets")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.DatabaseOpDescription.GET_USED_SUBNETS_BY_ENVIRONMENT_CRN, produces = MediaType.APPLICATION_JSON,
+            notes = Notes.DatabaseNotes.GET_USED_SUBNETS_BY_ENVIRONMENT_CRN, nickname = "getUsedSubnetsByEnvironment")
+    UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") String environmentCrn);
 
     @PUT
     @Path("{crn}/validate_upgrade")

@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.projection.InstanceMetaDataGroupView;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.cloudbreak.view.delegate.InstanceMetadataViewDelegate;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 
@@ -332,4 +333,12 @@ public interface InstanceMetaDataRepository extends JpaRepository<InstanceMetaDa
             "WHERE s.id = :stackId " +
             "ORDER BY im.privateId desc")
     Page<Long> findLastPrivateIdForStack(@Param("stackId") Long stackId, Pageable page);
+
+    @Query("SELECT distinct new com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn(s.name, s.resourceCrn, im.subnetId, s.type) " +
+            "FROM InstanceMetaData im " +
+            "LEFT JOIN im.instanceGroup ig  " +
+            "LEFT JOIN ig.stack s " +
+            "WHERE s.environmentCrn = :environmentCrn " +
+            "AND im.instanceStatus <> 'TERMINATED' ")
+    List<SubnetIdWithResourceNameAndCrn> findAllUsedSubnetsByEnvironmentCrn(@Param("environmentCrn") String environmentCrn);
 }

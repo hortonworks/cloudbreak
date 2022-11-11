@@ -31,6 +31,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GET_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GET_STACK_REQUEST_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GET_STATUS_BY_NAME;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GET_USED_SUBNETS_BY_ENVIRONMENT_CRN;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.LIST_BY_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.POST_STACK_FOR_BLUEPRINT_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.PUT_BY_NAME;
@@ -123,6 +124,7 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 
@@ -676,4 +678,13 @@ public interface StackV4Endpoint {
             @PathParam("name") String name,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn,
             @Valid StackVerticalScaleV4Request updateRequest);
+
+    @GET
+    @Path("internal/used_subnets")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = GET_USED_SUBNETS_BY_ENVIRONMENT_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "getUsedSubnetsByEnvironment")
+    UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(
+            @PathParam("workspaceId") Long workspaceId,
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") String environmentCrn);
 }

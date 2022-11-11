@@ -93,6 +93,7 @@ public class OperationDescriptions {
         public static final String RANGER_RAZ_ENABLED = "Determines if Ranger Raz is present in the cluster.";
         public static final String GENERATE_IMAGE_CATALOG = "Generates an image catalog that only contains the currently used image for creating instances";
         public static final String RE_REGISTER_CLUSTER_PROXY_CONFIG = "Re-registers the cluster proxy config for the cluster if needed.";
+        public static final String GET_USED_SUBNETS_BY_ENVIRONMENT_CRN = "List the used subnets by the given Environment resource CRN";
     }
 
     public static class ClusterOpDescription {

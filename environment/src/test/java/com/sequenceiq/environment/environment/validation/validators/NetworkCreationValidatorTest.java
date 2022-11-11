@@ -35,6 +35,9 @@ public class NetworkCreationValidatorTest {
     @Mock
     private EnvironmentDtoConverter environmentDtoConverter;
 
+    @Mock
+    private SubnetUsageValidator subnetUsageValidator;
+
     private final Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform = new EnumMap<>(CloudPlatform.class);
 
     private NetworkCreationValidator underTest;
@@ -44,7 +47,7 @@ public class NetworkCreationValidatorTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        underTest = new NetworkCreationValidator(environmentNetworkValidatorsByCloudPlatform, environmentDtoConverter);
+        underTest = new NetworkCreationValidator(environmentNetworkValidatorsByCloudPlatform, environmentDtoConverter, subnetUsageValidator);
         environment = EnvironmentTestData.newTestEnvironment();
         environmentNetworkValidatorsByCloudPlatform.put(CloudPlatform.AZURE, environmentNetworkValidatorMock);
     }
