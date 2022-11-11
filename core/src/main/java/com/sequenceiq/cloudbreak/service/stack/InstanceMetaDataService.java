@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
@@ -492,5 +493,9 @@ public class InstanceMetaDataService {
 
     public List<String> getAllAvailableHostNamesByPrivateIds(long stackId, List<Long> privateIds) {
         return repository.findAllAvailableHostNamesByPrivateIds(stackId, privateIds);
+    }
+
+    public List<SubnetIdWithResourceNameAndCrn> findAllUsedSubnetsByEnvironmentCrn(String environmentCrn) {
+        return repository.findAllUsedSubnetsByEnvironmentCrn(environmentCrn);
     }
 }

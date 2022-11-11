@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToTemplatePre
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -465,5 +466,9 @@ public class StackCommonService {
                 throw new BadRequestException(message);
             }
         }
+    }
+
+    public List<SubnetIdWithResourceNameAndCrn> getAllUsedSubnetsByEnvironmentCrn(String environmentCrn) {
+        return instanceMetaDataService.findAllUsedSubnetsByEnvironmentCrn(environmentCrn);
     }
 }

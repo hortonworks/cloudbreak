@@ -11,6 +11,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NA
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -40,6 +41,9 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityTy
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
+import com.sequenceiq.common.api.UsedSubnetWithResourceResponse;
+import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
+import com.sequenceiq.common.model.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
@@ -461,4 +465,12 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
         return freeIpaScalingService.verticalScale(accountId, environmentCrn, updateRequest);
     }
 
+    @Override
+    @InternalOnly
+    public UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(String environmentCrn) {
+        List<SubnetIdWithResourceNameAndCrn> allUsedSubnets = freeIpaListService.getAllUsedSubnetsByEnvironmentCrn(environmentCrn);
+        return new UsedSubnetsByEnvironmentResponse(allUsedSubnets
+                .stream().map(s -> new UsedSubnetWithResourceResponse(s.getName(), s.getSubnetId(), s.getResourceCrn(), s.getType()))
+                .collect(Collectors.toList()));
+    }
 }

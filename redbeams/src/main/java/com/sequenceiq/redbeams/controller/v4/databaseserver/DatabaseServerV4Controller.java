@@ -3,7 +3,9 @@ package com.sequenceiq.redbeams.controller.v4.databaseserver;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.CREATE_DATABASE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+import static org.slf4j.LoggerFactory.getLogger;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,6 +17,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import org.slf4j.Logger;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
@@ -35,6 +38,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
@@ -70,6 +74,8 @@ import com.sequenceiq.redbeams.service.validation.RedBeamsTagValidator;
 public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     static final Long DEFAULT_WORKSPACE = 0L;
+
+    private static final Logger LOGGER = getLogger(DatabaseServerV4Controller.class);
 
     @Inject
     private RedbeamsCreationService redbeamsCreationService;
@@ -250,6 +256,13 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     String databaseServerCrn, @Valid @NotNull UpgradeDatabaseServerV4Request request) {
         UpgradeDatabaseRequest upgradeDatabaseRequest = upgradeDatabaseServerV4RequestConverter.convert(request);
         return upgradeDatabaseServerV4ResponseConverter.convert(redbeamsUpgradeService.upgradeDatabaseServer(databaseServerCrn, upgradeDatabaseRequest));
+    }
+
+    @Override
+    @InternalOnly
+    public UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(String environmentCrn) {
+        LOGGER.info("We don't store the used subnet id so we don't give it back");
+        return new UsedSubnetsByEnvironmentResponse(Collections.emptyList());
     }
 
     @Override

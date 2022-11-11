@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.GET_RECOMMENDATION;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.GET_USED_SUBNETS_BY_ENVIRONMENT_CRN;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.LIST_RETRYABLE_FLOWS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.RETRY;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.UPDATE_SALT;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.freeipa.api.FreeIpaApi;
@@ -324,5 +326,13 @@ public interface FreeIpaV1Endpoint {
     VerticalScaleResponse verticalScalingByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
             @Valid @NotNull VerticalScaleRequest updateRequest);
+
+    @GET
+    @Path("internal/used_subnets")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = GET_USED_SUBNETS_BY_ENVIRONMENT_CRN, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "getUsedSubnetsByEnvironment")
+    UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") String environmentCrn);
 
 }

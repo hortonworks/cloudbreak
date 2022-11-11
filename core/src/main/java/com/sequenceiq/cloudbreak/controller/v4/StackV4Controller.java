@@ -65,12 +65,15 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.RdsUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
+import com.sequenceiq.common.api.UsedSubnetWithResourceResponse;
+import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.StackUpgradeOperations;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -597,5 +600,14 @@ public class StackV4Controller extends NotificationController implements StackV4
             @InitiatorUserCrn String initiatorUserCrn,
             @Valid StackVerticalScaleV4Request updateRequest) {
         return stackOperations.putVerticalScaling(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), updateRequest);
+    }
+
+    @Override
+    @InternalOnly
+    public UsedSubnetsByEnvironmentResponse getUsedSubnetsByEnvironment(Long workspaceId, String environmentCrn) {
+        List<SubnetIdWithResourceNameAndCrn> allUsedSubnets = stackOperations.getUsedSubnetsByEnvironment(environmentCrn);
+        return new UsedSubnetsByEnvironmentResponse(allUsedSubnets
+                .stream().map(s -> new UsedSubnetWithResourceResponse(s.getName(), s.getSubnetId(), s.getResourceCrn(), s.getType().name()))
+                .collect(Collectors.toList()));
     }
 }
