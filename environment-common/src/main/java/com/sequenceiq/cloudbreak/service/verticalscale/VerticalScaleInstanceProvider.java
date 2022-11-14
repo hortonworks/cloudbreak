@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
@@ -12,9 +14,13 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 
 @Service
 public class VerticalScaleInstanceProvider {
+
+    @Inject
+    private MinimalHardwareFilter minimalHardwareFilter;
 
     public CloudVmTypes listInstanceTypes(String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes) {
         String availabilityZoneForSelection = getAvailabilityZone(availabilityZone, allVmTypes);
@@ -46,10 +52,8 @@ public class VerticalScaleInstanceProvider {
             VmTypeMeta currentInstanceTypeMetaData = currentInstanceType.getMetaData();
             VmTypeMeta requestedInstanceTypeMetaData = requestedInstanceType.getMetaData();
 
-            validateCPU(currentInstanceTypeName, requestedInstanceTypeName,
-                    currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
-            validateMemory(currentInstanceTypeName, requestedInstanceTypeName,
-                    currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
+            validateCPU(requestedInstanceTypeName, requestedInstanceTypeMetaData);
+            validateMemory(requestedInstanceTypeName, requestedInstanceTypeMetaData);
             validateEphemeral(currentInstanceTypeName, requestedInstanceTypeName,
                     currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
             validateAutoAttached(currentInstanceTypeName, requestedInstanceTypeName,
@@ -103,21 +107,19 @@ public class VerticalScaleInstanceProvider {
         }
     }
 
-    private void validateMemory(String currentInstanceTypeName, String requestedInstanceTypeName,
-        VmTypeMeta currentInstanceTypeMetaData, VmTypeMeta requestedInstanceTypeMetaData) {
-        if (currentInstanceTypeMetaData.getMemoryInGb() > requestedInstanceTypeMetaData.getMemoryInGb()) {
+    private void validateMemory(String requestedInstanceTypeName, VmTypeMeta requestedInstanceTypeMetaData) {
+        if (!minimalHardwareFilter.suitableAsMinimumHardwareForMemory(requestedInstanceTypeMetaData.getMemoryInGb())) {
             throw new BadRequestException(String.format(
-                    "The current instancetype %s has more Memory then the requested %s.",
-                    currentInstanceTypeName, requestedInstanceTypeName));
+                    "The requested instancetype %s has less Memory then the minimum %s GB.",
+                    requestedInstanceTypeName, minimalHardwareFilter.minMemory()));
         }
     }
 
-    private void validateCPU(String currentInstanceTypeName, String requestedInstanceTypeName,
-        VmTypeMeta currentInstanceTypeMetaData, VmTypeMeta requestedInstanceTypeMetaData) {
-        if (currentInstanceTypeMetaData.getCPU() > requestedInstanceTypeMetaData.getCPU()) {
+    private void validateCPU(String requestedInstanceTypeName, VmTypeMeta requestedInstanceTypeMetaData) {
+        if (!minimalHardwareFilter.suitableAsMinimumHardwareForCpu(requestedInstanceTypeMetaData.getCPU())) {
             throw new BadRequestException(String.format(
-                    "The current instancetype %s has more CPU then the requested %s.",
-                    currentInstanceTypeName, requestedInstanceTypeName));
+                    "The requested instancetype %s has less Cpu then the minimum %s core.",
+                    requestedInstanceTypeName, minimalHardwareFilter.minCpu()));
         }
     }
 
