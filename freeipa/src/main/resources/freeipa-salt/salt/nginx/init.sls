@@ -33,6 +33,14 @@
     - makedirs: True
     - source: salt://nginx/conf/ssl-locations.d/nodestatus.conf
 
+{% if salt['file.file_exists']('/cdp/ipaldapagent/cdp-freeipa-ldapagent') %}
+/etc/nginx/sites-enabled/ssl-locations.d/ldapagent.conf:
+  file.managed:
+    - makedirs: True
+    - source: salt://nginx/conf/ssl-locations.d/ldapagent.conf
+    - template: jinja
+{% endif %}
+
 restart_nginx_after_ssl_reconfig:
   service.running:
     - name: nginx

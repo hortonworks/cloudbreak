@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView;
+import com.sequenceiq.freeipa.service.freeipa.config.LdapAgentConfigProvider;
 import com.sequenceiq.freeipa.service.proxy.ProxyConfigService;
 import com.sequenceiq.freeipa.service.tag.TagConfigService;
 import com.sequenceiq.freeipa.service.telemetry.TelemetryConfigService;
@@ -43,6 +44,8 @@ class SaltConfigProviderTest {
 
     private static final String ENV_CRN = "envCrn";
 
+    private static final String DOMAIN = "test.domain";
+
     @Mock
     private FreeIpaConfigService freeIpaConfigService;
 
@@ -58,15 +61,19 @@ class SaltConfigProviderTest {
     @Mock
     private CcmParametersConfigService ccmParametersConfigService;
 
+    @Mock
+    private LdapAgentConfigProvider ldapAgentConfigProvider;
+
     @InjectMocks
     private SaltConfigProvider underTest;
 
     @Test
-    public void testGetSaltConfig() throws Exception {
+    public void testGetSaltConfig() {
         Stack stack = mock(Stack.class);
         when(stack.getCcmParameters()).thenReturn(new CcmConnectivityParameters(new DefaultCcmV2JumpgateParameters()));
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         FreeIpaConfigView freeIpaConfigView = mock(FreeIpaConfigView.class);
+        when(freeIpaConfigView.getDomain()).thenReturn(DOMAIN);
         Map freeIpaConfigViewMap = mock(Map.class);
         when(freeIpaConfigService.createFreeIpaConfigs(any(), any())).thenReturn(freeIpaConfigView);
         when(stack.getCloudPlatform()).thenReturn(CLOUD_PLATFORM);
@@ -76,6 +83,8 @@ class SaltConfigProviderTest {
         when(tagConfigService.createTagsPillarConfig(any())).thenReturn(Map.of());
         when(ccmParametersConfigService.createCcmParametersPillarConfig(eq(ENV_CRN), any())).thenReturn(
                 Map.of(PILLAR, new SaltPillarProperties(PILLARPATH, Map.of(PILLARKEY, PILLARVALUE))));
+        when(ldapAgentConfigProvider.generateConfig(DOMAIN)).thenReturn(Map.of("ldap", new SaltPillarProperties("ldappath", Map.of())));
+
         SaltConfig saltConfig = underTest.getSaltConfig(stack, Set.of());
 
         Map<String, SaltPillarProperties> servicePillarConfig = saltConfig.getServicePillarConfig();
@@ -95,5 +104,8 @@ class SaltConfigProviderTest {
         assertNotNull(pillarProperties);
         assertEquals(PILLARPATH, pillarProperties.getPath());
         assertEquals(PILLARVALUE, pillarProperties.getProperties().get(PILLARKEY));
+
+        SaltPillarProperties ldapProperties = servicePillarConfig.get("ldap");
+        assertEquals("ldappath", ldapProperties.getPath());
     }
 }
