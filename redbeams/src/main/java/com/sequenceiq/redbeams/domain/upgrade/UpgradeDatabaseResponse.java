@@ -16,6 +16,18 @@ public class UpgradeDatabaseResponse {
     public UpgradeDatabaseResponse() {
     }
 
+    public UpgradeDatabaseResponse(MajorVersion currentVersion) {
+        this(null, null, currentVersion);
+    }
+
+    public UpgradeDatabaseResponse(String reason, MajorVersion currentVersion) {
+        this(reason, null, currentVersion);
+    }
+
+    public UpgradeDatabaseResponse(FlowIdentifier flowIdentifier, MajorVersion currentVersion) {
+        this(null, flowIdentifier, currentVersion);
+    }
+
     public UpgradeDatabaseResponse(String reason, FlowIdentifier flowIdentifier, MajorVersion currentVersion) {
         this.reason = reason;
         this.flowIdentifier = flowIdentifier;

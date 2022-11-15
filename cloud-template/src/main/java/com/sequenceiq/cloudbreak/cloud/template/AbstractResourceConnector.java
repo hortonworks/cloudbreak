@@ -130,6 +130,11 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     }
 
     @Override
+    public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier,
+            TargetMajorVersion targetMajorVersion) {
+    }
+
+    @Override
     public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion) throws Exception {
         databaseServerUpgradeService.upgrade(authenticatedContext, stack, persistenceNotifier, targetMajorVersion);
