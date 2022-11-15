@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.util;
 
 import static com.sequenceiq.cloudbreak.common.database.DatabaseCommon.POSTGRES_VERSION_REGEX;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -18,10 +19,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
@@ -52,12 +51,9 @@ public class DatabaseCommonTest {
 
     private static final String POSTGRES_URL_WITH_HYPHENATED_DATABASE_NAME = POSTGRES_URL_WITHOUT_DATABASE + "hive-db-";
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     private DatabaseCommon databaseCommon;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         databaseCommon = new DatabaseCommon();
     }
@@ -65,130 +61,135 @@ public class DatabaseCommonTest {
     @Test
     public void testMariadbParsing() {
         JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(MARIADB_URL);
-        assertThat(fields.getVendorDriverId()).isEqualTo("mariadb");
-        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
-        assertThat(fields.getPort()).isEqualTo(3306);
-        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:3306");
-        assertThat(fields.getDatabase()).isEqualTo(Optional.of("hivedb"));
+        assertEquals(fields.getVendorDriverId(), "mariadb");
+        assertEquals(fields.getHost(), "test.eu-west-1.rds.amazonaws.com");
+        assertEquals(fields.getPort(), 3306);
+        assertEquals(fields.getHostAndPort(), "test.eu-west-1.rds.amazonaws.com:3306");
+        assertEquals(fields.getDatabase(), Optional.of("hivedb"));
     }
 
     @Test
     public void testMysqlParsing() {
         JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(MYSQL_URL);
-        assertThat(fields.getVendorDriverId()).isEqualTo("mysql");
-        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
-        assertThat(fields.getPort()).isEqualTo(3306);
-        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:3306");
-        assertThat(fields.getDatabase()).isEqualTo(Optional.of("hivedb"));
+        assertEquals(fields.getVendorDriverId(), "mysql");
+        assertEquals(fields.getHost(), "test.eu-west-1.rds.amazonaws.com");
+        assertEquals(fields.getPort(), 3306);
+        assertEquals(fields.getHostAndPort(), "test.eu-west-1.rds.amazonaws.com:3306");
+        assertEquals(fields.getDatabase(), Optional.of("hivedb"));
     }
 
     @Test
     public void testMysqlNoDatabaseParsing() {
         JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(MYSQL_URL_WITHOUT_DATABASE_AND_SSL);
-        assertThat(fields.getVendorDriverId()).isEqualTo("mysql");
-        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
-        assertThat(fields.getPort()).isEqualTo(3306);
-        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:3306");
-        assertThat(fields.getDatabase().isPresent()).isFalse();
+        assertEquals(fields.getVendorDriverId(), "mysql");
+        assertEquals(fields.getHost(), "test.eu-west-1.rds.amazonaws.com");
+        assertEquals(fields.getPort(), 3306);
+        assertEquals(fields.getHostAndPort(), "test.eu-west-1.rds.amazonaws.com:3306");
+        assertFalse(fields.getDatabase().isPresent());
     }
 
     @Test
     public void testOracleParsing() {
         JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(ORACLE_URL);
-        assertThat(fields.getVendorDriverId()).isEqualTo("oracle");
-        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
-        assertThat(fields.getPort()).isEqualTo(1521);
-        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:1521");
-        assertThat(fields.getDatabase()).isEqualTo(Optional.of("hivedb"));
+        assertEquals(fields.getVendorDriverId(), "oracle");
+        assertEquals(fields.getHost(), "test.eu-west-1.rds.amazonaws.com");
+        assertEquals(fields.getPort(), 1521);
+        assertEquals(fields.getHostAndPort(), "test.eu-west-1.rds.amazonaws.com:1521");
+        assertEquals(fields.getDatabase(), Optional.of("hivedb"));
     }
 
     @Test
     public void testOracleThinParsing() {
         JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(ORACLE_THIN_URL);
-        assertThat(fields.getVendorDriverId()).isEqualTo("oracle");
-        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
-        assertThat(fields.getPort()).isEqualTo(1521);
-        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:1521");
-        assertThat(fields.getDatabase()).isEqualTo(Optional.of("hivedb"));
+        assertEquals(fields.getVendorDriverId(), "oracle");
+        assertEquals(fields.getHost(), "test.eu-west-1.rds.amazonaws.com");
+        assertEquals(fields.getPort(), 1521);
+        assertEquals(fields.getHostAndPort(), "test.eu-west-1.rds.amazonaws.com:1521");
+        assertEquals(fields.getDatabase(), Optional.of("hivedb"));
     }
 
     @Test
     public void testOracleThinNoDatabaseParsing() {
         JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(ORACLE_THIN_URL_WITHOUT_DATABASE);
-        assertThat(fields.getVendorDriverId()).isEqualTo("oracle");
-        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
-        assertThat(fields.getPort()).isEqualTo(1521);
-        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:1521");
-        assertThat(fields.getDatabase().isPresent()).isFalse();
+        assertEquals(fields.getVendorDriverId(), "oracle");
+        assertEquals(fields.getHost(), "test.eu-west-1.rds.amazonaws.com");
+        assertEquals(fields.getPort(), 1521);
+        assertEquals(fields.getHostAndPort(), "test.eu-west-1.rds.amazonaws.com:1521");
+        assertFalse(fields.getDatabase().isPresent());
     }
 
     @Test
     public void testPostgresParsing() {
         JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(POSTGRES_URL);
-        assertThat(fields.getVendorDriverId()).isEqualTo("postgresql");
-        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
-        assertThat(fields.getPort()).isEqualTo(5432);
-        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:5432");
-        assertThat(fields.getDatabase()).isEqualTo(Optional.of("hivedb"));
+        assertEquals(fields.getVendorDriverId(), "postgresql");
+        assertEquals(fields.getHost(), "test.eu-west-1.rds.amazonaws.com");
+        assertEquals(fields.getPort(), 5432);
+        assertEquals(fields.getHostAndPort(), "test.eu-west-1.rds.amazonaws.com:5432");
+        assertEquals(fields.getDatabase(), Optional.of("hivedb"));
     }
 
     @Test
     public void testPostgresNoDatabaseParsing() {
-        thrown.expect(IllegalArgumentException.class);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            databaseCommon.parseJdbcConnectionUrl(POSTGRES_URL_WITHOUT_DATABASE);
+        });
 
-        databaseCommon.parseJdbcConnectionUrl(POSTGRES_URL_WITHOUT_DATABASE);
+        assertEquals("PostgreSQL connection URLs require a database", exception.getMessage());
     }
 
     @Test
     public void testPostgresHyphenatedDatabaseParsing() {
         JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(POSTGRES_URL_WITH_HYPHENATED_DATABASE_NAME);
-        assertThat(fields.getVendorDriverId()).isEqualTo("postgresql");
-        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
-        assertThat(fields.getPort()).isEqualTo(5432);
-        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:5432");
-        assertThat(fields.getDatabase()).isEqualTo(Optional.of("hive-db-"));
+        assertEquals(fields.getVendorDriverId(), "postgresql");
+        assertEquals(fields.getHost(), "test.eu-west-1.rds.amazonaws.com");
+        assertEquals(fields.getPort(), 5432);
+        assertEquals(fields.getHostAndPort(), "test.eu-west-1.rds.amazonaws.com:5432");
+        assertEquals(fields.getDatabase(), Optional.of("hive-db-"));
     }
 
     @Test
     public void testPostgresConnectionUrlWithoutDatabase() {
         String url = databaseCommon.getJdbcConnectionUrl("postgresql", "test.eu-west-1.rds.amazonaws.com", 5432, Optional.empty());
-        assertThat(url).isEqualTo(POSTGRES_URL_WITH_POSTGRES_DATABASE);
+        assertEquals(url, POSTGRES_URL_WITH_POSTGRES_DATABASE);
     }
 
     @Test
     public void testPostgresConnectionUrlWithDatabase() {
         String url = databaseCommon.getJdbcConnectionUrl("postgresql", "test.eu-west-1.rds.amazonaws.com", 5432, Optional.of("hivedb"));
-        assertThat(url).isEqualTo(POSTGRES_URL);
+        assertEquals(url, POSTGRES_URL);
     }
 
     @Test
     public void testMySQLConnectionUrlWithoutDatabase() {
         String url = databaseCommon.getJdbcConnectionUrl("mysql", "test.eu-west-1.rds.amazonaws.com", 3306, Optional.empty());
-        assertThat(url).isEqualTo(MYSQL_URL_WITHOUT_DATABASE_AND_SSL);
+        assertEquals(url, MYSQL_URL_WITHOUT_DATABASE_AND_SSL);
     }
 
     @Test
     public void testMySQLConnectionUrlWithDatabase() {
         String url = databaseCommon.getJdbcConnectionUrl("mysql", "test.eu-west-1.rds.amazonaws.com", 3306, Optional.of("hivedb"));
-        assertThat(url).isEqualTo(MYSQL_URL_WITHOUT_SSL);
+        assertEquals(url, MYSQL_URL_WITHOUT_SSL);
     }
 
     @Test
     public void testOracleConnectionUrlWithoutDatabase() {
         String url = databaseCommon.getJdbcConnectionUrl("oracle", "test.eu-west-1.rds.amazonaws.com", 1521, Optional.empty());
-        assertThat(url).isEqualTo(ORACLE_THIN_URL_WITHOUT_DATABASE);
+        assertEquals(url, ORACLE_THIN_URL_WITHOUT_DATABASE);
     }
 
     @Test
     public void testOracleConnectionUrlWithDatabase() {
         String url = databaseCommon.getJdbcConnectionUrl("oracle", "test.eu-west-1.rds.amazonaws.com", 1521, Optional.of("hivedb"));
-        assertThat(url).isEqualTo(ORACLE_THIN_URL);
+        assertEquals(url, ORACLE_THIN_URL);
     }
 
     @Test
     public void testPortCheck() {
-        thrown.expect(IllegalArgumentException.class);
-        new JdbcConnectionUrlFields("postgresql", "test.eu-west-1.rds.amazonaws.com", -1, Optional.empty());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            new JdbcConnectionUrlFields("postgresql", "test.eu-west-1.rds.amazonaws.com", -1, Optional.empty());
+        });
+
+        assertEquals("invalid port -1", exception.getMessage());
     }
 
     @Test
@@ -201,7 +202,7 @@ public class DatabaseCommonTest {
 
         List<Integer> rowCounts = databaseCommon.executeUpdates(conn, sqlStrings, false);
 
-        assertThat(rowCounts).isEqualTo(List.of(1, 1));
+        assertEquals(rowCounts, List.of(1, 1));
         verify(statement).executeUpdate("sql1");
         verify(statement).executeUpdate("sql2");
         verify(conn, never()).setAutoCommit(false);
@@ -218,7 +219,7 @@ public class DatabaseCommonTest {
 
         List<Integer> rowCounts = databaseCommon.executeUpdates(conn, sqlStrings, true);
 
-        assertThat(rowCounts).isEqualTo(List.of(1, 1));
+        assertEquals(rowCounts, List.of(1, 1));
         verify(statement).executeUpdate("sql1");
         verify(statement).executeUpdate("sql2");
 
@@ -231,57 +232,64 @@ public class DatabaseCommonTest {
 
     @Test
     public void testExecuteUpdatesFailNoTransaction() throws SQLException {
-        thrown.expect(SQLException.class);
         Connection conn = mock(Connection.class);
         Statement statement = mock(Statement.class);
         when(conn.createStatement()).thenReturn(statement);
         when(statement.executeUpdate("sql1")).thenThrow(new SQLException("fail"));
         List<String> sqlStrings = List.of("sql1", "sql2");
 
-        try {
-            databaseCommon.executeUpdates(conn, sqlStrings, false);
-        } finally {
-            verify(statement).executeUpdate("sql1");
-            verify(statement, never()).executeUpdate("sql2");
-            verify(conn, never()).rollback();
-        }
+
+        SQLException exception = assertThrows(SQLException.class, () -> {
+            try {
+                databaseCommon.executeUpdates(conn, sqlStrings, false);
+            } finally {
+                verify(statement).executeUpdate("sql1");
+                verify(statement, never()).executeUpdate("sql2");
+                verify(conn, never()).rollback();
+            }
+        });
+
+        assertEquals("fail", exception.getMessage());
     }
 
     @Test
     public void testExecuteUpdatesFailTransaction() throws SQLException {
-        thrown.expect(SQLException.class);
         Connection conn = mock(Connection.class);
         Statement statement = mock(Statement.class);
         when(conn.createStatement()).thenReturn(statement);
         when(statement.executeUpdate("sql1")).thenThrow(new SQLException("fail"));
         List<String> sqlStrings = List.of("sql1", "sql2");
 
-        try {
-            databaseCommon.executeUpdates(conn, sqlStrings, true);
-        } finally {
-            verify(statement).executeUpdate("sql1");
-            verify(statement, never()).executeUpdate("sql2");
+        SQLException exception = assertThrows(SQLException.class, () -> {
+            try {
+                databaseCommon.executeUpdates(conn, sqlStrings, true);
+            } finally {
+                verify(statement).executeUpdate("sql1");
+                verify(statement, never()).executeUpdate("sql2");
 
-            InOrder inOrder = inOrder(conn);
-            inOrder.verify(conn).setAutoCommit(false);
-            inOrder.verify(conn).rollback();
-            inOrder.verify(conn, never()).commit();
-            inOrder.verify(conn).setAutoCommit(true);
-        }
+                InOrder inOrder = inOrder(conn);
+                inOrder.verify(conn).setAutoCommit(false);
+                inOrder.verify(conn).rollback();
+                inOrder.verify(conn, never()).commit();
+                inOrder.verify(conn).setAutoCommit(true);
+            }
+        });
+
+        assertEquals("fail", exception.getMessage());
     }
 
     @Test
     public void testDbMajorVersionRegexp() {
         Pattern dbVersionPattern = Pattern.compile(POSTGRES_VERSION_REGEX);
-        assertFalse("empty string", dbVersionPattern.matcher("").matches());
-        assertFalse("not a version", dbVersionPattern.matcher("null").matches());
-        assertTrue("valid version: 9.6", dbVersionPattern.matcher("9.6").matches());
-        assertTrue("valid version: 10", dbVersionPattern.matcher("10").matches());
-        assertTrue("valid version: 11", dbVersionPattern.matcher("11").matches());
-        assertTrue("valid version: 12", dbVersionPattern.matcher("12").matches());
-        assertTrue("valid version: 13", dbVersionPattern.matcher("13").matches());
-        assertTrue("valid version: 14", dbVersionPattern.matcher("14").matches());
-        assertFalse("not a valid version", dbVersionPattern.matcher("141").matches());
-        assertFalse("valid version twice", dbVersionPattern.matcher("1111").matches());
+        assertFalse(dbVersionPattern.matcher("").matches(), "empty string");
+        assertFalse(dbVersionPattern.matcher("null").matches(), "not a version");
+        assertTrue(dbVersionPattern.matcher("9.6").matches(), "valid version: 9.6");
+        assertTrue(dbVersionPattern.matcher("10").matches(), "valid version: 10");
+        assertTrue(dbVersionPattern.matcher("11").matches(), "valid version: 11");
+        assertTrue(dbVersionPattern.matcher("12").matches(), "valid version: 12");
+        assertTrue(dbVersionPattern.matcher("13").matches(), "valid version: 13");
+        assertTrue(dbVersionPattern.matcher("14").matches(), "valid version: 14");
+        assertFalse(dbVersionPattern.matcher("141").matches(), "not a valid version");
+        assertFalse(dbVersionPattern.matcher("1111").matches(), "valid version twice");
     }
 }

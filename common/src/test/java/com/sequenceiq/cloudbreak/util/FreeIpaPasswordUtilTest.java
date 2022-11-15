@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class FreeIpaPasswordUtilTest {
 
@@ -12,7 +13,7 @@ public class FreeIpaPasswordUtilTest {
     @Test
     public void testGeneratePasswordShouldCreatePwdWithCorrectSize() {
         String actual = FreeIpaPasswordUtil.generatePassword();
-        Assert.assertEquals(32, actual.length());
+        assertEquals(32, actual.length());
     }
 
     @Test
@@ -20,7 +21,7 @@ public class FreeIpaPasswordUtilTest {
         String actual = FreeIpaPasswordUtil.generatePassword();
         long characterClasses = PATTERNS.stream().filter(actual::matches).count();
 
-        Assert.assertEquals(4, characterClasses);
+        assertEquals(4, characterClasses);
     }
 
 }

@@ -1,22 +1,22 @@
 package com.sequenceiq.cloudbreak.auth.security;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CrnUserDetailsServiceTest {
 
     private String userCrn = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:f3b8ed82-e712-4f89-bda7-be07183720d3";
@@ -29,7 +29,7 @@ public class CrnUserDetailsServiceTest {
 
     private CrnUserDetailsService underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         underTest = new CrnUserDetailsService(mockedUmsClient, regionAwareInternalCrnGeneratorFactory);
     }

@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.telemetry.metering;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentUpgradeConfiguration;
@@ -22,7 +22,7 @@ public class MeteringConfigServiceTest {
 
     private MeteringConfigService underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "app", "stream", false);
         TelemetryComponentUpgradeConfiguration meteringAgentConfig = new TelemetryComponentUpgradeConfiguration();
