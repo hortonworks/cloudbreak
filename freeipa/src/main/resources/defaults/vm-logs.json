@@ -104,6 +104,10 @@
     "label": "ipahealthagent"
   },
   {
+    "path": "/cdp/ipaldapagent/ipaldapagent.log",
+    "label": "ipaldapagent"
+  },
+  {
     "path": "/var/log/freeipa-healthagent-getcert.log",
     "label": "freeipa-healthagent-getcert"
   },

@@ -31,6 +31,7 @@ base:
              - freeipa.healthagent
              - nodestatus
              - freeipa.patch-pki-tomcat
+             - freeipa.ldapagent
 
            'roles:freeipa_replica':
              - match: grain
@@ -40,6 +41,7 @@ base:
              - freeipa.healthagent
              - nodestatus
              - freeipa.patch-pki-tomcat
+             - freeipa.ldapagent
 
            'roles:freeipa_primary_replacement':
              - match: grain
@@ -50,6 +52,7 @@ base:
              - freeipa.healthagent
              - nodestatus
              - freeipa.patch-pki-tomcat
+             - freeipa.ldapagent
 
            'recipes:post-cluster-install':
              - match: grain
