@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.DATABASE_PRIVATE_DNS_ZONE_ID;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.NETWORK_ID;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.NO_PUBLIC_IP;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.ArrayList;
@@ -69,15 +73,8 @@ import rx.schedulers.Schedulers;
 
 @Component
 public class AzureUtils {
-    public static final String RG_NAME = "resourceGroupName";
-
-    public static final String NETWORK_ID = "networkId";
-
-    public static final String DATABASE_PRIVATE_DS_ZONE_ID = "databasePrivateDsZoneId";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureUtils.class);
-
-    private static final String NO_PUBLIC_IP = "noPublicIp";
 
     private static final int HOST_GROUP_LENGTH = 3;
 
@@ -208,11 +205,11 @@ public class AzureUtils {
     }
 
     public String getPrivateDnsZoneId(Network network) {
-        return network.getStringParameter(DATABASE_PRIVATE_DS_ZONE_ID);
+        return network.getStringParameter(DATABASE_PRIVATE_DNS_ZONE_ID);
     }
 
     public String getCustomResourceGroupName(Network network) {
-        return network.getStringParameter(RG_NAME);
+        return network.getStringParameter(RESOURCE_GROUP_NAME);
     }
 
     public List<String> getCustomSubnetIds(Network network) {

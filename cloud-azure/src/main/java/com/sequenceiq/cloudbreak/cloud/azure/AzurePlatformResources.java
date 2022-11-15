@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.EPHEMERAL;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.SSD;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.NETWORK_ID;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -111,8 +113,8 @@ public class AzurePlatformResources implements PlatformResources {
     public CloudNetworks networks(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
-        String networkId = filters.get("networkId");
-        String resourceGroupName = filters.get("resourceGroupName");
+        String networkId = filters.get(NETWORK_ID);
+        String resourceGroupName = filters.get(RESOURCE_GROUP_NAME);
         if (!StringUtils.isEmpty(networkId) && !StringUtils.isEmpty(resourceGroupName)) {
             LOGGER.info("Query network with id '{}' and resource group {}", networkId, resourceGroupName);
             Network network = client.getNetworkByResourceGroup(resourceGroupName, networkId);

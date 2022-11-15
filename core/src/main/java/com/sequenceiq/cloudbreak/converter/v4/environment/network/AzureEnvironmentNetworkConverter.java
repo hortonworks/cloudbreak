@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.converter.v4.environment.network;
 
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.DATABASE_PRIVATE_DNS_ZONE_ID;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.NETWORK_ID;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.NO_PUBLIC_IP;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
+
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -22,10 +27,10 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     Map<String, Object> getAttributesForLegacyNetwork(EnvironmentNetworkResponse source) {
         EnvironmentNetworkAzureParams azure = source.getAzure();
         return Map.of(
-                "networkId", azure.getNetworkId(),
-                "resourceGroupName", azure.getResourceGroupName(),
-                "noPublicIp", azure.getNoPublicIp(),
-                "databasePrivateDsZoneId", getDatabasePrivateDnsZoneId(azure)
+                NETWORK_ID, azure.getNetworkId(),
+                RESOURCE_GROUP_NAME, azure.getResourceGroupName(),
+                NO_PUBLIC_IP, azure.getNoPublicIp(),
+                DATABASE_PRIVATE_DNS_ZONE_ID, getDatabasePrivateDnsZoneId(azure)
         );
     }
 

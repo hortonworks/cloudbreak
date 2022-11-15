@@ -1,5 +1,10 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network;
 
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.NETWORK_ID;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.NO_PUBLIC_IP;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.SUBNET_ID;
+
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -63,10 +68,10 @@ public class AzureNetworkParameters extends MappableBase {
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        putIfValueNotNull(map, "noPublicIp", noPublicIp);
-        putIfValueNotNull(map, "resourceGroupName", resourceGroupName);
-        putIfValueNotNull(map, "networkId", networkId);
-        putIfValueNotNull(map, "subnetId", subnetId);
+        putIfValueNotNull(map, NO_PUBLIC_IP, noPublicIp);
+        putIfValueNotNull(map, RESOURCE_GROUP_NAME, resourceGroupName);
+        putIfValueNotNull(map, NETWORK_ID, networkId);
+        putIfValueNotNull(map, SUBNET_ID, subnetId);
         return map;
     }
 
@@ -79,10 +84,10 @@ public class AzureNetworkParameters extends MappableBase {
 
     @Override
     public void parse(Map<String, Object> parameters) {
-        noPublicIp = getBoolean(parameters, "noPublicIp");
-        resourceGroupName = getParameterOrNull(parameters, "resourceGroupName");
-        networkId = getParameterOrNull(parameters, "networkId");
-        subnetId = getParameterOrNull(parameters, "subnetId");
+        noPublicIp = getBoolean(parameters, NO_PUBLIC_IP);
+        resourceGroupName = getParameterOrNull(parameters, RESOURCE_GROUP_NAME);
+        networkId = getParameterOrNull(parameters, NETWORK_ID);
+        subnetId = getParameterOrNull(parameters, SUBNET_ID);
     }
 
     @Override

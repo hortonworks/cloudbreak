@@ -19,7 +19,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
@@ -78,6 +77,10 @@ class AzureEnvironmentNetworkConverterTest {
     private static final String SUBNET_CIDR_2 = "2.2.2.2/24";
 
     private static final String RESOURCE_GROUP_NAME = "resourceGroup";
+
+    private static final String RESOURCE_GROUP_NAME_KEY = "resourceGroupName";
+
+    private static final String NETWORK_ID_KEY = "networkId";
 
     @Mock
     private EnvironmentViewConverter environmentViewConverter;
@@ -227,8 +230,8 @@ class AzureEnvironmentNetworkConverterTest {
 
         Network network = underTest.convertToNetwork(azureNetwork);
 
-        assertEquals(RESOURCE_GROUP_NAME, network.getStringParameter(AzureUtils.RG_NAME));
-        assertEquals(NETWORK_ID, network.getStringParameter(AzureUtils.NETWORK_ID));
+        assertEquals(RESOURCE_GROUP_NAME, network.getStringParameter(RESOURCE_GROUP_NAME_KEY));
+        assertEquals(NETWORK_ID, network.getStringParameter(NETWORK_ID_KEY));
     }
 
     private Set<CreatedSubnet> createCreatedSubnets() {
