@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.environment.network;
 
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.CLOUD_PLATFORM;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,6 +28,20 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentN
 @MockitoSettings
 class AzureEnvironmentNetworkConverterTest {
 
+    private static final String DATABASE_PRIVATE_DNS_ZONE_ID = "my_database_private_dns_zone_id";
+
+    private static final String DATABASE_PRIVATE_DNS_ZONE_ID_KEY = "databasePrivateDsZoneId";
+
+    private static final String NETWORK_ID = "my_network_id";
+
+    private static final String NETWORK_ID_KEY = "networkId";
+
+    private static final String RESOURCE_GROUP_NAME = "my_resource_group";
+
+    private static final String RESOURCE_GROUP_NAME_KEY = "resourceGroupName";
+
+    private static final String NO_PUBLIC_IP_KEY = "noPublicIp";
+
     @Mock
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
@@ -47,8 +62,8 @@ class AzureEnvironmentNetworkConverterTest {
         when(cloudSubnet.getId()).thenReturn("my_cloud_subnet");
 
         when(environmentNetworkResponse.getAzure()).thenReturn(azure);
-        when(azure.getNetworkId()).thenReturn("my_network_id");
-        when(azure.getResourceGroupName()).thenReturn("my_resource_group");
+        when(azure.getNetworkId()).thenReturn(NETWORK_ID);
+        when(azure.getResourceGroupName()).thenReturn(RESOURCE_GROUP_NAME);
         when(azure.getNoPublicIp()).thenReturn(true);
 
         Network result = converter.convertToLegacyNetwork(environmentNetworkResponse, "my-az");
@@ -62,15 +77,18 @@ class AzureEnvironmentNetworkConverterTest {
         EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
         EnvironmentNetworkAzureParams azure = mock(EnvironmentNetworkAzureParams.class);
         when(environmentNetworkResponse.getAzure()).thenReturn(azure);
-        when(azure.getNetworkId()).thenReturn("my_network_id");
-        when(azure.getResourceGroupName()).thenReturn("my_resource_group");
+        when(azure.getNetworkId()).thenReturn(NETWORK_ID);
+        when(azure.getResourceGroupName()).thenReturn(RESOURCE_GROUP_NAME);
         when(azure.getNoPublicIp()).thenReturn(true);
+        when(azure.getDatabasePrivateDnsZoneId()).thenReturn(DATABASE_PRIVATE_DNS_ZONE_ID);
 
         Map<String, Object> result = converter.getAttributesForLegacyNetwork(environmentNetworkResponse);
 
-        assertEquals("my_network_id", result.get("networkId"));
-        assertEquals("my_resource_group", result.get("resourceGroupName"));
-        assertEquals(true, result.get("noPublicIp"));
+        assertThat(result).hasSize(4);
+        assertEquals(NETWORK_ID, result.get(NETWORK_ID_KEY));
+        assertEquals(RESOURCE_GROUP_NAME, result.get(RESOURCE_GROUP_NAME_KEY));
+        assertEquals(true, result.get(NO_PUBLIC_IP_KEY));
+        assertEquals(DATABASE_PRIVATE_DNS_ZONE_ID, result.get(DATABASE_PRIVATE_DNS_ZONE_ID_KEY));
     }
 
     @Test

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -286,7 +288,7 @@ public class AzureNetworkConnector implements NetworkConnector {
 
     private Map<String, Object> createProperties(String resourceGroupName, String stackName) {
         Map<String, Object> properties = new HashMap<>();
-        properties.put("resourceGroupName", resourceGroupName);
+        properties.put(RESOURCE_GROUP_NAME, resourceGroupName);
         properties.put("stackName", stackName);
         return properties;
     }

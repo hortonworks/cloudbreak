@@ -94,6 +94,8 @@ public class AzureNetworkConnectorTest {
 
     private static final String NETWORK_ID = "networkId";
 
+    private static final String NETWORK_ID_KEY = "networkId";
+
     private static final String NETWORK_RG = "networkRg";
 
     @InjectMocks
@@ -309,7 +311,7 @@ public class AzureNetworkConnectorTest {
         String resourceGroupName = "resourceGroupName";
         String cidrBlock = "10.0.0.0/16";
 
-        Network network = new Network(null, Map.of(AzureUtils.NETWORK_ID, networkId));
+        Network network = new Network(null, Map.of(NETWORK_ID_KEY, networkId));
         CloudCredential credential = new CloudCredential();
         com.microsoft.azure.management.network.Network azureNetwork = mock(com.microsoft.azure.management.network.Network.class);
 
@@ -328,7 +330,7 @@ public class AzureNetworkConnectorTest {
         String networkId = "vnet-1";
         String resourceGroupName = "resourceGroupName";
 
-        Network network = new Network(null, Map.of(AzureUtils.NETWORK_ID, networkId));
+        Network network = new Network(null, Map.of(NETWORK_ID_KEY, networkId));
         CloudCredential credential = new CloudCredential();
         com.microsoft.azure.management.network.Network azureNetwork = mock(com.microsoft.azure.management.network.Network.class);
 
@@ -354,7 +356,7 @@ public class AzureNetworkConnectorTest {
         String cidrBlock1 = "10.0.0.0/16";
         String cidrBlock2 = "10.23.0.0/16";
 
-        Network network = new Network(null, Map.of(AzureUtils.NETWORK_ID, networkId));
+        Network network = new Network(null, Map.of(NETWORK_ID_KEY, networkId));
         CloudCredential credential = new CloudCredential();
         com.microsoft.azure.management.network.Network azureNetwork = mock(com.microsoft.azure.management.network.Network.class);
 
@@ -373,7 +375,7 @@ public class AzureNetworkConnectorTest {
         String networkId = "vnet-1";
         String resourceGroupName = "resourceGroupName";
 
-        Network network = new Network(null, Map.of(AzureUtils.NETWORK_ID, networkId));
+        Network network = new Network(null, Map.of(NETWORK_ID_KEY, networkId));
         CloudCredential credential = new CloudCredential();
 
         when(azureClientService.getClient(credential)).thenReturn(azureClient);

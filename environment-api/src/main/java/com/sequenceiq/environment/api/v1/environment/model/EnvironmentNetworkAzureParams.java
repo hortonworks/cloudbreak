@@ -28,6 +28,10 @@ public class EnvironmentNetworkAzureParams {
     @ApiModelProperty(value = EnvironmentModelDescription.AZURE_PRIVATE_DNS_ZONE_ID)
     private String databasePrivateDnsZoneId;
 
+    @Size(max = 255)
+    @ApiModelProperty(value = EnvironmentModelDescription.AZURE_AKS_PRIVATE_DNS_ZONE_ID)
+    private String aksPrivateDnsZoneId;
+
     @NotNull
     @ApiModelProperty(EnvironmentModelDescription.AZURE_NO_PUBLIC_IP)
     private Boolean noPublicIp;
@@ -64,12 +68,21 @@ public class EnvironmentNetworkAzureParams {
         this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
     }
 
+    public String getAksPrivateDnsZoneId() {
+        return aksPrivateDnsZoneId;
+    }
+
+    public void setAksPrivateDnsZoneId(String aksPrivateDnsZoneId) {
+        this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentNetworkAzureParams{" +
                 "networkId='" + networkId + '\'' +
                 ", resourceGroupName='" + resourceGroupName + '\'' +
                 ", databasePrivateDnsZoneId='" + databasePrivateDnsZoneId + '\'' +
+                ", aksPrivateDnsZoneId='" + aksPrivateDnsZoneId + '\'' +
                 ", noPublicIp=" + noPublicIp +
                 '}';
     }
@@ -82,6 +95,8 @@ public class EnvironmentNetworkAzureParams {
         private Boolean noPublicIp;
 
         private String databasePrivateDnsZoneId;
+
+        private String aksPrivateDnsZoneId;
 
         private EnvironmentNetworkAzureParamsBuilder() {
         }
@@ -110,12 +125,18 @@ public class EnvironmentNetworkAzureParams {
             return this;
         }
 
+        public EnvironmentNetworkAzureParamsBuilder withAksPrivateDnsZoneId(String aksPrivateDnsZoneId) {
+            this.aksPrivateDnsZoneId = aksPrivateDnsZoneId;
+            return this;
+        }
+
         public EnvironmentNetworkAzureParams build() {
             EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
             environmentNetworkAzureParams.setNetworkId(networkId);
             environmentNetworkAzureParams.setResourceGroupName(resourceGroupName);
             environmentNetworkAzureParams.setNoPublicIp(noPublicIp);
             environmentNetworkAzureParams.setDatabasePrivateDnsZoneId(databasePrivateDnsZoneId);
+            environmentNetworkAzureParams.setAksPrivateDnsZoneId(aksPrivateDnsZoneId);
             return environmentNetworkAzureParams;
         }
     }

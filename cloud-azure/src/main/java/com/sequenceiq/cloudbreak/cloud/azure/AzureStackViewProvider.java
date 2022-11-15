@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy.SubnetStratgyType.FILL;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.NETWORK_ID;
+import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_NAME;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -78,8 +80,8 @@ class AzureStackViewProvider {
 
     private Map<String, Long> getNumberOfAvailableIPsInSubnets(AzureClient client, Network network) {
         Map<String, Long> result = new HashMap<>();
-        String resourceGroup = network.getStringParameter("resourceGroupName");
-        String networkId = network.getStringParameter("networkId");
+        String resourceGroup = network.getStringParameter(RESOURCE_GROUP_NAME);
+        String networkId = network.getStringParameter(NETWORK_ID);
         Collection<String> subnetIds = azureUtils.getCustomSubnetIds(network);
         for (String subnetId : subnetIds) {
             Subnet subnet = client.getSubnetProperties(resourceGroup, networkId, subnetId);
