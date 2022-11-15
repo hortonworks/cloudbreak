@@ -8,18 +8,18 @@ import static org.mockito.Mockito.verify;
 
 import java.lang.annotation.Annotation;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.AccountAuthorizationService;
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AccountAuthorizationServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:5678";

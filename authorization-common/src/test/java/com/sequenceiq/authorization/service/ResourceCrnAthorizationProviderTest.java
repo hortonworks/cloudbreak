@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
@@ -25,7 +25,7 @@ import com.sequenceiq.authorization.service.model.HasRight;
 import com.sequenceiq.authorization.service.model.HasRightOnAny;
 import com.sequenceiq.authorization.utils.CrnAccountValidator;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ResourceCrnAthorizationProviderTest {
 
     private static final AuthorizationResourceAction ACTION = AuthorizationResourceAction.DELETE_DATAHUB;
@@ -51,7 +51,7 @@ public class ResourceCrnAthorizationProviderTest {
     @InjectMocks
     private ResourceCrnAthorizationFactory underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), eq(ResourceCrn.class), eq(String.class)))
                 .thenReturn(RESOURCE_CRN);

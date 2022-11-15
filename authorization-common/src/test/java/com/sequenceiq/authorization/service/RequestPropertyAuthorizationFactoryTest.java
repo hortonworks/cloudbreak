@@ -7,6 +7,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME_LIST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -18,14 +19,12 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Rule;
-import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
@@ -38,7 +37,7 @@ import com.sequenceiq.authorization.service.model.HasRightOnAll;
 import com.sequenceiq.authorization.utils.CrnAccountValidator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RequestPropertyAuthorizationFactoryTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:5678";
@@ -46,9 +45,6 @@ public class RequestPropertyAuthorizationFactoryTest {
     private static final String RESOURCE_CRN = "crn:cdp:credential:us-west-1:1234:credential:5678";
 
     private static final String RESOURCE_NAME = "resource";
-
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
@@ -141,10 +137,11 @@ public class RequestPropertyAuthorizationFactoryTest {
     public void testOnNullWhenRequired() {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new SampleRequestObject());
 
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Property [field] of the request object must not be null.");
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            underTest.getAuthorization(getAnnotation(CRN_LIST, EDIT_CREDENTIAL, false, "field"), USER_CRN, null, null);
+        });
 
-        underTest.getAuthorization(getAnnotation(CRN_LIST, EDIT_CREDENTIAL, false, "field"), USER_CRN, null, null);
+        assertEquals("Property [field] of the request object must not be null.", exception.getMessage());
     }
 
     @Test
@@ -161,24 +158,26 @@ public class RequestPropertyAuthorizationFactoryTest {
     public void testOnNestedNullWhenRequired() {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new SampleRequestObject());
 
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Property [field.field] of the request object must not be null.");
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            underTest.getAuthorization(getAnnotation(CRN_LIST, EDIT_CREDENTIAL, false, "field.field"), USER_CRN, null, null);
+        });
 
-        underTest.getAuthorization(getAnnotation(CRN_LIST, EDIT_CREDENTIAL, false, "field.field"), USER_CRN, null, null);
+        assertEquals("Property [field.field] of the request object must not be null.", exception.getMessage());
     }
 
     @Test
     public void testOnNonStringRequestField() {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new SampleRequestObject(Integer.valueOf(0)));
 
-        thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("Referred property within request object is not string, thus access is denied!");
+        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
+            underTest.getAuthorization(getAnnotation(CRN, EDIT_CREDENTIAL, false, "field"), USER_CRN, null, null);
+        });
 
-        underTest.getAuthorization(getAnnotation(CRN, EDIT_CREDENTIAL, false, "field"), USER_CRN, null, null);
+        assertEquals("Referred property within request object is not string, thus access is denied!", exception.getMessage());
     }
 
     private CheckPermissionByRequestProperty getAnnotation(AuthorizationVariableType type, AuthorizationResourceAction action,
-        Boolean skipOnNull, String path) {
+            Boolean skipOnNull, String path) {
         return new CheckPermissionByRequestProperty() {
 
             @Override

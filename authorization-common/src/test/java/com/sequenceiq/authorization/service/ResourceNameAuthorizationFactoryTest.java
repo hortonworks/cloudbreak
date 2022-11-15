@@ -9,19 +9,19 @@ import java.lang.annotation.Annotation;
 import java.util.Map;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ResourceNameAuthorizationFactoryTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:5678";
@@ -40,7 +40,7 @@ public class ResourceNameAuthorizationFactoryTest {
     @Mock
     private AuthorizationResourceCrnProvider resourceBasedCrnProvider;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IllegalAccessException {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn("resource");
         when(resourceBasedCrnProvider.getResourceCrnByResourceName(any())).thenReturn(RESOURCE_CRN);
