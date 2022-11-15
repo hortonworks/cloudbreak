@@ -1,14 +1,14 @@
 package com.sequenceiq.cloudbreak.telemetry.fluent;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
@@ -42,7 +42,7 @@ public class FluentConfigServiceTest {
 
     private FluentConfigService underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MeteringConfiguration meteringConfiguration =
                 new MeteringConfiguration(false, "dbusApp", "dbusStream", false);

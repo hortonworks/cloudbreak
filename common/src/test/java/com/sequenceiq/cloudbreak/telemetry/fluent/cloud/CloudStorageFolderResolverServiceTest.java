@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.telemetry.fluent.cloud;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
@@ -17,7 +18,7 @@ public class CloudStorageFolderResolverServiceTest {
 
     private CloudStorageFolderResolverService underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         underTest = new CloudStorageFolderResolverService(new S3ConfigGenerator(),
                 new AdlsGen2ConfigGenerator(), new GcsConfigGenerator());
@@ -110,13 +111,16 @@ public class CloudStorageFolderResolverServiceTest {
         assertNull(telemetry);
     }
 
-    @Test(expected = CrnParseException.class)
+    @Test
     public void testUpdateStorageLocationWithInvalidCrn() {
         // GIVEN
         Telemetry telemetry = createTelemetry();
         // WHEN
-        underTest.updateStorageLocation(telemetry, FluentClusterType.DATAHUB.value(), "mycluster",
-                "crn:cdp:cloudbreak:us-west:someone:stack:12345");
+        CrnParseException exception = assertThrows(CrnParseException.class, () -> {
+            underTest.updateStorageLocation(telemetry, FluentClusterType.DATAHUB.value(), "mycluster",
+                    "crn:cdp:cloudbreak:us-west:someone:stack:12345");
+        });
+        assertEquals("us-west is not a valid region value", exception.getMessage());
     }
 
     private Telemetry createTelemetry() {

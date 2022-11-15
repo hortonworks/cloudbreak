@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.telemetry.common;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
@@ -15,7 +15,7 @@ public class AnonymizationRuleResolverTest {
 
     private AnonymizationRuleResolver underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         underTest = new AnonymizationRuleResolver();
     }

@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.telemetry.common;
 import static com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigService.AGENT_LOG_FOLDER_PREFIX;
 import static com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigService.SERVER_LOG_FOLDER_PREFIX;
 import static com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigService.SERVICE_LOG_FOLDER_PREFIX;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 import java.util.ArrayList;
@@ -13,8 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -47,7 +47,7 @@ public class TelemetryCommonConfigServiceTest {
     @Mock
     private AltusDatabusConnectionConfiguration altusDatabusConnectionConfiguration;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         underTest = new TelemetryCommonConfigService(anonymizationRuleResolver, telemetryUpgradeConfiguration,

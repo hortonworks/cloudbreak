@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.quartz;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,7 +32,7 @@ public class EnforceStatusCheckerAnnotationUtil {
         Set<Class<? extends StatusCheckerJob>> statusCheckers = REFLECTIONS.getSubTypesOf(StatusCheckerJob.class);
         Set<Class<? extends StatusCheckerJob>> statusCheckersWithMissingAnnotation =
                 Sets.difference(statusCheckers, annotatedStatusCheckers);
-        assertTrue("These classes are missing @DisallowConcurrentExecution annotation: " + Joiner.on(",").join(statusCheckersWithMissingAnnotation),
-                statusCheckersWithMissingAnnotation.isEmpty());
+        assertTrue(statusCheckersWithMissingAnnotation.isEmpty(),
+                "These classes are missing @DisallowConcurrentExecution annotation: " + Joiner.on(",").join(statusCheckersWithMissingAnnotation));
     }
 }

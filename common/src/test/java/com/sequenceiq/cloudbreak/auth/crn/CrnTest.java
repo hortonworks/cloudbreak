@@ -1,18 +1,14 @@
 package com.sequenceiq.cloudbreak.auth.crn;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 public class CrnTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     private String exampleCrn = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:f3b8ed82-e712-4f89-bda7-be07183720d3";
 
@@ -38,10 +34,7 @@ public class CrnTest {
 
     @Test
     public void testBuilder() {
-        Crn crn = CrnTestUtil.getUserCrnBuilder()
-                .setAccountId("accountId")
-                .setResource("userId")
-                .build();
+        Crn crn = CrnTestUtil.getUserCrnBuilder().setAccountId("accountId").setResource("userId").build();
 
         assertEquals(Crn.Service.IAM, crn.getService());
         assertEquals("accountId", crn.getAccountId());
@@ -81,40 +74,46 @@ public class CrnTest {
 
     @Test
     public void testInvalidCrnDueToPartition() {
-        thrown.expect(CrnParseException.class);
-        Crn.fromString(invalidCrnPartition);
+        CrnParseException exception = assertThrows(CrnParseException.class, () -> {
+            Crn.fromString(invalidCrnPartition);
+        });
+
+        assertEquals("cookie is not a valid partition value", exception.getMessage());
     }
 
     @Test
     public void testInvalidCrnDueToRegion() {
-        thrown.expect(CrnParseException.class);
-        Crn.fromString(invalidCrnRegion);
+        CrnParseException exception = assertThrows(CrnParseException.class, () -> {
+            Crn.fromString(invalidCrnRegion);
+        });
+
+        assertEquals("eu-north-1 is not a valid region value", exception.getMessage());
     }
 
     @Test
     public void testInvalidCrnDueToService() {
-        thrown.expect(CrnParseException.class);
-        Crn.fromString(invalidCrnService);
+        CrnParseException exception = assertThrows(CrnParseException.class, () -> {
+            Crn.fromString(invalidCrnService);
+        });
+
+        assertEquals("cookie is not a valid service value", exception.getMessage());
     }
 
     @Test
     public void testInvalidCrnDueToResourceType() {
-        thrown.expect(CrnParseException.class);
-        Crn.fromString(invalidCrnResourceType);
+        CrnParseException exception = assertThrows(CrnParseException.class, () -> {
+            Crn.fromString(invalidCrnResourceType);
+        });
+
+        assertEquals("cookie is not a valid resource type value", exception.getMessage());
     }
 
     @Test
     public void testGetUserId() {
-        Crn crn = CrnTestUtil.getUserCrnBuilder()
-                .setAccountId("accountId")
-                .setResource("userId")
-                .build();
+        Crn crn = CrnTestUtil.getUserCrnBuilder().setAccountId("accountId").setResource("userId").build();
         assertEquals("userId", crn.getUserId());
 
-        crn = CrnTestUtil.getUserCrnBuilder()
-                .setAccountId("accountId")
-                .setResource("externalId/userId")
-                .build();
+        crn = CrnTestUtil.getUserCrnBuilder().setAccountId("accountId").setResource("externalId/userId").build();
         assertEquals("userId", crn.getUserId());
     }
 
